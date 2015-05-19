@@ -1,2 +1,2 @@
 # catsim
-Computerized Adaptive Testing methodology assisted my Similarity algorithm
+**C**omputerized **A**daptive **T**esting methodology assisted my **SIM**ilarity algorithm
