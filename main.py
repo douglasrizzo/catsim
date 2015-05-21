@@ -34,6 +34,9 @@ def loadResults():
     Caso o arquivo cluster_results.csv já existe, ele pode ser carregado usando
     esta função
     """
+    if not os.path.exists:
+        raise FileNotFoundError('Arquivo com resultados não existe.')
+
     df = pandas.read_csv(dissertacao + 'dados/cluster_results.csv',
                          header=0,
                          encoding='latin_1')
@@ -178,99 +181,6 @@ def gen3DDatasetGraphs():
                     bbox_inches='tight')
 
 
-def gen3DClusterGraphs():
-    """Gera gráficos 3D dos itens classificados"""
-    datasets = loadDatasets()
-    df = loadResults()
-
-    t0 = time.time()
-    for counter, dataset in enumerate(datasets):
-        for index, row in df[df['Dataset'] == dataset[0]].iterrows():
-            print(format(counter + index + 1) + ' de ' + format(len(df.index))
-                  + '    ' + format(timedelta(
-                      seconds=(time.time() - t0) / (counter + index + 1) *
-                      (len(df.index) - (counter + index + 1)))))
-            plot.plot3D(dataset[2], row[10],
-                        dataset[0] + ' - ' + row[0] +
-                        ' (' + format(row[2]) + ')')
-
-
-def genIRTGraphics():
-    """
-    gera curvas características e de informação dos itens para o ML3 da TRI
-    """
-    datasets = loadDatasets()
-    total_imagens = 0
-    imagem_atual = 0
-    t0 = time.time()
-
-    for dataset_name, x, x_scaled in datasets:
-        total_imagens += np.size(x, 0)
-
-    for dataset_name, x, x_scaled in datasets:
-
-        print('\nGerando gráficos, base: ' + dataset_name)
-        for counter, triple in enumerate(x):
-            imagem_atual += 1
-            print(format(imagem_atual),
-                  'de', format(total_imagens),
-                  '  ',
-                  format(timedelta(seconds=((time.time() - t0) /
-                                            imagem_atual) *
-                                           (total_imagens - imagem_atual))),
-                  '\r',
-                  end='\r')
-            p_thetas = []
-            i_thetas = []
-            thetas = np.arange(triple[1] - 4, triple[1] + 4, .1, 'double')
-
-            for theta in thetas:
-                p_thetas.append(irt.tpm(theta, triple[0],
-                                        triple[1], triple[2]))
-                i_thetas.append(irt.inf(theta, triple[0],
-                                        triple[1], triple[2]))
-
-            tri_graphdir = '/home/douglas/Desktop/teste/'
-
-            if not os.path.exists(tri_graphdir):
-                os.makedirs(tri_graphdir)
-
-            plt.figure()
-            plt.title(dataset_name + ' - ' + format(counter + 1), size=18)
-            plt.annotate('$a = ' + format(triple[0]) + '$\n$b = ' + format(
-                triple[1]) + '$\n$c = ' + format(triple[2]) + '$',
-                bbox=dict(facecolor='white',
-                          alpha=1),
-                xy=(.75, .05),
-                xycoords='axes fraction')
-            plt.xlabel(r'$\theta$')
-            plt.ylabel(r'$P(\theta)$')
-            plt.grid()
-            plt.legend(loc='best')
-            plt.plot(thetas, p_thetas)
-            plt.savefig(tri_graphdir + '/' + dataset_name + '_' +
-                        format(counter + 1) + '_prob.pdf')
-
-            plt.figure()
-            plt.title(dataset_name + ' - ' + format(counter + 1), size=18)
-            plt.annotate('$a = ' + format(triple[0]) + '$\n$b = ' + format(
-                triple[1]) + '$\n$c = ' + format(triple[2]) + '$',
-                bbox=dict(facecolor='white',
-                          alpha=1),
-                xy=(.75, .05),
-                xycoords='axes fraction')
-            plt.xlabel(r'$\theta$')
-            plt.ylabel(r'$I(\theta)$')
-            plt.grid()
-            plt.legend(loc='best')
-            plt.plot(thetas, i_thetas)
-            plt.savefig(tri_graphdir + '/' + dataset_name + '_' +
-                        format(counter + 1) + '_info.pdf')
-
-    print('Término impressão gráficos TRI, ' + format(total_imagens) +
-          ' imagens\nTempo: ' + format(timedelta(seconds=time.time() - t0)))
-
-
 def genClusters(plots, videos=False):
     """Agrupa os itens em clusters"""
 
@@ -359,8 +269,8 @@ def genClusters(plots, videos=False):
                 min_c = min(cluster_bins)
                 max_c = max(cluster_bins)
 
-                var = dodo.mean_variance(y_pred, distances)
-                dun = dodo.dunn(y_pred, distances)
+                var = cluster.stats.mean_variance(y_pred, distances)
+                dun = cluster.stats.dunn(y_pred, distances)
                 silhouette = silhouette_score(x_scaled, y_pred)
 
                 cluster_mediasdir = outdir + 'medias/'
@@ -514,16 +424,16 @@ def genClusters(plots, videos=False):
 
     ax = pandas.pivot_table(df_sintetico, values='Silhueta',
                             columns='Algoritmo', index='Nº clusters').plot(
-                            figsize=(8, 6), grid=True, title='Média silhueta' +
-                            '/ Algoritmo na base \'Sintética\'')
+        figsize=(8, 6), grid=True, title='Média silhueta' +
+        '/ Algoritmo na base \'Sintética\'')
     ax.set_ylabel('Silhueta')
     ax.get_figure().savefig(
         dissertacao_imgdir + 'silhouette_by_algorithm_sintetico.pdf')
 
     ax = pandas.pivot_table(df_sintetico, values='Menor cluster',
                             columns='Algoritmo', index='Nº clusters').plot(
-                            figsize=(8, 6), grid=True, title='Itens no menor' +
-                            'cluster / Algoritmo na base \'Sintética\'')
+        figsize=(8, 6), grid=True, title='Itens no menor' +
+        'cluster / Algoritmo na base \'Sintética\'')
     ax.set_ylabel('Itens no menor cluster')
     ax.get_figure().savefig(
         dissertacao_imgdir + 'smallestcluster_by_algorithm_sintetico.pdf')
@@ -587,10 +497,11 @@ def genClusters(plots, videos=False):
     ax.get_figure().savefig(dissertacao_imgdir + 'nclusters_by_dbscan.pdf')
 
 
-dissertacao = '/home/douglas/Desktop/dissertacao/'
-dissertacao_imgdir = dissertacao + 'img/'
-dissertacao_datadir = dissertacao + 'dados/'
-outdir = '/home/douglas/Desktop/out/'
+if __name__ == '__main__':
+    dissertacao = '/home/douglas/Desktop/dissertacao/'
+    dissertacao_imgdir = dissertacao + 'img/'
+    dissertacao_datadir = dissertacao + 'dados/'
+    outdir = '/home/douglas/Desktop/out/'
 
-x = loadDatasets()
-distances.pnorm(x[0][1], 2)
+    x = loadDatasets()
+    distances.pnorm(x[0][1], 2)
