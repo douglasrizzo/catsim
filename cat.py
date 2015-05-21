@@ -2,6 +2,7 @@ import numpy as np
 import math
 from numpy import random
 from sklearn.metrics import mean_squared_error
+from scipy.optimize import minimize
 import irt
 
 
@@ -31,7 +32,7 @@ def simCAT(items, clusters, n_itens=20, tests=1):
 
             # keeps indexes of items that were already administered for this
             # examinee
-            administered_items = set()
+            administered_items = []
 
             response_vector = []
 
@@ -69,13 +70,22 @@ def simCAT(items, clusters, n_itens=20, tests=1):
                                   items[selected_item][1],
                                   items[selected_item][2]) >= random.uniform()
 
-                response_vector[q] = acertou
-
-                # todo: reestimate the examinee's proficiency
-                if response_vector
-
+                response_vector.append(acertou)
                 # adds the administered item to the pool of administered items
-                administered_items.update([selected_item])
+                administered_items.append(selected_item)
+
+                # reestimation of the examinee's proficiency: if the response
+                # vector contains only success or errors, Dodd's method is used
+                # to reestimate the proficiency
+                if all(items[0] == item for item in items):
+                    est_theta = dodd(est_theta, items, acertou)
+                # else, a maximum likelihood approach is used
+                else:
+                    res = minimize(
+                        irt.negativelogLik, [est_theta],
+                        args=[response_vector, items[administered_items]],
+                        options={'disp': True})
+                    est_theta = res.x
 
 
 def dodd(theta, items, acertou):
