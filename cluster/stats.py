@@ -1,55 +1,51 @@
 import numpy as np
+import catsim.distances
 
 
-def means(clusters, distances):
-    """
-    Calculates de mean distances for each cluster:
+def means(x, clusters):
+    # """
+    # Calculates de mean distances for each cluster:
 
-    .. math:: \\mu_g = \\frac{1}{N_g}\\sum_{i=1; j=i+1}^{N_g}d(i, j)
-    """
-    means = []
-    cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
+    # .. math:: \\mu_g = \\frac{1}{N_g}\\sum_{i=1; j=i+1}^{N_g}d(i, j)
+    # """
 
-    for i in np.arange(0, len(clusters)):
-        means[clusters[i]] = 0
-        for ii in np.arange(0, len(clusters)):
-            if clusters[i] == clusters[ii]:
-                means[clusters[i]] += distances[i, ii]
+    npoints, nfeatures = x.shape
+    centroids = np.zeros([len(set(clusters)), nfeatures])
 
-        means[clusters[i]] /= cluster_bins[i]
+    for i in range(len(np.bincount(clusters))):
+        clusters_aux = np.where(clusters == i)[0]
+        centroids[i] = x[clusters_aux].mean(axis=0)
 
-    return means
+    return centroids
 
 
-def variances(clusters, distances):
+def variances(x, clusters):
     """
     Calculates the variance for each cluster
 
     .. math:: \\sigma^2_g = \\frac{1}{N_g}\\sum_{i=1; j=i+1}^{N_g} (\mu_g - d(i, j))
     """
-    cluster_means = means(clusters, distances)
-    variances = []
-    cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
 
-    for i in np.arange(0, len(clusters)):
-        variances[clusters[i]] = 0
-        for ii in np.arange(0, len(clusters)):
-            if clusters[i] == clusters[ii]:
-                variances[
-                    clusters[i]] += cluster_means[clusters[i]] - distances[i, ii]
+    npoints, nfeatures = x.shape
+    cluster_means = means(x, clusters)
+    variances = np.zeros([len(set(clusters)), nfeatures])
+    # cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
+    D = catsim.distances.euclidean(x, cluster_means)
 
-        variances[clusters[i]] /= cluster_bins[i]
+    for i in range(len(np.bincount(clusters))):
+        clusters_aux = np.where(clusters == i)[0]
+        variances[i] = np.sum(D[clusters_aux])
 
     return variances
 
 
-def mean_variance(clusters, distances):
+def mean_variance(x, clusters):
     """
     Returns the mean variance for all clusters
 
     .. math:: \\sigma^2 = \\frac{1}{G}\\sum_{g=1}^G \\frac{1}{N}\\sum_{i=1; j=i+1}^N (\mu_g - d(i, j))
     """
-    return np.average(variances(clusters, distances))
+    return np.mean(variances(x, clusters))
 
 
 def dunn(c, distances):
