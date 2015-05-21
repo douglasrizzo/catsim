@@ -3,7 +3,7 @@ from time import time
 from datetime import timedelta
 import numpy as np
 import matplotlib.pyplot as plt
-import irt
+import catsim.cat.irt
 
 
 def plot3D(points, clusters, title, centers=None):

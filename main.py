@@ -1,28 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
 import time
 from datetime import timedelta
 from subprocess import call
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas
 from mpl_toolkits.mplot3d import Axes3D
 from numpy import random
-from pandas import DataFrame
 
 from sklearn import cluster as skcluster, preprocessing
 from sklearn.metrics import silhouette_score
 
-import cat
-import cluster.stats
-import distances
-import irt
-import plot
-import results
-import stats
+import catsim.cat.simulate
+import catsim.cluster.stats
+import catsim.cluster.distances
+import catsim.cat.irt
+import catsim.misc.plot
+import catsim.misc.results
+import catsim.misc.stats
 
 
 def column(matrix, i):
@@ -188,12 +185,14 @@ def sklearnTests(plots, videos=False):
         min_samples = 4
         for eps in np.arange(.1, 1, .02):
             algorithms.extend([('DBSCAN', 'DBSCAN (eps = ' + format(eps) + ')',
-                                eps, skcluster.DBSCAN(eps=eps,
-                                                    min_samples=min_samples))])
+                                eps, skcluster.DBSCAN(
+                                  eps=eps,
+                                  min_samples=min_samples))])
 
         algorithms.extend([('Aff. Propagation', 'Affinity Propagation', eps,
-                            skcluster.AffinityPropagation(damping=.9,
-                                                        preference=-200))])
+                            skcluster.AffinityPropagation(
+                              damping=.9,
+                              preference=-200))])
 
         t0 = time.time()
         for counter, algorithm_package in enumerate(algorithms):
@@ -235,11 +234,12 @@ def sklearnTests(plots, videos=False):
                            dataset_name + '_medias.csv', medias_tpm(x, y_pred),
                            delimiter=',')
 
-                results.saveResults(pandas.DataFrame(
-                     [algorithm_id, dataset_name, algorithm_variable,
-                      np.size(x, 0), len(set(y_pred)), t2 - t1, min_c, max_c,
-                      var, dun, silhouette, str(y_pred.tolist()).strip(
-                          '[]').replace(',', '')]))
+                results.saveResults([algorithm_id, dataset_name,
+                                     algorithm_variable,
+                                     np.size(x, 0), len(set(y_pred)),
+                                     t2 - t1, min_c, max_c, var, dun,
+                                     silhouette, str(y_pred.tolist()).strip(
+                                      '[]').replace(',', '')])
 
                 if plots:
                     # plota gráficos

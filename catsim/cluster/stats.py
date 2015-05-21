@@ -1,5 +1,5 @@
 import numpy as np
-import catsim.distances
+import catsim.cluster.distances as dist
 
 
 def means(x, clusters):
@@ -30,7 +30,7 @@ def variances(x, clusters):
     cluster_means = means(x, clusters)
     variances = np.zeros([len(set(clusters)), nfeatures])
     # cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
-    D = catsim.distances.euclidean(x, cluster_means)
+    D = dist.euclidean(x, cluster_means)
 
     for i in range(len(np.bincount(clusters))):
         clusters_aux = np.where(clusters == i)[0]

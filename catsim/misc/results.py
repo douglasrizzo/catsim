@@ -1,5 +1,6 @@
 import os
 import pandas
+from pandas import DataFrame
 import numpy as np
 
 
@@ -28,8 +29,7 @@ def loadResults(path):
                                                                dtype='int'))
     df['pct. sem classificação'] = df[['Sem classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
-                                                x[0],
-                                                axis=1)
+                                                x[0], axis=1)
     return df
 
 
@@ -45,7 +45,7 @@ def saveResults(df):
     group_indexes
     '''
     with open('my_csv.csv', 'a') as f:
-        df.to_csv(f, header=False)
+        DataFrame(df).to_csv(f, header=False)
 
 
 def process():

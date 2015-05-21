@@ -3,7 +3,7 @@ import math
 from numpy import random
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import minimize
-import irt
+import catsim.cat.irt
 
 
 def simCAT(items, clusters, n_itens=20, tests=1):
