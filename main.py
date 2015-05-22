@@ -13,13 +13,13 @@ from numpy import random
 from sklearn import cluster as skcluster, preprocessing
 from sklearn.metrics import silhouette_score
 
-import catsim.cat.simulate
-import catsim.cluster.stats
-import catsim.cluster.distances
 import catsim.cat.irt
+import catsim.cat.simulate
 import catsim.misc.plot
 import catsim.misc.results
-import catsim.misc.stats
+import catsim.cluster.stats
+import catsim.cluster.distances
+# import catsim.misc.stats
 
 
 def column(matrix, i):
@@ -148,9 +148,9 @@ def sklearnTests(plots, videos=False):
     datasets = loadDatasets()
 
     for dataset_name, x in datasets:
-        # distâncias euclideanas
 
         algorithms = []
+        distances = catsim.cluster.distances.euclidean(x)
 
         # cria estimadores de clustering
         for n_clusters in np.arange(2, (np.size(x, 0) / 2) - 1):
@@ -222,8 +222,8 @@ def sklearnTests(plots, videos=False):
                 min_c = min(cluster_bins)
                 max_c = max(cluster_bins)
 
-                var = cluster.stats.mean_variance(y_pred, distances)
-                dun = cluster.stats.dunn(y_pred, distances)
+                var = catsim.cluster.stats.mean_variance(x, y_pred)
+                dun = catsim.cluster.stats.dunn(y_pred, distances)
                 silhouette = silhouette_score(x, y_pred)
 
                 cluster_mediasdir = outdir + 'medias/'
@@ -234,12 +234,21 @@ def sklearnTests(plots, videos=False):
                            dataset_name + '_medias.csv', medias_tpm(x, y_pred),
                            delimiter=',')
 
-                results.saveResults([algorithm_id, dataset_name,
-                                     algorithm_variable,
-                                     np.size(x, 0), len(set(y_pred)),
-                                     t2 - t1, min_c, max_c, var, dun,
-                                     silhouette, str(y_pred.tolist()).strip(
-                                      '[]').replace(',', '')])
+                catsim.misc.results.saveResults([time.time(),
+                                                 algorithm_id,
+                                                 dataset_name,
+                                                 algorithm_variable,
+                                                 np.size(x, 0),
+                                                 len(set(y_pred)),
+                                                 t2 - t1,
+                                                 min_c,
+                                                 max_c,
+                                                 var,
+                                                 dun,
+                                                 silhouette,
+                                                 str(y_pred.tolist()).strip(
+                                                  '[]').replace(',', '')],
+                                                resultados_dir)
 
                 if plots:
                     # plota gráficos
@@ -250,9 +259,9 @@ def sklearnTests(plots, videos=False):
                     fig = plt.figure(figsize=(8, 6))
                     plt.title(dataset_name + ' - ' + algorithm_name, size=18)
                     ax = fig.add_subplot(111, projection='3d')
-                    ax.scatter(column(x_scaled.tolist(), 0),
-                               column(x_scaled.tolist(), 1),
-                               column(x_scaled.tolist(), 2),
+                    ax.scatter(column(x.tolist(), 0),
+                               column(x.tolist(), 1),
+                               column(x.tolist(), 2),
                                c=colors[y_pred].tolist(),
                                s=10)
 
@@ -304,5 +313,7 @@ if __name__ == '__main__':
     dissertacao_imgdir = dissertacao + 'img/'
     dissertacao_datadir = dissertacao + 'dados/'
     outdir = '/home/douglas/Desktop/out/'
+    resultados_dir = outdir + 'results.csv'
 
-    sklearnTests(False)
+    # sklearnTests(False)
+    catsim.misc.results.loadResults(resultados_dir)
