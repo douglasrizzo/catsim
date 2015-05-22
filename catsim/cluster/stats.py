@@ -1,5 +1,5 @@
 import numpy as np
-import catsim.cluster.distances as dist
+from catsim.cluster import distances
 
 
 def means(x, clusters):
@@ -30,7 +30,7 @@ def variances(x, clusters):
     cluster_means = means(x, clusters)
     variances = np.zeros([len(set(clusters)), nfeatures])
     # cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
-    D = dist.euclidean(x, cluster_means)
+    D = distances.euclidean(x, cluster_means)
 
     for i in range(len(np.bincount(clusters))):
         clusters_aux = np.where(clusters == i)[0]
@@ -43,7 +43,7 @@ def mean_variance(x, clusters):
     """
     Returns the mean variance for all clusters
 
-    .. math:: \\sigma^2 = \\frac{1}{G}\\sum_{g=1}^G \\frac{1}{N}\\sum_{i=1; j=i+1}^N (\mu_g - d(i, j))
+    .. math:: \\sigma^2 = \\frac{1}{G}\\sum_{g=1}^G \\frac{1}{N} \\sum_{i=1; j=i+1}^N (\mu_g - d(i, j))
     """
     return np.mean(variances(x, clusters))
 
@@ -79,7 +79,7 @@ def dunn(c, distances):
         return unique_cluster_distances[0] / max_diameter
 
 
-def min_cluster_distances(c, distances):
+def min_cluster_distances(c, D):
     """
     Calculates the distances between the two nearest points of each cluster.
     """
@@ -99,14 +99,14 @@ def min_cluster_distances(c, distances):
 
             # checks if data points belong to different clusters and updates
             # the minimum distance between clusters i and ii
-            if c[i] != c[ii] and distances[i, ii] > min_distances[c[i], c[ii]]:
+            if c[i] != c[ii] and D[i, ii] > min_distances[c[i], c[ii]]:
                 min_distances[c[i],
                               c[ii]] = min_distances[c[ii],
-                                                     c[i]] = distances[i, ii]
+                                                     c[i]] = D[i, ii]
     return min_distances
 
 
-def diameter(c, distances):
+def diameter(c, D):
     """
     Calculates cluster diameters (the distance between the two farthest data
     points in a cluster)
@@ -129,6 +129,6 @@ def diameter(c, distances):
 
             # checks if data points are in the same clusters and updates
             # the diameter accordingly
-            if c[i] == c[ii] and distances[i, ii] > diameters[c[i]]:
-                diameters[c[i]] = distances[i, ii]
+            if c[i] == c[ii] and D[i, ii] > diameters[c[i]]:
+                diameters[c[i]] = D[i, ii]
     return diameters

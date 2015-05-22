@@ -153,12 +153,3 @@ def kmeans(x, k, init='naive', iters=100, debug=False):
         centroids = centroidsN
 
     return clusters
-
-
-if __name__ == '__main__':
-    import sklearn.datasets
-
-    x = sklearn.datasets.load_iris()['data']
-
-    for m in ['ward']:
-        t = kmeans(x, 3, init=m, debug=True)

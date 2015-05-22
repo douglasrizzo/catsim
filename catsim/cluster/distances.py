@@ -70,17 +70,3 @@ def pnorm(x, y=None, p=2):
                            for iii in np.arange(nfeatures)), 1 / p)
 
     return D
-
-
-if __name__ == '__main__':
-    from scipy.spatial.distance import cdist
-    from sklearn.datasets import load_iris
-
-    x = load_iris()['data']
-
-    for p in range(1, 10):
-        print(np.mean(pnorm(x, p=p) - cdist(x, x, 'minkowski', p=p)))
-
-    che1 = cdist(x, x, 'chebyshev')
-    che2 = chebyshev(x)
-    print(np.mean(che1 - che2))
