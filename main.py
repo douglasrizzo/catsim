@@ -21,6 +21,10 @@ import catsim.cluster.stats
 import catsim.cluster.distances
 # import catsim.misc.stats
 
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import fcluster
+from scipy.spatial.distance import cdist
+
 
 def column(matrix, i):
     """retorna colunas de uma lista bidimensional do Python"""
@@ -75,36 +79,19 @@ def loadDatasets():
                               delimiter=',')
 
     return [
-            # ['CH', ch],
-            # ['CH normalizado', preprocessing.scale(ch)],
-            # ['CN', cn],
-            # ['CN normalizado', preprocessing.scale(cn)],
-            # ['LC', lc],
-            # ['LC normalizado', preprocessing.scale(lc)],
-            # ['MT', mt],
-            # ['MT normalizado', preprocessing.scale(mt)],
-            ['Enem', enem],
-            ['Enem normalizado', preprocessing.scale(enem)],
-            ['Sintético', sintetico],
-            ['Sintético normalizado', preprocessing.scale(sintetico)]
-           ]
-
-
-def testDistances(dataset):
-    name = dataset[0].lower()
-
-    ds = []
-    d_names = ['Manhattan', 'Euclidean', 'Minskowski - p = 3',
-               'Minskowski - p = 4', 'Minskowski - p = 5', 'Chebyshev']
-
-    for p in np.arange(4):
-        ds.append(distances.pnorm(dataset[1], p=p + 1))
-
-    ds.append(distances.pnorm(dataset[1], p=float('inf')))
-
-    # for i in distances:
-    #     np.savetxt(dissertacao_datadir + name + '_' + i[0] + '.csv', i[1],
-    #                delimiter=',')
+        # ['CH', ch],
+        # ['CH normalizado', preprocessing.scale(ch)],
+        # ['CN', cn],
+        # ['CN normalizado', preprocessing.scale(cn)],
+        # ['LC', lc],
+        # ['LC normalizado', preprocessing.scale(lc)],
+        # ['MT', mt],
+        # ['MT normalizado', preprocessing.scale(mt)],
+        ['Enem', enem],
+        ['Enem normalizado', preprocessing.scale(enem)],
+        ['Sintético', sintetico],
+        ['Sintético normalizado', preprocessing.scale(sintetico)]
+    ]
 
 
 def gen3DDatasetGraphs():
@@ -162,37 +149,37 @@ def sklearnTests(plots, videos=False):
                                                init='random')),
                  ('Hier. ligação média',
                   'Hier. ligação média (k = ' + format(n_clusters) + ')',
-                  n_clusters,
-                  skcluster.AgglomerativeClustering(linkage='average',
-                                                    affinity='euclidean',
-                                                    n_clusters=n_clusters)),
+                  n_clusters, skcluster.AgglomerativeClustering(
+                      linkage='average',
+                      affinity='euclidean',
+                      n_clusters=n_clusters)),
                  ('Hier. ligação completa',
                   'Hier. ligação completa (k = ' + format(n_clusters) + ')',
-                  n_clusters,
-                  skcluster.AgglomerativeClustering(linkage='complete',
-                                                    affinity='euclidean',
-                                                    n_clusters=n_clusters)),
+                  n_clusters, skcluster.AgglomerativeClustering(
+                      linkage='complete',
+                      affinity='euclidean',
+                      n_clusters=n_clusters)),
                  ('Hier. Ward', 'Hier. Ward (k = ' + format(n_clusters) + ')',
-                  n_clusters,
-                  skcluster.AgglomerativeClustering(linkage='ward',
-                                                    n_clusters=n_clusters)),
+                  n_clusters, skcluster.AgglomerativeClustering(
+                     linkage='ward',
+                     n_clusters=n_clusters)),
                  ('Espectral', 'Espectral (k = ' + format(n_clusters) + ')',
-                  n_clusters,
-                  skcluster.SpectralClustering(n_clusters=n_clusters,
-                                               eigen_solver='arpack',
-                                               affinity="nearest_neighbors"))])
+                  n_clusters, skcluster.SpectralClustering(
+                     n_clusters=n_clusters,
+                     eigen_solver='arpack',
+                     affinity="nearest_neighbors"))])
 
         min_samples = 4
         for eps in np.arange(.1, 1, .02):
             algorithms.extend([('DBSCAN', 'DBSCAN (eps = ' + format(eps) + ')',
                                 eps, skcluster.DBSCAN(
-                                  eps=eps,
-                                  min_samples=min_samples))])
+                eps=eps,
+                min_samples=min_samples))])
 
         algorithms.extend([('Aff. Propagation', 'Affinity Propagation', eps,
                             skcluster.AffinityPropagation(
-                              damping=.9,
-                              preference=-200))])
+                                damping=.9,
+                                preference=-200))])
 
         t0 = time.time()
         for counter, algorithm_package in enumerate(algorithms):
@@ -217,8 +204,8 @@ def sklearnTests(plots, videos=False):
 
             # calcula menor e maior clusters
             if len(set(y_pred)) > 1:
-                cluster_bins = np.bincount(np.delete(y_pred, np.where(y_pred ==
-                                                                      -1)))
+                cluster_bins = np.bincount(
+                    np.delete(y_pred, np.where(y_pred == -1)))
                 min_c = min(cluster_bins)
                 max_c = max(cluster_bins)
 
@@ -247,8 +234,8 @@ def sklearnTests(plots, videos=False):
                                                  dun,
                                                  silhouette,
                                                  str(y_pred.tolist()).strip(
-                                                  '[]').replace(',', '')],
-                                                resultados_dir)
+                    '[]').replace(',', '')],
+                    resultados_dir)
 
                 if plots:
                     # plota gráficos
@@ -308,6 +295,73 @@ def sklearnTests(plots, videos=False):
                         os.remove(cluster_graphdir + f)
 
 
+def scipyTests():
+    # todo: aqui vem os algoritmos hierárquicos do scipy
+    datasets = loadDatasets() # load datasets
+    for dataset_name, x in datasets:
+        npoints, nfeatures = x.shape
+        for k in range(2, int(npoints / 2)): # try for many possible k values
+
+            # try for many possible linkage types
+            for link_method in ['single', 'complete', 'average', 'weighted',
+                                'ward', 'centroid', 'median']:
+
+                # set algorithm name to go into file
+                algorithm_name = 'Hierárquico ' + link_method
+
+                # try for many possible linkage metrics
+                # these three linkage methods only accept euclidean distance
+                if link_method in ['ward', 'centroid', 'median']:
+                    link_metrics = ['euclidean']
+                # otherwise, test for these main four metrics
+                else:
+                    link_metrics = ['cityblock', 'euclidean',
+                                    'mahalanobis', 'chebyshev']
+
+                # run algorithm and extract statistics and validations
+                for link_metric in link_metrics:
+                    t1 = time.time()
+                    links = linkage(x, method=link_method, metric=link_metric)
+                    clusters = fcluster(links, k, criterion='maxclust') - 1
+                    t2 = time.time()
+                    if len(set(clusters)) > 1:
+                        cluster_bins = np.bincount(
+                            np.delete(clusters, np.where(clusters == -1)))
+                        min_c = min(cluster_bins)
+                        max_c = max(cluster_bins)
+
+                        var = catsim.cluster.stats.mean_variance(x, clusters)
+                        dun = catsim.cluster.stats.dunn(clusters,
+                                                        cdist(x, x,
+                                                              link_metric))
+                        silhouette = silhouette_score(x, clusters)
+
+                        cluster_mediasdir = outdir + 'medias/'
+                        if not os.path.exists(cluster_mediasdir):
+                            os.makedirs(cluster_mediasdir)
+
+                        np.savetxt(cluster_mediasdir + algorithm_name + '_' +
+                                   dataset_name + '_medias.csv',
+                                   medias_tpm(x, clusters),
+                                   delimiter=',')
+
+                        catsim.misc.results.saveResults([
+                          time.time(),
+                          algorithm_name,
+                          dataset_name,
+                          link_metric,
+                          np.size(x, 0),
+                          len(set(clusters)),
+                          t2 - t1,
+                          min_c,
+                          max_c,
+                          var,
+                          dun,
+                          silhouette,
+                          str(clusters.tolist()).strip('[]').replace(',', '')],
+                          resultados_dir)
+
+
 if __name__ == '__main__':
     dissertacao = '/home/douglas/repos/dissertacao/'
     dissertacao_imgdir = dissertacao + 'img/'
@@ -315,5 +369,6 @@ if __name__ == '__main__':
     outdir = '/home/douglas/Desktop/out/'
     resultados_dir = outdir + 'results.csv'
 
-    # sklearnTests(False)
-    catsim.misc.results.loadResults(resultados_dir)
+    sklearnTests(False)
+    scipyTests()
+    # print(catsim.misc.results.loadResults(resultados_dir))
