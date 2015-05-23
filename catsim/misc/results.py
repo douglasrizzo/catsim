@@ -3,9 +3,9 @@ import pandas
 from pandas import DataFrame
 import numpy as np
 
-columns = ['Data', 'Algoritmo', 'Dataset', 'Variável', 'Nº registros',
-           'Nº grupos', 't (segundos)', 'Menor cluster', 'Maior cluster',
-           'Variância', 'Dunn', 'Silhueta', 'Classificações']
+columns = ['Data', 'Algoritmo', 'Base de dados', 'Variável', 'Nº registros',
+           'Nº grupos', 't (segundos)', 'Menor grupo', 'Maior grupo',
+           'Variância', 'Dunn', 'Silhueta', 'Classificacoes']
 
 
 def loadResults(path):
@@ -16,20 +16,21 @@ def loadResults(path):
     if not os.path.exists(path):
         df = pandas.DataFrame([columns])
     else:
-        df = pandas.read_csv(path, header=0, encoding='latin_1')
+        df = pandas.read_csv(path, header=0, index_col=False,
+                             encoding='utf-8')
 
     df[['Data', 't (segundos)', 'Dunn', 'Silhueta', 'Nº registros', 'Variável',
-        'Nº grupos', 'Menor cluster', 'Maior cluster']] = df[
-        ['t (segundos)', 'Dunn', 'Silhueta', 'Nº registros',
-         'Variável', 'Nº grupos', 'Menor cluster',
-         'Maior cluster']].astype(float)
+        'Nº grupos', 'Menor grupo', 'Maior grupo']] = df[
+        ['Data', 't (segundos)', 'Dunn', 'Silhueta', 'Nº registros',
+         'Variável', 'Nº grupos', 'Menor grupo',
+         'Maior grupo']].astype(float)
 
-    df['Sem classificação'] = df['Classificações'].apply(lambda x:
+    df['Sem Classificacao'] = df['Classificacoes'].apply(lambda x:
                                                          x.count('-1'))
-    df['Classificações'] = df['Classificações'].apply(lambda x:
+    df['Classificacoes'] = df['Classificacoes'].apply(lambda x:
                                                       np.array(x.split(' '),
                                                                dtype='int'))
-    df['pct. sem classificação'] = df[['Sem classificação', 'Classificações'
+    df['pct. sem Classificacao'] = df[['Sem Classificacao', 'Classificacoes'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
                                                 x[0], axis=1)
     return df
@@ -55,28 +56,28 @@ def saveResults(df, path):
 def process(datadir, imgdir):
     df = loadResults()
 
-    df.groupby('Algoritmo')['Menor cluster', 'Maior cluster', 't (segundos)',
+    df.groupby('Algoritmo')['Menor grupo', 'Maior grupo', 't (segundos)',
                             'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
                                 datadir + 'alg_means.csv')
-    df.groupby('Dataset')['Menor cluster', 'Maior cluster', 't (segundos)',
+    df.groupby('Base de dados')['Menor grupo', 'Maior grupo', 't (segundos)',
                           'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
         datadir + 'dataset_means.csv')
-    df.groupby('Nº grupos')['Menor cluster', 'Maior cluster', 't (segundos)',
+    df.groupby('Nº grupos')['Menor grupo', 'Maior grupo', 't (segundos)',
                             'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
                                 datadir + 'nclusters_means.csv')
 
     ax = df.groupby(
         'Nº grupos')['Variância', 'Dunn', 'Silhueta'].mean().plot(
-            title='Índices de validação de clusters / Nº grupos',
+            title='Índices de validação de clusters / N. grupos',
             legend='best',
             figsize=(8, 6))
     ax.set_ylabel('Índices')
     ax.get_figure().savefig(imgdir + 'validity_by_nclusters.pdf')
 
-    df_enem = df[df['Dataset'] == 'Enem'][df['Algoritmo'] !=
+    df_enem = df[df['Base de dados'] == 'Enem'][df['Algoritmo'] !=
                                           'Aff. Propagation'][df['Algoritmo']
                                                               != 'DBSCAN']
-    df_sintetico = df[df['Dataset'] ==
+    df_sintetico = df[df['Base de dados'] ==
                       'Sintético'][df['Algoritmo'] !=
                                    'Aff. Propagation'][df['Algoritmo'] !=
                                                        'DBSCAN']
@@ -106,7 +107,7 @@ def process(datadir, imgdir):
 
     ax = pandas.pivot_table(
         df_enem,
-        values='Menor cluster',
+        values='Menor grupo',
         columns='Algoritmo',
         index='Nº grupos').plot(
             figsize=(8, 6),
@@ -134,7 +135,7 @@ def process(datadir, imgdir):
     ax.get_figure().savefig(
         imgdir + 'silhouette_by_algorithm_sintetico.pdf')
 
-    ax = pandas.pivot_table(df_sintetico, values='Menor cluster',
+    ax = pandas.pivot_table(df_sintetico, values='Menor grupo',
                             columns='Algoritmo', index='Nº grupos').plot(
         figsize=(8, 6), grid=True, title='Itens no menor' +
         'cluster / Algoritmo na base \'Sintética\'')
@@ -147,7 +148,7 @@ def process(datadir, imgdir):
 
     ax = pandas.pivot_table(dfdb,
                             values='Dunn',
-                            columns='Dataset',
+                            columns='Base de dados',
                             index='$\epsilon$').plot(
                                 figsize=(8, 6),
                                 grid=True,
@@ -158,7 +159,7 @@ def process(datadir, imgdir):
     ax = pandas.pivot_table(
         dfdb,
         values='Silhueta',
-        columns='Dataset',
+        columns='Base de dados',
         index='$\epsilon$').plot(
             figsize=(8, 6),
             grid=True,
@@ -168,8 +169,8 @@ def process(datadir, imgdir):
 
     ax = pandas.pivot_table(
         dfdb,
-        values='Menor cluster',
-        columns='Dataset',
+        values='Menor grupo',
+        columns='Base de dados',
         index='$\epsilon$').plot(
             figsize=(8, 6),
             grid=True,
@@ -180,8 +181,8 @@ def process(datadir, imgdir):
 
     ax = pandas.pivot_table(
         dfdb,
-        values='pct. sem classificação',
-        columns='Dataset',
+        values='pct. sem Classificacao',
+        columns='Base de dados',
         index='$\epsilon$').plot(
             figsize=(8, 6),
             grid=True,
@@ -192,7 +193,7 @@ def process(datadir, imgdir):
     ax = pandas.pivot_table(
         dfdb,
         values='Nº grupos',
-        columns='Dataset',
+        columns='Base de dados',
         index='$\epsilon$').plot(
             figsize=(8, 6),
             grid=True,
