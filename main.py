@@ -129,6 +129,113 @@ def gen3DDatasetGraphs():
                     bbox_inches='tight')
 
 
+def dodoKmeansTest():
+    datasets = loadDatasets()
+    n_init = 100
+    algorithm_name = 'Dodô K-means'
+    for dataset_name, x in datasets:
+        for k in range(2,  (np.size(x, 0) / 2) - 1):
+            for init_method in ['naive', 'varCovar', 'ward']:
+                t1 = time.time()
+                res1 = catsim.cluster.kmeans(x, k, init_method=init_method,
+                                             iters=1000, n_init=n_init,
+                                             debug=False)
+                t2 = time.time()
+
+            # calcula menor e maior clusters
+            if len(set(res1)) > 1:
+                cluster_bins = np.bincount(
+                    np.delete(res1, np.where(res1 == -1)))
+                min_c = min(cluster_bins)
+                max_c = max(cluster_bins)
+
+                var = catsim.cluster.stats.mean_variance(x, res1)
+                dun = catsim.cluster.stats.dunn(
+                  res1, catsim.cluster.distances.euclidean(x))
+                silhouette = silhouette_score(x, res1)
+
+                cluster_mediasdir = outdir + 'medias/'
+                if not os.path.exists(cluster_mediasdir):
+                    os.makedirs(cluster_mediasdir)
+
+                np.savetxt(cluster_mediasdir + algorithm_name + '_' +
+                           dataset_name + '_medias.csv', medias_tpm(x, res1),
+                           delimiter=',')
+
+                catsim.misc.results.saveResults([time.time(),
+                                                 algorithm_name,
+                                                 dataset_name,
+                                                 init_method,
+                                                 np.size(x, 0),
+                                                 len(set(res1)),
+                                                 (t2 - t1) / n_init,
+                                                 min_c,
+                                                 max_c,
+                                                 var,
+                                                 dun,
+                                                 silhouette,
+                                                 str(res1.tolist()).strip(
+                    '[]').replace(',', '')],
+                    resultados_dir)
+
+
+def dodoKmedoidsTest():
+    datasets = loadDatasets()
+    algorithm_name = 'K-medóides'
+
+    for dataset_name, x in datasets:
+        for p in range(1, 6):
+            D = catsim.cluster.distances.pnorm(x, p=p)
+            for k in range(2,  (np.size(x, 0) / 2) - 1):
+                var = 0
+                for iteration in range(100):
+                    t1_temp = time.time()
+                    res1_temp = catsim.cluster.kmedoids(D, k, iters=1000)
+                    t2_temp = time.time()
+                    var_temp = catsim.cluster.stats.mean_variance(x, res1_temp)
+                    if var_temp < var:
+                        t1 = t1_temp
+                        t2 = t2_temp
+                        var = var_temp
+                        res1 = res1_temp
+
+            # calcula menor e maior clusters
+            if len(set(res1)) > 1:
+                cluster_bins = np.bincount(
+                    np.delete(res1, np.where(res1 == -1)))
+                min_c = min(cluster_bins)
+                max_c = max(cluster_bins)
+
+                var = catsim.cluster.stats.mean_variance(x, res1)
+                dun = catsim.cluster.stats.dunn(
+                  res1, catsim.cluster.distances.euclidean(x))
+                silhouette = silhouette_score(x, res1)
+
+                cluster_mediasdir = outdir + 'medias/'
+                if not os.path.exists(cluster_mediasdir):
+                    os.makedirs(cluster_mediasdir)
+
+                np.savetxt(cluster_mediasdir + algorithm_name + '_' +
+                           dataset_name + '_medias.csv', medias_tpm(x, res1),
+                           delimiter=',')
+
+                catsim.misc.results.saveResults([time.time(),
+                                                 algorithm_name,
+                                                 dataset_name,
+                                                 p,
+                                                 np.size(x, 0),
+                                                 len(set(res1)),
+                                                 t2 - t1,
+                                                 min_c,
+                                                 max_c,
+                                                 var,
+                                                 dun,
+                                                 silhouette,
+                                                 str(res1.tolist()).strip(
+                    '[]').replace(',', '')],
+                    resultados_dir)
+
+
 def sklearnTests(plots, videos=False):
     """Agrupa os itens em clusters"""
 
@@ -144,7 +251,8 @@ def sklearnTests(plots, videos=False):
             n_clusters = int(n_clusters)
             # k-Means, ligação média, ligação completa, Ward, espectral
             algorithms.extend(
-                [('K-Means', 'K-Means (k = ' + format(n_clusters) + ')',
+                [
+                 ('K-Means', 'K-Means (k = ' + format(n_clusters) + ')',
                   n_clusters, skcluster.KMeans(n_clusters=n_clusters,
                                                init='random')),
                  ('Hier. ligação média',
@@ -167,7 +275,8 @@ def sklearnTests(plots, videos=False):
                   n_clusters, skcluster.SpectralClustering(
                      n_clusters=n_clusters,
                      eigen_solver='arpack',
-                     affinity="nearest_neighbors"))])
+                     affinity="nearest_neighbors"))
+                 ])
 
         min_samples = 4
         for eps in np.arange(.1, 1, .02):
@@ -297,10 +406,10 @@ def sklearnTests(plots, videos=False):
 
 def scipyTests():
     # todo: aqui vem os algoritmos hierárquicos do scipy
-    datasets = loadDatasets() # load datasets
+    datasets = loadDatasets()  # load datasets
     for dataset_name, x in datasets:
         npoints, nfeatures = x.shape
-        for k in range(2, int(npoints / 2)): # try for many possible k values
+        for k in range(2, int(npoints / 2)):  # try for many possible k values
 
             # try for many possible linkage types
             for link_method in ['single', 'complete', 'average', 'weighted',
@@ -371,4 +480,5 @@ if __name__ == '__main__':
 
     sklearnTests(False)
     scipyTests()
-    # print(catsim.misc.results.loadResults(resultados_dir))
+    dodoKmeansTest()
+    dodoKmedoidsTest()
