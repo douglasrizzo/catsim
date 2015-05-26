@@ -4,6 +4,8 @@ import catsim.cat.simulate
 import catsim.misc.plot
 import catsim.misc.results
 import catsim.cluster.stats
+import catsim.cluster.kmeans
+import catsim.cluster.kmedoids
 import catsim.cluster.distances
 from scipy.spatial.distance import cdist
 import sklearn.datasets
@@ -21,15 +23,17 @@ def distances():
     print(np.mean(che1 - che2))
 
 
-def kmeans():
-    x = sklearn.datasets.load_iris()['data']
+def testKmeans():
+    x, y = sklearn.datasets.samples_generator.make_blobs(2000, 3, 5)
+    # x = sklearn.datasets.load_iris()['data']
     for m in ['naive', 'varCovar', 'ward']:
-        kmeans(x, 3, init=m, debug=True)
+        catsim.cluster.kmeans.kmeans(x, 5, init_method=m,
+                                     n_init=10, debug=False)
 
 
 def kmedoids():
     x = sklearn.datasets.load_iris()['data']
-    catsim.cluster.kmedoids(catsim.cluster.distances.euclidean(x), 3)
+    catsim.cluster.kmedoids.kmedoids(catsim.cluster.distances.euclidean(x), 3)
 
 
 def miscStats():
@@ -41,3 +45,6 @@ def miscStats():
         minha_cov, cov_deles) else 'tá errada!')
     print(catsim.cluster.stats.coefCorrelation(x))
     print(catsim.misc.stats.bincount(np.array([-4, 0, 1, 1, 3, 2, 1, 7, 23])))
+
+if __name__ == '__main__':
+    testKmeans()
