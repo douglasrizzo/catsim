@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def column(matrix, i):
-    """retorna colunas de uma lista bidimensional do Python"""
+    '''retorna colunas de uma lista bidimensional do Python'''
     return [row[i] for row in matrix]
 
 
@@ -45,7 +45,7 @@ def plot3D(points, clusters, title, centers=None):
 
 
 def gen3DClusterGraphs():
-    """Gera gráficos 3D dos itens classificados"""
+    '''Gera gráficos 3D dos itens classificados'''
     datasets = loadDatasets()
     df = loadResults()
 
@@ -63,9 +63,9 @@ def gen3DClusterGraphs():
 
 
 def genIRTGraphics():
-    """
+    '''
     gera curvas características e de informação dos itens para o ML3 da TRI
-    """
+    '''
     datasets = loadDatasets()
     total_imagens = 0
     imagem_atual = 0
@@ -139,7 +139,7 @@ def genIRTGraphics():
 
 
 def gen3DDatasetGraphs():
-    """gera os gráficos 3D dos parâmetros da TRI"""
+    '''gera os gráficos 3D dos parâmetros da TRI'''
     dados_graphdir = dissertacao + '/img/3d/'
     if not os.path.exists(dados_graphdir):
         os.makedirs(dados_graphdir)

@@ -18,7 +18,7 @@ def minkowski(x, y=None, p=2):
 
 
 def pnorm(x, y=None, p=2):
-    """
+    '''
     Calculates the p-norm for two sets of elements. The p-norm equals the
     Minkowski distance function and is given by:
 
@@ -31,7 +31,7 @@ def pnorm(x, y=None, p=2):
     In special cases where :math:`p=1`, :math:`p=2` or :math:`p=\\infty`, the
     p-norm is equal to the Manhattan, Euclidean and Chebyshev distances,
     respectively.
-    """
+    '''
 
     x = np.asarray(x)
 

@@ -2,7 +2,7 @@ import math
 
 
 def tpm(theta, a, b, c):
-    """
+    '''
     Item Response Theory three-parameter logistic function:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{Da_i(\\theta-b_i)}}
@@ -24,7 +24,7 @@ def tpm(theta, a, b, c):
     c : float the item pseudo-guessing parameter. Being a probability,
         :math:`0\\leq c \\leq 1`, but items considered good usually have
         :math:`c \\leq 0.2`.
-    """
+    '''
     return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
 
 
@@ -62,7 +62,7 @@ def negativelogLik(est_theta, args):
 
 
 def inf(theta, a, b, c):
-    """
+    '''
     Item Response Theory three-parameter information function
 
     .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
@@ -84,7 +84,7 @@ def inf(theta, a, b, c):
     c : float the item pseudo-guessing parameter. Being a probability,
         :math:`0\\leq c \\leq 1`, but items considered good usually have
         :math:`c \\leq 0.2`.
-    """
+    '''
     ml3 = tpm(theta, a, b, c)
     return math.pow(a, 2) * (math.pow(ml3 - c, 2) /
                              math.pow(1 - c, 2)) * (1 - ml3) / ml3
