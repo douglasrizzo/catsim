@@ -19,6 +19,8 @@ import catsim.misc.plot
 import catsim.misc.results
 import catsim.cluster.stats
 import catsim.cluster.distances
+import catsim.cluster.kmeans
+import catsim.cluster.kmedoids
 # import catsim.misc.stats
 
 from scipy.cluster.hierarchy import linkage
@@ -37,7 +39,7 @@ def medias_tpm(x, c):
         medias[c[i], 1] += x[i, 1]
         medias[c[i], 2] += x[i, 2]
 
-    ocorrencias = np.bincount(np.delete(c, np.where(c == -1)))
+    ocorrencias = np.bincount(np.delete(c, np.where(c == -1)).astype(np.int64))
 
     for counter, i in enumerate(ocorrencias):
         medias[counter, 0] = medias[counter, 0] / i
@@ -94,18 +96,19 @@ def dodoKmeansTest():
     n_init = 100
     algorithm_name = 'Dodô K-means'
     for dataset_name, x in datasets:
-        for k in range(2,  (np.size(x, 0) / 2) - 1):
+        for k in range(2,  (int(np.size(x, 0) / 2) - 1)):
             for init_method in ['naive', 'varCovar', 'ward']:
                 t1 = time.time()
-                res1 = catsim.cluster.kmeans(x, k, init_method=init_method,
-                                             iters=1000, n_init=n_init,
-                                             debug=False)
+                res1 = catsim.cluster.kmeans.kmeans(x, k,
+                                                    init_method=init_method,
+                                                    iters=1000, n_init=n_init,
+                                                    debug=False)
                 t2 = time.time()
 
             # calcula menor e maior clusters
             if len(set(res1)) > 1:
                 cluster_bins = np.bincount(
-                    np.delete(res1, np.where(res1 == -1)))
+                    np.delete(res1, np.where(res1 == -1)).astype(np.int64))
                 min_c = min(cluster_bins)
                 max_c = max(cluster_bins)
 
@@ -446,6 +449,6 @@ if __name__ == '__main__':
     resultados_dir = outdir + 'results.csv'
 
     dodoKmeansTest()
-    dodoKmedoidsTest()
+    # dodoKmedoidsTest()
     sklearnTests(False)
     scipyTests()
