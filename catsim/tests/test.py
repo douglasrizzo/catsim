@@ -9,42 +9,42 @@ import catsim.cluster.kmedoids
 import catsim.cluster.distances
 from scipy.spatial.distance import cdist
 import sklearn.datasets
+import unittest
+
+n_clusters = 5
+blob, blob_clusters = sklearn.datasets.samples_generator.make_blobs(
+    2000, 3, n_clusters)
+iris = sklearn.datasets.load_iris()['data']
 
 
-def distances():
-    x = sklearn.datasets.load_iris()['data']
+class TestStuff(unittest.TestCase):
 
-    for p in range(1, 10):
-        print(np.mean(catsim.cluster.distances.pnorm(x, p=p) -
-                      cdist(x, x, 'minkowski', p=p)))
+    def distances(self):
+        for p in range(1, 10):
+            self.assertEqual(np.mean(
+                catsim.cluster.distances.pnorm(iris, p=p) -
+                cdist(iris, iris, 'minkowski', p=p)), 0)
 
-    che1 = cdist(x, x, 'chebyshev')
-    che2 = catsim.cluster.distances.chebyshev(x)
-    print(np.mean(che1 - che2))
+        che1 = cdist(iris, iris, 'chebyshev')
+        che2 = catsim.cluster.distances.chebyshev(iris)
+        self.assertEqual(np.mean(che1 - che2))
 
+    def testKmeans(self):
+        for m in ['naive', 'varCovar', 'ward']:
+            catsim.cluster.kmeans.kmeans(blob, n_clusters, init_method=m,
+                                         n_init=10, debug=False)
 
-def testKmeans():
-    x, y = sklearn.datasets.samples_generator.make_blobs(2000, 3, 5)
-    # x = sklearn.datasets.load_iris()['data']
-    for m in ['naive', 'varCovar', 'ward']:
-        catsim.cluster.kmeans.kmeans(x, 5, init_method=m,
-                                     n_init=10, debug=False)
+    def kmedoids(self):
+        catsim.cluster.kmedoids.kmedoids(
+            catsim.cluster.distances.euclidean(blob), n_clusters)
 
+    def miscStats(self):
+        minha_cov = catsim.cluster.stats.covariance(iris)
+        cov_deles = np.cov(iris.T)
 
-def kmedoids():
-    x = sklearn.datasets.load_iris()['data']
-    catsim.cluster.kmedoids.kmedoids(catsim.cluster.distances.euclidean(x), 3)
-
-
-def miscStats():
-    x = sklearn.datasets.load_iris()['data']
-    minha_cov = catsim.cluster.stats.covariance(x)
-    cov_deles = np.cov(x.T)
-
-    print('covariância', 'tá certa!' if np.array_equal(
-        minha_cov, cov_deles) else 'tá errada!')
-    print(catsim.cluster.stats.coefCorrelation(x))
-    print(catsim.misc.stats.bincount(np.array([-4, 0, 1, 1, 3, 2, 1, 7, 23])))
+        self.assertTrue(np.array_equal(minha_cov, cov_deles))
+        catsim.cluster.stats.coefCorrelation(iris)
+        catsim.misc.stats.bincount(np.array([-4, 0, 1, 1, 3, 2, 1, 7, 23]))
 
 if __name__ == '__main__':
-    testKmeans()
+    unittest.main()
