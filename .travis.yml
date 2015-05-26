@@ -4,6 +4,6 @@ python:
   - "3.3"
   - "3.4"
 install:
-  - "apt-get install libatlas-base-dev gfortran"
+  - "sudo apt-get install libatlas-base-dev gfortran"
   - "pip3 install ."
 script: "python3 -m unittest catsim/tests/test.py"
