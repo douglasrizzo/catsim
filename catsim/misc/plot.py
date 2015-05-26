@@ -3,7 +3,11 @@ from time import time
 from datetime import timedelta
 import numpy as np
 import matplotlib.pyplot as plt
-import catsim.cat.irt
+
+
+def column(matrix, i):
+    """retorna colunas de uma lista bidimensional do Python"""
+    return [row[i] for row in matrix]
 
 
 def plot3D(points, clusters, title, centers=None):
@@ -132,3 +136,38 @@ def genIRTGraphics():
 
     print('Término impressão gráficos TRI, ' + format(total_imagens) +
           ' imagens\nTempo: ' + format(timedelta(seconds=time.time() - t0)))
+
+
+def gen3DDatasetGraphs():
+    """gera os gráficos 3D dos parâmetros da TRI"""
+    dados_graphdir = dissertacao + '/img/3d/'
+    if not os.path.exists(dados_graphdir):
+        os.makedirs(dados_graphdir)
+    datasets = loadDatasets()
+
+    for dataset_name, x, x_scaled in datasets:
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(column(x_scaled.tolist(), 0), column(x_scaled.tolist(), 1),
+                   column(x_scaled.tolist(), 2),
+                   s=10)
+        ax.set_title(dataset_name + ' normalizado')
+        ax.set_xlabel('a')
+        ax.set_ylabel('b')
+        ax.set_zlabel('c')
+
+        plt.savefig(dados_graphdir + dataset_name + '_scaled.pdf',
+                    bbox_inches='tight')
+
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(column(x.tolist(), 0), column(x.tolist(), 1),
+                   column(x.tolist(), 2),
+                   s=10)
+        ax.set_title(dataset_name)
+        ax.set_xlabel('a')
+        ax.set_ylabel('b')
+        ax.set_zlabel('c')
+
+        plt.savefig(dados_graphdir + dataset_name + '.pdf',
+                    bbox_inches='tight')

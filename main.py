@@ -26,11 +26,6 @@ from scipy.cluster.hierarchy import fcluster
 from scipy.spatial.distance import cdist
 
 
-def column(matrix, i):
-    """retorna colunas de uma lista bidimensional do Python"""
-    return [row[i] for row in matrix]
-
-
 def medias_tpm(x, c):
     """médias dos parâmetros a, b e c para cada cluster"""
     medias = np.zeros((np.max(c) + 1, 3))
@@ -92,41 +87,6 @@ def loadDatasets():
         ['Sintético', sintetico],
         ['Sintético normalizado', preprocessing.scale(sintetico)]
     ]
-
-
-def gen3DDatasetGraphs():
-    """gera os gráficos 3D dos parâmetros da TRI"""
-    dados_graphdir = dissertacao + '/img/3d/'
-    if not os.path.exists(dados_graphdir):
-        os.makedirs(dados_graphdir)
-    datasets = loadDatasets()
-
-    for dataset_name, x, x_scaled in datasets:
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(column(x_scaled.tolist(), 0), column(x_scaled.tolist(), 1),
-                   column(x_scaled.tolist(), 2),
-                   s=10)
-        ax.set_title(dataset_name + ' normalizado')
-        ax.set_xlabel('a')
-        ax.set_ylabel('b')
-        ax.set_zlabel('c')
-
-        plt.savefig(dados_graphdir + dataset_name + '_scaled.pdf',
-                    bbox_inches='tight')
-
-        fig = plt.figure(figsize=(8, 6))
-        ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(column(x.tolist(), 0), column(x.tolist(), 1),
-                   column(x.tolist(), 2),
-                   s=10)
-        ax.set_title(dataset_name)
-        ax.set_xlabel('a')
-        ax.set_ylabel('b')
-        ax.set_zlabel('c')
-
-        plt.savefig(dados_graphdir + dataset_name + '.pdf',
-                    bbox_inches='tight')
 
 
 def dodoKmeansTest():
@@ -247,36 +207,36 @@ def sklearnTests(plots, videos=False):
         distances = catsim.cluster.distances.euclidean(x)
 
         # cria estimadores de clustering
-        for n_clusters in np.arange(2, (np.size(x, 0) / 2) - 1):
-            n_clusters = int(n_clusters)
-            # k-Means, ligação média, ligação completa, Ward, espectral
-            algorithms.extend(
-                [
-                 ('K-Means', 'K-Means (k = ' + format(n_clusters) + ')',
-                  n_clusters, skcluster.KMeans(n_clusters=n_clusters,
-                                               init='random')),
-                 ('Hier. ligação média',
-                  'Hier. ligação média (k = ' + format(n_clusters) + ')',
-                  n_clusters, skcluster.AgglomerativeClustering(
-                      linkage='average',
-                      affinity='euclidean',
-                      n_clusters=n_clusters)),
-                 ('Hier. ligação completa',
-                  'Hier. ligação completa (k = ' + format(n_clusters) + ')',
-                  n_clusters, skcluster.AgglomerativeClustering(
-                      linkage='complete',
-                      affinity='euclidean',
-                      n_clusters=n_clusters)),
-                 ('Hier. Ward', 'Hier. Ward (k = ' + format(n_clusters) + ')',
-                  n_clusters, skcluster.AgglomerativeClustering(
-                     linkage='ward',
-                     n_clusters=n_clusters)),
-                 ('Espectral', 'Espectral (k = ' + format(n_clusters) + ')',
-                  n_clusters, skcluster.SpectralClustering(
-                     n_clusters=n_clusters,
-                     eigen_solver='arpack',
-                     affinity="nearest_neighbors"))
-                 ])
+        # for n_clusters in np.arange(2, (np.size(x, 0) / 2) - 1):
+        #     n_clusters = int(n_clusters)
+        #     # k-Means, ligação média, ligação completa, Ward, espectral
+        #     algorithms.extend(
+        #         [
+        #          ('K-Means', 'K-Means (k = ' + format(n_clusters) + ')',
+        #           n_clusters, skcluster.KMeans(n_clusters=n_clusters,
+        #                                        init='random')),
+        #          ('Hier. ligação média',
+        #           'Hier. ligação média (k = ' + format(n_clusters) + ')',
+        #           n_clusters, skcluster.AgglomerativeClustering(
+        #               linkage='average',
+        #               affinity='euclidean',
+        #               n_clusters=n_clusters)),
+        #          ('Hier. ligação completa',
+        #           'Hier. ligação completa (k = ' + format(n_clusters) + ')',
+        #           n_clusters, skcluster.AgglomerativeClustering(
+        #               linkage='complete',
+        #               affinity='euclidean',
+        #               n_clusters=n_clusters)),
+        #          ('Hier. Ward', 'Hier. Ward (k = ' + format(n_clusters) + ')',
+        #           n_clusters, skcluster.AgglomerativeClustering(
+        #              linkage='ward',
+        #              n_clusters=n_clusters)),
+        #          ('Espectral', 'Espectral (k = ' + format(n_clusters) + ')',
+        #           n_clusters, skcluster.SpectralClustering(
+        #              n_clusters=n_clusters,
+        #              eigen_solver='arpack',
+        #              affinity="nearest_neighbors"))
+        #          ])
 
         min_samples = 4
         for eps in np.arange(.1, 1, .02):
@@ -347,61 +307,68 @@ def sklearnTests(plots, videos=False):
                     resultados_dir)
 
                 if plots:
-                    # plota gráficos
-                    # variáveis utilizadas no plot
-                    colors = np.array(
-                        [x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
-                    colors = np.hstack([colors] * 20)
-                    fig = plt.figure(figsize=(8, 6))
-                    plt.title(dataset_name + ' - ' + algorithm_name, size=18)
-                    ax = fig.add_subplot(111, projection='3d')
-                    ax.scatter(column(x.tolist(), 0),
-                               column(x.tolist(), 1),
-                               column(x.tolist(), 2),
-                               c=colors[y_pred].tolist(),
-                               s=10)
-
                     if hasattr(algorithm, 'cluster_centers_'):
                         centers = algorithm.cluster_centers_
-                        center_colors = colors[:len(centers)]
-                        ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2],
-                                   s=100,
-                                   c=center_colors)
+                    else:
+                        centers = None
+                    catsim.misc.plot.plot3D(x, y_pred, dataset_name +
+                                            ' - ' + algorithm_name,
+                                            centers=centers)
+                    # plota gráficos
+                    # variáveis utilizadas no plot
+                    # colors = np.array(
+                    #     [x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
+                    # colors = np.hstack([colors] * 20)
+                    # fig = plt.figure(figsize=(8, 6))
+                    # plt.title(dataset_name + ' - ' + algorithm_name, size=18)
+                    # ax = fig.add_subplot(111, projection='3d')
+                    # ax.scatter(column(x.tolist(), 0),
+                    #            column(x.tolist(), 1),
+                    #            column(x.tolist(), 2),
+                    #            c=colors[y_pred].tolist(),
+                    #            s=10)
 
-                    ax.set_title(algorithm_name + ' - ' + dataset_name)
-                    ax.set_xlabel('a')
-                    ax.set_ylabel('b')
-                    ax.set_zlabel('c')
+                    # if hasattr(algorithm, 'cluster_centers_'):
+                    #     centers = algorithm.cluster_centers_
+                    #     center_colors = colors[:len(centers)]
+                    #     ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2],
+                    #                s=100,
+                    #                c=center_colors)
 
-                    cluster_graphdir = outdir + 'clusters/'
+                    # ax.set_title(algorithm_name + ' - ' + dataset_name)
+                    # ax.set_xlabel('a')
+                    # ax.set_ylabel('b')
+                    # ax.set_zlabel('c')
 
-                    if not os.path.exists(cluster_graphdir):
-                        os.makedirs(cluster_graphdir)
+                    # cluster_graphdir = outdir + 'clusters/'
 
-                    plt.savefig(cluster_graphdir + algorithm_name + ' - ' +
-                                dataset_name + '.pdf',
-                                bbox_inches='tight')
+                    # if not os.path.exists(cluster_graphdir):
+                    #     os.makedirs(cluster_graphdir)
 
-                if videos:
-                    for ii in range(0, 360, 1):
-                        ax.view_init(elev=10., azim=ii)
-                        print('Gerando imagens para renderizar vídeo: ' +
-                              format(round(100 / 360 * ii, 2)) + '%')
-                        plt.savefig(cluster_graphdir + format(ii) + '.jpg',
-                                    dpi=500,
-                                    bbox_inches='tight')
+                    # plt.savefig(cluster_graphdir + algorithm_name + ' - ' +
+                    #             dataset_name + '.pdf',
+                    #             bbox_inches='tight')
 
-                    if os.path.isfile(cluster_graphdir + 'video.avi'):
-                        os.remove(cluster_graphdir + 'video.avi')
+                # if videos:
+                #     for ii in range(0, 360, 1):
+                #         ax.view_init(elev=10., azim=ii)
+                #         print('Gerando imagens para renderizar vídeo: ' +
+                #               format(round(100 / 360 * ii, 2)) + '%')
+                #         plt.savefig(cluster_graphdir + format(ii) + '.jpg',
+                #                     dpi=500,
+                #                     bbox_inches='tight')
 
-                    call('ffmpeg -i \'' + cluster_graphdir +
-                         '%d.jpg\' -vcodec mpeg4 \'' + cluster_graphdir +
-                         'video.mp4\'',
-                         shell=True)
-                    filelist = [f for f in os.listdir(cluster_graphdir)
-                                if f.endswith(".jpg")]
-                    for f in filelist:
-                        os.remove(cluster_graphdir + f)
+                #     if os.path.isfile(cluster_graphdir + 'video.avi'):
+                #         os.remove(cluster_graphdir + 'video.avi')
+
+                #     call('ffmpeg -i \'' + cluster_graphdir +
+                #          '%d.jpg\' -vcodec mpeg4 \'' + cluster_graphdir +
+                #          'video.mp4\'',
+                #          shell=True)
+                #     filelist = [f for f in os.listdir(cluster_graphdir)
+                #                 if f.endswith(".jpg")]
+                #     for f in filelist:
+                #         os.remove(cluster_graphdir + f)
 
 
 def scipyTests():
@@ -478,7 +445,7 @@ if __name__ == '__main__':
     outdir = '/home/douglas/Desktop/out/'
     resultados_dir = outdir + 'results.csv'
 
-    sklearnTests(False)
-    scipyTests()
     dodoKmeansTest()
     dodoKmedoidsTest()
+    sklearnTests(False)
+    scipyTests()
