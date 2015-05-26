@@ -281,7 +281,8 @@ def sklearnTests(plots, videos=False):
                 min_c = min(cluster_bins)
                 max_c = max(cluster_bins)
 
-                var = catsim.cluster.stats.mean_variance(x, y_pred)
+                var = catsim.cluster.stats.mean_variance(x, np.delete(
+                    y_pred, np.where(y_pred == -1)))
                 dun = catsim.cluster.stats.dunn(y_pred, distances)
                 silhouette = silhouette_score(x, y_pred)
 
@@ -450,5 +451,5 @@ if __name__ == '__main__':
 
     dodoKmeansTest()
     # dodoKmedoidsTest()
-    sklearnTests(False)
-    scipyTests()
+    # sklearnTests(False)
+    # scipyTests()

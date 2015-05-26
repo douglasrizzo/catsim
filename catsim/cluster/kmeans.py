@@ -165,7 +165,7 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
 
             for i in range(npoints):
                 # assigns data point to closest centroid
-                clusters[i] = np.argmin(D[i])
+                clusters[i] = np.argmin(D[i]).astype(np.int64)
 
                 if debug:
                     print(clusters[i])
@@ -173,7 +173,7 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
 
             # re-calculate centroids
             for i in range(k):
-                clusters_aux = np.where(clusters == i)[0]
+                clusters_aux = np.where(clusters == i)[0].astype(np.int64)
                 centroidsN[i] = x[clusters_aux].mean(axis=0) if len(
                     clusters_aux) > 0 else centroids[i]
 
@@ -191,6 +191,6 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
         this_var = np.sum(catsim.cluster.stats.variances(x, clusters))
         if this_var < var:
             var = this_var
-            final_clusters = clusters
-
+            final_clusters = clusters.astype(np.int64)
+    print(final_clusters)
     return final_clusters
