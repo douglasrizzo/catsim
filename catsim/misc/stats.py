@@ -8,8 +8,8 @@ def coefvariation(x, axis=0):
     mean = np.mean(x, axis=axis)
     stddev = np.std(x, axis=axis)
 
-    print('Means:', mean)
-    print('Std. Devs:', stddev)
+    # print('Means:', mean)
+    # print('Std. Devs:', stddev)
 
     result = stddev / \
         mean if axis == 0 else np.transpose(stddev) / np.transpose(mean)

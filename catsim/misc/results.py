@@ -36,11 +36,11 @@ def loadResults(path):
     return df
 
 
-def saveResults(df, path):
+def saveResults(ar, path):
     '''
     Appends a result to the end of the CSV file:
 
-    input : a pandas.DataFrame in which each column corresponds to the
+    input : a list in which each entry corresponds to the
             following:
 
     datetime, clustering_time, dunn, sillhouette, n_itens,
@@ -48,9 +48,9 @@ def saveResults(df, path):
     group_indexes
     '''
     if not os.path.exists(path):
-        DataFrame([df], columns=columns).to_csv(path, header=True, index=False)
+        DataFrame([ar], columns=columns).to_csv(path, header=True, index=False)
     with open(path, 'a') as f:
-        DataFrame([df]).to_csv(f, header=False, index=False)
+        DataFrame([ar]).to_csv(f, header=False, index=False)
 
 
 def process(datadir, imgdir):
