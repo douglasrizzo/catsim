@@ -12,7 +12,7 @@ def means(x, clusters):
     npoints, nfeatures = x.shape
     centroids = np.zeros([len(set(clusters)), nfeatures])
 
-    for i in range(len(np.bincount(clusters))):
+    for i in range(len(np.bincount(clusters.astype(np.int64)))):
         clusters_aux = np.where(clusters == i)[0]
         centroids[i] = x[clusters_aux].mean(axis=0)
 
@@ -32,7 +32,7 @@ def variances(x, clusters):
     # cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
     D = distances.euclidean(x, cluster_means)
 
-    for i in range(len(np.bincount(clusters))):
+    for i in range(len(np.bincount(clusters.astype(np.int64)))):
         clusters_aux = np.where(clusters == i)[0]
         variances[i] = np.sum(D[clusters_aux])
 
