@@ -2,6 +2,7 @@ import os
 import pandas
 from pandas import DataFrame
 import numpy as np
+import time
 
 columns = ['Data', 'Algoritmo', 'Base de dados', 'Variável', 'Nº registros',
            'Nº grupos', 't (segundos)', 'Menor grupo', 'Maior grupo',
@@ -9,10 +10,10 @@ columns = ['Data', 'Algoritmo', 'Base de dados', 'Variável', 'Nº registros',
 
 
 def loadResults(path):
-    """
+    '''
     Caso o arquivo cluster_results.csv já existe, ele pode ser carregado usando
     esta função
-    """
+    '''
     if not os.path.exists(path):
         df = pandas.DataFrame([columns])
     else:
@@ -36,7 +37,9 @@ def loadResults(path):
     return df
 
 
-def saveResults(ar, path):
+def saveResults(datetime, algorithm, dataset, variable, n_observations,
+                n_clusters, t, smallest_cluster, largest_cluster, variance,
+                dunn, sillhouette, classifications, path):
     '''
     Appends a result to the end of the CSV file:
 
@@ -47,6 +50,11 @@ def saveResults(ar, path):
     algorithm_specific_variable, n_clusters, smallest_cluster, largest_cluster,
     group_indexes
     '''
+    ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
+          algorithm, dataset, variable, n_observations, n_clusters, t,
+          smallest_cluster, largest_cluster, variance, dunn, sillhouette,
+          classifications]
+
     if not os.path.exists(path):
         DataFrame([ar], columns=columns).to_csv(path, header=True, index=False)
     with open(path, 'a') as f:
@@ -60,7 +68,7 @@ def process(datadir, imgdir):
                             'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
                                 datadir + 'alg_means.csv')
     df.groupby('Base de dados')['Menor grupo', 'Maior grupo', 't (segundos)',
-                          'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
+                                'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
         datadir + 'dataset_means.csv')
     df.groupby('Nº grupos')['Menor grupo', 'Maior grupo', 't (segundos)',
                             'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
@@ -75,8 +83,8 @@ def process(datadir, imgdir):
     ax.get_figure().savefig(imgdir + 'validity_by_nclusters.pdf')
 
     df_enem = df[df['Base de dados'] == 'Enem'][df['Algoritmo'] !=
-                                          'Aff. Propagation'][df['Algoritmo']
-                                                              != 'DBSCAN']
+                                                'Aff. Propagation'][df['Algoritmo']
+                                                                    != 'DBSCAN']
     df_sintetico = df[df['Base de dados'] ==
                       'Sintético'][df['Algoritmo'] !=
                                    'Aff. Propagation'][df['Algoritmo'] !=
