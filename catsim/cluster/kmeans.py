@@ -101,7 +101,7 @@ def ward_init(x, k):
 
 
 def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
-    """Cluster a set of data points using the k-means algorithm.
+    '''Cluster a set of data points using the k-means algorithm.
 
     Keyword arguments:
     x -- a numpy.ndarray in which columns are features and lines are
@@ -128,7 +128,7 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
     algorithm for initial cluster centers in k-means algorithm. Pattern
     Recognition Letters, 32(14), 1701–1705.
     http://doi.org/10.1016/j.patrec.2011.07.011
-    """
+    '''
     npoints, nfeatures = x.shape
     centroidsN = np.zeros([k, nfeatures])
     clusters = np.zeros(npoints)
@@ -165,7 +165,7 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
 
             for i in range(npoints):
                 # assigns data point to closest centroid
-                clusters[i] = np.argmin(D[i]).astype(np.int64)
+                clusters[i] = np.argmin(D[i])
 
                 if debug:
                     print(clusters[i])
@@ -188,9 +188,9 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
 
             centroids = centroidsN
 
+        clusters = clusters.astype(np.int64)
         this_var = np.sum(catsim.cluster.stats.variances(x, clusters))
         if this_var < var:
             var = this_var
-            final_clusters = clusters.astype(np.int64)
-    print(final_clusters)
+            final_clusters = clusters
     return final_clusters
