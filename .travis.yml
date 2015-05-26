@@ -1,9 +1,9 @@
+sudo: required
 language: python
 python:
   - "3.2"
   - "3.3"
   - "3.4"
-install:
-  - "sudo apt-get install libatlas-base-dev gfortran"
-  - "pip3 install ."
+before_install: "sudo apt-get install libatlas-base-dev gfortran"
+install: "pip3 install ."
 script: "python3 -m unittest catsim/tests/test.py"
