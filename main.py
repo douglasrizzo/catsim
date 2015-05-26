@@ -3,33 +3,29 @@
 import os
 import time
 from datetime import timedelta
-from subprocess import call
 
-import matplotlib.pyplot as plt
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 from numpy import random
 
-from sklearn import cluster as skcluster, preprocessing
 from sklearn.metrics import silhouette_score
+from sklearn import cluster as skcluster, preprocessing
 
 import catsim.cat.irt
-import catsim.cat.simulate
 import catsim.misc.plot
+import catsim.cat.simulate
 import catsim.misc.results
 import catsim.cluster.stats
-import catsim.cluster.distances
 import catsim.cluster.kmeans
 import catsim.cluster.kmedoids
-# import catsim.misc.stats
+import catsim.cluster.distances
 
+from scipy.spatial.distance import cdist
 from scipy.cluster.hierarchy import linkage
 from scipy.cluster.hierarchy import fcluster
-from scipy.spatial.distance import cdist
 
 
 def medias_tpm(x, c):
-    """médias dos parâmetros a, b e c para cada cluster"""
+    '''médias dos parâmetros a, b e c para cada cluster'''
     medias = np.zeros((np.max(c) + 1, 3))
 
     for i in np.arange(0, np.size(c)):
@@ -50,7 +46,7 @@ def medias_tpm(x, c):
 
 
 def loadDatasets():
-    """carrega datasets utilizados no experimento"""
+    '''carrega datasets utilizados no experimento'''
     mt = np.genfromtxt(dissertacao_datadir + 'mt_params.csv', dtype='double',
                        delimiter=',', skip_header=True)
     ch = np.genfromtxt(dissertacao_datadir + 'ch_params.csv', dtype='double',
@@ -125,21 +121,37 @@ def dodoKmeansTest():
                            dataset_name + '_medias.csv', medias_tpm(x, res1),
                            delimiter=',')
 
-                catsim.misc.results.saveResults([time.time(),
-                                                 algorithm_name,
-                                                 dataset_name,
-                                                 init_method,
-                                                 np.size(x, 0),
-                                                 len(set(res1)),
-                                                 (t2 - t1) / n_init,
-                                                 min_c,
-                                                 max_c,
-                                                 var,
-                                                 dun,
-                                                 silhouette,
-                                                 str(res1.tolist()).strip(
-                    '[]').replace(',', '')],
-                    resultados_dir)
+                print(time.time(),
+                      algorithm_name,
+                      dataset_name,
+                      init_method,
+                      np.size(x, 0),
+                      len(set(res1)),
+                      (t2 - t1) / n_init,
+                      min_c,
+                      max_c,
+                      var,
+                      dun,
+                      silhouette,
+                      str(res1.tolist()).strip(
+                                    '[]').replace(',', ''))
+
+                catsim.misc.results.saveResults(
+                              time.time(),
+                              algorithm_name,
+                              dataset_name,
+                              init_method,
+                              np.size(x, 0),
+                              len(set(res1)),
+                              (t2 - t1) / n_init,
+                              min_c,
+                              max_c,
+                              var,
+                              dun,
+                              silhouette,
+                              str(res1.tolist()).strip(
+                                    '[]').replace(',', ''),
+                              resultados_dir)
 
 
 def dodoKmedoidsTest():
@@ -182,25 +194,25 @@ def dodoKmedoidsTest():
                            dataset_name + '_medias.csv', medias_tpm(x, res1),
                            delimiter=',')
 
-                catsim.misc.results.saveResults([time.time(),
-                                                 algorithm_name,
-                                                 dataset_name,
-                                                 p,
-                                                 np.size(x, 0),
-                                                 len(set(res1)),
-                                                 t2 - t1,
-                                                 min_c,
-                                                 max_c,
-                                                 var,
-                                                 dun,
-                                                 silhouette,
-                                                 str(res1.tolist()).strip(
-                    '[]').replace(',', '')],
-                    resultados_dir)
+                catsim.misc.results.saveResults(time.time(),
+                                                algorithm_name,
+                                                dataset_name,
+                                                p,
+                                                np.size(x, 0),
+                                                len(set(res1)),
+                                                t2 - t1,
+                                                min_c,
+                                                max_c,
+                                                var,
+                                                dun,
+                                                silhouette,
+                                                str(res1.tolist()).strip(
+                                                    '[]').replace(',', ''),
+                                                resultados_dir)
 
 
 def sklearnTests(plots, videos=False):
-    """Agrupa os itens em clusters"""
+    '''Agrupa os itens em clusters'''
 
     datasets = loadDatasets()
 
@@ -294,21 +306,21 @@ def sklearnTests(plots, videos=False):
                            dataset_name + '_medias.csv', medias_tpm(x, y_pred),
                            delimiter=',')
 
-                catsim.misc.results.saveResults([time.time(),
-                                                 algorithm_id,
-                                                 dataset_name,
-                                                 algorithm_variable,
-                                                 np.size(x, 0),
-                                                 len(set(y_pred)),
-                                                 t2 - t1,
-                                                 min_c,
-                                                 max_c,
-                                                 var,
-                                                 dun,
-                                                 silhouette,
-                                                 str(y_pred.tolist()).strip(
-                    '[]').replace(',', '')],
-                    resultados_dir)
+                catsim.misc.results.saveResults(time.time(),
+                                                algorithm_id,
+                                                dataset_name,
+                                                algorithm_variable,
+                                                np.size(x, 0),
+                                                len(set(y_pred)),
+                                                t2 - t1,
+                                                min_c,
+                                                max_c,
+                                                var,
+                                                dun,
+                                                silhouette,
+                                                str(y_pred.tolist()).strip(
+                                                    '[]').replace(',', ''),
+                                                resultados_dir)
 
                 if plots:
                     if hasattr(algorithm, 'cluster_centers_'):
