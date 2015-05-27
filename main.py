@@ -140,6 +140,7 @@ def dodoKmeansTest():
                               time.time(),
                               algorithm_name,
                               dataset_name,
+                              'Euclideana',
                               init_method,
                               np.size(x, 0),
                               len(set(res1)),
@@ -159,8 +160,23 @@ def dodoKmedoidsTest():
     algorithm_name = 'K-medóides'
 
     for dataset_name, x in datasets:
-        for p in range(1, 6):
-            D = catsim.cluster.distances.pnorm(x, p=p)
+        for p in range(1, 8):
+            if p >= 1 and p <= 6:
+                D = catsim.cluster.distances.pnorm(x, p=p)
+                if p == 1:
+                    d_name = 'Manhattan'
+                elif p == 2:
+                    d_name = 'Euclideana'
+                elif p > 2 and p < float('inf'):
+                    d_name = 'Minkowski (p = ' + format(p) + ')'
+            elif p == 7:
+                p = float('inf')
+                d_name = 'Chebyshev'
+                D = catsim.cluster.distances.pnorm(x, p=p)
+            elif p == 8:
+                D = cdist(x, x, 'mahalanobis')
+                d_name = 'Mahalanobis'
+
             for k in range(2,  (np.size(x, 0) / 2) - 1):
                 var = 0
                 for iteration in range(100):
@@ -197,6 +213,7 @@ def dodoKmedoidsTest():
                 catsim.misc.results.saveResults(time.time(),
                                                 algorithm_name,
                                                 dataset_name,
+                                                d_name,
                                                 p,
                                                 np.size(x, 0),
                                                 len(set(res1)),
@@ -309,6 +326,7 @@ def sklearnTests(plots, videos=False):
                 catsim.misc.results.saveResults(time.time(),
                                                 algorithm_id,
                                                 dataset_name,
+                                                'Euclideana',
                                                 algorithm_variable,
                                                 np.size(x, 0),
                                                 len(set(y_pred)),
@@ -412,6 +430,15 @@ def scipyTests():
 
                 # run algorithm and extract statistics and validations
                 for link_metric in link_metrics:
+                    if link_metric == 'cityblock':
+                        d_name = 'Manhattan'
+                    if link_metric == 'euclidean':
+                        d_name = 'Euclideana'
+                    if link_metric == 'mahalanobis':
+                        d_name = 'Mahalanobis'
+                    if link_metric == 'chebyshev':
+                        d_name = 'Chebyshev'
+
                     t1 = time.time()
                     links = linkage(x, method=link_method, metric=link_metric)
                     clusters = fcluster(links, k, criterion='maxclust') - 1
@@ -437,10 +464,11 @@ def scipyTests():
                                    medias_tpm(x, clusters),
                                    delimiter=',')
 
-                        catsim.misc.results.saveResults([
+                        catsim.misc.results.saveResults(
                           time.time(),
                           algorithm_name,
                           dataset_name,
+                          d_name,
                           link_metric,
                           np.size(x, 0),
                           len(set(clusters)),
@@ -450,7 +478,7 @@ def scipyTests():
                           var,
                           dun,
                           silhouette,
-                          str(clusters.tolist()).strip('[]').replace(',', '')],
+                          str(clusters.tolist()).strip('[]').replace(',', ''),
                           resultados_dir)
 
 
