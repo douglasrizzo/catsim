@@ -4,9 +4,9 @@ from pandas import DataFrame
 import numpy as np
 import time
 
-columns = ['Data', 'Algoritmo', 'Base de dados', 'Variável', 'Nº registros',
-           'Nº grupos', 't (segundos)', 'Menor grupo', 'Maior grupo',
-           'Variância', 'Dunn', 'Silhueta', 'Classificacoes']
+columns = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
+           'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
+           'Maior grupo', 'Variância', 'Dunn', 'Silhueta', 'Classificações']
 
 
 def loadResults(path):
@@ -26,20 +26,21 @@ def loadResults(path):
          'Variável', 'Nº grupos', 'Menor grupo',
          'Maior grupo']].astype(float)
 
-    df['Sem Classificacao'] = df['Classificacoes'].apply(lambda x:
+    df['Sem Classificação'] = df['Classificações'].apply(lambda x:
                                                          x.count('-1'))
-    df['Classificacoes'] = df['Classificacoes'].apply(lambda x:
+    df['Classificações'] = df['Classificações'].apply(lambda x:
                                                       np.array(x.split(' '),
                                                                dtype='int'))
-    df['pct. sem Classificacao'] = df[['Sem Classificacao', 'Classificacoes'
+    df['pct. sem Classificação'] = df[['Sem Classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
                                                 x[0], axis=1)
     return df
 
 
-def saveResults(datetime, algorithm, dataset, variable, n_observations,
-                n_clusters, t, smallest_cluster, largest_cluster, variance,
-                dunn, sillhouette, classifications, path):
+def saveResults(datetime, algorithm, dataset, distance, variable,
+                n_observations, n_clusters, t, smallest_cluster,
+                largest_cluster, variance, dunn, sillhouette, classifications,
+                path):
     '''
     Appends a result to the end of the CSV file:
 
@@ -51,8 +52,8 @@ def saveResults(datetime, algorithm, dataset, variable, n_observations,
     group_indexes
     '''
     ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
-          algorithm, dataset, variable, n_observations, n_clusters, t,
-          smallest_cluster, largest_cluster, variance, dunn, sillhouette,
+          algorithm, dataset, distance, variable, n_observations, n_clusters,
+          t, smallest_cluster, largest_cluster, variance, dunn, sillhouette,
           classifications]
 
     if not os.path.exists(path):
@@ -189,7 +190,7 @@ def process(datadir, imgdir):
 
     ax = pandas.pivot_table(
         dfdb,
-        values='pct. sem Classificacao',
+        values='pct. sem Classificação',
         columns='Base de dados',
         index='$\epsilon$').plot(
             figsize=(8, 6),
