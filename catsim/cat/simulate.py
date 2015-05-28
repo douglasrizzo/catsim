@@ -42,8 +42,9 @@ def simCAT(items, clusters, n_itens=20, tests=1):
                 selected_item = None
                 max_inf = 0
                 for counter, i in enumerate(items):
-                    if counter not in administered_items and irt.inf(
-                            est_theta, i[0], i[1], i[2]) > max_inf:
+                    if (counter not in administered_items and
+                        catsim.cat.irt.inf(
+                            est_theta, i[0], i[1], i[2]) > max_inf):
                         selected_item = counter
 
                 # if the selected item's exposure rate is bigger than the
@@ -66,9 +67,11 @@ def simCAT(items, clusters, n_itens=20, tests=1):
 
                 # simulates the examinee's response via the three-parameter
                 # logistic function
-                acertou = irt.tpm(true_theta, items[selected_item][0],
-                                  items[selected_item][1],
-                                  items[selected_item][2]) >= random.uniform()
+                acertou = catsim.cat.irt.tpm(
+                    true_theta,
+                    items[selected_item][0],
+                    items[selected_item][1],
+                    items[selected_item][2]) >= random.uniform()
 
                 response_vector.append(acertou)
                 # adds the administered item to the pool of administered items
@@ -82,7 +85,7 @@ def simCAT(items, clusters, n_itens=20, tests=1):
                 # else, a maximum likelihood approach is used
                 else:
                     res = minimize(
-                        irt.negativelogLik, [est_theta],
+                        catsim.cat.irt.negativelogLik, [est_theta],
                         args=[response_vector, items[administered_items]],
                         options={'disp': True})
                     est_theta = res.x
