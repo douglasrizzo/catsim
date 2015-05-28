@@ -467,8 +467,6 @@ if __name__ == '__main__':
                 args=[dataset_name, x, 300, 400]).start()
         Process(target=dodoKmeansTest,
                 args=[dataset_name, x, 401, 500]).start()
-        # p.join()
-        # dodoKmeansTest(dataset_name, x, k_init=95)
 
     datasets = loadDatasets(enem=False, enem_n=False, sintetico_n=False)
 

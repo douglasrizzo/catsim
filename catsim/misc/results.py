@@ -59,9 +59,9 @@ def saveClusterResults(datetime, algorithm, dataset, distance, variable,
           variance,
           dunn,
           sillhouette,
+          classifications,
           None,
-          None,
-          classifications]
+          None]
 
     if not os.path.exists(path):
         DataFrame([ar], columns=col_cluster).to_csv(
