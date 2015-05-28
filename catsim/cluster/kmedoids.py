@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def kmedoids(D, k, tmax=100):
+def kmedoids(D, k, iters=100):
 
     # determine dimensions of distance matrix D
     m, n = D.shape
@@ -12,7 +12,7 @@ def kmedoids(D, k, tmax=100):
     # initialize a dictionary to represent clusters
     C = {}
 
-    for t in range(tmax):
+    for t in range(iters):
         # determine clusters, i.e. arrays of data indices
         J = np.argmin(D[:, M], axis=1)
 

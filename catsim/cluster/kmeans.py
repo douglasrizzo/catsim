@@ -9,7 +9,7 @@ def naive_init(x, k):
     Initialize first $k$ centroids between the minimum and maximum values of
     each feature from the $x$ matrix
     '''
-    nfeatures = x.shape[1]
+    npoints, nfeatures = x.shape
     centroids = np.zeros([k, nfeatures])
 
     for i in range(nfeatures):
@@ -17,6 +17,7 @@ def naive_init(x, k):
         f_max = np.max(x[:, i])
         centroids[:, i] = np.random.uniform(f_min, f_max, k)
 
+    centroids = x[np.random.choice(npoints, size=k, replace=False)]
     return centroids
 
 
