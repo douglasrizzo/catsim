@@ -1,30 +1,33 @@
 import os
-import pandas
-from pandas import DataFrame
-import numpy as np
 import time
+import pandas
+import numpy as np
+from pandas import DataFrame
 
-columns = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
-           'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
-           'Maior grupo', 'Variância', 'Dunn', 'Silhueta', 'Classificações']
+col_cluster = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
+               'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
+               'Maior grupo', 'Variância', 'Dunn', 'Silhueta',
+               'Classificações', 'RMSE', 'Taxa de sobreposição']
+col_cat = ['Theta', 'Banco de itens', 'Qtd. itens',
+           'Id. itens', 'Est. thetas', 'r_max']
 
 
-def loadResults(path):
-    '''
-    Caso o arquivo cluster_results.csv já existe, ele pode ser carregado usando
-    esta função
+def loadClusterResults(path):
+    '''Loads the csv file containing the clustering results in a
+       :func: pandas.DataFrame. If the file does not exist, creates an empty
+       file with the column headers
     '''
     if not os.path.exists(path):
-        df = pandas.DataFrame([columns])
+        df = pandas.DataFrame([col_cluster])
     else:
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')
 
-    df[['Data', 't (segundos)', 'Dunn', 'Silhueta', 'Nº registros', 'Variável',
-        'Nº grupos', 'Menor grupo', 'Maior grupo']] = df[
-        ['Data', 't (segundos)', 'Dunn', 'Silhueta', 'Nº registros',
-         'Variável', 'Nº grupos', 'Menor grupo',
-         'Maior grupo']].astype(float)
+    df[['t (segundos)', 'Dunn', 'Silhueta', 'Nº registros', 'Nº grupos',
+        'Menor grupo', 'Maior grupo', 'RMSE', 'Taxa de sobreposição']] = df[
+        ['t (segundos)', 'Dunn', 'Silhueta', 'Nº registros', 'Nº grupos',
+         'Menor grupo', 'Maior grupo', 'RMSE',
+         'Taxa de sobreposição']].astype(float)
 
     df['Sem Classificação'] = df['Classificações'].apply(lambda x:
                                                          x.count('-1'))
@@ -37,19 +40,11 @@ def loadResults(path):
     return df
 
 
-def saveResults(datetime, algorithm, dataset, distance, variable,
-                n_observations, n_clusters, t, smallest_cluster,
-                largest_cluster, variance, dunn, sillhouette, classifications,
-                path):
-    '''
-    Appends a result to the end of the CSV file:
-
-    input : a list in which each entry corresponds to the
-            following:
-
-    datetime, clustering_time, dunn, sillhouette, n_itens,
-    algorithm_specific_variable, n_clusters, smallest_cluster, largest_cluster,
-    group_indexes
+def saveClusterResults(datetime, algorithm, dataset, distance, variable,
+                       n_observations, n_clusters, t, smallest_cluster,
+                       largest_cluster, variance, dunn, sillhouette,
+                       classifications, path):
+    '''Appends a result to the end of the cluster results csv file:
     '''
     ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
           algorithm, dataset, distance, variable, n_observations, n_clusters,
@@ -57,13 +52,14 @@ def saveResults(datetime, algorithm, dataset, distance, variable,
           classifications]
 
     if not os.path.exists(path):
-        DataFrame([ar], columns=columns).to_csv(path, header=True, index=False)
+        DataFrame([ar], columns=col_cluster).to_csv(
+            path, header=True, index=False)
     with open(path, 'a') as f:
         DataFrame([ar]).to_csv(f, header=False, index=False)
 
 
 def process(datadir, imgdir):
-    df = loadResults()
+    df = loadClusterResults()
 
     df.groupby('Algoritmo')['Menor grupo', 'Maior grupo', 't (segundos)',
                             'Variância', 'Dunn', 'Silhueta'].mean().to_csv(
@@ -83,9 +79,10 @@ def process(datadir, imgdir):
     ax.set_ylabel('Índices')
     ax.get_figure().savefig(imgdir + 'validity_by_nclusters.pdf')
 
-    df_enem = df[df['Base de dados'] == 'Enem'][df['Algoritmo'] !=
-                                                'Aff. Propagation'][df['Algoritmo']
-                                                                    != 'DBSCAN']
+    df_enem = df[df['Base de dados'] == 'Enem'][
+        df['Algoritmo'] !=
+        'Aff. Propagation'][df['Algoritmo']
+                            != 'DBSCAN']
     df_sintetico = df[df['Base de dados'] ==
                       'Sintético'][df['Algoritmo'] !=
                                    'Aff. Propagation'][df['Algoritmo'] !=
@@ -209,3 +206,28 @@ def process(datadir, imgdir):
             title='Nº de clusters / $\epsilon$ para DBSCAN')
     ax.set_ylabel('Nº grupos')
     ax.get_figure().savefig(imgdir + 'nclusters_by_dbscan.pdf')
+
+
+def loadCATResults(path):
+    '''Loads the csv file containing the computerized adaptive testing
+       simulation results in a pandas.DataFrame. If the file does not exist,
+       creates an empty file with the column headers.
+    '''
+    if not os.path.exists(path):
+        df = pandas.DataFrame([col_cat])
+    else:
+        df = pandas.read_csv(path, header=0, index_col=False,
+                             encoding='utf-8')
+
+    df[['Theta', 'Qtd. itens', 'r_max']] = df[
+        ['Theta', 'Qtd. itens', 'r_max']].astype(float)
+
+    df['Id. itens'] = df['Id. itens'].apply(lambda x:
+                                            np.array(x.split(' '),
+                                                     dtype='int'))
+
+    df['Est. thetas'] = df['Est. thetas'].apply(lambda x:
+                                                np.array(x.split(' '),
+                                                         dtype='int'))
+
+    return df
