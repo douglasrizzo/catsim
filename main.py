@@ -2,6 +2,7 @@
 
 import os
 import time
+from multiprocessing import Process
 from datetime import timedelta
 
 import numpy as np
@@ -92,10 +93,17 @@ def loadDatasets(enem=True, sintetico=True, enem_n=True, sintetico_n=True):
     return retorno
 
 
-def dodoKmeansTest(dataset_name, x):
+def dodoKmeansTest(dataset_name, x, k_init=2, k_end=None):
     n_init = 100
+
+    if k_end is None:
+        k_end = int((np.size(x, 0) / 2) - 1)
+    else:
+        k_end = k_end + 1
+
+
     algorithm_name = 'Dodô K-means'
-    for k in range(2,  (int(np.size(x, 0) / 2) - 1)):
+    for k in range(k_init, k_end):
         for init_method in ['naive']:
             t1 = time.time()
             res1 = catsim.cluster.kmeans.kmeans(x, k,
@@ -449,10 +457,34 @@ if __name__ == '__main__':
     outdir = '/home/douglas/Desktop/out/'
     resultados_dir = outdir + 'results.csv'
 
-    datasets = loadDatasets()
+    for dataset_name, x in loadDatasets(enem=False, enem_n=False,
+                                        sintetico=False):
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 95, 197]).start()
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 198, 299]).start()
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 300, 400]).start()
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 401, 500]).start()
+        # p.join()
+        # dodoKmeansTest(dataset_name, x, k_init=95)
 
-    for dataset_name, x in datasets:
-        dodoKmeansTest(dataset_name, x)
+    datasets = loadDatasets(enem=False, enem_n=False, sintetico_n=False)
+
+    for dataset_name, x in loadDatasets(enem=False, enem_n=False,
+                                        sintetico_n=False):
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 205, 279]).start()
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 280, 354]).start()
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 355, 429]).start()
+        Process(target=dodoKmeansTest,
+                args=[dataset_name, x, 430, 500]).start()
+        # p.join()
+        # dodoKmeansTest(dataset_name, x, k_init=205)
+
         # scipyTests(dataset_name, x)
         # sklearnTests(dataset_name, x)
         # dodoKmedoidsTest(dataset_name, x)

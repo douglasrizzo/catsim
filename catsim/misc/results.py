@@ -47,8 +47,20 @@ def saveClusterResults(datetime, algorithm, dataset, distance, variable,
     '''Appends a result to the end of the cluster results csv file:
     '''
     ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
-          algorithm, dataset, distance, variable, n_observations, n_clusters,
-          t, smallest_cluster, largest_cluster, variance, dunn, sillhouette,
+          algorithm,
+          dataset,
+          distance,
+          variable,
+          n_observations,
+          n_clusters,
+          t,
+          smallest_cluster,
+          largest_cluster,
+          variance,
+          dunn,
+          sillhouette,
+          None,
+          None,
           classifications]
 
     if not os.path.exists(path):
