@@ -26,7 +26,7 @@ from scipy.cluster.hierarchy import fcluster
 
 
 def medias_tpm(x, c):
-    '''médias dos parâmetros a, b e c para cada cluster'''
+    """médias dos parâmetros a, b e c para cada cluster"""
     medias = np.zeros((np.max(c) + 1, 3))
 
     for i in np.arange(0, np.size(c)):
@@ -47,7 +47,7 @@ def medias_tpm(x, c):
 
 
 def loadDatasets(enem=True, sintetico=True, enem_n=True, sintetico_n=True):
-    '''carrega datasets utilizados no experimento'''
+    """carrega datasets utilizados no experimento"""
 
     retorno = []
 
@@ -239,7 +239,7 @@ def dodoKmedoidsTest(dataset_name, x):
 
 
 def sklearnTests(dataset_name, x):
-    '''Agrupa os itens em clusters'''
+    """Agrupa os itens em clusters"""
 
     algorithms = []
     distances = catsim.cluster.distances.euclidean(x)
@@ -400,11 +400,11 @@ def scipyTests(dataset_name, x):
             for link_metric in link_metrics:
                 if link_metric == 'cityblock':
                     d_name = 'Manhattan'
-                if link_metric == 'euclidean':
+                elif link_metric == 'euclidean':
                     d_name = 'Euclideana'
-                if link_metric == 'mahalanobis':
+                elif link_metric == 'mahalanobis':
                     d_name = 'Mahalanobis'
-                if link_metric == 'chebyshev':
+                elif link_metric == 'chebyshev':
                     d_name = 'Chebyshev'
 
                 t1 = time.time()
@@ -457,36 +457,69 @@ if __name__ == '__main__':
     outdir = '/home/douglas/Desktop/out/'
     resultados_dir = outdir + 'results.csv'
 
-    for dataset_name, x in loadDatasets(enem=False, enem_n=False,
-                                        sintetico=False):
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 95, 197]).start()
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 198, 299]).start()
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 300, 400]).start()
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 401, 500]).start()
+    datasets = loadDatasets()
 
-    datasets = loadDatasets(enem=False, enem_n=False, sintetico_n=False)
+    for dataset_name, x in datasets:
+        np.savetxt('/home/douglas/Desktop/' + dataset_name + '.csv',
+                   x, fmt='%10.9f', delimiter=',')
 
-    for dataset_name, x in loadDatasets(enem=False, enem_n=False,
-                                        sintetico_n=False):
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 205, 279]).start()
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 280, 354]).start()
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 355, 429]).start()
-        Process(target=dodoKmeansTest,
-                args=[dataset_name, x, 430, 500]).start()
-        # p.join()
-        # dodoKmeansTest(dataset_name, x, k_init=205)
+    df = catsim.misc.results.loadClusterResults(
+      '/home/douglas/Copy/qsim_results.csv')
 
-        # scipyTests(dataset_name, x)
-        # sklearnTests(dataset_name, x)
-        # dodoKmedoidsTest(dataset_name, x)
+    df['Menor grupo'] = df['Classificações'].apply(lambda x: min(np.bincount(
+        np.delete(x, np.where(x == -1)).astype(np.int64))))
 
-        # results = catsim.misc.results.loadClusterResults(resultados_dir)
-        # for result in results:
-        #     print(results['Classificações'])
+    df['Maior grupo'] = df['Classificações'].apply(lambda x: max(np.bincount(
+        np.delete(x, np.where(x == -1)).astype(np.int64))))
+
+    print(df['Base de dados'])
+
+    for dataset_name, x in datasets:
+        print('Dataset: '+dataset_name)
+        print('Dimensions: ' + format(x.shape))
+        minidf = df[df['Base de dados'] == dataset_name]
+        print(minidf['Classificações'].apply(len))
+        print(minidf['Classificações'])
+        df['Variância'][df['Base de dados'] == dataset_name] = df['Classificações'][df['Base de dados'] == dataset_name].apply(
+          lambda y: catsim.cluster.stats.mean_variance(x, y))
+        df['Silhueta'][df['Base de dados'] == dataset_name] = df['Classificações'][df['Base de dados'] == dataset_name].apply(
+          lambda y: silhouette_score(x, y))
+        df['Dunn'][df['Base de dados'] == dataset_name] = df['Classificações'][df['Base de dados'] == dataset_name].apply(
+          lambda y: catsim.cluster.stats.dunn(
+            y, catsim.cluster.distances.euclidean(x)))
+
+    df.to_csv('/home/douglas/Desktop/qsim_results_full.csv', index=False, encoding='utf-8')
+
+    # for dataset_name, x in loadDatasets(enem=False, enem_n=False,
+    #                                     sintetico=False):
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 95, 197]).start()
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 198, 299]).start()
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 300, 400]).start()
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 401, 500]).start()
+
+    # datasets = loadDatasets(enem=False, enem_n=False, sintetico_n=False)
+
+    # for dataset_name, x in loadDatasets(enem=False, enem_n=False,
+    #                                     sintetico_n=False):
+    #     Process(target=dodoKmeansTest,
+    #             args= [dataset_name, x, 205, 279]).start()
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 280, 354]).start()
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 355, 429]).start()
+    #     Process(target=dodoKmeansTest,
+    #             args=[dataset_name, x, 430, 500]).start()
+    #     # p.join()
+    #     # dodoKmeansTest(dataset_name, x, k_init=205)
+
+    #     # scipyTests(dataset_name, x)
+    #     # sklearnTests(dataset_name, x)
+    #     # dodoKmedoidsTest(dataset_name, x)
+
+    #     # results = catsim.misc.results.loadClusterResults(resultados_dir)
+    #     # for result in results:
+    #     #     print(results['Classificações'])
