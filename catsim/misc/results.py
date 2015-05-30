@@ -13,30 +13,37 @@ col_cat = ['Theta', 'Banco de itens', 'Qtd. itens',
 
 
 def loadClusterResults(path):
-    '''Loads the csv file containing the clustering results in a
+    """Loads the csv file containing the clustering results in a
        :func: pandas.DataFrame. If the file does not exist, creates an empty
        file with the column headers
-    '''
+    """
     if not os.path.exists(path):
         df = pandas.DataFrame([col_cluster])
     else:
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')
 
+    df['Data'] = pandas.to_datetime(df['Data'])
+
     df[['t (segundos)', 'Dunn', 'Silhueta', 'Nº registros', 'Nº grupos',
         'Menor grupo', 'Maior grupo', 'RMSE', 'Taxa de sobreposição']] = df[
         ['t (segundos)', 'Dunn', 'Silhueta', 'Nº registros', 'Nº grupos',
          'Menor grupo', 'Maior grupo', 'RMSE',
-         'Taxa de sobreposição']].astype(float)
+         'Taxa de sobreposição']].astype(np.float64)
+
+
+    df[['Base de dados', 'Distância']] = df[['Base de dados', 'Distância']].astype(str)
 
     df['Sem Classificação'] = df['Classificações'].apply(lambda x:
                                                          x.count('-1'))
     df['Classificações'] = df['Classificações'].apply(lambda x:
-                                                      np.array(x.split(' '),
-                                                               dtype='int'))
+                                                      np.array(x.strip().split(' '),
+                                                               dtype=np.int64))
     df['pct. sem Classificação'] = df[['Sem Classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
                                                 x[0], axis=1)
+
+    df['Classificações'] = df['Classificações'].astype(np.ndarray)
     return df
 
 
@@ -44,8 +51,8 @@ def saveClusterResults(datetime, algorithm, dataset, distance, variable,
                        n_observations, n_clusters, t, smallest_cluster,
                        largest_cluster, variance, dunn, sillhouette,
                        classifications, path):
-    '''Appends a result to the end of the cluster results csv file:
-    '''
+    """Appends a result to the end of the cluster results csv file:
+    """
     ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
           algorithm,
           dataset,
@@ -221,10 +228,10 @@ def process(datadir, imgdir):
 
 
 def loadCATResults(path):
-    '''Loads the csv file containing the computerized adaptive testing
+    """Loads the csv file containing the computerized adaptive testing
        simulation results in a pandas.DataFrame. If the file does not exist,
        creates an empty file with the column headers.
-    '''
+    """
     if not os.path.exists(path):
         df = pandas.DataFrame([col_cat])
     else:
@@ -235,11 +242,11 @@ def loadCATResults(path):
         ['Theta', 'Qtd. itens', 'r_max']].astype(float)
 
     df['Id. itens'] = df['Id. itens'].apply(lambda x:
-                                            np.array(x.split(' '),
+                                            np.array(x.strip().split(' '),
                                                      dtype='int'))
 
     df['Est. thetas'] = df['Est. thetas'].apply(lambda x:
-                                                np.array(x.split(' '),
+                                                np.array(x.strip().split(' '),
                                                          dtype='int'))
 
     return df

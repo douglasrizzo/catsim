@@ -5,10 +5,10 @@ import catsim.cluster.stats
 
 
 def naive_init(x, k):
-    '''
+    """
     Initialize first $k$ centroids between the minimum and maximum values of
     each feature from the $x$ matrix
-    '''
+    """
     npoints, nfeatures = x.shape
     centroids = np.zeros([k, nfeatures])
 
@@ -22,7 +22,7 @@ def naive_init(x, k):
 
 
 def var_covar_init(x, k):
-    '''
+    """
     Centroid initialization method proposed by [Erisoglu2011].
 
     Only two features of the dataset are used in this method. Feature
@@ -38,7 +38,7 @@ def var_covar_init(x, k):
     algorithm for initial cluster centers in k-means algorithm. Pattern
     Recognition Letters, 32(14), 1701–1705.
     http://doi.org/10.1016/j.patrec.2011.07.011
-    '''
+    """
 
     # calculate number of data points, number of features, coefficient of
     # variation for each feature and correlation matrix of features
@@ -76,7 +76,7 @@ def var_covar_init(x, k):
 
 
 def ward_init(x, k):
-    '''
+    """
     Ward initialization method for the centroids of k-means algorithm. In this
     method, the data is clustered hierarchically using Ward's function, which
     is a greedy iterative method that joins the two clusters in a way that the
@@ -85,7 +85,7 @@ def ward_init(x, k):
 
     After the :math:`k` clusters are generated, their centroids are calculated
     and used to initialize k-means.
-    '''
+    """
     from scipy.cluster.hierarchy import ward
     from scipy.cluster.hierarchy import fcluster
 
@@ -102,7 +102,7 @@ def ward_init(x, k):
 
 
 def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
-    '''Cluster a set of data points using the k-means algorithm.
+    """Cluster a set of data points using the k-means algorithm.
 
     Keyword arguments:
     x -- a numpy.ndarray in which columns are features and lines are
@@ -129,7 +129,7 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
     algorithm for initial cluster centers in k-means algorithm. Pattern
     Recognition Letters, 32(14), 1701–1705.
     http://doi.org/10.1016/j.patrec.2011.07.011
-    '''
+    """
     npoints, nfeatures = x.shape
     centroidsN = np.zeros([k, nfeatures])
     clusters = np.zeros(npoints)

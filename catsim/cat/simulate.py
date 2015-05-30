@@ -7,13 +7,13 @@ import catsim.cat.irt
 
 
 def simCAT(items, clusters, n_itens=20, tests=1):
-    '''
+    """
     CAT simulation and validation method proposed by [Barrada2010]
 
     .. [Barrada2010] BARRADA, Juan Ramón et al. A method for the comparison of
     item selection rules in computerized adaptive testing. Applied
     Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
-    '''
+    """
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, tests, n_itens)
 
@@ -92,7 +92,7 @@ def simCAT(items, clusters, n_itens=20, tests=1):
 
 
 def dodd(theta, items, acertou):
-    '''
+    """
     Method proposed by [Dodd1990] for the reestimation of
     :math:`\\hat{\\theta}` when the response vector is composed entirely of 1s
     or 0s
@@ -109,7 +109,7 @@ def dodd(theta, items, acertou):
     and Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
     Scale Model. Applied Psychological Measurement, 14(4), 355–366.
     http://doi.org/10.1177/014662169001400403
-    '''
+    """
     b = items[:, 1]
     b_max = max(b)
     b_min = min(b)
@@ -120,20 +120,20 @@ def dodd(theta, items, acertou):
 
 
 def rmse(actual, predicted):
-    '''
+    """
     Root mean squared error
 
     .. math:: RMSE =
     \\sqrt{\\frac{\\sum_{i=1}^N(\\hat{\\theta}_i-\\theta_i)^2}{N}}
-    '''
+    """
     return math.pow(math.sqrt(mean_squared_error(actual, predicted)), .5)
 
 
 def overlap_rate():
-    '''
+    """
     Test overlap rate
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
-    '''
+    """
 
     return 0

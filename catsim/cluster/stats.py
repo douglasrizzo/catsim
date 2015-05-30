@@ -3,11 +3,11 @@ from catsim.cluster import distances
 
 
 def means(x, clusters):
-    # '''
+    # """
     # Calculates de mean distances for each cluster:
 
     # .. math:: \\mu_g = \\frac{1}{N_g}\\sum_{i=1; j=i+1}^{N_g}d(i, j)
-    # '''
+    # """
 
     npoints, nfeatures = x.shape
     centroids = np.zeros([max(clusters) + 1, nfeatures])
@@ -20,11 +20,11 @@ def means(x, clusters):
 
 
 def variances(x, clusters):
-    '''
+    """
     Calculates the variance for each cluster
 
     .. math:: \\sigma^2_g = \\frac{1}{N_g}\\sum_{i=1; j=i+1}^{N_g} (\mu_g - d(i, j))
-    '''
+    """
 
     npoints, nfeatures = x.shape
     cluster_means = means(x, clusters)
@@ -40,16 +40,16 @@ def variances(x, clusters):
 
 
 def mean_variance(x, clusters):
-    '''
+    """
     Returns the mean variance for all clusters
 
     .. math:: \\sigma^2 = \\frac{1}{G}\\sum_{g=1}^G \\frac{1}{N} \\sum_{i=1; j=i+1}^N (\mu_g - d(i, j))
-    '''
+    """
     return np.mean(variances(x, clusters))
 
 
 def dunn(c, distances):
-    '''
+    """
     Dunn index for cluster validation (the bigger, the better)
 
     .. math:: D = \\min_{i = 1 \\ldots n_c; j = i + 1\ldots n_c}
@@ -69,7 +69,7 @@ def dunn(c, distances):
     .. [Kovacs2005] Kovács, F., Legány, C., & Babos, A. (2005). Cluster
     validity measurement techniques. 6th International Symposium of Hungarian
     Researchers on Computational Intelligence.
-    '''
+    """
     unique_cluster_distances = np.unique(min_cluster_distances(c, distances))
     max_diameter = max(diameter(c, distances))
 
@@ -80,9 +80,9 @@ def dunn(c, distances):
 
 
 def min_cluster_distances(c, D):
-    '''
+    """
     Calculates the distances between the two nearest points of each cluster.
-    '''
+    """
 
     # creates empty matrix
     min_distances = np.zeros((max(c) + 1, max(c) + 1))
@@ -107,10 +107,10 @@ def min_cluster_distances(c, D):
 
 
 def diameter(c, D):
-    '''
+    """
     Calculates cluster diameters (the distance between the two farthest data
     points in a cluster)
-    '''
+    """
 
     # creates empty matrix
     diameters = np.zeros(max(c) + 1)
