@@ -101,7 +101,8 @@ def ward_init(x, k):
     return centroids
 
 
-def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
+def kmeans(x, k, init_method='naive', iters=100, n_init=1,
+           debug=False, metric='euclidean'):
     """Cluster a set of data points using the k-means algorithm.
 
     Keyword arguments:
@@ -159,8 +160,16 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1, debug=False):
     for init in range(n_init):
         for t in range(iters):
             # calculates distances from data points to centroids
-            D = catsim.cluster.distances.euclidean(x, centroids)
-
+            # according to a meeting with the statistics teacher, both the
+            # Euclidean and Mahalanobis distance use the mean as the best
+            # estimator to minimize squared error criterion/sum of
+            # intra-cluster variances, so in this implementation of k-means,
+            # both distances can be used without significantly changing the
+            # code
+            if metric == 'euclidean':
+                D = catsim.cluster.distances.euclidean(x, centroids)
+            elif metric == 'mahalanobis':
+                D = catsim.cluster.distances.mahalanobis(x, centroids)
             if debug:
                 print('Distances: ', D.shape, '\n', D)
 
