@@ -2,8 +2,10 @@
 
 import os
 import time
-from multiprocessing import Process
 from datetime import timedelta
+
+import multiprocessing as mp
+from multiprocessing import Process
 
 import numpy as np
 from numpy import random
@@ -93,14 +95,14 @@ def loadDatasets(enem=True, sintetico=True, enem_n=True, sintetico_n=True):
     return retorno
 
 
-def dodoKmeansTest(dataset_name, x, k_init=2, k_end=None):
+def dodoKmeansTest(dataset_name, x, k_init=2, k_end=None, metric='euclidean'):
     n_init = 100
+    readable_metric = 'Mahalanobis' if metric == 'mahalanobis' else 'Euclideana'
 
     if k_end is None:
         k_end = int((np.size(x, 0) / 2) - 1)
     else:
         k_end = k_end + 1
-
 
     algorithm_name = 'Dodô K-means'
     for k in range(k_init, k_end):
@@ -109,7 +111,7 @@ def dodoKmeansTest(dataset_name, x, k_init=2, k_end=None):
             res1 = catsim.cluster.kmeans.kmeans(x, k,
                                                 init_method=init_method,
                                                 iters=1000, n_init=n_init,
-                                                debug=False)
+                                                debug=False, metric=metric)
             t2 = time.time()
 
         # calcula menor e maior clusters
@@ -121,7 +123,7 @@ def dodoKmeansTest(dataset_name, x, k_init=2, k_end=None):
 
             var = catsim.cluster.stats.mean_variance(x, res1)
             dun = catsim.cluster.stats.dunn(
-              res1, catsim.cluster.distances.euclidean(x))
+                res1, catsim.cluster.distances.euclidean(x))
             silhouette = silhouette_score(x, res1)
 
             cluster_mediasdir = outdir + 'medias/'
@@ -145,29 +147,37 @@ def dodoKmeansTest(dataset_name, x, k_init=2, k_end=None):
                   dun,
                   silhouette,
                   str(res1.tolist()).strip(
-                                '[]').replace(',', ''))
+                '[]').replace(',', ''))
 
             catsim.misc.results.saveClusterResults(
-                          time.time(),
-                          algorithm_name,
-                          dataset_name,
-                          'Euclideana',
-                          init_method,
-                          np.size(x, 0),
-                          len(set(res1)),
-                          (t2 - t1) / n_init,
-                          min_c,
-                          max_c,
-                          var,
-                          dun,
-                          silhouette,
-                          str(res1.tolist()).strip(
-                                '[]').replace(',', ''),
-                          resultados_dir)
+                time.time(),
+                algorithm_name,
+                dataset_name,
+                readable_metric,
+                init_method,
+                np.size(x, 0),
+                len(set(res1)),
+                (t2 - t1) / n_init,
+                min_c,
+                max_c,
+                var,
+                dun,
+                silhouette,
+                str(res1.tolist()).strip(
+                    '[]').replace(',', ''),
+                resultados_dir)
 
 
-def dodoKmedoidsTest(dataset_name, x):
+def dodoKmedoidsTest(dataset_name, x, k_init=2, k_end=None):
     algorithm_name = 'K-medóides'
+
+    if k_init < 2:
+        k_init = 2
+
+    if k_end is None:
+        k_end = int((np.size(x, 0) / 2) - 1)
+    else:
+        k_end = k_end + 1
 
     for p in range(1, 8):
         if p >= 1 and p <= 6:
@@ -186,7 +196,7 @@ def dodoKmedoidsTest(dataset_name, x):
             D = cdist(x, x, 'mahalanobis')
             d_name = 'Mahalanobis'
 
-        for k in range(2,  int((np.size(x, 0) / 2) - 1)):
+        for k in range(k_init,  k_end):
             var = 0
             for iteration in range(100):
                 t1_temp = time.time()
@@ -209,7 +219,7 @@ def dodoKmedoidsTest(dataset_name, x):
 
             var = catsim.cluster.stats.mean_variance(x, res1)
             dun = catsim.cluster.stats.dunn(
-              res1, catsim.cluster.distances.euclidean(x))
+                res1, catsim.cluster.distances.euclidean(x))
             silhouette = silhouette_score(x, res1)
 
             cluster_mediasdir = outdir + 'medias/'
@@ -247,7 +257,7 @@ def sklearnTests(dataset_name, x):
     # cria estimadores de clustering
     # for n_clusters in np.arange(2, (np.size(x, 0) / 2) - 1):
     #     n_clusters = int(n_clusters)
-    #     # k-Means, ligação média, ligação completa, Ward, espectral
+    # k-Means, ligação média, ligação completa, Ward, espectral
     #     algorithms.extend(
     #         [
     #          ('K-Means', 'K-Means (k = ' + format(n_clusters) + ')',
@@ -433,38 +443,34 @@ def scipyTests(dataset_name, x):
                                delimiter=',')
 
                     catsim.misc.results.saveClusterResults(
-                      time.time(),
-                      algorithm_name,
-                      dataset_name,
-                      d_name,
-                      link_metric,
-                      np.size(x, 0),
-                      len(set(clusters)),
-                      t2 - t1,
-                      min_c,
-                      max_c,
-                      var,
-                      dun,
-                      silhouette,
-                      str(clusters.tolist()).strip('[]').replace(',', ''),
-                      resultados_dir)
+                        time.time(),
+                        algorithm_name,
+                        dataset_name,
+                        d_name,
+                        link_metric,
+                        np.size(x, 0),
+                        len(set(clusters)),
+                        t2 - t1,
+                        min_c,
+                        max_c,
+                        var,
+                        dun,
+                        silhouette,
+                        str(clusters.tolist()).strip('[]').replace(',', ''),
+                        resultados_dir)
 
 
-if __name__ == '__main__':
-    dissertacao = '/home/douglas/repos/dissertacao/'
-    dissertacao_imgdir = dissertacao + 'img/'
-    dissertacao_datadir = dissertacao + 'dados/'
-    outdir = '/home/douglas/Desktop/out/'
-    resultados_dir = outdir + 'results.csv'
-
+def exportDatasets():
     datasets = loadDatasets()
 
     for dataset_name, x in datasets:
-        np.savetxt('/home/douglas/Desktop/' + dataset_name + '.csv',
-                   x, fmt='%10.9f', delimiter=',')
+        np.savetxt(outdir + dataset_name + '.csv', x,
+                   fmt='%10.9f', delimiter=',')
 
+
+def processQSIMResults():
     df = catsim.misc.results.loadClusterResults(
-      '/home/douglas/Copy/qsim_results.csv')
+        '/home/douglas/Copy/qsim_results.csv')
 
     df['Menor grupo'] = df['Classificações'].apply(lambda x: min(np.bincount(
         np.delete(x, np.where(x == -1)).astype(np.int64))))
@@ -472,54 +478,44 @@ if __name__ == '__main__':
     df['Maior grupo'] = df['Classificações'].apply(lambda x: max(np.bincount(
         np.delete(x, np.where(x == -1)).astype(np.int64))))
 
-    print(df['Base de dados'])
+    df['Nº grupos'] = df['Classificações'].apply(lambda x: len(set(x)))
+
+    datasets = loadDatasets()
 
     for dataset_name, x in datasets:
-        print('Dataset: '+dataset_name)
-        print('Dimensions: ' + format(x.shape))
-        minidf = df[df['Base de dados'] == dataset_name]
-        print(minidf['Classificações'].apply(len))
-        print(minidf['Classificações'])
-        df['Variância'][df['Base de dados'] == dataset_name] = df['Classificações'][df['Base de dados'] == dataset_name].apply(
-          lambda y: catsim.cluster.stats.mean_variance(x, y))
-        df['Silhueta'][df['Base de dados'] == dataset_name] = df['Classificações'][df['Base de dados'] == dataset_name].apply(
-          lambda y: silhouette_score(x, y))
-        df['Dunn'][df['Base de dados'] == dataset_name] = df['Classificações'][df['Base de dados'] == dataset_name].apply(
-          lambda y: catsim.cluster.stats.dunn(
-            y, catsim.cluster.distances.euclidean(x)))
+        df['Variância'][df['Base de dados'] == dataset_name] = df[
+            'Classificações'][df['Base de dados'] == dataset_name].apply(
+                lambda y: catsim.cluster.stats.mean_variance(x, y))
+        df['Silhueta'][df['Base de dados'] == dataset_name] = df[
+            'Classificações'][df['Base de dados'] == dataset_name].apply(
+                lambda y: silhouette_score(x, y))
+        df['Dunn'][df['Base de dados'] == dataset_name] = df['Classificações'][
+            df['Base de dados'] == dataset_name].apply(
+                lambda y: catsim.cluster.stats.dunn(
+                    y, catsim.cluster.distances.euclidean(x)))
 
-    df.to_csv('/home/douglas/Desktop/qsim_results_full.csv', index=False, encoding='utf-8')
+    df.to_csv(outdir + 'qsim_results_full.csv', index=False, encoding='utf-8')
 
-    # for dataset_name, x in loadDatasets(enem=False, enem_n=False,
-    #                                     sintetico=False):
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 95, 197]).start()
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 198, 299]).start()
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 300, 400]).start()
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 401, 500]).start()
+if __name__ == '__main__':
+    dissertacao = '/home/douglas/repos/dissertacao/'
+    dissertacao_imgdir = dissertacao + 'img/'
+    dissertacao_datadir = dissertacao + 'dados/'
+    outdir = '/home/douglas/Desktop/out/'
+    resultados_dir = outdir + 'results.csv'
+    qsim_res_dir = outdir + 'qsim_results.csv'
+    cpus = mp.cpu_count()
 
-    # datasets = loadDatasets(enem=False, enem_n=False, sintetico_n=False)
-
-    # for dataset_name, x in loadDatasets(enem=False, enem_n=False,
-    #                                     sintetico_n=False):
-    #     Process(target=dodoKmeansTest,
-    #             args= [dataset_name, x, 205, 279]).start()
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 280, 354]).start()
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 355, 429]).start()
-    #     Process(target=dodoKmeansTest,
-    #             args=[dataset_name, x, 430, 500]).start()
-    #     # p.join()
-    #     # dodoKmeansTest(dataset_name, x, k_init=205)
-
-    #     # scipyTests(dataset_name, x)
-    #     # sklearnTests(dataset_name, x)
-    #     # dodoKmedoidsTest(dataset_name, x)
-
-    #     # results = catsim.misc.results.loadClusterResults(resultados_dir)
-    #     # for result in results:
-    #     #     print(results['Classificações'])
+    for dataset_name, x in loadDatasets():
+        # calculates the total number of experiments and the number of
+        # experiments for each 'slice'. each slice will be delegated to a CPU
+        # core. the number of cores is caught from the system
+        n_experiments = int(x.shape[0] / 2)
+        slice_size = int(n_experiments / cpus)
+        for i in range(cpus):
+            start = (i * slice_size) + 1
+            end = (i + 1) * slice_size if i != (cpus - 1) else n_experiments
+            print(start, end)
+            Process(target=dodoKmeansTest,
+                    args=[dataset_name, x, start,
+                          end, 'mahalanobis']).start()
+        # dodoKmedoidsTest(dataset_name, x)
