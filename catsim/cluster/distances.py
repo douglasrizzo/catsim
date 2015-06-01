@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.spatial.distance import cdist
 
 
 def manhattan(x, y=None):
@@ -70,3 +71,18 @@ def pnorm(x, y=None, p=2):
                            for iii in np.arange(nfeatures)), 1 / p)
 
     return D
+
+
+def mahalanobis(x, y=None):
+    x = np.asarray(x)
+
+    # arrays must have 2 dimensions, even if they are 1D-arrays
+    if x.ndim == 1:
+        np.reshape(x, [1, x.shape[0]])
+
+    if y is None:
+        y = x
+    elif y.ndim == 1:
+        np.reshape(y, [1, y.shape[0]])
+
+    return cdist(x, y, metric='mahalanobis')
