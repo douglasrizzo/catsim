@@ -1,4 +1,4 @@
-import os
+import os.path
 import time
 import pandas
 import numpy as np
@@ -8,8 +8,8 @@ col_cluster = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
                'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
                'Maior grupo', 'Variância', 'Dunn', 'Silhueta',
                'Classificações', 'RMSE', 'Taxa de sobreposição']
-col_cat = ['Theta', 'Banco de itens', 'Qtd. itens',
-           'Id. itens', 'Est. thetas', 'r_max']
+col_cat = ['Data', 't (segundos)', 'Base de itens', 'Theta', 'Qtd. itens',
+           'r_max', 'Id. itens', 'Est. thetas']
 
 
 def loadClusterResults(path):
@@ -31,14 +31,14 @@ def loadClusterResults(path):
          'Menor grupo', 'Maior grupo', 'RMSE',
          'Taxa de sobreposição']].astype(np.float64)
 
-
-    df[['Base de dados', 'Distância']] = df[['Base de dados', 'Distância']].astype(str)
+    df[['Base de dados', 'Distância']] = df[
+        ['Base de dados', 'Distância']].astype(str)
 
     df['Sem Classificação'] = df['Classificações'].apply(lambda x:
                                                          x.count('-1'))
-    df['Classificações'] = df['Classificações'].apply(lambda x:
-                                                      np.array(x.strip().split(' '),
-                                                               dtype=np.int64))
+    df['Classificações'] = df[
+        'Classificações'].apply(lambda x: np.array(x.strip().strip('[]').split(' '),
+                                                   dtype=np.int64))
     df['pct. sem Classificação'] = df[['Sem Classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
                                                 x[0], axis=1)
@@ -66,7 +66,7 @@ def saveClusterResults(datetime, algorithm, dataset, distance, variable,
           variance,
           dunn,
           sillhouette,
-          classifications,
+          str(classifications.tolist()).strip('[]').replace(',', ''),
           None,
           None]
 
@@ -250,3 +250,23 @@ def loadCATResults(path):
                                                          dtype='int'))
 
     return df
+
+
+def saveCATResults(datetime, t, theta, dataset, qtd_itens, itens_id,
+                   est_thetas, r_max):
+    """Appends a result to the end of the cluster results csv file:
+    """
+    ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
+          t,
+          dataset,
+          theta,
+          qtd_itens,
+          r_max,
+          str(itens_id.tolist()).strip('[]').replace(',', ''),
+          str(est_thetas.tolist()).strip('[]').replace(',', '')]
+
+    if not os.path.exists(path):
+        DataFrame([ar], columns=col_cluster).to_csv(
+            path, header=True, index=False)
+    with open(path, 'a') as f:
+        DataFrame([ar]).to_csv(f, header=False, index=False)
