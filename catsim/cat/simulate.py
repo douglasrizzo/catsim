@@ -1,28 +1,27 @@
-import numpy as np
 import math
-from numpy import random
-from sklearn.metrics import mean_squared_error
-from scipy.optimize import minimize
+import numpy as np
 import catsim.cat.irt
+from numpy import random
+from scipy.optimize import minimize
+from sklearn.metrics import mean_squared_error
 
 
-def simCAT(items, clusters, n_itens=20, tests=1):
-    """
-    CAT simulation and validation method proposed by [Barrada2010]
+def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
+    """CAT simulation and validation method proposed by [Barrada2010]
 
     .. [Barrada2010] BARRADA, Juan Ramón et al. A method for the comparison of
     item selection rules in computerized adaptive testing. Applied
     Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
     """
     # true thetas extracted from a normal distribution
-    true_thetas = np.random.normal(0, 1, tests, n_itens)
+    true_thetas = np.random.normal(0, 1, examinees)
 
     # adds a column for each item's exposure rate to the item parameter matrix
-    items = np.append(items, np.zeros((np.size(items, 0), 1)), 1)
+    items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
 
-    # 10 maximum exposure rates extracted from a linear interval rangin from
+    # maximum exposure rates extracted from a linear interval rangin from
     # .1 to 1
-    r_maxes = np.linspace(0.1, 1, 10, dtype=float)
+    r_maxes = np.linspace(0.1, 1, r_max_interval, dtype=float)
 
     for r_max in r_maxes:
         for true_theta in true_thetas:
