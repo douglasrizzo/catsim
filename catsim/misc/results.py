@@ -261,8 +261,8 @@ def saveCATResults(datetime, t, theta, dataset, qtd_itens, itens_id,
           theta,
           qtd_itens,
           r_max,
-          str(itens_id.tolist()).strip('[]').replace(',', ''),
-          str(est_thetas.tolist()).strip('[]').replace(',', '')]
+          str(itens_id).strip('[]').replace(',', ''),
+          str(est_thetas).strip('[]').replace(',', '')]
 
     if not os.path.exists(path):
         DataFrame([ar], columns=col_cluster).to_csv(

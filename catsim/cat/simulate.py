@@ -23,6 +23,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
     # .1 to 1
     r_maxes = np.linspace(0.1, 1, r_max_interval, dtype=float)
 
+    id_itens = []
+    est_thetas = []
+
     for r_max in r_maxes:
         for true_theta in true_thetas:
 
@@ -64,6 +67,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                         else:
                             random_item = None
 
+                id_itens.append(selected_item)
+
                 # simulates the examinee's response via the three-parameter
                 # logistic function
                 acertou = catsim.cat.irt.tpm(
@@ -89,11 +94,15 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                         options={'disp': True})
                     est_theta = res.x
 
+                est_thetas.append(est_theta)
+
         results = {'Theta': est_theta,
                    'Qtd. itens': n_itens,
                    'Id. Itens': id_itens,
                    'Est. thetas': est_thetas,
                    'r. max': r_max}
+
+        return results
 
 
 def dodd(theta, items, acertou):
