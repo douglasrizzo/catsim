@@ -253,9 +253,8 @@ def loadCATResults(path):
 
 
 def saveCATResults(datetime, t, theta, dataset, qtd_itens, itens_id,
-                   est_thetas, r_max):
-    """Appends a result to the end of the cluster results csv file:
-    """
+                   est_thetas, r_max, path):
+    """Appends a result to the end of the cluster results csv file:"""
     ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
           t,
           dataset,

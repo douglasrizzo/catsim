@@ -79,7 +79,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                 # reestimation of the examinee's proficiency: if the response
                 # vector contains only success or errors, Dodd's method is used
                 # to reestimate the proficiency
-                if all(items[0] == item for item in items):
+                if all(response_vector[0] == response for response in response_vector):
                     est_theta = dodd(est_theta, items, acertou)
                 # else, a maximum likelihood approach is used
                 else:
@@ -88,6 +88,12 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                         args=[response_vector, items[administered_items]],
                         options={'disp': True})
                     est_theta = res.x
+
+        results = {'Theta': est_theta,
+                   'Qtd. itens': n_itens,
+                   'Id. Itens': id_itens,
+                   'Est. thetas': est_thetas,
+                   'r. max': r_max}
 
 
 def dodd(theta, items, acertou):
