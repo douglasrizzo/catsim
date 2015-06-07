@@ -92,7 +92,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                         catsim.cat.irt.negativelogLik, [est_theta],
                         args=[response_vector, items[administered_items]],
                         options={'disp': True})
-                    est_theta = res.x
+                    est_theta = res.x[0]
 
                 est_thetas.append(est_theta)
 
@@ -128,9 +128,10 @@ def dodd(theta, items, acertou):
     b_max = max(b)
     b_min = min(b)
 
-    return (theta +
-            ((b_max - theta) / 2)) if acertou else (theta -
-                                                    ((theta - b_min) / 2))
+    dodd = theta + \
+        ((b_max - theta) / 2) if acertou else theta - ((theta - b_min) / 2)
+
+    return (dodd)
 
 
 def rmse(actual, predicted):

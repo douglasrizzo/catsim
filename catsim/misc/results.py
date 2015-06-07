@@ -265,7 +265,7 @@ def saveCATResults(datetime, t, theta, dataset, qtd_itens, itens_id,
           str(est_thetas).strip('[]').replace(',', '')]
 
     if not os.path.exists(path):
-        DataFrame([ar], columns=col_cluster).to_csv(
+        DataFrame([ar], columns=col_cat).to_csv(
             path, header=True, index=False)
     with open(path, 'a') as f:
         DataFrame([ar]).to_csv(f, header=False, index=False)
