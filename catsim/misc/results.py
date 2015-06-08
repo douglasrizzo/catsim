@@ -240,16 +240,11 @@ def loadGlobalCATResults(path):
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')
 
-    df[['Theta', 'Qtd. itens', 'r_max']] = df[
-        ['Theta', 'Qtd. itens', 'r_max']].astype(float)
 
-    df['Id. itens'] = df['Id. itens'].apply(lambda x:
-                                            np.array(x.strip().split(' '),
-                                                     dtype='int'))
+    df[['Índice', 'Qtd. Itens']] = df[['Índice', 'Qtd. Itens']].astype(np.int64)
 
-    df['Est. thetas'] = df['Est. thetas'].apply(lambda x:
-                                                np.array(x.strip().split(' '),
-                                                         dtype='int'))
+    df[['Theta', 'Est. Theta', 'r. max']] = df[
+        ['Theta', 'Est. Theta', 'r. max']].astype(float)
 
     return df
 
