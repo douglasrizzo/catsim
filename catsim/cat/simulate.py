@@ -91,8 +91,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                 else:
                     res = minimize(
                         catsim.cat.irt.negativelogLik, [est_theta],
-                        args=[response_vector, items[administered_items]],
-                        options={'disp': True})
+                        args=[response_vector, items[administered_items]])
+                    # ,options={'disp': True})
                     est_theta = res.x[0]
 
             # save the results for this examinee simulation
