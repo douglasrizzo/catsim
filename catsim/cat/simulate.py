@@ -19,6 +19,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
 
     # adds a column for each item's exposure rate to the item parameter matrix
     items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
+    bank_size = np.size(items, 0)
 
     # maximum exposure rates extracted from a linear interval rangin from
     # .1 to 1
@@ -58,7 +59,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                 # item from the same cluster the original item came from, with
                 # an exposure rate under the allowed constraints, and applies
                 # it
-                if items[counter, 3] >= r_max:
+                if items[counter, 3] == 0 or (
+                    items[counter, 3] != 0 and bank_size / items[counter, 3] >= r_max):
                     selected_item_cluster = clusters[selected_item]
                     random_item = None
                     while random_item is None:
@@ -85,7 +87,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                 # adds the administered item to the pool of administered items
                 administered_items.append(selected_item)
 
-                items[selected_item][3] =
+                items[selected_item][3] += 1
 
                 # reestimation of the examinee's proficiency: if the response
                 # vector contains only success or errors, Dodd's method is used
