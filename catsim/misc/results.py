@@ -8,8 +8,9 @@ col_cluster = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
                'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
                'Maior grupo', 'Variância', 'Dunn', 'Silhueta',
                'Classificações', 'RMSE', 'Taxa de sobreposição']
-col_cat = ['Data', 't (segundos)', 'Base de itens', 'Theta', 'Qtd. itens',
-           'r_max', 'Id. itens', 'Est. thetas']
+col_cat = ['Índice', 'Data', 't (segundos)', 'Base de itens', 'Theta',
+           'Qtd. itens', 'r_max', 'Id. itens', 'Est. thetas']
+col_localCat = ['Índice', 'Theta', 'Est. Theta', 'Id. itens', 'r. max']
 
 
 def loadClusterResults(path):
@@ -37,8 +38,9 @@ def loadClusterResults(path):
     df['Sem Classificação'] = df['Classificações'].apply(lambda x:
                                                          x.count('-1'))
     df['Classificações'] = df[
-        'Classificações'].apply(lambda x: np.array(x.strip().strip('[]').split(' '),
-                                                   dtype=np.int64))
+        'Classificações'].apply(
+        lambda x: np.array(x.strip().strip('[]').split(' '), dtype=np.int64))
+
     df['pct. sem Classificação'] = df[['Sem Classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
                                                 x[0], axis=1)
@@ -252,20 +254,35 @@ def loadCATResults(path):
     return df
 
 
-def saveCATResults(datetime, t, theta, dataset, qtd_itens, itens_id,
-                   est_thetas, r_max, path):
+def saveCATResults(index, datetime, t, theta, dataset, qtd_itens, itens_id,
+                   est_theta, r_max, path):
     """Appends a result to the end of the cluster results csv file:"""
-    ar = [time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
+    ar = [index,
+          time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
           t,
           dataset,
           theta,
           qtd_itens,
           r_max,
           str(itens_id).strip('[]').replace(',', ''),
-          str(est_thetas).strip('[]').replace(',', '')]
+          est_theta]
 
     if not os.path.exists(path):
         DataFrame([ar], columns=col_cat).to_csv(
+            path, header=True, index=False)
+    with open(path, 'a') as f:
+        DataFrame([ar]).to_csv(f, header=False, index=False)
+
+
+def saveLocalCATResults(index, theta, est_theta, id_itens, r_max, path):
+    ar = [index,
+          theta,
+          est_theta,
+          str(id_itens).strip('[]').replace(',', ''),
+          r_max]
+
+    if not os.path.exists(path):
+        DataFrame([ar], columns=col_localCat).to_csv(
             path, header=True, index=False)
     with open(path, 'a') as f:
         DataFrame([ar]).to_csv(f, header=False, index=False)
