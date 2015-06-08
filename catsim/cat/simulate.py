@@ -2,7 +2,7 @@ import math
 import numpy as np
 import catsim.cat.irt
 from numpy import random
-from scipy.optimize import minimize
+from scipy.optimize import *
 from sklearn.metrics import mean_squared_error
 
 
@@ -96,11 +96,23 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     est_theta = dodd(est_theta, items, acertou)
                 # else, a maximum likelihood approach is used
                 else:
-                    res = minimize(
-                        catsim.cat.irt.negativelogLik, [est_theta],
+                    # res = minimize(
+                    #     catsim.cat.irt.negativelogLik, [est_theta],
+                    #     args=[response_vector, items[administered_items]],
+                    #     method=optimizer)
+                    # ,options={'disp': True})
+                    res = brute(
+                        catsim.cat.irt.negativelogLik, ranges=(-6, 6),
                         args=[response_vector, items[administered_items]],
                         method=optimizer)
-                    # ,options={'disp': True})
+                    # res = leastsq(
+                    #     catsim.cat.irt.negativelogLik, [est_theta],
+                    #     args=[response_vector, items[administered_items]],
+                    #     method=optimizer)
+                    # res = leastsq(
+                    #     catsim.cat.irt.negativelogLik, [est_theta],
+                    #     args=[response_vector, items[administered_items]],
+                    #     method=optimizer)
                     est_theta = res.x[0]
 
             # save the results for this examinee simulation
