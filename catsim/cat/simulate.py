@@ -6,7 +6,8 @@ from scipy.optimize import minimize
 from sklearn.metrics import mean_squared_error
 
 
-def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
+def simCAT(items, clusters, examinees=1, n_itens=20,
+           r_max_interval=10, optimizer='BFGS'):
     """CAT simulation and validation method proposed by [Barrada2010]
 
     .. [Barrada2010] BARRADA, Juan Ramón et al. A method for the comparison of
@@ -91,7 +92,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                 else:
                     res = minimize(
                         catsim.cat.irt.negativelogLik, [est_theta],
-                        args=[response_vector, items[administered_items]])
+                        args=[response_vector, items[administered_items]],
+                        method=optimizer)
                     # ,options={'disp': True})
                     est_theta = res.x[0]
 
