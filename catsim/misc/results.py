@@ -81,7 +81,7 @@ def loadClusterResults(path):
        file with the column headers
     """
     if not os.path.exists(path):
-        df = pandas.DataFrame([col_cluster])
+        df = pandas.DataFrame(columns=[col_cluster])
     else:
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')
@@ -113,7 +113,7 @@ def loadClusterResults(path):
 
 def loadGlobalCATResults(path):
     if not os.path.exists(path):
-        df = pandas.DataFrame([col_cat])
+        df = pandas.DataFrame(columns=[col_cat])
     else:
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')
@@ -134,7 +134,7 @@ def loadLocalCATResults(path):
        creates an empty file with the column headers.
     """
     if not os.path.exists(path):
-        df = pandas.DataFrame([col_localCat])
+        df = pandas.DataFrame(columns=[col_localCat])
     else:
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')

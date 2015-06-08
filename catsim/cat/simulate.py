@@ -7,7 +7,7 @@ from sklearn.metrics import mean_squared_error
 
 
 def simCAT(items, clusters, examinees=1, n_itens=20,
-           r_max_interval=10, optimizer='BFGS'):
+           r_max_interval=10, optimizer='BFGS', verbose=False):
     """CAT simulation and validation method proposed by [Barrada2010]
 
     .. [Barrada2010] BARRADA, Juan Ramón et al. A method for the comparison of
@@ -27,7 +27,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
     globalResults = []
     localResults = []
 
-    for r_max in r_maxes:
+    for v, r_max in enumerate(r_maxes):
+        if verbose:
+            print('r. max ' + format(v) + ' of ' + r_max_interval)
         estimatedThetasForThisR = []
         id_itens = []
         for true_theta in true_thetas:
@@ -82,6 +84,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                 response_vector.append(acertou)
                 # adds the administered item to the pool of administered items
                 administered_items.append(selected_item)
+
+                items[selected_item][3] =
 
                 # reestimation of the examinee's proficiency: if the response
                 # vector contains only success or errors, Dodd's method is used
