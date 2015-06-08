@@ -23,10 +23,12 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
     # .1 to 1
     r_maxes = np.linspace(0.1, 1, r_max_interval, dtype=float)
 
-    id_itens = []
-    est_thetas = []
+    globalResults = []
+    localResults = []
 
     for r_max in r_maxes:
+        estimatedThetasForThisR = []
+        id_itens = []
         for true_theta in true_thetas:
 
             # estimated theta value
@@ -35,7 +37,6 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
             # keeps indexes of items that were already administered for this
             # examinee
             administered_items = []
-
             response_vector = []
 
             for q in np.arange(n_itens):
@@ -94,15 +95,24 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max_interval=10):
                         options={'disp': True})
                     est_theta = res.x[0]
 
-                est_thetas.append(est_theta)
+            # save the results for this examinee simulation
+            localResults.append({'Theta': true_theta,
+                                 'Est. Theta': est_theta,
+                                 'Id. Itens': id_itens,
+                                 'r_max': r_max})
 
-        results = {'Theta': est_theta,
-                   'Qtd. itens': n_itens,
-                   'Id. Itens': id_itens,
-                   'Est. thetas': est_thetas,
-                   'r. max': r_max}
+            estimatedThetasForThisR.append(est_theta)
+        # end true_theta loop
 
-        return results
+        # save the results for this r value
+        globalResults.append({
+            'Qtd. Itens': n_itens,
+            'RMSE': rmse(true_thetas, estimatedThetasForThisR),
+            'Overlap': overlap_rate(items, n_itens),
+            'r_max': r_max})
+    # end r_max loop
+
+    return globalResults, localResults
 
 
 def dodd(theta, items, acertou):
@@ -141,14 +151,18 @@ def rmse(actual, predicted):
     .. math:: RMSE =
     \\sqrt{\\frac{\\sum_{i=1}^N(\\hat{\\theta}_i-\\theta_i)^2}{N}}
     """
-    return math.pow(math.sqrt(mean_squared_error(actual, predicted)), .5)
+    return math.sqrt(mean_squared_error(actual, predicted))
 
 
-def overlap_rate():
-    """
-    Test overlap rate
+def overlap_rate(items, testSize):
+    """Test overlap rate
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
     """
 
-    return 0
+    bankSize = items.shape[0]
+    varR = np.var(items[:, 3])
+
+    T = (bankSize / testSize) * varR + (testSize / bankSize)
+
+    return T
