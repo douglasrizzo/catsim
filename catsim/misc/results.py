@@ -8,10 +8,6 @@ col_cluster = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
                'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
                'Maior grupo', 'Variância', 'Dunn', 'Silhueta',
                'Classificações', 'RMSE', 'Taxa de sobreposição']
-
-index, datetime, t, qtd_itens, rmse, overlap,
-                         r_max, path
-
 col_cat = ['Índice', 'Data', 't (segundos)', 'Qtd. itens',
            'RMSE', 'Taxa de sobreposição', 'r. max']
 col_localCat = ['Índice', 'Theta', 'Est. Theta', 'Id. itens', 'r. max']
