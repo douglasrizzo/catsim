@@ -229,7 +229,7 @@ def process(datadir, imgdir):
     ax.get_figure().savefig(imgdir + 'nclusters_by_dbscan.pdf')
 
 
-def loadCATResults(path):
+def loadGlobalCATResults(path):
     """Loads the csv file containing the computerized adaptive testing
        simulation results in a pandas.DataFrame. If the file does not exist,
        creates an empty file with the column headers.
@@ -254,8 +254,8 @@ def loadCATResults(path):
     return df
 
 
-def saveCATResults(index, datetime, t, theta, dataset, qtd_itens, itens_id,
-                   est_theta, r_max, path):
+def saveGlobalCATResults(index, datetime, t, theta, dataset, qtd_itens,
+                         itens_id, est_theta, r_max, path):
     """Appends a result to the end of the cluster results csv file:"""
     ar = [index,
           time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
