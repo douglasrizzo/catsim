@@ -30,7 +30,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
 
     for v, r_max in enumerate(r_maxes):
         if verbose:
-            print('r. max ' + format(v) + ' of ' + r_max_interval)
+            print('r. max ' + format(v) + ' of ' + format(r_max_interval))
         estimatedThetasForThisR = []
         id_itens = []
         for true_theta in true_thetas:
