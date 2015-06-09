@@ -60,7 +60,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                 # an exposure rate under the allowed constraints, and applies
                 # it
                 if items[counter, 3] == 0 or (
-                    items[counter, 3] != 0 and bank_size / items[counter, 3] >= r_max):
+                        items[counter, 3] != 0 and bank_size / items[counter, 3] >= r_max):
                     selected_item_cluster = clusters[selected_item]
                     random_item = None
                     while random_item is None:
@@ -100,19 +100,16 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     #     catsim.cat.irt.negativelogLik, [est_theta],
                     #     args=[response_vector, items[administered_items]],
                     #     method=optimizer)
-                    # ,options={'disp': True})
-                    res = brute(
-                        catsim.cat.irt.negativelogLik, ranges=(-6, 6),
-                        args=[response_vector, items[administered_items]],
-                        method=optimizer)
-                    # res = leastsq(
-                    #     catsim.cat.irt.negativelogLik, [est_theta],
-                    #     args=[response_vector, items[administered_items]],
-                    #     method=optimizer)
-                    # res = leastsq(
-                    #     catsim.cat.irt.negativelogLik, [est_theta],
-                    #     args=[response_vector, items[administered_items]],
-                    #     method=optimizer)
+                    # est_theta = res.x[0]
+
+                    # res = brute(
+                    #     catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
+                    #     args=(response_vector, items[administered_items]))
+                    # est_theta = res[0]
+
+                    res = differential_evolution(
+                        catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
+                        args=(response_vector, items[administered_items]))
                     est_theta = res.x[0]
 
             # save the results for this examinee simulation
