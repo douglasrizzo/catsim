@@ -53,11 +53,11 @@ def logLik(est_theta, response_vector, administered_items):
     return LL
 
 
-def negativelogLik(est_theta, args):
+def negativelogLik(est_theta, *args):
     """Function used by `scipy.optimize.minimize` to find the estimated
     proficiency that maximizes the likelihood of a given response vector
     """
-    return -logLik(est_theta[0], args[0], args[1])
+    return -logLik(est_theta, args[0], args[1])
 
 
 def inf(theta, a, b, c):
