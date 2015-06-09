@@ -102,15 +102,16 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     #     method=optimizer)
                     # est_theta = res.x[0]
 
-                    # res = brute(
-                    #     catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
-                    #     args=(response_vector, items[administered_items]))
-                    # est_theta = res[0]
-
-                    res = differential_evolution(
-                        catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
-                        args=(response_vector, items[administered_items]))
-                    est_theta = res.x[0]
+                    try:
+                        res = brute(
+                            catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
+                            args=(response_vector, items[administered_items]))
+                        est_theta = res[0]
+                    except:
+                        res = differential_evolution(
+                            catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
+                            args=(response_vector, items[administered_items]))
+                        est_theta = res.x[0]
 
             # save the results for this examinee simulation
             localResults.append({'Theta': true_theta,
