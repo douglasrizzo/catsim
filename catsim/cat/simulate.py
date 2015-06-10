@@ -1,7 +1,6 @@
 import math
 import numpy as np
 import catsim.cat.irt
-from numpy import random
 from scipy.optimize import *
 from sklearn.metrics import mean_squared_error
 
@@ -20,6 +19,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
     # adds a column for each item's exposure rate to the item parameter matrix
     items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
     bank_size = np.size(items, 0)
+    max_difficulty = np.max(items[1])
+    min_difficulty = np.min(items[1])
 
     # maximum exposure rates extracted from a linear interval rangin from
     # .1 to 1
@@ -36,14 +37,14 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
         for true_theta in true_thetas:
 
             # estimated theta value
-            est_theta = random.uniform(-5, 5)
+            est_theta = np.random.uniform(-5, 5)
 
             # keeps indexes of items that were already administered for this
             # examinee
             administered_items = []
             response_vector = []
 
-            for q in np.arange(n_itens):
+            for q in range(n_itens):
                 # iterates through all items, looking for the item that has the
                 # biggest information value, given the estimated theta
                 selected_item = None
@@ -60,11 +61,12 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                 # an exposure rate under the allowed constraints, and applies
                 # it
                 if items[counter, 3] == 0 or (
-                        items[counter, 3] != 0 and bank_size / items[counter, 3] >= r_max):
+                    items[counter, 3] != 0 and bank_size /
+                        items[counter, 3] >= r_max):
                     selected_item_cluster = clusters[selected_item]
                     random_item = None
                     while random_item is None:
-                        random_item = random.randint(0, np.size(items, 0))
+                        random_item = np.random.randint(0, np.size(items, 0))
                         if(
                             selected_item_cluster == clusters[random_item] and
                             random_item not in administered_items
@@ -81,7 +83,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     true_theta,
                     items[selected_item][0],
                     items[selected_item][1],
-                    items[selected_item][2]) >= random.uniform()
+                    items[selected_item][2]) >= np.random.uniform()
 
                 response_vector.append(acertou)
                 # adds the administered item to the pool of administered items
@@ -102,16 +104,21 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     #     method=optimizer)
                     # est_theta = res.x[0]
 
-                    try:
-                        res = brute(
-                            catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
-                            args=(response_vector, items[administered_items]))
-                        est_theta = res[0]
-                    except:
-                        res = differential_evolution(
-                            catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
-                            args=(response_vector, items[administered_items]))
-                        est_theta = res.x[0]
+                    # try:
+                    res = brute(
+                        catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
+                        args=(response_vector, items[administered_items]))
+                    est_theta = res[0]
+                    # except:
+                    #     res = differential_evolution(
+                    #         catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
+                    #         args=(response_vector, items[administered_items]))
+                    #     est_theta = res.x[0]
+
+                if est_theta > max_difficulty:
+                    est_theta = max_difficulty
+                if est_theta < min_difficulty:
+                    est_theta = min_difficulty
 
             # save the results for this examinee simulation
             localResults.append({'Theta': true_theta,

@@ -24,7 +24,12 @@ def tpm(theta, a, b, c):
         :math:`0\\leq c \\leq 1`, but items considered good usually have
         :math:`c \\leq 0.2`.
     """
-    return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
+    try:
+        return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
+    except OverflowError:
+        print('----ERROR HAPPENED WITH THESE VALUES: ' +
+              format([theta, a, b, c]))
+        raise
 
 
 def logLik(est_theta, response_vector, administered_items):
