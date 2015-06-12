@@ -68,8 +68,8 @@ def negativelogLik(est_theta, *args):
 
 def bruteMLE(response_vector, administered_items,
              precision=12, theta_guess=None):
-    """Finds and returns the theta value which has the maximum likelihood of
-    being true, given a response vector and a matrix with the administered
+    """Finds and returns the theta value which maximizes the likelihood
+    function, given a response vector and a matrix with the administered
     items parameters
     """
     lbound = -8
