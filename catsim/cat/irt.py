@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 
 def tpm(theta, a, b, c):
@@ -63,6 +64,34 @@ def negativelogLik(est_theta, *args):
     proficiency that maximizes the likelihood of a given response vector
     """
     return -logLik(est_theta, args[0], args[1])
+
+
+def bruteMLE(response_vector, administered_items,
+             precision=12, theta_guess=None):
+    """Finds and returns the theta value which has the maximum likelihood of
+    being true, given a response vector and a matrix with the administered
+    items parameters
+    """
+    lbound = -8
+    ubound = 8
+
+    for i in range(precision):
+        intervals = np.linspace(lbound, ubound, 20)
+        previous_ll = -float('inf')
+        # print('Bounds: ' + str(lbound) + ' ' + str(ubound))
+        # print('Interval size: ' + str(intervals[1] - intervals[0]))
+
+        for ii in intervals:
+            ll = logLik(ii, response_vector, administered_items)
+            if ll > previous_ll:
+                previous_ll = ll
+                best_theta = ii
+                # print(best_theta)
+            else:
+                lbound = best_theta - (intervals[1] - intervals[0])
+                ubound = best_theta + (intervals[1] - intervals[0])
+
+    return best_theta
 
 
 def inf(theta, a, b, c):

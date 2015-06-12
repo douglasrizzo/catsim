@@ -1,8 +1,8 @@
 import math
 import numpy as np
 import catsim.cat.irt
-from scipy.optimize import *
 from sklearn.metrics import mean_squared_error
+from scipy.optimize import differential_evolution
 
 
 def simCAT(items, clusters, examinees=1, n_itens=20,
@@ -19,8 +19,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
     # adds a column for each item's exposure rate to the item parameter matrix
     items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
     bank_size = np.size(items, 0)
-    max_difficulty = np.max(items[1])
-    min_difficulty = np.min(items[1])
+    # max_difficulty = np.max(items[1])
+    # min_difficulty = np.min(items[1])
 
     # maximum exposure rates extracted from a linear interval rangin from
     # .1 to 1
@@ -31,9 +31,10 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
 
     for v, r_max in enumerate(r_maxes):
         if verbose:
-            print('r. max ' + format(v) + ' of ' + format(r_max_interval))
+            print('r. max ' + str(v + 1) + ' of ' + format(r_max_interval))
         estimatedThetasForThisR = []
         id_itens = []
+        items[3] = 0
         for true_theta in true_thetas:
 
             # estimated theta value
@@ -98,6 +99,15 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     est_theta = dodd(est_theta, items, acertou)
                 # else, a maximum likelihood approach is used
                 else:
+                    try:
+                        est_theta = catsim.cat.irt.bruteMLE(
+                            response_vector, items[administered_items])
+                    except:
+                        res = differential_evolution(
+                            catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
+                            args=(response_vector, items[administered_items]))
+                        est_theta = res.x[0]
+
                     # res = minimize(
                     #     catsim.cat.irt.negativelogLik, [est_theta],
                     #     args=[response_vector, items[administered_items]],
@@ -105,20 +115,15 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
                     # est_theta = res.x[0]
 
                     # try:
-                    res = brute(
-                        catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
-                        args=(response_vector, items[administered_items]))
-                    est_theta = res[0]
-                    # except:
-                    #     res = differential_evolution(
-                    #         catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
-                    #         args=(response_vector, items[administered_items]))
-                    #     est_theta = res.x[0]
+                    # res = brute(
+                    #     catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
+                    #     args=(response_vector, items[administered_items]))
+                    # est_theta = res[0]
 
-                if est_theta > max_difficulty:
-                    est_theta = max_difficulty
-                if est_theta < min_difficulty:
-                    est_theta = min_difficulty
+                # if est_theta > max_difficulty:
+                #     est_theta = max_difficulty
+                # if est_theta < min_difficulty:
+                #     est_theta = min_difficulty
 
             # save the results for this examinee simulation
             localResults.append({'Theta': true_theta,
