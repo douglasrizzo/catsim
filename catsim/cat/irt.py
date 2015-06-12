@@ -51,11 +51,6 @@ def logLik(est_theta, response_vector, administered_items):
     # try:
     LL = 0
 
-    if est_theta > 8:
-        est_theta = 8
-    if est_theta < -8:
-        est_theta = -8
-
     for i in range(len(response_vector)):
         prob = tpm(est_theta, administered_items[i][
                    0], administered_items[i][1], administered_items[i][2])
