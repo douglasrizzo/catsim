@@ -48,15 +48,25 @@ def logLik(est_theta, response_vector, administered_items):
     # inspired in the example found in
     # http://stats.stackexchange.com/questions/66199/maximum-likelihood-curve-
     # model-fitting-in-python
+    # try:
     LL = 0
+
+    if est_theta > 8:
+        est_theta = 8
+    if est_theta < -8:
+        est_theta = -8
+
     for i in range(len(response_vector)):
         prob = tpm(est_theta, administered_items[i][
                    0], administered_items[i][1], administered_items[i][2])
 
         LL += (response_vector[i] * math.log10(prob)) + \
             ((1 - response_vector[i]) * math.log10(1 - prob))
-
     return LL
+    # except OverflowError:
+    #     print('Deu pau com esses valores: \n' + str(est_theta) + '\n' +
+    #           str([prob, math.log10(prob)]) + '\n' + str(response_vector))
+    #     raise
 
 
 def negativelogLik(est_theta, *args):
