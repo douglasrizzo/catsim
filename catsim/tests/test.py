@@ -12,7 +12,7 @@ import sklearn.datasets
 import unittest
 
 n_clusters = 5
-blob, blob_clusters = sklearn.datasets.samples_generator.make_blobs(
+blob, blob_clusters = sklearn.datasets.make_blobs(
     2000, 3, n_clusters)
 iris = sklearn.datasets.load_iris()['data']
 
@@ -30,7 +30,7 @@ class TestStuff(unittest.TestCase):
         self.assertEqual(np.mean(che1 - che2))
 
     def testKmeans(self):
-        for m in ['naive', 'varCovar', 'ward']:
+        for m in ['naive', 'ward']:
             catsim.cluster.kmeans.kmeans(blob, n_clusters, init_method=m,
                                          n_init=10, debug=False)
 
