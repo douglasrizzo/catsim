@@ -18,7 +18,7 @@ import os
 import shlex
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy']
+MOCK_MODULES = ['numpy', 'scipy', 'scipy.optimize', 'scipy.cluster.hierarchy', 'numpy.random']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
