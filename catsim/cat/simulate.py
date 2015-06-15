@@ -7,11 +7,9 @@ from scipy.optimize import differential_evolution
 
 def simCAT(items, clusters, examinees=1, n_itens=20,
            r_max_interval=10, optimizer='BFGS', verbose=False):
-    """CAT simulation and validation method proposed by [Barrada2010]
+    """CAT simulation and validation method proposed by [Bar10]_.
 
-    .. [Barrada2010] BARRADA, Juan Ramón et al. A method for the comparison of
-    item selection rules in computerized adaptive testing. Applied
-    Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
+    .. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
     """
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
@@ -145,53 +143,56 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
     return globalResults, localResults
 
 
-def dodd(theta, items, acertou):
-    """
-    Method proposed by [Dodd1990] for the reestimation of
+def dodd(theta, items, correct):
+    """Method proposed by [Dod90]_ for the reestimation of
     :math:`\\hat{\\theta}` when the response vector is composed entirely of 1s
     or 0s
 
     .. math::
+
         \\hat{\\theta}_{t+1} = \\left\\lbrace \\begin{array}{ll}
-        \\hat{\\theta}_t+\\frac{b_{max}-\\hat{\\theta_t}}{2} & \\text{if } X_t
-        \\= 1 \\\\
-        \\hat{\\theta}_t-\\frac{\\hat{\\theta}_t-b_{min}}{2} & \\text{if }  X_t
-        \\= 0
+        \\hat{\\theta}_t+\\frac{b_{max}-\\hat{\\theta_t}}{2} & \\text{if } X_t = 1 \\\\
+        \\hat{\\theta}_t-\\frac{\\hat{\\theta}_t-b_{min}}{2} & \\text{if }  X_t = 0
         \\end{array} \\right\\rbrace
 
-    .. [Dood1990] Dodd, B. G. (1990). The Effect of Item Selection Procedure
-    and Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
-    Scale Model. Applied Psychological Measurement, 14(4), 355–366.
-    http://doi.org/10.1177/014662169001400403
+    :param theta: the initial profficiency level
+    :param items: a numpy array containing the parameters of the items in the database. This is necessary to capture the maximum and minimum difficulty levels necessary for the method.
+    :param correct: a boolean value informing whether or not the examinee correctly answered the current item.
+
+    .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and Stepsize on Computerized Adaptive Attitude Measurement Using the Rating Scale Model. Applied Psychological Measurement, 14(4), 355–366. http://doi.org/10.1177/014662169001400403
     """
     b = items[:, 1]
     b_max = max(b)
     b_min = min(b)
 
     dodd = theta + \
-        ((b_max - theta) / 2) if acertou else theta - ((theta - b_min) / 2)
+        ((b_max - theta) / 2) if correct else theta - ((theta - b_min) / 2)
 
     return (dodd)
 
 
 def rmse(actual, predicted):
-    """
-    Root mean squared error
+    """Root mean squared error:
 
-    .. math:: RMSE =
-    \\sqrt{\\frac{\\sum_{i=1}^N(\\hat{\\theta}_i-\\theta_i)^2}{N}}
+    .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
+
+    :param actual: a list or 1-D numpy array containing the true profficiency values
+    :param predicted: a list or 1-D numpy array containing the estimated profficiency values
     """
     return math.sqrt(mean_squared_error(actual, predicted))
 
 
 def overlap_rate(items, testSize):
-    """Test overlap rate
+    """Test overlap rate:
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
+
+    :param items: a numpy array containing, in the 4th column, the number of times each item was used in the tests.
+    :param testSize: an integer informing the number of items in a test.
     """
 
     bankSize = items.shape[0]
-    varR = np.var(items[:, 3])
+    varR = np.var(bankSize / items[:, 3])
 
     T = (bankSize / testSize) * varR + (testSize / bankSize)
 
