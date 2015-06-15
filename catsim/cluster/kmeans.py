@@ -171,8 +171,8 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1,
             if debug:
                 print('Distances: ', D.shape, '\n', D)
 
+            # assigns data points to the closest centroids
             for i in range(npoints):
-                # assigns data point to closest centroid
                 clusters[i] = np.argmin(D[i])
 
                 if debug:
@@ -201,7 +201,7 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1,
         if this_var < var:
             var = this_var
             final_clusters = clusters
-    return normalize(final_clusters)
+    return final_clusters
 
 if __name__ == '__main__':
     from sklearn.cluster import KMeans as sKmeans
