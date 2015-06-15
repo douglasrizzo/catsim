@@ -5,5 +5,5 @@ clean:
 	find -name __pycache__ -exec rm -rf {} \;
 install:
 	sudo python3 setup.py install
-test:
+tests:
 	nosetests

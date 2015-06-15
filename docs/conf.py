@@ -18,7 +18,8 @@ import os
 import shlex
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy', 'scipy.optimize', 'scipy.cluster.hierarchy', 'numpy.random']
+MOCK_MODULES = ['numpy', 'numpy.random', 'scipy',
+                'scipy.optimize', 'scipy.cluster.hierarchy']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
@@ -46,7 +47,7 @@ extensions = [
 intersphinx_mapping = {'python': ('https://docs.python.org/3.4', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'sklearn':('http://scikit-learn.org/stable/', None)}
+                       'sklearn': ('http://scikit-learn.org/stable/', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
