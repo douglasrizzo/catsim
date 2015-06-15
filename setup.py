@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+
 from setuptools import setup, find_packages
 
 setup(name='catsim',
+      version='1.0',
+      release='1.0a',
       description='Computerized Adaptive Testing' +
                   ' assisted by Similarity Algorithm',
       author='Douglas De Rizzo Meneghetti',
