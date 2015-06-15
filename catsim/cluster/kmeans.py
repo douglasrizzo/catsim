@@ -2,28 +2,22 @@ import numpy as np
 import catsim.cluster.distances
 import catsim.misc.stats
 import catsim.cluster.stats
+from catsim.cluster.helpers import normalize
+
+
+possible_inits = ['naive', 'varCovar', 'ward']
+possible_metrics = ['euclidean', 'mahalanobis']
 
 
 def naive_init(x, k):
+    """Initialize first :math:`k` centroids by randomly choosing
+    representatives from the :math:`x` matrix
     """
-    Initialize first $k$ centroids between the minimum and maximum values of
-    each feature from the $x$ matrix
-    """
-    npoints, nfeatures = x.shape
-    centroids = np.zeros([k, nfeatures])
-
-    for i in range(nfeatures):
-        f_min = np.min(x[:, i])
-        f_max = np.max(x[:, i])
-        centroids[:, i] = np.random.uniform(f_min, f_max, k)
-
-    centroids = x[np.random.choice(npoints, size=k, replace=False)]
-    return centroids
+    return x[np.random.choice(x.shape[0], size=k, replace=False)]
 
 
 def var_covar_init(x, k):
-    """
-    Centroid initialization method proposed by [Erisoglu2011].
+    """Centroid initialization method proposed by [Eri11]_.
 
     Only two features of the dataset are used in this method. Feature
     :math:`X_1` is the one that has the largest absolute coefficient of
@@ -34,10 +28,7 @@ def var_covar_init(x, k):
     :math:`c_i, i = 2, \ldots, k` are selected as the farthest data points wrt
     :math:`c_{i-1}`
 
-    .. [Erisoglu2011] Erisoglu, M., Calis, N., & Sakallioglu, S. (2011). A new
-    algorithm for initial cluster centers in k-means algorithm. Pattern
-    Recognition Letters, 32(14), 1701–1705.
-    http://doi.org/10.1016/j.patrec.2011.07.011
+    .. [Eri11] Erisoglu, M., Calis, N., & Sakallioglu, S. (2011). A new algorithm for initial cluster centers in k-means algorithm. Pattern Recognition Letters, 32(14), 1701–1705. http://doi.org/10.1016/j.patrec.2011.07.011
     """
 
     # calculate number of data points, number of features, coefficient of
@@ -76,8 +67,7 @@ def var_covar_init(x, k):
 
 
 def ward_init(x, k):
-    """
-    Ward initialization method for the centroids of k-means algorithm. In this
+    """Ward initialization method for the centroids of k-means algorithm. In this
     method, the data is clustered hierarchically using Ward's function, which
     is a greedy iterative method that joins the two clusters in a way that the
     resulting cluster has the minimum possible variance of all the other
@@ -105,59 +95,67 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1,
            debug=False, metric='euclidean'):
     """Cluster a set of data points using the k-means algorithm.
 
-    Keyword arguments:
-    x -- a numpy.ndarray in which columns are features and lines are
-         observations
-    k -- number of desired clusters
-    init_method -- the centroids initialization method. Can be one of the
+    :param x: a matrix in which columns are features and lines are observations
+    :type x: numpy.ndarray
+    :param k: number of desired clusters
+    :type k: integer
+    :param init_method: the centroids initialization method. Can be one of the
                    following: ['naive', 'varCovar', 'ward'] in which 'naive'
                    initializes the k centroids in a way that all features are
                    within the minimum and maximum values of each feature of x;
-                   'varCovar' [1] selects two features that explain most of the
-                   dataset and iteratively selects the data points furthest
-                   from the center and form each other as the initial
+                   'varCovar' [Eri11]_ selects two features that explain most
+                   of the dataset and iteratively selects the data points
+                   furthest from the center and form each other as the initial
                    centroids; and 'ward' initializes the centroids using the
                    means of k clusters generated via the hierarchical
                    agglomerative clustering procedure that uses Ward function.
-    iters -- number of maximum iterations if convergence is not reached before
-    n_init -- number of re-initializations; the fuction returns the best of
-              n_init results, chosen as the one with minimum sum of
-              intra-cluster variances.
-    debug -- if using an interactive console, such as iPython, debug = True
-             allows for extra output messages separated by user input.
-
-    .. [1] Erisoglu, M., Calis, N., & Sakallioglu, S. (2011). A new
-    algorithm for initial cluster centers in k-means algorithm. Pattern
-    Recognition Letters, 32(14), 1701–1705.
-    http://doi.org/10.1016/j.patrec.2011.07.011
+    :type init_method: string
+    :param iters: number of maximum iterations if convergence is not reached
+                  before
+    :type iters: integer
+    :param n_init: number of re-initializations; the fuction returns the best
+                   of n_init results, chosen as the one with minimum sum of
+                   intra-cluster variances.
+    :type n_init: integer
+    :param debug: if using an interactive console, such as iPython, passing
+                  True allows for extra output messages separated by user
+                  input.
+    :type debug: boolean
     """
+    if init_method not in possible_inits:
+        raise ValueError(
+            '"' + init_method + '" is not a valid initialization method')
+
+    if metric not in possible_metrics:
+        raise ValueError(
+            '"' + metric + '" is not a valid metric')
+
     npoints, nfeatures = x.shape
     centroidsN = np.zeros([k, nfeatures])
     clusters = np.zeros(npoints)
-    final_clusters = np.zeros(npoints)
+    final_clusters = np.empty(npoints).fill(-1)
 
     # initialize centroids according to a given initialization method
     # centroids = naive_centroid_init(x, k)
 
     if debug:
-        print('init =', init_method)
+        print('init = ', init_method)
 
-    if init_method == 'naive':
-        centroids = naive_init(x, k)
-    elif init_method == 'varCovar':
-        centroids = var_covar_init(x, k)
     # if method is ward, algorithm is deterministic, so no reason to try to
     # minimize the sum of intra-cluster variances
-    elif init_method == 'ward':
+    if init_method == 'ward':
         centroids = ward_init(x, k)
         n_init = 1
 
-    if debug:
-        print('initial centroids', centroids.shape, ':\n', centroids)
-        input()
-
     var = float('inf')
     for init in range(n_init):
+        if init_method == 'naive':
+            centroids = naive_init(x, k)
+        elif init_method == 'varCovar':
+            centroids = var_covar_init(x, k)
+        if debug:
+            print('initial centroids', centroids.shape, ':\n', centroids)
+            input()
         for t in range(iters):
             # calculates distances from data points to centroids
             # according to a meeting with the statistics teacher, both the
@@ -203,4 +201,34 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1,
         if this_var < var:
             var = this_var
             final_clusters = clusters
-    return final_clusters
+    return normalize(final_clusters)
+
+if __name__ == '__main__':
+    from sklearn.cluster import KMeans as sKmeans
+    from sklearn.datasets import make_blobs
+    n_clusters = 20
+    x, clusters = make_blobs(500, 2, n_clusters)
+
+    dodo_res = catsim.cluster.kmeans.kmeans(x, n_clusters, init_method='naive',
+                                            iters=1000, n_init=50,
+                                            metric='mahalanobis')
+
+    clusters = catsim.cluster.helpers.normalize(clusters)
+    dodo_res = catsim.cluster.helpers.normalize(dodo_res)
+    sklearn_res = catsim.cluster.helpers.normalize(
+        sKmeans(n_clusters=n_clusters, init='random').fit_predict(x))
+
+    dodo_acertos = 0
+    sklearn_acertos = 0
+    for i in range(len(clusters)):
+        if clusters[i] == dodo_res[i]:
+            dodo_acertos += 1
+        if clusters[i] == sklearn_res[i]:
+            sklearn_acertos += 1
+
+    print(len(clusters), '\n',
+          dodo_acertos, dodo_acertos /
+          len(clusters) *
+          100, sum(catsim.cluster.stats.variances(x, dodo_res)), '\n',
+          sklearn_acertos, sklearn_acertos / len(clusters) * 100,
+          sum(catsim.cluster.stats.variances(x, sklearn_res)))
