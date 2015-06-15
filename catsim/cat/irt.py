@@ -1,3 +1,6 @@
+"""Module containing functions pertaining to Item Response Theory
+three-parameter logistic model."""
+
 import math
 import numpy as np
 

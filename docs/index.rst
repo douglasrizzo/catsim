@@ -6,45 +6,20 @@
 Welcome to catsim's documentation!
 ==================================
 
-Contents:
+Contents
+--------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+    :glob:
+
+    *
+
+.. include:: ../README.rst
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-.. automodule:: catsim.cat.irt
-   :members:
-
-.. automodule:: catsim.cat.simulate
-   :members:
-
-.. automodule:: catsim.cluster.distances
-   :members:
-
-.. automodule:: catsim.cluster.helpers
-   :members:
-
-.. automodule:: catsim.cluster.kmeans
-   :members:
-
-.. automodule:: catsim.cluster.kmedoids
-   :members:
-
-.. automodule:: catsim.cluster.stats
-   :members:
-
-.. automodule:: catsim.misc.plot
-   :members:
-
-.. automodule:: catsim.misc.results
-   :members:
-
-.. automodule:: catsim.misc.stats
-   :members:
-

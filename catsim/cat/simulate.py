@@ -1,3 +1,10 @@
+"""Module containing functions relevant to the process of simulating the
+application of adaptive tests. Most of this module is based on the work of
+[Bar10]_.
+
+.. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
+"""
+
 import math
 import numpy as np
 import catsim.cat.irt
@@ -7,20 +14,17 @@ from scipy.optimize import differential_evolution
 
 def simCAT(items, clusters, examinees=1, n_itens=20,
            r_max_interval=10, optimizer='BFGS', verbose=False):
-    """CAT simulation and validation method proposed by [Bar10]_.
-
-    .. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
-    """
+    """CAT simulation and validation method proposed by [Bar10]_."""
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
 
     # adds a column for each item's exposure rate to the item parameter matrix
     items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
-    bank_size = np.size(items, 0)
+    bank_size = items.shape[0]
     # max_difficulty = np.max(items[1])
     # min_difficulty = np.min(items[1])
 
-    # maximum exposure rates extracted from a linear interval rangin from
+    # maximum exposure rates extracted from a linear interval ranging from
     # .1 to 1
     r_maxes = np.linspace(0.1, 1, r_max_interval, dtype=float)
 

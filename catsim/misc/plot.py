@@ -1,3 +1,5 @@
+"""Module with functions for plotting clustering and IRT-related results."""
+
 import os
 from time import time
 from datetime import timedelta
