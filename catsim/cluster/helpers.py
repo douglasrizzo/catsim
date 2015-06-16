@@ -1,4 +1,22 @@
 def normalize(c):
+    """Normalize the clustering results list, so that they are comparable
+       between each other.
+
+    :param c: a vector containing cluster memberships
+    :type c: numpy.ndarray
+    :return: a vector containing normalized cluster memberships
+    :rtype: numpy.ndarray
+
+    :note: as an example of what is meant by 'normalization', imagine the
+           following cluster membership vectors:
+           `[2, 2, 3, 2, 1, 0]`
+           `[1, 1, 2, 1, 3, 0]`
+           In this case, both membership vectors can be considered equal, since
+           they cluster data points in equal clusters. What this function does
+           is transform both of them in the following:
+           `[0, 0, 1, 0, 2, 3]`
+           In this way, membership vectors are comparable.
+    """
     c += max(c)  # shift all assginments away from their original values
     bogus = max(c) + 1  # get a bogus value that is not in the original array
 

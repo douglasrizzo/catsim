@@ -8,11 +8,23 @@ import matplotlib.pyplot as plt
 
 
 def column(matrix, i):
-    """retorna colunas de uma lista bidimensional do Python"""
+    """Returns columns from a bidimensional Python list (a list of lists)"""
     return [row[i] for row in matrix]
 
 
 def plot3D(points, clusters, title, centers=None):
+    """Plots 3D cluster charts
+
+       :param points: a matrix with the 3D locations of the data points
+       :type points: numpy.ndarray
+       :param clusters: a list with the cluster memberships for each data point
+       :type clusters: numpy.ndarray
+       :param title: The title for the plot
+       :type title: string
+       :param centers: a matrix with the positions of the cluster centers,
+                       if they exist
+       :type centers: numpy.ndarray
+    """
     # plota gráficos
     # variáveis utilizadas no plot
     colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
@@ -47,7 +59,7 @@ def plot3D(points, clusters, title, centers=None):
 
 
 def gen3DClusterGraphs():
-    """Gera gráficos 3D dos itens classificados"""
+    """Generates the 3D plots from the results CSV file"""
     datasets = loadDatasets()
     df = loadResults()
 
@@ -65,9 +77,8 @@ def gen3DClusterGraphs():
 
 
 def genIRTGraphics():
-    """
-    gera curvas características e de informação dos itens para o ML3 da TRI
-    """
+    """Generates the item characteristic and information functions for all
+    items in the CSV results file"""
     datasets = loadDatasets()
     total_imagens = 0
     imagem_atual = 0
@@ -141,7 +152,6 @@ def genIRTGraphics():
 
 
 def gen3DDatasetGraphs():
-    """gera os gráficos 3D dos parâmetros da TRI"""
     dados_graphdir = dissertacao + '/img/3d/'
     if not os.path.exists(dados_graphdir):
         os.makedirs(dados_graphdir)
