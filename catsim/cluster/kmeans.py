@@ -28,7 +28,10 @@ def var_covar_init(x, k):
     :math:`c_i, i = 2, \ldots, k` are selected as the farthest data points wrt
     :math:`c_{i-1}`
 
-    .. [Eri11] Erisoglu, M., Calis, N., & Sakallioglu, S. (2011). A new algorithm for initial cluster centers in k-means algorithm. Pattern Recognition Letters, 32(14), 1701–1705. http://doi.org/10.1016/j.patrec.2011.07.011
+    .. [Eri11] Erisoglu, M., Calis, N., & Sakallioglu, S. (2011). A new
+       algorithm for initial cluster centers in k-means algorithm. Pattern
+       Recognition Letters, 32(14), 1701–1705.
+       http://doi.org/10.1016/j.patrec.2011.07.011
     """
 
     # calculate number of data points, number of features, coefficient of

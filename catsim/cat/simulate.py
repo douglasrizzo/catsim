@@ -2,8 +2,9 @@
 application of adaptive tests. Most of this module is based on the work of
 [Bar10]_.
 
-.. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, v. 34, n. 6, p. 438-452, 2010.
-"""
+.. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item
+   selection rules in computerized adaptive testing. Applied Psychological
+   Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
 import math
 import numpy as np
@@ -163,7 +164,10 @@ def dodd(theta, items, correct):
     :param items: a numpy array containing the parameters of the items in the database. This is necessary to capture the maximum and minimum difficulty levels necessary for the method.
     :param correct: a boolean value informing whether or not the examinee correctly answered the current item.
 
-    .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and Stepsize on Computerized Adaptive Attitude Measurement Using the Rating Scale Model. Applied Psychological Measurement, 14(4), 355–366. http://doi.org/10.1177/014662169001400403
+    .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
+       Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
+       Scale Model. Applied Psychological Measurement, 14(4), 355–366.
+       http://doi.org/10.1177/014662169001400403
     """
     b = items[:, 1]
     b_max = max(b)
@@ -180,8 +184,10 @@ def rmse(actual, predicted):
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
-    :param actual: a list or 1-D numpy array containing the true profficiency values
-    :param predicted: a list or 1-D numpy array containing the estimated profficiency values
+    :param actual: a list or 1-D numpy array containing the true profficiency
+                   values
+    :param predicted: a list or 1-D numpy array containing the estimated
+                      profficiency values
     """
     return math.sqrt(mean_squared_error(actual, predicted))
 
@@ -191,7 +197,8 @@ def overlap_rate(items, testSize):
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
 
-    :param items: a numpy array containing, in the 4th column, the number of times each item was used in the tests.
+    :param items: a numpy array containing, in the 4th column, the number of
+                  times each item was used in the tests.
     :param testSize: an integer informing the number of items in a test.
     """
 

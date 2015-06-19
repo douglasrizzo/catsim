@@ -92,7 +92,8 @@ def bruteMLE(response_vector, administered_items, precision=12):
     items parameters
 
     :param response_vector: a binary list containing the response vector
-    :param administered_items: a numpy array containing the parameters of the answered items
+    :param administered_items: a numpy array containing the parameters of the
+                               answered items
     :param precision: number of decimal points of precision
     """
     lbound = -8
@@ -123,16 +124,16 @@ def inf(theta, a, b, c):
     .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
 
     :param theta: the individual's proficiency value. This parameter value has
-                  no boundary, but if a distribution of the form :math:`N(0, 1)` was
-                  used to estimate the parameters, then :math:`-4 \\leq \\theta \\leq
-                  4`.
+                  no boundary, but if a distribution of the form
+                  :math:`N(0, 1)` was used to estimate the parameters, then
+                  :math:`-4 \\leq \\theta \\leq 4`.
 
     :param a: the discrimination parameter of the item, usually a positive
               value in which :math:`0.8 \\leq a \\leq 2.5`.
 
     :param b: the item difficulty parameter. This parameter value has no
-              boundary, but if a distribution of the form :math:`N(0, 1)` was used to
-              estimate the parameters, then :math:`-4 \\leq b \\leq 4`.
+              boundary, but if a distribution of the form :math:`N(0, 1)` was
+              used to estimate the parameters, then :math:`-4 \\leq b \\leq 4`.
 
     :param c: the item pseudo-guessing parameter. Being a probability,
         :math:`0\\leq c \\leq 1`, but items considered good usually have

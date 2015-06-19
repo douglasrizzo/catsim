@@ -60,7 +60,9 @@ def dunn(c, distances):
     clustering result is considered, since higher values indicate that
     clusters are compact (small :math:`diam(c_k)`) and far apart.
 
-    .. [Kov05] Kovács, F., Legány, C., & Babos, A. (2005). Cluster validity measurement techniques. 6th International Symposium of Hungarian Researchers on Computational Intelligence.
+    .. [Kov05] Kovács, F., Legány, C., & Babos, A. (2005). Cluster validity
+       measurement techniques. 6th International Symposium of Hungarian
+       Researchers on Computational Intelligence.
     """
     unique_cluster_distances = np.unique(min_cluster_distances(c, distances))
     max_diameter = max(diameter(c, distances))
