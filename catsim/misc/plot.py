@@ -1,10 +1,9 @@
 """Module with functions for plotting clustering and IRT-related results."""
 
 import os
-from time import time
-from datetime import timedelta
 import numpy as np
 import matplotlib.pyplot as plt
+import catsim.cat.irt
 
 
 def column(matrix, i):
@@ -12,7 +11,7 @@ def column(matrix, i):
     return [row[i] for row in matrix]
 
 
-def plot3D(points, clusters, title, centers=None):
+def plot3D(points, clusters, title, path, centers=None):
     """Plots 3D cluster charts
 
        :param points: a matrix with the 3D locations of the data points
@@ -50,105 +49,88 @@ def plot3D(points, clusters, title, centers=None):
     ax.set_ylabel('b')
     ax.set_zlabel('c')
 
-    cluster_graphdir = dissertacao_imgdir + 'clusters/'
+    if not os.path.exists(path):
+        os.makedirs(path)
 
-    if not os.path.exists(cluster_graphdir):
-        os.makedirs(cluster_graphdir)
-
-    plt.savefig(cluster_graphdir + title + '.pdf', bbox_inches='tight')
+    plt.savefig(path + title + '.pdf', bbox_inches='tight')
 
 
-def gen3DClusterGraphs():
-    """Generates the 3D plots from the results CSV file"""
-    datasets = loadDatasets()
-    df = loadResults()
+def plotIRT(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):
+    """Plots 'Item Response Theory'-related item plots
 
-    t0 = time()
-    for counter, dataset in enumerate(datasets):
-        for index, row in df[df['Dataset'] == dataset[0]].iterrows():
-            print(format(counter + index + 1) +
-                  ' de ' + format(len(df.index)) + '    ' +
-                  format(timedelta(
-                    seconds=(time.time() - t0) / (counter + index + 1) *
-                    (len(df.index) - (counter + index + 1)))))
+       :param a: item discrimination parameter
+       :type a: float
+       :param b: item difficulty parameter
+       :type b: float
+       :param c: item pseudo-guessing parameter
+       :type c: float
+       :param title: plot title
+       :type title: string
+       :param ptype: 'icc' for the item characteristic curve, 'iif' for the
+                     item information curve or 'both' for both curve in the
+                     same plot
+       :type ptype: string
+       :param filepath: saves the plot in the given path
+       :type filepath: string
+    """
+    thetas = np.arange(b - 4, b + 4, .1, 'double')
+    p_thetas = []
+    i_thetas = []
+    for theta in thetas:
+        p_thetas.append(catsim.cat.irt.tpm(theta, a, b, c))
+        i_thetas.append(catsim.cat.irt.inf(theta, a, b, c))
 
-            plot3D(dataset[2], row[10], dataset[0] + ' - ' + row[0] +
-                   ' (' + format(row[2]) + ')')
+    if ptype in ['icc', 'iif']:
+        plt.figure()
+        plt.title(title, size=18)
+        plt.annotate('$a = ' + format(a) + '$\n$b = ' + format(
+            b) + '$\n$c = ' + format(c) + '$',
+            bbox=dict(facecolor='white',
+                      alpha=1),
+            xy=(.75, .05),
+            xycoords='axes fraction')
+        plt.xlabel(r'$\theta$')
+        plt.grid()
+        plt.legend(loc='best')
 
-
-def genIRTGraphics():
-    """Generates the item characteristic and information functions for all
-    items in the CSV results file"""
-    datasets = loadDatasets()
-    total_imagens = 0
-    imagem_atual = 0
-    t0 = time.time()
-
-    for dataset_name, x, x_scaled in datasets:
-        total_imagens += np.size(x, 0)
-
-    for dataset_name, x, x_scaled in datasets:
-
-        print('\nGerando gráficos, base: ' + dataset_name)
-        for counter, triple in enumerate(x):
-            imagem_atual += 1
-            print(format(imagem_atual),
-                  'de', format(total_imagens),
-                  '  ',
-                  format(timedelta(seconds=((time.time() - t0) /
-                                            imagem_atual) *
-                                           (total_imagens - imagem_atual))),
-                  '\r',
-                  end='\r')
-            p_thetas = []
-            i_thetas = []
-            thetas = np.arange(triple[1] - 4, triple[1] + 4, .1, 'double')
-
-            for theta in thetas:
-                p_thetas.append(irt.tpm(theta, triple[0],
-                                        triple[1], triple[2]))
-                i_thetas.append(irt.inf(theta, triple[0],
-                                        triple[1], triple[2]))
-
-            tri_graphdir = '/home/douglas/Desktop/teste/'
-
-            if not os.path.exists(tri_graphdir):
-                os.makedirs(tri_graphdir)
-
-            plt.figure()
-            plt.title(dataset_name + ' - ' + format(counter + 1), size=18)
-            plt.annotate('$a = ' + format(triple[0]) + '$\n$b = ' + format(
-                triple[1]) + '$\n$c = ' + format(triple[2]) + '$',
-                bbox=dict(facecolor='white',
-                          alpha=1),
-                xy=(.75, .05),
-                xycoords='axes fraction')
-            plt.xlabel(r'$\theta$')
+        if ptype == 'icc':
             plt.ylabel(r'$P(\theta)$')
-            plt.grid()
-            plt.legend(loc='best')
             plt.plot(thetas, p_thetas)
-            plt.savefig(tri_graphdir + '/' + dataset_name + '_' +
-                        format(counter + 1) + '_prob.pdf')
 
-            plt.figure()
-            plt.title(dataset_name + ' - ' + format(counter + 1), size=18)
-            plt.annotate('$a = ' + format(triple[0]) + '$\n$b = ' + format(
-                triple[1]) + '$\n$c = ' + format(triple[2]) + '$',
-                bbox=dict(facecolor='white',
-                          alpha=1),
-                xy=(.75, .05),
-                xycoords='axes fraction')
-            plt.xlabel(r'$\theta$')
+        elif ptype == 'iif':
             plt.ylabel(r'$I(\theta)$')
-            plt.grid()
-            plt.legend(loc='best')
             plt.plot(thetas, i_thetas)
-            plt.savefig(tri_graphdir + '/' + dataset_name + '_' +
-                        format(counter + 1) + '_info.pdf')
 
-    print('Término impressão gráficos TRI, ' + format(total_imagens) +
-          ' imagens\nTempo: ' + format(timedelta(seconds=time.time() - t0)))
+    elif ptype == 'both':
+        fig, ax1 = plt.subplots()
+
+        ax1.plot(thetas, p_thetas, 'b-')
+        ax1.set_xlabel(r'$\theta$', size=16)
+        # Make the y-axis label and tick labels match the line color.
+        ax1.set_ylabel(r'$P(\theta)$', color='b', size=16)
+        for tl in ax1.get_yticklabels():
+            tl.set_color('b')
+
+        ax2 = ax1.twinx()
+        ax2.plot(thetas, i_thetas, 'r-')
+        ax2.set_ylabel(r'$I(\theta)$', color='r', size=16)
+        for tl in ax2.get_yticklabels():
+            tl.set_color('r')
+
+        ax1.set_title(title, size=18)
+
+        ax2.annotate('$a = ' + format(a) + '$\n$b = ' + format(
+            b) + '$\n$c = ' + format(c) + '$',
+            bbox=dict(facecolor='white',
+                      alpha=1),
+            xy=(.75, .05),
+            xycoords='axes fraction')
+        ax2.legend(loc='best', framealpha=0)
+
+    if filepath is not None:
+        plt.savefig(filepath)
+
+    plt.close()
 
 
 def gen3DDatasetGraphs():
