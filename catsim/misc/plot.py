@@ -2,8 +2,9 @@
 
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 import catsim.cat.irt
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 
 def column(matrix, i):
@@ -11,7 +12,7 @@ def column(matrix, i):
     return [row[i] for row in matrix]
 
 
-def plot3D(points, clusters, title, path, centers=None):
+def cluster_plot(points, clusters, title, path, centers=None, threeD=True):
     """Plots 3D cluster charts
 
        :param points: a matrix with the 3D locations of the data points
@@ -24,35 +25,49 @@ def plot3D(points, clusters, title, path, centers=None):
                        if they exist
        :type centers: numpy.ndarray
     """
-    # plota gráficos
-    # variáveis utilizadas no plot
     colors = np.array([x for x in 'bgrcmykbgrcmykbgrcmykbgrcmyk'])
     colors = np.hstack([colors] * 20)
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111, projection='3d')
-
-    if title is not None:
-        ax.set_title(title)
-
-    ax.scatter(column(points.tolist(), 0), column(points.tolist(), 1),
-               column(points.tolist(), 2),
-               c=colors[clusters].tolist(),
-               s=10)
-
-    if centers is not None:
-        center_colors = colors[:len(centers)]
-        ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2],
-                   s=100,
-                   c=center_colors)
-
-    ax.set_xlabel('a')
-    ax.set_ylabel('b')
-    ax.set_zlabel('c')
 
     if not os.path.exists(path):
         os.makedirs(path)
 
-    plt.savefig(path + title + '.pdf', bbox_inches='tight')
+    # this was not tested
+    if not threeD:
+        pca = PCA(n_components=2)
+        points = pca.fit_transform(points)
+        plt.title(title)
+        plt.xlabel('C1')
+        plt.xlabel('C2')
+        plt.scatter(points[:, 0], points[:, 1], c=colors[clusters].tolist())
+        plt.savefig(path + title + '.pdf', bbox_inches='tight')
+        plt.close()
+
+    else:
+        # plota gráficos
+        # variáveis utilizadas no plot
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(111, projection='3d')
+
+        if title is not None:
+            ax.set_title(title)
+
+        ax.scatter(column(points.tolist(), 0), column(points.tolist(), 1),
+                   column(points.tolist(), 2),
+                   c=colors[clusters].tolist(),
+                   s=10)
+
+        if centers is not None:
+            center_colors = colors[:len(centers)]
+            ax.scatter(centers[:, 0], centers[:, 1], centers[:, 2],
+                       s=100,
+                       c=center_colors)
+
+        ax.set_xlabel('a')
+        ax.set_ylabel('b')
+        ax.set_zlabel('c')
+
+        plt.savefig(path + title + '.pdf', bbox_inches='tight')
+        plt.close()
 
 
 def plotIRT(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):

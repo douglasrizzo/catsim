@@ -1,9 +1,11 @@
 """A bunch of statistical functions that I implemented just to show that I
 knew how they worked."""
 import numpy as np
+from sklearn.preprocessing import scale
 
 
 def coefvariation(x, axis=0):
+    '''..math:: \\frac{\\sigma}{\\mu}'''
     if not isinstance(x, np.matrix):
         x = np.asarray(x)
 
@@ -61,6 +63,18 @@ def bincount(x):
         count[i + abs(x_min)] += 1
 
     return count
+
+
+def scatter_matrix(data):
+    """
+    .. math:: S=\\sum_{{j=1}}^{n}({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})^{T}=\\sum _{{j=1}}^{n}({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})\\otimes({\\mathbf{x}}_{j}-\\overline{{\\mathbf{x}}})=\\left(\\sum _{{j=1}}^{n}{\\mathbf {x}}_{j}{\\mathbf {x}}_{j}^{T}\\right)-n\\overline {{\\mathbf {x}}}\\overline {{\\mathbf {x}}}^{T}"""
+    mean_vector = np.mean(data, axis=0)
+    scatter = np.zeros((data.shape[1], data.shape[1]))
+    for i in range(data.shape[0]):
+        scatter += (data[i, :].reshape(data.shape[1], 1) - mean_vector).dot(
+            (data[i, :].reshape(data.shape[1], 1) - mean_vector).T)
+
+    return scatter
 
 
 if __name__ == '__main__':
