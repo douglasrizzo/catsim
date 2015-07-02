@@ -11,6 +11,7 @@ setup(name='catsim',
       url='https://www.github.com/douglasrizzo/catsim',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       install_requires=[
-          'numpy', 'scipy', 'matplotlib', 'scikit-learn', 'pandas'],
+          'numpy', 'scipy', 'matplotlib',
+          'scikit-learn', 'pandas', 'unidecode'],
       license='GPLv2'
       )
