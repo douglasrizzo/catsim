@@ -180,7 +180,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
     # print('taxas de exposição antes\n' + str(items[:, 3]))
     # print('tamanho do banco\n' + str(bank_size))
 
-    items[:, 3] = items[:, 3] / bank_size
+    items[:, 3] = items[:, 3] / examinees
 
     # print('taxas de exposição\n' + str(items[:, 3]))
     # print('rmse\n' + str(rmse(true_thetas, estimatedThetasForThisR)))
