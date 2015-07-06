@@ -15,39 +15,37 @@ from scipy.optimize import differential_evolution
 
 def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
     """CAT simulation and validation method proposed by [Bar10]_.
-
        :param items: an n x 3 matrix containing item parameters
        :param clusters: a list containing item cluster memberships
        :param n_itens: the number of items an examinee will answer during the
-                       adaptive test
+       adaptive test
        :param r_max: maximum exposure rate for items
        :type items: numpy.ndarray
        :type clusters: list
        :type n_itens: int
        :type r_max: float
-
        :return: a list containing two dictionaries:
 
                 **globalResults**:
                 The global results of the simulation process.
-                  *Qtd. Itens*: number of items in the test;
+                    *Qtd. Itens*: number of items in the test;
 
-                  *RMSE*: root mean squared error of the estimations;
+                    *RMSE*: root mean squared error of the estimations;
 
-                  *Overlap*: overlap rate;
+                    *Overlap*: overlap rate;
 
-                  *r_max*: maximum exposure rate.
+                    *r_max*: maximum exposure rate.
 
                 **localResults**:
                 Individual results for each simulated examinee.
-                  *Theta*: true theta value of the individual;
+                    *Theta*: true theta value of the individual;
 
-                  *Est. theta*: estimated theta value of the individual;
+                    *Est. theta*: estimated theta value of the individual;
 
-                  *Id. Itens*: a list containing the id. of the items used
-                  during the test, in the order they were used;
+                    *Id. Itens*: a list containing the id. of the items used
+                    during the test, in the order they were used;
 
-                  *r_max*: maximum exposure rate.
+                    *r_max*: maximum exposure rate.
 
        :rtype: list
     """
