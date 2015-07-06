@@ -106,7 +106,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
             # an exposure rate under the allowed constraints, and applies
             # it
             if items[counter, 3] == 0 or (
-                    items[counter, 3] != 0 and (items[counter, 3] / bank_size) >= r_max):
+                    items[counter, 3] != 0 and (items[counter, 3] / examinees) >= r_max):
                 selected_item_cluster = clusters[selected_item]
                 random_item = None
                 while random_item is None:
