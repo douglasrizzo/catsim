@@ -13,7 +13,7 @@ from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution
 
 
-def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
+def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
     """CAT simulation and validation method proposed by [Bar10]_.
 
        :param items: an n x 3 matrix containing item parameters
@@ -21,13 +21,10 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
        :param n_itens: the number of items an examinee will answer during the
                        adaptive test
        :param r_max: maximum exposure rate for items
-       :param verbose: whether the process should output partial results to the
-                       console
        :type items: numpy.ndarray
        :type clusters: list
        :type n_itens: int
        :type r_max: float
-       :type verbose: bool
 
        :return: a list containing two dictionaries:
 
@@ -66,16 +63,13 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
 
-    # adds a column for each item's exposure rate to the item parameter matrix
+    # adds a column for each item's exposure rate and their cluster membership
     items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
-    bank_size = items.shape[0]
-    # max_difficulty = np.max(items[1])
-    # min_difficulty = np.min(items[1])
+    items = np.append(
+        items, np.array(clusters).reshape(len(clusters), 1), axis=1).astype(np.float64)
 
     globalResults = []
     localResults = []
-    if verbose:
-        print('Max exposure rate = ' + str(r_max))
     estimatedThetasForThisR = []
     id_itens = []
     items[3] = 0
@@ -106,18 +100,34 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
             # an exposure rate under the allowed constraints, and applies
             # it
             if items[counter, 3] == 0 or (
-                    items[counter, 3] != 0 and (items[counter, 3] / examinees) >= r_max):
-                selected_item_cluster = clusters[selected_item]
-                random_item = None
-                while random_item is None:
-                    random_item = np.random.randint(0, np.size(items, 0))
-                    if(
-                        selected_item_cluster == clusters[random_item] and
-                        random_item not in administered_items
-                    ):
-                        selected_item = random_item
-                    else:
-                        random_item = None
+                    items[counter, 3] != 0 and (items[counter, 3]) >= r_max):
+
+                selected_item_cluster = np.float64(clusters[selected_item])
+                # print('cluster do melhor item ' + str(selected_item_cluster))
+                # print('clusters de todos os itens\n' + str(items[:, 4]))
+                # print(str(np.where(items[:, 4] == selected_item_cluster)))
+                # print(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max)
+
+                # checks whether there is an item in the same cluster with
+                # exposure rate below the maximum threshold
+                if any(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max):
+                    random_item = None
+                    while random_item is None:
+                        random_item = np.random.randint(0, np.size(items, 0))
+                        if(
+                            selected_item_cluster == clusters[random_item] and
+                            random_item not in administered_items
+                        ):
+                            selected_item = random_item
+                        else:
+                            random_item = None
+
+                # if not, selects the one with smallest exposure rate
+                else:
+                    item_indexes = np.where(
+                        items[:, 4] == selected_item_cluster)
+                    selected_item = item_indexes[np.argmin(
+                        items[np.where(items[:, 4] == selected_item_cluster)][:, 3])]
 
             id_itens.append(selected_item)
 
@@ -133,7 +143,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
             # adds the administered item to the pool of administered items
             administered_items.append(selected_item)
 
-            items[selected_item][3] += 1
+            # update the exposure value for this item
+            items[selected_item][3] = (
+                (items[selected_item][3] * examinees) + 1) / examinees
 
             # reestimation of the examinee's proficiency: if the response
             # vector contains only success or errors, Dodd's method is used
@@ -151,23 +163,6 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
                         args=(response_vector, items[administered_items]))
                     est_theta = res.x[0]
 
-                # res = minimize(
-                #     catsim.cat.irt.negativelogLik, [est_theta],
-                #     args=[response_vector, items[administered_items]],
-                #     method=optimizer)
-                # est_theta = res.x[0]
-
-                # try:
-                # res = brute(
-                #     catsim.cat.irt.negativelogLik, ranges=[[-6, 6]],
-                #     args=(response_vector, items[administered_items]))
-                # est_theta = res[0]
-
-            # if est_theta > max_difficulty:
-            #     est_theta = max_difficulty
-            # if est_theta < min_difficulty:
-            #     est_theta = min_difficulty
-
         # save the results for this examinee simulation
         localResults.append({'Theta': true_theta,
                              'Est. Theta': est_theta,
@@ -177,22 +172,13 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1, verbose=False):
         estimatedThetasForThisR.append(est_theta)
     # end true_theta loop
 
-    # print('taxas de exposição antes\n' + str(items[:, 3]))
-    # print('tamanho do banco\n' + str(bank_size))
-
-    items[:, 3] = items[:, 3] / examinees
-
-    # print('taxas de exposição\n' + str(items[:, 3]))
-    # print('rmse\n' + str(rmse(true_thetas, estimatedThetasForThisR)))
-    # print('overlap\n' + str(overlap_rate(items, n_itens)))
-
     # save the results for this r value
     globalResults.append({
+        'Nº de grupos': len(set(clusters)),
         'Qtd. Itens': n_itens,
         'RMSE': rmse(true_thetas, estimatedThetasForThisR),
         'Overlap': overlap_rate(items, n_itens),
         'r_max': r_max})
-# end r_max loop
 
     return globalResults, localResults
 
