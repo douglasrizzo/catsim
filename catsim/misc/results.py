@@ -11,7 +11,7 @@ col_cluster = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
                'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',
                'Maior grupo', 'Variância', 'Dunn', 'Silhueta',
                'Classificações', 'RMSE', 'Taxa de sobreposição']
-col_cat = ['Índice', 'Data', 't (segundos)', 'Qtd. itens',
+col_cat = ['Índice', 'Data', 't (segundos)', 'Nº de grupos', 'Qtd. itens',
            'RMSE', 'Taxa de sobreposição', 'r. max']
 col_localCat = ['Índice', 'Theta', 'Est. Theta', 'Id. itens', 'r. max']
 
@@ -46,12 +46,13 @@ def saveClusterResults(datetime, algorithm, dataset, distance, variable,
         DataFrame([ar]).to_csv(f, header=False, index=False)
 
 
-def saveGlobalCATResults(index, datetime, t, qtd_itens, rmse, overlap,
-                         r_max, path):
+def saveGlobalCATResults(index, datetime, t, n_clusters, qtd_itens, rmse,
+                         overlap, r_max, path):
     """Appends a result to the end of the cluster results csv file:"""
     ar = [index,
           time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(datetime)),
           t,
+          n_clusters,
           qtd_itens,
           rmse,
           overlap,
@@ -121,8 +122,8 @@ def loadGlobalCATResults(path):
         df = pandas.read_csv(path, header=0, index_col=False,
                              encoding='utf-8')
 
-    df[['Índice', 'Qtd. itens']] = df[
-        ['Índice', 'Qtd. itens']].astype(np.int64)
+    df[['Índice', 'Nº de grupos', 'Qtd. itens']] = df[
+        ['Índice', 'Nº de grupos', 'Qtd. itens']].astype(np.int64)
     df['Data'] = pandas.to_datetime(df['Data'])
     df[['t (segundos)', 'RMSE', 'Taxa de sobreposição', 'r. max']] = df[
         ['t (segundos)', 'RMSE', 'Taxa de sobreposição', 'r. max']].astype(
