@@ -63,6 +63,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
 
     # adds a column for each item's exposure rate and their cluster membership
     items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
+
+    print('clusters ' + str(len(clusters)))
+
     items = np.append(
         items, np.array(clusters).reshape(len(clusters), 1), axis=1).astype(np.float64)
 
@@ -101,19 +104,15 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                     items[counter, 3] != 0 and (items[counter, 3]) >= r_max):
 
                 selected_item_cluster = np.float64(clusters[selected_item])
-                # print('cluster do melhor item ' + str(selected_item_cluster))
-                # print('clusters de todos os itens\n' + str(items[:, 4]))
-                # print(str(np.where(items[:, 4] == selected_item_cluster)))
-                # print(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max)
-
                 # checks whether there is an item in the same cluster with
                 # exposure rate below the maximum threshold
                 if any(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max):
                     random_item = None
                     while random_item is None:
+                        # print('.')
                         random_item = np.random.randint(0, np.size(items, 0))
                         if(
-                            selected_item_cluster == clusters[random_item] and
+                            selected_item_cluster == items[:, 4][random_item] and
                             random_item not in administered_items
                         ):
                             selected_item = random_item
