@@ -22,12 +22,11 @@ def means(x, clusters):
 def variances(x, clusters):
     """Calculates the variance for each cluster
 
-    .. math:: \\sigma^2_g = \\frac{1}{N_g}\\sum_{i=1; j=i+1}^{N_g} (\mu_g - d(i, j))
+    .. math:: \\sigma^2_g = \\sum_{i=1; j=i+1}^{N_g} (\mu_g - d(i, j))
     """
 
-    npoints, nfeatures = x.shape
     cluster_means = means(x, clusters)
-    variances = np.zeros([max(clusters) + 1, nfeatures])
+    variances = np.zeros([max(clusters) + 1])
     # cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
     D = distances.euclidean(x, cluster_means)
 
