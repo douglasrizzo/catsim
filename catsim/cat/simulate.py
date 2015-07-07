@@ -62,12 +62,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
     true_thetas = np.random.normal(0, 1, examinees)
 
     # adds a column for each item's exposure rate and their cluster membership
-    items = np.append(items, np.zeros([np.size(items, 0), 1]), axis=1)
-
-    print('clusters ' + str(len(clusters)))
-
+    items = np.append(items, np.zeros([items.shape[0], 1]), axis=1)
     items = np.append(
-        items, np.array(clusters).reshape(len(clusters), 1), axis=1).astype(np.float64)
+        items, np.array(clusters).reshape(clusters.shape[0], 1), axis=1).astype(np.float64)
 
     globalResults = []
     localResults = []
@@ -110,7 +107,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                     random_item = None
                     while random_item is None:
                         # print('.')
-                        random_item = np.random.randint(0, np.size(items, 0))
+                        random_item = np.random.randint(0, items.shape[0])
                         if(
                             selected_item_cluster == items[:, 4][random_item] and
                             random_item not in administered_items
@@ -121,10 +118,14 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
 
                 # if not, selects the one with smallest exposure rate
                 else:
+                    # get indices of items in the same cluster
                     item_indexes = np.where(
                         items[:, 4] == selected_item_cluster)
-                    selected_item = item_indexes[np.argmin(
-                        items[np.where(items[:, 4] == selected_item_cluster)][:, 3])]
+
+                    np.argmin(items[item_indexes][3])
+
+                    selected_item = item_indexes[
+                        np.argmin(items[item_indexes][3])]
 
             id_itens.append(selected_item)
 
