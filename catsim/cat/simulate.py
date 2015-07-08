@@ -119,11 +119,18 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                 # if not, selects the one with smallest exposure rate
                 else:
                     # get indices of items in the same cluster
-                    item_indexes = np.where(
+                    # the [0] is to get only the element in the tuple that
+                    # represents rows
+                    item_indexes = np.nonzero(
                         items[:, 4] == selected_item_cluster)[0]
 
-                    selected_item = item_indexes[
-                        np.argmin(items[item_indexes][3])]
+                    # get the index of the item with the smallest r value from
+                    # a matrix with only the items in that cluster
+                    smallest_r_item = np.argmin(items[item_indexes, 3])
+
+                    # gets the corresponding item index from the item_indexes
+                    # vector
+                    selected_item = item_indexes[smallest_r_item]
 
             id_itens.append(selected_item)
 
