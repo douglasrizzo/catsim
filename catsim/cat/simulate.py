@@ -123,7 +123,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                         items[:, 4] == selected_item_cluster)[0]
 
                     selected_item = item_indexes[
-                        np.argmin(items[item_indexes][3], axis=0)]
+                        np.argmin(items[item_indexes][3])]
 
             id_itens.append(selected_item)
 
