@@ -120,12 +120,10 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                 else:
                     # get indices of items in the same cluster
                     item_indexes = np.where(
-                        items[:, 4] == selected_item_cluster)
-
-                    np.argmin(items[item_indexes][3])
+                        items[:, 4] == selected_item_cluster)[0]
 
                     selected_item = item_indexes[
-                        np.argmin(items[item_indexes][3])]
+                        np.argmin(items[item_indexes][3], axis=0)]
 
             id_itens.append(selected_item)
 
