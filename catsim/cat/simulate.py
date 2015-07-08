@@ -103,34 +103,35 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                 selected_item_cluster = np.float64(clusters[selected_item])
                 # checks whether there is an item in the same cluster with
                 # exposure rate below the maximum threshold
-                if any(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max):
-                    random_item = None
-                    while random_item is None:
-                        # print('.')
-                        random_item = np.random.randint(0, items.shape[0])
-                        if(
-                            selected_item_cluster == items[:, 4][random_item] and
-                            random_item not in administered_items
-                        ):
-                            selected_item = random_item
-                        else:
-                            random_item = None
+                # if any(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max):
+                random_item = None
+                while random_item is None:
+                    # print('.')
+                    random_item = np.random.randint(0, items.shape[0])
+                    if(
+                        selected_item_cluster == items[:, 4][random_item]
+                        and random_item not in administered_items and
+                        items[:, 3][random_item] < items[:, 3][selected_item]
+                    ):
+                        selected_item = random_item
+                    else:
+                        random_item = None
 
-                # if not, selects the one with smallest exposure rate
-                else:
-                    # get indices of items in the same cluster
-                    # the [0] is to get only the element in the tuple that
-                    # represents rows
-                    item_indexes = np.nonzero(
-                        items[:, 4] == selected_item_cluster)[0]
+                # # if not, selects the one with smallest exposure rate
+                # else:
+                #     # get indices of items in the same cluster
+                #     # the [0] is to get only the element in the tuple that
+                #     # represents rows
+                #     item_indexes = np.nonzero(
+                #         items[:, 4] == selected_item_cluster)[0]
 
-                    # get the index of the item with the smallest r value from
-                    # a matrix with only the items in that cluster
-                    smallest_r_item = np.argmin(items[item_indexes, 3])
+                #     # get the index of the item with the smallest r value from
+                #     # a matrix with only the items in that cluster
+                #     smallest_r_item = np.argmin(items[item_indexes, 3])
 
-                    # gets the corresponding item index from the item_indexes
-                    # vector
-                    selected_item = item_indexes[smallest_r_item]
+                #     # gets the corresponding item index from the item_indexes
+                #     # vector
+                #     selected_item = item_indexes[smallest_r_item]
 
             id_itens.append(selected_item)
 
