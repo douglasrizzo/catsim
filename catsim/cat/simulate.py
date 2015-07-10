@@ -57,6 +57,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
         raise ValueError('item matrix has the incorrect number of parameters')
     if n_itens < 1:
         raise ValueError('Number of items must be positive.')
+    if items.shape[0] < n_itens:
+        raise ValueError('There are not enough items in the item matrix.')
 
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
@@ -70,7 +72,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
     localResults = []
     estimatedThetasForThisR = []
     id_itens = []
-    items[3] = 0
+
     for true_theta in true_thetas:
 
         # estimated theta value
