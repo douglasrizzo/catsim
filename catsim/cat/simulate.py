@@ -8,7 +8,7 @@ application of adaptive tests. Most of this module is based on the work of
 
 import math
 import numpy as np
-import catsim.cat.irt
+from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution
 
@@ -89,10 +89,10 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
             max_inf = 0
             for counter, i in enumerate(items):
                 if (counter not in administered_items and
-                    catsim.cat.irt.inf(
+                    inf(
                         est_theta, i[0], i[1], i[2]) > max_inf):
                     selected_item = counter
-                    max_inf = catsim.cat.irt.inf(est_theta, i[0], i[1], i[2])
+                    max_inf = inf(est_theta, i[0], i[1], i[2])
 
             assert(selected_item is not None)
 
@@ -104,26 +104,35 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
             if items[selected_item, 3] >= r_max:
 
                 selected_item_cluster = items[selected_item, 4]
-                random_item = None
+                selected_item = None
                 valid_indexes = np.nonzero(
                     items[:, 4] == selected_item_cluster)[0]
+                inf_values = [inf(est_theta, i[0], i[1], i[2])
+                              for i in items[valid_indexes]]
 
-                while random_item is None:
-                    # selects an item from the same cluster of the item that
-                    # has maximum information
-                    random_item = valid_indexes[
-                        np.random.randint(len(valid_indexes))]
-                    if(
-                        random_item not in administered_items and
-                        items[:, 3][random_item] <= items[:, 3][selected_item]
-                    ):
-                        selected_item = random_item
-                    else:
-                        random_item = None
+                # if there is at least one item in the cluster with r < r_max,
+                # returns the one with maximum information in the same cluster
+                if any(items[valid_indexes, 3] < r_max):
+                    # sort both items and their indexes by their information value
+                    # this type of sorting as seem on
+                    # http://stackoverflow.com/a/6618543
+                    sorted_items = np.array(
+                        [item for (inf_value, item) in sorted(zip(inf_values, items[valid_indexes]))])
+                    valid_indexes = [
+                        index for (inf_value, index) in sorted(zip(inf_values, valid_indexes))]
+                    for index, item in enumerate(sorted_items):
+                        if (item[3] < r_max and valid_indexes[index] not in administered_items):
+                            selected_item = valid_indexes[index]
+
+                # else, if all items have exceed tehir r values, selects the
+                # one with smallest r, regardless of information
+                else:
+                    selected_item = valid_indexes[
+                        np.argmin(items[valid_indexes, 3])]
 
             # simulates the examinee's response via the three-parameter
             # logistic function
-            acertou = catsim.cat.irt.tpm(
+            acertou = tpm(
                 true_theta,
                 items[selected_item][0],
                 items[selected_item][1],
@@ -145,11 +154,11 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
             # else, a maximum likelihood approach is used
             else:
                 try:
-                    est_theta = catsim.cat.irt.bruteMLE(
+                    est_theta = bruteMLE(
                         response_vector, items[administered_items])
                 except:
                     res = differential_evolution(
-                        catsim.cat.irt.negativelogLik, bounds=[[-6, 6]],
+                        negativelogLik, bounds=[[-6, 6]],
                         args=(response_vector, items[administered_items]))
                     est_theta = res.x[0]
 
