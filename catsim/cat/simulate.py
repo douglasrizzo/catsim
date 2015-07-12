@@ -104,16 +104,18 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
             if items[selected_item, 3] >= r_max:
 
                 selected_item_cluster = items[selected_item, 4]
-                # checks whether there is an item in the same cluster with
-                # exposure rate below the maximum threshold
-                # if any(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max):
                 random_item = None
+                valid_indexes = np.nonzero(
+                    items[:, 4] == selected_item_cluster)[0]
+
                 while random_item is None:
-                    random_item = np.random.randint(0, items.shape[0])
+                    # selects an item from the same cluster of the item that
+                    # has maximum information
+                    random_item = valid_indexes[
+                        np.random.randint(len(valid_indexes))]
                     if(
-                        selected_item_cluster == items[:, 4][random_item]
-                        and random_item not in administered_items and
-                        items[:, 3][random_item] < items[:, 3][selected_item]
+                        random_item not in administered_items and
+                        items[:, 3][random_item] <= items[:, 3][selected_item]
                     ):
                         selected_item = random_item
                     else:
