@@ -70,8 +70,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
 
     globalResults = []
     localResults = []
-    estimatedThetasForThisR = []
-    id_itens = []
+    est_thetas = []
 
     for true_theta in true_thetas:
 
@@ -93,22 +92,23 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                     catsim.cat.irt.inf(
                         est_theta, i[0], i[1], i[2]) > max_inf):
                     selected_item = counter
+                    max_inf = catsim.cat.irt.inf(est_theta, i[0], i[1], i[2])
+
+            assert(selected_item is not None)
 
             # if the selected item's exposure rate is bigger than the
             # maximum exposure rate allowed, the algorithm picks another
             # item from the same cluster the original item came from, with
             # an exposure rate under the allowed constraints, and applies
             # it
-            if items[counter, 3] == 0 or (
-                    items[counter, 3] != 0 and (items[counter, 3]) >= r_max):
+            if items[selected_item, 3] >= r_max:
 
-                selected_item_cluster = np.float64(clusters[selected_item])
+                selected_item_cluster = items[selected_item, 4]
                 # checks whether there is an item in the same cluster with
                 # exposure rate below the maximum threshold
                 # if any(items[np.where(items[:, 4] == selected_item_cluster)][:, 3] < r_max):
                 random_item = None
                 while random_item is None:
-                    # print('.')
                     random_item = np.random.randint(0, items.shape[0])
                     if(
                         selected_item_cluster == items[:, 4][random_item]
@@ -118,24 +118,6 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
                         selected_item = random_item
                     else:
                         random_item = None
-
-                # # if not, selects the one with smallest exposure rate
-                # else:
-                #     # get indices of items in the same cluster
-                #     # the [0] is to get only the element in the tuple that
-                #     # represents rows
-                #     item_indexes = np.nonzero(
-                #         items[:, 4] == selected_item_cluster)[0]
-
-                #     # get the index of the item with the smallest r value from
-                #     # a matrix with only the items in that cluster
-                #     smallest_r_item = np.argmin(items[item_indexes, 3])
-
-                #     # gets the corresponding item index from the item_indexes
-                #     # vector
-                #     selected_item = item_indexes[smallest_r_item]
-
-            id_itens.append(selected_item)
 
             # simulates the examinee's response via the three-parameter
             # logistic function
@@ -150,8 +132,8 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
             administered_items.append(selected_item)
 
             # update the exposure value for this item
-            items[selected_item][3] = (
-                (items[selected_item][3] * examinees) + 1) / examinees
+            items[selected_item, 3] = (
+                (items[selected_item, 3] * examinees) + 1) / examinees
 
             # reestimation of the examinee's proficiency: if the response
             # vector contains only success or errors, Dodd's method is used
@@ -172,17 +154,17 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
         # save the results for this examinee simulation
         localResults.append({'Theta': true_theta,
                              'Est. Theta': est_theta,
-                             'Id. Itens': id_itens,
+                             'Id. Itens': administered_items,
                              'r_max': r_max})
 
-        estimatedThetasForThisR.append(est_theta)
+        est_thetas.append(est_theta)
     # end true_theta loop
 
     # save the results for this r value
     globalResults.append({
         'Nº de grupos': len(set(clusters)),
         'Qtd. Itens': n_itens,
-        'RMSE': rmse(true_thetas, estimatedThetasForThisR),
+        'RMSE': rmse(true_thetas, est_thetas),
         'Overlap': overlap_rate(items, n_itens),
         'r_max': r_max})
 
