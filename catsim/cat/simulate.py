@@ -12,42 +12,58 @@ from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution
 
+existent_methods = ['item_info', 'cluster_info', 'weighted_info']
 
-def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
+
+def simCAT(items, clusters, examinees=1, n_itens=20,
+           r_max=1, method='item_info'):
     """CAT simulation and validation method proposed by [Bar10]_.
-       :param items: an n x 3 matrix containing item parameters
-       :param clusters: a list containing item cluster memberships
-       :param n_itens: the number of items an examinee will answer during the
-       adaptive test
-       :param r_max: maximum exposure rate for items
-       :type items: numpy.ndarray
-       :type clusters: list
-       :type n_itens: int
-       :type r_max: float
-       :return: a list containing two dictionaries:
 
-                **globalResults**:
-                The global results of the simulation process.
-                    *Qtd. Itens*: number of items in the test;
+    :param items: an n x 3 matrix containing item parameters
+    :type items: numpy.ndarray
+    :param clusters: a list containing item cluster memberships
+    :type clusters: list
+    :param n_itens: the number of items an examinee will answer during the
+                    adaptive test
+    :type n_itens: int
+    :param r_max: maximum exposure rate for items
+    :type r_max: float
+    :param method: one of the available methods for cluster selection. Given
+                   the estimated theta value at each step:
 
-                    *RMSE*: root mean squared error of the estimations;
+                       ``item_info``: selects the cluster which has the item
+                       with maximum information;
 
-                    *Overlap*: overlap rate;
+                       ``cluster_info``: selects the cluster whose items sum of
+                       information is maximum;
 
-                    *r_max*: maximum exposure rate.
+                       ``weighted_info``: selects the cluster whose weighted
+                       sum of information is maximum. The weighted equals the
+                       number of items in the cluster;
 
-                **localResults**:
-                Individual results for each simulated examinee.
-                    *Theta*: true theta value of the individual;
+    :type method: string
+    :return: a list containing two dictionaries:
 
-                    *Est. theta*: estimated theta value of the individual;
+            **globalResults**: The global results of the simulation process.
+                *Qtd. Itens*: number of items in the test;
 
-                    *Id. Itens*: a list containing the id. of the items used
-                    during the test, in the order they were used;
+                *RMSE*: root mean squared error of the estimations;
 
-                    *r_max*: maximum exposure rate.
+                *Overlap*: overlap rate;
 
-       :rtype: list
+                *r_max*: maximum exposure rate.
+
+            **localResults**: Individual results for each simulated examinee.
+                *Theta*: true theta value of the individual;
+
+                *Est. theta*: estimated theta value of the individual;
+
+                *Id. Itens*: a list containing the id. of the items used
+                during the test, in the order they were used;
+
+                *r_max*: maximum exposure rate.
+
+    :rtype: list
     """
 
     if r_max > 1:
@@ -59,6 +75,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
         raise ValueError('Number of items must be positive.')
     if items.shape[0] < n_itens:
         raise ValueError('There are not enough items in the item matrix.')
+    if method not in existent_methods:
+        raise ValueError(
+            'Invalid method, select one from' + str(existent_methods) + '.')
 
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
@@ -85,60 +104,102 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
         for q in range(n_itens):
             # iterates through all items, looking for the item that has the
             # biggest information value, given the estimated theta
+
+            selected_cluster = None
+
+            # this part of the code selects the cluster from which the item at
+            # the current point of the test will be chosen
+            if method == 'item_info':
+                # finds the item in the matrix which maximizes the
+                # information, given the current estimated theta value
+                max_inf = 0
+                for counter, i in enumerate(items):
+                    if inf(est_theta, i[0], i[1], i[2]) > max_inf:
+                        # gets the indexes of all the items in the same cluster
+                        # as the current selected item
+                        valid_indexes = np.nonzero(items[:, 4] == i[4])[0]
+
+                        # checks if at least one item from this cluster has not
+                        # been adminitered to this examinee yet
+                        if set(valid_indexes).intersection(administered_items) != set(valid_indexes):
+                            selected_cluster = i[4]
+                            max_inf = inf(est_theta, i[0], i[1], i[2])
+
+            elif method in ['cluster_info', 'weighted_info']:
+                # calculates the cluster information, depending on the method
+                # selected
+                if method == 'cluster_info':
+                    cluster_infos = sum_cluster_infos(
+                        est_theta, items, clusters)
+                elif method == 'weighted_info':
+                    cluster_infos = weighted_cluster_infos(
+                        est_theta, items, clusters)
+
+                # sorts clusters descending by their information values
+                # this type of sorting was seem on
+                # http://stackoverflow.com/a/6618543
+                sorted_clusters = np.array(
+                    [cluster for (inf_value, cluster) in sorted(zip(cluster_infos, set(clusters)), reverse=True)], dtype=float)
+
+                # walks through the sorted clusters in order
+                for i in range(len(sorted_clusters)):
+                    valid_indexes = np.nonzero(
+                        items[:, 4] == sorted_clusters[i])[0]
+
+                    # checks if at least one item from this cluster has not
+                    # been adminitered to this examinee yet
+                    if set(valid_indexes).intersection(administered_items) != set(valid_indexes):
+                        selected_cluster = sorted_clusters[i]
+                        break
+                # the for loop ends with the cluster that has a) the maximum
+                # information possible and b) at least one item that has not
+                # yet been administered
+
+            assert(selected_cluster is not None)
+
+            # in this part, an item is chosen from the cluster that was
+            # selected above
             selected_item = None
-            max_inf = 0
-            for counter, i in enumerate(items):
-                if (counter not in administered_items and
-                    inf(
-                        est_theta, i[0], i[1], i[2]) > max_inf):
-                    selected_item = counter
-                    max_inf = inf(est_theta, i[0], i[1], i[2])
+
+            # gets the indexes and information values from the items in the
+            # selected cluster
+            valid_indexes = np.nonzero(
+                items[:, 4] == selected_cluster)[0]
+            inf_values = [inf(est_theta, i[0], i[1], i[2])
+                          for i in items[valid_indexes]]
+
+            # if there is at least one item in the cluster with r < r_max,
+            # returns the one with maximum information
+            if any(items[valid_indexes, 3] < r_max):
+                # sort both items and their indexes by their information value
+                sorted_items = np.array(
+                    [item for (inf_value, item) in sorted(zip(inf_values, items[valid_indexes]))])
+                valid_indexes = [
+                    index for (inf_value, index) in sorted(zip(inf_values, valid_indexes))]
+
+                # traverse the sorted item matrix in search of the item with
+                # maximum information and r < rmax
+                for index, item in enumerate(sorted_items):
+                    if (item[3] < r_max and valid_indexes[index] not in administered_items):
+                        selected_item = valid_indexes[index]
+
+            # if all items in the selected cluster have exceed their r values,
+            # select the one with smallest r, regardless of information
+            else:
+                selected_item = valid_indexes[
+                    np.argmin(items[valid_indexes, 3])]
 
             assert(selected_item is not None)
 
-            # if the selected item's exposure rate is bigger than the
-            # maximum exposure rate allowed, the algorithm picks another
-            # item from the same cluster the original item came from, with
-            # an exposure rate under the allowed constraints, and applies
-            # it
-            if items[selected_item, 3] >= r_max:
-
-                selected_item_cluster = items[selected_item, 4]
-                selected_item = None
-                valid_indexes = np.nonzero(
-                    items[:, 4] == selected_item_cluster)[0]
-                inf_values = [inf(est_theta, i[0], i[1], i[2])
-                              for i in items[valid_indexes]]
-
-                # if there is at least one item in the cluster with r < r_max,
-                # returns the one with maximum information in the same cluster
-                if any(items[valid_indexes, 3] < r_max):
-                    # sort both items and their indexes by their information value
-                    # this type of sorting as seem on
-                    # http://stackoverflow.com/a/6618543
-                    sorted_items = np.array(
-                        [item for (inf_value, item) in sorted(zip(inf_values, items[valid_indexes]))])
-                    valid_indexes = [
-                        index for (inf_value, index) in sorted(zip(inf_values, valid_indexes))]
-                    for index, item in enumerate(sorted_items):
-                        if (item[3] < r_max and valid_indexes[index] not in administered_items):
-                            selected_item = valid_indexes[index]
-
-                # else, if all items have exceed tehir r values, selects the
-                # one with smallest r, regardless of information
-                else:
-                    selected_item = valid_indexes[
-                        np.argmin(items[valid_indexes, 3])]
-
             # simulates the examinee's response via the three-parameter
             # logistic function
-            acertou = tpm(
+            response = tpm(
                 true_theta,
                 items[selected_item][0],
                 items[selected_item][1],
                 items[selected_item][2]) >= np.random.uniform()
 
-            response_vector.append(acertou)
+            response_vector.append(response)
             # adds the administered item to the pool of administered items
             administered_items.append(selected_item)
 
@@ -150,7 +211,7 @@ def simCAT(items, clusters, examinees=1, n_itens=20, r_max=1):
             # vector contains only success or errors, Dodd's method is used
             # to reestimate the proficiency
             if all(response_vector[0] == response for response in response_vector):
-                est_theta = dodd(est_theta, items, acertou)
+                est_theta = dodd(est_theta, items, response)
             # else, a maximum likelihood approach is used
             else:
                 try:
@@ -195,8 +256,11 @@ def dodd(theta, items, correct):
         \\end{array} \\right\\rbrace
 
     :param theta: the initial profficiency level
-    :param items: a numpy array containing the parameters of the items in the database. This is necessary to capture the maximum and minimum difficulty levels necessary for the method.
-    :param correct: a boolean value informing whether or not the examinee correctly answered the current item.
+    :param items: a numpy array containing the parameters of the items in the
+                  database. This is necessary to capture the maximum and minimum
+                  difficulty levels necessary for the method.
+    :param correct: a boolean value informing whether or not the examinee
+                    correctly answered the current item.
 
     .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
        Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
@@ -242,3 +306,29 @@ def overlap_rate(items, testSize):
     T = (bankSize / testSize) * varR + (testSize / bankSize)
 
     return T
+
+
+def sum_cluster_infos(theta, items, clusters):
+    """Returns the sum of item informations, separated by cluster"""
+    cluster_infos = np.zeros((len(set(clusters))))
+
+    for cluster in set(clusters):
+        cluster_indexes = np.nonzero(clusters == cluster)[0]
+
+        for item in items[cluster_indexes]:
+            cluster_infos[cluster] = cluster_infos[
+                cluster] + inf(theta, item[0], item[1], item[2])
+
+    return cluster_infos
+
+
+def weighted_cluster_infos(theta, items, clusters):
+    """Returns the weighted sum of item informations, separated by cluster.
+       The weight is the number of items in each cluster."""
+    cluster_infos = sum_cluster_infos(theta, items, clusters)
+    count = np.bincount(clusters)
+
+    for i in range(len(cluster_infos)):
+        cluster_infos[i] = cluster_infos[i] / count[i]
+
+    return cluster_infos
