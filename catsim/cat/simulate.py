@@ -12,10 +12,11 @@ from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution
 
-existent_methods = ['item_info', 'cluster_info', 'weighted_info']
+existent_methods = ['max_info', 'item_info', 'cluster_info', 'weighted_info']
+cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
 
 
-def simCAT(items, clusters, examinees=1, n_itens=20,
+def simCAT(items, clusters=None, examinees=1, n_itens=20,
            r_max=1, method='item_info'):
     """CAT simulation and validation method proposed by [Bar10]_.
 
@@ -78,6 +79,9 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
     if method not in existent_methods:
         raise ValueError(
             'Invalid method, select one from' + str(existent_methods) + '.')
+    if method in cluster_dependent_methods and clusters is None:
+        raise ValueError(
+            'Method {0} cannot be used when clusters is None'.format(method))
 
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
@@ -102,98 +106,113 @@ def simCAT(items, clusters, examinees=1, n_itens=20,
         response_vector = []
 
         for q in range(n_itens):
+            if method == 'max_info':
+                # get the indexes of all items that have not yet been
+                # administered, calculate their information value and pick the
+                # one with maximum information
+                valid_indexes = np.array(
+                    list(set(range(items.shape[0])) - set(administered_items)))
 
-            selected_cluster = None
-            # this part of the code selects the cluster from which the item at
-            # the current point of the test will be chosen
-            if method == 'item_info':
-                # finds the item in the matrix which maximizes the
-                # information, given the current estimated theta value
-                max_inf = 0
-                for counter, i in enumerate(items):
-                    if inf(est_theta, i[0], i[1], i[2]) > max_inf:
-                        # gets the indexes of all the items in the same cluster
-                        # as the current selected item that have not been
-                        # administered
-                        valid_indexes = np.array(list(set(np.nonzero(
-                            items[:, 4] == i[4])[0]) - set(administered_items)))
+                inf_values = [inf(est_theta, i[0], i[1], i[2])
+                              for i in items[valid_indexes]]
+
+                valid_indexes = [
+                    index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
+
+                selected_item = valid_indexes[0]
+            else:
+                selected_cluster = None
+                # this part of the code selects the cluster from which the item at
+                # the current point of the test will be chosen
+                if method == 'item_info':
+                    # finds the item in the matrix which maximizes the
+                    # information, given the current estimated theta value
+                    max_inf = 0
+                    for counter, i in enumerate(items):
+                        if inf(est_theta, i[0], i[1], i[2]) > max_inf:
+                            # gets the indexes of all the items in the same cluster
+                            # as the current selected item that have not been
+                            # administered
+                            valid_indexes = np.array(list(set(np.nonzero(
+                                items[:, 4] == i[4])[0]) - set(administered_items)))
+
+                            # checks if at least one item from this cluster has not
+                            # been adminitered to this examinee yet
+                            if len(valid_indexes) > 0:
+                                selected_cluster = i[4]
+                                max_inf = inf(est_theta, i[0], i[1], i[2])
+
+                elif method in ['cluster_info', 'weighted_info']:
+                    # calculates the cluster information, depending on the method
+                    # selected
+                    if method == 'cluster_info':
+                        cluster_infos = sum_cluster_infos(
+                            est_theta, items, clusters)
+                    elif method == 'weighted_info':
+                        cluster_infos = weighted_cluster_infos(
+                            est_theta, items, clusters)
+
+                    # sorts clusters descending by their information values
+                    # this type of sorting was seem on
+                    # http://stackoverflow.com/a/6618543
+                    sorted_clusters = np.array(
+                        [cluster for (inf_value, cluster) in sorted(zip(cluster_infos, set(clusters)), reverse=True)], dtype=float)
+
+                    # walks through the sorted clusters in order
+                    for i in range(len(sorted_clusters)):
+                        valid_indexes = np.nonzero(
+                            items[:, 4] == sorted_clusters[i])[0]
 
                         # checks if at least one item from this cluster has not
                         # been adminitered to this examinee yet
-                        if len(valid_indexes) > 0:
-                            selected_cluster = i[4]
-                            max_inf = inf(est_theta, i[0], i[1], i[2])
+                        if set(valid_indexes).intersection(administered_items) != set(valid_indexes):
+                            selected_cluster = sorted_clusters[i]
+                            break
+                    # the for loop ends with the cluster that has a) the maximum
+                    # information possible and b) at least one item that has not
+                    # yet been administered
 
-            elif method in ['cluster_info', 'weighted_info']:
-                # calculates the cluster information, depending on the method
-                # selected
-                if method == 'cluster_info':
-                    cluster_infos = sum_cluster_infos(
-                        est_theta, items, clusters)
-                elif method == 'weighted_info':
-                    cluster_infos = weighted_cluster_infos(
-                        est_theta, items, clusters)
+                assert(selected_cluster is not None)
 
-                # sorts clusters descending by their information values
-                # this type of sorting was seem on
-                # http://stackoverflow.com/a/6618543
-                sorted_clusters = np.array(
-                    [cluster for (inf_value, cluster) in sorted(zip(cluster_infos, set(clusters)), reverse=True)], dtype=float)
+                # in this part, an item is chosen from the cluster that was
+                # selected above
+                selected_item = None
 
-                # walks through the sorted clusters in order
-                for i in range(len(sorted_clusters)):
-                    valid_indexes = np.nonzero(
-                        items[:, 4] == sorted_clusters[i])[0]
+                # gets the indexes and information values from the items in the
+                # selected cluster that have not been administered
+                valid_indexes = np.array(list(set(np.nonzero(
+                    items[:, 4] == selected_cluster)[0]) - set(administered_items)))
 
-                    # checks if at least one item from this cluster has not
-                    # been adminitered to this examinee yet
-                    if set(valid_indexes).intersection(administered_items) != set(valid_indexes):
-                        selected_cluster = sorted_clusters[i]
-                        break
-                # the for loop ends with the cluster that has a) the maximum
-                # information possible and b) at least one item that has not
-                # yet been administered
+                # gets the indexes and information values from the items in the
+                # selected cluster with r < rmax that have not been
+                # administered
+                valid_indexes_low_r = np.array(list(set(np.nonzero(
+                    (items[:, 4] == selected_cluster) & (items[:, 3] < r_max))[0]) - set(administered_items)))
 
-            assert(selected_cluster is not None)
+                if len(valid_indexes_low_r) > 0:
+                    # sort both items and their indexes by their information
+                    # value
+                    inf_values = [inf(est_theta, i[0], i[1], i[2])
+                                  for i in items[valid_indexes_low_r]]
+                    valid_indexes_low_r = [
+                        index for (inf_value, index) in sorted(zip(inf_values, valid_indexes_low_r), reverse=True)]
+                    # sorted_items = items[valid_indexes_low_r]
 
-            # in this part, an item is chosen from the cluster that was
-            # selected above
-            selected_item = None
+                    selected_item = valid_indexes_low_r[0]
 
-            # gets the indexes and information values from the items in the
-            # selected cluster that have not been administered
-            valid_indexes = np.array(list(set(np.nonzero(
-                items[:, 4] == selected_cluster)[0]) - set(administered_items)))
+                # if all items in the selected cluster have exceed their r values,
+                # select the one with smallest r, regardless of information
+                else:
+                    inf_values = [inf(est_theta, i[0], i[1], i[2])
+                                  for i in items[valid_indexes]]
+                    valid_indexes = [
+                        index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
+                    # sorted_items = items[valid_indexes_low_r]
 
-            # gets the indexes and information values from the items in the
-            # selected cluster with r < rmax that have not been administered
-            valid_indexes_low_r = np.array(list(set(np.nonzero(
-                (items[:, 4] == selected_cluster) & (items[:, 3] < r_max))[0]) - set(administered_items)))
-
-            if len(valid_indexes_low_r) > 0:
-                # sort both items and their indexes by their information value
-                inf_values = [inf(est_theta, i[0], i[1], i[2])
-                              for i in items[valid_indexes_low_r]]
-                valid_indexes_low_r = [
-                    index for (inf_value, index) in sorted(zip(inf_values, valid_indexes_low_r))]
-                # sorted_items = items[valid_indexes_low_r]
-
-                selected_item = valid_indexes_low_r[0]
-
-            # if all items in the selected cluster have exceed their r values,
-            # select the one with smallest r, regardless of information
-            else:
-                inf_values = [inf(est_theta, i[0], i[1], i[2])
-                              for i in items[valid_indexes]]
-                valid_indexes = [
-                    index for (inf_value, index) in sorted(zip(inf_values, valid_indexes))]
-                # sorted_items = items[valid_indexes_low_r]
-
-                selected_item = valid_indexes[0]
+                    selected_item = valid_indexes[0]
 
             if selected_item is None:
                 print('selected_cluster = ' + str(selected_cluster))
-                print('sorted_items = ' + str(sorted_items))
                 print('inf_values = ' + str(inf_values))
                 print('valid_indexes_low_r = ' + str(valid_indexes_low_r))
                 print('valid_indexes = ' + str(valid_indexes))
