@@ -32,6 +32,12 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
     :param method: one of the available methods for cluster selection. Given
                    the estimated theta value at each step:
 
+                       ``max_info``: ignores cluster selection altogether and
+                       selects the item with maximum information to be applied
+                       at each step. This is the traditional item selection
+                       method used by CATs, prioritizing precision over item
+                       exposure;
+
                        ``item_info``: selects the cluster which has the item
                        with maximum information;
 
@@ -361,3 +367,48 @@ def weighted_cluster_infos(theta, items, clusters):
         cluster_infos[i] = cluster_infos[i] / count[i]
 
     return cluster_infos
+
+
+def generateItemBank(items, itemtype='3PL', corr=0.5):
+    """Generate a synthetic item bank whose parameters approximately follow
+    real-world parameters, as proposed by [Bar10]_.
+
+    Item parameters are extracted from the following probability distributions:
+    
+    * discrimination: :math:`N(1.2,0.25)`
+
+    * difficulty: :math:`N(0,1)`
+
+    * pseudo-guessing: :math:`N(0.25,0.02)`
+
+    :param items: how many items are to be generated
+    :type items: int
+    :param itemtype: either ``1PL``, ``2PL`` or ``3PL`` for the one-, two- or
+                     three-parameter logistic model
+    :type itemtype: string
+    :param corr: the correlation between item discrimination and difficulty. If
+                 ``itemtype == '1PL'``, it is ignored.
+    :type corr: float
+    :return: an ``itens x 3`` numerical matrix containing item parameters
+    :rtype: numpy.ndarray
+    """
+
+    valid_itemtypes = ['1PL', '2PL', '3PL']
+
+    if itemtype not in valid_itemtypes:
+        raise ValueError('Item type not in ' + str(valid_itemtypes))
+
+    means = [0, 1.2]
+    stds = [1, 0.25]
+    covs = [[stds[0]**2, stds[0] * stds[1] * corr],
+            [stds[0] * stds[1] * corr,           stds[1]**2]]
+
+    b, a = np.random.multivariate_normal(means, covs, items).T
+
+    if itemtype not in ['2PL', '3PL']:
+        a = np.ones((500))
+    if itemtype == '3PL':
+        c = np.random.normal(.25, .02, items)
+    else:
+        c = np.zeros((500))
+    return np.array([a, b, c]).T
