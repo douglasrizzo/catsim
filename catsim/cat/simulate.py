@@ -49,9 +49,8 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                        number of items in the cluster;
 
     :type method: string
-    :return: a list containing two dictionaries:
-
-            **globalResults**: The global results of the simulation process.
+    :return: a list containing two dictionaries. The first contains the global
+             results of the simulation process.
                 *Qtd. Itens*: number of items in the test;
 
                 *RMSE*: root mean squared error of the estimations;
@@ -68,7 +67,8 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                 *Id. Itens*: a list containing the id. of the items used
                 during the test, in the order they were used;
 
-                *r_max*: maximum exposure rate.
+                *r*: exposure rate of the items in the bank, after the
+                simulations
 
     :rtype: list
     """
@@ -94,14 +94,19 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
 
     # adds a column for each item's exposure rate and their cluster membership
     items = np.append(items, np.zeros([items.shape[0], 1]), axis=1)
+
+    if clusters is None:
+        clusters = np.zeros(items.shape[0])
+
     items = np.append(
         items, np.array(clusters).reshape(clusters.shape[0], 1), axis=1).astype(np.float64)
 
-    globalResults = []
     localResults = []
     est_thetas = []
 
+    current_examinee = 0
     for true_theta in true_thetas:
+        current_examinee += 1
 
         # estimated theta value
         est_theta = np.random.uniform(-5, 5)
@@ -193,7 +198,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                 # selected cluster with r < rmax that have not been
                 # administered
                 valid_indexes_low_r = np.array(list(set(np.nonzero(
-                    (items[:, 4] == selected_cluster) & (items[:, 3] < r_max))[0]) - set(administered_items)))
+                    (items[:, 4] == selected_cluster) & (items[:, 3] / current_examinee < r_max))[0]) - set(administered_items)))
 
                 if len(valid_indexes_low_r) > 0:
                     # sort both items and their indexes by their information
@@ -202,7 +207,6 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                                   for i in items[valid_indexes_low_r]]
                     valid_indexes_low_r = [
                         index for (inf_value, index) in sorted(zip(inf_values, valid_indexes_low_r), reverse=True)]
-                    # sorted_items = items[valid_indexes_low_r]
 
                     selected_item = valid_indexes_low_r[0]
 
@@ -213,7 +217,6 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                                   for i in items[valid_indexes]]
                     valid_indexes = [
                         index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
-                    # sorted_items = items[valid_indexes_low_r]
 
                     selected_item = valid_indexes[0]
 
@@ -239,8 +242,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
             administered_items.append(selected_item)
 
             # update the exposure value for this item
-            items[selected_item, 3] = (
-                (items[selected_item, 3] * examinees) + 1) / examinees
+            items[selected_item, 3] += 1
 
             # reestimation of the examinee's proficiency: if the response
             # vector contains only success or errors, Dodd's method is used
@@ -258,24 +260,22 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                         args=(response_vector, items[administered_items]))
                     est_theta = res.x[0]
 
+        items[:, 3] /= examinees
+
         # save the results for this examinee simulation
         localResults.append({'Theta': true_theta,
                              'Est. Theta': est_theta,
                              'Id. Itens': administered_items,
-                             'r_max': r_max})
+                             'r': items[:, 3]})
 
         est_thetas.append(est_theta)
     # end true_theta loop
 
-    # save the results for this r value
-    globalResults.append({
-        'Nº de grupos': len(set(clusters)),
-        'Qtd. Itens': n_itens,
-        'RMSE': rmse(true_thetas, est_thetas),
-        'Overlap': overlap_rate(items, n_itens),
-        'r_max': r_max})
-
-    return globalResults, localResults
+    return {'Nº de grupos': len(set(clusters)),
+            'Qtd. Itens': n_itens,
+            'RMSE': rmse(true_thetas, est_thetas),
+            'Overlap': overlap_rate(items, n_itens),
+            'r_max': r_max}, localResults
 
 
 def dodd(theta, items, correct):
@@ -322,7 +322,19 @@ def rmse(actual, predicted):
     :param predicted: a list or 1-D numpy array containing the estimated
                       profficiency values
     """
-    return math.sqrt(mean_squared_error(actual, predicted))
+    if len(actual) != len(predicted):
+        raise ValueError('actuala nd predicted need to be the same size')
+
+    # se = 0
+    # for i in range(len(actual)):
+    #     se += (predicted[i] - actual[i])**2
+
+    # mse = se / len(actual)
+
+    # rmse = np.sqrt(mse)
+
+    # return rmse
+    return mean_squared_error(actual, predicted)**.5
 
 
 def overlap_rate(items, testSize):
@@ -374,7 +386,7 @@ def generateItemBank(items, itemtype='3PL', corr=0.5):
     real-world parameters, as proposed by [Bar10]_.
 
     Item parameters are extracted from the following probability distributions:
-    
+
     * discrimination: :math:`N(1.2,0.25)`
 
     * difficulty: :math:`N(0,1)`
