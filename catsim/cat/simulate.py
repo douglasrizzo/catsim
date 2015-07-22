@@ -239,7 +239,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                             index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
                     elif r_control == 'aggressive':
                         valid_indexes = [
-                            index for (r, index) in sorted(zip(items[valid_indexes, 3], valid_indexes), reverse=True)]
+                            index for (r, index) in sorted(zip(items[valid_indexes, 3], valid_indexes))]
 
                     selected_item = valid_indexes[0]
 
