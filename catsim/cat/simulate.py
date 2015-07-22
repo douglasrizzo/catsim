@@ -6,7 +6,6 @@ application of adaptive tests. Most of this module is based on the work of
    selection rules in computerized adaptive testing. Applied Psychological
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
-import math
 import numpy as np
 from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
 from sklearn.metrics import mean_squared_error
@@ -17,7 +16,8 @@ cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
 
 
 def simCAT(items, clusters=None, examinees=1, n_itens=20,
-           r_max=1, method='item_info'):
+           r_max=1, method='item_info', optimization='DE',
+           r_control='passive'):
     """CAT simulation and validation method proposed by [Bar10]_.
 
     :param items: an n x 3 matrix containing item parameters
@@ -49,6 +49,19 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                        number of items in the cluster;
 
     :type method: string
+    :param optimization: the optimization to be used in order to estimate the
+                         :math:`\\hat{\\theta}` values. `brute` for a brute
+                         force, simulated annealing-like optimization; `DE` for
+                         scikit-learn differential evolution. Differential
+                         evolution is faster and more reliable, but the brute
+                         force algorithm is mine and I know how it works, so I
+                         left it here in case someone wants to experiment.
+    :type optimization: string
+    :param r_control: if `passive` and all items :math:`i` in the selected
+                      cluster have :math:`r_i > r^{max}`, applies the item with
+                      maximum information; if `aggressive`, applies the item
+                      with smallest :math:`r` value.
+    :type r_control: string
     :return: a list containing two dictionaries. The first contains the global
              results of the simulation process.
                 *Qtd. Itens*: number of items in the test;
@@ -88,9 +101,15 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
     if method in cluster_dependent_methods and clusters is None:
         raise ValueError(
             'Method {0} cannot be used when clusters is None'.format(method))
+    if optimization not in ['brute', 'DE']:
+        raise ValueError('Optimization method not supported')
+    if r_control not in ['passive', 'aggressive']:
+        raise ValueError('Exposure control method not supported')
 
     # true thetas extracted from a normal distribution
     true_thetas = np.random.normal(0, 1, examinees)
+    min_difficulty = np.min(items[:, 1])
+    max_difficulty = np.max(items[:, 1])
 
     # adds a column for each item's exposure rate and their cluster membership
     items = np.append(items, np.zeros([items.shape[0], 1]), axis=1)
@@ -213,10 +232,14 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                 # if all items in the selected cluster have exceed their r values,
                 # select the one with smallest r, regardless of information
                 else:
-                    inf_values = [inf(est_theta, i[0], i[1], i[2])
-                                  for i in items[valid_indexes]]
-                    valid_indexes = [
-                        index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
+                    if r_control == 'passive':
+                        inf_values = [inf(est_theta, i[0], i[1], i[2])
+                                      for i in items[valid_indexes]]
+                        valid_indexes = [
+                            index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
+                    elif r_control == 'aggressive':
+                        valid_indexes = [
+                            index for (r, index) in sorted(zip(items[valid_indexes, 3], valid_indexes), reverse=True)]
 
                     selected_item = valid_indexes[0]
 
@@ -251,12 +274,13 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                 est_theta = dodd(est_theta, items, response)
             # else, a maximum likelihood approach is used
             else:
-                try:
+                if optimization == 'brute':
                     est_theta = bruteMLE(
                         response_vector, items[administered_items])
-                except:
+                elif optimization == 'DE':
                     res = differential_evolution(
-                        negativelogLik, bounds=[[-6, 6]],
+                        negativelogLik, bounds=[
+                            [min_difficulty, max_difficulty]],
                         args=(response_vector, items[administered_items]))
                     est_theta = res.x[0]
 
