@@ -10,9 +10,13 @@ def means(x, clusters):
     # """
 
     npoints, nfeatures = x.shape
-    centroids = np.zeros([max(clusters) + 1, nfeatures])
+    nclusters = len(set(clusters))
+    centroids = np.zeros((nclusters, nfeatures))
 
-    for i in range(max(clusters) + 1):
+    if min(clusters) > 0:
+        clusters = clusters - min(clusters)
+
+    for i in range(nclusters):
         clusters_aux = np.where(clusters == i)[0]
         centroids[i] = x[clusters_aux].mean(axis=0)
 
@@ -26,13 +30,12 @@ def variances(x, clusters):
     """
 
     cluster_means = means(x, clusters)
-    variances = np.zeros([max(clusters) + 1])
-    # cluster_bins = np.bincount(np.delete(clusters, np.where(clusters == -1)))
-    D = distances.euclidean(x, cluster_means)
+    nclusters = len(set(clusters))
+    variances = np.zeros([nclusters])
 
-    for i in range(max(clusters) + 1):
+    for i in range(nclusters):
         clusters_aux = np.where(clusters == i)[0]
-        variances[i] = np.sum(D[clusters_aux])
+        variances[i] = np.sum((x[clusters_aux] - cluster_means[i])**2)
 
     return variances
 
@@ -45,7 +48,7 @@ def mean_variance(x, clusters):
     return np.mean(variances(x, clusters))
 
 
-def dunn(c, distances):
+def dunn(c, D):
     """Dunn index for cluster validation (the bigger, the better)
 
     .. math:: D = \\min_{i = 1 \\ldots n_c; j = i + 1\ldots n_c}\\left\\lbrace\\frac{d \\left( c_i,c_j \\right)}{\\max_{k = 1 \\ldots n_c} \\left(diam \\left(c_k \\right) \\right)} \\right\\rbrace
@@ -63,8 +66,8 @@ def dunn(c, distances):
        measurement techniques. 6th International Symposium of Hungarian
        Researchers on Computational Intelligence.
     """
-    unique_cluster_distances = np.unique(min_cluster_distances(c, distances))
-    max_diameter = max(diameter(c, distances))
+    unique_cluster_distances = np.unique(min_cluster_distances(c, D))
+    max_diameter = max(diameter(c, D))
 
     if np.size(unique_cluster_distances) > 1:
         return unique_cluster_distances[1] / max_diameter
