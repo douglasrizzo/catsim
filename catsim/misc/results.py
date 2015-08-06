@@ -3,6 +3,7 @@ clustering and CAT simulation results"""
 
 import os.path
 import time
+
 import pandas
 import numpy as np
 from pandas import DataFrame
@@ -110,7 +111,7 @@ def loadClusterResults(path):
 
     df['pct. sem Classificação'] = df[['Sem Classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
-                                                x[0], axis=1)
+                                                          x[0], axis=1)
 
     df['Classificações'] = df['Classificações'].astype(np.ndarray)
     return df
@@ -128,7 +129,7 @@ def loadGlobalCATResults(path):
     df['Data'] = pandas.to_datetime(df['Data'])
     df[['t (segundos)', 'RMSE', 'Taxa de sobreposição', 'r. max']] = df[
         ['t (segundos)', 'RMSE', 'Taxa de sobreposição', 'r. max']].astype(
-            np.float64)
+        np.float64)
 
     return df
 

@@ -2,7 +2,6 @@ import numpy as np
 
 
 def kmedoids(D, k, iters=100):
-
     # determine dimensions of distance matrix D
     m, n = D.shape
     # randomly initialize an array of k medoid indices

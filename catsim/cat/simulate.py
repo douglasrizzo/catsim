@@ -7,9 +7,10 @@ application of adaptive tests. Most of this module is based on the work of
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
 import numpy as np
-from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution
+
+from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
 
 existent_methods = ['max_info', 'item_info', 'cluster_info', 'weighted_info']
 cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
@@ -190,7 +191,8 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                         # this type of sorting was seem on
                         # http://stackoverflow.com/a/6618543
                         sorted_clusters = np.array(
-                            [cluster for (inf_value, cluster) in sorted(zip(cluster_infos, set(clusters)), reverse=True)], dtype=float)
+                            [cluster for (inf_value, cluster) in
+                             sorted(zip(cluster_infos, set(clusters)), reverse=True)], dtype=float)
 
                         # walks through the sorted clusters in order
                         for i in range(len(sorted_clusters)):
@@ -202,11 +204,11 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                             if set(valid_indexes).intersection(administered_items) != set(valid_indexes):
                                 selected_cluster = sorted_clusters[i]
                                 break
-                        # the for loop ends with the cluster that has a) the maximum
-                        # information possible and b) at least one item that has not
-                        # yet been administered
+                                # the for loop ends with the cluster that has a) the maximum
+                                # information possible and b) at least one item that has not
+                                # yet been administered
 
-                    assert(selected_cluster is not None)
+                    assert (selected_cluster is not None)
 
                     # in this part, an item is chosen from the cluster that was
                     # selected above
@@ -255,7 +257,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                     print('valid_indexes = ' + str(valid_indexes))
                     print('administered_items = ' + str(administered_items))
 
-                assert(selected_item is not None)
+                assert (selected_item is not None)
 
                 # simulates the examinee's response via the three-parameter
                 # logistic function
@@ -291,8 +293,8 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                                 [min_difficulty * 2, max_difficulty * 2]],
                             args=(response_vector, items[administered_items])).x[0]
 
-            # if abs(est_theta - true_theta) > 1:
-            #     print('....', true_theta, est_theta)
+                        # if abs(est_theta - true_theta) > 1:
+                        #     print('....', true_theta, est_theta)
 
         # items[:, 3] /= examinees
 
@@ -300,7 +302,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
 
         # update the exposure value for this item
         items[administered_items, 3] = (
-            (items[administered_items, 3] * examinees) + 1) / examinees
+                                           (items[administered_items, 3] * examinees) + 1) / examinees
         est_thetas.append(est_theta)
 
     # save the results for this examinee simulation
@@ -309,7 +311,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                          'Id. Itens': administered_items,
                          'r': items[:, 3]})
 
-# end true_theta loop
+    # end true_theta loop
 
     print(examinees, total_tries)
 
@@ -349,7 +351,7 @@ def dodd(theta, items, correct):
     b_min = min(b)
 
     dodd = theta + \
-        ((b_max - theta) / 2) if correct else theta - ((theta - b_min) / 2)
+           ((b_max - theta) / 2) if correct else theta - ((theta - b_min) / 2)
 
     return (dodd)
 
@@ -376,7 +378,7 @@ def rmse(actual, predicted):
     # rmse = np.sqrt(mse)
 
     # return rmse
-    return mean_squared_error(actual, predicted)**.5
+    return mean_squared_error(actual, predicted) ** .5
 
 
 def overlap_rate(items, testSize):
@@ -406,7 +408,7 @@ def sum_cluster_infos(theta, items, clusters):
 
         for item in items[cluster_indexes]:
             cluster_infos[cluster] = cluster_infos[
-                cluster] + inf(theta, item[0], item[1], item[2])
+                                         cluster] + inf(theta, item[0], item[1], item[2])
 
     return cluster_infos
 
@@ -454,8 +456,8 @@ def generateItemBank(items, itemtype='3PL', corr=0.5):
 
     means = [0, 1.2]
     stds = [1, 0.25]
-    covs = [[stds[0]**2, stds[0] * stds[1] * corr],
-            [stds[0] * stds[1] * corr,           stds[1]**2]]
+    covs = [[stds[0] ** 2, stds[0] * stds[1] * corr],
+            [stds[0] * stds[1] * corr, stds[1] ** 2]]
 
     b, a = np.random.multivariate_normal(means, covs, items).T
 

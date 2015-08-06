@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sys
 import time
 import socket
@@ -14,17 +13,8 @@ import zmq
 import pandas
 import numpy as np
 
+from catsim.distributed.misc import ventilator_port, sink_port, data_port, default_ip, ping
 import catsim.misc.results
-
-_ventilator_port = '5557'
-_sink_port = '5558'
-_data_port = '5559'
-default_ip = '10.24.2.18'
-
-
-def ping(ip):
-    response = os.system('ping -c 1 ' + str(ip))
-    return response == 0
 
 
 def relevantResults():
@@ -148,7 +138,7 @@ def ventilate_datasets(datasets):
 
     # Socket to send messages on
     sender = context.socket(zmq.REP)
-    sender.bind("tcp://*:" + _data_port)
+    sender.bind("tcp://*:" + data_port)
     print("Sending datasets to workers...")
 
     while True:
@@ -193,11 +183,11 @@ def ventilate_cases():
 
     # Socket to send messages on
     sender = context.socket(zmq.REP)
-    sender.bind("tcp://*:" + _ventilator_port)
+    sender.bind("tcp://*:" + ventilator_port)
 
     # Socket with direct access to the sink: used to synchronize start of batch
     sink = context.socket(zmq.PUSH)
-    sink.connect("tcp://localhost:" + _sink_port)
+    sink.connect("tcp://localhost:" + sink_port)
     print("Sending tasks to workers...")
 
     while True:
@@ -226,7 +216,7 @@ def start_sink():
 
     # Socket to receive messages on
     receiver = context.socket(zmq.PULL)
-    receiver.bind("tcp://*:" + _sink_port)
+    receiver.bind("tcp://*:" + sink_port)
 
     # Wait for start of batch
     # s = receiver.recv()

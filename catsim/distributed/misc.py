@@ -1,8 +1,8 @@
 import os
 
-_ventilator_port = '5557'
-_sink_port = '5558'
-_data_port = '5559'
+ventilator_port = '5557'
+sink_port = '5558'
+data_port = '5559'
 default_ip = '10.24.2.18'
 
 

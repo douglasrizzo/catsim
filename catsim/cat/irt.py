@@ -2,6 +2,7 @@
 three-parameter logistic model."""
 
 import math
+
 import numpy as np
 
 
@@ -61,10 +62,10 @@ def logLik(est_theta, response_vector, administered_items):
 
     for i in range(len(response_vector)):
         prob = tpm(est_theta, administered_items[i][
-                   0], administered_items[i][1], administered_items[i][2])
+            0], administered_items[i][1], administered_items[i][2])
 
         LL += (response_vector[i] * math.log10(prob)) + \
-            ((1 - response_vector[i]) * math.log10(1 - prob))
+              ((1 - response_vector[i]) * math.log10(1 - prob))
     return LL
     # except OverflowError:
     #     print('Deu pau com esses valores: \n' + str(est_theta) + '\n' +

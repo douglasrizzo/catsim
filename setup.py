@@ -12,6 +12,6 @@ setup(name='catsim',
       packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
       install_requires=[
           'numpy', 'scipy', 'matplotlib',
-          'scikit-learn', 'pandas', 'unidecode'],
+          'scikit-learn', 'pandas', 'unidecode', 'zmq'],
       license='GPLv2'
       )

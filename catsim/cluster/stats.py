@@ -1,5 +1,4 @@
 import numpy as np
-from catsim.cluster import distances
 
 
 def means(x, clusters):
@@ -35,7 +34,7 @@ def variances(x, clusters):
 
     for i in range(nclusters):
         clusters_aux = np.where(clusters == i)[0]
-        variances[i] = np.sum((x[clusters_aux] - cluster_means[i])**2)
+        variances[i] = np.sum((x[clusters_aux] - cluster_means[i]) ** 2)
 
     return variances
 

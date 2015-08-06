@@ -1,9 +1,9 @@
 import numpy as np
+
 import catsim.cluster.distances
 import catsim.misc.stats
 import catsim.cluster.stats
 from catsim.cluster.helpers import normalize
-
 
 possible_inits = ['naive', 'varCovar', 'ward']
 possible_metrics = ['euclidean', 'mahalanobis']
@@ -206,9 +206,11 @@ def kmeans(x, k, init_method='naive', iters=100, n_init=1,
             final_clusters = clusters
     return final_clusters
 
+
 if __name__ == '__main__':
     from sklearn.cluster import KMeans as sKmeans
     from sklearn.datasets import make_blobs
+
     n_clusters = 20
     x, clusters = make_blobs(500, 2, n_clusters)
 
