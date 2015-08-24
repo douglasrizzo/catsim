@@ -64,8 +64,8 @@ def logLik(est_theta, response_vector, administered_items):
         prob = tpm(est_theta, administered_items[i][
             0], administered_items[i][1], administered_items[i][2])
 
-        LL += (response_vector[i] * math.log10(prob)) + \
-              ((1 - response_vector[i]) * math.log10(1 - prob))
+        LL += (response_vector[i] * math.log(prob)) + \
+              ((1 - response_vector[i]) * math.log(1 - prob))
     return LL
     # except OverflowError:
     #     print('Deu pau com esses valores: \n' + str(est_theta) + '\n' +
@@ -87,34 +87,54 @@ def negativelogLik(est_theta, *args):
     return -logLik(est_theta, args[0], args[1])
 
 
-def bruteMLE(response_vector, administered_items, precision=12):
-    """Finds and returns the theta value which maximizes the likelihood
-    function, given a response vector and a matrix with the administered
-    items parameters
+def maximum_likelihood(response_vector, administered_items, precision=6, verbose=False):
+    """Uses a hill-climbing algorithm to find and returns the theta value
+    that maximizes the likelihood function, given a response vector and a
+    matrix with the administered items parameters.
 
     :param response_vector: a binary list containing the response vector
     :param administered_items: a numpy array containing the parameters of the
                                answered items
     :param precision: number of decimal points of precision
+    :param verbose: verbosity level of the maximization method
     """
-    lbound = -8
-    ubound = 8
 
-    for i in range(precision):
-        intervals = np.linspace(lbound, ubound, 20)
-        previous_ll = -float('inf')
-        # print('Bounds: ' + str(lbound) + ' ' + str(ubound))
-        # print('Interval size: ' + str(intervals[1] - intervals[0]))
+    if set(response_vector) == 1:
+        return float('inf')
+    elif set(response_vector) == 0:
+        return float('-inf')
+
+    lbound = min(administered_items[:, 1])
+    ubound = max(administered_items[:, 1])
+    best_theta = -float('inf')
+    max_ll = -float('inf')
+
+    iters = 0
+
+    for i in range(10):
+        intervals = np.linspace(lbound, ubound, 10)
+        if verbose:
+            print('Bounds: ' + str(lbound) + ' ' + str(ubound))
+            print('Interval size: ' + str(intervals[1] - intervals[0]))
 
         for ii in intervals:
+            iters += 1
             ll = logLik(ii, response_vector, administered_items)
-            if ll > previous_ll:
-                previous_ll = ll
+            if ll > max_ll:
+                max_ll = ll
+
+                if verbose:
+                    print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, ii, ll))
+
+                if abs(best_theta - ii) < float('1e-'+str(precision)):
+                    return ii
+
                 best_theta = ii
-                # print(best_theta)
+
             else:
                 lbound = best_theta - (intervals[1] - intervals[0])
-                ubound = best_theta + (intervals[1] - intervals[0])
+                ubound = ii
+                break
 
     return best_theta
 

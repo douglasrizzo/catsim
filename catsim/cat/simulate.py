@@ -8,16 +8,16 @@ application of adaptive tests. Most of this module is based on the work of
 
 import numpy as np
 from sklearn.metrics import mean_squared_error
-from scipy.optimize import differential_evolution
+from scipy.optimize import differential_evolution, fmin
 
-from catsim.cat.irt import bruteMLE, inf, tpm, negativelogLik
+from catsim.cat.irt import maximum_likelihood, inf, tpm, negativelogLik
 
 existent_methods = ['max_info', 'item_info', 'cluster_info', 'weighted_info']
 cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
 
 
 def simCAT(items, clusters=None, examinees=1, n_itens=20,
-           r_max=1, method='item_info', optimization='DE',
+           r_max=1, method='item_info', optimization='fmin',
            r_control='passive'):
     """CAT simulation and validation method proposed by [Bar10]_.
 
@@ -51,12 +51,13 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
 
     :type method: string
     :param optimization: the optimization to be used in order to estimate the
-                         :math:`\\hat{\\theta}` values. `brute` for a brute
-                         force, simulated annealing-like optimization; `DE` for
-                         scikit-learn differential evolution. Differential
-                         evolution is faster and more reliable, but the brute
-                         force algorithm is mine and I know how it works, so I
-                         left it here in case someone wants to experiment.
+                         :math:`\\hat{\\theta}` values. `brute` for a hill-climbing
+                         algorithm; `fmin` for scipy's function minimization method;
+                         `DE` for scipy's differential evolution. With their default
+                         parameters, the firt method takes roughly 190 function
+                         evaluations to converge; the second takes 40 funcction
+                         evaluations; and the last, between 80 and 100 function
+                         evaluations. The default method is `fmin`, due to its speed.
     :type optimization: string
     :param r_control: if `passive` and all items :math:`i` in the selected
                       cluster have :math:`r_i > r^{max}`, applies the item with
@@ -102,7 +103,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
     if method in cluster_dependent_methods and clusters is None:
         raise ValueError(
             'Method {0} cannot be used when clusters is None'.format(method))
-    if optimization not in ['brute', 'DE']:
+    if optimization not in ['brute', 'fmin', 'DE']:
         raise ValueError('Optimization method not supported')
     if r_control not in ['passive', 'aggressive']:
         raise ValueError('Exposure control method not supported')
@@ -283,11 +284,11 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                 # else, a maximum likelihood approach is used
                 else:
                     if optimization == 'brute':
-                        est_theta = bruteMLE(
+                        est_theta = maximum_likelihood(
                             response_vector, items[administered_items])
+                    elif optimization == 'fmin':
+                        est_theta = fmin(negativelogLik, est_theta, (response_vector, items[administered_items]))
                     elif optimization == 'DE':
-                        # est_theta = basinhopping(negativelogLik, est_theta, minimizer_kwargs={
-                        #                          'args': (response_vector, items[administered_items])}).x[0]
                         est_theta = differential_evolution(
                             negativelogLik, bounds=[
                                 [min_difficulty * 2, max_difficulty * 2]],
