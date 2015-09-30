@@ -99,7 +99,8 @@ def plotIRT(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):
 
     if ptype in ['icc', 'iif']:
         plt.figure()
-        plt.title(title, size=18)
+        if title is not None:
+            plt.title(title, size=18)
         plt.annotate('$a = ' + format(a) + '$\n$b = ' + format(
             b) + '$\n$c = ' + format(c) + '$',
                      bbox=dict(facecolor='white',

@@ -87,7 +87,7 @@ def negativelogLik(est_theta, *args):
     return -logLik(est_theta, args[0], args[1])
 
 
-def maximum_likelihood(response_vector, administered_items, precision=6, verbose=False):
+def hill_climbing_ml(response_vector, administered_items, precision=6, verbose=False):
     """Uses a hill-climbing algorithm to find and returns the theta value
     that maximizes the likelihood function, given a response vector and a
     matrix with the administered items parameters.
@@ -126,7 +126,7 @@ def maximum_likelihood(response_vector, administered_items, precision=6, verbose
                 if verbose:
                     print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, ii, ll))
 
-                if abs(best_theta - ii) < float('1e-'+str(precision)):
+                if abs(best_theta - ii) < float('1e-' + str(precision)):
                     return ii
 
                 best_theta = ii
@@ -137,6 +137,51 @@ def maximum_likelihood(response_vector, administered_items, precision=6, verbose
                 break
 
     return best_theta
+
+
+def binary_search_ml(response_vector, administered_items, precision=35, verbose=False):
+    """Uses a binary search algorithm to find and returns the theta value
+    that maximizes the likelihood function, given a response vector and a
+    matrix with the administered items parameters.
+
+    :param response_vector: a binary list containing the response vector
+    :param administered_items: a numpy array containing the parameters of the
+                               answered items
+    :param precision: number of decimal points of precision
+    :param verbose: verbosity level of the maximization method
+    """
+
+    if set(response_vector) == 1:
+        return float('inf')
+    elif set(response_vector) == 0:
+        return float('-inf')
+
+    lbound = min(administered_items[:, 1])
+    ubound = max(administered_items[:, 1])
+    best_theta = -float('inf')
+    iters = 0
+
+    while True:
+        iters += 1
+        if verbose:
+            print('Bounds: ' + str(lbound) + ' ' + str(ubound))
+            print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, best_theta,
+                                                               logLik(best_theta, response_vector, administered_items)))
+
+        if logLik(ubound, response_vector, administered_items) > logLik(lbound, response_vector, administered_items):
+
+            if abs(best_theta - ubound) < float('1e-' + str(precision)):
+                return ubound
+
+            best_theta = ubound
+            lbound += (ubound - lbound) / 2
+        else:
+
+            if abs(best_theta - lbound) < float('1e-' + str(precision)):
+                return lbound
+
+            best_theta = lbound
+            ubound -= (ubound - lbound) / 2
 
 
 def inf(theta, a, b, c):

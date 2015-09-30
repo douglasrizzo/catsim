@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution, fmin
 
-from catsim.cat.irt import maximum_likelihood, inf, tpm, negativelogLik
+from catsim.cat.irt import hill_climbing_ml, inf, tpm, negativelogLik, binary_search_ml
 
 existent_methods = ['max_info', 'item_info', 'cluster_info', 'weighted_info']
 cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
@@ -51,11 +51,12 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
 
     :type method: string
     :param optimization: the optimization to be used in order to estimate the
-                         :math:`\\hat{\\theta}` values. `brute` for a hill-climbing
-                         algorithm; `fmin` for scipy's function minimization method;
+                         :math:`\\hat{\\theta}` values. `hill` for a hill-climbing
+                         algorithm; `binary` for a binary search algorithm;
+                         `fmin` for scipy's function minimization method;
                          `DE` for scipy's differential evolution. With their default
-                         parameters, the firt method takes roughly 190 function
-                         evaluations to converge; the second takes 40 funcction
+                         parameters, the first method takes roughly 35 function
+                         evaluations to converge; the second takes 40 function
                          evaluations; and the last, between 80 and 100 function
                          evaluations. The default method is `fmin`, due to its speed.
     :type optimization: string
@@ -103,7 +104,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
     if method in cluster_dependent_methods and clusters is None:
         raise ValueError(
             'Method {0} cannot be used when clusters is None'.format(method))
-    if optimization not in ['brute', 'fmin', 'DE']:
+    if optimization not in ['hill', 'binary', 'fmin', 'DE']:
         raise ValueError('Optimization method not supported')
     if r_control not in ['passive', 'aggressive']:
         raise ValueError('Exposure control method not supported')
@@ -283,8 +284,11 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
                     est_theta = dodd(est_theta, items, response)
                 # else, a maximum likelihood approach is used
                 else:
-                    if optimization == 'brute':
-                        est_theta = maximum_likelihood(
+                    if optimization == 'hill':
+                        est_theta = hill_climbing_ml(
+                            response_vector, items[administered_items])
+                    elif optimization == 'binary':
+                        est_theta = binary_search_ml(
                             response_vector, items[administered_items])
                     elif optimization == 'fmin':
                         est_theta = fmin(negativelogLik, est_theta, (response_vector, items[administered_items]))
