@@ -1,5 +1,3 @@
-__author__ = 'douglas'
-
 import os
 import time
 

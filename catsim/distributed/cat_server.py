@@ -3,7 +3,7 @@
 import sys
 import time
 import socket
-import pickle
+import json
 import smtplib
 import platform
 from io import StringIO
@@ -190,17 +190,21 @@ def ventilate_cases():
     sink.connect("tcp://localhost:" + sink_port)
     print("Sending tasks to workers...")
 
+    # ventilate cases forever, until all results are received
     while True:
         if workload.shape[0] == 0:
             break
 
         for work_index, work in workload.iterrows():
             workerName = str(sender.recv())
-            buf = StringIO()
-            # special treatment for the cluster results column
-            work.to_csv(buf)
-            buf.seek(0)
-            print('....Sending case ' + str(work) + ' to ' + workerName
+            # buf = StringIO()
+            # # special treatment for the cluster results column
+            # work.to_csv(buf)
+            # buf.seek(0)
+
+            buf = json.dumps(work.to_dict())
+
+            print('....Sending case ' + str(work_index) + ' to ' + workerName
                   + ' -- ' + time.strftime('%Y-%m-%d %H:%M:%S',
                                            time.localtime(time.time())))
 
@@ -229,7 +233,7 @@ def start_sink():
     print('Receiving results from workers...')
 
     while True:
-        s = pickle.loads(receiver.recv())
+        s = json.loads(receiver.recv())
         globalResults = s['globalResults']
         # localResults = s['localResults']
 

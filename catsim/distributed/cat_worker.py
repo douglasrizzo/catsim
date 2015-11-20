@@ -3,7 +3,7 @@
 from multiprocessing import Process
 from socket import gethostname
 import multiprocessing as mp
-import pickle
+import json
 import time
 import sys
 
@@ -34,15 +34,15 @@ def start():
     print('....Waiting for datasets....')
     data_socket.send_string(gethostname())
     # só vai fazer experimentos com a base sintética
-    x = pickle.loads(data_socket.recv())[0][1]
+    x = json.loads(data_socket.recv())[0][1]
     print('........Done!\n....Waiting for tasks....')
 
     # Process tasks forever
     while True:
         cluster_socket.send_string(hostname)
-        string_row = pickle.loads(cluster_socket.recv())
-
-        s = pandas.Series.from_csv(string_row, parse_dates=False)
+        # string_row = json.loads(cluster_socket.recv())
+        # s = pandas.Series.from_csv(string_row, parse_dates=False)
+        s = json.loads(cluster_socket.recv())
         s[['Qtd. itens', 'Índice']] = s[
             ['Qtd. itens', 'Índice']].astype(np.int64)
         s['r. max'] = np.float64(s['r. max'])
@@ -90,4 +90,4 @@ if __name__ == '__main__':
         numWorkers = mp.cpu_count()
 
     for cpu in range(numWorkers):
-        Process(target=start).start()
+        Process(target=start, name=str(cpu)).start()
