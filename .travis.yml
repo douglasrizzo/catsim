@@ -3,29 +3,30 @@ language: python
 python:
   - 3.3
   - 3.4
-addons:
-  apt:
-    packages:
-    - python-setuptools
-    - cmake
-    - libfreetype6-dev
-    - cython
-    - libatlas-base-dev
-    - gfortran
-    - python-scipy
-    - python3-scipy
+# addons:
+#   apt:
+#     packages:
+#     - python-setuptools
+#     - cmake
+#     - libfreetype6-dev
+#     - cython
+#     - libatlas-base-dev
+#     - gfortran
+#     - python-scipy
+#     - python3-scipy
 before_install:
   # since Travis is unable to install scipy from pip and the ones availabe in
   # apt-get are outdated, manually download Miniconda and point PATH to it
-  # - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-  # - chmod +x miniconda.sh
-  # - ./miniconda.sh -b
-  # - export PATH=/home/travis/miniconda/bin:$PATH
-  # - conda update --yes conda
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:$PATH
+  - conda update --yes conda
   # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
-  # - sudo rm -rf /dev/shm
-  # - sudo ln -s /run/shm /dev/shm
-  - pip install -e .
+  - sudo rm -rf /dev/shm
+  - sudo ln -s /run/shm /dev/shm
+  # - pip install -e .
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose coverage coveralls unidecode scikit-learn pyzmq dateutil pandas statsmodels
 install:
   - python setup.py install
   - coverage run setup.py test
