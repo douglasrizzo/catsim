@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 language: python
 python:
   - 3.3
@@ -16,8 +16,7 @@ before_install:
   # - sudo ln -s /run/shm /dev/shm
   - pip install -e .
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION atlas numpy scipy matplotlib nose dateutil pandas statsmodels coveralls coverage
   - python setup.py install
   - coverage run setup.py test
-script: make tests
+script: nosetests
 after_success: coveralls
