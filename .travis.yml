@@ -3,6 +3,17 @@ language: python
 python:
   - 3.3
   - 3.4
+addons:
+  apt:
+    packages:
+    - python-setuptools
+    - cmake
+    - libfreetype6-dev
+    - cython
+    - libatlas-base-dev
+    - gfortran
+    - python-scipy
+    - python3-scipy
 before_install:
   # since Travis is unable to install scipy from pip and the ones availabe in
   # apt-get are outdated, manually download Miniconda and point PATH to it
