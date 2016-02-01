@@ -15,7 +15,7 @@ def coefvariation(x, axis=0):
     # print('Std. Devs:', stddev)
 
     result = stddev / \
-             mean if axis == 0 else np.transpose(stddev) / np.transpose(mean)
+        mean if axis == 0 else np.transpose(stddev) / np.transpose(mean)
 
     return result
 
@@ -46,7 +46,7 @@ def covariance(x, minus_one=True):
             for iii in range(n_obs):
                 sum += (x[iii, i] - x_means[i]) * (x[iii, ii] - x_means[ii])
             covars[i, ii] = covars[ii, i] = sum / \
-                                            ((n_obs - 1) if minus_one else n_obs)
+                ((n_obs - 1) if minus_one else n_obs)
 
     return covars
 

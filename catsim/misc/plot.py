@@ -103,10 +103,10 @@ def plotIRT(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):
             plt.title(title, size=18)
         plt.annotate('$a = ' + format(a) + '$\n$b = ' + format(
             b) + '$\n$c = ' + format(c) + '$',
-                     bbox=dict(facecolor='white',
-                               alpha=1),
-                     xy=(.75, .05),
-                     xycoords='axes fraction')
+            bbox=dict(facecolor='white',
+                      alpha=1),
+            xy=(.75, .05),
+            xycoords='axes fraction')
         plt.xlabel(r'$\theta$')
         plt.grid()
         plt.legend(loc='best')
@@ -139,10 +139,10 @@ def plotIRT(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):
 
         ax2.annotate('$a = ' + format(a) + '$\n$b = ' + format(
             b) + '$\n$c = ' + format(c) + '$',
-                     bbox=dict(facecolor='white',
-                               alpha=1),
-                     xy=(.75, .05),
-                     xycoords='axes fraction')
+            bbox=dict(facecolor='white',
+                      alpha=1),
+            xy=(.75, .05),
+            xycoords='axes fraction')
         ax2.legend(loc='best', framealpha=0)
 
     if filepath is not None:

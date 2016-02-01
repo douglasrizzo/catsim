@@ -59,10 +59,10 @@ def cases():
             for rmax in canonical_rmaxes:
                 for index, clusterResult in clusterResults.iterrows():
                     if processed_cases[
-                                                (processed_cases['Qtd. itens'] == item) &
-                                                (processed_cases['Método'] == method) &
-                                        (processed_cases['Índice'] == index) &
-                                (processed_cases['r. max'] == rmax)
+                        (processed_cases['Qtd. itens'] == item) &
+                        (processed_cases['Método'] == method) &
+                        (processed_cases['Índice'] == index) &
+                        (processed_cases['r. max'] == rmax)
                     ].shape[0] == 0:
                         cluster = str(clusterResult['Classificações']).strip(
                             '[]').replace(',', '')

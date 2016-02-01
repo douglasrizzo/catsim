@@ -21,6 +21,7 @@ iris = sklearn.datasets.load_iris()['data']
 
 
 class TestStuff(unittest.TestCase):
+
     def distances(self):
         for p in range(1, 10):
             self.assertEqual(np.mean(

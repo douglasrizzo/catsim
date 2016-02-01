@@ -307,7 +307,7 @@ def simCAT(items, clusters=None, examinees=1, n_itens=20,
 
         # update the exposure value for this item
         items[administered_items, 3] = (
-                                           (items[administered_items, 3] * examinees) + 1) / examinees
+            (items[administered_items, 3] * examinees) + 1) / examinees
         est_thetas.append(est_theta)
 
     # save the results for this examinee simulation
@@ -356,7 +356,7 @@ def dodd(theta, items, correct):
     b_min = min(b)
 
     dodd = theta + \
-           ((b_max - theta) / 2) if correct else theta - ((theta - b_min) / 2)
+        ((b_max - theta) / 2) if correct else theta - ((theta - b_min) / 2)
 
     return (dodd)
 
@@ -413,7 +413,7 @@ def sum_cluster_infos(theta, items, clusters):
 
         for item in items[cluster_indexes]:
             cluster_infos[cluster] = cluster_infos[
-                                         cluster] + inf(theta, item[0], item[1], item[2])
+                cluster] + inf(theta, item[0], item[1], item[2])
 
     return cluster_infos
 

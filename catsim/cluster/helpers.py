@@ -14,13 +14,13 @@ def normalize(c):
 
                [2, 2, 3, 2, 1, 0]
                [1, 1, 2, 1, 3, 0]
-           
+
            In this case, both membership vectors can be considered equal, since
            they cluster data points in equal clusters. What this function does
            is transform both of them in the following:
-           
+
             .. code-block:: python
-           
+
                [0, 0, 1, 0, 2, 3]
 
            In this way, membership vectors are comparable.

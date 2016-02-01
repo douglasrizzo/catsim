@@ -111,7 +111,7 @@ def loadClusterResults(path):
 
     df['pct. sem Classificação'] = df[['Sem Classificação', 'Classificações'
                                        ]].apply(lambda x: 100 / np.size(x[1]) *
-                                                          x[0], axis=1)
+                                                x[0], axis=1)
 
     df['Classificações'] = df['Classificações'].astype(np.ndarray)
     return df
