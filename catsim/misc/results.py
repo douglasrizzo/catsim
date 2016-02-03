@@ -1,12 +1,12 @@
 """Module with functions that take care of loading and saving CSV files with
 clustering and CAT simulation results"""
 
-import os.path
 import time
-
 import pandas
+import os.path
 import numpy as np
 from pandas import DataFrame
+
 
 col_cluster = ['Data', 'Algoritmo', 'Base de dados', 'Distância', 'Variável',
                'Nº registros', 'Nº grupos', 't (segundos)', 'Menor grupo',

@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import zmq
 import time
-import socket
 import json
+import socket
+import pandas
 import smtplib
 import platform
-from io import StringIO
+import numpy as np
+import catsim.misc.results
 from multiprocessing import Process
 
-import zmq
-import pandas
-import numpy as np
-
 from catsim.distributed.misc import ventilator_port, sink_port, data_port, default_ip, ping
-import catsim.misc.results
 
 
 def relevantResults():

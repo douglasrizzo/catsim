@@ -1,5 +1,5 @@
-Computerized Adaptive Testing Simulation
-========================================
+Computerized Adaptive Testing Simulator
+=======================================
 
-.. automodule:: catsim.cat.simulate
+.. autoclass:: catsim.Simulator
    :members:

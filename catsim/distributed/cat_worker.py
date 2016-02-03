@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from multiprocessing import Process
-from socket import gethostname
-import multiprocessing as mp
+import zmq
+import sys
 import json
 import time
-import sys
-
 import numpy as np
-import pandas
-import zmq
-
 import catsim.cat.simulate
+import multiprocessing as mp
+from socket import gethostname
+from multiprocessing import Process
 from catsim.distributed import defaultIP as serverIp
 
 

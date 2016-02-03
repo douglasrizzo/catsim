@@ -1,5 +1,6 @@
 """A bunch of statistical functions that I implemented just to show that I
 knew how they worked."""
+
 import numpy as np
 
 
