@@ -6,7 +6,7 @@ application of adaptive tests. Most of this module is based on the work of
    selection rules in computerized adaptive testing. Applied Psychological
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
-import math
+import irt
 import numpy as np
 from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution, fmin
@@ -14,13 +14,25 @@ from scipy.optimize import differential_evolution, fmin
 
 class Simulator:
 
-    def __init__(self):
+    def __init__(self, procedure=None):
         self.existent_methods = ['max_info', 'item_info', 'cluster_info', 'weighted_info']
         self.cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
+        self.p = procedure
 
-    def simulate(items, clusters=None, examinees=1, n_itens=20,
-                 r_max=1, method='item_info', optimization='fmin',
-                 r_control='passive'):
+    def simulate(self, procedure=None):
+        if procedure is not None:
+            self.p = procedure
+
+        if not self.p.started():
+            self.p.start()
+
+        while not self.p.stop():
+            self.p.next()
+
+        return self.p.results
+
+    def simCAT(self, items, clusters=None, examinees=1, n_itens=20, r_max=1,
+               method='item_info', optimization='fmin', r_control='passive'):
         """CAT simulation and validation method proposed by [Bar10]_.
 
         :param items: an n x 3 matrix containing item parameters
@@ -146,14 +158,14 @@ class Simulator:
 
                 for q in range(n_itens):
                     if method == 'max_info':
-                        
+
                         # get the indexes of all items that have not yet been
                         # administered, calculate their information value and pick the
                         # one with maximum information
                         valid_indexes = np.array(
                             list(set(range(items.shape[0])) - set(administered_items)))
 
-                        inf_values = [inf(est_theta, i[0], i[1], i[2])
+                        inf_values = [irt.inf(est_theta, i[0], i[1], i[2])
                                       for i in items[valid_indexes]]
 
                         valid_indexes = [
@@ -180,7 +192,7 @@ class Simulator:
                                     # been adminitered to this examinee yet
                                     if len(valid_indexes) > 0:
                                         selected_cluster = i[4]
-                                        max_inf = inf(est_theta, i[0], i[1], i[2])
+                                        max_inf = irt.inf(est_theta, i[0], i[1], i[2])
 
                         elif method in ['cluster_info', 'weighted_info']:
                             # calculates the cluster information, depending on the method
@@ -233,7 +245,7 @@ class Simulator:
                         if len(valid_indexes_low_r) > 0:
                             # sort both items and their indexes by their information
                             # value
-                            inf_values = [inf(est_theta, i[0], i[1], i[2])
+                            inf_values = [irt.inf(est_theta, i[0], i[1], i[2])
                                           for i in items[valid_indexes_low_r]]
                             valid_indexes_low_r = [
                                 index for (inf_value, index) in sorted(zip(inf_values, valid_indexes_low_r), reverse=True)]
@@ -244,7 +256,7 @@ class Simulator:
                         # select the one with smallest r, regardless of information
                         else:
                             if r_control == 'passive':
-                                inf_values = [inf(est_theta, i[0], i[1], i[2])
+                                inf_values = [irt.inf(est_theta, i[0], i[1], i[2])
                                               for i in items[valid_indexes]]
                                 valid_indexes = [
                                     index for (inf_value, index) in sorted(zip(inf_values, valid_indexes), reverse=True)]
@@ -266,7 +278,7 @@ class Simulator:
 
                     # simulates the examinee's response via the three-parameter
                     # logistic function
-                    response = tpm(
+                    response = irt.tpm(
                         true_theta,
                         items[selected_item][0],
                         items[selected_item][1],
@@ -284,20 +296,20 @@ class Simulator:
                     # vector contains only success or errors, Dodd's method is used
                     # to reestimate the proficiency
                     if all(response_vector[0] == response for response in response_vector):
-                        est_theta = dodd(est_theta, items, response)
+                        est_theta = irt.dodd(est_theta, items, response)
                     # else, a maximum likelihood approach is used
                     else:
                         if optimization == 'hill':
-                            est_theta = hill_climbing_ml(
+                            est_theta = irt.hill_climbing_ml(
                                 response_vector, items[administered_items])
                         elif optimization == 'binary':
-                            est_theta = binary_search_ml(
+                            est_theta = irt.binary_search_ml(
                                 response_vector, items[administered_items])
                         elif optimization == 'fmin':
-                            est_theta = fmin(negativelogLik, est_theta, (response_vector, items[administered_items]))
+                            est_theta = fmin(irt.negativelogLik, est_theta, (response_vector, items[administered_items]))
                         elif optimization == 'DE':
                             est_theta = differential_evolution(
-                                negativelogLik, bounds=[
+                                irt.negativelogLik, bounds=[
                                     [min_difficulty * 2, max_difficulty * 2]],
                                 args=(response_vector, items[administered_items])).x[0]
 
@@ -325,8 +337,8 @@ class Simulator:
 
         return {'Nº de grupos': len(set(clusters)),
                 'Qtd. Itens': n_itens,
-                'RMSE': rmse(true_thetas, est_thetas),
-                'Overlap': overlap_rate(items, n_itens),
+                'RMSE': irt.rmse(true_thetas, est_thetas),
+                'Overlap': irt.overlap_rate(items, n_itens),
                 'r_max': r_max}, localResults
 
     def dodd(theta, items, correct):
@@ -470,207 +482,3 @@ class Simulator:
         else:
             c = np.zeros((500))
         return np.array([a, b, c]).T
-
-    def tpm(theta, a, b, c):
-        @staticmethod
-        """Item Response Theory three-parameter logistic function:
-
-        .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{Da_i(\\theta-b_i)}}
-
-        :param theta: the individual's proficiency value. This parameter value has
-                      no boundary, but if a distribution of the form :math:`N(0, 1)` was
-                      used to estimate the parameters, then :math:`-4 \\leq \\theta \\leq
-                      4`.
-
-        :param a: the discrimination parameter of the item, usually a positive
-                  value in which :math:`0.8 \\leq a \\leq 2.5`.
-
-        :param b: the item difficulty parameter. This parameter value has no
-                  boundary, but if a distribution of the form :math:`N(0, 1)` was used to
-                  estimate the parameters, then :math:`-4 \\leq b \\leq 4`.
-
-        :param c: the item pseudo-guessing parameter. Being a probability,
-            :math:`0\\leq c \\leq 1`, but items considered good usually have
-            :math:`c \\leq 0.2`.
-        """
-        try:
-            return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
-        except OverflowError:
-            print('----ERROR HAPPENED WITH THESE VALUES: ' +
-                  format([theta, a, b, c]))
-            raise
-
-    def logLik(est_theta, response_vector, administered_items):
-        @staticmethod
-        """Calculates the log-likelihood of an estimated proficiency, given a
-        response vector and the parameters of the answered items.
-
-        .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}
-
-        For computational reasons, it is common to use the log-likelihood in
-        maximization/minimization problems, transforming the product of
-        probabilities in a sum of probabilities:
-
-        .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I) = \\sum_{i=1} ^ I \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log Q_{ij}(\\theta) \\right\\rbrace
-
-        :param est_theta: estimated profficiency value
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a numpy array containing the parameters of the answered items
-        """
-        # inspired in the example found in
-        # http://stats.stackexchange.com/questions/66199/maximum-likelihood-curve-
-        # model-fitting-in-python
-        # try:
-        if len(response_vector) != administered_items.shape[0]:
-            raise ValueError(
-                'Response vector and administered items must have the number of items')
-        LL = 0
-
-        for i in range(len(response_vector)):
-            prob = tpm(est_theta, administered_items[i][
-                0], administered_items[i][1], administered_items[i][2])
-
-            LL += (response_vector[i] * math.log(prob)) + \
-                  ((1 - response_vector[i]) * math.log(1 - prob))
-        return LL
-        # except OverflowError:
-        #     print('Deu pau com esses valores: \n' + str(est_theta) + '\n' +
-        #           str([prob, math.log10(prob)]) + '\n' + str(response_vector))
-        #     raise
-
-    def negativelogLik(est_theta, *args):
-        @staticmethod
-        """Function used by :py:mod:`scipy.optimize` functions to find the estimated
-        proficiency that maximizes the likelihood of a given response vector
-
-        :param est_theta: estimated profficiency value
-        :type est_theta: float
-        :param args: a list containing the response vector and the array of
-                     administered items, just like :py:func:`logLik`
-        :type args: list
-        :return: the estimated proficiency that maximizes the likelihood function
-        """
-        return -logLik(est_theta, args[0], args[1])
-
-    def hill_climbing_ml(response_vector, administered_items, precision=6, verbose=False):
-        @staticmethod
-        """Uses a hill-climbing algorithm to find and returns the theta value
-        that maximizes the likelihood function, given a response vector and a
-        matrix with the administered items parameters.
-
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a numpy array containing the parameters of the
-                                   answered items
-        :param precision: number of decimal points of precision
-        :param verbose: verbosity level of the maximization method
-        """
-
-        if set(response_vector) == 1:
-            return float('inf')
-        elif set(response_vector) == 0:
-            return float('-inf')
-
-        lbound = min(administered_items[:, 1])
-        ubound = max(administered_items[:, 1])
-        best_theta = -float('inf')
-        max_ll = -float('inf')
-
-        iters = 0
-
-        for i in range(10):
-            intervals = np.linspace(lbound, ubound, 10)
-            if verbose:
-                print('Bounds: ' + str(lbound) + ' ' + str(ubound))
-                print('Interval size: ' + str(intervals[1] - intervals[0]))
-
-            for ii in intervals:
-                iters += 1
-                ll = logLik(ii, response_vector, administered_items)
-                if ll > max_ll:
-                    max_ll = ll
-
-                    if verbose:
-                        print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, ii, ll))
-
-                    if abs(best_theta - ii) < float('1e-' + str(precision)):
-                        return ii
-
-                    best_theta = ii
-
-                else:
-                    lbound = best_theta - (intervals[1] - intervals[0])
-                    ubound = ii
-                    break
-
-        return best_theta
-
-    def binary_search_ml(response_vector, administered_items, precision=35, verbose=False):
-        @staticmethod
-        """Uses a binary search algorithm to find and returns the theta value
-        that maximizes the likelihood function, given a response vector and a
-        matrix with the administered items parameters.
-
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a numpy array containing the parameters of the
-                                   answered items
-        :param precision: number of decimal points of precision
-        :param verbose: verbosity level of the maximization method
-        """
-
-        if set(response_vector) == 1:
-            return float('inf')
-        elif set(response_vector) == 0:
-            return float('-inf')
-
-        lbound = min(administered_items[:, 1])
-        ubound = max(administered_items[:, 1])
-        best_theta = -float('inf')
-        iters = 0
-
-        while True:
-            iters += 1
-            if verbose:
-                print('Bounds: ' + str(lbound) + ' ' + str(ubound))
-                print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, best_theta,
-                                                                   logLik(best_theta, response_vector, administered_items)))
-
-            if logLik(ubound, response_vector, administered_items) > logLik(lbound, response_vector, administered_items):
-
-                if abs(best_theta - ubound) < float('1e-' + str(precision)):
-                    return ubound
-
-                best_theta = ubound
-                lbound += (ubound - lbound) / 2
-            else:
-
-                if abs(best_theta - lbound) < float('1e-' + str(precision)):
-                    return lbound
-
-                best_theta = lbound
-                ubound -= (ubound - lbound) / 2
-
-    def inf(theta, a, b, c):
-        @staticmethod
-        """Item Response Theory three-parameter information function
-
-        .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
-
-        :param theta: the individual's proficiency value. This parameter value has
-                      no boundary, but if a distribution of the form
-                      :math:`N(0, 1)` was used to estimate the parameters, then
-                      :math:`-4 \\leq \\theta \\leq 4`.
-
-        :param a: the discrimination parameter of the item, usually a positive
-                  value in which :math:`0.8 \\leq a \\leq 2.5`.
-
-        :param b: the item difficulty parameter. This parameter value has no
-                  boundary, but if a distribution of the form :math:`N(0, 1)` was
-                  used to estimate the parameters, then :math:`-4 \\leq b \\leq 4`.
-
-        :param c: the item pseudo-guessing parameter. Being a probability,
-            :math:`0\\leq c \\leq 1`, but items considered good usually have
-            :math:`c \\leq 0.2`.
-        """
-        ml3 = tpm(theta, a, b, c)
-        return math.pow(a, 2) * (math.pow(ml3 - c, 2) /
-                                 math.pow(1 - c, 2)) * (1 - ml3) / ml3
