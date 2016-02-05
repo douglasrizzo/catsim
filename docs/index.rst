@@ -6,6 +6,8 @@
 Welcome to catsim's documentation!
 ==================================
 
+:ref:`search`
+
 Contents
 --------
 
@@ -16,10 +18,3 @@ Contents
     *
 
 .. include:: ../README.rst
-
-Indices and tables
-------------------
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

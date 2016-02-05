@@ -3,7 +3,7 @@ import unittest
 
 class TestStuff(unittest.TestCase):
 
-    def distances(self):
+    def nothing(self):
         self.assertTrue(True)
 
 

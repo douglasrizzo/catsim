@@ -6,25 +6,24 @@ application of adaptive tests. Most of this module is based on the work of
    selection rules in computerized adaptive testing. Applied Psychological
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
-import irt
+from catsim import irt
 import numpy as np
-from sklearn.metrics import mean_squared_error
 from scipy.optimize import differential_evolution, fmin
 
 
 class Simulator:
 
-    def __init__(self, procedure=None):
+    def __init__(self, initialization, selection, reestimation, stop):
         self.existent_methods = ['max_info', 'item_info', 'cluster_info', 'weighted_info']
         self.cluster_dependent_methods = ['item_info', 'cluster_info', 'weighted_info']
-        self.p = procedure
+        self.initialization = initialization
+        self.selection = selection
+        self.reestimation = reestimation
+        self.stop = stop
 
-    def simulate(self, procedure=None):
+    def simulate(self, initialization, selection, reestimation, stop):
         if procedure is not None:
             self.p = procedure
-
-        if not self.p.started():
-            self.p.start()
 
         while not self.p.stop():
             self.p.next()
@@ -181,7 +180,7 @@ class Simulator:
                             # information, given the current estimated theta value
                             max_inf = 0
                             for counter, i in enumerate(items):
-                                if inf(est_theta, i[0], i[1], i[2]) > max_inf:
+                                if irt.inf(est_theta, i[0], i[1], i[2]) > max_inf:
                                     # gets the indexes of all the items in the same cluster
                                     # as the current selected item that have not been
                                     # administered
@@ -340,145 +339,3 @@ class Simulator:
                 'RMSE': irt.rmse(true_thetas, est_thetas),
                 'Overlap': irt.overlap_rate(items, n_itens),
                 'r_max': r_max}, localResults
-
-    def dodd(theta, items, correct):
-        """Method proposed by [Dod90]_ for the reestimation of
-        :math:`\\hat{\\theta}` when the response vector is composed entirely of 1s
-        or 0s
-
-        .. math::
-
-            \\hat{\\theta}_{t+1} = \\left\\lbrace \\begin{array}{ll}
-            \\hat{\\theta}_t+\\frac{b_{max}-\\hat{\\theta_t}}{2} & \\text{if } X_t = 1 \\\\
-            \\hat{\\theta}_t-\\frac{\\hat{\\theta}_t-b_{min}}{2} & \\text{if }  X_t = 0
-            \\end{array} \\right\\rbrace
-
-        :param theta: the initial profficiency level
-        :param items: a numpy array containing the parameters of the items in the
-                      database. This is necessary to capture the maximum and minimum
-                      difficulty levels necessary for the method.
-        :param correct: a boolean value informing whether or not the examinee
-                        correctly answered the current item.
-
-        .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
-           Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
-           Scale Model. Applied Psychological Measurement, 14(4), 355–366.
-           http://doi.org/10.1177/014662169001400403
-        """
-        b = items[:, 1]
-        b_max = max(b)
-        b_min = min(b)
-
-        dodd = theta + \
-            ((b_max - theta) / 2) if correct else theta - ((theta - b_min) / 2)
-
-        return (dodd)
-
-    def rmse(actual, predicted):
-        """Root mean squared error:
-
-        .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
-
-        :param actual: a list or 1-D numpy array containing the true profficiency
-                       values
-        :param predicted: a list or 1-D numpy array containing the estimated
-                          profficiency values
-        """
-        if len(actual) != len(predicted):
-            raise ValueError('actuala nd predicted need to be the same size')
-
-        # se = 0
-        # for i in range(len(actual)):
-        #     se += (predicted[i] - actual[i])**2
-
-        # mse = se / len(actual)
-
-        # rmse = np.sqrt(mse)
-
-        # return rmse
-        return mean_squared_error(actual, predicted) ** .5
-
-    def overlap_rate(items, testSize):
-        """Test overlap rate:
-
-        .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
-
-        :param items: a numpy array containing, in the 4th column, the number of
-                      times each item was used in the tests.
-        :param testSize: an integer informing the number of items in a test.
-        """
-
-        bankSize = items.shape[0]
-        varR = np.var(items[:, 3])
-
-        T = (bankSize / testSize) * varR + (testSize / bankSize)
-
-        return T
-
-    def sum_cluster_infos(theta, items, clusters):
-        """Returns the sum of item informations, separated by cluster"""
-        cluster_infos = np.zeros((len(set(clusters))))
-
-        for cluster in set(clusters):
-            cluster_indexes = np.nonzero(clusters == cluster)[0]
-
-            for item in items[cluster_indexes]:
-                cluster_infos[cluster] = cluster_infos[
-                    cluster] + inf(theta, item[0], item[1], item[2])
-
-        return cluster_infos
-
-    def weighted_cluster_infos(theta, items, clusters):
-        """Returns the weighted sum of item informations, separated by cluster.
-           The weight is the number of items in each cluster."""
-        cluster_infos = sum_cluster_infos(theta, items, clusters)
-        count = np.bincount(clusters)
-
-        for i in range(len(cluster_infos)):
-            cluster_infos[i] = cluster_infos[i] / count[i]
-
-        return cluster_infos
-
-    def generateItemBank(items, itemtype='3PL', corr=0.5):
-        """Generate a synthetic item bank whose parameters approximately follow
-        real-world parameters, as proposed by [Bar10]_.
-
-        Item parameters are extracted from the following probability distributions:
-
-        * discrimination: :math:`N(1.2,0.25)`
-
-        * difficulty: :math:`N(0,1)`
-
-        * pseudo-guessing: :math:`N(0.25,0.02)`
-
-        :param items: how many items are to be generated
-        :type items: int
-        :param itemtype: either ``1PL``, ``2PL`` or ``3PL`` for the one-, two- or
-                         three-parameter logistic model
-        :type itemtype: string
-        :param corr: the correlation between item discrimination and difficulty. If
-                     ``itemtype == '1PL'``, it is ignored.
-        :type corr: float
-        :return: an ``itens x 3`` numerical matrix containing item parameters
-        :rtype: numpy.ndarray
-        """
-
-        valid_itemtypes = ['1PL', '2PL', '3PL']
-
-        if itemtype not in valid_itemtypes:
-            raise ValueError('Item type not in ' + str(valid_itemtypes))
-
-        means = [0, 1.2]
-        stds = [1, 0.25]
-        covs = [[stds[0] ** 2, stds[0] * stds[1] * corr],
-                [stds[0] * stds[1] * corr, stds[1] ** 2]]
-
-        b, a = np.random.multivariate_normal(means, covs, items).T
-
-        if itemtype not in ['2PL', '3PL']:
-            a = np.ones((500))
-        if itemtype == '3PL':
-            c = np.random.normal(.25, .02, items)
-        else:
-            c = np.zeros((500))
-        return np.array([a, b, c]).T

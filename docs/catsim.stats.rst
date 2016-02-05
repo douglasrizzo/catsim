@@ -1,5 +1,5 @@
 Miscellaneous Statistical Functions
 ===================================
 
-.. automodule:: catsim.misc.stats
+.. automodule:: catsim.stats
    :members:

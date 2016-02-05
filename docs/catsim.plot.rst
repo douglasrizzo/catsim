@@ -1,5 +1,5 @@
 Miscellaneous Plotting Functions
 ================================
 
-.. automodule:: catsim.misc.plot
+.. automodule:: catsim.plot
    :members:
