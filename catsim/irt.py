@@ -1,10 +1,10 @@
 """Module containing functions pertaining to the Item Response Theory logistic models."""
 
 import math
-import numpy as np
+import numpy
 
 
-def tpm(theta, a, b, c):
+def tpm(theta: float, a: float, b: float, c: float=0) -> float:
     """Item Response Theory three-parameter logistic function:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{Da_i(\\theta-b_i)}}
@@ -35,8 +35,8 @@ def tpm(theta, a, b, c):
         )
 
 
-def inf(theta, a, b, c):
-    """Item Response Theory three-parameter information function
+def inf(theta: float, a: float, b: float, c: float=0) -> float:
+    """Calculates the information value of an item using the Item Response Theory three-parameter logistic model function:
 
     .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
 
@@ -63,9 +63,11 @@ def inf(theta, a, b, c):
     return math.pow(a, 2) * (math.pow(ml3 - c, 2) / math.pow(1 - c, 2)) * (1 - ml3) / ml3
 
 
-def logLik(est_theta, response_vector, administered_items):
+def logLik(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
     """Calculates the log-likelihood of an estimated proficiency, given a
     response vector and the parameters of the answered items.
+
+    The likelihood function of a given :math:`\\theta` value given the answers to :math:`I` items is given by:
 
     .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}
 
@@ -78,6 +80,7 @@ def logLik(est_theta, response_vector, administered_items):
     :param est_theta: estimated proficiency value
     :param response_vector: a binary list containing the response vector
     :param administered_items: a numpy array containing the parameters of the answered items
+    :returns: log-likelihood of a given proficiency value, given the responses to the administered items
     """
     # inspired in the example found in
     # http://stats.stackexchange.com/questions/66199/maximum-likelihood-curve-
@@ -103,16 +106,21 @@ def logLik(est_theta, response_vector, administered_items):
     #     raise
 
 
-def negativelogLik(est_theta, *args):
-    """Function used by :py:mod:`scipy.optimize` functions to find the estimated
-    proficiency that maximizes the likelihood of a given response vector
+def negativelogLik(est_theta: float, *args) -> float:
+    """Function used by :py:mod:`scipy.optimize` optimization functions that tend to minimize
+    values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
+    value, given a response vector and the parameters of the administered items. The value of
+    :py:func:`negativelogLik` is simply the value of :math:`-` :py:func:`logLik` or, mathematically:
+
+    .. math:: - \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I)
 
     :param est_theta: estimated proficiency value
-    :type est_theta: float
-    :param args: a list containing the response vector and the array of
-                 administered items, just like :py:func:`logLik`
-    :type args: list
-    :return: the estimated proficiency that maximizes the likelihood function
+
+    args:
+
+    :param response_vector list: a binary list containing the response vector
+    :param administered_items numpy.ndarray: a numpy array containing the parameters of the answered items
+    :returns: negative log-likelihood of a given proficiency value, given the responses to the administered items
     """
     return -logLik(est_theta, args[0], args[1])
 
@@ -135,9 +143,9 @@ def normalize_item_bank(items):
     :rtype: numpy.ndarray
     """
     if items.shape[1] == 1:
-        items = np.append(np.ones((items.shape[0])), items, axis=1)
+        items = numpy.append(numpy.ones((items.shape[0])), items, axis=1)
     if items.shape[1] == 2:
-        items = np.append(items, np.zeros((items.shape[0])), axis=1)
+        items = numpy.append(items, numpy.zeros((items.shape[0])), axis=1)
 
     return items
 
@@ -157,8 +165,8 @@ def validate_item_bank(items, raise_err=False):
                       just print the error message to standard output.
     :type raise_err: bool
     """
-    if type(items) is not np.ndarray:
-        raise ValueError('Item matrix is not of type {0}'.format(type(np.zeros((1)))))
+    if type(items) is not numpy.ndarray:
+        raise ValueError('Item matrix is not of type {0}'.format(type(numpy.zeros((1)))))
 
     err = ''
 
