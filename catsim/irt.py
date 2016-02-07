@@ -183,8 +183,3 @@ def validate_item_bank(items, raise_err=False):
         raise ValueError(err)
 
     print(err)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

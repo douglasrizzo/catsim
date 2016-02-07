@@ -22,7 +22,7 @@ def dodd(theta, items, correct):
 
     .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
        Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
-       Scale Model. Applied Psychological Measurement, 14(4), 355–366.
+       Scale Model. Applied Psychological Measurement, 14(4), 355-366.
        http://doi.org/10.1177/014662169001400403
     """
     b = items[:, 1]
@@ -105,3 +105,8 @@ def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
     else:
         c = np.zeros((n))
     return np.array([a, b, c]).T
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
