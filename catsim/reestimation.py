@@ -47,12 +47,7 @@ class HillClimbingEstimator(Estimator):
         self.__precision = precision
         self.__verbose = verbose
 
-    def estimate(
-        self,
-        response_vector: list,
-        administered_items: numpy.ndarray,
-        current_theta: float=None
-    ):
+    def estimate(self, response_vector, administered_items, current_theta=None):
         """Uses a hill-climbing algorithm to find and returns the theta value
         that maximizes the likelihood function, given a response vector and a
         matrix with the administered items parameters.
@@ -117,21 +112,24 @@ class BinarySearchEstimator(Estimator):
     :type verbose: boolean
     """
 
-    def __init__(self, precision: int=6, verbose: bool=False):
+    def __init__(self):
         super(BinarySearchEstimator, self).__init__()
-        self.__precision = precision
-        self.__verbose = verbose
 
-    def estimate(self, response_vector: list, administered_items: numpy.ndarray) -> float:
+    def estimate(response_vector, administered_items, **kwargs):
         """Uses a binary search algorithm to find and returns the theta value
         that maximizes the likelihood function, given a response vector and a
         matrix with the administered items parameters.
 
         :param response_vector: a binary list containing the response vector
+        :type response_vector: list
         :param administered_items: a matrix containing the parameters of the
                                    answered items
+        :type administered_items: numpy.ndarray
         :returns: a new estimation of the examinee's proficiency, given his answers up until now
+        :rtype: float
         """
+        precision = kwargs['precision'] if 'precision' in kwargs else 6
+        verbose = kwargs['verbose'] if 'verbose' in kwargs else False
 
         if set(response_vector) == 1:
             return float('inf')
@@ -145,28 +143,20 @@ class BinarySearchEstimator(Estimator):
 
         while True:
             iters += 1
-            if self.verbose:
+            if verbose:
                 print('Bounds: ' + str(lbound) + ' ' + str(ubound))
-                print(
-                    'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                        iters, best_theta, irt.logLik(
-                            best_theta, response_vector, administered_items
-                        )
-                    )
-                )
+                print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, best_theta, irt.logLik(best_theta, response_vector, administered_items)))
 
-            if irt.logLik(ubound, response_vector, administered_items) > irt.logLik(
-                lbound, response_vector, administered_items
-            ):
+            if irt.logLik(ubound, response_vector, administered_items) > irt.logLik(lbound, response_vector, administered_items):
 
-                if abs(best_theta - ubound) < float('1e-' + str(self.precision)):
+                if abs(best_theta - ubound) < float('1e-' + str(precision)):
                     return ubound
 
                 best_theta = ubound
                 lbound += (ubound - lbound) / 2
             else:
 
-                if abs(best_theta - lbound) < float('1e-' + str(self.precision)):
+                if abs(best_theta - lbound) < float('1e-' + str(precision)):
                     return lbound
 
                 best_theta = lbound

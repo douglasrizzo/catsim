@@ -21,10 +21,6 @@ class MaxItemStopper(Stopper):
         self.__max_itens = max_itens
 
     def stop(self, n_itens: int) -> bool:
+        """orelha"""
         if n_itens > self.__max_itens:
-            raise ValueError(
-                'More items than permitted were administered: {0} > {1}'.format(
-                    n_itens, self.__max_itens
-                )
-            )
-        return n_itens == self.__max_itens
+            raise ValueError('More items than permitted were administered: {0} > {1}'.format(n_itens, self.__max_itens))
