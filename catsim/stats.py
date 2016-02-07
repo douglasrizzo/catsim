@@ -1,33 +1,39 @@
-"""A bunch of statistical functions that I implemented just to show that I
-knew how they worked.
-"""
+"""Miscellaneous statistical functions"""
 
-import numpy as np
+import numpy
 
 
-def coefvariation(x, axis=0):
-    '''..math:: \\frac{\\sigma}{\\mu}'''
-    if not isinstance(x, np.matrix):
-        x = np.asarray(x)
+def coefvariation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
+    '''Calculates the coefficientof variation of the rows or columns of a matrix.
+    The coefficient of variation is given by the standard deviation divided by the mean of a variable:
 
-    mean = np.mean(x, axis=axis)
-    stddev = np.std(x, axis=axis)
+    .. math:: \\frac{\\sigma}{\\mu}
+
+    :param x: the data matrix
+    :param axis: `0` to calculate for columns, `1` for rows
+    :returns: a vector containing the coefficient of variations along the chosen axis
+    '''
+    if not isinstance(x, numpy.matrix):
+        x = numpy.asarray(x)
+
+    mean = numpy.mean(x, axis=axis)
+    stddev = numpy.std(x, axis=axis)
 
     # print('Means:', mean)
     # print('Std. Devs:', stddev)
 
     result = stddev / \
-        mean if axis == 0 else np.transpose(stddev) / np.transpose(mean)
+        mean if axis == 0 else numpy.transpose(stddev) / numpy.transpose(mean)
 
     return result
 
 
-def coefCorrelation(x):
+def coefCorrelation(x: numpy.ndarray):
     cov = covariance(x, False)
-    stddev = np.std(x, axis=0)
+    stddev = numpy.std(x, axis=0)
     n_obs, n_features = x.shape
 
-    corr = np.zeros([n_features, n_features])
+    corr = numpy.zeros([n_features, n_features])
 
     for i in range(n_features):
         for ii in range(i, n_features):
@@ -36,20 +42,21 @@ def coefCorrelation(x):
     return corr
 
 
-def covariance(x: np.ndarray, minus_one: bool=True):
+def covariance(x: numpy.ndarray, minus_one: bool=True):
     """Calculates the covariance matrix of another matrix
 
     :param x: a data matrix
     :param minus_one: subtract one from the total number of observations
+
     >>> from sklearn.datasets import load_iris
     >>> x = load_iris()['data']
-    >>> print(np.array_equal(covariance(x), np.cov(x.T)))
+    >>> print(numpy.array_equal(covariance(x), numpy.cov(x.T)))
     True
     """
-    x_means = np.mean(x, axis=0)
+    x_means = numpy.mean(x, axis=0)
     n_obs, n_features = x.shape
 
-    covars = np.zeros([n_features, n_features])
+    covars = numpy.zeros([n_features, n_features])
 
     for i in range(n_features):
         for ii in range(i, n_features):
@@ -63,16 +70,17 @@ def covariance(x: np.ndarray, minus_one: bool=True):
 
 
 def bincount(x):
-    """Count the number of occurrences from each integer in a list or 1-D :py:type:`np.ndarray`.
+    """Count the number of occurrences from each integer in a list or 1-D :py:class:`numpy.ndarray`.
     If there are gaps between the numbers, then the numbers in those gaps are given a 0 value of occurrences.
-    >>> bincount(np.array([-4, 0, 1, 1, 3, 2, 1, 5]))
+
+    >>> bincount(numpy.array([-4, 0, 1, 1, 3, 2, 1, 5]))
     array([1, 0, 0, 0, 1, 3, 1, 1, 0, 1], dtype=int32)
     """
-    x_max = np.max(x)
-    x_min = np.min(x)
+    x_max = numpy.max(x)
+    x_min = numpy.min(x)
     size = abs(x_max) + abs(x_min) + 1
 
-    count = np.zeros(size, dtype=np.int32)
+    count = numpy.zeros(size, dtype=numpy.int32)
 
     for i in x:
         count[i + abs(x_min)] += 1
@@ -80,7 +88,7 @@ def bincount(x):
     return count
 
 
-def scatter_matrix(data: np.ndarray) -> np.ndarray:
+def scatter_matrix(data: numpy.ndarray) -> numpy.ndarray:
     """Calculates the scatter matrix of a data matrix. The scatter matrix is an unnormalized
     version of the covariance matrix, in which the means of the observation values are subtracted.
 
@@ -91,8 +99,8 @@ def scatter_matrix(data: np.ndarray) -> np.ndarray:
     :param data: the data matrix
     :returns: the scatter matrix of the given data matrix
     """
-    mean_vector = np.mean(data, axis=0)
-    scatter = np.zeros((data.shape[1], data.shape[1]))
+    mean_vector = numpy.mean(data, axis=0)
+    scatter = numpy.zeros((data.shape[1], data.shape[1]))
     for i in range(data.shape[0]):
         scatter += (
             data[i, :].reshape(data.shape[1], 1) - mean_vector

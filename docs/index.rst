@@ -8,6 +8,8 @@ Welcome to catsim's documentation!
 
 :ref:`search`
 
+.. include:: ../README.rst
+
 Contents
 --------
 
@@ -16,5 +18,3 @@ Contents
     :glob:
 
     *
-
-.. include:: ../README.rst
