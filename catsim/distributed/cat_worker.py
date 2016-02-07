@@ -40,8 +40,7 @@ def start():
         # string_row = json.loads(cluster_socket.recv())
         # s = pandas.Series.from_csv(string_row, parse_dates=False)
         s = json.loads(cluster_socket.recv())
-        s[['Qtd. itens', 'Índice']] = s[
-            ['Qtd. itens', 'Índice']].astype(np.int64)
+        s[['Qtd. itens', 'Índice']] = s[['Qtd. itens', 'Índice']].astype(np.int64)
         s['r. max'] = np.float64(s['r. max'])
         s['Classificações'] = ' '.join(s['Classificações'].split()).split(' ')
         s['Classificações'] = np.array(s['Classificações'])
@@ -62,13 +61,19 @@ def start():
                     r_max=s['r. max'],
                     method=s['Método'],
                     optimization='DE',
-                    r_control='passive')
+                    r_control='passive'
+                )
                 t2 = time.time() - t1
 
-                sinkMessage = {'index': s['Índice'], 'date': t1, 'time': t2,
-                               'method': s['Método'], 'dataset': 'Sintética',
-                               'globalResults': globalResults,
-                               'localResults': localResults}
+                sinkMessage = {
+                    'index': s['Índice'],
+                    'date': t1,
+                    'time': t2,
+                    'method': s['Método'],
+                    'dataset': 'Sintética',
+                    'globalResults': globalResults,
+                    'localResults': localResults
+                }
 
                 sink_socket.send_pyobj(sinkMessage)
                 break
@@ -81,8 +86,7 @@ def start():
 if __name__ == '__main__':
     numWorkers = 0
     if len(sys.argv) > 1:
-        numWorkers = mp.cpu_count() if int(
-            sys.argv[1]) > mp.cpu_count() else int(sys.argv[1])
+        numWorkers = mp.cpu_count() if int(sys.argv[1]) > mp.cpu_count() else int(sys.argv[1])
     else:
         numWorkers = mp.cpu_count()
 

@@ -17,12 +17,10 @@ from catsim.distributed.misc import ventilator_port, sink_port, data_port, defau
 
 def relevantResults():
     # load existing CAT results and all clustering results
-    clusterResultsAux = catsim.misc.results.loadClusterResults(
-        'results_masters.csv')
+    clusterResultsAux = catsim.misc.results.loadClusterResults('results_masters.csv')
 
     # filter clustering results to those with n. of groups multiples of ten
-    clusterResults = pandas.DataFrame(
-        data=None, columns=clusterResultsAux.columns)
+    clusterResults = pandas.DataFrame(data=None, columns=clusterResultsAux.columns)
 
     for i in range(10, 251, 10):
         # if i == 250:
@@ -37,15 +35,11 @@ def relevantResults():
 
 def cases():
     # Itens Método Índice r.max
-    cases = pandas.DataFrame(
-        columns=['Qtd. itens', 'Método', 'Índice', 'r. max', 'Classificações'])
-    cases[['Qtd. itens', 'Índice']] = cases[
-        ['Qtd. itens', 'Índice']].astype(np.int64)
+    cases = pandas.DataFrame(columns=['Qtd. itens', 'Método', 'Índice', 'r. max', 'Classificações'])
+    cases[['Qtd. itens', 'Índice']] = cases[['Qtd. itens', 'Índice']].astype(np.int64)
     cases['r. max'] = cases['r. max'].astype(np.float64)
     clusterResults = relevantResults()
-    catResults = catsim.misc.results.loadGlobalCATResults(
-        'cat_results.csv').drop_duplicates(
-        subset=['Índice', 'r. max']).sort(['Índice', 'r. max'])
+    catResults = catsim.misc.results.loadGlobalCATResults('cat_results.csv').drop_duplicates(subset=['Índice', 'r. max']).sort(['Índice', 'r. max'])
     canonical_rmaxes = np.round(np.linspace(0.1, 1, 10, dtype=float), 1)
     itens = [20]
     methods = ['item_info']
@@ -57,20 +51,22 @@ def cases():
             for rmax in canonical_rmaxes:
                 for index, clusterResult in clusterResults.iterrows():
                     if processed_cases[
-                        (processed_cases['Qtd. itens'] == item) &
-                        (processed_cases['Método'] == method) &
-                        (processed_cases['Índice'] == index) &
-                        (processed_cases['r. max'] == rmax)
+                        (processed_cases['Qtd. itens'] == item) & (processed_cases['Método'] == method) & (processed_cases['Índice'] == index) & (
+                            processed_cases['r. max'] == rmax)
                     ].shape[0] == 0:
-                        cluster = str(clusterResult['Classificações']).strip(
-                            '[]').replace(',', '')
+                        cluster = str(clusterResult['Classificações']).strip('[]').replace(',', '')
                         cases = cases.append(
-                            pandas.DataFrame({'Qtd. itens': item,
-                                              'Método': method,
-                                              'Índice': index,
-                                              'r. max': rmax,
-                                              'Classificações': cluster},
-                                             index=[0]))
+                            pandas.DataFrame(
+                                {
+                                    'Qtd. itens': item,
+                                    'Método': method,
+                                    'Índice': index,
+                                    'r. max': rmax,
+                                    'Classificações': cluster
+                                },
+                                index=[0]
+                            )
+                        )
 
     return cases
 
@@ -78,13 +74,7 @@ def cases():
 def send_email():
     fromaddr = 'douglasrizzom@gmail.com'
     toaddrs = 'douglasrizzom@gmail.com'
-    msg = "\r\n".join([
-        "From: douglasrizzom@gmail.com",
-        "To: douglasrizzom@gmail.com",
-        "Subject: Finish",
-        "",
-        "The simulations finished!"
-    ])
+    msg = "\r\n".join(["From: douglasrizzom@gmail.com", "To: douglasrizzom@gmail.com", "Subject: Finish", "", "The simulations finished!"])
     username = 'douglasrizzom@gmail.com'
     password = 'douglasobeso'
 
@@ -101,9 +91,7 @@ def send_email():
 
 
 def indexes_and_rmaxes(clusterResults):
-    catResults = catsim.misc.results.loadGlobalCATResults(
-        'cat_results.csv').drop_duplicates(
-        subset=['Índice', 'r. max']).sort(['Índice', 'r. max'])
+    catResults = catsim.misc.results.loadGlobalCATResults('cat_results.csv').drop_duplicates(subset=['Índice', 'r. max']).sort(['Índice', 'r. max'])
 
     canonical_rmaxes = np.round(np.linspace(0.1, 1, 10, dtype=float), 1)
 
@@ -113,8 +101,7 @@ def indexes_and_rmaxes(clusterResults):
     # iterate through all cluster results that shoulb be simulated
     for index in clusterResults.index:
         # get rmaxes already simulated for this index
-        simulated_rmaxes = list(
-            np.round(catResults[catResults['Índice'] == index]['r. max'], 1))
+        simulated_rmaxes = list(np.round(catResults[catResults['Índice'] == index]['r. max'], 1))
 
         # filter only those rmax values that were not simulate
         not_simulated_rmaxes = []
@@ -141,8 +128,7 @@ def ventilate_datasets(datasets):
 
     while True:
         workerName = str(sender.recv())
-        print('....Sending data to ' + workerName + ' -- ' +
-              time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
+        print('....Sending data to ' + workerName + ' -- ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
         sender.send_pyobj(datasets)
 
     # Give 0MQ time to deliver
@@ -202,9 +188,7 @@ def ventilate_cases():
 
             buf = json.dumps(work.to_dict())
 
-            print('....Sending case ' + str(work_index) + ' to ' + workerName
-                  + ' -- ' + time.strftime('%Y-%m-%d %H:%M:%S',
-                                           time.localtime(time.time())))
+            print('....Sending case ' + str(work_index) + ' to ' + workerName + ' -- ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())))
 
             sender.send_pyobj(buf)
 
@@ -235,23 +219,16 @@ def start_sink():
         globalResults = s['globalResults']
         # localResults = s['localResults']
 
-        print('....Received results for case ' +
-              format(s['index']) + ', r. max ' +
-              format(globalResults['r_max']) + ' -- ' +
-              time.strftime('%Y-%m-%d %H:%M:%S',
-                            time.localtime(time.time())))
+        print(
+            '....Received results for case ' + format(s['index']) + ', r. max ' + format(globalResults['r_max']) + ' -- ' + time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime(time.time())
+            )
+        )
 
         catsim.misc.results.saveGlobalCATResults(
-            s['index'],
-            s['date'],
-            s['method'],
-            s['time'],
-            globalResults['Nº de grupos'],
-            globalResults['Qtd. Itens'],
-            globalResults['RMSE'],
-            globalResults['Overlap'],
-            globalResults['r_max'],
-            'cat_results.csv')
+            s['index'], s['date'], s['method'], s['time'], globalResults['Nº de grupos'], globalResults['Qtd. Itens'], globalResults['RMSE'],
+            globalResults['Overlap'], globalResults['r_max'], 'cat_results.csv'
+        )
 
         # for result in localResults:
         #     catsim.misc.results.saveLocalCATResults(
@@ -262,7 +239,7 @@ def start_sink():
         #         result['r_max'],
         #         'individual_cat_results.csv')
 
-    # Calculate and report duration of batch
+        # Calculate and report duration of batch
     tend = time.time()
     print("Total elapsed time: %d msec" % ((tend - tstart) * 1000))
 

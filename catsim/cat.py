@@ -43,25 +43,25 @@ def rmse(actual, predicted):
     return np.sqrt(np.mean((predicted - actual)**2))
 
 
-def overlap_rate(items, testSize):
+def overlap_rate(items: np.ndarray, test_size: int):
     """Test overlap rate:
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
 
-    :param items: a numpy array containing, in the 4th column, the number of
+    :param items: a matrix containing, in the 4th column, the number of
                   times each item was used in the tests.
-    :param testSize: an integer informing the number of items in a test.
+    :param test_size: an integer informing the number of items in a test.
     """
 
-    bankSize = items.shape[0]
+    bank_size = items.shape[0]
     varR = np.var(items[:, 3])
 
-    T = (bankSize / testSize) * varR + (testSize / bankSize)
+    T = (bank_size / test_size) * varR + (test_size / bank_size)
 
     return T
 
 
-def generateItemBank(items, itemtype='3PL', corr=0.5):
+def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
     """Generate a synthetic item bank whose parameters approximately follow
     real-world parameters, as proposed by [Bar10]_.
 
@@ -73,16 +73,18 @@ def generateItemBank(items, itemtype='3PL', corr=0.5):
 
     * pseudo-guessing: :math:`N(0.25,0.02)`
 
-    :param items: how many items are to be generated
-    :type items: int
+    :param n: how many items are to be generated
     :param itemtype: either ``1PL``, ``2PL`` or ``3PL`` for the one-, two- or
                      three-parameter logistic model
-    :type itemtype: string
     :param corr: the correlation between item discrimination and difficulty. If
                  ``itemtype == '1PL'``, it is ignored.
-    :type corr: float
-    :return: an ``itens x 3`` numerical matrix containing item parameters
+    :return: an ``n x 3`` numerical matrix containing item parameters
     :rtype: numpy.ndarray
+
+    >>> generate_item_bank(5, '1PL')
+    >>> generate_item_bank(5, '2PL')
+    >>> generate_item_bank(5, '3PL')
+    >>> generate_item_bank(5, '3PL', corr=0)
     """
 
     valid_itemtypes = ['1PL', '2PL', '3PL']
@@ -92,15 +94,14 @@ def generateItemBank(items, itemtype='3PL', corr=0.5):
 
     means = [0, 1.2]
     stds = [1, 0.25]
-    covs = [[stds[0] ** 2, stds[0] * stds[1] * corr],
-            [stds[0] * stds[1] * corr, stds[1] ** 2]]
+    covs = [[stds[0]**2, stds[0] * stds[1] * corr], [stds[0] * stds[1] * corr, stds[1]**2]]
 
-    b, a = np.random.multivariate_normal(means, covs, items).T
+    b, a = np.random.multivariate_normal(means, covs, n).T
 
     if itemtype not in ['2PL', '3PL']:
-        a = np.ones((500))
+        a = np.ones((n))
     if itemtype == '3PL':
-        c = np.random.normal(.25, .02, items)
+        c = np.random.normal(.25, .02, n)
     else:
-        c = np.zeros((500))
+        c = np.zeros((n))
     return np.array([a, b, c]).T

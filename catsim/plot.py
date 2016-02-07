@@ -44,12 +44,17 @@ def plot_irt(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):
         plt.figure()
         if title is not None:
             plt.title(title, size=18)
-        plt.annotate('$a = ' + format(a) + '$\n$b = ' + format(
-            b) + '$\n$c = ' + format(c) + '$',
-            bbox=dict(facecolor='white',
-                      alpha=1),
+        plt.annotate(
+            '$a = ' + format(a) + '$\n$b = ' + format(
+                b
+            ) + '$\n$c = ' + format(c) + '$',
+            bbox=dict(
+                facecolor='white',
+                alpha=1
+            ),
             xy=(.75, .05),
-            xycoords='axes fraction')
+            xycoords='axes fraction'
+        )
         plt.xlabel(r'$\theta$')
         plt.grid()
         plt.legend(loc='best')
@@ -80,12 +85,17 @@ def plot_irt(a=1, b=0, c=0, title=None, ptype='icc', filepath=None):
 
         ax1.set_title(title, size=18)
 
-        ax2.annotate('$a = ' + format(a) + '$\n$b = ' + format(
-            b) + '$\n$c = ' + format(c) + '$',
-            bbox=dict(facecolor='white',
-                      alpha=1),
+        ax2.annotate(
+            '$a = ' + format(a) + '$\n$b = ' + format(
+                b
+            ) + '$\n$c = ' + format(c) + '$',
+            bbox=dict(
+                facecolor='white',
+                alpha=1
+            ),
             xy=(.75, .05),
-            xycoords='axes fraction')
+            xycoords='axes fraction'
+        )
         ax2.legend(loc='best', framealpha=0)
 
     if filepath is not None:
@@ -111,13 +121,10 @@ def gen3D_dataset_scatter(title, items, path):
 
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(__column(items.tolist(), 0), __column(items.tolist(), 1),
-               __column(items.tolist(), 2),
-               s=10)
+    ax.scatter(__column(items.tolist(), 0), __column(items.tolist(), 1), __column(items.tolist(), 2), s=10)
     ax.set_title(title)
     ax.set_xlabel('a')
     ax.set_ylabel('b')
     ax.set_zlabel('c')
 
-    plt.savefig(path + title + '.pdf',
-                bbox_inches='tight')
+    plt.savefig(path + title + '.pdf', bbox_inches='tight')
