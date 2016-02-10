@@ -7,7 +7,7 @@ application of adaptive tests. Most of this module is based on the work of
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
 import numpy as np
-from catsim import irt
+from catsim import irt, cat
 from catsim.initialization import Initializer, RandomInitializer
 from catsim.selection import Selector, MaxInfoSelector
 from catsim.reestimation import Estimator, HillClimbingEstimator
@@ -30,34 +30,24 @@ class Simulator:
         # adds a column for each item's exposure rate and their cluster membership
         items = np.append(items, np.zeros([items.shape[0], 1]), axis=1)
 
-        self.items = items
+        self.__items = items
+        self.__estimations = []
+        self.__administered_items = []
+
+        # `examinees` is passed to its special setter
         self.examinees = examinees
-        self.estimations = []
-        self.administered_items = []
 
     @property
     def items(self):
         return self.__items
 
-    @items.setter
-    def items(self, items):
-        self.__items = items
-
     @property
     def administered_items(self):
         return self.__administered_items
 
-    @administered_items.setter
-    def administered_items(self, administered_items):
-        self.__administered_items = administered_items
-
     @property
     def estimations(self):
         return self.__estimations
-
-    @estimations.setter
-    def estimations(self, estimations):
-        self.__estimations = estimations
 
     @property
     def examinees(self):
@@ -90,7 +80,7 @@ class Simulator:
 
         for true_theta in self.examinees:
             est_theta = initializer.initialize()
-            response_vector, administered_items = [], []
+            response_vector, administered_items, est_thetas = [], [], []
 
             while not stopper.stop(len(administered_items)):
                 selected_item = selector.select(self.items, administered_items, est_theta)
@@ -107,18 +97,19 @@ class Simulator:
                 administered_items.append(selected_item)
 
                 if len(set(response_vector)) == 1:
-                    pass
+                    est_theta = cat.dodd(est_theta, self.items, response)
                 else:
-                    est_theta = estimator.estimate(
-                        response_vector, self.items[administered_items], est_theta
-                    )
+                    est_theta = estimator.estimate(response_vector, self.items[administered_items],
+                                                   est_theta)
 
                 # update the exposure value for this item
                 self.items[administered_items, 3] = (
                     (self.items[administered_items, 3] * len(self.examinees)) + 1
                 ) / len(self.examinees)
 
-            self.__estimations.append(est_theta)
+                est_thetas.append(est_theta)
+
+            self.__estimations.append(est_thetas)
             self.__administered_items.append(administered_items)
 
 
