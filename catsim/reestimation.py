@@ -236,39 +236,3 @@ class DifferentialEvolutionEstimator(Estimator):
             ],
             args=(response_vector, administered_items)
         ).x[0]
-
-# class BayesianEstimator(Estimator):
-#     """Bayesian estimator for maximizing the likelihood function
-#
-#     .. math:: P(\\theta_j | X_{Ij}, a_I, b_I, c_I) = P(X_{Ij} | \\theta_j, a_I, b_I, c_I)P(\\theta_j|\\eta)
-#
-#     """
-#
-#     def __init__(self):
-#         super(BayesianEstimator, self).__init__()
-#
-#     def estimate(
-#         self,
-#         response_vector: list,
-#         administered_items: numpy.ndarray,
-#         current_theta: float=None
-#     ):
-#         pass
-#
-#     def model(thetas, administered_items):
-#         # I think this is how I pass the parameters in administered_items to PyMC
-#         a = pymc.Normal("a", mu=1, tau=1, value=administered_items[:, 0])
-#         b = pymc.Normal("b", mu=0, tau=1, value=administered_items[:, 1])
-#         c = pymc.Normal("c", mu=.25, tau=.02, value=administered_items[:, 2])
-#
-#         theta_prior = pymc.Normal('theta_prior', mu=0.0, tau=1.0)
-#         answers = pymc.Bernoulli('answers', p=irt.tpm, value=thetas, observed=True)
-#
-#         mod = pymc.Model([theta_prior, answers, a, b, c])
-#         mc = pymc.MCMC(mod)
-#         mc.sample(iter=5000, burn=1000)
-#         pymc.Matplot.histogram(
-#             mc.trace('theta_prior')[:],
-#             "theta prior; size=100",
-#             datarange=(0.2, 0.9)
-#         )
