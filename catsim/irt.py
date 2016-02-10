@@ -187,7 +187,7 @@ def validate_item_bank(items, raise_err=False):
         if any(items[:, 2] > 1):
             err += '\nThere are items with pseudo-guessing > 1'
 
-    if raise_err:
+    if len(err) > 0 and raise_err:
         raise ValueError(err)
 
     print(err)

@@ -1,7 +1,7 @@
-import numpy as np
+import numpy
 
 
-def dodd(theta, items, correct):
+def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     """Method proposed by [Dod90]_ for the reestimation of
     :math:`\\hat{\\theta}` when the response vector is composed entirely of 1s
     or 0s
@@ -19,6 +19,7 @@ def dodd(theta, items, correct):
                   difficulty levels necessary for the method.
     :param correct: a boolean value informing whether or not the examinee
                     correctly answered the current item.
+    :returns: a new estimation for :math:`\\theta`
 
     .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
        Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
@@ -40,10 +41,10 @@ def rmse(actual, predicted):
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return np.sqrt(np.mean((predicted - actual)**2))
+    return numpy.sqrt(numpy.mean((predicted - actual)**2))
 
 
-def overlap_rate(items: np.ndarray, test_size: int):
+def overlap_rate(items: numpy.ndarray, test_size: int):
     """Test overlap rate:
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
@@ -54,7 +55,7 @@ def overlap_rate(items: np.ndarray, test_size: int):
     """
 
     bank_size = items.shape[0]
-    varR = np.var(items[:, 3])
+    varR = numpy.var(items[:, 3])
 
     T = (bank_size / test_size) * varR + (test_size / bank_size)
 
@@ -96,15 +97,15 @@ def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
     stds = [1, 0.25]
     covs = [[stds[0]**2, stds[0] * stds[1] * corr], [stds[0] * stds[1] * corr, stds[1]**2]]
 
-    b, a = np.random.multivariate_normal(means, covs, n).T
+    b, a = numpy.random.multivariate_normal(means, covs, n).T
 
     if itemtype not in ['2PL', '3PL']:
-        a = np.ones((n))
+        a = numpy.ones((n))
     if itemtype == '3PL':
-        c = np.random.normal(.25, .02, n)
+        c = numpy.random.normal(.25, .02, n)
     else:
-        c = np.zeros((n))
-    return np.array([a, b, c]).T
+        c = numpy.zeros((n))
+    return numpy.array([a, b, c]).T
 
 
 if __name__ == '__main__':
