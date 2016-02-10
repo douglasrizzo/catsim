@@ -36,6 +36,15 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx_autodoc_annotation',
+    # 'matplotlib.sphinxext.mathmpl',
+    'matplotlib.sphinxext.only_directives',
+    'matplotlib.sphinxext.plot_directive',
+    # 'matplotlib.sphinxext.ipython_directive',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    # 'ipython_console_highlighting',
+    # 'inheritance_diagram',
+    'numpydoc'
 ]
 
 intersphinx_mapping = {

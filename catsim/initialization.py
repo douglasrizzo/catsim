@@ -27,7 +27,11 @@ class RandomInitializer(Initializer):
 
         available_distributions = ['uniform', 'normal']
         if dist_type not in available_distributions:
-            raise ValueError('{0} not in available distributions {1}'.format(dist_type, available_distributions))
+            raise ValueError(
+                '{0} not in available distributions {1}'.format(
+                    dist_type, available_distributions
+                )
+            )
 
         self.__dist_type = dist_type
         self.__dist_params = dist_params

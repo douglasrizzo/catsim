@@ -99,8 +99,9 @@ class Simulator:
                 if len(set(response_vector)) == 1:
                     est_theta = cat.dodd(est_theta, self.items, response)
                 else:
-                    est_theta = estimator.estimate(response_vector, self.items[administered_items],
-                                                   est_theta)
+                    est_theta = estimator.estimate(
+                        response_vector, self.items[administered_items], est_theta
+                    )
 
                 # update the exposure value for this item
                 self.items[administered_items, 3] = (

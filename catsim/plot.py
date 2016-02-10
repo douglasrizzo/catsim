@@ -1,8 +1,8 @@
 """Module with functions for plotting IRT-related results."""
 
 import os
-from catsim import irt
 import numpy
+from catsim import irt
 import matplotlib.pyplot as plt
 from catsim.simulation import Simulator
 from mpl_toolkits.mplot3d import Axes3D
@@ -23,18 +23,24 @@ def item_curve(
 ):
     """Plots 'Item Response Theory'-related item plots
 
+    .. plot::
+
+        from catsim.cat import generate_item_bank
+        from catsim import plot
+        item = generate_item_bank(1)[0]
+        plot.item_curve(item[0], item[1], item[2], ptype='icc')
+        plot.item_curve(item[0], item[1], item[2], ptype='iic')
+        plot.item_curve(item[0], item[1], item[2], ptype='both')
+
     :param a: item discrimination parameter
     :param b: item difficulty parameter
     :param c: item pseudo-guessing parameter
     :param title: plot title
-    :param ptype: 'icc' for the item characteristic curve, 'iif' for the item
+    :param ptype: 'icc' for the item characteristic curve, 'iic' for the item
                   information curve or 'both' for both curves in the same plot
     :param filepath: saves the plot in the given path
     """
-    available_types = ['icc', 'iif', 'both']
-
-    if not os.path.exists(os.path.dirname(filepath)):
-        os.makedirs(os.path.dirname(filepath))
+    available_types = ['icc', 'iic', 'both']
 
     if ptype not in available_types:
         raise ValueError('\'{0}\' not in available plot types: {1}'.format(ptype, available_types))
@@ -46,8 +52,12 @@ def item_curve(
         p_thetas.append(irt.tpm(theta, a, b, c))
         i_thetas.append(irt.inf(theta, a, b, c))
 
-    if ptype in ['icc', 'iif']:
+    if ptype in ['icc', 'iic']:
         plt.figure()
+
+        if title is not None:
+            plt.title(title, size=18)
+
         plt.annotate(
             '$a = ' + format(a) + '$\n$b = ' + format(
                 b
@@ -66,16 +76,10 @@ def item_curve(
         if ptype == 'icc':
             plt.ylabel(r'$P(\theta)$')
             plt.plot(thetas, p_thetas)
-            if title is not None:
-                title = 'Item characteristic curve'
 
-        elif ptype == 'iif':
+        elif ptype == 'iic':
             plt.ylabel(r'$I(\theta)$')
             plt.plot(thetas, i_thetas)
-            if title is not None:
-                title = 'Item information curve'
-
-        plt.title(title, size=18)
 
     elif ptype == 'both':
         fig, ax1 = plt.subplots()
@@ -115,11 +119,17 @@ def item_curve(
         plt.savefig(filepath, bbox_inches='tight')
 
     plt.show()
-    plt.close()
 
 
-def gen3D_dataset_scatter(items: numpy.ndarray, title: str='Item parameters', filepath: str=None):
+def gen3D_dataset_scatter(items: numpy.ndarray, title: str=None, filepath: str=None):
     """Generate the item matrix tridimensional dataset scatter plot
+
+    .. plot::
+
+        from catsim.cat import generate_item_bank
+        from catsim import plot
+        items = generate_item_bank(100)
+        plot.gen3D_dataset_scatter(items)
 
     :param items: the item matrix
     :param title: the scatter plot title
@@ -136,7 +146,8 @@ def gen3D_dataset_scatter(items: numpy.ndarray, title: str='Item parameters', fi
         s=10
     )
 
-    plt.title(title, size=18)
+    if title is not None:
+        plt.title(title, size=18)
 
     ax.set_xlabel('a')
     ax.set_ylabel('b')
@@ -148,7 +159,6 @@ def gen3D_dataset_scatter(items: numpy.ndarray, title: str='Item parameters', fi
         plt.savefig(filepath, bbox_inches='tight')
 
     plt.show()
-    plt.close()
 
 
 def test_progress(
@@ -162,6 +172,24 @@ def test_progress(
 ):
     """Generates a plot representing an examinee's test progress
 
+    .. plot::
+
+        from catsim.cat import generate_item_bank
+        from catsim import plot
+        from catsim.initialization import RandomInitializer
+        from catsim.selection import MaxInfoSelector
+        from catsim.reestimation import HillClimbingEstimator
+        from catsim.stopping import MaxItemStopper
+        from catsim.simulation import Simulator
+
+        initializer = RandomInitializer()
+        selector = MaxInfoSelector()
+        estimator = HillClimbingEstimator()
+        stopper = MaxItemStopper(20)
+        s = Simulator(generate_item_bank(100), 10)
+        s.simulate(initializer, selector, estimator, stopper)
+        plot.test_progress(simulator=s, index=0)
+
     :param title: the plot title
     :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees' proficiencies and a list of administered items for each examinee
     :param index: the index of the examinee in the simulator whose plot is to be done
@@ -174,7 +202,10 @@ def test_progress(
         raise ValueError('Not a single plottable object was passed.')
 
     plt.figure()
-    plt.title(title, size=18)
+
+    if title is not None:
+        plt.title(title, size=18)
+
     if simulator is not None and index is not None:
         thetas = simulator.estimations[index]
         administered_items = simulator.items[simulator.administered_items[index]]
@@ -207,4 +238,3 @@ def test_progress(
         plt.savefig(filepath, bbox_inches='tight')
 
     plt.show()
-    plt.close()
