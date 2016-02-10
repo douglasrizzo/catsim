@@ -3,7 +3,7 @@ from catsim.cat import generate_item_bank
 from catsim import irt
 from catsim import plot
 from catsim.initialization import RandomInitializer
-from catsim.selection import MaxInfoSelector
+from catsim.selection import MaxInfoSelector, ClusterSelector
 from catsim.reestimation import HillClimbingEstimator, BinarySearchEstimator, DifferentialEvolutionEstimator, FMinEstimator
 from catsim.stopping import MaxItemStopper
 from catsim.simulation import Simulator
@@ -65,6 +65,24 @@ class TestStuff(unittest.TestCase):
             Simulator(
                 generate_item_bank(100), 10
             ).simulate(initializer, selector, estimator, stopper)
+
+        assert True
+
+    def test_cism(self):
+        from sklearn.cluster import KMeans
+
+        items = generate_item_bank(100)
+        clusters = KMeans(n_clusters=8).fit_predict(items)
+
+        initializer = RandomInitializer()
+        selector = ClusterSelector(clusters=clusters, r_max=.2)
+        estimator = HillClimbingEstimator()
+        stopper = MaxItemStopper(20)
+        simulator = Simulator(items, 10)
+        simulator.simulate(initializer, selector, estimator, stopper)
+
+        plot.test_progress(simulator=simulator, index=0)
+        plot.test_progress(simulator=simulator, index=len(simulator.examinees) - 1)
 
         assert True
 
