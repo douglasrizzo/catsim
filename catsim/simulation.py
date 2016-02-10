@@ -6,12 +6,12 @@ application of adaptive tests. Most of this module is based on the work of
    selection rules in computerized adaptive testing. Applied Psychological
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
-import numpy as np
+import numpy
 from catsim import irt, cat
-from catsim.initialization import Initializer, RandomInitializer
-from catsim.selection import Selector, MaxInfoSelector
-from catsim.reestimation import Estimator, HillClimbingEstimator
-from catsim.stopping import Stopper, MaxItemStopper
+from catsim.initialization import Initializer
+from catsim.selection import Selector
+from catsim.reestimation import Estimator
+from catsim.stopping import Stopper
 
 
 class Simulator:
@@ -24,11 +24,11 @@ class Simulator:
                       :math:`\\theta_0` values
     """
 
-    def __init__(self, items: np.ndarray, examinees):
+    def __init__(self, items: numpy.ndarray, examinees):
         irt.validate_item_bank(items)
 
         # adds a column for each item's exposure rate and their cluster membership
-        items = np.append(items, np.zeros([items.shape[0], 1]), axis=1)
+        items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
         self.__items = items
         self.__estimations = []
@@ -56,9 +56,9 @@ class Simulator:
     @examinees.setter
     def examinees(self, examinees):
         if type(examinees) == int:
-            self.__examinees = np.random.normal(0, 1, examinees)
+            self.__examinees = numpy.random.normal(0, 1, examinees)
         elif type(examinees) == list:
-            self.__examinees = np.array(examinees)
+            self.__examinees = numpy.array(examinees)
 
     def simulate(
         self, initializer: Initializer, selector: Selector, estimator: Estimator, stopper: Stopper
@@ -70,6 +70,10 @@ class Simulator:
         :param estimator: an estimator that reestimates examinees proficiencies after each item is applied
         :param stopper: an object with a stopping criteria for the test
 
+        >>> from catsim.initialization import RandomInitializer
+        >>> from catsim.selection import MaxInfoSelector
+        >>> from catsim.reestimation import HillClimbingEstimator
+        >>> from catsim.stopping import MaxItemStopper
         >>> from catsim.cat import generate_item_bank
         >>> initializer = RandomInitializer()
         >>> selector = MaxInfoSelector()
@@ -90,7 +94,7 @@ class Simulator:
                 response = irt.tpm(
                     true_theta, self.items[selected_item][0], self.items[selected_item][1],
                     self.items[selected_item][2]
-                ) >= np.random.uniform()
+                ) >= numpy.random.uniform()
 
                 response_vector.append(response)
                 # adds the administered item to the pool of administered items
@@ -103,9 +107,12 @@ class Simulator:
                         response_vector, self.items[administered_items], est_theta
                     )
 
+                administered_matrix = numpy.array(self.administered_items, dtype=numpy.int32)
+
                 # update the exposure value for this item
-                self.items[administered_items, 3] = (
-                    (self.items[administered_items, 3] * len(self.examinees)) + 1
+                # r = number of tests item has been used / total number of tests
+                self.items[selected_item, 3] = numpy.sum(
+                    administered_matrix == selected_item
                 ) / len(self.examinees)
 
                 est_thetas.append(est_theta)

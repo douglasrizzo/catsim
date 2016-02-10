@@ -20,9 +20,12 @@ class Initializer:
 
 
 class RandomInitializer(Initializer):
-    """Randomly initializes the first estimate of an examinee's proficiency"""
+    """Randomly initializes the first estimate of an examinee's proficiency
 
-    def __init__(self, dist_type='uniform', dist_params=(-5, 5)):
+    :param dist_type: either `uniform` or `normal`
+    :param dist_params: a tuple containing minimum and maximum values for the uniform distribution (in no particular order) or the average and standard deviation values for the normal distribution (in this particular order)."""
+
+    def __init__(self, dist_type: str='uniform', dist_params: tuple=(-5, 5)):
         super(RandomInitializer, self).__init__()
 
         available_distributions = ['uniform', 'normal']
@@ -36,8 +39,26 @@ class RandomInitializer(Initializer):
         self.__dist_type = dist_type
         self.__dist_params = dist_params
 
-    def initialize(self):
+    def initialize(self) -> float:
+        """Generates a value using the chosen distribution and parameters
+
+        :returns: a proficiency value generated from the chosen distribution using the passed parameters"""
         if self.__dist_type == 'uniform':
             return numpy.random.uniform(min(self.__dist_params), max(self.__dist_params))
         elif self.__dist_type == 'normal':
             return numpy.random.normal(self.__dist_params[0], self.dist_params[1])
+
+
+class FixedPointInitializer(Initializer):
+    "Initializes every proficiency at the same point."
+
+    def __init__(self, start: float):
+        super(FixedPointInitializer, self).__init__()
+
+        self.__start = start
+
+    def initialize(self) -> float:
+        """Returns the same proficiency value that was passed to the constructor of the initializer
+
+        :returns: the same proficiency value that was passed to the constructor of the initializer"""
+        return self.__start

@@ -1,4 +1,5 @@
 import numpy
+import typing
 
 
 def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
@@ -31,27 +32,33 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
-def rmse(actual, predicted):
-    """Root mean squared error:
+def rmse(actual: typing.Iterable[float], predicted: typing.Iterable[float]):
+    """Root mean squared error, a common value used when measuring the precision with which a computerized adaptive test estimates examinees proficiencies. The value is calculated by:
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+
     :param actual: a list or 1-D numpy array containing the true proficiency values
     :param predicted: a list or 1-D numpy array containing the estimated proficiency values
+    :returns: the root mean squared error between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
     return numpy.sqrt(numpy.mean((predicted - actual)**2))
 
 
-def overlap_rate(items: numpy.ndarray, test_size: int):
-    """Test overlap rate:
+def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
+    """Test overlap rate, an average measure of how much of the test two examinees take is equal. It is given by:
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
+
+    If, for example :math:`T = 0.5`, it means that the tests of two random examinees have 50% of equal items.
 
     :param items: a matrix containing, in the 4th column, the number of
                   times each item was used in the tests.
     :param test_size: an integer informing the number of items in a test.
+    :returns: test overlap rate.
     """
 
     bank_size = items.shape[0]
