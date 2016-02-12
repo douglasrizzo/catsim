@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='catsim',
-    version='1.2a',
+    version='0.8',
     description='Computerized Adaptive Testing Simulator',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
