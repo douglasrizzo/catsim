@@ -86,8 +86,12 @@ class Simulator:
             est_theta = initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
 
-            while not stopper.stop(len(administered_items)):
-                selected_item = selector.select(self.items, administered_items, est_theta)
+            while not stopper.stop(self.items[administered_items], est_thetas):
+                try:
+                    selected_item = selector.select(self.items, administered_items, est_theta)
+                except:
+                    print(len(administered_items))
+                    raise
 
                 # simulates the examinee's response via the three-parameter
                 # logistic function
@@ -107,12 +111,17 @@ class Simulator:
                         response_vector, self.items[administered_items], est_theta
                     )
 
-                administered_matrix = numpy.array(self.administered_items, dtype=numpy.int32)
+                # flatten the list of lists so that we can count occurrences of items easier
+                flattened_administered_items = [
+                    administered_item
+                    for administered_list in self.administered_items
+                    for administered_item in administered_list
+                ]
 
                 # update the exposure value for this item
                 # r = number of tests item has been used / total number of tests
                 self.items[selected_item, 3] = numpy.sum(
-                    administered_matrix == selected_item
+                    flattened_administered_items == selected_item
                 ) / len(self.examinees)
 
                 est_thetas.append(est_theta)
