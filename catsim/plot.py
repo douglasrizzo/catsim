@@ -191,7 +191,6 @@ def test_progress(
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(initializer, selector, estimator, stopper)
         plot.test_progress(simulator=s, index=0)
-        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0])
         plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], see=True)
 
     :param title: the plot title
