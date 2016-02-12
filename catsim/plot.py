@@ -32,6 +32,9 @@ def item_curve(
         plot.item_curve(item[0], item[1], item[2], ptype='iic')
         plot.item_curve(item[0], item[1], item[2], ptype='both')
 
+    When both curves are plotted in the same figure, the figure has no grid,
+    since each curve has a different scale.
+
     :param a: item discrimination parameter
     :param b: item difficulty parameter
     :param c: item pseudo-guessing parameter
