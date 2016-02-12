@@ -2,14 +2,20 @@
 
 On the mathematical domain, IRT allows us to calculate the probability with which an examinee might answer an item correctly. For that both items and examinees are modelled using numerical parameters. This allows for the estimation and analysis of examinees proficiencies on the same scale as items difficulties. It also allows for the quality of items to be judged by the values of their parameters.
 
-This module containing functions pertaining to the Item Response Theory logistic models."""
+This module containing functions pertaining to the Item Response Theory logistic models.
+
+.. [Ayala2009] De Ayala, R. J. (2009). The Theory and Practice of Item Response Theory. New York: Guilford Press. Retrieved from http://books.google.com/books?id=-k36zbOBa28C&pgis=1
+
+.. [Thissen00] Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), Computerized adaptive testing: A primer (2nd ed., pp. 159–184). Lawrence Erlbaum Associates Publishers.
+
+"""
 
 import math
 import numpy
 
 
 def tpm(theta: float, a: float, b: float, c: float=0) -> float:
-    """Item Response Theory three-parameter logistic function:
+    """Item Response Theory three-parameter logistic function [Ayala2009]_:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{Da_i(\\theta-b_i)}}
 
@@ -39,8 +45,45 @@ def tpm(theta: float, a: float, b: float, c: float=0) -> float:
         )
 
 
+def see(theta: float, items: numpy.ndarray) -> float:
+    """Computes the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\\theta` value [Ayala2009]_:
+
+    .. math:: SEE = \\frac{1}{I(\\theta)}
+
+    where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
+
+    :param theta: a proficiency value.
+    :param items: a matrix containing item parameters.
+    :returns: the standard error of estimation at `theta` for a test represented by `items`
+    """
+    return 1 / math.sqrt(test_info(theta, items))
+
+
+def test_info(theta: float, items: numpy.ndarray):
+    """Computes the test information of a test at a specific :math:`\\theta` value [Ayala2009]_:
+
+    .. math:: I(\\theta) = \\sum_{j \\in J} I_j(\\theta)
+
+    where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the item information of :math:`j` at aspecific :math:`\\theta` value.
+
+    :param theta: a proficiency value.
+    :param items: a matrix containing item parameters.
+    :returns: the test information at `theta` for a test represented by `items`
+    """
+    return sum([inf(theta, item[0], item[1], item[2]) for item in items])
+
+# 
+# def reliability(theta: float, items: numpy.ndarray):
+#     """ Computes test reliability [Thissen00]_, given by
+#
+#     .. math:: 1 - \\frac{1}{I(\\theta)}
+#     """
+#     # return 1 - see(theta, items)**2
+#     return 1 - (1 / test_info(theta, items))
+
+
 def inf(theta: float, a: float, b: float, c: float=0) -> float:
-    """Calculates the information value of an item using the Item Response Theory three-parameter logistic model function:
+    """Calculates the information value of an item using the Item Response Theory three-parameter logistic model function [Ayala2009]_:
 
     .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
 
@@ -69,7 +112,7 @@ def inf(theta: float, a: float, b: float, c: float=0) -> float:
 
 def logLik(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
     """Calculates the log-likelihood of an estimated proficiency, given a
-    response vector and the parameters of the answered items.
+    response vector and the parameters of the answered items [Ayala2009]_.
 
     The likelihood function of a given :math:`\\theta` value given the answers to :math:`I` items is given by:
 
