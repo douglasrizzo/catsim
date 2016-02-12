@@ -46,7 +46,8 @@ class HillClimbingEstimator(Estimator):
         self.__iters = 0
 
     @property
-    def estimations(self):
+    def evaluations(self):
+        """Count the number of function evaluations during the most recent estimation process"""
         return self.__iters
 
     def estimate(
@@ -123,7 +124,8 @@ class BinarySearchEstimator(Estimator):
         self.__iters = 0
 
     @property
-    def estimations(self):
+    def evaluations(self):
+        """Count the number of function evaluations during the most recent estimation process"""
         return self.__iters
 
     def estimate(
@@ -224,6 +226,7 @@ class DifferentialEvolutionEstimator(Estimator):
 
     @property
     def evaluations(self):
+        """Count the number of function evaluations during the most recent estimation process"""
         return self.__iters
 
     def estimate(
