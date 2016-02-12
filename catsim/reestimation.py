@@ -43,6 +43,11 @@ class HillClimbingEstimator(Estimator):
         super(HillClimbingEstimator, self).__init__()
         self.__precision = precision
         self.__verbose = verbose
+        self.__iters = 0
+
+    @property
+    def estimations(self):
+        return self.__iters
 
     def estimate(
         self,
@@ -72,7 +77,7 @@ class HillClimbingEstimator(Estimator):
         best_theta = -float('inf')
         max_ll = -float('inf')
 
-        iters = 0
+        self.__iters = 0
 
         for i in range(10):
             intervals = numpy.linspace(lbound, ubound, 10)
@@ -81,13 +86,13 @@ class HillClimbingEstimator(Estimator):
                 print('Interval size: ' + str(intervals[1] - intervals[0]))
 
             for ii in intervals:
-                iters += 1
+                self.__iters += 1
                 ll = irt.logLik(ii, response_vector, administered_items)
                 if ll > max_ll:
                     max_ll = ll
 
                     if self.__verbose:
-                        print('Iteration: {0}, Theta: {1}, LL: {2}'.format(iters, ii, ll))
+                        print('Iteration: {0}, Theta: {1}, LL: {2}'.format(self.__iters, ii, ll))
 
                     if abs(best_theta - ii) < float('1e-' + str(self.__precision)):
                         return ii
@@ -115,6 +120,11 @@ class BinarySearchEstimator(Estimator):
         super(BinarySearchEstimator, self).__init__()
         self.__precision = precision
         self.__verbose = verbose
+        self.__iters = 0
+
+    @property
+    def estimations(self):
+        return self.__iters
 
     def estimate(
         self,
@@ -141,15 +151,15 @@ class BinarySearchEstimator(Estimator):
         lbound = min(administered_items[:, 1])
         ubound = max(administered_items[:, 1])
         best_theta = -float('inf')
-        iters = 0
+        self.__iters = 0
 
         while True:
-            iters += 1
+            self.__iters += 1
             if self.__verbose:
                 print('Bounds: ' + str(lbound) + ' ' + str(ubound))
                 print(
                     'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                        iters, best_theta, irt.logLik(
+                        self.__iters, best_theta, irt.logLik(
                             best_theta, response_vector, administered_items
                         )
                     )
@@ -210,6 +220,11 @@ class DifferentialEvolutionEstimator(Estimator):
         super(DifferentialEvolutionEstimator, self).__init__()
         self.__lower_bound = min(bounds)
         self.__upper_bound = max(bounds)
+        self.__iters = 0
+
+    @property
+    def evaluations(self):
+        return self.__iters
 
     def estimate(
         self,
@@ -229,10 +244,14 @@ class DifferentialEvolutionEstimator(Estimator):
         :rtype: float
         """
 
-        return differential_evolution(
+        res = differential_evolution(
             irt.negativelogLik,
             bounds=[
                 [self.__lower_bound * 2, self.__upper_bound * 2]
             ],
             args=(response_vector, administered_items)
-        ).x[0]
+        )
+
+        self.__iters = res.nfev
+
+        return res.x[0]
