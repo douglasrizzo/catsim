@@ -1,11 +1,22 @@
+"""Functions used specifically during the application/simulation of computerized adaptive tests.
+
+.. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item
+   selection rules in computerized adaptive testing. Applied Psychological
+   Measurement, v. 34, n. 6, p. 438-452, 2010.
+
+.. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
+  Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
+  Scale Model. Applied Psychological Measurement, 14(4), 355-366.
+  http://doi.org/10.1177/014662169001400403
+"""
+
 import numpy
 import typing
 
 
 def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
-    """Method proposed by [Dod90]_ for the reestimation of
-    :math:`\\hat{\\theta}` when the response vector is composed entirely of 1s
-    or 0s
+    """Method proposed by [Dod90]_ for the reestimation of :math:`\\hat{\\theta}`
+    when the response vector is composed entirely of 1s or 0s
 
     .. math::
 
@@ -21,11 +32,6 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     :param correct: a boolean value informing whether or not the examinee
                     correctly answered the current item.
     :returns: a new estimation for :math:`\\theta`
-
-    .. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
-       Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
-       Scale Model. Applied Psychological Measurement, 14(4), 355-366.
-       http://doi.org/10.1177/014662169001400403
     """
     b = items[:, 1]
 
@@ -33,7 +39,7 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
 
 
 def rmse(actual: typing.Iterable[float], predicted: typing.Iterable[float]):
-    """Root mean squared error, a common value used when measuring the precision with which a computerized adaptive test estimates examinees proficiencies. The value is calculated by:
+    """Root mean squared error, a common value used when measuring the precision with which a computerized adaptive test estimates examinees proficiencies [Bar10]_. The value is calculated by:
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
@@ -49,7 +55,7 @@ def rmse(actual: typing.Iterable[float], predicted: typing.Iterable[float]):
 
 
 def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
-    """Test overlap rate, an average measure of how much of the test two examinees take is equal. It is given by:
+    """Test overlap rate, an average measure of how much of the test two examinees take is equal [Bar10]_. It is given by:
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
 
