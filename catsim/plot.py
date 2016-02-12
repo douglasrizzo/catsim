@@ -168,6 +168,8 @@ def test_progress(
     thetas: list=None,
     administered_items: numpy.ndarray=None,
     true_theta: float=None,
+    see: bool=False,
+    reliability: bool=False,
     filepath: str=None
 ):
     """Generates a plot representing an examinee's test progress
@@ -189,6 +191,8 @@ def test_progress(
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(initializer, selector, estimator, stopper)
         plot.test_progress(simulator=s, index=0)
+        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0])
+        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], see=True)
 
     :param title: the plot title
     :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees' proficiencies and a list of administered items for each examinee
@@ -196,6 +200,7 @@ def test_progress(
     :param thetas: if a :py:class:`Simulator` is not passed, then a list of proficiency estimations can be manually passed to the function
     :param administered_items: if a :py:class:`Simulator` is not passed, then a matrix of administered items, represented by their parameters, can be manually passed to the function
     :param true_theta: the value of the examinee's true proficiency. If it is passed, it will be shown on the plot, otherwise not
+    :param see: plot the standard error of estimation during the test. It only works if both proficiencies and administered items are passed
     :param filepath: the path to save the plot
     """
     if simulator is None and thetas is None and administered_items is None:
@@ -221,12 +226,22 @@ def test_progress(
     xs = range(len(thetas)) if thetas is not None else range(len(administered_items[:, 1]))
 
     if thetas is not None:
-        plt.plot(xs, thetas, label=r'$\theta$')
+        plt.plot(xs, thetas, label=r'$\hat{\theta}$')
     if administered_items is not None:
         difficulties = administered_items[:, 1]
         plt.plot(xs, difficulties, label='Item difficulty')
     if true_theta is not None:
-        plt.hlines(true_theta, 0, len(xs), label='True theta')
+        plt.hlines(true_theta, 0, len(xs), label=r'$\theta$')
+    if thetas is not None and administered_items is not None:
+
+        # calculate and plot standard error and reliability
+        if see:
+            sees = [irt.see(thetas[x], administered_items[:x + 1, ]) for x in xs]
+            plt.plot(xs, sees, label=r'$SEE$')
+
+        # if reliability:
+        #     reliabilities = [irt.reliability(thetas[x], administered_items[:x + 1, ]) for x in xs]
+        #     plt.plot(xs, reliabilities, label='Reliability')
 
     plt.xlabel('Items')
     plt.grid()
