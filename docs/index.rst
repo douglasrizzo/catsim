@@ -18,12 +18,13 @@ Contents
     :glob:
 
     item_matrix.rst
-    catsim.irt.rst
-    catsim.cat.rst
-    catsim.plot.rst
-    catsim.stats.rst
     catsim.initialization.rst
     catsim.selection.rst
     catsim.reestimation.rst
     catsim.stopping.rst
     catsim.simulation.rst
+    catsim.irt.rst
+    catsim.cat.rst
+    catsim.plot.rst
+    catsim.stats.rst
+    contributing.rst
