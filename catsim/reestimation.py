@@ -46,8 +46,10 @@ class HillClimbingEstimator(Estimator):
         self.__iters = 0
 
     @property
-    def evaluations(self):
-        """Count the number of function evaluations during the most recent estimation process"""
+    def evaluations(self) -> int:
+        """Count the number of function evaluations during the most recent estimation process
+
+        :returns: number of function evaluations"""
         return self.__iters
 
     def estimate(
@@ -112,9 +114,7 @@ class BinarySearchEstimator(Estimator):
     """Estimator that uses a binary search approach in the log-likelihood function domain to maximize it
 
     :param precision: number of decimal points of precision
-    :type precision: int
     :param verbose: verbosity level of the maximization method
-    :type verbose: boolean
     """
 
     def __init__(self, precision: int=6, verbose: bool=False):
@@ -125,7 +125,9 @@ class BinarySearchEstimator(Estimator):
 
     @property
     def evaluations(self):
-        """Count the number of function evaluations during the most recent estimation process"""
+        """Count the number of function evaluations during the most recent estimation process
+
+        :returns: number of function evaluations"""
         return self.__iters
 
     def estimate(
@@ -201,7 +203,6 @@ class FMinEstimator(Estimator):
         :param response_vector: a binary list containing the response vector
         :param administered_items: a matrix containing the parameters of the
                                    answered items
-        :type administered_items: numpy.ndarray
         :param current_theta: the current estimation of the examinee's :math:`\\theta` value
         :returns: a new estimation of the examinee's proficiency, given his answers up until now
         """
@@ -211,11 +212,12 @@ class FMinEstimator(Estimator):
 class DifferentialEvolutionEstimator(Estimator):
     """Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function
 
-    :param bounds: a tuple containing both lower and upper bounds for the differential evolution algorithm search space.
-                   In theory, it is best if they represent the minimum and maximum possible
-                   :math:`\\theta` values; in practice, one could also use the smallest and largest
-                   difficulty parameters in the item bank, in case no better
-                   bounds for :math:`\\theta` exist.
+    :param bounds: a tuple containing both lower and upper bounds for the differential
+                   evolution algorithm search space. In theory, it is best if they
+                   represent the minimum and maximum possible :math:`\\theta` values;
+                   in practice, one could also use the smallest and largest difficulty
+                   parameters in the item bank, in case no better bounds for
+                   :math:`\\theta` exist.
     """
 
     def __init__(self, bounds: tuple):
@@ -226,7 +228,9 @@ class DifferentialEvolutionEstimator(Estimator):
 
     @property
     def evaluations(self):
-        """Count the number of function evaluations during the most recent estimation process"""
+        """Count the number of function evaluations during the most recent estimation process
+
+        :returns: number of function evaluations"""
         return self.__iters
 
     def estimate(
@@ -244,7 +248,6 @@ class DifferentialEvolutionEstimator(Estimator):
                                    answered items
         :param current_theta: the current estimation of the examinee's :math:`\\theta` value
         :returns: not used by this selector
-        :rtype: float
         """
 
         res = differential_evolution(

@@ -58,9 +58,7 @@ class ClusterSelector(Selector):
         .. [Men15] Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes adaptativos informatizados baseada em agrupamento por similaridade (Mestrado). Centro Universitário da FEI. Retrieved from https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade
 
     :param clusters: a list containing item cluster memberships
-    :type clusters: list
     :param r_max: maximum exposure rate for items
-    :type r_max: float
     :param method: one of the available methods for cluster selection. Given
                    the estimated theta value at each step:
 
@@ -74,12 +72,10 @@ class ClusterSelector(Selector):
                        sum of information is maximum. The weighted equals the
                        number of items in the cluster;
 
-    :type method: string
     :param r_control: if `passive` and all items :math:`i` in the selected
                       cluster have :math:`r_i > r^{max}`, applies the item with
                       maximum information; if `aggressive`, applies the item
                       with smallest :math:`r` value.
-    :type r_control: string
     """
 
     def __init__(

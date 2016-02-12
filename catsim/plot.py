@@ -194,15 +194,16 @@ def test_progress(
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(initializer, selector, estimator, stopper)
         plot.test_progress(simulator=s, index=0)
-        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], see=True)
+        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], see=True, reliability=True)
 
-    :param title: the plot title
-    :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees' proficiencies and a list of administered items for each examinee
-    :param index: the index of the examinee in the simulator whose plot is to be done
-    :param thetas: if a :py:class:`Simulator` is not passed, then a list of proficiency estimations can be manually passed to the function
-    :param administered_items: if a :py:class:`Simulator` is not passed, then a matrix of administered items, represented by their parameters, can be manually passed to the function
-    :param true_theta: the value of the examinee's true proficiency. If it is passed, it will be shown on the plot, otherwise not
-    :param see: plot the standard error of estimation during the test. It only works if both proficiencies and administered items are passed
+    :param title: the plot title.
+    :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees' proficiencies and a list of administered items for each examinee.
+    :param index: the index of the examinee in the simulator whose plot is to be done.
+    :param thetas: if a :py:class:`Simulator` is not passed, then a list of proficiency estimations can be manually passed to the function.
+    :param administered_items: if a :py:class:`Simulator` is not passed, then a matrix of administered items, represented by their parameters, can be manually passed to the function.
+    :param true_theta: the value of the examinee's true proficiency. If it is passed, it will be shown on the plot, otherwise not.
+    :param see: plot the standard error of estimation during the test. It only works if both proficiencies and administered items are passed.
+    :param see: plot the test reliability. It only works if both proficiencies and administered items are passed.
     :param filepath: the path to save the plot
     """
     if simulator is None and thetas is None and administered_items is None:

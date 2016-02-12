@@ -10,11 +10,10 @@ class Initializer:
         super(Initializer, self).__init__()
 
     @abstractmethod
-    def initialize(self):
+    def initialize(self) -> float:
         """Selects an examinee's initial :math:`\\theta` value
 
         :returns: examinee's initial :math:`\\theta` value
-        :rtype: float
         """
         pass
 

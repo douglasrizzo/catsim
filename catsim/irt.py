@@ -54,7 +54,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
 
     :param theta: a proficiency value.
     :param items: a matrix containing item parameters.
-    :returns: the standard error of estimation at `theta` for a test represented by `items`
+    :returns: the standard error of estimation at `theta` for a test represented by `items`.
     """
     return 1 / math.sqrt(test_info(theta, items))
 
@@ -64,22 +64,32 @@ def test_info(theta: float, items: numpy.ndarray):
 
     .. math:: I(\\theta) = \\sum_{j \\in J} I_j(\\theta)
 
-    where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the item information of :math:`j` at aspecific :math:`\\theta` value.
+    where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the
+    item information of :math:`j` at aspecific :math:`\\theta` value.
 
     :param theta: a proficiency value.
     :param items: a matrix containing item parameters.
-    :returns: the test information at `theta` for a test represented by `items`
+    :returns: the test information at `theta` for a test represented by `items`.
     """
     return sum([inf(theta, item[0], item[1], item[2]) for item in items])
 
-# 
-# def reliability(theta: float, items: numpy.ndarray):
-#     """ Computes test reliability [Thissen00]_, given by
-#
-#     .. math:: 1 - \\frac{1}{I(\\theta)}
-#     """
-#     # return 1 - see(theta, items)**2
-#     return 1 - (1 / test_info(theta, items))
+
+def reliability(theta: float, items: numpy.ndarray):
+    """ Computes test reliability [Thissen00]_, given by
+
+    .. math:: Rel = 1 - \\frac{1}{I(\\theta)}
+
+    Test reliability is a measure of internal consistency for the test, similar
+    to Cronbach's :math:`\\alpha` in Classical Test Theory. Its value is always
+    lower than 1, with values close to 1 indicating good reliability. If
+    :math:`I(\\theta) < 1`, :math:`Rel < 0` and in these cases it does not make
+    sense, but usually the application of additional items solves this problem.
+
+    :param theta: a proficiency value.
+    :param items: a matrix containing item parameters.
+    :returns: the test reliability at `theta` for a test represented by `items`.
+    """
+    return 1 - (1 / test_info(theta, items))
 
 
 def inf(theta: float, a: float, b: float, c: float=0) -> float:
@@ -103,8 +113,7 @@ def inf(theta: float, a: float, b: float, c: float=0) -> float:
         :math:`0\\leq c \\leq 1`, but items considered good usually have
         :math:`c \\leq 0.2`.
 
-    :returns: the information value of the item at the designated `theta` point
-    :rtype: float
+    :returns: the information value of the item at the designated `theta` point.
     """
     ml3 = tpm(theta, a, b, c)
     return math.pow(a, 2) * (math.pow(ml3 - c, 2) / math.pow(1 - c, 2)) * (1 - ml3) / ml3
@@ -172,7 +181,7 @@ def negativelogLik(est_theta: float, *args) -> float:
     return -logLik(est_theta, args[0], args[1])
 
 
-def normalize_item_bank(items):
+def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     """Normalize an item matrix so that it conforms to the standard used by catsim.
     The item matrix must have dimension nx3, in which column 1 represents item discrimination,
     column 2 represents item difficulty and column 3 represents the pseudo-guessing parameter.
@@ -184,10 +193,8 @@ def normalize_item_bank(items):
     columns, respectively. the pseudo-guessing column is added such that items simulate the 2-parameter logistic model.
 
     :param items: the item matrix
-    :type items: numpy.ndarray
 
     :returns: an nx3 item matrix conforming to 1, 2 and 3 parameter logistic models
-    :rtype: numpy.ndarray
     """
     if items.shape[1] == 1:
         items = numpy.append(numpy.ones((items.shape[0])), items, axis=1)
@@ -197,7 +204,7 @@ def normalize_item_bank(items):
     return items
 
 
-def validate_item_bank(items, raise_err=False):
+def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
     """Validates the shape and parameters in the item matrix so that it conforms to the standard
     used by catsim. The item matrix must have dimension nx3, in which column 1 represents item
     discrimination, column 2 represents item difficulty and column 3 represents the
@@ -207,10 +214,8 @@ def validate_item_bank(items, raise_err=False):
     :math:`\\forall i \\in I , a_i > 0 \\wedge 0 < c_i < 1`
 
     :param items: the item matrix
-    :type items: numpy.ndarray
     :param raise_err: whether to raise an error in case the validation fails or
                       just print the error message to standard output.
-    :type raise_err: bool
     """
     if type(items) is not numpy.ndarray:
         raise ValueError('Item matrix is not of type {0}'.format(type(numpy.zeros((1)))))
