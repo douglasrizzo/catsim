@@ -3,6 +3,12 @@ python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "3.5"
   - "3.4"
+addons:
+  apt:
+    packages:
+      - libatlas3gf-base
+      - libatlas-dev
+      - python3-scipy
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
