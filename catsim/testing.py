@@ -1,7 +1,7 @@
 import unittest
 from catsim.cat import generate_item_bank
 from catsim import irt
-from catsim.initialization import RandomInitializer
+from catsim.initialization import RandomInitializer, FixedPointInitializer
 from catsim.selection import MaxInfoSelector, ClusterSelector
 from catsim.reestimation import HillClimbingEstimator, BinarySearchEstimator, DifferentialEvolutionEstimator, FMinEstimator
 from catsim.stopping import MaxItemStopper, MinErrorStopper
@@ -21,38 +21,29 @@ class TestStuff(unittest.TestCase):
         ]:
             irt.validate_item_bank(items, raise_err=True)
 
-            assert True
-
     def test_simulations(self):
-        items = generate_item_bank(5000)
-
-        initializer = RandomInitializer()
-        selector = MaxInfoSelector()
-
-        for estimator in [
-            HillClimbingEstimator(), BinarySearchEstimator(),
-            DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()
-        ]:
-            for stopper in [MaxItemStopper(20), MinErrorStopper(.4)]:
-                s = Simulator(items, 10)
-                s.simulate(initializer, selector, estimator, stopper)
-                # plot.test_progress(simulator=s, index=0, see=True)
-
-        assert True
-
-    def test_cism(self):
         from sklearn.cluster import KMeans
-
-        items = generate_item_bank(100)
+        items = generate_item_bank(5000)
+        examinees = 10
         clusters = KMeans(n_clusters=8).fit_predict(items)
 
-        initializer = RandomInitializer()
-        selector = ClusterSelector(clusters=clusters, r_max=.2)
-        estimator = HillClimbingEstimator()
-        stopper = MaxItemStopper(20)
-        simulator = Simulator(items, 10)
-        simulator.simulate(initializer, selector, estimator, stopper)
+        for initializer in [
+            RandomInitializer(
+                'uniform', (-5, 5)
+            ), RandomInitializer(
+                'normal', (0, 1)
+            ), FixedPointInitializer(0)
+        ]:
+            for selector in [MaxInfoSelector(), ClusterSelector(clusters=clusters, r_max=.2)]:
+                for estimator in [
+                    HillClimbingEstimator(), BinarySearchEstimator(),
+                    DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()
+                ]:
+                    for stopper in [MaxItemStopper(20), MinErrorStopper(.4)]:
+                        yield self.one_simulation, items, examinees, initializer, selector, estimator, stopper
 
+    def one_simulation(self, items, examinees, initializer, selector, estimator, stopper):
+        Simulator(items, examinees).simulate(initializer, selector, estimator, stopper)
         assert True
 
 
