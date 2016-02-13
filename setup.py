@@ -11,7 +11,7 @@ setup(
     url='https://www.github.com/douglasrizzo/catsim',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
-        'numpy', 'scipy', 'matplotlib', 'scikit-learn', 'pyzmq'
+        'numpy', 'scipy', 'matplotlib', 'scikit-learn'
     ],
     license='GPLv2'
 )
