@@ -271,7 +271,7 @@ class FMinEstimator(Estimator):
             irt.negativelogLik,
             current_theta,
             (response_vector, administered_items),
-            disp=True,
+            disp=False,
             full_output=True
         )
 

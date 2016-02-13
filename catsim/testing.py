@@ -27,18 +27,23 @@ def test_simulations():
     clusters = KMeans(n_clusters=8).fit_predict(items)
 
     for initializer in [
-        RandomInitializer(
-            'uniform', (-5, 5)
-        ), RandomInitializer(
-            'normal', (0, 1)
-        ), FixedPointInitializer(0)
+        RandomInitializer('uniform',
+                          (-5, 5)
+                          # ), RandomInitializer(
+                          #     'normal', (0, 1)
+                          ),
+        FixedPointInitializer(0)
     ]:
-        for selector in [MaxInfoSelector(), ClusterSelector(clusters=clusters, r_max=.2)]:
-            for estimator in [
-                HillClimbingEstimator(), BinarySearchEstimator(),
-                DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()
-            ]:
+        for estimator in [
+            HillClimbingEstimator(), BinarySearchEstimator(),
+            DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()
+        ]:
+            for selector in [MaxInfoSelector()]:
                 for stopper in [MaxItemStopper(20), MinErrorStopper(.4)]:
+                    yield one_simulation, items, examinees, initializer, selector, estimator, stopper
+
+            for selector in [MaxInfoSelector(), ClusterSelector(clusters=clusters, r_max=.2)]:
+                for stopper in [MaxItemStopper(20)]:
                     yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
