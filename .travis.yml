@@ -1,32 +1,34 @@
 language: python
 python:
-  # We don't actually use the Travis Python, but this keeps it organized.
-  - "3.4"
+- '3.4'
 install:
-  - sudo apt-get update
-  - cpus=$(grep -c ^processor /proc/cpuinfo)
-  - python --version
-  - which python
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib coverage nose
-  - source activate test-environment
-  - pip install coveralls python-coveralls nose-cov
-  - conda list
-  - python --version
-  - which python
-  - python setup.py install
+- sudo apt-get update
+- cpus=$(grep -c ^processor /proc/cpuinfo)
+- python --version
+- which python
+- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]
+  then
+    wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+  else
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  fi
+- bash miniconda.sh -b -p $HOME/miniconda
+- export PATH="$HOME/miniconda/bin:$PATH"
+- hash -r
+- conda config --set always_yes yes --set changeps1 no
+- conda update -q conda
+- conda info -a
+- conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib coverage nose
+- source activate test-environment
+- pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc
+- conda list
+- python --version
+- which python
+- python setup.py install
 script: nosetests --cov-config .coveragerc --with-coverage --processes=$cpus --cover-package=catsim
-after_success: coveralls
+after_success:
+- coveralls
+- deploy.sh
+env:
+  global:
+    secure: byc2wWgxM4rrewNYwvJymK0TQOwqxufcHtv2u82fJ9lHZMtduztOlRemFQyRTzC6iqgQucVZtYu0E1+GWnzdwRZKQ2mvMNcMhcaaoNN9CjIjkjauFFJKGgwKRvUc4SeopDsDN7eVBai3L/gmghlYkKY192HS7uKemwW0TD17WwWCxBqYMI3X9BpxqYxXKxMTRLwI838dvfo7Ab8LHsdPPEcfH5wq2Z6NW6iMIWYFEKzCwt08NFfTXfb3zLar2jKntFN/H2Zn4x/JswKeFFcvyxJud4MrHOt6ckyuVKd07M6RjROC50CwCMfIe7ZC1BWmqZyE/ib+xCz3ATJ4Bv1omiH5aIexPrvi6RE33WGguDWWg1/lbsvZWOM+SG+nStBmiUT+lT7Ap/o/a1X7u4hdRAmkh6sXUUji/0TL0kjDoKa7J4p8BqoWxbyeDgAWu+EB8CjhL+8toSPV7/FhxSlMV9RncyfK1Aix1iJ9JSZ+PNli/1q0Do29Tbt3dKO2N+9wvdlADwbzpm/WlOLgY58y81NVQUZMwp3+L55cnvVe7XnjV72PnV7n1k1oJ9PoAnvWVQaY5TAPEmd3NDUeaqgIhlF6IXtF1lrJUXXibPQ3HW47BSwskpwnaMNmG7IOBQjj+B3B+qDUIyndSGDcauNmg69gNK8DdrfzA8OWkvlvRcQ=
