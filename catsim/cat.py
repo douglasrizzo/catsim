@@ -11,7 +11,7 @@
 """
 
 import numpy
-import typing
+from collections.abc import Iterable
 
 
 def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
@@ -38,7 +38,7 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
-def rmse(actual: typing.Iterable[float], predicted: typing.Iterable[float]):
+def rmse(actual: Iterable, predicted: Iterable):
     """Root mean squared error, a common value used when measuring the precision with which a computerized adaptive test estimates examinees proficiencies [Bar10]_. The value is calculated by:
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
