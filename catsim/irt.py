@@ -35,14 +35,7 @@ def tpm(theta: float, a: float, b: float, c: float=0) -> float:
         :math:`0\\leq c \\leq 1`, but items considered good usually have
         :math:`c \\leq 0.2`.
     """
-    try:
-        return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
-    except OverflowError as ofe:
-        raise OverflowError(
-            ofe.strerror + '\nError happened with these values: ' + format(
-                [theta, a, b, c]
-            )
-        )
+    return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
 
 
 def see(theta: float, items: numpy.ndarray) -> float:
