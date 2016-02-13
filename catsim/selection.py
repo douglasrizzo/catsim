@@ -100,10 +100,10 @@ class ClusterSelector(Selector):
                 )
             )
 
-        self.__clusters = clusters
-        self.__method = method
-        self.__r_max = r_max
-        self.__r_control = r_control
+        self._clusters = clusters
+        self._method = method
+        self._r_max = r_max
+        self._r_control = r_control
 
     def select(self, items: numpy.ndarray, administered_items: list, est_theta: float) -> int:
         """CAT simulation and validation method proposed by [Bar10]_.
@@ -117,7 +117,7 @@ class ClusterSelector(Selector):
         selected_cluster = None
         # this part of the code selects the cluster from which the item at
         # the current point of the test will be chosen
-        if self.__method == 'item_info':
+        if self._method == 'item_info':
             # finds the item in the matrix which maximizes the
             # information, given the current estimated theta value
             max_inf = 0
@@ -129,7 +129,7 @@ class ClusterSelector(Selector):
                     valid_indexes = numpy.array(
                         list(
                             set(
-                                numpy.nonzero(self.__clusters == self.__clusters[counter])[
+                                numpy.nonzero(self._clusters == self._clusters[counter])[
                                     0
                                 ]
                             ) - set(
@@ -141,17 +141,17 @@ class ClusterSelector(Selector):
                     # checks if at least one item from this cluster has not
                     # been adminitered to this examinee yet
                     if len(valid_indexes) > 0:
-                        selected_cluster = self.__clusters[counter]
+                        selected_cluster = self._clusters[counter]
                         max_inf = irt.inf(est_theta, i[0], i[1], i[2])
 
-        elif self.__method in ['cluster_info', 'weighted_info']:
+        elif self._method in ['cluster_info', 'weighted_info']:
             # calculates the cluster information, depending on the method
             # selected
-            if self.__method == 'cluster_info':
-                cluster_infos = ClusterSelector.sum_cluster_infos(est_theta, items, self.__clusters)
-            elif self.__method == 'weighted_info':
+            if self._method == 'cluster_info':
+                cluster_infos = ClusterSelector.sum_cluster_infos(est_theta, items, self._clusters)
+            elif self._method == 'weighted_info':
                 cluster_infos = ClusterSelector.weighted_cluster_infos(
-                    est_theta, items, self.__clusters
+                    est_theta, items, self._clusters
                 )
 
             # sorts clusters descending by their information values
@@ -161,7 +161,7 @@ class ClusterSelector(Selector):
                 [
                     cluster
                     for (inf_value, cluster) in sorted(
-                        zip(cluster_infos, set(self.__clusters)),
+                        zip(cluster_infos, set(self._clusters)),
                         reverse=True
                     )
                 ],
@@ -191,7 +191,7 @@ class ClusterSelector(Selector):
         # selected cluster that have not been administered
         valid_indexes = numpy.array(
             list(
-                set(numpy.nonzero(self.__clusters == selected_cluster)[0]) - set(
+                set(numpy.nonzero(self._clusters == selected_cluster)[0]) - set(
                     administered_items
                 )
             )
@@ -204,8 +204,8 @@ class ClusterSelector(Selector):
             list(
                 set(
                     numpy.nonzero(
-                        (self.__clusters == selected_cluster) & (
-                            items[:, 3] < self.__r_max
+                        (self._clusters == selected_cluster) & (
+                            items[:, 3] < self._r_max
                         )
                     )[0]
                 ) - set(administered_items)
@@ -229,7 +229,7 @@ class ClusterSelector(Selector):
         # if all items in the selected cluster have exceed their r values,
         # select the one with smallest r, regardless of information
         else:
-            if self.__r_control == 'passive':
+            if self._r_control == 'passive':
                 inf_values = [irt.inf(est_theta, i[0], i[1], i[2]) for i in items[valid_indexes]]
                 valid_indexes = [
                     index
@@ -238,7 +238,7 @@ class ClusterSelector(Selector):
                         reverse=True
                     )
                 ]
-            elif self.__r_control == 'aggressive':
+            elif self._r_control == 'aggressive':
                 valid_indexes = [
                     index for (r, index) in sorted(zip(items[valid_indexes, 3], valid_indexes))
                 ]

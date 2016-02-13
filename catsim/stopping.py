@@ -27,7 +27,7 @@ class MaxItemStopper(Stopper):
 
     def __init__(self, max_itens: int):
         super(MaxItemStopper, self).__init__()
-        self.__max_itens = max_itens
+        self._max_itens = max_itens
 
     def stop(self, administered_items: numpy.ndarray, estimations: list) -> bool:
         """Checks whether the test reached its stopping criterion
@@ -36,13 +36,13 @@ class MaxItemStopper(Stopper):
         :param estimations: the estimations of the examinee's proficiency so far
         :returns: `True` if the test met its stopping criterion, else `False`"""
         n_itens = administered_items.shape[0]
-        if n_itens > self.__max_itens:
+        if n_itens > self._max_itens:
             raise ValueError(
                 'More items than permitted were administered: {0} > {1}'.format(
-                    n_itens, self.__max_itens
+                    n_itens, self._max_itens
                 )
             )
-        return n_itens == self.__max_itens
+        return n_itens == self._max_itens
 
 
 class MinErrorStopper(Stopper):
@@ -52,7 +52,7 @@ class MinErrorStopper(Stopper):
 
     def __init__(self, min_error: float):
         super(MinErrorStopper, self).__init__()
-        self.__min_error = min_error
+        self._min_error = min_error
 
     def stop(self, administered_items: numpy.ndarray, estimations: list) -> bool:
         """Checks whether the test reached its stopping criterion
@@ -64,4 +64,4 @@ class MinErrorStopper(Stopper):
             return False
 
         theta = estimations[-1]
-        return irt.see(theta, administered_items) < self.__min_error
+        return irt.see(theta, administered_items) < self._min_error

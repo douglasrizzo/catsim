@@ -35,17 +35,17 @@ class RandomInitializer(Initializer):
                 )
             )
 
-        self.__dist_type = dist_type
-        self.__dist_params = dist_params
+        self._dist_type = dist_type
+        self._dist_params = dist_params
 
     def initialize(self) -> float:
         """Generates a value using the chosen distribution and parameters
 
         :returns: a proficiency value generated from the chosen distribution using the passed parameters"""
-        if self.__dist_type == 'uniform':
-            return numpy.random.uniform(min(self.__dist_params), max(self.__dist_params))
-        elif self.__dist_type == 'normal':
-            return numpy.random.normal(self.__dist_params[0], self.dist_params[1])
+        if self._dist_type == 'uniform':
+            return numpy.random.uniform(min(self._dist_params), max(self._dist_params))
+        elif self._dist_type == 'normal':
+            return numpy.random.normal(self._dist_params[0], self.dist_params[1])
 
 
 class FixedPointInitializer(Initializer):
@@ -54,10 +54,10 @@ class FixedPointInitializer(Initializer):
     def __init__(self, start: float):
         super(FixedPointInitializer, self).__init__()
 
-        self.__start = start
+        self._start = start
 
     def initialize(self) -> float:
         """Returns the same proficiency value that was passed to the constructor of the initializer
 
         :returns: the same proficiency value that was passed to the constructor of the initializer"""
-        return self.__start
+        return self._start

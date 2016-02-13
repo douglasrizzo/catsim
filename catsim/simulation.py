@@ -30,35 +30,35 @@ class Simulator:
         # adds a column for each item's exposure rate and their cluster membership
         items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
-        self.__items = items
-        self.__estimations = []
-        self.__administered_items = []
+        self._items = items
+        self._estimations = []
+        self._administered_items = []
 
         # `examinees` is passed to its special setter
         self.examinees = examinees
 
     @property
     def items(self):
-        return self.__items
+        return self._items
 
     @property
     def administered_items(self):
-        return self.__administered_items
+        return self._administered_items
 
     @property
     def estimations(self):
-        return self.__estimations
+        return self._estimations
 
     @property
     def examinees(self):
-        return self.__examinees
+        return self._examinees
 
     @examinees.setter
     def examinees(self, examinees):
         if type(examinees) == int:
-            self.__examinees = numpy.random.normal(0, 1, examinees)
+            self._examinees = numpy.random.normal(0, 1, examinees)
         elif type(examinees) == list:
-            self.__examinees = numpy.array(examinees)
+            self._examinees = numpy.array(examinees)
 
     def simulate(
         self, initializer: Initializer, selector: Selector, estimator: Estimator, stopper: Stopper
@@ -126,8 +126,8 @@ class Simulator:
 
                 est_thetas.append(est_theta)
 
-            self.__estimations.append(est_thetas)
-            self.__administered_items.append(administered_items)
+            self._estimations.append(est_thetas)
+            self._administered_items.append(administered_items)
 
 
 if __name__ == '__main__':

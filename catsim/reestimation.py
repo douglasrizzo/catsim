@@ -40,16 +40,16 @@ class HillClimbingEstimator(Estimator):
 
     def __init__(self, precision: int=6, verbose: bool=False):
         super(HillClimbingEstimator, self).__init__()
-        self.__precision = precision
-        self.__verbose = verbose
-        self.__iters = 0
+        self._precision = precision
+        self._verbose = verbose
+        self._iters = 0
 
     @property
     def evaluations(self) -> int:
         """Count the number of function evaluations during the most recent estimation process
 
         :returns: number of function evaluations"""
-        return self.__iters
+        return self._iters
 
     def estimate(
         self,
@@ -79,24 +79,24 @@ class HillClimbingEstimator(Estimator):
         best_theta = -float('inf')
         max_ll = -float('inf')
 
-        self.__iters = 0
+        self._iters = 0
 
         for i in range(10):
             intervals = numpy.linspace(lbound, ubound, 10)
-            if self.__verbose:
+            if self._verbose:
                 print('Bounds: ' + str(lbound) + ' ' + str(ubound))
                 print('Interval size: ' + str(intervals[1] - intervals[0]))
 
             for ii in intervals:
-                self.__iters += 1
+                self._iters += 1
                 ll = irt.logLik(ii, response_vector, administered_items)
                 if ll > max_ll:
                     max_ll = ll
 
-                    if self.__verbose:
-                        print('Iteration: {0}, Theta: {1}, LL: {2}'.format(self.__iters, ii, ll))
+                    if self._verbose:
+                        print('Iteration: {0}, Theta: {1}, LL: {2}'.format(self._iters, ii, ll))
 
-                    if abs(best_theta - ii) < float('1e-' + str(self.__precision)):
+                    if abs(best_theta - ii) < float('1e-' + str(self._precision)):
                         return ii
 
                     best_theta = ii
@@ -118,16 +118,16 @@ class BinarySearchEstimator(Estimator):
 
     def __init__(self, precision: int=6, verbose: bool=False):
         super(BinarySearchEstimator, self).__init__()
-        self.__precision = precision
-        self.__verbose = verbose
-        self.__iters = 0
+        self._precision = precision
+        self._verbose = verbose
+        self._iters = 0
 
     @property
     def evaluations(self):
         """Count the number of function evaluations during the most recent estimation process
 
         :returns: number of function evaluations"""
-        return self.__iters
+        return self._iters
 
     def estimate(
         self,
@@ -154,15 +154,15 @@ class BinarySearchEstimator(Estimator):
         lbound = min(administered_items[:, 1])
         ubound = max(administered_items[:, 1])
         best_theta = -float('inf')
-        self.__iters = 0
+        self._iters = 0
 
         while True:
-            self.__iters += 1
-            if self.__verbose:
+            self._iters += 1
+            if self._verbose:
                 print('Bounds: ' + str(lbound) + ' ' + str(ubound))
                 print(
                     'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                        self.__iters, best_theta, irt.logLik(
+                        self._iters, best_theta, irt.logLik(
                             best_theta, response_vector, administered_items
                         )
                     )
@@ -172,14 +172,14 @@ class BinarySearchEstimator(Estimator):
                 lbound, response_vector, administered_items
             ):
 
-                if abs(best_theta - ubound) < float('1e-' + str(self.__precision)):
+                if abs(best_theta - ubound) < float('1e-' + str(self._precision)):
                     return ubound
 
                 best_theta = ubound
                 lbound += (ubound - lbound) / 2
             else:
 
-                if abs(best_theta - lbound) < float('1e-' + str(self.__precision)):
+                if abs(best_theta - lbound) < float('1e-' + str(self._precision)):
                     return lbound
 
                 best_theta = lbound
@@ -221,16 +221,16 @@ class DifferentialEvolutionEstimator(Estimator):
 
     def __init__(self, bounds: tuple):
         super(DifferentialEvolutionEstimator, self).__init__()
-        self.__lower_bound = min(bounds)
-        self.__upper_bound = max(bounds)
-        self.__iters = 0
+        self._lower_bound = min(bounds)
+        self._upper_bound = max(bounds)
+        self._iters = 0
 
     @property
     def evaluations(self):
         """Count the number of function evaluations during the most recent estimation process
 
         :returns: number of function evaluations"""
-        return self.__iters
+        return self._iters
 
     def estimate(
         self,
@@ -252,11 +252,11 @@ class DifferentialEvolutionEstimator(Estimator):
         res = differential_evolution(
             irt.negativelogLik,
             bounds=[
-                [self.__lower_bound * 2, self.__upper_bound * 2]
+                [self._lower_bound * 2, self._upper_bound * 2]
             ],
             args=(response_vector, administered_items)
         )
 
-        self.__iters = res.nfev
+        self._iters = res.nfev
 
         return res.x[0]

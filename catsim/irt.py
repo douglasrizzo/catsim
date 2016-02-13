@@ -56,7 +56,11 @@ def see(theta: float, items: numpy.ndarray) -> float:
     :param items: a matrix containing item parameters.
     :returns: the standard error of estimation at `theta` for a test represented by `items`.
     """
-    return 1 / math.sqrt(test_info(theta, items))
+    try:
+        return 1 / math.sqrt(test_info(theta, items))
+    except ZeroDivisionError:
+        print(theta, '\n', items)
+        raise
 
 
 def test_info(theta: float, items: numpy.ndarray):
