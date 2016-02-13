@@ -6,6 +6,7 @@ application of adaptive tests. Most of this module is based on the work of
    selection rules in computerized adaptive testing. Applied Psychological
    Measurement, v. 34, n. 6, p. 438-452, 2010."""
 
+import time
 import numpy
 from catsim import irt, cat
 from catsim.initialization import Initializer
@@ -30,6 +31,7 @@ class Simulator:
         # adds a column for each item's exposure rate and their cluster membership
         items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
+        self._duration = 0
         self._items = items
         self._estimations = []
         self._administered_items = []
@@ -52,6 +54,10 @@ class Simulator:
     @property
     def examinees(self):
         return self._examinees
+
+    @property
+    def duration(self):
+        return self._duration
 
     @examinees.setter
     def examinees(self, examinees):
@@ -82,6 +88,7 @@ class Simulator:
         >>> Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
         """
 
+        start_time = int(round(time.time() * 1000))
         for true_theta in self.examinees:
             est_theta = initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
@@ -128,6 +135,8 @@ class Simulator:
 
             self._estimations.append(est_thetas)
             self._administered_items.append(administered_items)
+
+        self._duration = int(round(time.time() * 1000)) - start_time
 
 
 if __name__ == '__main__':
