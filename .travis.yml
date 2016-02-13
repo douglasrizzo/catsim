@@ -3,12 +3,12 @@ python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "3.5"
   - "3.4"
-addons:
-  apt:
-    packages:
-      - libatlas3gf-base
-      - libatlas-dev
-      - python3-scipy
+# addons:
+#   apt:
+#     packages:
+#       - libatlas3gf-base
+#       - libatlas-dev
+#       - python3-scipy
 install:
   - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
@@ -25,7 +25,7 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn pyzmq matplotlib
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn pyzmq matplotlib typing
   - source activate test-environment
   - python setup.py install
 script: nosetests
