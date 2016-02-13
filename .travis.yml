@@ -28,7 +28,14 @@ install:
   - conda list
   - python --version
   - python3 --version
+  - whereis python
+  - whereis python3
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn pyzmq matplotlib
   - source activate test-environment
+  - conda list
+  - python --version
+  - python3 --version
+  - whereis python
+  - whereis python3
   - python setup.py install
 script: nosetests
