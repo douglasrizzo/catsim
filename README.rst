@@ -1,5 +1,7 @@
 .. image:: https://travis-ci.org/douglasrizzo/catsim.svg?branch=master
 
+.. image:: https://coveralls.io/repos/github/douglasrizzo/catsim/badge.svg?branch=master :target: https://coveralls.io/github/douglasrizzo/catsim?branch=master 
+
 Introduction
 ------------
 
