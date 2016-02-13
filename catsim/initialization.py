@@ -45,7 +45,7 @@ class RandomInitializer(Initializer):
         if self._dist_type == 'uniform':
             return numpy.random.uniform(min(self._dist_params), max(self._dist_params))
         elif self._dist_type == 'normal':
-            return numpy.random.normal(self._dist_params[0], self.dist_params[1])
+            return numpy.random.normal(self._dist_params[0], self._dist_params[1])
 
 
 class FixedPointInitializer(Initializer):
