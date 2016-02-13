@@ -42,14 +42,29 @@ class HillClimbingEstimator(Estimator):
         super(HillClimbingEstimator, self).__init__()
         self._precision = precision
         self._verbose = verbose
-        self._iters = 0
+        self._evaluations = 0
+        self._calls = 0
 
     @property
-    def evaluations(self) -> int:
-        """Count the number of function evaluations during the most recent estimation process
+    def calls(self):
+        """How many times the estimator has been called to maximize/minimize the log-likelihood function
+
+        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
+        return self._calls
+
+    @property
+    def evaluations(self):
+        """Total number of times the estimator has evaluated the log-likelihood function during its existence
 
         :returns: number of function evaluations"""
-        return self._iters
+        return self._evaluations
+
+    @property
+    def avg_evaluations(self):
+        """Average number of function evaluations for all tests the estimator has been used
+
+        :returns: average number of function evaluations"""
+        return self._evaluations / self._calls
 
     def estimate(
         self,
@@ -69,6 +84,8 @@ class HillClimbingEstimator(Estimator):
         :rtype: float
         """
 
+        self._calls += 1
+
         if set(response_vector) == 1:
             return float('inf')
         elif set(response_vector) == 0:
@@ -79,7 +96,7 @@ class HillClimbingEstimator(Estimator):
         best_theta = -float('inf')
         max_ll = -float('inf')
 
-        self._iters = 0
+        self._evaluations = 0
 
         for i in range(10):
             intervals = numpy.linspace(lbound, ubound, 10)
@@ -88,13 +105,17 @@ class HillClimbingEstimator(Estimator):
                 print('Interval size: ' + str(intervals[1] - intervals[0]))
 
             for ii in intervals:
-                self._iters += 1
+                self._evaluations += 1
                 ll = irt.logLik(ii, response_vector, administered_items)
                 if ll > max_ll:
                     max_ll = ll
 
                     if self._verbose:
-                        print('Iteration: {0}, Theta: {1}, LL: {2}'.format(self._iters, ii, ll))
+                        print(
+                            'Iteration: {0}, Theta: {1}, LL: {2}'.format(
+                                self._evaluations, ii, ll
+                            )
+                        )
 
                     if abs(best_theta - ii) < float('1e-' + str(self._precision)):
                         return ii
@@ -120,14 +141,29 @@ class BinarySearchEstimator(Estimator):
         super(BinarySearchEstimator, self).__init__()
         self._precision = precision
         self._verbose = verbose
-        self._iters = 0
+        self._evaluations = 0
+        self._calls = 0
+
+    @property
+    def calls(self):
+        """How many times the estimator has been called to maximize/minimize the log-likelihood function
+
+        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
+        return self._calls
 
     @property
     def evaluations(self):
-        """Count the number of function evaluations during the most recent estimation process
+        """Total number of times the estimator has evaluated the log-likelihood function during its existence
 
         :returns: number of function evaluations"""
-        return self._iters
+        return self._evaluations
+
+    @property
+    def avg_evaluations(self):
+        """Average number of function evaluations for all tests the estimator has been used
+
+        :returns: average number of function evaluations"""
+        return self._evaluations / self._calls
 
     def estimate(
         self,
@@ -146,6 +182,8 @@ class BinarySearchEstimator(Estimator):
         :returns: a new estimation of the examinee's proficiency, given his answers up until now
         """
 
+        self._calls += 1
+
         if set(response_vector) == 1:
             return float('inf')
         elif set(response_vector) == 0:
@@ -154,15 +192,15 @@ class BinarySearchEstimator(Estimator):
         lbound = min(administered_items[:, 1])
         ubound = max(administered_items[:, 1])
         best_theta = -float('inf')
-        self._iters = 0
+        self._evaluations = 0
 
         while True:
-            self._iters += 1
+            self._evaluations += 1
             if self._verbose:
                 print('Bounds: ' + str(lbound) + ' ' + str(ubound))
                 print(
                     'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                        self._iters, best_theta, irt.logLik(
+                        self._evaluations, best_theta, irt.logLik(
                             best_theta, response_vector, administered_items
                         )
                     )
@@ -191,6 +229,29 @@ class FMinEstimator(Estimator):
 
     def __init__(self):
         super(FMinEstimator, self).__init__()
+        self._evaluations = 0
+        self._calls = 0
+
+    @property
+    def calls(self):
+        """How many times the estimator has been called to maximize/minimize the log-likelihood function
+
+        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
+        return self._calls
+
+    @property
+    def evaluations(self):
+        """Total number of times the estimator has evaluated the log-likelihood function during its existence
+
+        :returns: number of function evaluations"""
+        return self._evaluations
+
+    @property
+    def avg_evaluations(self):
+        """Average number of function evaluations for all tests the estimator has been used
+
+        :returns: average number of function evaluations"""
+        return self._evaluations / self._calls
 
     def estimate(
         self, response_vector: list, administered_items: numpy.ndarray, current_theta: float
@@ -205,7 +266,19 @@ class FMinEstimator(Estimator):
         :param current_theta: the current estimation of the examinee's :math:`\\theta` value
         :returns: a new estimation of the examinee's proficiency, given his answers up until now
         """
-        return fmin(irt.negativelogLik, current_theta, (response_vector, administered_items))
+        self._calls += 1
+        res = fmin(
+            irt.negativelogLik,
+            current_theta,
+            (response_vector, administered_items),
+            disp=True,
+            full_output=True
+        )
+
+        print(res)
+
+        self._evaluations = res[3]
+        return res[0]
 
 
 class DifferentialEvolutionEstimator(Estimator):
@@ -223,14 +296,29 @@ class DifferentialEvolutionEstimator(Estimator):
         super(DifferentialEvolutionEstimator, self).__init__()
         self._lower_bound = min(bounds)
         self._upper_bound = max(bounds)
-        self._iters = 0
+        self._evaluations = 0
+        self._calls = 0
+
+    @property
+    def calls(self):
+        """How many times the estimator has been called to maximize/minimize the log-likelihood function
+
+        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
+        return self._calls
 
     @property
     def evaluations(self):
-        """Count the number of function evaluations during the most recent estimation process
+        """Total number of times the estimator has evaluated the log-likelihood function during its existence
 
         :returns: number of function evaluations"""
-        return self._iters
+        return self._evaluations
+
+    @property
+    def avg_evaluations(self):
+        """Average number of function evaluations for all tests the estimator has been used
+
+        :returns: average number of function evaluations"""
+        return self._evaluations / self._calls
 
     def estimate(
         self,
@@ -249,6 +337,8 @@ class DifferentialEvolutionEstimator(Estimator):
         :returns: not used by this selector
         """
 
+        self._calls += 1
+
         res = differential_evolution(
             irt.negativelogLik,
             bounds=[
@@ -257,6 +347,6 @@ class DifferentialEvolutionEstimator(Estimator):
             args=(response_vector, administered_items)
         )
 
-        self._iters = res.nfev
+        self._evaluations = res.nfev
 
         return res.x[0]
