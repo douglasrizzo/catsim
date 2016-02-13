@@ -4,6 +4,7 @@ python:
   - "3.4"
 install:
   - sudo apt-get update
+  - cpus=$(grep -c ^processor /proc/cpuinfo)
   - python --version
   - which python
   # We do this conditionally because it saves us some downloading if the
@@ -27,5 +28,5 @@ install:
   - python --version
   - which python
   - python setup.py install
-script: nosetests --cov-config .coveragerc --with-coverage
+script: nosetests --cov-config .coveragerc --with-coverage --processes=$cpus --cover-package=catsim
 after_success: coveralls
