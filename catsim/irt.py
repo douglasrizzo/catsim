@@ -59,8 +59,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
     try:
         return 1 / math.sqrt(test_info(theta, items))
     except ZeroDivisionError:
-        print(theta, '\n', items)
-        raise
+        return float('-inf')
 
 
 def test_info(theta: float, items: numpy.ndarray):
@@ -120,6 +119,7 @@ def inf(theta: float, a: float, b: float, c: float=0) -> float:
     :returns: the information value of the item at the designated `theta` point.
     """
     ml3 = tpm(theta, a, b, c)
+
     return math.pow(a, 2) * (math.pow(ml3 - c, 2) / math.pow(1 - c, 2)) * (1 - ml3) / ml3
 
 
