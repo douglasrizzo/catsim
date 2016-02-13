@@ -2,7 +2,6 @@ from abc import ABCMeta, abstractmethod
 
 from catsim import irt
 import numpy
-import pymc
 from scipy.optimize import fmin
 from scipy.optimize import differential_evolution
 
