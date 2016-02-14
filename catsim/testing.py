@@ -21,30 +21,55 @@ def test_item_bank_generation():
 
 
 def test_simulations():
-    from sklearn.cluster import KMeans
-    items = generate_item_bank(5000)
     examinees = 10
-    clusters = KMeans(n_clusters=8).fit_predict(items)
-
-    for initializer in [
+    initializers = [
         RandomInitializer('uniform',
                           (-5, 5)
                           # ), RandomInitializer(
                           #     'normal', (0, 1)
                           ),
         FixedPointInitializer(0)
-    ]:
-        for estimator in [
-            HillClimbingEstimator(), BinarySearchEstimator(),
-            DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()
-        ]:
-            for selector in [MaxInfoSelector()]:
-                for stopper in [MaxItemStopper(20), MinErrorStopper(.4)]:
+    ]
+    selectors = [MaxInfoSelector()]
+    estimators = [
+        HillClimbingEstimator(), BinarySearchEstimator(), DifferentialEvolutionEstimator((-8, 8)),
+        FMinEstimator()
+    ]
+    stoppers = [MaxItemStopper(20), MinErrorStopper(.4)]
+
+    for initializer in initializers:
+        for selector in selectors:
+            for estimator in estimators:
+                for stopper in stoppers:
+                    items = generate_item_bank(5000)
                     yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
-            for selector in [MaxInfoSelector(), ClusterSelector(clusters=clusters, r_max=.2)]:
-                for stopper in [MaxItemStopper(20)]:
-                    yield one_simulation, items, examinees, initializer, selector, estimator, stopper
+
+def test_cism():
+    from sklearn.cluster import KMeans
+
+    examinees = 10
+    initializers = [
+        RandomInitializer('uniform',
+                          (-5, 5)
+                          # ), RandomInitializer(
+                          #     'normal', (0, 1)
+                          ),
+        FixedPointInitializer(0)
+    ]
+    estimators = [
+        HillClimbingEstimator(), BinarySearchEstimator(), DifferentialEvolutionEstimator((-8, 8)),
+        FMinEstimator()
+    ]
+    stoppers = [MaxItemStopper(20), MinErrorStopper(.4)]
+
+    for initializer in initializers:
+        for estimator in estimators:
+            for stopper in stoppers:
+                items = generate_item_bank(5000)
+                clusters = KMeans(n_clusters=8).fit_predict(items)
+                selector = ClusterSelector(clusters=clusters, r_max=.2)
+                yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
 def one_simulation(items, examinees, initializer, selector, estimator, stopper):

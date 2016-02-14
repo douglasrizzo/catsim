@@ -5,9 +5,9 @@ clean:
 	find -name *.pyc -delete
 	find -name __pycache__ -delete
 install:
-	sudo python3 setup.py install
+	python3 setup.py install
 tests:
-	nosetests
+	nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim
 upload-test:
 	python setup.py register -r pypitest && python setup.py sdist upload -r pypitest
 upload:
