@@ -138,30 +138,25 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
     # inspired in the example found in
     # http://stats.stackexchange.com/questions/66199/maximum-likelihood-curve-
     # model-fitting-in-python
+    # try:
     if len(response_vector) != administered_items.shape[0]:
         raise ValueError(
             'Response vector and administered items must have the same number of items'
         )
+    LL = 0
 
-    return sum(
-        [
-            (
-                i * math.log(
-                    tpm(
-                        est_theta, administered_items[i][0], administered_items[i][
-                            1], administered_items[i][2]
-                    )
-                )
-            ) + (
-                (1 - i) * math.log(
-                    1 - tpm(
-                        est_theta, administered_items[i][0], administered_items[i][
-                            1], administered_items[i][2]
-                    )
-                )
-            ) for i in response_vector
-        ]
-    )
+    for i in range(len(response_vector)):
+        prob = tpm(
+            est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2]
+        )
+
+        LL += (response_vector[i] * math.log(prob)) + \
+              ((1 - response_vector[i]) * math.log(1 - prob))
+    return LL
+    # except OverflowError:
+    #     print('Deu pau com esses valores: \n' + str(est_theta) + '\n' +
+    #           str([prob, math.log10(prob)]) + '\n' + str(response_vector))
+    #     raise
 
 
 def negativelogLik(est_theta: float, *args) -> float:
