@@ -18,15 +18,14 @@ install:
 - conda config --set always_yes yes --set changeps1 no
 - conda update -q conda
 - conda info -a
-- conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib coverage nose
+- conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib
 - source activate test-environment
-- pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc
+- pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc sphinx_rtd_theme coverage nose
 - conda list
 - python --version
 - which python
 - python setup.py install
-script: echo 0
-# - nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim
+script: nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim
 after_success:
 - coveralls
 - bash deploy_docs.sh
