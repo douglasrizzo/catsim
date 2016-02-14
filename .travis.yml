@@ -24,8 +24,8 @@ install:
 - conda list
 - python --version
 - which python
-- python setup.py install
-script: nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim
+- make install clean
+script: make tests
 after_success:
 - coveralls
 - bash deploy_docs.sh
