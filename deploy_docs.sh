@@ -24,7 +24,7 @@ git reset upstream/gh-pages
 
 # echo "myproject.com" > CNAME
 
-touch .
+touch . .nojekyll
 
 git add -A .
 git commit -m "rebuild pages at ${rev}"
