@@ -286,7 +286,7 @@ class ClusterSelector(Selector):
         return cluster_infos
 
     @staticmethod
-    def cluster_sum(items: numpy.ndarray, c: list):
+    def sum_cluster_params(items: numpy.ndarray, c: list):
         """Returns the sum of item parameter values for each cluster cluster
 
         :param items: a matrix containing item parameters.
@@ -304,13 +304,13 @@ class ClusterSelector(Selector):
         return averages
 
     @staticmethod
-    def cluster_averages(items: numpy.ndarray, c: list):
+    def avg_cluster_params(items: numpy.ndarray, c: list):
         """Returns the average values of item parameters by cluster
 
         :param items: a matrix containing item parameters.
         :param c: a list containing clustering memeberships.
         :returns: a matrix containing the average values of each parameter by cluster. Lines are clusters, columns are parameters."""
-        averages = ClusterSelector.cluster_sum(items, c)
+        averages = ClusterSelector.sum_cluster_params(items, c)
 
         occurrences = numpy.bincount(numpy.delete(c, numpy.where(c == -1)).astype(numpy.int64))
 

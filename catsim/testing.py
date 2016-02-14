@@ -1,11 +1,12 @@
 import unittest
-from catsim.cat import generate_item_bank
+import numpy
 from catsim import irt
-from catsim.initialization import RandomInitializer, FixedPointInitializer
-from catsim.selection import MaxInfoSelector, ClusterSelector
-from catsim.reestimation import HillClimbingEstimator, BinarySearchEstimator, DifferentialEvolutionEstimator, FMinEstimator
-from catsim.stopping import MaxItemStopper, MinErrorStopper
 from catsim.simulation import Simulator
+from catsim.cat import generate_item_bank
+from catsim.stopping import MaxItemStopper, MinErrorStopper
+from catsim.selection import MaxInfoSelector, ClusterSelector
+from catsim.initialization import RandomInitializer, FixedPointInitializer
+from catsim.reestimation import HillClimbingEstimator, BinarySearchEstimator, DifferentialEvolutionEstimator, FMinEstimator
 
 
 def test_item_bank_generation():
@@ -18,6 +19,11 @@ def test_item_bank_generation():
         )
     ]:
         irt.validate_item_bank(items, raise_err=True)
+
+    items = numpy.zeros((100))
+    irt.validate_item_bank(items)
+    items = irt.normalize_item_bank(items)
+    irt.validate_item_bank(items, raise_err=True)
 
 
 def test_simulations():
@@ -68,6 +74,8 @@ def test_cism():
             for stopper in stoppers:
                 items = generate_item_bank(5000)
                 clusters = KMeans(n_clusters=8).fit_predict(items)
+                ClusterSelector.weighted_cluster_infos(0, items, clusters)
+                ClusterSelector.avg_cluster_params(items, clusters)
                 selector = ClusterSelector(clusters=clusters, r_max=.2)
                 yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
