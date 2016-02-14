@@ -6,8 +6,6 @@
 Welcome to catsim's documentation!
 ==================================
 
-:ref:`search`
-
 .. include:: ../README.rst
 
 Contents

@@ -28,7 +28,7 @@ install:
 script: nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim
 after_success:
 - coveralls
-- deploy.sh
+- deploy_docs.sh
 env:
   global:
     secure: byc2wWgxM4rrewNYwvJymK0TQOwqxufcHtv2u82fJ9lHZMtduztOlRemFQyRTzC6iqgQucVZtYu0E1+GWnzdwRZKQ2mvMNcMhcaaoNN9CjIjkjauFFJKGgwKRvUc4SeopDsDN7eVBai3L/gmghlYkKY192HS7uKemwW0TD17WwWCxBqYMI3X9BpxqYxXKxMTRLwI838dvfo7Ab8LHsdPPEcfH5wq2Z6NW6iMIWYFEKzCwt08NFfTXfb3zLar2jKntFN/H2Zn4x/JswKeFFcvyxJud4MrHOt6ckyuVKd07M6RjROC50CwCMfIe7ZC1BWmqZyE/ib+xCz3ATJ4Bv1omiH5aIexPrvi6RE33WGguDWWg1/lbsvZWOM+SG+nStBmiUT+lT7Ap/o/a1X7u4hdRAmkh6sXUUji/0TL0kjDoKa7J4p8BqoWxbyeDgAWu+EB8CjhL+8toSPV7/FhxSlMV9RncyfK1Aix1iJ9JSZ+PNli/1q0Do29Tbt3dKO2N+9wvdlADwbzpm/WlOLgY58y81NVQUZMwp3+L55cnvVe7XnjV72PnV7n1k1oJ9PoAnvWVQaY5TAPEmd3NDUeaqgIhlF6IXtF1lrJUXXibPQ3HW47BSwskpwnaMNmG7IOBQjj+B3B+qDUIyndSGDcauNmg69gNK8DdrfzA8OWkvlvRcQ=
