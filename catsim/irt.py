@@ -193,6 +193,8 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
 
     :returns: an nx3 item matrix conforming to 1, 2 and 3 parameter logistic models
     """
+    if len(items.shape) == 1:
+        items = numpy.expand_dims(items, axis=0)
     if items.shape[1] == 1:
         items = numpy.append(numpy.ones((items.shape[0])), items, axis=1)
     if items.shape[1] == 2:
@@ -215,11 +217,13 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
                       just print the error message to standard output.
     """
     if type(items) is not numpy.ndarray:
-        raise ValueError('Item matrix is not of type {0}'.format(type(numpy.zeros((1)))))
+        raise ValueError('Item matrix is not of type {0}'.format(numpy.ndarray))
 
     err = ''
 
-    if items.shape[1] > 3:
+    if len(items.shape) == 1:
+        err += 'Item matrix has only one dimension.'
+    elif items.shape[1] > 3:
         print(
             '\nItem matrix has more than 3 columns. catsim tends to add additional columns to the matriz during the simulation, so it\'s not a good idea to keep them.'
         )
