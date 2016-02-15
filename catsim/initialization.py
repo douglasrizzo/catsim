@@ -22,7 +22,9 @@ class RandomInitializer(Initializer):
     """Randomly initializes the first estimate of an examinee's proficiency
 
     :param dist_type: either `uniform` or `normal`
-    :param dist_params: a tuple containing minimum and maximum values for the uniform distribution (in no particular order) or the average and standard deviation values for the normal distribution (in this particular order)."""
+    :param dist_params: a tuple containing minimum and maximum values for the
+    uniform distribution (in no particular order) or the average and standard
+    deviation values for the normal distribution (in this particular order)."""
 
     def __init__(self, dist_type: str='uniform', dist_params: tuple=(-5, 5)):
         super(RandomInitializer, self).__init__()
