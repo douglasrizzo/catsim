@@ -45,14 +45,15 @@ def tpm(theta: float, a: float, b: float, c: float=0) -> float:
               as `theta` (usually :math:`-4 \\leq b \\leq 4`).
 
     :param c: the item pseudo-guessing parameter. Being a probability,
-        :math:`0\\leq c \\leq 1`, but items considered good usually have
-        :math:`c \\leq 0.2`.
+              :math:`0\\leq c \\leq 1`, but items considered good usually have
+              :math:`c \\leq 0.2`.
     """
     return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
 
 
 def see(theta: float, items: numpy.ndarray) -> float:
-    """Computes the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\\theta` value [Ayala2009]_:
+    """Computes the standard error of estimation (:math:`SEE`) of a test at a
+    specific :math:`\\theta` value [Ayala2009]_:
 
     .. math:: SEE = \\frac{1}{I(\\theta)}
 
@@ -202,7 +203,6 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     columns, respectively. the pseudo-guessing column is added such that items simulate the 2-parameter logistic model.
 
     :param items: the item matrix
-
     :returns: an nx3 item matrix conforming to 1, 2 and 3 parameter logistic models
     """
     if len(items.shape) == 1:

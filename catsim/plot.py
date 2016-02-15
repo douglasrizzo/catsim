@@ -210,20 +210,22 @@ def test_progress(
 
     :param title: the plot title.
     :param simulator: a simulator which has already simulated a series of CATs,
-    containing estimations to the examinees' proficiencies and a list of administered
-    items for each examinee.
+                      containing estimations to the examinees' proficiencies and
+                      a list of administered items for each examinee.
     :param index: the index of the examinee in the simulator whose plot is to be done.
     :param thetas: if a :py:class:`Simulator` is not passed, then a list of proficiency
-    estimations can be manually passed to the function.
+                   estimations can be manually passed to the function.
     :param administered_items: if a :py:class:`Simulator` is not passed, then a
-    matrix of administered items, represented by their parameters, can be manually passed to the function.
+                               matrix of administered items, represented by their
+                               parameters, can be manually passed to the function.
     :param true_theta: the value of the examinee's true proficiency. If it is passed,
-    it will be shown on the plot, otherwise not.
-    :param info: plot test information. It only works if both proficiencies and administered items are passed.
+                       it will be shown on the plot, otherwise not.
+    :param info: plot test information. It only works if both proficiencies and
+                 administered items are passed.
     :param see: plot the standard error of estimation during the test. It only
-    works if both proficiencies and administered items are passed.
+                works if both proficiencies and administered items are passed.
     :param reliability: plot the test reliability. It only works if both proficiencies
-    and administered items are passed.
+                        and administered items are passed.
     :param filepath: the path to save the plot
     :param show: whether the generated plot is to be shown
     """

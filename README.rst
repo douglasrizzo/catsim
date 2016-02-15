@@ -27,6 +27,11 @@ Computerized adaptive tests are educational evaluations, usually taken by examin
 
 *catsim* allows users to simulate the application of a computerized adaptive test, given a sample of examinees, represented by their proficiency levels, and an item bank, represented by their parameters according to some Item Response Theory model.
 
+Installation
+------------
+
+Install it using `pip install catsim`.
+
 Basic Usage
 -----------
 
