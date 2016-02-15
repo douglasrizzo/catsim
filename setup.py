@@ -3,6 +3,19 @@
 from setuptools import setup, find_packages
 
 setup(
+    classifiers=[
+        # How mature is this project? Common values are
+        #   3 - Alpha
+        #   4 - Beta
+        #   5 - Production/Stable
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Statisticians',
+        'Intended Audience :: Academics',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
+    ],
     name='catsim',
     version='0.8.1',
     description='Computerized Adaptive Testing Simulator',
