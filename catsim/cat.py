@@ -39,11 +39,14 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
 
 
 def rmse(actual: Iterable, predicted: Iterable):
-    """Root mean squared error, a common value used when measuring the precision with which a computerized adaptive test estimates examinees proficiencies [Bar10]_. The value is calculated by:
+    """Root mean squared error, a common value used when measuring the precision
+    with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
+    The value is calculated by:
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
+    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
 
     :param actual: a list or 1-D numpy array containing the true proficiency values
     :param predicted: a list or 1-D numpy array containing the estimated proficiency values

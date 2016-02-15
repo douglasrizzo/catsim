@@ -94,7 +94,12 @@ def scatter_matrix(data: numpy.ndarray) -> numpy.ndarray:
 
     The calculations done by this function follow the following equation:
 
-    .. math:: S=\\sum_{{j=1}}^{n}({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})^{T}=\\sum _{{j=1}}^{n}({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})\\otimes({\\mathbf{x}}_{j}-\\overline{{\\mathbf{x}}})=\\left(\\sum _{{j=1}}^{n}{\\mathbf {x}}_{j}{\\mathbf {x}}_{j}^{T}\\right)-n\\overline {{\\mathbf {x}}}\\overline {{\\mathbf {x}}}^{T}
+    .. math:: S=\\sum_{{j=1}}^{n}({\\mathbf{x}}_{j}-\\overline
+              {{\\mathbf{x}}})({\\mathbf{x}}_{j}-\\overline {{\\mathbf{x}}})^{T}=\\sum
+              _{{j=1}}^{n}({\\mathbf{x}}_{j}-\\overline
+              {{\\mathbf{x}}})\\otimes({\\mathbf{x}}_{j}-\\overline{{\\mathbf{x}}})=\\left(\\sum
+              _{{j=1}}^{n}{\\mathbf {x}}_{j}{\\mathbf {x}}_{j}^{T}\\right)-n\\overline
+              {{\\mathbf {x}}}\\overline {{\\mathbf {x}}}^{T}
 
     :param data: the data matrix
     :returns: the scatter matrix of the given data matrix

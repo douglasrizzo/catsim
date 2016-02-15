@@ -1,12 +1,25 @@
-"""Item Response Theory is a group of statistical tools created with the purpose of measuring latent traits, like personality traits or knowledge in specific areas. IRT allows for the creation of a measuring instrument (the test), under which every examinee may be positioned and compared with others. The masuring instrument is created by items, which can be most commonly represented as tasks in a test.
+"""Item Response Theory is a group of statistical tools created with the purpose
+of measuring latent traits, like personality traits or knowledge in specific areas.
+IRT allows for the creation of a measuring instrument (the test), under which every
+examinee may be positioned and compared with others. The masuring instrument is
+created by items, which can be most commonly represented as tasks in a test.
 
-On the mathematical domain, IRT allows us to calculate the probability with which an examinee might answer an item correctly. For that both items and examinees are modelled using numerical parameters. This allows for the estimation and analysis of examinees proficiencies on the same scale as items difficulties. It also allows for the quality of items to be judged by the values of their parameters.
+On the mathematical domain, IRT allows us to calculate the probability with
+which an examinee might answer an item correctly. For that both items and
+examinees are modelled using numerical parameters. This allows for the
+estimation and analysis of examinees proficiencies on the same scale as items
+difficulties. It also allows for the quality of items to be judged by the values
+of their parameters.
 
 This module containing functions pertaining to the Item Response Theory logistic models.
 
-.. [Ayala2009] De Ayala, R. J. (2009). The Theory and Practice of Item Response Theory. New York: Guilford Press. Retrieved from http://books.google.com/books?id=-k36zbOBa28C&pgis=1
+ .. [Ayala2009] De Ayala, R. J. (2009). The Theory and Practice of Item
+Response Theory. New York: Guilford Press. Retrieved from
+http://books.google.com/books?id=-k36zbOBa28C&pgis=1
 
-.. [Thissen00] Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), Computerized adaptive testing: A primer (2nd ed., pp. 159–184). Lawrence Erlbaum Associates Publishers.
+.. [Thissen00] Thissen, D. (2000). Reliability and measurement precision. In H.
+Wainer (Ed.), Computerized adaptive testing: A primer (2nd ed., pp. 159–184).
+Lawrence Erlbaum Associates Publishers.
 
 """
 
@@ -89,7 +102,8 @@ def reliability(theta: float, items: numpy.ndarray):
 
 
 def inf(theta: float, a: float, b: float, c: float=0) -> float:
-    """Calculates the information value of an item using the Item Response Theory three-parameter logistic model function [Ayala2009]_:
+    """Calculates the information value of an item using the Item Response Theory
+three-parameter logistic model function [Ayala2009]_:
 
     .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
 
@@ -128,7 +142,9 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
     maximization/minimization problems, transforming the product of
     probabilities in a sum of probabilities:
 
-    .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I) = \\sum_{i=1} ^ I \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log Q_{ij}(\\theta) \\right\\rbrace
+     .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I) = \\sum_{i=1} ^ I
+    \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
+    Q_{ij}(\\theta) \\right\\rbrace
 
     :param est_theta: estimated proficiency value
     :param response_vector: a binary list containing the response vector
@@ -221,7 +237,8 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
         err += 'Item matrix has only one dimension.'
     elif items.shape[1] > 3:
         print(
-            '\nItem matrix has more than 3 columns. catsim tends to add additional columns to the matriz during the simulation, so it\'s not a good idea to keep them.'
+            '\nItem matrix has more than 3 columns. catsim tends to add additional\
+            columns to the matriz during the simulation, so it\'s not a good idea to keep them.'
         )
     elif items.shape[1] < 3:
         if items.shape[1] == 1:

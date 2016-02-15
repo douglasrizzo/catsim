@@ -55,7 +55,10 @@ class MaxInfoSelector(Selector):
 class ClusterSelector(Selector):
     """Cluster-based Item Selection Method.
 
-        .. [Men15] Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes adaptativos informatizados baseada em agrupamento por similaridade (Mestrado). Centro Universitário da FEI. Retrieved from https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade
+        .. [Men15] Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes
+           adaptativos informatizados baseada em agrupamento por similaridade (Mestrado).
+           Centro Universitário da FEI. Retrieved from
+           https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade
 
     :param clusters: a list containing item cluster memberships
     :param r_max: maximum exposure rate for items

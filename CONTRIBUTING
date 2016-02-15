@@ -33,9 +33,9 @@ How to contribute
 
 **Contributing code:** create a fork on GitHub, make your changes on your own repo and then send a pull request to out **testing** branch so that we can check your contributions. Make sure your version passes on the unit tests.
 
-**Contributing ideas:** file an `issue on GitHub<https://github.com/douglasrizzo/catsim/issues>`_, label it as an **enhancement** and describe as thoroughly as possible what could be done.
+**Contributing ideas:** file an `issue on GitHub <https://github.com/douglasrizzo/catsim/issues>`_, label it as an **enhancement** and describe as thoroughly as possible what could be done.
 
-**Blaming us:** file an `issue on GitHub<https://github.com/douglasrizzo/catsim/issues>`_ describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.
+**Blaming us:** file an `issue on GitHub <https://github.com/douglasrizzo/catsim/issues>`_ describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.
 
 .. [Chang99] Chang, H.-H., & Ying, Z. (1999). a-Stratified Multistage Computerized Adaptive Testing. Applied Psychological Measurement, 23(3), 211–222. http://doi.org/10.1177/01466219922031338
 
