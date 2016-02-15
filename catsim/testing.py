@@ -28,8 +28,6 @@ def test_item_bank_generation():
 
 
 def test_plots():
-    import matplotlib
-    matplotlib.use('agg')
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
     estimator = HillClimbingEstimator()
