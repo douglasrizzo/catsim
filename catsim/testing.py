@@ -1,6 +1,7 @@
 import unittest
 import numpy
 from catsim import irt
+from catsim import plot
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 from catsim.stopping import MaxItemStopper, MinErrorStopper
@@ -24,6 +25,32 @@ def test_item_bank_generation():
     irt.validate_item_bank(items)
     items = irt.normalize_item_bank(items)
     irt.validate_item_bank(items, raise_err=True)
+
+
+def test_plots():
+    import matplotlib
+    matplotlib.use('agg')
+    initializer = RandomInitializer()
+    selector = MaxInfoSelector()
+    estimator = HillClimbingEstimator()
+    stopper = MaxItemStopper(20)
+    s = Simulator(generate_item_bank(100), 10)
+    s.simulate(initializer, selector, estimator, stopper)
+
+    for item in s.items[0:10]:
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', None
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', None
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', None
+
+    plot.gen3D_dataset_scatter(items=s.items)
+    plot.test_progress(
+        title='Test progress',
+        simulator=s,
+        index=0,
+        info=True,
+        see=True,
+        reliability=True
+    )
 
 
 def test_simulations():
@@ -82,7 +109,6 @@ def test_cism():
 
 def one_simulation(items, examinees, initializer, selector, estimator, stopper):
     Simulator(items, examinees).simulate(initializer, selector, estimator, stopper)
-    pass
 
 
 if __name__ == '__main__':

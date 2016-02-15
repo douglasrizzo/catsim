@@ -4,11 +4,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='catsim',
-    version='0.8',
+    version='0.8.1',
     description='Computerized Adaptive Testing Simulator',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
-    url='https://www.github.com/douglasrizzo/catsim',
+    url='https://douglasrizzo.github.io/catsim',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
         'numpy', 'scipy', 'matplotlib', 'scikit-learn'
