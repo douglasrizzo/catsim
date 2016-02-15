@@ -19,7 +19,8 @@ def item_curve(
     c: float=0,
     title: str=None,
     ptype: str='icc',
-    filepath: str=None
+    filepath: str=None,
+    show: bool=True
 ):
     """Plots 'Item Response Theory'-related item plots
 
@@ -42,6 +43,7 @@ def item_curve(
     :param ptype: 'icc' for the item characteristic curve, 'iic' for the item
                   information curve or 'both' for both curves in the same plot
     :param filepath: saves the plot in the given path
+    :param show: whether the generated plot is to be shown
     """
     available_types = ['icc', 'iic', 'both']
 
@@ -121,10 +123,16 @@ def item_curve(
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight')
 
-    plt.show()
+    if show:
+        plt.show()
 
 
-def gen3D_dataset_scatter(items: numpy.ndarray, title: str=None, filepath: str=None):
+def gen3D_dataset_scatter(
+    items: numpy.ndarray,
+    title: str=None,
+    filepath: str=None,
+    show: bool=True
+):
     """Generate the item matrix tridimensional dataset scatter plot
 
     .. plot::
@@ -137,6 +145,7 @@ def gen3D_dataset_scatter(items: numpy.ndarray, title: str=None, filepath: str=N
     :param items: the item matrix
     :param title: the scatter plot title
     :param filepath: the path to save the scatter plot
+    :param show: whether the generated plot is to be shown
     """
     irt.validate_item_bank(items)
 
@@ -161,7 +170,8 @@ def gen3D_dataset_scatter(items: numpy.ndarray, title: str=None, filepath: str=N
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight')
 
-    plt.show()
+    if show:
+        plt.show()
 
 
 def test_progress(
@@ -174,7 +184,8 @@ def test_progress(
     info: bool=False,
     see: bool=False,
     reliability: bool=False,
-    filepath: str=None
+    filepath: str=None,
+    show: bool=True
 ):
     """Generates a plot representing an examinee's test progress
 
@@ -207,6 +218,7 @@ def test_progress(
     :param see: plot the standard error of estimation during the test. It only works if both proficiencies and administered items are passed.
     :param reliability: plot the test reliability. It only works if both proficiencies and administered items are passed.
     :param filepath: the path to save the plot
+    :param show: whether the generated plot is to be shown
     """
     if simulator is None and thetas is None and administered_items is None:
         raise ValueError('Not a single plottable object was passed.')
@@ -261,4 +273,5 @@ def test_progress(
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight')
 
-    plt.show()
+    if show:
+        plt.show()

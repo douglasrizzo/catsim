@@ -36,18 +36,19 @@ def test_plots():
     s.simulate(initializer, selector, estimator, stopper)
 
     for item in s.items[0:10]:
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', None
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', None
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', None
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', None, False
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', None, False
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', None, False
 
-    plot.gen3D_dataset_scatter(items=s.items)
+    plot.gen3D_dataset_scatter(items=s.items, show=False)
     plot.test_progress(
         title='Test progress',
         simulator=s,
         index=0,
         info=True,
         see=True,
-        reliability=True
+        reliability=True,
+        show=False
     )
 
 
