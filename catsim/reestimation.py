@@ -275,8 +275,6 @@ class FMinEstimator(Estimator):
             full_output=True
         )
 
-        print(res)
-
         self._evaluations = res[3]
         return res[0]
 
