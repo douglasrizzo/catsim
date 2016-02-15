@@ -5,6 +5,7 @@ install:
 - sudo apt-get update
 - python --version
 - which python
+# install Miniconda conditionally, dependeing on the Python version in the VM
 - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
   -O miniconda.sh; else wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
   -O miniconda.sh; fi
@@ -14,14 +15,16 @@ install:
 - conda config --set always_yes yes --set changeps1 no
 - conda update -q conda
 - conda info -a
+# create a virtualenv and install the packages that take the longest to be compiled under pip
 - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib
 - source activate test-environment
+# install remaining packages using pip
 - pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc sphinx_rtd_theme coverage nose
 - conda list
 - python --version
 - which python
 - make install clean
-before_script:
+before_script: # configure a headless display to test plot generation
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
