@@ -17,6 +17,10 @@
    :target: https://landscape.io/github/douglasrizzo/catsim/master
    :alt: Code Health
 
+.. image:: https://requires.io/github/douglasrizzo/catsim/requirements.svg?branch=master
+ :target: https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master
+ :alt: Requirements Status
+
 **catsim** is a computerized adaptive testing simulator written in Python 3.4. It allow for the simulation of computerized adaptive tests, selecting different test initialization rules, item selection rules, proficiency reestimation methods and stopping criteria.
 
 Computerized adaptive tests are educational evaluations, usually taken by examinees in a computer or some other digital means, in which the examinee's proficiency is evaluated after the response of each item. The new proficiency is then used to select a new item, closer to the examinee's real proficiency. This method of test application has several advantages compared to the traditional paper-and-pencil method, since high-proficiency examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low proficiency level.
