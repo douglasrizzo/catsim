@@ -98,7 +98,7 @@ class HillClimbingEstimator(Estimator):
 
         self._evaluations = 0
 
-        for i in range(10):
+        for _ in range(10):
             intervals = numpy.linspace(lbound, ubound, 10)
             if self._verbose:
                 print('Bounds: ' + str(lbound) + ' ' + str(ubound))

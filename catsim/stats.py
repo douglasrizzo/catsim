@@ -60,10 +60,10 @@ def covariance(x: numpy.ndarray, minus_one: bool=True):
 
     for i in range(n_features):
         for ii in range(i, n_features):
-            sum = 0
+            _sum = 0
             for iii in range(n_obs):
-                sum += (x[iii, i] - x_means[i]) * (x[iii, ii] - x_means[ii])
-            covars[i, ii] = covars[ii, i] = sum / \
+                _sum += (x[iii, i] - x_means[i]) * (x[iii, ii] - x_means[ii])
+            covars[i, ii] = covars[ii, i] = _sum / \
                 ((n_obs - 1) if minus_one else n_obs)
 
     return covars

@@ -87,7 +87,7 @@ def item_curve(
             plt.plot(thetas, i_thetas)
 
     elif ptype == 'both':
-        fig, ax1 = plt.subplots()
+        _, ax1 = plt.subplots()
 
         ax1.plot(thetas, p_thetas, 'b-')
         ax1.set_xlabel(r'$\theta$', size=16)
