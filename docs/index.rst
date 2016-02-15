@@ -16,13 +16,13 @@ Contents
     :glob:
 
     item_matrix.rst
-    catsim.initialization.rst
-    catsim.selection.rst
-    catsim.reestimation.rst
-    catsim.stopping.rst
-    catsim.simulation.rst
-    catsim.irt.rst
-    catsim.cat.rst
-    catsim.plot.rst
-    catsim.stats.rst
+    initialization.rst
+    selection.rst
+    reestimation.rst
+    stopping.rst
+    simulation.rst
+    irt.rst
+    cat.rst
+    plot.rst
+    stats.rst
     contributing.rst
