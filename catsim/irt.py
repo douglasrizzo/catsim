@@ -153,10 +153,6 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
         LL += (response_vector[i] * math.log(prob)) + \
               ((1 - response_vector[i]) * math.log(1 - prob))
     return LL
-    # except OverflowError:
-    #     print('Deu pau com esses valores: \n' + str(est_theta) + '\n' +
-    #           str([prob, math.log10(prob)]) + '\n' + str(response_vector))
-    #     raise
 
 
 def negativelogLik(est_theta: float, *args) -> float:
