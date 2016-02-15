@@ -30,15 +30,15 @@ Computerized adaptive tests are educational evaluations, usually taken by examin
 Basic Usage
 -----------
 
-1. Have an `item matrix <item_matrix.rst>`_;
+1. Have an `item matrix <https://douglasrizzo.github.io/catsim/item_matrix.html>`_;
 2. Have a sample, or a number of examinees;
-3. Create a `initializer <initialization.rst>`_, an item `selector <selection.rst>`_, a proficiency `estimator <estimation.rst>`_ and a `stopping criterion <stopping.rst>`_;
-4. Pass them to a `simulator <simulation.rst>`_ and start the simulation.
+3. Create a `initializer <https://douglasrizzo.github.io/catsim/initialization.html>`_, an item `selector <https://douglasrizzo.github.io/catsim/selection.html>`_, a proficiency `estimator <https://douglasrizzo.github.io/catsim/estimation.html>`_ and a `stopping criterion <https://douglasrizzo.github.io/catsim/stopping.html>`_;
+4. Pass them to a `simulator <https://douglasrizzo.github.io/catsim/simulation.html>`_ and start the simulation.
 
 Optional:
 
 5. Access the simulator's properties to get specifics of the results;
-6. `Plot <plot.rst>`_ your results.
+6. `Plot <https://douglasrizzo.github.io/catsim/plot.html>`_ your results.
 
  .. code-block:: python
      :linenos:
