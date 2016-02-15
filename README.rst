@@ -1,3 +1,6 @@
+`catsim` -- Computerized Adaptive Testing Simulator
+===================================================
+
 .. image:: https://travis-ci.org/douglasrizzo/catsim.svg?branch=master
     :target: https://travis-ci.org/douglasrizzo/catsim:
     :alt: Build Status
@@ -5,15 +8,14 @@
 .. image:: https://coveralls.io/repos/github/douglasrizzo/catsim/badge.svg?branch=master
     :target: https://coveralls.io/github/douglasrizzo/catsim?branch=master
     :alt: Test Coverage
+
 .. image:: https://badge.fury.io/py/catsim.svg
     :target: https://badge.fury.io/py/catsim
     :alt: Latest Version
+
 .. image:: https://landscape.io/github/douglasrizzo/catsim/master/landscape.svg?style=flat
    :target: https://landscape.io/github/douglasrizzo/catsim/master
    :alt: Code Health
-
-Introduction
-------------
 
 **catsim** is a computerized adaptive testing simulator written in Python 3.4. It allow for the simulation of computerized adaptive tests, selecting different test initialization rules, item selection rules, proficiency reestimation methods and stopping criteria.
 
