@@ -3,7 +3,7 @@
 import numpy
 
 
-def coefvariation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
+def coef_variation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
     '''Calculates the coefficientof variation of the rows or columns of a matrix.
     The coefficient of variation is given by the standard deviation divided by the mean of a variable:
 
@@ -28,7 +28,7 @@ def coefvariation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
     return result
 
 
-def coefCorrelation(x: numpy.ndarray):
+def coef_correlation(x: numpy.ndarray):
     cov = covariance(x, False)
     stddev = numpy.std(x, axis=0)
     n_obs, n_features = x.shape

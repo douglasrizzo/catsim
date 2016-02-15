@@ -2,6 +2,7 @@ import unittest
 import numpy
 from catsim import irt
 from catsim import plot
+from catsim import stats
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 from catsim.stopping import MaxItemStopper, MinErrorStopper
@@ -55,6 +56,20 @@ def test_plots():
 
     # close all plots after testing
     close('all')
+
+
+def test_stats():
+    import numpy.random as nprnd
+    for i in range(10):
+        items = generate_item_bank(500)
+        yield stats.coef_variation, items
+        yield stats.coef_correlation, items
+        yield stats.covariance, items
+        yield stats.covariance, items, False
+        yield stats.scatter_matrix, items
+
+        random_integers = nprnd.randint(30, size=1000)
+        yield stats.bincount, random_integers
 
 
 def test_simulations():
