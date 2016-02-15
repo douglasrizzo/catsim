@@ -28,6 +28,7 @@ def test_item_bank_generation():
 
 
 def test_plots():
+    from matplotlib.pyplot import close
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
     estimator = HillClimbingEstimator()
@@ -39,6 +40,7 @@ def test_plots():
         yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', None, False
         yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', None, False
         yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', None, False
+        close('all')
 
     plot.gen3D_dataset_scatter(items=s.items, show=False)
     plot.test_progress(
@@ -50,6 +52,9 @@ def test_plots():
         reliability=True,
         show=False
     )
+
+    # close all plots after testing
+    close('all')
 
 
 def test_simulations():
