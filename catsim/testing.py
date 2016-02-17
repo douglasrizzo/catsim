@@ -60,7 +60,7 @@ def test_plots():
 
 def test_stats():
     import numpy.random as nprnd
-    for i in range(10):
+    for _ in range(10):
         items = generate_item_bank(500)
         yield stats.coef_variation, items
         yield stats.coef_correlation, items
