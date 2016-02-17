@@ -6,8 +6,6 @@ All implemented classes in this module inherit from a base abstract class
 used during the simulation, as long as it also inherits from
 :py:class:`Stopper`.
 
-.. inheritance-diagram:: catsim.estimation
-
 .. automodule:: catsim.stopping
    :members:
    :show-inheritance:
