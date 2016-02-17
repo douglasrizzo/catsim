@@ -31,9 +31,9 @@ sys.path.insert(0, os.path.abspath('..'))
 # ones.
 extensions = [
     'sphinx.ext.intersphinx', 'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.mathjax',
-    'sphinx.ext.autosummary', 'sphinx.ext.viewcode', 'sphinx_autodoc_annotation',
-    'matplotlib.sphinxext.only_directives', 'matplotlib.sphinxext.plot_directive',
-    'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'numpydoc'
+    'sphinx.ext.autosummary', 'sphinx.ext.viewcode', 'sphinx.ext.graphviz',
+    'sphinx_autodoc_annotation', 'matplotlib.sphinxext.only_directives',
+    'matplotlib.sphinxext.plot_directive', 'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'numpydoc'
 ]
 
 intersphinx_mapping = {

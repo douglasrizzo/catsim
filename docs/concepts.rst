@@ -1,0 +1,95 @@
+Basic Concepts
+==============
+
+As a CAT simulator, :py:mod:`catsim` borrows many concepts from Item Response Theory, a series of models created in the second part of the 20th century with the goal of *measuring latent traits*. :py:mod:`catsim` makes use of Item Response Theory three-parameter logistical model, a model in which examinees and items are represented by the following numerical values:
+
+
+Examinee
+    * :math:`\theta` denotes an examinee's proficiency. Since Item Reponse Theory was first conceived with the goal to measure *latent traits*, that is, features of an individual that cannot be directly measured, psycologists and statisticians created *instruments*, composed of *items*, such that examinee's could manifest their latent traits and that these could be represented numerically manifestation of one such latent trait. :math:`\theta` represents this numerical manifestation of a latent trait, usually called *ability* or *proficiency*. Usually :math:`-\inf < \theta < \inf`, but since the scale of :math:`\theta` is up to the individuals creating the instrument, it is common for the values to be around the normal distribution :math:`N(0; 1)`, such that :math:`-4 < \theta < 4`.
+    * :math:`\hat\theta` is the esimate of :math:`\theta`. Since a latent trait can't be measured directly, estimates need to be made, which tend to get closer to the theorically real :math:`\theta` as the test progresses in length.
+
+Item
+    * :math:`a` represents an item's *discrimination* parameter, that is, how well it discriminates individuals who answer the item correctly (or, in an alternative interpretation, individuals who agree with the idea of the item) and those who don't. An item with a high :math:`a` value tends to be answered correctly by all individuals whose :math:`\theta` is above the items difficulty level and wrongly by all the others; as this value gets lower, this threshold gets blurry and the item starts not to be as informative. It is common for :math:`a > 0`.
+    * :math:`b` represents an item's *difficulty* parameter. This parameter, which is measured in the same scale as :math:`\theta`, shows at which point of the proficiency scale an item is more informative, that is, where it discriminates the individuals who agree and those who disagree with the item. Since :math:`b` and :math:`\theta` are measured in the same scale, :math:`b` follows the same distributions as :math:`\theta`. For a CAT, it is good for an item bank to have as many items as possible in all difficulty levels, so that the CAT may select the best item for each individual in all ability levels.
+    * :math:`c` represents an item's *pseudo-guessing* parameter. This parameter denotes what is the probability of individuals with low proficiency values to still answer the item correctly. Since :math:`c` is a probability, :math:`0 < c \leq 1`, but the lower the value of this parameter, the better the item is considered.
+
+In :py:mod:`catsim`, the probability of an examinee with a given :math:`\hat\theta` value to answer an item correctly, given the item parameters, is given by :py:func:`catsim.irt.tpm`. The amount of information this item gives is calculated by :py:func:`catsim.irt.inf`.
+
+The Item Matrix
+---------------
+
+In catsim, an item bank, or matrix, is a :py:class:`numpy.ndarray` whose rows represent items and columns represent item characteristics. The most important characteristics are situated in the first three columns of the matrix:
+
+* column 1 contains item discrimination, commonly known in the literature as the :math:`a` parameter. For all purposes of the simulation, :math:`a > 0`;
+* column 2 contains item difficulty, or the :math:`b` parameter. Usually, :math:`b \in [-\inf; \inf]`, but in practice, the values of :math:`b` depend on the scale examinees' proficiencies are being measured. In literature, both proficiencies and item difficulties are standardized to :math:`N(0; 1)` and it is in that domain that catsim has been mostly tested;
+* column 3 contains the item's pseudo-guessing parameter, which represents a fixed probability all examinees have of answering the item correctly. Being a probabiliy :math:`0 > c >1`.
+
+After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as :math:`r`. Its value denotes how many times an item has been used and it is calculated as follows:
+
+.. math:: r_i = \frac{q_i}{N}
+
+Where :math:`q_i` represents the number of tests item :math:`i` has been used and :math:`N` is the total number of tests applied.
+
+The CAT Lifecycle
+-----------------
+
+In general, a computerized adaptive test has a very well-defined lifecycle:
+
+.. graphviz::
+
+    digraph cat_simple {
+    	bgcolor="transparent";
+    	rankdir=TB;
+    	a[label=<START>, shape=box];
+    	b[label=<Initial proficiency<br/>estimation>];
+    	c[label=<Item selection and <br/>administration>];
+    	d[label=<Capture answer>];
+    	e[label=<Proficiency estimation>];
+    	rank=same;
+    	f[label=<Stopping criterion<br/>reached?>, shape=diamond];
+    	g[label=<END>, shape=box];
+    	a -> b -> c -> d -> e -> f;
+    	f -> g[label=<YES>];
+    	f -> c[label=<NO>];
+    }
+
+1. The examinee's initial proficiency is estimated;
+2. An item is selected based on the current proficiency estimation;
+3. The proficency is reestimated based on the answers to all items up until now;
+4. **If** a stopping criterion is met, stop the test. **Else** go back to step 2.
+
+There is a considerable amount of literature covering these four topics. New methods of doing any of the four have been proposed and during the development of :py:mod:`catsim`, each topic resides in its own module. This way, it is easy to create simulations combining different methods of each topic.
+
+Initialization
+^^^^^^^^^^^^^^
+
+The initialization procedure is done only once during each examinee's test. In it, the value of :math:`\hat\theta_0` is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (:py:class:`catsim.initialization.FixedInitializer`); it can be chosen randomly from a probability distribution (:py:class:`catsim.initialization.RandomInitializer`); the place in the item bank with items of more information can be chosen to initialize :math:`\hat\theta_0` etc.
+
+In :py:mod:`catsim`, initialization procedures can be found at :py:mod:`catsim.initialization`.
+
+Item Selection
+^^^^^^^^^^^^^^
+
+With a set value for :math:`\hat\theta`, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate :math:`\hat\theta`.
+
+Item selection methods are diverse. The most famous method is to choose the item that maximizes the *gain of information*, represented by :py:class:`catsim.selection.MaxInfoSelector`. This method, however, has been shown to have some drawbacks, like overusing few items form the item bank while ignoring items with inferior parameters.
+
+In order to correct that, other item selection methods were proposed.
+
+In :py:mod:`catsim`, item selection procedures can be found at :py:mod:`catsim.selection`.
+
+Proficiency Estimation
+^^^^^^^^^^^^^^^^^^^^^^
+
+Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's :mat:`\hat\theta`. This value reflects the examinee's proficiency, given his or hers answers up until that point of the test.
+
+Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the :math:`\hat\theta` value that maximizes the *log-likelihood* function, presented in :py:func:`catsim.irt.logLik`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's proficiencies to estimate new values for them.
+
+In :py:mod:`catsim`, proficiency estimation procedures can be found at :py:mod:`catsim.estimation`.
+
+Stopping Criterion
+^^^^^^^^^^^^^^^^^^
+
+Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items (:py:class:`catsim.stopping.MaxItemStopper`) or when the standard error of estimation (:py:func:`catsim.irt.see`) reaches a lower threshold (:py:class:`catsim.stopping.MaxItemStopper`) etc.
+
+In :py::mod`catsim`, test stopping criteria can be found at :py:mod:`catsim.stopping`.
