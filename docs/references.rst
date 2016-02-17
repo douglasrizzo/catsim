@@ -1,0 +1,24 @@
+References
+==========
+
+.. [Ayala2009] De Ayala, R. J. (2009). The Theory and Practice of Item
+   Response Theory. New York: Guilford Press. Retrieved from
+   http://books.google.com/books?id=-k36zbOBa28C&pgis=1
+
+.. [Thissen00] Thissen, D. (2000). Reliability and measurement precision. In H.
+   Wainer (Ed.), Computerized adaptive testing: A primer (2nd ed., pp. 159–184).
+   Lawrence Erlbaum Associates Publishers.
+
+.. [Bar10] Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A Method
+   for the Comparison of Item Selection Rules in Computerized Adaptive Testing.
+   Applied Psychological Measurement, 34(6), 438–452.
+   http://doi.org/10.1177/0146621610370152
+
+.. [Bar14] Barrada, J. R., Abad, F. J., & Olea, J. (2014). Optimal Number of
+   Strata for the Stratified Methods in Computerized Adaptive Testing. The Spanish
+   Journal of Psychology, 17. http://doi.org/10.1017/sjp.2014.50 
+
+.. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
+  Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
+  Scale Model. Applied Psychological Measurement, 14(4), 355-366.
+  http://doi.org/10.1177/014662169001400403
