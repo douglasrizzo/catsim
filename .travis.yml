@@ -1,6 +1,10 @@
 language: python
 python:
 - '3.4'
+addons:
+  apt:
+    sources:
+    - graphviz
 install:
 - sudo apt-get update
 # install Miniconda conditionally, dependeing on the Python version in the VM
