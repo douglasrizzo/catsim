@@ -1,14 +1,4 @@
-"""Functions used specifically during the application/simulation of computerized adaptive tests.
-
-.. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item
-   selection rules in computerized adaptive testing. Applied Psychological
-   Measurement, v. 34, n. 6, p. 438-452, 2010.
-
-.. [Dod90] Dodd, B. G. (1990). The Effect of Item Selection Procedure and
-  Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
-  Scale Model. Applied Psychological Measurement, 14(4), 355-366.
-  http://doi.org/10.1177/014662169001400403
-"""
+"""Functions used specifically during the application/simulation of computerized adaptive tests."""
 
 import numpy
 from collections.abc import Iterable
@@ -16,7 +6,7 @@ from collections.abc import Iterable
 
 def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     """Method proposed by [Dod90]_ for the reestimation of :math:`\\hat{\\theta}`
-    when the response vector is composed entirely of 1s or 0s
+    when the response vector is composed entirely of 1s or 0s.
 
     .. math::
 

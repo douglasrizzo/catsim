@@ -11,17 +11,7 @@ estimation and analysis of examinees proficiencies on the same scale as items
 difficulties. It also allows for the quality of items to be judged by the values
 of their parameters.
 
-This module containing functions pertaining to the Item Response Theory logistic models.
-
- .. [Ayala2009] De Ayala, R. J. (2009). The Theory and Practice of Item
-Response Theory. New York: Guilford Press. Retrieved from
-http://books.google.com/books?id=-k36zbOBa28C&pgis=1
-
-.. [Thissen00] Thissen, D. (2000). Reliability and measurement precision. In H.
-Wainer (Ed.), Computerized adaptive testing: A primer (2nd ed., pp. 159–184).
-Lawrence Erlbaum Associates Publishers.
-
-"""
+This module containing functions pertaining to the Item Response Theory logistic models."""
 
 import math
 import numpy
@@ -104,7 +94,7 @@ def reliability(theta: float, items: numpy.ndarray):
 
 def inf(theta: float, a: float, b: float, c: float=0) -> float:
     """Calculates the information value of an item using the Item Response Theory
-three-parameter logistic model function [Ayala2009]_:
+    three-parameter logistic model function [Ayala2009]_:
 
     .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
 
@@ -124,8 +114,7 @@ three-parameter logistic model function [Ayala2009]_:
         :math:`0\\leq c \\leq 1`, but items considered good usually have
         :math:`c \\leq 0.2`.
 
-    :returns: the information value of the item at the designated `theta` point.
-    """
+    :returns: the information value of the item at the designated `theta` point."""
     ml3 = tpm(theta, a, b, c)
 
     return math.pow(a, 2) * (math.pow(ml3 - c, 2) / math.pow(1 - c, 2)) * (1 - ml3) / ml3
@@ -144,13 +133,13 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
     probabilities in a sum of probabilities:
 
      .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I) = \\sum_{i=1} ^ I
-    \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
-    Q_{ij}(\\theta) \\right\\rbrace
+               \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
+               Q_{ij}(\\theta) \\right\\rbrace
 
-    :param est_theta: estimated proficiency value
-    :param response_vector: a binary list containing the response vector
-    :param administered_items: a numpy array containing the parameters of the answered items
-    :returns: log-likelihood of a given proficiency value, given the responses to the administered items
+    :param est_theta: estimated proficiency value.
+    :param response_vector: a binary list containing the response vector.
+    :param administered_items: a numpy array containing the parameters of the answered items.
+    :returns: log-likelihood of a given proficiency value, given the responses to the administered items.
     """
     # inspired in the example found in
     # http://stats.stackexchange.com/questions/66199/maximum-likelihood-curve-
