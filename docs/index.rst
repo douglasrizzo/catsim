@@ -15,7 +15,7 @@ Contents
     item_matrix.rst
     initialization.rst
     selection.rst
-    reestimation.rst
+    estimation.rst
     stopping.rst
     simulation.rst
     irt.rst
@@ -23,3 +23,4 @@ Contents
     plot.rst
     stats.rst
     contributing.rst
+    references.rst

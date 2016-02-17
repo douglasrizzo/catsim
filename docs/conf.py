@@ -30,21 +30,10 @@ sys.path.insert(0, os.path.abspath('..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-    'sphinx_autodoc_annotation',
-    # 'matplotlib.sphinxext.mathmpl',
-    'matplotlib.sphinxext.only_directives',
-    'matplotlib.sphinxext.plot_directive',
-    # 'matplotlib.sphinxext.ipython_directive',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    # 'ipython_console_highlighting',
-    # 'inheritance_diagram',
-    'numpydoc'
+    'sphinx.ext.intersphinx', 'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.mathjax',
+    'sphinx.ext.autosummary', 'sphinx.ext.viewcode', 'sphinx_autodoc_annotation',
+    'matplotlib.sphinxext.only_directives', 'matplotlib.sphinxext.plot_directive',
+    'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'numpydoc', 'sphinx.ext.inheritance_diagram'
 ]
 
 intersphinx_mapping = {
@@ -301,3 +290,5 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
+
+numpydoc_show_class_members = False
