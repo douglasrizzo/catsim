@@ -1,17 +1,13 @@
 """Module containing functions relevant to the process of simulating the
 application of adaptive tests. Most of this module is based on the work of
-[Bar10]_.
-
-.. [Bar10] BARRADA, Juan Ramón et al. A method for the comparison of item
-   selection rules in computerized adaptive testing. Applied Psychological
-   Measurement, v. 34, n. 6, p. 438-452, 2010."""
+[Bar10]_."""
 
 import time
 import numpy
 from catsim import irt, cat
 from catsim.initialization import Initializer
 from catsim.selection import Selector
-from catsim.reestimation import Estimator
+from catsim.estimation import Estimator
 from catsim.stopping import Stopper
 
 
@@ -78,7 +74,7 @@ class Simulator:
 
         >>> from catsim.initialization import RandomInitializer
         >>> from catsim.selection import MaxInfoSelector
-        >>> from catsim.reestimation import HillClimbingEstimator
+        >>> from catsim.estimation import HillClimbingEstimator
         >>> from catsim.stopping import MaxItemStopper
         >>> from catsim.cat import generate_item_bank
         >>> initializer = RandomInitializer()

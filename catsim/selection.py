@@ -52,6 +52,76 @@ class MaxInfoSelector(Selector):
         return valid_indexes[0]
 
 
+class LinearSelector(Selector):
+    """Selector that returns item indexes in a linear order, simulating a standard (non-adaptive) test.
+
+    :param indexes: the indexes of the items that will be returned in order"""
+
+    def __init__(self, indexes: list):
+        super().__init__()
+        self._indexes = indexes
+        self._current = 0
+
+    @property
+    def indexes(self):
+        return self._indexes
+
+    @property
+    def current(self):
+        return self._current
+
+    def select(
+        self,
+        items: numpy.ndarray=None,
+        administered_items: list=None,
+        est_theta: float=None
+    ) -> int:
+        """Returns the index of the next item to be administered. This method does not use any parameter.
+
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :returns: index of the first item in `indexes`, minus the indexes presented in `administered_items`.
+        """
+        if len(set(self._indexes) - set(administered_items)) == 0:
+            raise ValueError(
+                'A new index was asked for, but there are no more item indexes to present.'
+            )
+
+        return list(set(self._indexes) - set(administered_items))[0]
+
+        self._current += 1
+        return self._indexes[self._current - 1]
+
+
+class RandomSelector(Selector):
+    """Selector that randomly selects items for application.
+
+
+    :param replace: whether to select an item that has already been selected before for this examinee."""
+
+    def __init__(self, replace: bool=False):
+        super().__init__()
+        self._replace = replace
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+        """Returns the index of a random item to be administered.
+
+        :param items: an item matrix.
+        :param administered_items: a list with the indexes of all administered from the item matrix.
+        :param est_theta: estimated proficiency value. This parameter is not used by this estimator.
+        :returns: random integer from 0 to `len(items)`. If `replace=False`, then the
+                  indexes in `administered_items are excluded from the selection`.
+        """
+        if len(administered_items) >= items.shape[0] and not self._replace:
+            raise ValueError(
+                'A new index was asked for, but there are no more item indexes to present.'
+            )
+
+        if self._replace:
+            return numpy.random.choice(items.shape[0])
+        else:
+            return numpy.random.choice(list(set(range(items.shape[0])) - set(administered_items)))
+
+
 class ClusterSelector(Selector):
     """Cluster-based Item Selection Method.
 

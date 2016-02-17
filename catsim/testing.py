@@ -6,9 +6,9 @@ from catsim import stats
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 from catsim.stopping import MaxItemStopper, MinErrorStopper
-from catsim.selection import MaxInfoSelector, ClusterSelector
+from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector
 from catsim.initialization import RandomInitializer, FixedPointInitializer
-from catsim.reestimation import HillClimbingEstimator, BinarySearchEstimator, DifferentialEvolutionEstimator, FMinEstimator
+from catsim.estimation import HillClimbingEstimator, DifferentialEvolutionEstimator, FMinEstimator
 
 
 def test_item_bank_generation():
@@ -74,6 +74,7 @@ def test_stats():
 
 def test_simulations():
     examinees = 10
+    bank_size = 5000
     initializers = [
         RandomInitializer('uniform',
                           (-5, 5)
@@ -82,18 +83,24 @@ def test_simulations():
                           ),
         FixedPointInitializer(0)
     ]
-    selectors = [MaxInfoSelector()]
-    estimators = [
-        HillClimbingEstimator(), BinarySearchEstimator(), DifferentialEvolutionEstimator((-8, 8)),
-        FMinEstimator()
+    selectors = [
+        MaxInfoSelector(), RandomSelector(), LinearSelector(
+            numpy.random.randint(
+                bank_size,
+                size=(int)(bank_size / 250)
+            )
+        )
     ]
-    stoppers = [MaxItemStopper(20), MinErrorStopper(.4)]
+    estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()]
+    stoppers = [MaxItemStopper(20),
+                #  MinErrorStopper(.4)
+                ]
 
     for initializer in initializers:
         for selector in selectors:
             for estimator in estimators:
                 for stopper in stoppers:
-                    items = generate_item_bank(5000)
+                    items = generate_item_bank(bank_size)
                     yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
@@ -109,10 +116,7 @@ def test_cism():
                           ),
         FixedPointInitializer(0)
     ]
-    estimators = [
-        HillClimbingEstimator(), BinarySearchEstimator(), DifferentialEvolutionEstimator((-8, 8)),
-        FMinEstimator()
-    ]
+    estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()]
     stoppers = [MaxItemStopper(20), MinErrorStopper(.4)]
 
     for initializer in initializers:
