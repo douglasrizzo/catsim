@@ -6,6 +6,8 @@ All implemented classes in this module inherit from a base abstract class
 used during the simulation, as long as it also inherits from
 :py:class:`Selector`.
 
+.. inheritance-diagram:: catsim.selection
+
 .. automodule:: catsim.selection
    :members:
    :show-inheritance:

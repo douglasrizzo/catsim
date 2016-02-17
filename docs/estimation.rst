@@ -21,6 +21,8 @@ All implemented classes in this module inherit from a base abstract class
 used during the simulation, as long as it also inherits from
 :py:class:`Estimator`.
 
+.. inheritance-diagram:: catsim.estimation
+
 :mod:`catsim` implements a few types of maximum-likelihood estimators.
 
 .. automodule:: catsim.estimation
