@@ -92,7 +92,7 @@ class Simulator:
 
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
-            print('{0}/{1} examinees...'.format(current_examinee, len(self.examinees)))
+            print('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees)))
 
             est_theta = initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
