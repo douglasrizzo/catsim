@@ -65,7 +65,7 @@ def test_stats():
         stats.coef_variation(items)
         stats.coef_correlation(items)
         stats.covariance(items)
-        stats.covariance, items(False)
+        stats.covariance(items, False)
         stats.scatter_matrix(items)
 
         random_integers = nprnd.randint(30, size=1000)
