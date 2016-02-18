@@ -34,7 +34,7 @@ Computerized adaptive tests are educational evaluations, usually taken by examin
 Installation
 ------------
 
-Install it using `pip install catsim`.
+Install it using ``pip install catsim``.
 
 Basic Usage
 -----------

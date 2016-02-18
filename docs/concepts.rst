@@ -81,7 +81,7 @@ In :py:mod:`catsim`, item selection procedures can be found at :py:mod:`catsim.s
 Proficiency Estimation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's :mat:`\hat\theta`. This value reflects the examinee's proficiency, given his or hers answers up until that point of the test.
+Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's :math:`\hat\theta`. This value reflects the examinee's proficiency, given his or hers answers up until that point of the test.
 
 Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the :math:`\hat\theta` value that maximizes the *log-likelihood* function, presented in :py:func:`catsim.irt.logLik`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's proficiencies to estimate new values for them.
 
