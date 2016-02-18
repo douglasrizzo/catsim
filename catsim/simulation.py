@@ -63,7 +63,12 @@ class Simulator:
             self._examinees = numpy.array(examinees)
 
     def simulate(
-        self, initializer: Initializer, selector: Selector, estimator: Estimator, stopper: Stopper
+        self,
+        initializer: Initializer,
+        selector: Selector,
+        estimator: Estimator,
+        stopper: Stopper,
+        verbose: bool=False
     ):
         """Simulates a computerized adaptive testing application to one or more examinees
 
@@ -71,6 +76,7 @@ class Simulator:
         :param selector: a selector that selects new items to be presented to examinees
         :param estimator: an estimator that reestimates examinees proficiencies after each item is applied
         :param stopper: an object with a stopping criteria for the test
+        :param verbose: whether to periodically print a message regarding the progress of the simulation. Good for longer simulations.
 
         >>> from catsim.initialization import RandomInitializer
         >>> from catsim.selection import MaxInfoSelector
@@ -85,7 +91,9 @@ class Simulator:
         """
 
         start_time = int(round(time.time() * 1000))
-        for true_theta in self.examinees:
+        for current_examinee, true_theta in enumerate(self.examinees):
+            print('{0}/{1} examinees...'.format(current_examinee, len(self.examinees)))
+
             est_theta = initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
 
