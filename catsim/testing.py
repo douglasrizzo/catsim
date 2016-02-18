@@ -62,14 +62,14 @@ def test_stats():
     import numpy.random as nprnd
     for _ in range(10):
         items = generate_item_bank(500)
-        yield stats.coef_variation, items
-        yield stats.coef_correlation, items
-        yield stats.covariance, items
-        yield stats.covariance, items, False
-        yield stats.scatter_matrix, items
+        stats.coef_variation(items)
+        stats.coef_correlation(items)
+        stats.covariance(items)
+        stats.covariance, items(False)
+        stats.scatter_matrix(items)
 
         random_integers = nprnd.randint(30, size=1000)
-        yield stats.bincount, random_integers
+        stats.bincount(random_integers)
 
 
 def test_simulations():
