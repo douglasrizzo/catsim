@@ -14,12 +14,16 @@
     :alt: Latest Version
 
 .. image:: https://landscape.io/github/douglasrizzo/catsim/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/douglasrizzo/catsim/master
-   :alt: Code Health
+    :target: https://landscape.io/github/douglasrizzo/catsim/master
+    :alt: Code Health
 
 .. image:: https://requires.io/github/douglasrizzo/catsim/requirements.svg?branch=master
- :target: https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master
- :alt: Requirements Status
+    :target: https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master
+    :alt: Requirements Status
+
+.. image:: https://zenodo.org/badge/20502/douglasrizzo/catsim.svg
+    :target: https://zenodo.org/badge/latestdoi/20502/douglasrizzo/catsim
+    :alt: Digital Object Identifier
 
 **catsim** is a computerized adaptive testing simulator written in Python 3.4. It allow for the simulation of computerized adaptive tests, selecting different test initialization rules, item selection rules, proficiency reestimation methods and stopping criteria.
 
