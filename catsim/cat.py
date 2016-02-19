@@ -44,7 +44,44 @@ def rmse(actual: Iterable, predicted: Iterable):
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.sqrt(numpy.mean((predicted - actual)**2))
+    return numpy.sqrt(mse(actual, predicted))
+
+
+def mse(actual: Iterable, predicted: Iterable):
+    """Mean squared error, a value used when measuring the precision
+    with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.
+    The value is calculated by:
+
+    .. math:: MSE = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}
+
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
+    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+
+    :param actual: a list or 1-D numpy array containing the true proficiency values
+    :param predicted: a list or 1-D numpy array containing the estimated proficiency values
+    :returns: the mean squared error between the predicted values and actual values.
+    """
+    if len(actual) != len(predicted):
+        raise ValueError('actual and predicted vectors need to be the same size')
+    return numpy.mean((predicted - actual)**2)
+
+
+def bias(actual: Iterable, predicted: Iterable):
+    """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
+    The value is calculated by:
+
+    .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
+
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
+    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+
+    :param actual: a list or 1-D numpy array containing the true proficiency values
+    :param predicted: a list or 1-D numpy array containing the estimated proficiency values
+    :returns: the bias between the predicted values and actual values.
+    """
+    if len(actual) != len(predicted):
+        raise ValueError('actual and predicted vectors need to be the same size')
+    return numpy.mean(predicted - actual)
 
 
 def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
