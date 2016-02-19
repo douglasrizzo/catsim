@@ -6,7 +6,7 @@ from catsim import stats
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 from catsim.stopping import MaxItemStopper, MinErrorStopper
-from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector
+from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector, AStratifiedBBlockingSelector, MaxInfoStratificationSelector, MaxInfoBBlockingSelector, AStratifiedSelector, The54321Selector
 from catsim.initialization import RandomInitializer, FixedPointInitializer
 from catsim.estimation import HillClimbingEstimator, DifferentialEvolutionEstimator, FMinEstimator
 
@@ -74,7 +74,10 @@ def test_stats():
 
 def test_simulations():
     examinees = 10
+    test_size = 20
     bank_size = 5000
+
+    logistic_models = ['1PL', '2PL', '3PL']
     initializers = [
         RandomInitializer('uniform',
                           (-5, 5)
@@ -83,25 +86,31 @@ def test_simulations():
                           ),
         FixedPointInitializer(0)
     ]
-    selectors = [
-        MaxInfoSelector(), RandomSelector(), LinearSelector(
+    infinite_selectors = [MaxInfoSelector(), RandomSelector()]
+    finite_selectors = [
+        LinearSelector(
             numpy.random.randint(
                 bank_size,
-                size=(int)(bank_size / 250)
+                size=test_size
             )
-        )
+        ), AStratifiedSelector(test_size), AStratifiedBBlockingSelector(test_size),
+        MaxInfoStratificationSelector(test_size), MaxInfoBBlockingSelector(test_size),
+        The54321Selector(test_size)
     ]
     estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()]
-    stoppers = [MaxItemStopper(20),
-                #  MinErrorStopper(.4)
-                ]
 
-    for initializer in initializers:
-        for selector in selectors:
+    for logistic_model in logistic_models:
+        for initializer in initializers:
             for estimator in estimators:
-                for stopper in stoppers:
-                    items = generate_item_bank(bank_size)
-                    yield one_simulation, items, examinees, initializer, selector, estimator, stopper
+                for stopper in [MaxItemStopper(test_size)]:
+                    for selector in finite_selectors:
+                        items = generate_item_bank(bank_size, itemtype=logistic_model)
+                        yield one_simulation, items, examinees, initializer, selector, estimator, stopper
+
+                for stopper in [MinErrorStopper(.4)]:
+                    for selector in infinite_selectors:
+                        items = generate_item_bank(bank_size, itemtype=logistic_model)
+                        yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
 def test_cism():

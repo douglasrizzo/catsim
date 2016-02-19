@@ -394,3 +394,219 @@ class ClusterSelector(Selector):
             averages[counter, 2] = averages[counter, 2] / i
 
         return averages
+
+
+class AStratifiedSelector(Selector):
+    """Implementation of the :math:`\\alpha`-stratified selector proposed by [Chang99]_, in which the item bank is sorted in ascending order according to the items discrimination parameter and then separated into :math:`K` strata (:math:`K` being the test size), each stratum containing gradually higher average discrimination. The :math:`\\alpha`-stratified selector then selects the first non-administered item from stratum :math:`k`, in which :math:`k` represents the position in the test of the current item the examinee is being presented.
+
+    .. image:: ../docs/alpha-strat.svg
+
+    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+
+    def __init__(self, test_size):
+        super().__init__()
+        self._test_size = test_size
+
+    @property
+    def test_size(self):
+        return self._test_size
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by their discrimination value
+        organized_items = items[:, 0].argsort()
+
+        # select the item in the correct layer, according to the point in the test the examinee is
+        pointer = len(administered_items) * self._test_size
+
+        # if the selected item has already been administered, select the next one
+        while organized_items[pointer] in administered_items:
+            pointer += 1
+
+        return organized_items[pointer]
+
+
+class AStratifiedBBlockingSelector(Selector):
+    """Implementation of the :math:`\\alpha`-stratified selector with :math:`b` blocking proposed by [Chang2001]_, in which the item bank is sorted in ascending order according to the items difficulty parameter and then separated into :math:`M` strata, each stratum containing gradually higher average difficulty.
+
+    Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size), according to their discrimination. The final item bank is then ordered such that the first sub-strata of each strata forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution of both parameters between all strata, after perceiving that they are correlated.
+
+    .. image:: ../docs/b-blocking.svg
+
+    .. image:: ../docs/blocking-end.svg
+
+    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+
+    def __init__(self, test_size):
+        super().__init__()
+        self._test_size = test_size
+
+    @property
+    def test_size(self):
+        return self._test_size
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by their difficulty, then their discrimination value
+        organized_items = numpy.argsort((items[:, 0], items[:, 1]))
+
+        # select the item in the correct layer, according to the point in the test the examinee is
+        pointer = len(administered_items)
+
+        # if the selected item has already been administered, select the next one
+        while organized_items[pointer] in administered_items:
+            pointer += self._test_size
+
+        return organized_items[pointer]
+
+
+class MaxInfoStratificationSelector(Selector):
+    """Implementation of the maximum information stratification (MIS) selector proposed by [Bar06]_, in which the item bank is sorted in ascending order according to the items maximum information and then separated into :math:`K` strata (:math:`K` being the test size), each stratum containing items with gradually higher maximum information. The MIS selector then selects the first non-administered item from stratum :math:`k`, in which :math:`k` represents the position in the test of the current item the examinee is being presented.
+
+    .. image:: ../docs/mis.svg
+
+    This method claims to work better than the :math:`a`-stratified method by [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty and maximum information are not positioned in the same place in the proficiency scale in 3PL.
+
+    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+
+    def __init__(self, test_size):
+        super().__init__()
+        self._test_size = test_size
+
+    @property
+    def test_size(self):
+        return self._test_size
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by their maximum information value
+        organized_items = numpy.array(
+            [
+                irt.inf(
+                    irt.max_info(item[0], item[1], item[2]), item[0], item[1], item[2]
+                ) for item in items
+            ]
+        ).argsort()
+
+        # select the item in the correct layer, according to the point in the test the examinee is
+        pointer = len(administered_items) * self._test_size
+
+        # if the selected item has already been administered, select the next one
+        while organized_items[pointer] in administered_items:
+            pointer += 1
+
+        return organized_items[pointer]
+
+
+class MaxInfoBBlockingSelector(Selector):
+    """Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted in ascending order according to the items difficulty parameter and then separated into :math:`M` strata, each stratum containing gradually higher average difficulty.
+
+    Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size), according to the items maximum information. The final item bank is then ordered such that the first sub-strata of each strata forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution of both parameters between all strata and works better than the :math:`a`-stratified with :math:`b` blocking method by [Chang2001]_ for the three-parameter logistic model of IRT, since item difficulty and maximum information are not positioned in the same place in the proficiency scale in 3PL.
+
+    .. image:: ../docs/mis-b.svg
+
+    .. image:: ../docs/blocking-end.svg
+
+    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+
+    def __init__(self, test_size):
+        super().__init__()
+        self._test_size = test_size
+
+    @property
+    def test_size(self):
+        return self._test_size
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by their difficulty, then their discrimination value
+        organized_items = numpy.argsort(
+            (
+                [
+                    irt.inf(
+                        irt.max_info(item[0], item[1], item[2]), item[0], item[1], item[2]
+                    ) for item in items
+                ], items[:, 1]
+            )
+        )
+
+        # select the item in the correct layer, according to the point in the test the examinee is
+        pointer = len(administered_items)
+
+        # if the selected item has already been administered, select the next one
+        while organized_items[pointer] in administered_items:
+            pointer += self._test_size
+
+        return organized_items[pointer]
+
+
+class The54321Selector(Selector):
+    """Implementation of the 5-4-3-2-1 selector proposed by [orelha]_, in which, at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin containing the :math:`K-k` most informative items in the bank, given the current :math:`\\hat\\theta`. As the test progresses, the bin gets smaller and more informative items have a higher probability of being chosen by the end of the test, when the estimation of ':math:`\\hat\\theta` is more precise.
+
+    :param test_size: the number of items the test contains. The selector uses this parameter to set the bin size"""
+
+    def __init__(self, test_size):
+        super().__init__()
+        self._test_size = test_size
+
+    @property
+    def test_size(self):
+        return self._test_size
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :param est_theta: estimated proficiency value
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by their information value
+        organized_items = numpy.array(
+            [
+                irt.inf(
+                    est_theta, item[0], item[1], item[2]
+                ) for item in items
+            ]
+        ).argsort()
+
+        # select the item in the correct layer, according to the point in the test the examinee is
+        begin = 0
+        bin_size = self._test_size - len(administered_items)
+
+        # while every item in the bin has already been applied, move the bin forward
+        while set(organized_items[begin:bin_size]).issubset(set(administered_items)):
+            begin += bin_size
+
+        selected_item = organized_items[numpy.random.randint(begin, bin_size + 1, size=1)]
+
+        # while the current randomly selected item is an administered one, select another one
+        while selected_item in administered_items:
+            selected_item = organized_items[numpy.random.randint(begin, bin_size + 1, size=1)]
+
+        return selected_item
