@@ -92,6 +92,8 @@ class Simulator:
 
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
+
+            # if verbose:
             print('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees)))
 
             est_theta = initializer.initialize()
@@ -112,12 +114,14 @@ class Simulator:
                 ) >= numpy.random.uniform()
 
                 response_vector.append(response)
-                # adds the administered item to the pool of administered items
+
+                # adds the item selected by the selector to the pool of administered items
                 administered_items.append(selected_item)
 
+                # if the response vector is composed only of correct or wrong answers, use dodd's method of estimation
                 if len(set(response_vector)) == 1:
                     est_theta = cat.dodd(est_theta, self.items, response)
-                else:
+                else:  # else, use the given estimator
                     est_theta = estimator.estimate(
                         response_vector, self.items[administered_items], est_theta
                     )
@@ -141,6 +145,9 @@ class Simulator:
             self._administered_items.append(administered_items)
 
         self._duration = int(round(time.time() * 1000)) - start_time
+
+        # if verbose:
+        print('Simulation took {0} milliseconds'.format(self._duration))
 
 
 if __name__ == '__main__':
