@@ -5,7 +5,7 @@ import numpy
 def tpm(theta: float, a: float, b: float, c: float=0) -> float:
     """Item Response Theory three-parameter logistic function [Ayala2009]_:
 
-    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{Da_i(\\theta-b_i)}}
+    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{a_i(\\theta-b_i)}}
 
     :param theta: the individual's proficiency value. This parameter value has
                   no boundary, but if a distribution of the form :math:`N(0, 1)` was
@@ -23,7 +23,53 @@ def tpm(theta: float, a: float, b: float, c: float=0) -> float:
               :math:`0\\leq c \\leq 1`, but items considered good usually have
               :math:`c \\leq 0.2`.
     """
-    return c + ((1 - c) / (1 + math.exp(-a * (theta - b))))
+    return c + ((1 - c) / (1 + _tpm_exponent(theta, a, b)))
+
+
+def _w(theta, a, b, c):
+    p_star = math.pow(1 + _tpm_exponent(theta, a, b), -1)
+    q_star = 1 - p_star
+    p = tpm(theta, a, b, c)
+    q = 1 - p
+
+    return p_star * q_star / p * q
+
+
+def _tpm_exponent(theta, a, b):
+    return math.exp(-a * (theta - b))
+
+
+def _theta_map(
+    theta: float,
+    response_vector: list,
+    administered_items: numpy.ndarray,
+    mu: float=0,
+    sigma: float=1
+) -> float:
+    """ Maximum a posteriori estimation function for :math:`\\hat\\theta` [Andrade2000]_, given by:
+
+    .. math:: \\sum_{i-1}^{I} a_i(1-c_i)(u_{ji}-P_{JI})W_{ji} - \\frac{(\\theta_j - \\mu)}{\\sigma^2}
+
+    where .. math:: W = \\frac{P^*Q^*}{P^Q^}
+
+    where :math:`P` is given by :py:func:`catsim.irt.tpm`, :math:`P^* = (1 + e^{a_i(\\theta-b_i)})^{-1}`,
+    :math:`Q^* = 1 - P^*` and :math:`Q = 1 - P`
+    """
+    return sum(
+        [
+            administered_items[i, 0] * (1 - administered_items[i, 2]) * (
+                response_vector[i] - tpm(
+                    theta, administered_items[i, 0], administered_items[
+                        i, 1
+                    ], administered_items[i, 2]
+                ) * _w(
+                    theta, administered_items[
+                        i, 0
+                    ], administered_items[i, 1], administered_items[i, 2]
+                )
+            ) for i in range(len(response_vector))
+        ]
+    ) - (theta - mu) / (sigma**2)
 
 
 def see(theta: float, items: numpy.ndarray) -> float:
@@ -60,7 +106,7 @@ def test_info(theta: float, items: numpy.ndarray):
 
 
 def reliability(theta: float, items: numpy.ndarray):
-    """ Computes test reliability [Thissen00]_, given by
+    """ Computes test reliability [Thissen00]_, given by:
 
     .. math:: Rel = 1 - \\frac{1}{I(\\theta)}
 
@@ -103,6 +149,15 @@ def inf(theta: float, a: float, b: float, c: float=0) -> float:
     ml3 = tpm(theta, a, b, c)
 
     return math.pow(a, 2) * (math.pow(ml3 - c, 2) / math.pow(1 - c, 2)) * (1 - ml3) / ml3
+
+
+def max_info(a=1, b=0, c=0):
+    """Returns the :math:`\\theta` value to which the item with the given parameters gives maximum information. For the 1-parameter and 2-parameter logistic models, this :math:`\\theta` corresponds to where :math:`b = 0.5`. In the 3-parameter logistic model, however, this value is given by the following function [Ayala2009]_:
+
+    .. math::
+        \\argmax_{\\theta}I(\\theta) = \\frac{a^2}{8(1-b)^2}[1-20b-8b^2+(1+8b)^{1.5}]
+    """
+    return ((a**2) / (8 * ((1 - b)**2))) * (1 - 20 * b - 8 * b**2 + (1 + 8 * b)**1.5)
 
 
 def logLik(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
@@ -176,8 +231,8 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     If the matrix has two columns, they are assumed to be the discrimination and difficulty
     columns, respectively. the pseudo-guessing column is added such that items simulate the 2-parameter logistic model.
 
-    :param items: the item matrix
-    :returns: an nx3 item matrix conforming to 1, 2 and 3 parameter logistic models
+    :param items: the item matrix.
+    :returns: an nx3 item matrix conforming to 1, 2 and 3 parameter logistic models.
     """
     if len(items.shape) == 1:
         items = numpy.expand_dims(items, axis=0)
@@ -198,7 +253,7 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
     The item matrix must have at least one line, exactly three columns and
     :math:`\\forall i \\in I , a_i > 0 \\wedge 0 < c_i < 1`
 
-    :param items: the item matrix
+    :param items: the item matrix.
     :param raise_err: whether to raise an error in case the validation fails or
                       just print the error message to standard output.
     """
