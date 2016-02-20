@@ -78,7 +78,7 @@ Item selection methods are diverse. The most famous method is to choose the item
 
 In :py:mod:`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of :math:`p` is given by the IRT logistic model characteristic function (:py:func:`catsim.irt.tpm`), given by:
 
-.. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{Da_i(\\theta-b_i)}}
+.. math:: P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{a_i(\theta-b_i)}}
 
 In :py:mod:`catsim`, item selection procedures can be found at :py:mod:`catsim.selection`.
 

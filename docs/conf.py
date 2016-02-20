@@ -15,13 +15,6 @@
 
 import sys
 import os
-import mock
-
-# import mock modules so that Read the Docs may be able to compile the documentation
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.optimize',
-                'scikit-learn']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = mock.Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
