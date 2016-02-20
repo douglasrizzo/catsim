@@ -8,9 +8,9 @@ install:
 	python3 setup.py install
 tests:
 ifneq '$USER' 'travis'
-	nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim --processes=$(grep -c ^processor /proc/cpuinfo)
+	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim --processes=$(grep -c ^processor /proc/cpuinfo)
 else
-	nosetests --cov-config .coveragerc --with-coverage --cover-package=catsim
+	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
 endif
 upload-test:
 	python setup.py register -r pypitest && python setup.py sdist upload -r pypitest
