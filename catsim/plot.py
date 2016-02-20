@@ -238,7 +238,7 @@ def test_progress(
         plt.title(title, size=18)
 
     if simulator is not None and index is not None:
-        thetas = simulator.estimations[index]
+        thetas = simulator.all_estimations[index]
         administered_items = simulator.items[simulator.administered_items[index]]
         true_theta = simulator.examinees[index]
 

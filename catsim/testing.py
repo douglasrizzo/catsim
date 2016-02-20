@@ -1,6 +1,7 @@
 import unittest
 import numpy
 from catsim import irt
+from catsim import cat
 from catsim import plot
 from catsim import stats
 from catsim.simulation import Simulator
@@ -72,6 +73,12 @@ def test_stats():
         stats.bincount(random_integers)
 
 
+def one_simulation(items, examinees, initializer, selector, estimator, stopper):
+    s = Simulator(items, examinees)
+    s.simulate(initializer, selector, estimator, stopper)
+    cat.rmse(s.examinees, s.estimations)
+
+
 def test_simulations():
     examinees = 10
     test_size = 20
@@ -141,10 +148,6 @@ def test_cism():
                 ClusterSelector.avg_cluster_params(items, clusters)
                 selector = ClusterSelector(clusters=clusters, r_max=.2)
                 yield one_simulation, items, examinees, initializer, selector, estimator, stopper
-
-
-def one_simulation(items, examinees, initializer, selector, estimator, stopper):
-    Simulator(items, examinees).simulate(initializer, selector, estimator, stopper)
 
 
 if __name__ == '__main__':

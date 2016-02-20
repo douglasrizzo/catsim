@@ -36,23 +36,37 @@ class Simulator:
         self.examinees = examinees
 
     @property
-    def items(self):
+    def items(self) -> numpy.ndarray:
+        """Item matrix used by the simulator. If the simulation already
+        occurred, a column containin item esposure rates will be added to the
+        matrix."""
         return self._items
 
     @property
-    def administered_items(self):
+    def administered_items(self) -> list:
+        """List of lists containin the indexes of items administered to each
+        examinee during the simulation."""
         return self._administered_items
 
     @property
-    def estimations(self):
+    def all_estimations(self) -> list:
+        """List of lists containing all estimated :math:`\\hat\\theta` values
+        for all examinees during each step of the test."""
         return self._estimations
 
     @property
-    def examinees(self):
+    def estimations(self) -> list:
+        """Final estimated :math:`\\hat\\theta` values for all examinees."""
+        return [ests[-1] for ests in self._estimations]
+
+    @property
+    def examinees(self) -> list:
+        """List containing examinees true proficiency values (:math:`\\theta`)."""
         return self._examinees
 
     @property
-    def duration(self):
+    def duration(self) -> float:
+        """Duration of the simulation, in milliseconds."""
         return self._duration
 
     @examinees.setter
