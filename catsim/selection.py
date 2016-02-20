@@ -460,7 +460,7 @@ class AStratifiedBBlockingSelector(Selector):
         """
 
         # sort item indexes by their difficulty, then their discrimination value
-        organized_items = numpy.argsort((items[:, 0], items[:, 1]))
+        organized_items = numpy.lexsort((items[:, 0], items[:, 1]))
 
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items)
@@ -544,7 +544,7 @@ class MaxInfoBBlockingSelector(Selector):
         """
 
         # sort item indexes by their difficulty, then their discrimination value
-        organized_items = numpy.argsort(
+        organized_items = numpy.lexsort(
             (
                 [
                     irt.inf(
@@ -589,9 +589,7 @@ class The54321Selector(Selector):
         # sort item indexes by their information value
         organized_items = numpy.array(
             [
-                irt.inf(
-                    est_theta, item[0], item[1], item[2]
-                ) for item in items
+                irt.inf(est_theta, item[0], item[1], item[2]) for item in items
             ]
         ).argsort()
 
@@ -600,13 +598,26 @@ class The54321Selector(Selector):
         bin_size = self._test_size - len(administered_items)
 
         # while every item in the bin has already been applied, move the bin forward
-        while set(organized_items[begin:bin_size]).issubset(set(administered_items)):
+        while set(organized_items[begin:begin + bin_size]).issubset(set(administered_items)):
+            print('Begin', begin)
+            print('bin_size', bin_size)
+            print('Organized items', organized_items)
+            print('Items in the bin', organized_items[begin:bin_size])
+            print('Administered items', administered_items)
             begin += bin_size
+            if begin >= len(organized_items):
+                raise ValueError('There are no more items to apply.')
 
-        selected_item = organized_items[numpy.random.randint(begin, bin_size + 1, size=1)]
-
-        # while the current randomly selected item is an administered one, select another one
-        while selected_item in administered_items:
-            selected_item = organized_items[numpy.random.randint(begin, bin_size + 1, size=1)]
+        selected_item = organized_items[
+            numpy.random.choice(
+                list(
+                    set(
+                        organized_items[
+                            begin:begin + bin_size
+                        ]
+                    ) - set(administered_items)
+                )
+            )
+        ]
 
         return selected_item
