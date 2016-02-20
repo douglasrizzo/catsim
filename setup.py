@@ -19,7 +19,7 @@ setup(
         'Topic :: Education :: Testing'
     ],
     name='catsim',
-    version='0.8.4',
+    version='0.9',
     description='Computerized Adaptive Testing Simulator',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
