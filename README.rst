@@ -21,10 +21,6 @@
     :target: https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://readthedocs.org/projects/catsim/badge/?version=master
-    :target: http://douglasrizzo.github.io/catsim/
-    :alt: Documentation Status
-
 .. image:: https://zenodo.org/badge/20502/douglasrizzo/catsim.svg
     :target: https://zenodo.org/badge/latestdoi/20502/douglasrizzo/catsim
     :alt: Digital Object Identifier
