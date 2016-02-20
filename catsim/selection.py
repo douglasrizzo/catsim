@@ -88,9 +88,6 @@ class LinearSelector(Selector):
 
         return list(set(self._indexes) - set(administered_items))[0]
 
-        self._current += 1
-        return self._indexes[self._current - 1]
-
 
 class RandomSelector(Selector):
     """Selector that randomly selects items for application.
@@ -397,7 +394,14 @@ class ClusterSelector(Selector):
 
 
 class AStratifiedSelector(Selector):
-    """Implementation of the :math:`\\alpha`-stratified selector proposed by [Chang99]_, in which the item bank is sorted in ascending order according to the items discrimination parameter and then separated into :math:`K` strata (:math:`K` being the test size), each stratum containing gradually higher average discrimination. The :math:`\\alpha`-stratified selector then selects the first non-administered item from stratum :math:`k`, in which :math:`k` represents the position in the test of the current item the examinee is being presented.
+    """Implementation of the :math:`\\alpha`-stratified selector proposed by
+    [Chang99]_, in which the item bank is sorted in ascending order according to the
+    items discrimination parameter and then separated into :math:`K` strata
+    (:math:`K` being the test size), each stratum containing gradually higher
+    average discrimination. The :math:`\\alpha`-stratified selector then selects the
+    first non-administered item from stratum :math:`k`, in which :math:`k`
+    represents the position in the test of the current item the examinee is being
+    presented.
 
     .. image:: ../docs/alpha-strat.svg
 
@@ -433,9 +437,17 @@ class AStratifiedSelector(Selector):
 
 
 class AStratifiedBBlockingSelector(Selector):
-    """Implementation of the :math:`\\alpha`-stratified selector with :math:`b` blocking proposed by [Chang2001]_, in which the item bank is sorted in ascending order according to the items difficulty parameter and then separated into :math:`M` strata, each stratum containing gradually higher average difficulty.
+    """Implementation of the :math:`\\alpha`-stratified selector with :math:`b`
+    blocking proposed by [Chang2001]_, in which the item bank is sorted in ascending
+    order according to the items difficulty parameter and then separated into
+    :math:`M` strata, each stratum containing gradually higher average difficulty.
 
-    Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size), according to their discrimination. The final item bank is then ordered such that the first sub-strata of each strata forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution of both parameters between all strata, after perceiving that they are correlated.
+    Each of the :math:`M` strata is then again separated into :math:`K`
+    sub-strata (:math:`k` being the test size), according to their
+    discrimination. The final item bank is then ordered such that the first
+    sub-strata of each strata forms the first strata of the new ordered item
+    bank, and so on. This method tries to balance the distribution of both
+    parameters between all strata, after perceiving that they are correlated.
 
     .. image:: ../docs/b-blocking.svg
 
@@ -473,11 +485,20 @@ class AStratifiedBBlockingSelector(Selector):
 
 
 class MaxInfoStratificationSelector(Selector):
-    """Implementation of the maximum information stratification (MIS) selector proposed by [Bar06]_, in which the item bank is sorted in ascending order according to the items maximum information and then separated into :math:`K` strata (:math:`K` being the test size), each stratum containing items with gradually higher maximum information. The MIS selector then selects the first non-administered item from stratum :math:`k`, in which :math:`k` represents the position in the test of the current item the examinee is being presented.
+    """Implementation of the maximum information stratification (MIS) selector
+    proposed by [Bar06]_, in which the item bank is sorted in ascending order
+    according to the items maximum information and then separated into :math:`K`
+    strata (:math:`K` being the test size), each stratum containing items with
+    gradually higher maximum information. The MIS selector then selects the first
+    non-administered item from stratum :math:`k`, in which :math:`k` represents the
+    position in the test of the current item the examinee is being presented.
 
     .. image:: ../docs/mis.svg
 
-    This method claims to work better than the :math:`a`-stratified method by [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty and maximum information are not positioned in the same place in the proficiency scale in 3PL.
+    This method claims to work better than the :math:`a`-stratified method by
+    [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty
+    and maximum information are not positioned in the same place in the proficiency
+    scale in 3PL.
 
     :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
 
@@ -517,9 +538,21 @@ class MaxInfoStratificationSelector(Selector):
 
 
 class MaxInfoBBlockingSelector(Selector):
-    """Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted in ascending order according to the items difficulty parameter and then separated into :math:`M` strata, each stratum containing gradually higher average difficulty.
+    """Implementation of the maximum information stratification with :math:`b`
+    blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted
+    in ascending order according to the items difficulty parameter and then
+    separated into :math:`M` strata, each stratum containing gradually higher
+    average difficulty.
 
-    Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size), according to the items maximum information. The final item bank is then ordered such that the first sub-strata of each strata forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution of both parameters between all strata and works better than the :math:`a`-stratified with :math:`b` blocking method by [Chang2001]_ for the three-parameter logistic model of IRT, since item difficulty and maximum information are not positioned in the same place in the proficiency scale in 3PL.
+    Each of the :math:`M` strata is then again separated into :math:`K`
+    sub-strata (:math:`k` being the test size), according to the items maximum
+    information. The final item bank is then ordered such that the first
+    sub-strata of each strata forms the first strata of the new ordered item
+    bank, and so on. This method tries to balance the distribution of both
+    parameters between all strata and works better than the :math:`a`-stratified
+    with :math:`b` blocking method by [Chang2001]_ for the three-parameter
+    logistic model of IRT, since item difficulty and maximum information are not
+    positioned in the same place in the proficiency scale in 3PL.
 
     .. image:: ../docs/mis-b.svg
 
@@ -565,9 +598,16 @@ class MaxInfoBBlockingSelector(Selector):
 
 
 class The54321Selector(Selector):
-    """Implementation of the 5-4-3-2-1 selector proposed by [orelha]_, in which, at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin containing the :math:`K-k` most informative items in the bank, given the current :math:`\\hat\\theta`. As the test progresses, the bin gets smaller and more informative items have a higher probability of being chosen by the end of the test, when the estimation of ':math:`\\hat\\theta` is more precise.
+    """Implementation of the 5-4-3-2-1 selector proposed by [orelha]_, in which,
+    at each step :math:`k` of a test of size :math:`K`, an item is chosen from a
+    bin containing the :math:`K-k` most informative items in the bank, given the
+    current :math:`\\hat\\theta`. As the test progresses, the bin gets smaller
+    and more informative items have a higher probability of being chosen by the
+    end of the test, when the estimation of ':math:`\\hat\\theta` is more
+    precise.
 
-    :param test_size: the number of items the test contains. The selector uses this parameter to set the bin size"""
+    :param test_size: the number of items the test contains. The selector uses
+                      this parameter to set the bin size"""
 
     def __init__(self, test_size):
         super().__init__()

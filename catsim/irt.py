@@ -152,10 +152,13 @@ def inf(theta: float, a: float, b: float, c: float=0) -> float:
 
 
 def max_info(a=1, b=0, c=0):
-    """Returns the :math:`\\theta` value to which the item with the given parameters gives maximum information. For the 1-parameter and 2-parameter logistic models, this :math:`\\theta` corresponds to where :math:`b = 0.5`. In the 3-parameter logistic model, however, this value is given by the following function [Ayala2009]_:
+    """Returns the :math:`\\theta` value to which the item with the given parameters
+    gives maximum information. For the 1-parameter and 2-parameter logistic models,
+    this :math:`\\theta` corresponds to where :math:`b = 0.5`. In the 3-parameter
+    logistic model, however, this value is given by the following function
+    [Ayala2009]_:
 
-    .. math::
-        \\argmax_{\\theta}I(\\theta) = \\frac{a^2}{8(1-b)^2}[1-20b-8b^2+(1+8b)^{1.5}]
+    .. math:: \\argmax_{\\theta}I(\\theta) = \\frac{a^2}{8(1-b)^2}[1-20b-8b^2+(1+8b)^{1.5}]
     """
     return ((a**2) / (8 * ((1 - b)**2))) * (1 - 20 * b - 8 * b**2 + (1 + 8 * b)**1.5)
 
