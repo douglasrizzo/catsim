@@ -13,8 +13,8 @@ Psychometrics
 **catsim** still has a way to go before it can be considered a mature package. Here is a list of features that may be of interest:
 
 * Bayesian estimators (maybe using `PyMC <https://pymc-devs.github.io/pymc/>`_);
-* Stratification-based selection methods (like the ones in [Chang99]_, [Chang2001]_ and [Barr2014]_);
-* Comparison between different simulations (for example [Barr2010]_);
+* Test evaluation indexes;
+* Comparison between simulation results (for example [Barr2010]_);
 * Other information functions, selection methods based on intervals or areas of information etc. (see [Lind2010]_).
 
 Software architecture
@@ -37,12 +37,6 @@ How to contribute
 
 **Blaming us:** file an `issue on GitHub <https://github.com/douglasrizzo/catsim/issues>`_ describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.
 
-.. [Chang99] Chang, H.-H., & Ying, Z. (1999). a-Stratified Multistage Computerized Adaptive Testing. Applied Psychological Measurement, 23(3), 211–222. http://doi.org/10.1177/01466219922031338
-
-.. [Chang2001] Chang, H.-H., Qian, J., & Ying, Z. (2001). a-Stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4), 333–341.
-
 .. [Lind2010] Linden, W. J. V. D., & Pashley, J. P. Item Selection and Ability Estimation in Adaptive Testing. _In_ Linden, W. J. V. D., & Glas, C. A. W. (2010). Elements of Adaptive Testing. New York, NY, USA: Springer New York.
 
 .. [Barr2010] Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A Method for the Comparison of Item Selection Rules in Computerized Adaptive Testing. Applied Psychological Measurement, 34(6), 438–452. http://doi.org/10.1177/0146621610370152
-
-.. [Barr2014] Barrada, J. R., Abad, F. J., & Olea, J. (2014). Optimal Number of Strata for the Stratified Methods in Computerized Adaptive Testing. The Spanish Journal of Psychology, 17. http://doi.org/10.1017/sjp.2014.50

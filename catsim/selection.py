@@ -598,7 +598,7 @@ class MaxInfoBBlockingSelector(Selector):
 
 
 class The54321Selector(Selector):
-    """Implementation of the 5-4-3-2-1 selector proposed by [orelha]_, in which,
+    """Implementation of the 5-4-3-2-1 selector proposed by [McBride83]_, in which,
     at each step :math:`k` of a test of size :math:`K`, an item is chosen from a
     bin containing the :math:`K-k` most informative items in the bank, given the
     current :math:`\\hat\\theta`. As the test progresses, the bin gets smaller

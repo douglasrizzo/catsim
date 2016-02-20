@@ -38,3 +38,8 @@ References
   Stepsize on Computerized Adaptive Attitude Measurement Using the Rating
   Scale Model. Applied Psychological Measurement, 14(4), 355-366.
   http://doi.org/10.1177/014662169001400403
+
+.. [McBride83] McBride, J. R., & Martin, J. T. (1983). Reliability and validity of
+   adaptive ability tests in a military setting. In New horizons in testing: Latent
+   trait test theory and computerized adaptive testing (pp. 224–236). Academic
+   Press New York.
