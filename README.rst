@@ -43,14 +43,10 @@ Basic Usage
 2. Have a sample, or a number of examinees;
 3. Create a `initializer <https://douglasrizzo.github.io/catsim/initialization.html>`_, an item `selector <https://douglasrizzo.github.io/catsim/selection.html>`_, a proficiency `estimator <https://douglasrizzo.github.io/catsim/estimation.html>`_ and a `stopping criterion <https://douglasrizzo.github.io/catsim/stopping.html>`_;
 4. Pass them to a `simulator <https://douglasrizzo.github.io/catsim/simulation.html>`_ and start the simulation.
-
-Optional:
-
 5. Access the simulator's properties to get specifics of the results;
 6. `Plot <https://douglasrizzo.github.io/catsim/plot.html>`_ your results.
 
  .. code-block:: python
-     :linenos:
 
      from catsim.initialization import RandomInitializer
      from catsim.selection import MaxInfoSelector

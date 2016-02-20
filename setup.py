@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from setuptools import setup, find_packages
+from catsim import __version__
 
 setup(
     classifiers=[
@@ -19,7 +20,7 @@ setup(
         'Topic :: Education :: Testing'
     ],
     name='catsim',
-    version='0.9',
+    version=__version__,
     description='Computerized Adaptive Testing Simulator',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
