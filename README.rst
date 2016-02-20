@@ -46,15 +46,29 @@ Basic Usage
 5. Access the simulator's properties to get specifics of the results;
 6. `Plot <https://douglasrizzo.github.io/catsim/plot.html>`_ your results.
 
- .. code-block:: python
+.. code-block:: python
 
-     from catsim.initialization import RandomInitializer
-     from catsim.selection import MaxInfoSelector
-     from catsim.reestimation import HillClimbingEstimator
-     from catsim.stopping import MaxItemStopper
-     from catsim.cat import generate_item_bank
-     initializer = RandomInitializer()
-     selector = MaxInfoSelector()
-     estimator = HillClimbingEstimator()
-     stopper = MaxItemStopper(20)
-     Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
+    from catsim.initialization import RandomInitializer
+    from catsim.selection import MaxInfoSelector
+    from catsim.reestimation import HillClimbingEstimator
+    from catsim.stopping import MaxItemStopper
+    from catsim.cat import generate_item_bank
+    initializer = RandomInitializer()
+    selector = MaxInfoSelector()
+    estimator = HillClimbingEstimator()
+    stopper = MaxItemStopper(20)
+    Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
+
+
+Citing `catsim`
+---------------
+
+.. code-block:: bibtex
+
+    @misc{catsim,
+        author = {Meneghetti, Douglas De Rizzo},
+        title = {catsim: Computerized Adaptive Testing Simulator},
+        url = {http://douglasrizzo.github.io/catsim/},
+        year = {2016},
+        doi = {10.5281/zenodo.46259}
+    }

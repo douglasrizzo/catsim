@@ -21,7 +21,7 @@ install:
 - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib
 - source activate test-environment
 # install remaining packages using pip
-- pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc sphinx_rtd_theme coverage nose sphinxcontrib-inheritance
+- pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc sphinx_rtd_theme coverage nose sphinxcontrib-inheritance bibtex-pygments-lexer
 - python --version
 - which python
 - make install clean
