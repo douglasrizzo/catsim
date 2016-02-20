@@ -1,5 +1,6 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
+from catsim import irt
 import numpy
 from collections.abc import Iterable
 
@@ -148,7 +149,7 @@ def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
         c = numpy.random.normal(.25, .02, n)
     else:
         c = numpy.zeros((n))
-    return numpy.array([a, b, c]).T
+    return irt.normalize_item_bank(numpy.array([a, b, c]).T)
 
 
 if __name__ == '__main__':

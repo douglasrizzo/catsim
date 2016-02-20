@@ -77,7 +77,10 @@ def test_simulations():
     test_size = 20
     bank_size = 5000
 
-    logistic_models = ['1PL', '2PL', '3PL']
+    logistic_models = [
+        # '1PL', '2PL',
+        '3PL'
+    ]
     initializers = [
         RandomInitializer('uniform',
                           (-5, 5)
@@ -97,6 +100,7 @@ def test_simulations():
         MaxInfoStratificationSelector(test_size), MaxInfoBBlockingSelector(test_size),
         The54321Selector(test_size)
     ]
+
     estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()]
 
     for logistic_model in logistic_models:
