@@ -188,31 +188,24 @@ class ClusterSelector(Selector):
         # this part of the code selects the cluster from which the item at
         # the current point of the test will be chosen
         if self._method == 'item_info':
-            # finds the item in the matrix which maximizes the
-            # information, given the current estimated theta value
-            max_inf = 0
-            for counter, i in enumerate(items):
-                if irt.inf(est_theta, i[0], i[1], i[2]) > max_inf:
-                    # gets the indexes of all the items in the same cluster
-                    # as the current selected item that have not been
-                    # administered
-                    valid_indexes = numpy.array(
-                        list(
-                            set(
-                                numpy.nonzero(self._clusters == self._clusters[counter])[
-                                    0
-                                ]
-                            ) - set(
-                                administered_items
-                            )
-                        )
-                    )
+            infos = [irt.inf(est_theta, i[0], i[1], i[2]) for i in items]
 
-                    # checks if at least one item from this cluster has not
-                    # been adminitered to this examinee yet
-                    if len(valid_indexes) > 0:
-                        selected_cluster = self._clusters[counter]
-                        max_inf = irt.inf(est_theta, i[0], i[1], i[2])
+            while selected_cluster is None:
+                # find item with maximum information
+                max_info_item = infos.index(max(infos))
+
+                # gets the indexes of all the items in the same cluster
+                # as the current selected item that have not been
+                # administered
+                valid_indexes = [
+                    i for i, x in enumerate(self._clusters) if x == self._clusters[max_info_item]
+                ]
+
+                # if all items in the same cluster as the selected have been used, get the next item with maximum information
+                if set(valid_indexes).issubset(set(administered_items)):
+                    infos[max_info_item] = float('-inf')
+                else:
+                    selected_cluster = self._clusters[max_info_item]
 
         elif self._method in ['cluster_info', 'weighted_info']:
             # calculates the cluster information, depending on the method
@@ -251,10 +244,8 @@ class ClusterSelector(Selector):
                     # information possible and b) at least one item that has not
                     # yet been administered
 
-        assert selected_cluster is not None
-
-        # in this part, an item is chosen from the cluster that was
-        # selected above
+                    # in this part, an item is chosen from the cluster that was
+                    # selected above
         selected_item = None
 
         # gets the indexes and information values from the items in the
@@ -639,11 +630,6 @@ class The54321Selector(Selector):
 
         # while every item in the bin has already been applied, move the bin forward
         while set(organized_items[begin:begin + bin_size]).issubset(set(administered_items)):
-            print('Begin', begin)
-            print('bin_size', bin_size)
-            print('Organized items', organized_items)
-            print('Items in the bin', organized_items[begin:bin_size])
-            print('Administered items', administered_items)
             begin += bin_size
             if begin >= len(organized_items):
                 raise ValueError('There are no more items to apply.')

@@ -136,7 +136,7 @@ def test_cism():
         for estimator in estimators:
             for stopper in stoppers:
                 items = generate_item_bank(5000)
-                clusters = KMeans(n_clusters=8).fit_predict(items)
+                clusters = list(KMeans(n_clusters=8).fit_predict(items))
                 ClusterSelector.weighted_cluster_infos(0, items, clusters)
                 ClusterSelector.avg_cluster_params(items, clusters)
                 selector = ClusterSelector(clusters=clusters, r_max=.2)
