@@ -90,6 +90,12 @@ class Simulator:
         >>> Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
         """
 
+        # if verbose:
+        print(
+            'Starting simulation: {0} {1} {2} {3}'.format(
+                initializer.__class__, selector.__class__, estimator.__class__, stopper.__class__
+            )
+        )
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
 
