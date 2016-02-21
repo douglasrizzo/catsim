@@ -53,7 +53,8 @@ class MaxInfoSelector(Selector):
 
 
 class LinearSelector(Selector):
-    """Selector that returns item indexes in a linear order, simulating a standard (non-adaptive) test.
+    """Selector that returns item indexes in a linear order, simulating a standard
+    (non-adaptive) test.
 
     :param indexes: the indexes of the items that will be returned in order"""
 
@@ -81,7 +82,7 @@ class LinearSelector(Selector):
         :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
         :returns: index of the first item in `indexes`, minus the indexes presented in `administered_items`.
         """
-        if len(set(self._indexes) - set(administered_items)) == 0:
+        if set(self._indexes).issubset(set(administered_items)):
             raise ValueError(
                 'A new index was asked for, but there are no more item indexes to present.'
             )
