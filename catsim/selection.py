@@ -443,8 +443,6 @@ class AStratifiedBBlockingSelector(Selector):
 
     .. image:: ../docs/b-blocking.svg
 
-    .. image:: ../docs/blocking-end.svg
-
     :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
 
     def __init__(self, test_size):
@@ -547,8 +545,6 @@ class MaxInfoBBlockingSelector(Selector):
     positioned in the same place in the proficiency scale in 3PL.
 
     .. image:: ../docs/mis-b.svg
-
-    .. image:: ../docs/blocking-end.svg
 
     :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
 
