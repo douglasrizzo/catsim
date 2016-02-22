@@ -19,6 +19,7 @@ def item_curve(
     c: float=0,
     title: str=None,
     ptype: str='icc',
+    max_info=True,
     filepath: str=None,
     show: bool=True
 ):
@@ -85,6 +86,8 @@ def item_curve(
         elif ptype == 'iic':
             plt.ylabel(r'$I(\theta)$')
             plt.plot(thetas, i_thetas)
+            if max_info:
+                plt.plot(irt.inf(irt.max_info(a, b, c), a, b, c), irt.max_info(a, b, c), 'o')
 
     elif ptype == 'both':
         _, ax1 = plt.subplots()
@@ -101,6 +104,8 @@ def item_curve(
         ax2.set_ylabel(r'$I(\theta)$', color='r', size=16)
         for tl in ax2.get_yticklabels():
             tl.set_color('r')
+        if max_info:
+            ax2.plot(irt.inf(irt.max_info(a, b, c), a, b, c), irt.max_info(a, b, c), 'o')
 
         if title is not None:
             ax1.set_title(title, size=18)
@@ -182,6 +187,7 @@ def test_progress(
     administered_items: numpy.ndarray=None,
     true_theta: float=None,
     info: bool=False,
+    var: bool=False,
     see: bool=False,
     reliability: bool=False,
     filepath: str=None,
@@ -206,7 +212,7 @@ def test_progress(
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(initializer, selector, estimator, stopper)
         plot.test_progress(simulator=s, index=0)
-        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], info=True, see=True)
+        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], info=True, var=True, see=True)
 
     :param title: the plot title.
     :param simulator: a simulator which has already simulated a series of CATs,
@@ -222,8 +228,10 @@ def test_progress(
                        it will be shown on the plot, otherwise not.
     :param info: plot test information. It only works if both proficiencies and
                  administered items are passed.
-    :param see: plot the standard error of estimation during the test. It only
+    :param var: plot the estimation variance during the test. It only
                 works if both proficiencies and administered items are passed.
+    :param see: plot the standard error of estimation during the test. It only
+               works if both proficiencies and administered items are passed.
     :param reliability: plot the test reliability. It only works if both proficiencies
                         and administered items are passed.
     :param filepath: the path to save the plot
@@ -260,10 +268,14 @@ def test_progress(
         plt.hlines(true_theta, 0, len(xs), label=r'$\theta$')
     if thetas is not None and administered_items is not None:
 
-        # calculate and plot test information, standard error and thissen's reliability
+        # calculate and plot test information, var, standard error and reliability
         if info:
             sees = [irt.test_info(thetas[x], administered_items[:x + 1, ]) for x in xs]
             plt.plot(xs, sees, label=r'$I(\theta)$')
+
+        if var:
+            varss = [irt.var(thetas[x], administered_items[:x + 1, ]) for x in xs]
+            plt.plot(xs, varss, label=r'$Var$')
 
         if see:
             sees = [irt.see(thetas[x], administered_items[:x + 1, ]) for x in xs]
