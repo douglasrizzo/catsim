@@ -587,12 +587,14 @@ class MaxInfoBBlockingSelector(Selector):
 
 class The54321Selector(Selector):
     """Implementation of the 5-4-3-2-1 selector proposed by [McBride83]_, in which,
-    at each step :math:`k` of a test of size :math:`K`, an item is chosen from a
-    bin containing the :math:`K-k` most informative items in the bank, given the
-    current :math:`\\hat\\theta`. As the test progresses, the bin gets smaller
-    and more informative items have a higher probability of being chosen by the
-    end of the test, when the estimation of ':math:`\\hat\\theta` is more
-    precise.
+    at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin
+    containing the :math:`K-k` most informative items in the bank, given the current
+    :math:`\\hat\\theta`. As the test progresses, the bin gets smaller and more
+    informative items have a higher probability of being chosen by the end of the
+    test, when the estimation of ':math:`\\hat\\theta` is more precise. The
+    5-4-3-2-1 selector can be viewed as a specialization of the
+    :py:class:`catsim.selection.RandomesqueSelector`, in which the bin size of most
+    informative items gets smaller as the test progresses.
 
     :param test_size: the number of items the test contains. The selector uses
                       this parameter to set the bin size"""
@@ -614,33 +616,59 @@ class The54321Selector(Selector):
         :returns: index of the next item to be applied.
         """
 
-        # sort item indexes by their information value
-        organized_items = numpy.array(
-            [
-                irt.inf(est_theta, item[0], item[1], item[2]) for item in items
-            ]
-        ).argsort()
+        # sort item indexes by their information value and remove indexes of administered items
+        organized_items = set(
+            numpy.array(
+                [
+                    irt.inf(est_theta, item[0], item[1], item[2]) for item in items
+                ]
+            ).argsort()
+        ) - set(administered_items)
 
-        # select the item in the correct layer, according to the point in the test the examinee is
-        begin = 0
         bin_size = self._test_size - len(administered_items)
 
-        # while every item in the bin has already been applied, move the bin forward
-        while set(organized_items[begin:begin + bin_size]).issubset(set(administered_items)):
-            begin += bin_size
-            if begin >= len(organized_items):
-                raise ValueError('There are no more items to apply.')
+        if len(organized_items) == 0:
+            raise ValueError('There are no more items to apply.')
 
-        selected_item = organized_items[
-            numpy.random.choice(
-                list(
-                    set(
-                        organized_items[
-                            begin:begin + bin_size
-                        ]
-                    ) - set(administered_items)
-                )
-            )
-        ]
+        return numpy.random.choice(list(organized_items)[0:0 + bin_size])
 
-        return selected_item
+
+class RandomesqueSelector(Selector):
+    """Implementation of the randomesque selector proposed by [McBride83]_, in which,
+    at every step of the test, an item is randomly chosen from the :math:`n` most informative
+    items in the item bank, :math:`n` being a predefined value (originally 5, but user-defined
+    in this implementation)
+
+    :param bin_size: the number of most informative items to be taken into
+    consideration when randomly selecting one of them."""
+
+    def __init__(self, bin_size):
+        super().__init__()
+        self._bin_size = bin_size
+
+    @property
+    def bin_size(self):
+        return self._bin_size
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :param est_theta: estimated proficiency value
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by their information value and remove indexes of administered items
+        organized_items = set(
+            numpy.array(
+                [
+                    irt.inf(est_theta, item[0], item[1], item[2]) for item in items
+                ]
+            ).argsort()
+        ) - set(administered_items)
+
+        if len(organized_items) == 0:
+            raise ValueError('There are no more items to apply.')
+
+        return numpy.random.choice(list(organized_items)[:self._bin_size])
