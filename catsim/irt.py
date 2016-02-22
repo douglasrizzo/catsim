@@ -72,11 +72,29 @@ def _theta_map(
     ) - (theta - mu) / (sigma**2)
 
 
+def var(theta: float, items: numpy.ndarray) -> float:
+    """Computes the variance (:math:`Var`) of the proficiency estimate of a test at a
+    specific :math:`\\theta` value [Ayala2009]_:
+
+    .. math:: Var = \\frac{1}{I(\\theta)}
+
+    where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
+
+    :param theta: a proficiency value.
+    :param items: a matrix containing item parameters.
+    :returns: the variance of proficency estimation at `theta` for a test represented by `items`.
+    """
+    try:
+        return 1 / test_info(theta, items)
+    except ZeroDivisionError:
+        return float('-inf')
+
+
 def see(theta: float, items: numpy.ndarray) -> float:
     """Computes the standard error of estimation (:math:`SEE`) of a test at a
     specific :math:`\\theta` value [Ayala2009]_:
 
-    .. math:: SEE = \\frac{1}{I(\\theta)}
+    .. math:: SEE = \\\\sqrt{frac{1}{I(\\theta)}}
 
     where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
 
@@ -85,7 +103,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
     :returns: the standard error of estimation at `theta` for a test represented by `items`.
     """
     try:
-        return 1 / math.sqrt(test_info(theta, items))
+        return math.sqrt(var(theta, items))
     except ZeroDivisionError:
         return float('-inf')
 
