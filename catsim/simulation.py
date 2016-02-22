@@ -69,6 +69,27 @@ class Simulator:
         """Duration of the simulation, in milliseconds."""
         return self._duration
 
+    @property
+    def bias(self) -> float:
+        """Bias between the estimated and true proficiencies. This property is only available after :py:func:`simulate` has been successfully called. For more information on estimation bias, see :py:func:`catsim.cat.bias`"""
+        return self._bias
+
+    @property
+    def mse(self) -> float:
+        """Mean-squared error between the estimated and true proficiencies. This
+        property is only available after :py:func:`simulate` has been successfully
+        called. For more information on the mean-squared error of estimation, see
+        :py:func:`catsim.cat.mse`"""
+        return self._mse
+
+    @property
+    def rmse(self) -> float:
+        """Root mean-squared error between the estimated and true proficiencies. This
+        property is only available after :py:func:`simulate` has been successfully
+        called. For more information on the root mean-squared error of estimation, see
+        :py:func:`catsim.cat.rmse`"""
+        return self._rmse
+
     @examinees.setter
     def examinees(self, examinees):
         if type(examinees) == int:
@@ -168,6 +189,10 @@ class Simulator:
 
         # if verbose:
         print('Simulation took {0} milliseconds'.format(self._duration))
+
+        self._bias = cat.bias(self.examinees, self.evaluations)
+        self._mse = cat.mse(self.examinees, self.evaluations)
+        self._rmse = cat.rmse(self.examinees, self.evaluations)
 
 
 if __name__ == '__main__':
