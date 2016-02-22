@@ -7,7 +7,7 @@ from catsim import stats
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 from catsim.stopping import MaxItemStopper, MinErrorStopper
-from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector, AStratifiedBBlockingSelector, MaxInfoStratificationSelector, MaxInfoBBlockingSelector, AStratifiedSelector, The54321Selector
+from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector, AStratifiedBBlockingSelector, MaxInfoStratificationSelector, MaxInfoBBlockingSelector, AStratifiedSelector, The54321Selector, RandomesqueSelector
 from catsim.initialization import RandomInitializer, FixedPointInitializer
 from catsim.estimation import HillClimbingEstimator, DifferentialEvolutionEstimator, FMinEstimator
 
@@ -39,9 +39,9 @@ def test_plots():
     s.simulate(initializer, selector, estimator, stopper)
 
     for item in s.items[0:10]:
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', None, False
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', None, False
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', None, False
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', False, None, False
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', True, None, False
+        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', True, None, False
         close('all')
 
     plot.gen3D_dataset_scatter(items=s.items, show=False)
@@ -105,7 +105,7 @@ def test_simulations():
             )
         ), AStratifiedSelector(test_size), AStratifiedBBlockingSelector(test_size),
         MaxInfoStratificationSelector(test_size), MaxInfoBBlockingSelector(test_size),
-        The54321Selector(test_size)
+        The54321Selector(test_size), RandomesqueSelector(5)
     ]
 
     estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8)), FMinEstimator()]
