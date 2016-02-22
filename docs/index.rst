@@ -3,28 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. include:: readme_head.rst
-
-Contents
---------
-
-.. toctree::
-    :maxdepth: 2
-
-    concepts.rst
-    initialization.rst
-    selection.rst
-    estimation.rst
-    stopping.rst
-    simulation.rst
-    irt.rst
-    cat.rst
-    plot.rst
-    stats.rst
-    contributing.rst
-    references.rst
-
-.. include:: readme_body.rst
+.. include:: ../README.rst
 
 Basic Usage
 -----------
@@ -63,3 +42,22 @@ You can cite the package using the following bibtex entry:
         year = {2016},
         doi = {10.5281/zenodo.46259}
     }
+
+Contents
+--------
+
+.. toctree::
+    :maxdepth: 2
+
+    concepts.rst
+    initialization.rst
+    selection.rst
+    estimation.rst
+    stopping.rst
+    simulation.rst
+    irt.rst
+    cat.rst
+    plot.rst
+    stats.rst
+    contributing.rst
+    references.rst
