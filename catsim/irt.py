@@ -281,7 +281,7 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     if items.shape[1] == 2:
         items = numpy.append(items, numpy.zeros((items.shape[0])), axis=1)
 
-    return items
+    return items.astype(numpy.float128)
 
 
 def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
