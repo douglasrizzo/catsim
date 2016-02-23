@@ -634,7 +634,7 @@ class The54321Selector(Selector):
 
 
 class RandomesqueSelector(Selector):
-    """Implementation of the randomesque selector proposed by [McBride83]_, in which,
+    """Implementation of the randomesque selector proposed by [Kingsbury89]_, in which,
     at every step of the test, an item is randomly chosen from the :math:`n` most informative
     items in the item bank, :math:`n` being a predefined value (originally 5, but user-defined
     in this implementation)

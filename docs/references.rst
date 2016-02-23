@@ -39,6 +39,11 @@ References
   Scale Model. Applied Psychological Measurement, 14(4), 355-366.
   http://doi.org/10.1177/014662169001400403
 
+.. [Kingsbury89] Kingsbury, G. G., & Zara, A. R. (1989). Procedures for
+   selecting items for computerized adaptive tests. Applied Measurement in
+   Education, 2(4), 359–375.
+
+
 .. [McBride83] McBride, J. R., & Martin, J. T. (1983). Reliability and validity of
    adaptive ability tests in a military setting. In New horizons in testing: Latent
    trait test theory and computerized adaptive testing (pp. 224–236). Academic

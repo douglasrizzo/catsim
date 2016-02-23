@@ -87,7 +87,8 @@ def item_curve(
             plt.ylabel(r'$I(\theta)$')
             plt.plot(thetas, i_thetas)
             if max_info:
-                plt.plot(irt.inf(irt.max_info(a, b, c), a, b, c), irt.max_info(a, b, c), 'o')
+                aux = irt.max_info(a, b, c)
+                plt.plot(aux, irt.inf(aux, a, b, c), 'o')
 
     elif ptype == 'both':
         _, ax1 = plt.subplots()
@@ -105,7 +106,8 @@ def item_curve(
         for tl in ax2.get_yticklabels():
             tl.set_color('r')
         if max_info:
-            ax2.plot(irt.inf(irt.max_info(a, b, c), a, b, c), irt.max_info(a, b, c), 'o')
+            aux = irt.max_info(a, b, c)
+            plt.plot(aux, irt.inf(aux, a, b, c), 'o')
 
         if title is not None:
             ax1.set_title(title, size=18)

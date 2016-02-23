@@ -190,9 +190,9 @@ class Simulator:
         # if verbose:
         print('Simulation took {0} milliseconds'.format(self._duration))
 
-        self._bias = cat.bias(self.examinees, self.evaluations)
-        self._mse = cat.mse(self.examinees, self.evaluations)
-        self._rmse = cat.rmse(self.examinees, self.evaluations)
+        self._bias = cat.bias(self.examinees, self.estimations)
+        self._mse = cat.mse(self.examinees, self.estimations)
+        self._rmse = cat.rmse(self.examinees, self.estimations)
 
 
 if __name__ == '__main__':
