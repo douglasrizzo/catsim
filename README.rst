@@ -21,8 +21,8 @@
     :target: https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://zenodo.org/badge/20502/douglasrizzo/catsim.svg
-    :target: https://zenodo.org/badge/latestdoi/20502/douglasrizzo/catsim
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg
+    :target: http://dx.doi.org/10.5281/zenodo.46420
     :alt: Digital Object Identifier
 
 Introduction
