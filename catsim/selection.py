@@ -691,17 +691,18 @@ class RandomesqueSelector(Selector):
 class IntervalIntegrationSelector(Selector):
     """Implementation of an interval integration selector in which, at every step of
     the test, the item that maximizes the information function integral at a
-    predetermined ``interval`` :math:`\\delta` above and below the current :math:`\\hat\\theta` is
-    chosen.
+    predetermined ``interval`` :math:`\\delta` above and below the current
+    :math:`\\hat\\theta` is chosen.
 
     .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta - \\delta}I_i(\\hat\\theta)
 
-    :param interval: the interval of the integral.
+    :param interval: the interval of the integral. If no interval is passed, the
+                     integral is calculated from :math:`[-\\inf, \\inf]`.
     """
 
-    def __init__(self, interval):
+    def __init__(self, interval: float=None):
         super().__init__()
-        self._interval = interval
+        self._interval = interval if interval is not None else numpy.inf
 
     @property
     def interval(self):
