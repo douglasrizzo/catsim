@@ -7,7 +7,7 @@ from catsim import stats
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 from catsim.stopping import MaxItemStopper, MinErrorStopper
-from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector, AStratifiedBBlockingSelector, MaxInfoStratificationSelector, MaxInfoBBlockingSelector, AStratifiedSelector, The54321Selector, RandomesqueSelector
+from catsim.selection import MaxInfoSelector, ClusterSelector, LinearSelector, RandomSelector, AStratifiedBBlockingSelector, MaxInfoStratificationSelector, MaxInfoBBlockingSelector, AStratifiedSelector, The54321Selector, RandomesqueSelector, IntervalIntegrationSelector
 from catsim.initialization import RandomInitializer, FixedPointInitializer
 from catsim.estimation import HillClimbingEstimator, DifferentialEvolutionEstimator, FMinEstimator
 
@@ -96,7 +96,7 @@ def test_simulations():
                           ),
         FixedPointInitializer(0)
     ]
-    infinite_selectors = [MaxInfoSelector(), RandomSelector()]
+    infinite_selectors = [MaxInfoSelector(), RandomSelector(), IntervalIntegrationSelector(0.3)]
     finite_selectors = [
         LinearSelector(
             numpy.random.randint(

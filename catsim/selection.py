@@ -697,7 +697,7 @@ class IntervalIntegrationSelector(Selector):
     .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta - \\delta}I_i(\\hat\\theta)
 
     :param interval: the interval of the integral. If no interval is passed, the
-                     integral is calculated from :math:`[-\\inf, \\inf]`.
+                     integral is calculated from :math:`[-\\infty, \\infty]`.
     """
 
     def __init__(self, interval: float=None):
