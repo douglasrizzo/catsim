@@ -1,6 +1,8 @@
-from catsim import irt
-import numpy
 from abc import ABCMeta, abstractmethod
+
+import numpy
+from catsim import irt
+from scipy.integrate import quad
 
 
 class Selector:
@@ -253,9 +255,11 @@ class ClusterSelector(Selector):
         # selected cluster that have not been administered
         valid_indexes = numpy.array(
             list(
-                set(numpy.nonzero(self._clusters == selected_cluster)[0]) - set(
-                    administered_items
-                )
+                set(
+                    numpy.nonzero(
+                        self._clusters == selected_cluster
+                    )[0]
+                ) - set(administered_items)
             )
         )
 
@@ -266,10 +270,12 @@ class ClusterSelector(Selector):
             list(
                 set(
                     numpy.nonzero(
-                        (self._clusters == selected_cluster) & (
-                            items[:, 3] < self._r_max
-                        )
-                    )[0]
+                        (
+                            self._clusters == selected_cluster
+                        ) & (items[:, 3] < self._r_max)
+                    )[
+                        0
+                    ]
                 ) - set(administered_items)
             )
         )
@@ -302,7 +308,11 @@ class ClusterSelector(Selector):
                 ]
             elif self._r_control == 'aggressive':
                 valid_indexes = [
-                    index for (r, index) in sorted(zip(items[valid_indexes, 3], valid_indexes))
+                    index for (r, index) in sorted(
+                        zip(
+                            items[valid_indexes, 3], valid_indexes
+                        )
+                    )
                 ]
 
             selected_item = valid_indexes[0]
@@ -512,7 +522,9 @@ class MaxInfoStratificationSelector(Selector):
         organized_items = numpy.array(
             [
                 irt.inf(
-                    irt.max_info(item[0], item[1], item[2]), item[0], item[1], item[2]
+                    irt.max_info(item[0], item[1], item[2]), item[0], item[
+                        1
+                    ], item[2]
                 ) for item in items
             ]
         ).argsort()
@@ -569,7 +581,9 @@ class MaxInfoBBlockingSelector(Selector):
             (
                 [
                     irt.inf(
-                        irt.max_info(item[0], item[1], item[2]), item[0], item[1], item[2]
+                        irt.max_info(item[0], item[1], item[2]), item[0], item[
+                            1
+                        ], item[2]
                     ) for item in items
                 ], items[:, 1]
             )
@@ -639,8 +653,8 @@ class RandomesqueSelector(Selector):
     items in the item bank, :math:`n` being a predefined value (originally 5, but user-defined
     in this implementation)
 
-    :param bin_size: the number of most informative items to be taken into
-    consideration when randomly selecting one of them."""
+    :param bin_size: the number of most informative items to be taken into consideration when randomly selecting one of them.
+    """
 
     def __init__(self, bin_size):
         super().__init__()
@@ -672,3 +686,51 @@ class RandomesqueSelector(Selector):
             raise ValueError('There are no more items to apply.')
 
         return numpy.random.choice(list(organized_items)[:self._bin_size])
+
+
+class IntervalIntegrationSelector(Selector):
+    """Implementation of an interval integration selector in which, at every step of
+    the test, the item that maximizes the information function integral at a
+    predetermined ``interval`` :math:`\\delta` above and below the current :math:`\\hat\\theta` is
+    chosen.
+
+    .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta - \\delta}I_i(\\hat\\theta)
+
+    :param interval: the interval of the integral.
+    """
+
+    def __init__(self, interval):
+        super().__init__()
+        self._interval = interval
+
+    @property
+    def interval(self):
+        return self._interval
+
+    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param items: a valid item matrix.
+        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :param est_theta: estimated proficiency value
+        :returns: index of the next item to be applied.
+        """
+
+        # sort item indexes by the integral of the information function and remove indexes of administered items
+        organized_items = set(
+            numpy.array(
+                [
+                    quad(
+                        irt.inf,
+                        est_theta - self._interval,
+                        est_theta + self._interval,
+                        args=(item[0], item[1], item[2])
+                    )[0] for item in items
+                ]
+            ).argsort()
+        ) - set(administered_items)
+
+        if len(organized_items) == 0:
+            raise ValueError('There are no more items to apply.')
+
+        return list(organized_items)[0]
