@@ -156,14 +156,9 @@ def gen3D_dataset_scatter(
     """
     irt.validate_item_bank(items)
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(
-        __column(items.tolist(), 0),
-        __column(items.tolist(), 1),
-        __column(items.tolist(), 2),
-        s=10
-    )
+    ax.scatter(list(items[:, 0]), list(items[:, 1]), list(items[:, 2]), s=10, c='b')
 
     if title is not None:
         plt.title(title, size=18)
