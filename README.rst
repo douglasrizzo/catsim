@@ -21,12 +21,10 @@
     :target: https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master
     :alt: Requirements Status
 
+
 .. image:: https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg
     :target: http://dx.doi.org/10.5281/zenodo.46420
     :alt: Digital Object Identifier
-
-Introduction
-------------
 
 **catsim** is a computerized adaptive testing simulator written in Python 3.4. It allow for the simulation of computerized adaptive tests, selecting different test initialization rules, item selection rules, proficiency reestimation methods and stopping criteria.
 
@@ -37,7 +35,7 @@ Computerized adaptive tests are educational evaluations, usually taken by examin
 Installation
 ------------
 
-``pip install catsim``
+Install it using ``pip install catsim``.
 
 Important links
 ---------------
@@ -47,7 +45,7 @@ Important links
 - Issue tracker: https://github.com/douglasrizzo/catsim/issues
 
 Dependencies
-============
+------------
 
 `catsim` depends on the latest versions of NumPy, SciPy, Matplotlib and scikit-learn,
 which are automatically installed from `pip`.
