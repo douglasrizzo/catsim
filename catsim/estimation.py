@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy
-from catsim import irt
+from catsim import irt, cat
 from scipy.optimize import fmin
 from scipy.optimize import differential_evolution
 
@@ -38,32 +38,41 @@ class HillClimbingEstimator(Estimator):
     :param verbose: verbosity level of the maximization method
     """
 
-    def __init__(self, precision: int=6, verbose: bool=False):
+    def __init__(self, precision: int=6, dodd: bool=False, verbose: bool=False):
         super(HillClimbingEstimator, self).__init__()
         self._precision = precision
         self._verbose = verbose
         self._evaluations = 0
         self._calls = 0
+        self._dodd = dodd
 
     @property
-    def calls(self):
+    def calls(self) -> float:
         """How many times the estimator has been called to maximize/minimize the log-likelihood function
 
         :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
         return self._calls
 
     @property
-    def evaluations(self):
+    def evaluations(self) -> float:
         """Total number of times the estimator has evaluated the log-likelihood function during its existence
 
         :returns: number of function evaluations"""
         return self._evaluations
 
     @property
-    def avg_evaluations(self):
+    def avg_evaluations(self) -> float:
         """Average number of function evaluations for all tests the estimator has been used
 
         :returns: average number of function evaluations"""
+        return self._evaluations / self._calls
+
+    @property
+    def dodd(self) -> bool:
+        """Whether Dodd's method will be called by estimator in case the response vector
+        is composed solely of right or wrong answers.
+
+        :returns: boolean value indicating if Dodd's method will be used or not."""
         return self._evaluations / self._calls
 
     def estimate(
@@ -85,6 +94,9 @@ class HillClimbingEstimator(Estimator):
         """
 
         self._calls += 1
+
+        if len(set(response_vector)) == 1 and self._dodd:
+            return cat.dodd(current_theta, self.items, response_vector[-1])
 
         if set(response_vector) == 1:
             return float('inf')

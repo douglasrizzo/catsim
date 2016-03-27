@@ -3,11 +3,12 @@ application of adaptive tests. Most of this module is based on the work of
 [Bar10]_."""
 
 import time
+
 import numpy
-from catsim import irt, cat
+from catsim import cat, irt
+from catsim.estimation import Estimator
 from catsim.initialization import Initializer
 from catsim.selection import Selector
-from catsim.estimation import Estimator
 from catsim.stopping import Stopper
 
 
@@ -97,14 +98,12 @@ class Simulator:
         elif type(examinees) == list:
             self._examinees = numpy.array(examinees)
 
-    def simulate(
-        self,
-        initializer: Initializer,
-        selector: Selector,
-        estimator: Estimator,
-        stopper: Stopper,
-        verbose: bool=False
-    ):
+    def simulate(self,
+                 initializer: Initializer,
+                 selector: Selector,
+                 estimator: Estimator,
+                 stopper: Stopper,
+                 verbose: bool=False):
         """Simulates a computerized adaptive testing application to one or more examinees
 
         :param initializer: an initializer that selects examinees :math:`\\theta_0`
@@ -126,23 +125,23 @@ class Simulator:
         """
 
         # if verbose:
-        print(
-            'Starting simulation: {0} {1} {2} {3}'.format(
-                initializer.__class__, selector.__class__, estimator.__class__, stopper.__class__
-            )
-        )
+        print('Starting simulation: {0} {1} {2} {3}'.format(
+            initializer.__class__, selector.__class__, estimator.__class__,
+            stopper.__class__))
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
 
             # if verbose:
-            print('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees)))
+            print('{0}/{1} examinees...'.format(current_examinee + 1, len(
+                self.examinees)))
 
             est_theta = initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
 
             while not stopper.stop(self.items[administered_items], est_thetas):
                 try:
-                    selected_item = selector.select(self.items, administered_items, est_theta)
+                    selected_item = selector.select(
+                        self.items, administered_items, est_theta)
                 except:
                     print(len(administered_items))
                     raise
@@ -150,22 +149,18 @@ class Simulator:
                 # simulates the examinee's response via the three-parameter
                 # logistic function
                 response = irt.tpm(
-                    true_theta, self.items[selected_item][0], self.items[selected_item][1],
-                    self.items[selected_item][2]
-                ) >= numpy.random.uniform()
+                    true_theta, self.items[selected_item][0],
+                    self.items[selected_item][1],
+                    self.items[selected_item][2]) >= numpy.random.uniform()
 
                 response_vector.append(response)
 
                 # adds the item selected by the selector to the pool of administered items
                 administered_items.append(selected_item)
 
-                # if the response vector is composed only of correct or wrong answers, use dodd's method of estimation
-                if len(set(response_vector)) == 1:
-                    est_theta = cat.dodd(est_theta, self.items, response)
-                else:  # else, use the given estimator
-                    est_theta = estimator.estimate(
-                        response_vector, self.items[administered_items], est_theta
-                    )
+                # estimate the new theta using the given estimator
+                est_theta = estimator.estimate(
+                    response_vector, self.items[administered_items], est_theta)
 
                 # flatten the list of lists so that we can count occurrences of items easier
                 flattened_administered_items = [
@@ -177,8 +172,8 @@ class Simulator:
                 # update the exposure value for this item
                 # r = number of tests item has been used / total number of tests
                 self.items[selected_item, 3] = numpy.sum(
-                    flattened_administered_items == selected_item
-                ) / len(self.examinees)
+                    flattened_administered_items == selected_item) / len(
+                        self.examinees)
 
                 est_thetas.append(est_theta)
 
