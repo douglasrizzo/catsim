@@ -4,6 +4,7 @@ application of adaptive tests. Most of this module is based on the work of
 
 import time
 
+import json_tricks.np as jsnp
 import numpy
 from catsim import cat, irt
 from catsim.estimation import Estimator
@@ -22,7 +23,13 @@ class Simulator:
                       :math:`\\theta_0` values
     """
 
-    def __init__(self, items: numpy.ndarray, examinees):
+    def __init__(self,
+                 items: numpy.ndarray,
+                 examinees,
+                 initializer: Initializer=None,
+                 selector: Selector=None,
+                 estimator: Estimator=None,
+                 stopper: Stopper=None):
         irt.validate_item_bank(items)
 
         # adds a column for each item's exposure rate and their cluster membership
@@ -32,6 +39,11 @@ class Simulator:
         self._items = items
         self._estimations = []
         self._administered_items = []
+
+        self._initializer = initializer
+        self._selector = selector
+        self._estimator = estimator
+        self._stopper = stopper
 
         # `examinees` is passed to its special setter
         self.examinees = examinees
@@ -71,6 +83,22 @@ class Simulator:
         return self._duration
 
     @property
+    def initializer(self) -> Initializer:
+        return self._initializer
+
+    @property
+    def selector(self) -> Selector:
+        return self._selector
+
+    @property
+    def estimator(self) -> Estimator:
+        return self._estimator
+
+    @property
+    def stopper(self) -> Stopper:
+        return self._stopper
+
+    @property
     def bias(self) -> float:
         """Bias between the estimated and true proficiencies. This property is only available after :py:func:`simulate` has been successfully called. For more information on estimation bias, see :py:func:`catsim.cat.bias`"""
         return self._bias
@@ -99,10 +127,10 @@ class Simulator:
             self._examinees = numpy.array(examinees)
 
     def simulate(self,
-                 initializer: Initializer,
-                 selector: Selector,
-                 estimator: Estimator,
-                 stopper: Stopper,
+                 initializer: Initializer=None,
+                 selector: Selector=None,
+                 estimator: Estimator=None,
+                 stopper: Stopper=None,
                  verbose: bool=False):
         """Simulates a computerized adaptive testing application to one or more examinees
 
@@ -124,10 +152,19 @@ class Simulator:
         >>> Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
         """
 
+        if initializer is not None:
+            self._initializer = initializer
+        if selector is not None:
+            self._selector = selector
+        if estimator is not None:
+            self._estimator = estimator
+        if stopper is not None:
+            self._stopper = stopper
+
         # if verbose:
         print('Starting simulation: {0} {1} {2} {3}'.format(
-            initializer.__class__, selector.__class__, estimator.__class__,
-            stopper.__class__))
+            self._initializer.__class__, selector.__class__,
+            self._estimator.__class__, self._stopper.__class__))
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
 
@@ -135,10 +172,11 @@ class Simulator:
             print('{0}/{1} examinees...'.format(current_examinee + 1, len(
                 self.examinees)))
 
-            est_theta = initializer.initialize()
+            est_theta = self._initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
 
-            while not stopper.stop(self.items[administered_items], est_thetas):
+            while not self._stopper.stop(self.items[administered_items],
+                                         est_thetas):
                 try:
                     selected_item = selector.select(
                         self.items, administered_items, est_theta)
@@ -159,7 +197,7 @@ class Simulator:
                 administered_items.append(selected_item)
 
                 # estimate the new theta using the given estimator
-                est_theta = estimator.estimate(
+                est_theta = self._estimator.estimate(
                     response_vector, self.items[administered_items], est_theta)
 
                 # flatten the list of lists so that we can count occurrences of items easier
@@ -188,6 +226,12 @@ class Simulator:
         self._bias = cat.bias(self.examinees, self.estimations)
         self._mse = cat.mse(self.examinees, self.estimations)
         self._rmse = cat.rmse(self.examinees, self.estimations)
+
+    def dumps(self):
+        return jsnp.dumps(self)
+
+    def loads(json):
+        return jsnp.loads(json)
 
 
 if __name__ == '__main__':
