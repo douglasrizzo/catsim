@@ -1,5 +1,5 @@
 Item Response Theory Functions -- :mod:`catsim.irt`
-===================================================
+***************************************************
 
 Item Response Theory is a group of statistical tools created with the purpose of measuring latent traits, like personality traits or knowledge in specific areas. IRT allows for the creation of a measuring instrument (the test), under which every examinee may be positioned and compared with others. The masuring instrument is created by items, which can be most commonly represented as tasks in a test.
 

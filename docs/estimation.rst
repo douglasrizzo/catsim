@@ -1,5 +1,5 @@
 Estimation Methods -- :mod:`catsim.estimation`
-================================================
+**********************************************
 
 Estimators are the objects responsible for estimating of examinees
 proficiency values, given a dichotomous (binary) response vector and an array of

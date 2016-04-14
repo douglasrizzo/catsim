@@ -1,5 +1,5 @@
 References
-==========
+**********
 
 .. [Andrade2000] de Andrade, D. F., Tavares, H. R., da Cunha Valle, R., Valle,
    R. da C., de Andrade, D. F., Tavares, H. R., & Valle, R. da C. (2000). Teoria da

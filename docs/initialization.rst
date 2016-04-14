@@ -1,5 +1,5 @@
 Initialization Methods -- :mod:`catsim.initialization`
-======================================================
+******************************************************
 
 All implemented classes in this module inherit from a base abstract class
 :py:class:`Initializer`. :py:class:`Simulator` allows that a custom initializer be

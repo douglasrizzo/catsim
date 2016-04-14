@@ -1,5 +1,5 @@
 Basic Concepts
-==============
+**************
 
 As a CAT simulator, :py:mod:`catsim` borrows many concepts from Item Response Theory, a series of models created in the second part of the 20th century with the goal of *measuring latent traits*. :py:mod:`catsim` makes use of Item Response Theory three-parameter logistical model, a model in which examinees and items are represented by the following numerical values:
 
@@ -16,7 +16,7 @@ Item
 In :py:mod:`catsim`, the probability of an examinee with a given :math:`\hat\theta` value to answer an item correctly, given the item parameters, is given by :py:func:`catsim.irt.tpm`. The amount of information this item gives is calculated by :py:func:`catsim.irt.inf`.
 
 The Item Matrix
----------------
+===============
 
 In catsim, an item bank, or matrix, is a :py:class:`numpy.ndarray` whose rows represent items and columns represent item characteristics. The most important characteristics are situated in the first three columns of the matrix:
 
@@ -33,7 +33,7 @@ After the simulation, catsim adds a fourth column to the item matrix, representi
 Where :math:`q_i` represents the number of tests item :math:`i` has been used and :math:`N` is the total number of tests applied.
 
 The CAT Lifecycle
------------------
+=================
 
 In general, a computerized adaptive test has a very well-defined lifecycle:
 
@@ -63,14 +63,14 @@ In general, a computerized adaptive test has a very well-defined lifecycle:
 There is a considerable amount of literature covering these four topics. New methods of doing any of the four have been proposed and during the development of :py:mod:`catsim`, each topic resides in its own module. This way, it is easy to create simulations combining different methods of each topic.
 
 Initialization
-^^^^^^^^^^^^^^
+--------------
 
 The initialization procedure is done only once during each examinee's test. In it, the value of :math:`\hat\theta_0` is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (:py:class:`catsim.initialization.FixedInitializer`); it can be chosen randomly from a probability distribution (:py:class:`catsim.initialization.RandomInitializer`); the place in the item bank with items of more information can be chosen to initialize :math:`\hat\theta_0` etc.
 
 In :py:mod:`catsim`, initialization procedures can be found at :py:mod:`catsim.initialization`.
 
 Item Selection
-^^^^^^^^^^^^^^
+--------------
 
 With a set value for :math:`\hat\theta`, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate :math:`\hat\theta`.
 
@@ -83,7 +83,7 @@ In :py:mod:`catsim`, an examinee's response to a given item is simulated by samp
 In :py:mod:`catsim`, item selection procedures can be found at :py:mod:`catsim.selection`.
 
 Proficiency Estimation
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's :math:`\hat\theta`. This value reflects the examinee's proficiency, given his or hers answers up until that point of the test.
 
@@ -96,7 +96,7 @@ Estimation techniques are generally separated between maximum-likelihood estimat
 In :py:mod:`catsim`, proficiency estimation procedures can be found at :py:mod:`catsim.estimation`.
 
 Stopping Criterion
-^^^^^^^^^^^^^^^^^^
+------------------
 
 Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (:py:func:`catsim.irt.see`) reaches a lower threshold etc. Both of these stopping criteria are implemented as :py:class:`catsim.stopping.MaxItemStopper` and :py:class:`catsim.stopping.MaxItemStopper`, respectively.
 

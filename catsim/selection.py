@@ -95,7 +95,6 @@ class LinearSelector(Selector):
 class RandomSelector(Selector):
     """Selector that randomly selects items for application.
 
-
     :param replace: whether to select an item that has already been selected before for this examinee."""
 
     def __init__(self, replace: bool=False):
@@ -405,7 +404,7 @@ class AStratifiedSelector(Selector):
     represents the position in the test of the current item the examinee is being
     presented.
 
-    .. image:: ../docs/alpha-strat.svg
+    .. image:: ../docs/alpha-strat.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
 
@@ -451,7 +450,7 @@ class AStratifiedBBlockingSelector(Selector):
     bank, and so on. This method tries to balance the distribution of both
     parameters between all strata, after perceiving that they are correlated.
 
-    .. image:: ../docs/b-blocking.svg
+    .. image:: ../docs/b-blocking.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
 
@@ -493,7 +492,7 @@ class MaxInfoStratificationSelector(Selector):
     non-administered item from stratum :math:`k`, in which :math:`k` represents the
     position in the test of the current item the examinee is being presented.
 
-    .. image:: ../docs/mis.svg
+    .. image:: ../docs/mis.*
 
     This method claims to work better than the :math:`a`-stratified method by
     [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty
@@ -556,7 +555,7 @@ class MaxInfoBBlockingSelector(Selector):
     logistic model of IRT, since item difficulty and maximum information are not
     positioned in the same place in the proficiency scale in 3PL.
 
-    .. image:: ../docs/mis-b.svg
+    .. image:: ../docs/mis-b.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
 
