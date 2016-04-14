@@ -55,3 +55,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Personally, I don't control .ipynb files
+*.ipynb
