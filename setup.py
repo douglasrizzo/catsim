@@ -18,7 +18,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Topic :: Education :: Testing',
-        'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)'
+        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)'
     ],
     name='catsim',
     version=__version__,
