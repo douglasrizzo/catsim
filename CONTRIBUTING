@@ -8,7 +8,7 @@ If you think the simulator could be doing something it is currently not doing, f
 If you know a better way to present all the data collected during simulation, fell free to contribute with `your own plots <catsim.plot.html>`_.
 
 Psychometrics
--------------
+=============
 
 **catsim** still has a way to go before it can be considered a mature package. Here is a list of features that may be of interest:
 
@@ -18,18 +18,18 @@ Psychometrics
 * Other information functions, selection methods based on intervals or areas of information etc. (see [Lind2010]_).
 
 Software architecture
----------------------
+=====================
 
 If you think you have a better idea on how classes should be arranged so as to make the package more comprehensive and extensible, your contribution is also accepted. But be aware that major changes in the software may affect other users and the package will only be released to the public if it is tested accordingly.
 
 Unit testing
-------------
+============
 
 If you are interested in making a contribution to **catsim**, make sure it is contemplated in the package testing module. If new features require new unit tests, don't hesitate in making them.
 If you think there is something already in the package that is worth testing, you are welcome to create a unit test for it.
 
 How to contribute
------------------
+=================
 
 **Contributing code:** create a fork on GitHub, make your changes on your own repo and then send a pull request to out **testing** branch so that we can check your contributions. Make sure your version passes on the unit tests.
 

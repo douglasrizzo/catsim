@@ -26,8 +26,8 @@
     :target: http://dx.doi.org/10.5281/zenodo.46420
     :alt: Digital Object Identifier
 
-Introduction
-************
+Quick start
+***********
 
 **catsim** is a computerized adaptive testing simulator written in Python 3.4. It allow for the simulation of computerized adaptive tests, selecting different test initialization rules, item selection rules, proficiency reestimation methods and stopping criteria.
 

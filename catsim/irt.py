@@ -94,7 +94,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
     """Computes the standard error of estimation (:math:`SEE`) of a test at a
     specific :math:`\\theta` value [Ayala2009]_:
 
-    .. math:: SEE = \\\\sqrt{frac{1}{I(\\theta)}}
+    .. math:: SEE = \\sqrt{frac{1}{I(\\theta)}}
 
     where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
 
@@ -145,7 +145,7 @@ def inf(theta: float, a: float, b: float, c: float=0) -> float:
     """Calculates the information value of an item using the Item Response Theory
     three-parameter logistic model function [Ayala2009]_:
 
-    .. math:: I(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
+    .. math:: I_i(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
 
     :param theta: the individual's proficiency value. This parameter value has
                   no boundary, but if a distribution of the form

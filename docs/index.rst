@@ -6,11 +6,11 @@
 .. include:: ../README.rst
 
 Basic Usage
------------
+===========
 
 1. Have an `item matrix <https://douglasrizzo.github.io/catsim/item_matrix.html>`_;
-2. Have a sample, or a number of examinees;
-3. Create a `initializer <https://douglasrizzo.github.io/catsim/initialization.html>`_, an item `selector <https://douglasrizzo.github.io/catsim/selection.html>`_, a proficiency `estimator <https://douglasrizzo.github.io/catsim/estimation.html>`_ and a `stopping criterion <https://douglasrizzo.github.io/catsim/stopping.html>`_;
+2. Have a sample of examinee proficiencies, or a number of examinees to be generated;
+3. Create an `initializer <https://douglasrizzo.github.io/catsim/initialization.html>`_, an item `selector <https://douglasrizzo.github.io/catsim/selection.html>`_, a proficiency `estimator <https://douglasrizzo.github.io/catsim/estimation.html>`_ and a `stopping criterion <https://douglasrizzo.github.io/catsim/stopping.html>`_;
 4. Pass them to a `simulator <https://douglasrizzo.github.io/catsim/simulation.html>`_ and start the simulation.
 5. Access the simulator's properties to get specifics of the results;
 6. `Plot <https://douglasrizzo.github.io/catsim/plot.html>`_ your results.
@@ -29,7 +29,7 @@ Basic Usage
     Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
 
 Citing `catsim`
----------------
+===============
 
 You can cite the package using the following bibtex entry:
 
@@ -43,13 +43,10 @@ You can cite the package using the following bibtex entry:
         doi = {10.5281/zenodo.46259}
     }
 
-Contents
---------
-
 .. toctree::
     :maxdepth: 2
 
-    concepts.rst
+    introduction.rst
     initialization.rst
     selection.rst
     estimation.rst

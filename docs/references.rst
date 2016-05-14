@@ -1,5 +1,5 @@
-References
-**********
+Bibliography
+************
 
 .. [Andrade2000] de Andrade, D. F., Tavares, H. R., da Cunha Valle, R., Valle,
    R. da C., de Andrade, D. F., Tavares, H. R., & Valle, R. da C. (2000). Teoria da
@@ -48,3 +48,17 @@ References
    adaptive ability tests in a military setting. In New horizons in testing: Latent
    trait test theory and computerized adaptive testing (pp. 224–236). Academic
    Press New York.
+
+.. [Lord68] Lord, F. M., Novick, M. R., & Birnbaum, A. (1968). Statistical theories
+   of mental test scores. Oxford, England: Addison-Wesley.
+
+.. [Lord77] Lord, F. M. (1977). A Broad-Range Tailored Test of Verbal Ability.
+   Applied Psychological Measurement, 1(1), 95–100.
+   http://doi.org/10.1177/014662167700100115
+
+.. [Rasch66] Rasch, G. (1966). An item analysis which takes individual differences
+   into account. The British Journal of Mathematical and Statistical Psychology, 19(1), 49–57.
+   http://doi.org/10.1111/j.2044-8317.1966.tb00354.x
+
+.. [Magis12] Magis, D., & Raîche, G. (2012). Random Generation of Response Patterns under
+   Computerized Adaptive Testing with the R Package catR. Journal of Statistical Software, 48(8), 1–31.
