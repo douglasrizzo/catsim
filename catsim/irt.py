@@ -2,10 +2,14 @@ import math
 import numpy
 
 
-def tpm(theta: float, a: float, b: float, c: float=0) -> float:
+def _tpm_exponent(theta, a, b):
+    return math.exp(-a * (theta - b))
+
+
+def tpm(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
     """Item Response Theory three-parameter logistic function [Ayala2009]_:
 
-    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{1-c_i}{1+ e^{a_i(\\theta-b_i)}}
+    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{a_i(\\theta-b_i)}}
 
     :param theta: the individual's proficiency value. This parameter value has
                   no boundary, but if a distribution of the form :math:`N(0, 1)` was
@@ -22,54 +26,59 @@ def tpm(theta: float, a: float, b: float, c: float=0) -> float:
     :param c: the item pseudo-guessing parameter. Being a probability,
               :math:`0\\leq c \\leq 1`, but items considered good usually have
               :math:`c \\leq 0.2`.
+
+    :param d: the item upper asymptote. Being a probability,
+              :math:`0\\leq d \\leq 1`, but items considered good usually have
+              :math:`d \\approx 1`.
     """
-    return c + ((1 - c) / (1 + _tpm_exponent(theta, a, b)))
+    return c + ((d - c) / (1 + _tpm_exponent(theta, a, b)))
 
 
-def _w(theta, a, b, c):
-    p_star = math.pow(1 + _tpm_exponent(theta, a, b), -1)
-    q_star = 1 - p_star
-    p = tpm(theta, a, b, c)
-    q = 1 - p
+def inf(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
+    """Calculates the information value of an item using the Item Response Theory
+    three-parameter logistic model function [Ayala2009]_:
 
-    return p_star * q_star / p * q
+    .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2(1-P(\\theta))P(\\theta)}
+
+    :param theta: the individual's proficiency value. This parameter value has
+                  no boundary, but if a distribution of the form
+                  :math:`N(0, 1)` was used to estimate the parameters, then
+                  :math:`-4 \\leq \\theta \\leq 4`.
+
+    :param a: the discrimination parameter of the item, usually a positive
+              value in which :math:`0.8 \\leq a \\leq 2.5`.
+
+    :param b: the item difficulty parameter. This parameter value has no
+              boundary, but if a distribution of the form :math:`N(0, 1)` was
+              used to estimate the parameters, then :math:`-4 \\leq b \\leq 4`.
+
+    :param c: the item pseudo-guessing parameter. Being a probability,
+              :math:`0\\leq c \\leq 1`, but items considered good usually have
+              :math:`c \\leq 0.2`.
+
+    :param d: the item upper asymptote. Being a probability,
+              :math:`0\\leq d \\leq 1`, but items considered good usually have
+              :math:`d \\approx 1`.
+
+    :returns: the information value of the item at the designated `theta` point."""
+    ml3 = tpm(theta, a, b, c, d)
+
+    return (math.pow(a, 2) * math.pow(ml3 - c, 2) * math.pow(d - ml3, 2)) / (math.pow(d - c, 2) * ml3 * (1 - ml3))
 
 
-def _tpm_exponent(theta, a, b):
-    return math.exp(-a * (theta - b))
+def test_info(theta: float, items: numpy.ndarray):
+    """Computes the test information of a test at a specific :math:`\\theta` value [Ayala2009]_:
 
+    .. math:: I(\\theta) = \\sum_{j \\in J} I_j(\\theta)
 
-def _theta_map(
-    theta: float,
-    response_vector: list,
-    administered_items: numpy.ndarray,
-    mu: float=0,
-    sigma: float=1
-) -> float:
-    """ Maximum a posteriori estimation function for :math:`\\hat\\theta` [Andrade2000]_, given by:
+    where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the
+    item information of :math:`j` at aspecific :math:`\\theta` value.
 
-    .. math:: \\sum_{i-1}^{I} a_i(1-c_i)(u_{ji}-P_{JI})W_{ji} - \\frac{(\\theta_j - \\mu)}{\\sigma^2}
-
-    where .. math:: W = \\frac{P^*Q^*}{P^Q^}
-
-    where :math:`P` is given by :py:func:`catsim.irt.tpm`, :math:`P^* = (1 + e^{a_i(\\theta-b_i)})^{-1}`,
-    :math:`Q^* = 1 - P^*` and :math:`Q = 1 - P`
+    :param theta: a proficiency value.
+    :param items: a matrix containing item parameters.
+    :returns: the test information at `theta` for a test represented by `items`.
     """
-    return sum(
-        [
-            administered_items[i, 0] * (1 - administered_items[i, 2]) * (
-                response_vector[i] - tpm(
-                    theta, administered_items[i, 0], administered_items[
-                        i, 1
-                    ], administered_items[i, 2]
-                ) * _w(
-                    theta, administered_items[
-                        i, 0
-                    ], administered_items[i, 1], administered_items[i, 2]
-                )
-            ) for i in range(len(response_vector))
-        ]
-    ) - (theta - mu) / (sigma**2)
+    return sum([inf(theta, item[0], item[1], item[2], item[3]) for item in items])
 
 
 def var(theta: float, items: numpy.ndarray) -> float:
@@ -108,21 +117,6 @@ def see(theta: float, items: numpy.ndarray) -> float:
         return float('-inf')
 
 
-def test_info(theta: float, items: numpy.ndarray):
-    """Computes the test information of a test at a specific :math:`\\theta` value [Ayala2009]_:
-
-    .. math:: I(\\theta) = \\sum_{j \\in J} I_j(\\theta)
-
-    where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the
-    item information of :math:`j` at aspecific :math:`\\theta` value.
-
-    :param theta: a proficiency value.
-    :param items: a matrix containing item parameters.
-    :returns: the test information at `theta` for a test represented by `items`.
-    """
-    return sum([inf(theta, item[0], item[1], item[2]) for item in items])
-
-
 def reliability(theta: float, items: numpy.ndarray):
     """ Computes test reliability [Thissen00]_, given by:
 
@@ -141,39 +135,12 @@ def reliability(theta: float, items: numpy.ndarray):
     return 1 - (1 / test_info(theta, items))
 
 
-def inf(theta: float, a: float, b: float, c: float=0) -> float:
-    """Calculates the information value of an item using the Item Response Theory
-    three-parameter logistic model function [Ayala2009]_:
-
-    .. math:: I_i(\\theta) = a^2\\frac{(P(\\theta)-c)^2}{(1-c)^2}.\\frac{(1-P(\\theta))}{P(\\theta)}
-
-    :param theta: the individual's proficiency value. This parameter value has
-                  no boundary, but if a distribution of the form
-                  :math:`N(0, 1)` was used to estimate the parameters, then
-                  :math:`-4 \\leq \\theta \\leq 4`.
-
-    :param a: the discrimination parameter of the item, usually a positive
-              value in which :math:`0.8 \\leq a \\leq 2.5`.
-
-    :param b: the item difficulty parameter. This parameter value has no
-              boundary, but if a distribution of the form :math:`N(0, 1)` was
-              used to estimate the parameters, then :math:`-4 \\leq b \\leq 4`.
-
-    :param c: the item pseudo-guessing parameter. Being a probability,
-        :math:`0\\leq c \\leq 1`, but items considered good usually have
-        :math:`c \\leq 0.2`.
-
-    :returns: the information value of the item at the designated `theta` point."""
-    ml3 = tpm(theta, a, b, c)
-
-    return math.pow(a, 2) * (math.pow(ml3 - c, 2) / math.pow(1 - c, 2)) * (1 - ml3) / ml3
-
-
-def max_info(a=1, b=0, c=0):
+def max_info(a: float=1, b: float=0, c: float=0, d: float=1) -> float:
     """Returns the :math:`\\theta` value to which the item with the given parameters
-    gives maximum information. For the 1-parameter and 2-parameter logistic models,
-    this :math:`\\theta` corresponds to where :math:`b = 0.5`. In the 3-parameter
-    logistic model, however, this value is approximated by the following function:
+    gives maximum information [Magis13]_. For the 1-parameter and 2-parameter
+    logistic models, this :math:`\\theta` corresponds to where :math:`b = 0.5`.
+    In the 3-parameter logistic model, however, this value is approximated by the
+    following function:
 
     .. math:: argmax_{\\theta}I(\\theta) \\approx \\frac{a*b-\\log(-2(c-0.616))}{a}
 
@@ -185,11 +152,12 @@ def max_info(a=1, b=0, c=0):
         from catsim import plot
         items = generate_item_bank(2)
         for item in items:
-            plot.item_curve(item[0], item[1], item[2], ptype='iic', max_info=True)
+            plot.item_curve(item[0], item[1], item[2], item[3], ptype='iic', max_info=True)
 
     :param a: item discrimination parameter
     :param b: item difficulty parameter
     :param c: item pseudo-guessing parameter
+    :param d: item upper asymptote
     :param title: plot title
     :param ptype: 'icc' for the item characteristic curve, 'iic' for the item
                   information curve or 'both' for both curves in the same plot
@@ -197,7 +165,12 @@ def max_info(a=1, b=0, c=0):
     :param show: whether the generated plot is to be shown
 
     """
-    return (a * b - math.log(-2 * (c - 0.616))) / a
+    # for explanations on finding the following values, see referenced work in function description
+    u = - (3 / 4) + ((c + d - 2 * c * d) / 2)
+    v = (c + d - 1) / 4
+    x_star = 2 * math.sqrt(-u / 3) * math.cos((1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) + (4 * math.pi / 3)) + 0.5
+
+    return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
 def logLik(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
@@ -206,13 +179,13 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
 
     The likelihood function of a given :math:`\\theta` value given the answers to :math:`I` items is given by:
 
-    .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}
+    .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}
 
     For computational reasons, it is common to use the log-likelihood in
     maximization/minimization problems, transforming the product of
     probabilities in a sum of probabilities:
 
-     .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I) = \\sum_{i=1} ^ I
+     .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I, d_I) = \\sum_{i=1} ^ I
                \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
                Q_{ij}(\\theta) \\right\\rbrace
 
@@ -247,7 +220,7 @@ def negativelogLik(est_theta: float, *args) -> float:
     value, given a response vector and the parameters of the administered items. The value of
     :py:func:`negativelogLik` is simply the value of :math:`-` :py:func:`logLik` or, mathematically:
 
-    .. math:: - \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I)
+    .. math:: - \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I, d_I)
 
     :param est_theta: estimated proficiency value
 
@@ -263,16 +236,22 @@ def negativelogLik(est_theta: float, *args) -> float:
 def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     """Normalize an item matrix so that it conforms to the standard used by catsim.
     The item matrix must have dimension nx3, in which column 1 represents item discrimination,
-    column 2 represents item difficulty and column 3 represents the pseudo-guessing parameter.
+    column 2 represents item difficulty, column 3 represents the pseudo-guessing parameter and
+    column 4 represents the item upper asymptote.
 
     If the matrix has one column, it is assumed to be the difficulty column and the other
     two columns are added such that items simulate the 1-parameter logistic model.
 
     If the matrix has two columns, they are assumed to be the discrimination and difficulty
-    columns, respectively. the pseudo-guessing column is added such that items simulate the 2-parameter logistic model.
+    columns, respectively. The pseudo-guessing column is added such that items simulate
+    the 2-parameter logistic model.
+
+    If the matrix has three columns, they are assumed to be the discrimination, difficulty
+    and pseudo-guessing columns, respectively. The upper asymptote column is added such that
+    items simulate the 3-parameter logistic model.
 
     :param items: the item matrix.
-    :returns: an nx3 item matrix conforming to 1, 2 and 3 parameter logistic models.
+    :returns: an nx4 item matrix conforming to the 4 parameter logistic model.
     """
     if len(items.shape) == 1:
         items = numpy.expand_dims(items, axis=0)
@@ -280,18 +259,20 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
         items = numpy.append(numpy.ones((items.shape[0])), items, axis=1)
     if items.shape[1] == 2:
         items = numpy.append(items, numpy.zeros((items.shape[0])), axis=1)
+    if items.shape[1] == 3:
+        items = numpy.append(items, numpy.ones((items.shape[0])), axis=1)
 
     return items
 
 
 def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
     """Validates the shape and parameters in the item matrix so that it conforms to the standard
-    used by catsim. The item matrix must have dimension nx3, in which column 1 represents item
-    discrimination, column 2 represents item difficulty and column 3 represents the
-    pseudo-guessing parameter.
+    used by catsim. The item matrix must have dimension nx4, in which column 1 represents item
+    discrimination, column 2 represents item difficulty, column 3 represents the
+    pseudo-guessing parameter and column 4 represents the item upper asymptote.
 
-    The item matrix must have at least one line, exactly three columns and
-    :math:`\\forall i \\in I , a_i > 0 \\wedge 0 < c_i < 1`
+    The item matrix must have at least one line, exactly four columns and
+    :math:`\\forall i \\in I , a_i > 0 \\wedge 0 < c_i < 1 \\wedge 0 < d_i < 1`
 
     :param items: the item matrix.
     :param raise_err: whether to raise an error in case the validation fails or
@@ -304,16 +285,18 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
 
     if len(items.shape) == 1:
         err += 'Item matrix has only one dimension.'
-    elif items.shape[1] > 3:
+    elif items.shape[1] > 4:
         print(
-            '\nItem matrix has more than 3 columns. catsim tends to add additional\
+            '\nItem matrix has more than 4 columns. catsim tends to add additional\
             columns to the matriz during the simulation, so it\'s not a good idea to keep them.'
         )
-    elif items.shape[1] < 3:
+    elif items.shape[1] < 4:
         if items.shape[1] == 1:
-            err += '\nItem matrix has no discrimination or pseudo-guessing parameter columns'
+            err += '\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns'
         elif items.shape[1] == 2:
-            err += '\nItem matrix has no pseudo-guessing parameter column'
+            err += '\nItem matrix has no pseudo-guessing or upper asymptote parameter columns'
+        elif items.shape[1] == 3:
+            err += '\nItem matrix has no upper asymptote parameter column'
     else:
         if any(items[:, 2] < 0):
             err += '\nThere are items with discrimination < 0'
@@ -321,6 +304,10 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
             err += '\nThere are items with pseudo-guessing < 0'
         if any(items[:, 2] > 1):
             err += '\nThere are items with pseudo-guessing > 1'
+        if any(items[:, 3] > 1):
+            err += '\nThere are items with upper asymptote > 1'
+        if any(items[:, 3] < 0):
+            err += '\nThere are items with upper asymptote < 0'
 
     if len(err) > 0 and raise_err:
         raise ValueError(err)

@@ -17,8 +17,8 @@ class Selector:
         """Get the indexes of all items that have not yet been administered, calculate
         their information value and pick the one with maximum information
 
-        :param items: an item matrix in which the first 3 columns represent item discrimination,
-                      difficulty and pseudo-guessing parameters, respectively.
+        :param items: an item matrix in which the first 4 columns represent item discrimination,
+                      difficulty, pseudo-guessing and upper asymptote parameters, respectively.
         :param administered_items: a list with the indexes of all administered from the item matrix
         :param est_theta: estimated proficiency value
         :returns: index of the first non-administered item with maximum information
@@ -36,14 +36,14 @@ class MaxInfoSelector(Selector):
         """Get the indexes of all items that have not yet been administered, calculate
         their information value and pick the one with maximum information
 
-        :param items: an item matrix in which the first 3 columns represent item discrimination,
-                      difficulty and pseudo-guessing parameters, respectively.
+        :param items: an item matrix in which the first 4 columns represent item discrimination,
+                      difficulty, pseudo-guessing and upper asymptote parameters, respectively.
         :param administered_items: a list with the indexes of all administered from the item matrix
         :param est_theta: estimated proficiency value
         :returns: index of the first non-administered item with maximum information
         """
         valid_indexes = numpy.array(list(set(range(items.shape[0])) - set(administered_items)))
-        inf_values = [irt.inf(est_theta, i[0], i[1], i[2]) for i in items[valid_indexes]]
+        inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]]
         valid_indexes = [
             index for (inf_value, index) in sorted(
                 zip(inf_values, valid_indexes),
@@ -180,8 +180,8 @@ class ClusterSelector(Selector):
     def select(self, items: numpy.ndarray, administered_items: list, est_theta: float) -> int:
         """CAT simulation and validation method proposed by [Bar10]_.
 
-        :param items: an item matrix in which the first 3 columns represent item discrimination,
-                      difficulty and pseudo-guessing parameters, respectively.
+        :param items: an item matrix in which the first 4 columns represent item discrimination,
+                      difficulty, pseudo-guessing and upper asymptote parameters, respectively.
         :param administered_items: a list with the indexes of all administered from the item matrix
         :param est_theta: estimated proficiency value
         :returns: index of the first non-administered item with maximum information
@@ -190,7 +190,7 @@ class ClusterSelector(Selector):
         # this part of the code selects the cluster from which the item at
         # the current point of the test will be chosen
         if self._method == 'item_info':
-            infos = [irt.inf(est_theta, i[0], i[1], i[2]) for i in items]
+            infos = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items]
 
             while selected_cluster is None:
                 # find item with maximum information
@@ -271,7 +271,7 @@ class ClusterSelector(Selector):
                     numpy.nonzero(
                         (
                             self._clusters == selected_cluster
-                        ) & (items[:, 3] < self._r_max)
+                        ) & (items[:, 4] < self._r_max)
                     )[
                         0
                     ]
@@ -282,7 +282,7 @@ class ClusterSelector(Selector):
         if len(valid_indexes_low_r) > 0:
             # sort both items and their indexes by their information
             # value
-            inf_values = [irt.inf(est_theta, i[0], i[1], i[2]) for i in items[valid_indexes_low_r]]
+            inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes_low_r]]
             valid_indexes_low_r = [
                 index
                 for (inf_value, index) in sorted(
@@ -297,7 +297,7 @@ class ClusterSelector(Selector):
         # select the one with smallest r, regardless of information
         else:
             if self._r_control == 'passive':
-                inf_values = [irt.inf(est_theta, i[0], i[1], i[2]) for i in items[valid_indexes]]
+                inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]]
                 valid_indexes = [
                     index
                     for (inf_value, index) in sorted(
@@ -309,7 +309,7 @@ class ClusterSelector(Selector):
                 valid_indexes = [
                     index for (r, index) in sorted(
                         zip(
-                            items[valid_indexes, 3], valid_indexes
+                            items[valid_indexes, 4], valid_indexes
                         )
                     )
                 ]
@@ -333,7 +333,7 @@ class ClusterSelector(Selector):
 
             for item in items[cluster_indexes]:
                 cluster_infos[cluster] = cluster_infos[cluster] + irt.inf(
-                    theta, item[0], item[1], item[2]
+                    theta, item[0], item[1], item[2], item[3]
                 )
 
         return cluster_infos
@@ -363,7 +363,7 @@ class ClusterSelector(Selector):
         :param items: a matrix containing item parameters.
         :param c: a list containing clustering memeberships.
         :returns: a matrix containing the sum of each parameter by cluster. Lines are clusters, columns are parameters."""
-        averages = numpy.zeros((numpy.max(c) + 1, 3))
+        averages = numpy.zeros((numpy.max(c) + 1, 4))
 
         for i in numpy.arange(0, numpy.size(c)):
             if c[i] == -1:
@@ -371,6 +371,7 @@ class ClusterSelector(Selector):
             averages[c[i], 0] += items[i, 0]
             averages[c[i], 1] += items[i, 1]
             averages[c[i], 2] += items[i, 2]
+            averages[c[i], 3] += items[i, 3]
 
         return averages
 
@@ -390,6 +391,7 @@ class ClusterSelector(Selector):
             averages[counter, 0] = averages[counter, 0] / i
             averages[counter, 1] = averages[counter, 1] / i
             averages[counter, 2] = averages[counter, 2] / i
+            averages[counter, 3] = averages[counter, 3] / i
 
         return averages
 
@@ -521,9 +523,9 @@ class MaxInfoStratificationSelector(Selector):
         organized_items = numpy.array(
             [
                 irt.inf(
-                    irt.max_info(item[0], item[1], item[2]), item[0], item[
+                    irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[
                         1
-                    ], item[2]
+                    ], item[2], item[3]
                 ) for item in items
             ]
         ).argsort()
@@ -580,9 +582,9 @@ class MaxInfoBBlockingSelector(Selector):
             (
                 [
                     irt.inf(
-                        irt.max_info(item[0], item[1], item[2]), item[0], item[
+                        irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[
                             1
-                        ], item[2]
+                        ], item[2], item[3]
                     ) for item in items
                 ], items[:, 1]
             )
@@ -633,7 +635,7 @@ class The54321Selector(Selector):
         organized_items = set(
             numpy.array(
                 [
-                    irt.inf(est_theta, item[0], item[1], item[2]) for item in items
+                    irt.inf(est_theta, item[0], item[1], item[2], item[3]) for item in items
                 ]
             ).argsort()
         ) - set(administered_items)
@@ -676,7 +678,7 @@ class RandomesqueSelector(Selector):
         organized_items = set(
             numpy.array(
                 [
-                    irt.inf(est_theta, item[0], item[1], item[2]) for item in items
+                    irt.inf(est_theta, item[0], item[1], item[2], item[3]) for item in items
                 ]
             ).argsort()
         ) - set(administered_items)
@@ -724,7 +726,7 @@ class IntervalIntegrationSelector(Selector):
                         irt.inf,
                         est_theta - self._interval,
                         est_theta + self._interval,
-                        args=(item[0], item[1], item[2])
+                        args=(item[0], item[1], item[2], item[3])
                     )[0] for item in items
                 ]
             ).argsort()

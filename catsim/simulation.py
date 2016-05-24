@@ -209,7 +209,7 @@ class Simulator:
 
                 # update the exposure value for this item
                 # r = number of tests item has been used / total number of tests
-                self.items[selected_item, 3] = numpy.sum(
+                self.items[selected_item, 4] = numpy.sum(
                     flattened_administered_items == selected_item) / len(
                         self.examinees)
 

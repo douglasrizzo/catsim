@@ -17,6 +17,7 @@ def item_curve(
     a: float=1,
     b: float=0,
     c: float=0,
+    d: float=1,
     title: str=None,
     ptype: str='icc',
     max_info=True,
@@ -55,8 +56,8 @@ def item_curve(
     p_thetas = []
     i_thetas = []
     for theta in thetas:
-        p_thetas.append(irt.tpm(theta, a, b, c))
-        i_thetas.append(irt.inf(theta, a, b, c))
+        p_thetas.append(irt.tpm(theta, a, b, c, d))
+        i_thetas.append(irt.inf(theta, a, b, c, d))
 
     if ptype in ['icc', 'iic']:
         plt.figure()
@@ -87,8 +88,8 @@ def item_curve(
             plt.ylabel(r'$I(\theta)$')
             plt.plot(thetas, i_thetas)
             if max_info:
-                aux = irt.max_info(a, b, c)
-                plt.plot(aux, irt.inf(aux, a, b, c), 'o')
+                aux = irt.max_info(a, b, c, d)
+                plt.plot(aux, irt.inf(aux, a, b, c, d), 'o')
 
     elif ptype == 'both':
         _, ax1 = plt.subplots()
@@ -106,8 +107,8 @@ def item_curve(
         for tl in ax2.get_yticklabels():
             tl.set_color('r')
         if max_info:
-            aux = irt.max_info(a, b, c)
-            plt.plot(aux, irt.inf(aux, a, b, c), 'o')
+            aux = irt.max_info(a, b, c, d)
+            plt.plot(aux, irt.inf(aux, a, b, c, d), 'o')
 
         if title is not None:
             ax1.set_title(title, size=18)
@@ -115,7 +116,7 @@ def item_curve(
         ax2.annotate(
             '$a = ' + format(a) + '$\n$b = ' + format(
                 b
-            ) + '$\n$c = ' + format(c) + '$',
+            ) + '$\n$c = ' + format(c) + '$\n$d = ' + format(d) + '$',
             bbox=dict(
                 facecolor='white',
                 alpha=1

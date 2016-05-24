@@ -106,7 +106,7 @@ def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
     return T
 
 
-def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
+def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
     """Generate a synthetic item bank whose parameters approximately follow
     real-world parameters, as proposed by [Bar10]_.
 
@@ -118,21 +118,24 @@ def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
 
     * pseudo-guessing: :math:`N(0.25,0.02)`
 
+    * upper asymptote: :math:`N(0.93,0.02)`
+
     :param n: how many items are to be generated
-    :param itemtype: either ``1PL``, ``2PL`` or ``3PL`` for the one-, two- or
-                     three-parameter logistic model
+    :param itemtype: either ``1PL``, ``2PL``, ``3PL`` or ``4PL`` for the one-, two-,
+                     three- or four-parameter logistic model
     :param corr: the correlation between item discrimination and difficulty. If
                  ``itemtype == '1PL'``, it is ignored.
-    :return: an ``n x 3`` numerical matrix containing item parameters
+    :return: an ``n x 4`` numerical matrix containing item parameters
     :rtype: numpy.ndarray
 
     >>> generate_item_bank(5, '1PL')
     >>> generate_item_bank(5, '2PL')
     >>> generate_item_bank(5, '3PL')
-    >>> generate_item_bank(5, '3PL', corr=0)
+    >>> generate_item_bank(5, '4PL')
+    >>> generate_item_bank(5, '4PL', corr=0)
     """
 
-    valid_itemtypes = ['1PL', '2PL', '3PL']
+    valid_itemtypes = ['1PL', '2PL', '3PL', '4PL']
 
     if itemtype not in valid_itemtypes:
         raise ValueError('Item type not in ' + str(valid_itemtypes))
@@ -143,13 +146,15 @@ def generate_item_bank(n: int, itemtype: str='3PL', corr: float=0.5):
 
     b, a = numpy.random.multivariate_normal(means, covs, n).T
 
-    if itemtype not in ['2PL', '3PL']:
+    if itemtype not in ['2PL', '3PL', '4PL']:
         a = numpy.ones((n))
-    if itemtype == '3PL':
+    if itemtype in ['3PL', '4PL']:
         c = numpy.random.normal(.25, .02, n)
     else:
         c = numpy.zeros((n))
-    return irt.normalize_item_bank(numpy.array([a, b, c]).T)
+    if itemtype == '4PL':
+        d = numpy.random.normal(.93, .02, n)
+    return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
 
 
 if __name__ == '__main__':

@@ -62,3 +62,7 @@ Bibliography
 
 .. [Magis12] Magis, D., & Raîche, G. (2012). Random Generation of Response Patterns under
    Computerized Adaptive Testing with the R Package catR. Journal of Statistical Software, 48(8), 1–31.
+
+.. [Magis13] Magis, D. (2013). A Note on the Item Information Function of the
+   Four-Parameter Logistic Model. Applied Psychological Measurement, 37(4),
+   304–315. http://doi.org/10.1177/0146621613475471

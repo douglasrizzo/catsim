@@ -19,7 +19,8 @@ def test_item_bank_generation():
             5,
             '3PL',
             corr=0
-        )
+        ),
+        generate_item_bank(5, '4PL')
     ]:
         irt.validate_item_bank(items, raise_err=True)
 
@@ -39,9 +40,9 @@ def test_plots():
     s.simulate(initializer, selector, estimator, stopper)
 
     for item in s.items[0:10]:
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'icc', False, None, False
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'iic', True, None, False
-        yield plot.item_curve, item[0], item[1], item[2], 'Test plot', 'both', True, None, False
+        yield plot.item_curve, item[0], item[1], item[2], item[3], 'Test plot', 'icc', False, None, False
+        yield plot.item_curve, item[0], item[1], item[2], item[3], 'Test plot', 'iic', True, None, False
+        yield plot.item_curve, item[0], item[1], item[2], item[3], 'Test plot', 'both', True, None, False
         close('all')
 
     plot.gen3D_dataset_scatter(items=s.items, show=False)
