@@ -25,16 +25,17 @@ Under the logistic models of IRT, an item is represented by the following parame
     * :math:`a` represents an item's *discrimination* parameter, that is, how well it discriminates individuals who answer the item correctly (or, in an alternative interpretation, individuals who agree with the idea of the item) and those who don't. An item with a high :math:`a` value tends to be answered correctly by all individuals whose :math:`\theta` is above the items difficulty level and wrongly by all the others; as this value gets lower, this threshold gets blurry and the item starts not to be as informative. It is common for :math:`a > 0`.
     * :math:`b` represents an item's *difficulty* parameter. This parameter, which is measured in the same scale as :math:`\theta`, shows at which point of the proficiency scale an item is more informative, that is, where it discriminates the individuals who agree and those who disagree with the item. Since :math:`b` and :math:`\theta` are measured in the same scale, :math:`b` follows the same distributions as :math:`\theta`. For a CAT, it is good for an item bank to have as many items as possible in all difficulty levels, so that the CAT may select the best item for each individual in all ability levels.
     * :math:`c` represents an item's *pseudo-guessing* parameter. This parameter denotes what is the probability of individuals with low proficiency values to still answer the item correctly. Since :math:`c` is a probability, :math:`0 < c \leq 1`, but the lower the value of this parameter, the better the item is considered.
+    * :math:`d` represents an item's *upper asymptote*. This parameter denotes what is the probability of individuals with high proficiency values to still answer the item incorrectly. Since :math:`d` is a probability, :math:`0 < d \leq 1`, but the higher the value of this parameter, the better the item is considered.
 
 For a set of items :math:`I`, when :math:`\forall i \in I, c_i = 0`, the three-parameter logistic model is reduced to the two-parameter logistic model. Additionally, if all values of :math:`a` are equal, the two-parameter logistic model is reduced to the one-parameter logistic model. Finally, when :math:`\forall i \in I, a_i = 1`, we have the Rasch model ([Rasch66]_). Thus, :py:mod:`catsim` is able of treating all of the logistic models presented above, since the underlying functions of all logistic models related to test simulations are the same, given the correct item paramaters.
 
-Under IRT, the probability of an examinee with a given :math:`\hat\theta` value to answer item :math:`i` correctly, given the item parameters, is given by
+Under IRT, the probability of an examinee with a given :math:`\hat\theta` value to answer item :math:`i` correctly, given the item parameters, is given by ([Ayala2009]_, [Magis13]_)
 
-.. math:: P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{a_i(\theta-b_i)}}.
+.. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{a_i(\theta-b_i)}}.
 
-The information this item gives is calculated as
+The information this item gives is calculated as ([Ayala2009]_, [Magis13]_)
 
-.. math:: I_i(\theta) = a^2\frac{(P(\theta)-c)^2}{(1-c)^2}.\frac{(1-P(\theta))}{P(\theta)}.
+.. math:: I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.
 
 Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee's proficiency.
 

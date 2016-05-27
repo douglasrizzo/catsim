@@ -7,7 +7,7 @@ def _icc_exponent(theta, a, b):
 
 
 def icc(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
-    """Item Response Theory four-parameter logistic function [Ayala2009]_:
+    """Item Response Theory four-parameter logistic function [Ayala2009]_, [Magis13]_:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{a_i(\\theta-b_i)}}
 
@@ -36,7 +36,7 @@ def icc(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
 
 def inf(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
     """Calculates the information value of an item using the Item Response Theory
-    four-parameter logistic model function [Ayala2009]_:
+    four-parameter logistic model function [Ayala2009]_, [Magis13]_:
 
     .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2(1-P(\\theta))P(\\theta)}
 
@@ -136,12 +136,20 @@ def reliability(theta: float, items: numpy.ndarray):
 
 def max_info(a: float=1, b: float=0, c: float=0, d: float=1) -> float:
     """Returns the :math:`\\theta` value to which the item with the given parameters
-    gives maximum information [Magis13]_. For the 1-parameter and 2-parameter
+    gives maximum information. For the 1-parameter and 2-parameter
     logistic models, this :math:`\\theta` corresponds to where :math:`b = 0.5`.
-    In the 3-parameter logistic model, however, this value is approximated by the
-    following function:
+    In the 3-parameter and 4-parameter logistic models, however, this value is given
+    by ([Magis13]_)
 
-    .. math:: argmax_{\\theta}I(\\theta) \\approx \\frac{a*b-\\log(-2(c-0.616))}{a}
+    .. math:: argmax_{\\theta}I(\\theta) = b + \\frac{1}{a} log \\left(\\frac{x^* - c}{d - x^*}\\right)
+
+    where
+
+    .. math:: x^* = 2 \\sqrt{\\frac{-u}{3}} cos\\left\{\\frac{1}{3}acos\\left(-\\frac{v}{2}\\sqrt{\\frac{27}{-u^3}}\\right)+\\frac{4 \\pi}{3}\\right\} + 0.5
+
+    .. math:: u = -\\frac{3}{4} + \\frac{c + d - 2cd}{2}
+
+    .. math:: v = -\\frac{c + d - 1}{4}
 
     A few results can be seen in the plots below:
 
