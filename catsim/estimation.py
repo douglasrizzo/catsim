@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 import numpy
 from catsim import irt, cat
-from scipy.optimize import fmin
+# from scipy.optimize import fmin
 from scipy.optimize import differential_evolution
 
 
@@ -142,61 +142,61 @@ class HillClimbingEstimator(Estimator):
         return best_theta
 
 
-class FMinEstimator(Estimator):
-    """Estimator that uses :py:func:`scipy.optimize.fmin` to minimize the negative log-likelihood function"""
-
-    def __init__(self):
-        super(FMinEstimator, self).__init__()
-        self._evaluations = 0
-        self._calls = 0
-
-    @property
-    def calls(self):
-        """How many times the estimator has been called to maximize/minimize the log-likelihood function
-
-        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
-        return self._calls
-
-    @property
-    def evaluations(self):
-        """Total number of times the estimator has evaluated the log-likelihood function during its existence
-
-        :returns: number of function evaluations"""
-        return self._evaluations
-
-    @property
-    def avg_evaluations(self):
-        """Average number of function evaluations for all tests the estimator has been used
-
-        :returns: average number of function evaluations"""
-        return self._evaluations / self._calls
-
-    def estimate(
-        self, response_vector: list, administered_items: numpy.ndarray, current_theta: float
-    ) -> float:
-        """Uses :py:func:`scipy.optimize.fmin` to find and return the theta value
-        that minimizes the negative log-likelihood function, given a response vector, a
-        matrix with the administered items parameters and the current :math:`\\theta`.
-
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a matrix containing the parameters of the
-                                   answered items
-        :param current_theta: the current estimation of the examinee's :math:`\\theta` value
-        :returns: a new estimation of the examinee's proficiency, given his answers up until now
-        """
-        self._calls += 1
-        res = fmin(
-            irt.negativelogLik,
-            current_theta,
-            (response_vector, administered_items),
-            disp=False,
-            full_output=True
-        )
-
-        self._evaluations = res[3]
-        return res[0][0]
-
-
+# class FMinEstimator(Estimator):
+#     """Estimator that uses :py:func:`scipy.optimize.fmin` to minimize the negative log-likelihood function"""
+#
+#     def __init__(self):
+#         super(FMinEstimator, self).__init__()
+#         self._evaluations = 0
+#         self._calls = 0
+#
+#     @property
+#     def calls(self):
+#         """How many times the estimator has been called to maximize/minimize the log-likelihood function
+#
+#         :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
+#         return self._calls
+#
+#     @property
+#     def evaluations(self):
+#         """Total number of times the estimator has evaluated the log-likelihood function during its existence
+#
+#         :returns: number of function evaluations"""
+#         return self._evaluations
+#
+#     @property
+#     def avg_evaluations(self):
+#         """Average number of function evaluations for all tests the estimator has been used
+#
+#         :returns: average number of function evaluations"""
+#         return self._evaluations / self._calls
+#
+#     def estimate(
+#         self, response_vector: list, administered_items: numpy.ndarray, current_theta: float
+#     ) -> float:
+#         """Uses :py:func:`scipy.optimize.fmin` to find and return the theta value
+#         that minimizes the negative log-likelihood function, given a response vector, a
+#         matrix with the administered items parameters and the current :math:`\\theta`.
+#
+#         :param response_vector: a binary list containing the response vector
+#         :param administered_items: a matrix containing the parameters of the
+#                                    answered items
+#         :param current_theta: the current estimation of the examinee's :math:`\\theta` value
+#         :returns: a new estimation of the examinee's proficiency, given his answers up until now
+#         """
+#         self._calls += 1
+#         res = fmin(
+#             irt.negativelogLik,
+#             current_theta,
+#             (response_vector, administered_items),
+#             disp=False,
+#             full_output=True
+#         )
+#
+#         self._evaluations = res[3]
+#         return res[0][0]
+#
+#
 class DifferentialEvolutionEstimator(Estimator):
     """Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function
 
