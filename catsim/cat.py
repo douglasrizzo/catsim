@@ -153,7 +153,10 @@ def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
     else:
         c = numpy.zeros((n))
     if itemtype == '4PL':
-        d = numpy.random.normal(.93, .02, n)
+        d = numpy.random.normal(.93, 0.0005, n)
+    else:
+        d = numpy.ones((n))
+
     return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
 
 

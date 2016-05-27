@@ -124,7 +124,7 @@ With a set value for :math:`\hat\theta`, an item is chosen from the item bank an
 
 Item selection methods are diverse. The most famous method is to choose the item that maximizes the *gain of information*, represented by :py:class:`catsim.selection.MaxInfoSelector`. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.
 
-In :py:mod:`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of :math:`p` is given by the IRT logistic model characteristic function (:py:func:`catsim.irt.tpm`), given by:
+In :py:mod:`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of :math:`p` is given by the IRT logistic model characteristic function (:py:func:`catsim.irt.icc`), given by:
 
 .. math:: P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{a_i(\theta-b_i)}}
 

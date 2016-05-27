@@ -2,12 +2,12 @@ import math
 import numpy
 
 
-def _tpm_exponent(theta, a, b):
+def _icc_exponent(theta, a, b):
     return math.exp(-a * (theta - b))
 
 
-def tpm(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
-    """Item Response Theory three-parameter logistic function [Ayala2009]_:
+def icc(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
+    """Item Response Theory four-parameter logistic function [Ayala2009]_:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{a_i(\\theta-b_i)}}
 
@@ -31,12 +31,12 @@ def tpm(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
               :math:`0\\leq d \\leq 1`, but items considered good usually have
               :math:`d \\approx 1`.
     """
-    return c + ((d - c) / (1 + _tpm_exponent(theta, a, b)))
+    return c + ((d - c) / (1 + _icc_exponent(theta, a, b)))
 
 
 def inf(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
     """Calculates the information value of an item using the Item Response Theory
-    three-parameter logistic model function [Ayala2009]_:
+    four-parameter logistic model function [Ayala2009]_:
 
     .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2(1-P(\\theta))P(\\theta)}
 
@@ -61,9 +61,11 @@ def inf(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
               :math:`d \\approx 1`.
 
     :returns: the information value of the item at the designated `theta` point."""
-    ml3 = tpm(theta, a, b, c, d)
+    p = icc(theta, a, b, c, d)
 
-    return (math.pow(a, 2) * math.pow(ml3 - c, 2) * math.pow(d - ml3, 2)) / (math.pow(d - c, 2) * ml3 * (1 - ml3))
+    return (math.pow(a, 2) * math.pow(p - c, 2) * math.pow(d - p, 2)) / (
+        math.pow(d - c, 2) * p * (1 - p)
+    )
 
 
 def test_info(theta: float, items: numpy.ndarray):
@@ -111,10 +113,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
     :param items: a matrix containing item parameters.
     :returns: the standard error of estimation at `theta` for a test represented by `items`.
     """
-    try:
-        return math.sqrt(var(theta, items))
-    except ZeroDivisionError:
-        return float('-inf')
+    return math.sqrt(var(theta, items))
 
 
 def reliability(theta: float, items: numpy.ndarray):
@@ -132,7 +131,7 @@ def reliability(theta: float, items: numpy.ndarray):
     :param items: a matrix containing item parameters.
     :returns: the test reliability at `theta` for a test represented by `items`.
     """
-    return 1 - (1 / test_info(theta, items))
+    return 1 - var(theta, items)
 
 
 def max_info(a: float=1, b: float=0, c: float=0, d: float=1) -> float:
@@ -166,9 +165,17 @@ def max_info(a: float=1, b: float=0, c: float=0, d: float=1) -> float:
 
     """
     # for explanations on finding the following values, see referenced work in function description
-    u = - (3 / 4) + ((c + d - 2 * c * d) / 2)
+    u = -(3 / 4) + ((c + d - 2 * c * d) / 2)
     v = (c + d - 1) / 4
-    x_star = 2 * math.sqrt(-u / 3) * math.cos((1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) + (4 * math.pi / 3)) + 0.5
+    x_star = 2 * math.sqrt(-u / 3) * math.cos(
+        (1 / 3) * math.acos(
+            -(v / 2) * math.sqrt(
+                27 / (
+                    -math.pow(u, 3)
+                )
+            )
+        ) + (4 * math.pi / 3)
+    ) + 0.5
 
     return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
@@ -181,36 +188,57 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
 
     .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}
 
-    For computational reasons, it is common to use the log-likelihood in
-    maximization/minimization problems, transforming the product of
-    probabilities in a sum of probabilities:
+    For mathematical reasons, finding the maximum of :math:`L(X_{Ij}` includes using the
+    product rule of derivations. Since :math:`L(X_{Ij}` has :math:`j` parts, it can be quite
+    complicated to do so. Also, for computational reasons, the product of probabilities can
+    quickly tend to 0, so it is common to use the log-likelihood in maximization/minimization
+    problems, transforming the product of probabilities in a sum of probabilities:
 
-     .. math:: \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I, d_I) = \\sum_{i=1} ^ I
+     .. math:: \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\sum_{i=1} ^ I
                \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
                Q_{ij}(\\theta) \\right\\rbrace
 
     :param est_theta: estimated proficiency value.
-    :param response_vector: a binary list containing the response vector.
+    :param response_vector: a Boolean list containing the response vector.
     :param administered_items: a numpy array containing the parameters of the answered items.
     :returns: log-likelihood of a given proficiency value, given the responses to the administered items.
     """
-    # inspired in the example found in
-    # http://stats.stackexchange.com/questions/66199/maximum-likelihood-curve-
-    # model-fitting-in-python
-    # try:
     if len(response_vector) != administered_items.shape[0]:
         raise ValueError(
             'Response vector and administered items must have the same number of items'
         )
+    # print(response_vector)
+    # print(set(response_vector) - set([True, False]))
+    if len(set(response_vector) - set([True, False])) > 0:
+        raise ValueError('Response vector must contain only Boolean elements')
+
     LL = 0
 
+    # try:
     for i in range(len(response_vector)):
-        prob = tpm(
-            est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2]
+        p = icc(
+            est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
+            administered_items[i][3]
         )
 
-        LL += (response_vector[i] * math.log(prob)) + \
-              ((1 - response_vector[i]) * math.log(1 - prob))
+        # The original funtion is as follows, but since log(0) is undefined, a math domain error occurs
+        # LL += (response_vector[i] * math.log(p)) + (
+        #     (1 - response_vector[i]) * math.log(1 - p))
+
+        if p < 0:
+            print('p = ' + str(p))
+
+        # This way, no error occurs, at the expense of some conditional checks
+        if response_vector[i]:
+            LL += math.log(p)
+        else:
+            try:
+                LL += math.log(1 - p)
+            except:
+                print('p = ' + str(p))
+                print('1 - p = ' + str(1 - p))
+                print('log(1 - p) = ' + math.log(1 - p))
+
     return LL
 
 
@@ -226,7 +254,7 @@ def negativelogLik(est_theta: float, *args) -> float:
 
     args:
 
-    :param response_vector list: a binary list containing the response vector
+    :param response_vector list: a Boolean list containing the response vector
     :param administered_items numpy.ndarray: a numpy array containing the parameters of the answered items
     :returns: negative log-likelihood of a given proficiency value, given the responses to the administered items
     """

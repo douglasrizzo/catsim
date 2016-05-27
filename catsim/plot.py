@@ -56,7 +56,7 @@ def item_curve(
     p_thetas = []
     i_thetas = []
     for theta in thetas:
-        p_thetas.append(irt.tpm(theta, a, b, c, d))
+        p_thetas.append(irt.icc(theta, a, b, c, d))
         i_thetas.append(irt.inf(theta, a, b, c, d))
 
     if ptype in ['icc', 'iic']:
