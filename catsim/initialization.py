@@ -2,9 +2,8 @@ from abc import ABCMeta, abstractmethod
 import numpy
 
 
-class Initializer:
+class Initializer(metaclass=ABCMeta):
     """Base class for CAT initializers"""
-    __metaclass__ = ABCMeta
 
     def __init__(self):
         super(Initializer, self).__init__()

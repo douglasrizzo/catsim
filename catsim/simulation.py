@@ -171,17 +171,17 @@ class Simulator:
             self._stopper = stopper
 
         # if verbose:
-        print(
+        print((
             'Starting simulation: {0} {1} {2} {3}'.format(
                 self._initializer.__class__, selector.__class__, self._estimator.__class__,
                 self._stopper.__class__
             )
-        )
+        ))
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
 
             # if verbose:
-            print('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees)))
+            print(('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees))))
 
             est_theta = self._initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
@@ -190,7 +190,7 @@ class Simulator:
                 try:
                     selected_item = selector.select(self.items, administered_items, est_theta)
                 except:
-                    print(len(administered_items))
+                    print((len(administered_items)))
                     raise
 
                 # simulates the examinee's response via the four-parameter
@@ -233,7 +233,7 @@ class Simulator:
         self._duration = int(round(time.time() * 1000)) - start_time
 
         # if verbose:
-        print('Simulation took {0} milliseconds'.format(self._duration))
+        print(('Simulation took {0} milliseconds'.format(self._duration)))
 
         self._bias = cat.bias(self.examinees, self.estimations)
         self._mse = cat.mse(self.examinees, self.estimations)

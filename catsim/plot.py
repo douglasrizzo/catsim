@@ -256,7 +256,7 @@ def test_progress(
             'Number of estimations and administered items is not the same. They should be.'
         )
 
-    xs = range(len(thetas)) if thetas is not None else range(len(administered_items[:, 1]))
+    xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
 
     if thetas is not None:
         plt.plot(xs, thetas, label=r'$\hat{\theta}$')

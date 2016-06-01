@@ -5,9 +5,8 @@ from catsim import irt
 from scipy.integrate import quad
 
 
-class Selector:
+class Selector(metaclass=ABCMeta):
     """Base class representing a CAT item selector."""
-    __metaclass__ = ABCMeta
 
     def __init__(self):
         super(Selector, self).__init__()

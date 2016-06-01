@@ -3,9 +3,8 @@ from catsim import irt
 import numpy
 
 
-class Stopper:
+class Stopper(metaclass=ABCMeta):
     """Base class for CAT stop criterion"""
-    __metaclass__ = ABCMeta
 
     def __init__(self):
         super(Stopper, self).__init__()

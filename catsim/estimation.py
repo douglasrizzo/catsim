@@ -6,10 +6,8 @@ from catsim import irt, cat
 from scipy.optimize import differential_evolution
 
 
-class Estimator:
+class Estimator(metaclass=ABCMeta):
     """Base class for proficiency estimators"""
-
-    __metaclass__ = ABCMeta
 
     def __init__(self):
         super(Estimator, self).__init__()
@@ -113,8 +111,8 @@ class HillClimbingEstimator(Estimator):
         for _ in range(10):
             intervals = numpy.linspace(lbound, ubound, 10)
             if self._verbose:
-                print('Bounds: ' + str(lbound) + ' ' + str(ubound))
-                print('Interval size: ' + str(intervals[1] - intervals[0]))
+                print(('Bounds: ' + str(lbound) + ' ' + str(ubound)))
+                print(('Interval size: ' + str(intervals[1] - intervals[0])))
 
             for ii in intervals:
                 self._evaluations += 1
@@ -123,11 +121,11 @@ class HillClimbingEstimator(Estimator):
                     max_ll = ll
 
                     if self._verbose:
-                        print(
+                        print((
                             'Iteration: {0}, Theta: {1}, LL: {2}'.format(
                                 self._evaluations, ii, ll
                             )
-                        )
+                        ))
 
                     if abs(best_theta - ii) < float('1e-' + str(self._precision)):
                         return ii

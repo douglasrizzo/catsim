@@ -234,7 +234,7 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
         #     (1 - response_vector[i]) * math.log(1 - p))
 
         if p < 0:
-            print('p = ' + str(p))
+            print(('p = ' + str(p)))
 
         # This way, no error occurs, at the expense of some conditional checks
         if response_vector[i]:
@@ -243,9 +243,9 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
             try:
                 LL += math.log(1 - p)
             except:
-                print('p = ' + str(p))
-                print('1 - p = ' + str(1 - p))
-                print('log(1 - p) = ' + math.log(1 - p))
+                print(('p = ' + str(p)))
+                print(('1 - p = ' + str(1 - p)))
+                print(('log(1 - p) = ' + math.log(1 - p)))
 
     return LL
 
