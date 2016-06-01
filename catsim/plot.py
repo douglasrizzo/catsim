@@ -31,9 +31,9 @@ def item_curve(
         from catsim.cat import generate_item_bank
         from catsim import plot
         item = generate_item_bank(1)[0]
-        plot.item_curve(item[0], item[1], item[2], ptype='icc')
-        plot.item_curve(item[0], item[1], item[2], ptype='iic')
-        plot.item_curve(item[0], item[1], item[2], ptype='both')
+        plot.item_curve(item[0], item[1], item[2], item[3], ptype='icc')
+        plot.item_curve(item[0], item[1], item[2], item[3], ptype='iic')
+        plot.item_curve(item[0], item[1], item[2], item[3], ptype='both')
 
     When both curves are plotted in the same figure, the figure has no grid,
     since each curve has a different scale.
@@ -41,6 +41,7 @@ def item_curve(
     :param a: item discrimination parameter
     :param b: item difficulty parameter
     :param c: item pseudo-guessing parameter
+    :param d: item upper asymptote
     :param title: plot title
     :param ptype: 'icc' for the item characteristic curve, 'iic' for the item
                   information curve or 'both' for both curves in the same plot
@@ -68,7 +69,7 @@ def item_curve(
         plt.annotate(
             '$a = ' + format(a) + '$\n$b = ' + format(
                 b
-            ) + '$\n$c = ' + format(c) + '$',
+            ) + '$\n$c = ' + format(c) + '$\n$d = ' + format(d) + '$',
             bbox=dict(
                 facecolor='white',
                 alpha=1

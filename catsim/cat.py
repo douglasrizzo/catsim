@@ -29,23 +29,22 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
-def rmse(actual: Iterable, predicted: Iterable):
-    """Root mean squared error, a common value used when measuring the precision
-    with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
+def bias(actual: Iterable, predicted: Iterable):
+    """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
     The value is calculated by:
 
-    .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
+    .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
 
     where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
     :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
 
     :param actual: a list or 1-D numpy array containing the true proficiency values
     :param predicted: a list or 1-D numpy array containing the estimated proficiency values
-    :returns: the root mean squared error between the predicted values and actual values.
+    :returns: the bias between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.sqrt(mse(actual, predicted))
+    return numpy.mean(predicted - actual)
 
 
 def mse(actual: Iterable, predicted: Iterable):
@@ -67,22 +66,23 @@ def mse(actual: Iterable, predicted: Iterable):
     return numpy.mean((predicted - actual)**2)
 
 
-def bias(actual: Iterable, predicted: Iterable):
-    """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
+def rmse(actual: Iterable, predicted: Iterable):
+    """Root mean squared error, a common value used when measuring the precision
+    with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
     The value is calculated by:
 
-    .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
+    .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
     where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
     :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
 
     :param actual: a list or 1-D numpy array containing the true proficiency values
     :param predicted: a list or 1-D numpy array containing the estimated proficiency values
-    :returns: the bias between the predicted values and actual values.
+    :returns: the root mean squared error between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.mean(predicted - actual)
+    return numpy.sqrt(mse(actual, predicted))
 
 
 def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
@@ -112,13 +112,13 @@ def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
 
     Item parameters are extracted from the following probability distributions:
 
-    * discrimination: :math:`N(1.2,0.25)`
+    * discrimination: :math:`N(1.2, 0.25)`
 
-    * difficulty: :math:`N(0,1)`
+    * difficulty: :math:`N(0,  1)`
 
-    * pseudo-guessing: :math:`N(0.25,0.02)`
+    * pseudo-guessing: :math:`N(0.25, 0.02)`
 
-    * upper asymptote: :math:`N(0.93,0.02)`
+    * upper asymptote: :math:`U(0.94, 1)`
 
     :param n: how many items are to be generated
     :param itemtype: either ``1PL``, ``2PL``, ``3PL`` or ``4PL`` for the one-, two-,
@@ -148,12 +148,14 @@ def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
 
     if itemtype not in ['2PL', '3PL', '4PL']:
         a = numpy.ones((n))
+
     if itemtype in ['3PL', '4PL']:
         c = numpy.random.normal(.25, .02, n)
     else:
         c = numpy.zeros((n))
+
     if itemtype == '4PL':
-        d = numpy.random.normal(.93, 0.0005, n)
+        d = numpy.random.uniform(.94, 1, n)
     else:
         d = numpy.ones((n))
 

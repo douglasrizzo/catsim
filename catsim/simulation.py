@@ -124,7 +124,12 @@ class Simulator:
     @examinees.setter
     def examinees(self, examinees):
         if type(examinees) == int:
-            self._examinees = numpy.random.normal(0, 1, examinees)
+            if self._items is not None:
+                mean = numpy.mean(self._items[:, 1])
+                stddev = numpy.std(self._items[:, 1])
+                self._examinees = numpy.random.normal(mean, stddev, examinees)
+            else:
+                self._examinees = numpy.random.normal(0, 1, examinees)
         elif type(examinees) == list:
             self._examinees = numpy.array(examinees)
 

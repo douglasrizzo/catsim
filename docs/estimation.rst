@@ -56,7 +56,7 @@ necessarily) more efficient estimators.
     response_vectors = [r0, r1, r2]
     thetas = np.arange(-6.,6.,.1)
 
-    for estimator in [FMinEstimator(), DifferentialEvolutionEstimator((-8, 8)), HillClimbingEstimator()]:
+    for estimator in [DifferentialEvolutionEstimator((-8, 8)), HillClimbingEstimator()]:
         plt.figure()
 
         for response_vector in response_vectors:

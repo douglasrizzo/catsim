@@ -256,7 +256,7 @@ def negativelogLik(est_theta: float, *args) -> float:
     value, given a response vector and the parameters of the administered items. The value of
     :py:func:`negativelogLik` is simply the value of :math:`-` :py:func:`logLik` or, mathematically:
 
-    .. math:: - \\log L(X_{Ij} | \\theta_j, , a_I, b_I, c_I, d_I)
+    .. math:: - \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I)
 
     :param est_theta: estimated proficiency value
 

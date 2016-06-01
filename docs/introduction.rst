@@ -44,7 +44,7 @@ Both of these functions are graphically represented in the following figure. It 
     from catsim.cat import generate_item_bank
     from catsim import plot
     item = generate_item_bank(1)[0]
-    plot.item_curve(item[0], item[1], item[2], ptype='both')
+    plot.item_curve(item[0], item[1], item[2], item[3], ptype='both')
 
 The sum of the information of all items in a test is called *test information* [Ayala2009]_:
 
