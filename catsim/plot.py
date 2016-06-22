@@ -1,11 +1,13 @@
 """Module with functions for plotting IRT-related results."""
 
 import os
-import numpy
-from catsim import irt
+
 import matplotlib.pyplot as plt
-from catsim.simulation import Simulator
+import numpy
 from mpl_toolkits.mplot3d import Axes3D
+
+from catsim import irt
+from catsim.simulation import Simulator
 
 
 def __column(matrix, i):
@@ -192,7 +194,12 @@ def test_progress(
     filepath: str=None,
     show: bool=True
 ):
-    """Generates a plot representing an examinee's test progress
+    """Generates a plot representing an examinee's test progress. Please note that,
+    while some functions increase or decrease monotonically, like test information
+    and standard error of estimation, the plot calculates these values using the
+    examinee's proficiency estimated at that given time of the test. This means
+    that a test that was tought to be informative at a given point may not be as
+    informative after new estimates are done.
 
     .. plot::
 
@@ -256,7 +263,8 @@ def test_progress(
             'Number of estimations and administered items is not the same. They should be.'
         )
 
-    xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
+    xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:,
+                                                                                               1])))
 
     if thetas is not None:
         plt.plot(xs, thetas, label=r'$\hat{\theta}$')
@@ -269,8 +277,8 @@ def test_progress(
 
         # calculate and plot test information, var, standard error and reliability
         if info:
-            sees = [irt.test_info(thetas[x], administered_items[:x + 1, ]) for x in xs]
-            plt.plot(xs, sees, label=r'$I(\theta)$')
+            infos = [irt.test_info(thetas[x], administered_items[:x + 1, ]) for x in xs]
+            plt.plot(xs, infos, label=r'$I(\theta)$')
 
         if var:
             varss = [irt.var(thetas[x], administered_items[:x + 1, ]) for x in xs]
