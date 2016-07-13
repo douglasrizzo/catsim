@@ -53,6 +53,6 @@ Dependencies
 `catsim` depends on the latest versions of NumPy, SciPy, Matplotlib and scikit-learn,
 which are automatically installed from `pip`.
 
-To run the tests, you'll need `nose`.
+To run the tests, you'll need to install the testing requirements `pip install catsim[testing]`.
 
 To generate the documentation, Sphinx and its dependencies are needed.
