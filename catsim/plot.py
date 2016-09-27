@@ -81,15 +81,14 @@ def item_curve(
         )
         plt.xlabel(r'$\theta$')
         plt.grid()
-        plt.legend(loc='best')
 
         if ptype == 'icc':
             plt.ylabel(r'$P(\theta)$')
-            plt.plot(thetas, p_thetas)
+            plt.plot(thetas, p_thetas, label=r'$P(\theta)$')
 
         elif ptype == 'iic':
             plt.ylabel(r'$I(\theta)$')
-            plt.plot(thetas, i_thetas)
+            plt.plot(thetas, i_thetas, label=r'$I(\theta)$')
             if max_info:
                 aux = irt.max_info(a, b, c, d)
                 plt.plot(aux, irt.inf(aux, a, b, c, d), 'o')
@@ -97,16 +96,16 @@ def item_curve(
     elif ptype == 'both':
         _, ax1 = plt.subplots()
 
-        ax1.plot(thetas, p_thetas, 'b-')
         ax1.set_xlabel(r'$\theta$', size=16)
-        # Make the y-axis label and tick labels match the line color.
         ax1.set_ylabel(r'$P(\theta)$', color='b', size=16)
+        ax1.plot(thetas, p_thetas, 'b-', label=r'$P(\theta)$')
+        # Make the y-axis label and tick labels match the line color.
         for tl in ax1.get_yticklabels():
             tl.set_color('b')
 
         ax2 = ax1.twinx()
-        ax2.plot(thetas, i_thetas, 'r-')
         ax2.set_ylabel(r'$I(\theta)$', color='r', size=16)
+        ax2.plot(thetas, i_thetas, 'r-', label=r'$I(\theta)$')
         for tl in ax2.get_yticklabels():
             tl.set_color('r')
         if max_info:
@@ -127,7 +126,6 @@ def item_curve(
             xy=(.75, .05),
             xycoords='axes fraction'
         )
-        ax2.legend(loc='best', framealpha=0)
 
     if filepath is not None:
         if not os.path.exists(os.path.dirname(filepath)):
@@ -218,7 +216,7 @@ def test_progress(
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(initializer, selector, estimator, stopper)
         plot.test_progress(simulator=s, index=0)
-        plot.test_progress(simulator=s, index=0, true_theta=s.examinees[0], info=True, var=True, see=True)
+        plot.test_progress(simulator=s, index=0, info=True, var=True, see=True)
 
     :param title: the plot title.
     :param simulator: a simulator which has already simulated a series of CATs,
@@ -299,7 +297,7 @@ def test_progress(
     if filepath is not None:
         if not os.path.exists(os.path.dirname(filepath)):
             os.makedirs(os.path.dirname(filepath))
-        plt.savefig(filepath, bbox_inches='tight')
+        plt.savefig(filepath, bbox_inches='tight', dpi=(300))
 
     if show:
         plt.show()
