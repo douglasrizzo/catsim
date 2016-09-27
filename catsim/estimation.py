@@ -121,11 +121,13 @@ class HillClimbingEstimator(Estimator):
                     max_ll = ll
 
                     if self._verbose:
-                        print((
-                            'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                                self._evaluations, ii, ll
+                        print(
+                            (
+                                'Iteration: {0}, Theta: {1}, LL: {2}'.format(
+                                    self._evaluations, ii, ll
+                                )
                             )
-                        ))
+                        )
 
                     if abs(best_theta - ii) < float('1e-' + str(self._precision)):
                         return ii
