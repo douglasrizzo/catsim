@@ -38,7 +38,7 @@ def inf(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
     """Calculates the information value of an item using the Item Response Theory
     four-parameter logistic model function [Ayala2009]_, [Magis13]_:
 
-    .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2(1-P(\\theta))P(\\theta)}
+    .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2[1-P(\\theta)]P(\\theta)}
 
     :param theta: the individual's proficiency value. This parameter value has
                   no boundary, but if a distribution of the form

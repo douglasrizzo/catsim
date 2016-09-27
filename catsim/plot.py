@@ -194,7 +194,7 @@ def test_progress(
     filepath: str=None,
     show: bool=True
 ):
-    """Generates a plot representing an examinee's test progress. Please note that,
+    """Generates a plot representing an examinee's test progress. Note that,
     while some functions increase or decrease monotonically, like test information
     and standard error of estimation, the plot calculates these values using the
     examinee's proficiency estimated at that given time of the test. This means
