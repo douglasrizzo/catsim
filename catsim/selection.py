@@ -281,8 +281,9 @@ class ClusterSelector(Selector):
         if len(valid_indexes_low_r) > 0:
             # sort both items and their indexes by their information
             # value
-            inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3])
-                          for i in items[valid_indexes_low_r]]
+            inf_values = [
+                irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes_low_r]
+            ]
             valid_indexes_low_r = [
                 index
                 for (inf_value, index) in sorted(
@@ -297,8 +298,9 @@ class ClusterSelector(Selector):
         # select the one with smallest r, regardless of information
         else:
             if self._r_control == 'passive':
-                inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3])
-                              for i in items[valid_indexes]]
+                inf_values = [
+                    irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]
+                ]
                 valid_indexes = [
                     index
                     for (inf_value, index) in sorted(
