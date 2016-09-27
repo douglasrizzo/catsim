@@ -6,6 +6,7 @@ import time
 
 import json_tricks.np as jsnp
 import numpy
+
 from catsim import cat, irt
 from catsim.estimation import Estimator
 from catsim.initialization import Initializer
@@ -170,18 +171,21 @@ class Simulator:
         if stopper is not None:
             self._stopper = stopper
 
-        # if verbose:
-        print((
-            'Starting simulation: {0} {1} {2} {3}'.format(
-                self._initializer.__class__, selector.__class__, self._estimator.__class__,
-                self._stopper.__class__
+        if verbose:
+            print(
+                (
+                    'Starting simulation: {0} {1} {2} {3}'.format(
+                        self._initializer.__class__, selector.__class__, self._estimator.__class__,
+                        self._stopper.__class__
+                    )
+                )
             )
-        ))
+
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
 
-            # if verbose:
-            print(('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees))))
+            if verbose:
+                print(('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees))))
 
             est_theta = self._initializer.initialize()
             response_vector, administered_items, est_thetas = [], [], []
@@ -232,8 +236,8 @@ class Simulator:
 
         self._duration = int(round(time.time() * 1000)) - start_time
 
-        # if verbose:
-        print(('Simulation took {0} milliseconds'.format(self._duration)))
+        if verbose:
+            print('Simulation took {0} milliseconds'.format(self._duration))
 
         self._bias = cat.bias(self.examinees, self.estimations)
         self._mse = cat.mse(self.examinees, self.estimations)
