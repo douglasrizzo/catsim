@@ -122,16 +122,18 @@ class Simulator:
         return self._rmse
 
     @examinees.setter
-    def examinees(self, examinees):
-        if type(examinees) == int:
+    def examinees(self, x):
+        if type(x) == int:
             if self._items is not None:
                 mean = numpy.mean(self._items[:, 1])
                 stddev = numpy.std(self._items[:, 1])
-                self._examinees = numpy.random.normal(mean, stddev, examinees)
+                self._examinees = numpy.random.normal(mean, stddev, x)
             else:
-                self._examinees = numpy.random.normal(0, 1, examinees)
-        elif type(examinees) == list:
-            self._examinees = numpy.array(examinees)
+                self._examinees = numpy.random.normal(0, 1, x)
+        elif type(x) == list:
+            self._examinees = numpy.array(x)
+        else:
+            raise ValueError('Examinees must be an int or list')
 
     def simulate(
         self,
