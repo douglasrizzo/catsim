@@ -194,7 +194,7 @@ class Simulator:
 
             while not self._stopper.stop(self.items[administered_items], est_thetas):
                 try:
-                    selected_item = selector.select(self.items, administered_items, est_theta)
+                    selected_item = self._selector.select(self.items, administered_items, est_theta)
                 except:
                     print((len(administered_items)))
                     raise
