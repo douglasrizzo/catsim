@@ -41,7 +41,7 @@ class MaxInfoSelector(Selector):
         :param est_theta: estimated proficiency value
         :returns: index of the first non-administered item with maximum information
         """
-        valid_indexes = numpy.array(list(set(range(items.shape[0])) - set(administered_items)))
+        valid_indexes = list(set(range(items.shape[0])) - set(administered_items))
         inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]]
         valid_indexes = [
             index for (inf_value, index) in sorted(
