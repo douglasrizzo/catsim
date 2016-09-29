@@ -4,7 +4,6 @@ application of adaptive tests. Most of this module is based on the work of
 
 import time
 
-import json_tricks.np as jsnp
 import numpy
 
 from catsim import cat, irt
@@ -242,12 +241,6 @@ class Simulator:
         self._bias = cat.bias(self.examinees, self.estimations)
         self._mse = cat.mse(self.examinees, self.estimations)
         self._rmse = cat.rmse(self.examinees, self.estimations)
-
-    def dumps(self):
-        return jsnp.dumps(self)
-
-    def loads(json):
-        return jsnp.loads(json)
 
 
 if __name__ == '__main__':
