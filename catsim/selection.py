@@ -44,8 +44,10 @@ class MaxInfoSelector(Selector):
         valid_indexes = list(set(range(items.shape[0])) - set(administered_items))
         inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]]
         valid_indexes = [
-            index for (inf_value, index) in sorted(
+            index
+            for (inf_value, index) in sorted(
                 zip(inf_values, valid_indexes),
+                key=lambda pair: pair[0],
                 reverse=True
             )
         ]
@@ -110,9 +112,7 @@ class RandomSelector(Selector):
                   indexes in `administered_items are excluded from the selection`.
         """
         if len(administered_items) >= items.shape[0] and not self._replace:
-            raise ValueError(
-                'A new index was asked for, but there are no more item indexes to present.'
-            )
+            raise ValueError('A new item was asked for, but there are no more items to present.')
 
         if self._replace:
             return numpy.random.choice(items.shape[0])
@@ -226,6 +226,7 @@ class ClusterSelector(Selector):
                     cluster
                     for (inf_value, cluster) in sorted(
                         zip(cluster_infos, set(self._clusters)),
+                        key=lambda pair: pair[0],
                         reverse=True
                     )
                 ],
@@ -288,6 +289,7 @@ class ClusterSelector(Selector):
                 index
                 for (inf_value, index) in sorted(
                     zip(inf_values, valid_indexes_low_r),
+                    key=lambda pair: pair[0],
                     reverse=True
                 )
             ]
@@ -305,15 +307,18 @@ class ClusterSelector(Selector):
                     index
                     for (inf_value, index) in sorted(
                         zip(inf_values, valid_indexes),
+                        key=lambda pair: pair[0],
                         reverse=True
                     )
                 ]
             elif self._r_control == 'aggressive':
                 valid_indexes = [
-                    index for (r, index) in sorted(
+                    index
+                    for (r, index) in sorted(
                         zip(
                             items[valid_indexes, 4], valid_indexes
-                        )
+                        ),
+                        key=lambda pair: pair[0]
                     )
                 ]
 
