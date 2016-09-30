@@ -36,7 +36,7 @@ def test_plots():
     estimator = HillClimbingEstimator()
     stopper = MaxItemStopper(20)
     s = Simulator(generate_item_bank(100), 10)
-    s.simulate(initializer, selector, estimator, stopper)
+    s.simulate(initializer, selector, estimator, stopper, verbose=True)
 
     for item in s.items[0:10]:
         yield plot.item_curve, item[0], item[1], item[2], item[
@@ -81,7 +81,7 @@ def test_stats():
 
 def one_simulation(items, examinees, initializer, selector, estimator, stopper):
     s = Simulator(items, examinees)
-    s.simulate(initializer, selector, estimator, stopper)
+    s.simulate(initializer, selector, estimator, stopper, verbose=True)
     cat.rmse(s.examinees, s.estimations)
 
 
