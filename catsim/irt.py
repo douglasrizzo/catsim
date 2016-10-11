@@ -114,7 +114,10 @@ def see(theta: float, items: numpy.ndarray) -> float:
     :param items: a matrix containing item parameters.
     :returns: the standard error of estimation at `theta` for a test represented by `items`.
     """
-    return math.sqrt(var(theta, items))
+    try:
+        return math.sqrt(var(theta, items))
+    except ValueError:
+        return float('inf')
 
 
 def reliability(theta: float, items: numpy.ndarray):
