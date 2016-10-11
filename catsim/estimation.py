@@ -71,7 +71,7 @@ class HillClimbingEstimator(Estimator):
         is composed solely of right or wrong answers.
 
         :returns: boolean value indicating if Dodd's method will be used or not."""
-        return self._evaluations / self._calls
+        return self._dodd
 
     def estimate(
         self,
