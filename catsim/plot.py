@@ -224,7 +224,7 @@ def test_progress(title: str = None, simulator: Simulator = None, index: int = N
         plt.plot(xs, thetas, label=r'$\hat{\theta}$')
     if administered_items is not None:
         difficulties = administered_items[:, 1]
-        plt.plot(xs, difficulties, label='Item difficulty')
+        plt.plot(xs[1:], difficulties, label='Item difficulty')
     if true_theta is not None:
         plt.hlines(true_theta, 0, len(xs), label=r'$\theta$')
     if thetas is not None and administered_items is not None:
