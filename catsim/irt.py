@@ -329,7 +329,7 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
         elif items.shape[1] == 3:
             err += '\nItem matrix has no upper asymptote parameter column'
     else:
-        if any(items[:, 2] < 0):
+        if any(items[:, 0] < 0):
             err += '\nThere are items with discrimination < 0'
         if any(items[:, 2] < 0):
             err += '\nThere are items with pseudo-guessing < 0'
