@@ -29,7 +29,7 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
-def bias(actual: Iterable, predicted: Iterable):
+def bias(actual: list, predicted: list):
     """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
     The value is calculated by:
 
@@ -44,10 +44,10 @@ def bias(actual: Iterable, predicted: Iterable):
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.mean(predicted - actual)
+    return numpy.mean(list(map(operator.sub, predicted, actual)))
 
 
-def mse(actual: Iterable, predicted: Iterable):
+def mse(actual: list, predicted: list):
     """Mean squared error, a value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.
     The value is calculated by:
@@ -63,10 +63,10 @@ def mse(actual: Iterable, predicted: Iterable):
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.mean((predicted - actual)**2)
+    return numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))])
 
 
-def rmse(actual: Iterable, predicted: Iterable):
+def rmse(actual: list, predicted: list):
     """Root mean squared error, a common value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
     The value is calculated by:
