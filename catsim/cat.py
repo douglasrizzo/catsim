@@ -147,21 +147,22 @@ def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
     b, a = numpy.random.multivariate_normal(means, covs, n).T
 
     if itemtype not in ['2PL', '3PL', '4PL']:
-        a = numpy.ones((n))
+        a = numpy.ones(n)
 
     if itemtype in ['3PL', '4PL']:
         c = numpy.random.normal(.25, .02, n)
     else:
-        c = numpy.zeros((n))
+        c = numpy.zeros(n)
 
     if itemtype == '4PL':
         d = numpy.random.uniform(.94, 1, n)
     else:
-        d = numpy.ones((n))
+        d = numpy.ones(n)
 
     return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
 
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()
