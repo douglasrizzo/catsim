@@ -3,14 +3,103 @@ application of adaptive tests. Most of this module is based on the work of
 [Bar10]_."""
 
 import time
+from abc import ABCMeta, abstractmethod
 
 import numpy
 
 from catsim import cat, irt
-from catsim.estimation import Estimator
-from catsim.initialization import Initializer
-from catsim.selection import Selector
-from catsim.stopping import Stopper
+
+
+class Simulable(metaclass=ABCMeta):
+    """Base class representing one of the Simulator components that will receive a reference back to it."""
+
+    def __init__(self):
+        super(Simulable).__init__()
+        self._simulator = None
+
+    @property
+    def simulator(self):
+        if self._simulator is not None and type(self._simulator) is not Simulator:
+            raise ValueError('simulator has to be of type catsim.simulation.Simulator')
+        return self._simulator
+
+    @simulator.setter
+    def simulator(self, x: 'Simulator'):
+        if type(x) is not Simulator:
+            raise ValueError('simulator has to be of type catsim.simulation.Simulator')
+        self._simulator = x
+        self.preprocess()
+
+    def preprocess(self):
+        """Override this method to initialize any static values the `Simulable` might use for the duration of the
+        simulation. `preprocess` is called after a value is set for the `simulator` property. If a new value if
+        attributed to `simulator`, this method is called again, guaranteeing that internal properties of the
+        `Simulable` are re-initialized as necessary."""
+        pass
+
+
+class Initializer(Simulable):
+    """Base class for CAT initializers"""
+
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def initialize(self, index: int) -> float:
+        """Selects an examinee's initial :math:`\\theta` value
+
+        :param index: the index of the current examinee
+        :returns: examinee's initial :math:`\\theta` value
+        """
+        pass
+
+
+class Selector(Simulable):
+    """Base class representing a CAT item selector."""
+
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def select(self, index: int) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param index: the index of the current examinee in the simulator.
+        :returns: index of the next item to be applied.
+        """
+        pass
+
+
+class Estimator(Simulable):
+    """Base class for proficiency estimators"""
+
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def estimate(self, index: int) -> float:
+        """Returns the theta value that minimizes the negative log-likelihood function, given the current state of the
+         test for the given examinee.
+
+        :param index: index of the current examinee in the simulator
+        :returns: the current :math:`\\hat\\theta`
+        """
+        pass
+
+
+class Stopper(Simulable):
+    """Base class for CAT stop criterion"""
+
+    def __init__(self):
+        super().__init__()
+
+    @abstractmethod
+    def stop(self, index: int) -> bool:
+        """Checks whether the test reached its stopping criterion for the given user
+
+        :param index: the index of the current examinee
+        :returns: `True` if the test met its stopping criterion, else `False`"""
+        pass
 
 
 class Simulator:
@@ -23,15 +112,8 @@ class Simulator:
                       :math:`\\theta_0` values
     """
 
-    def __init__(
-        self,
-        items: numpy.ndarray,
-        examinees,
-        initializer: Initializer=None,
-        selector: Selector=None,
-        estimator: Estimator=None,
-        stopper: Stopper=None
-    ):
+    def __init__(self, items: numpy.ndarray, examinees, initializer: Initializer = None, selector: Selector = None,
+                 estimator: Estimator = None, stopper: Stopper = None):
         irt.validate_item_bank(items)
 
         # adds a column for each item's exposure rate and their cluster membership
@@ -39,8 +121,6 @@ class Simulator:
 
         self._duration = 0
         self._items = items
-        self._estimations = []
-        self._administered_items = []
 
         self._initializer = initializer
         self._selector = selector
@@ -50,29 +130,38 @@ class Simulator:
         # `examinees` is passed to its special setter
         self.examinees = examinees
 
+        self._estimations = [[] for _ in range(len(self.examinees))]
+        self._administered_items = [[] for _ in range(len(self.examinees))]
+        self._response_vectors = [[] for _ in range(len(self.examinees))]
+
     @property
     def items(self) -> numpy.ndarray:
         """Item matrix used by the simulator. If the simulation already
-        occurred, a column containin item esposure rates will be added to the
+        occurred, a column containing item exposure rates will be added to the
         matrix."""
         return self._items
 
     @property
     def administered_items(self) -> list:
-        """List of lists containin the indexes of items administered to each
+        """List of lists containing the indexes of items administered to each
         examinee during the simulation."""
         return self._administered_items
 
     @property
-    def all_estimations(self) -> list:
+    def estimations(self) -> list:
         """List of lists containing all estimated :math:`\\hat\\theta` values
         for all examinees during each step of the test."""
         return self._estimations
 
     @property
-    def estimations(self) -> list:
+    def response_vectors(self) -> list:
+        """List of boolean lists containing the examinees answers to all items."""
+        return self._response_vectors
+
+    @property
+    def latest_estimations(self) -> list:
         """Final estimated :math:`\\hat\\theta` values for all examinees."""
-        return [ests[-1] for ests in self._estimations]
+        return [ests[-1] if len(ests) > 0 else None for ests in self._estimations]
 
     @property
     def examinees(self) -> list:
@@ -102,7 +191,9 @@ class Simulator:
 
     @property
     def bias(self) -> float:
-        """Bias between the estimated and true proficiencies. This property is only available after :py:func:`simulate` has been successfully called. For more information on estimation bias, see :py:func:`catsim.cat.bias`"""
+        """Bias between the estimated and true proficiencies. This property is only
+        available after :py:func:`simulate` has been successfully called. For more
+        information on estimation bias, see :py:func:`catsim.cat.bias`"""
         return self._bias
 
     @property
@@ -135,21 +226,16 @@ class Simulator:
         else:
             raise ValueError('Examinees must be an int or list')
 
-    def simulate(
-        self,
-        initializer: Initializer=None,
-        selector: Selector=None,
-        estimator: Estimator=None,
-        stopper: Stopper=None,
-        verbose: bool=False
-    ):
+    def simulate(self, initializer: Initializer = None, selector: Selector = None, estimator: Estimator = None,
+            stopper: Stopper = None, verbose: bool = False):
         """Simulates a computerized adaptive testing application to one or more examinees
 
         :param initializer: an initializer that selects examinees :math:`\\theta_0`
         :param selector: a selector that selects new items to be presented to examinees
         :param estimator: an estimator that reestimates examinees proficiencies after each item is applied
         :param stopper: an object with a stopping criteria for the test
-        :param verbose: whether to periodically print a message regarding the progress of the simulation. Good for longer simulations.
+        :param verbose: whether to periodically print a message regarding the progress of the simulation.
+                        Good for longer simulations.
 
         >>> from catsim.initialization import RandomInitializer
         >>> from catsim.selection import MaxInfoSelector
@@ -173,15 +259,11 @@ class Simulator:
         if stopper is not None:
             self._stopper = stopper
 
+        for s in [initializer, selector, estimator, stopper]:
+            s.simulator = self
+
         if verbose:
-            print(
-                (
-                    'Starting simulation: {0} {1} {2} {3}'.format(
-                        self._initializer.__class__, selector.__class__, self._estimator.__class__,
-                        self._stopper.__class__
-                    )
-                )
-            )
+            print(('Starting simulation: {0} {1} {2} {3}'.format(initializer, selector, estimator, stopper)))
 
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
@@ -189,63 +271,51 @@ class Simulator:
             if verbose:
                 print(('{0}/{1} examinees...'.format(current_examinee + 1, len(self.examinees))))
 
-            est_theta = self._initializer.initialize()
-            response_vector, administered_items, est_thetas = [], [], []
+            est_theta = self._initializer.initialize(current_examinee)
+            self._estimations[current_examinee].append(est_theta)
 
-            while not self._stopper.stop(self.items[administered_items], est_thetas):
+            while not self._stopper.stop(current_examinee):
                 try:
-                    selected_item = self._selector.select(self.items, administered_items, est_theta)
+                    selected_item = self._selector.select(current_examinee)
                 except:
-                    print((len(administered_items)))
+                    print((len(self._administered_items[current_examinee])))
                     raise
 
                 # simulates the examinee's response via the four-parameter
                 # logistic function
-                response = irt.icc(
-                    true_theta, self.items[selected_item][0], self.items[selected_item][1],
-                    self.items[selected_item][2], self.items[selected_item][3]
-                ) >= numpy.random.uniform()
+                response = irt.icc(true_theta, self.items[selected_item][0], self.items[selected_item][1],
+                    self.items[selected_item][2], self.items[selected_item][3]) >= numpy.random.uniform()
 
-                response_vector.append(response)
+                self._response_vectors[current_examinee].append(response)
 
                 # adds the item selected by the selector to the pool of administered items
-                administered_items.append(selected_item)
+                self._administered_items[current_examinee].append(selected_item)
 
                 # estimate the new theta using the given estimator
-                est_theta = self._estimator.estimate(
-                    response_vector, self.items[administered_items], est_theta
-                )
+                est_theta = self._estimator.estimate(current_examinee)
 
                 # flatten the list of lists so that we can count occurrences of items easier
-                flattened_administered_items = [
-                    administered_item
-                    for administered_list in self.administered_items
-                    for administered_item in administered_list
-                ]
+                flattened_administered_items = [administered_item for administered_list in self._administered_items for
+                                                administered_item in administered_list]
 
                 # update the exposure value for this item
                 # r = number of tests item has been used / total number of tests
-                self.items[selected_item, 4] = numpy.sum(
-                    flattened_administered_items == selected_item
-                ) / len(
-                    self.examinees
-                )
+                self.items[selected_item, 4] = numpy.sum(flattened_administered_items == selected_item) / len(
+                    self.examinees)
 
-                est_thetas.append(est_theta)
-
-            self._estimations.append(est_thetas)
-            self._administered_items.append(administered_items)
+                self._estimations[current_examinee].append(est_theta)
 
         self._duration = int(round(time.time() * 1000)) - start_time
 
         if verbose:
             print('Simulation took {0} milliseconds'.format(self._duration))
 
-        self._bias = cat.bias(self.examinees, self.estimations)
-        self._mse = cat.mse(self.examinees, self.estimations)
-        self._rmse = cat.rmse(self.examinees, self.estimations)
+        self._bias = cat.bias(self.examinees, self.latest_estimations)
+        self._mse = cat.mse(self.examinees, self.latest_estimations)
+        self._rmse = cat.rmse(self.examinees, self.latest_estimations)
 
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

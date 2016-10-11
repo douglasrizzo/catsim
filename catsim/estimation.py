@@ -1,32 +1,8 @@
-from abc import ABCMeta, abstractmethod
-
 import numpy
-from catsim import irt, cat
-# from scipy.optimize import fmin
 from scipy.optimize import differential_evolution
 
-
-class Estimator(metaclass=ABCMeta):
-    """Base class for proficiency estimators"""
-
-    def __init__(self):
-        super(Estimator, self).__init__()
-
-    @abstractmethod
-    def estimate(
-        self, response_vector: list, administered_items: numpy.ndarray, current_theta: float
-    ) -> float:
-        """Uses a hill-climbing algorithm to find and return the theta value
-        that maximizes the likelihood function, given a response vector and a
-        matrix with the administered items parameters.
-
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a matrix containing the parameters of the
-                                   answered items
-        :param current_theta: the current estimation of the examinee's :math:`\\theta` value
-        :returns: a new estimation of the examinee's proficiency, given his answers up until now
-        """
-        pass
+from catsim import irt, cat
+from catsim.simulation import Estimator
 
 
 class HillClimbingEstimator(Estimator):
@@ -36,10 +12,11 @@ class HillClimbingEstimator(Estimator):
     :param verbose: verbosity level of the maximization method
     """
 
-    def __init__(self, precision: int=6, dodd: bool=False, verbose: bool=False):
-        super(HillClimbingEstimator, self).__init__()
     def __str__(self):
         return 'Hill Climbing Estimator'
+
+    def __init__(self, precision: int = 6, dodd: bool = False, verbose: bool = False):
+        super().__init__()
         self._precision = precision
         self._verbose = verbose
         self._evaluations = 0
@@ -75,36 +52,31 @@ class HillClimbingEstimator(Estimator):
         :returns: boolean value indicating if Dodd's method will be used or not."""
         return self._dodd
 
-    def estimate(
-        self,
-        response_vector: list,
-        administered_items: numpy.ndarray,
-        current_theta: float=None
-    ) -> float:
-        """Uses a hill-climbing algorithm to find and returns the theta value
-        that maximizes the likelihood function, given a response vector and a
-        matrix with the administered items parameters.
+    def estimate(self, index: int) -> float:
+        """Returns the theta value that minimizes the negative log-likelihood function, given the current state of the
+         test for the given examinee.
 
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a matrix containing the parameters of the
-                                   answered items
-        :param current_theta: not used by this selector
-        :returns: a new estimation of the examinee's proficiency, given his answers up until now
-        :rtype: float
+        :param index: index of the current examinee in the simulator
+        :returns: the current :math:`\\hat\\theta`
         """
-
         self._calls += 1
 
-        if len(set(response_vector)) == 1 and self._dodd:
-            return cat.dodd(current_theta, self.items, response_vector[-1])
+        if len(set(self.simulator.response_vectors[index])) == 1 and self._dodd:
+            return cat.dodd(self.simulator.latest_estimations[index], self.simulator.items,
+                            self.simulator.response_vectors[index][-1])
 
-        if set(response_vector) == 1:
+        if set(self.simulator.response_vectors[index]) == 1:
             return float('inf')
-        elif set(response_vector) == 0:
+        elif set(self.simulator.response_vectors[index]) == 0:
             return float('-inf')
 
-        lbound = min(administered_items[:, 1])
-        ubound = max(administered_items[:, 1])
+        if len(self.simulator.administered_items[index]) > 0:
+            lbound = min(self.simulator.items[self.simulator.administered_items[index]][:, 1])
+            ubound = max(self.simulator.items[self.simulator.administered_items[index]][:, 1])
+        else:
+            lbound = min(self.simulator.items[:, 1])
+            ubound = max(self.simulator.items[:, 1])
+
         best_theta = -float('inf')
         max_ll = -float('inf')
 
@@ -118,18 +90,13 @@ class HillClimbingEstimator(Estimator):
 
             for ii in intervals:
                 self._evaluations += 1
-                ll = irt.logLik(ii, response_vector, administered_items)
+                ll = irt.logLik(ii, self.simulator.response_vectors[index],
+                                self.simulator.items[self.simulator.administered_items[index]])
                 if ll > max_ll:
                     max_ll = ll
 
                     if self._verbose:
-                        print(
-                            (
-                                'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                                    self._evaluations, ii, ll
-                                )
-                            )
-                        )
+                        print(('Iteration: {0}, Theta: {1}, LL: {2}'.format(self._evaluations, ii, ll)))
 
                     if abs(best_theta - ii) < float('1e-' + str(self._precision)):
                         return ii
@@ -144,61 +111,6 @@ class HillClimbingEstimator(Estimator):
         return best_theta
 
 
-# class FMinEstimator(Estimator):
-#     """Estimator that uses :py:func:`scipy.optimize.fmin` to minimize the negative log-likelihood function"""
-#
-#     def __init__(self):
-#         super(FMinEstimator, self).__init__()
-#         self._evaluations = 0
-#         self._calls = 0
-#
-#     @property
-#     def calls(self):
-#         """How many times the estimator has been called to maximize/minimize the log-likelihood function
-#
-#         :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
-#         return self._calls
-#
-#     @property
-#     def evaluations(self):
-#         """Total number of times the estimator has evaluated the log-likelihood function during its existence
-#
-#         :returns: number of function evaluations"""
-#         return self._evaluations
-#
-#     @property
-#     def avg_evaluations(self):
-#         """Average number of function evaluations for all tests the estimator has been used
-#
-#         :returns: average number of function evaluations"""
-#         return self._evaluations / self._calls
-#
-#     def estimate(
-#         self, response_vector: list, administered_items: numpy.ndarray, current_theta: float
-#     ) -> float:
-#         """Uses :py:func:`scipy.optimize.fmin` to find and return the theta value
-#         that minimizes the negative log-likelihood function, given a response vector, a
-#         matrix with the administered items parameters and the current :math:`\\theta`.
-#
-#         :param response_vector: a binary list containing the response vector
-#         :param administered_items: a matrix containing the parameters of the
-#                                    answered items
-#         :param current_theta: the current estimation of the examinee's :math:`\\theta` value
-#         :returns: a new estimation of the examinee's proficiency, given his answers up until now
-#         """
-#         self._calls += 1
-#         res = fmin(
-#             irt.negativelogLik,
-#             current_theta,
-#             (response_vector, administered_items),
-#             disp=False,
-#             full_output=True
-#         )
-#
-#         self._evaluations = res[3]
-#         return res[0][0]
-#
-#
 class DifferentialEvolutionEstimator(Estimator):
     """Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function
 
@@ -241,32 +153,19 @@ class DifferentialEvolutionEstimator(Estimator):
         :returns: average number of function evaluations"""
         return self._evaluations / self._calls
 
-    def estimate(
-        self,
-        response_vector: list,
-        administered_items: numpy.ndarray,
-        current_theta: float=None
-    ) -> float:
-        """Uses :py:func:`scipy.optimize.fmin` to find and return the theta value
-        that minimizes the negative log-likelihood function, given a response vector, a
-        matrix with the administered items parameters and the current :math:`\\theta`.
+    def estimate(self, index: int) -> float:
+        """Uses :py:func:`scipy.optimize.differential_evolution` to return the theta value
+        that minimizes the negative log-likelihood function, given the current state of the
+        test for the given examinee.
 
-        :param response_vector: a binary list containing the response vector
-        :param administered_items: a matrix containing the parameters of the
-                                   answered items
-        :param current_theta: the current estimation of the examinee's :math:`\\theta` value
-        :returns: not used by this selector
+        :param index: index of the current examinee in the simulator
+        :returns: the current :math:`\\hat\\theta`
         """
 
         self._calls += 1
 
-        res = differential_evolution(
-            irt.negativelogLik,
-            bounds=[
-                [self._lower_bound * 2, self._upper_bound * 2]
-            ],
-            args=(response_vector, administered_items)
-        )
+        res = differential_evolution(irt.negativelogLik, bounds=[[self._lower_bound * 2, self._upper_bound * 2]], args=(
+        self.simulator.response_vectors[index], self.simulator.items[self.simulator.administered_items[index]]))
 
         self._evaluations = res.nfev
 

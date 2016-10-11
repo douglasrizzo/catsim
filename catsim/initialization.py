@@ -1,20 +1,6 @@
-from abc import ABCMeta, abstractmethod
 import numpy
 
-
-class Initializer(metaclass=ABCMeta):
-    """Base class for CAT initializers"""
-
-    def __init__(self):
-        super(Initializer, self).__init__()
-
-    @abstractmethod
-    def initialize(self) -> float:
-        """Selects an examinee's initial :math:`\\theta` value
-
-        :returns: examinee's initial :math:`\\theta` value
-        """
-        pass
+from catsim.simulation import Initializer
 
 
 class RandomInitializer(Initializer):
@@ -26,26 +12,23 @@ class RandomInitializer(Initializer):
                         and standard deviation values for the normal distribution
                         (in this particular order)."""
 
-    def __init__(self, dist_type: str='uniform', dist_params: tuple=(-5, 5)):
     def __str__(self):
         return 'Random Initializer'
 
+    def __init__(self, dist_type: str = 'uniform', dist_params: tuple = (-5, 5)):
         super(RandomInitializer, self).__init__()
 
         available_distributions = ['uniform', 'normal']
         if dist_type not in available_distributions:
-            raise ValueError(
-                '{0} not in available distributions {1}'.format(
-                    dist_type, available_distributions
-                )
-            )
+            raise ValueError('{0} not in available distributions {1}'.format(dist_type, available_distributions))
 
         self._dist_type = dist_type
         self._dist_params = dist_params
 
-    def initialize(self) -> float:
+    def initialize(self, index: int) -> float:
         """Generates a value using the chosen distribution and parameters
 
+        :param index: the index of the current examinee. This parameter is not used by this method.
         :returns: a proficiency value generated from the chosen distribution using the passed parameters"""
         if self._dist_type == 'uniform':
             return numpy.random.uniform(min(self._dist_params), max(self._dist_params))
@@ -60,12 +43,15 @@ class FixedPointInitializer(Initializer):
         return 'Fixed Point Initializer'
 
     def __init__(self, start: float):
+        """
+        :param start: the starting point for every examinee
+        """
         super(FixedPointInitializer, self).__init__()
-
         self._start = start
 
-    def initialize(self) -> float:
+    def initialize(self, index: int) -> float:
         """Returns the same proficiency value that was passed to the constructor of the initializer
 
+        :param index: the index of the current examinee. This parameter is not used by this method.
         :returns: the same proficiency value that was passed to the constructor of the initializer"""
         return self._start
