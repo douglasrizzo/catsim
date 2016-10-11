@@ -243,7 +243,7 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
             except:
                 print(('p = ' + str(p)))
                 print(('1 - p = ' + str(1 - p)))
-                print(('log(1 - p) = ' + math.log(1 - p)))
+                print(('log(1 - p) = ' + str(math.log(1 - p))))
 
     return LL
 
