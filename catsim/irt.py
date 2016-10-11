@@ -1,4 +1,5 @@
 import math
+
 import numpy
 
 
@@ -6,7 +7,7 @@ def _icc_exponent(theta, a, b):
     return math.exp(-a * (theta - b))
 
 
-def icc(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
+def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     """Item Response Theory four-parameter logistic function [Ayala2009]_, [Magis13]_:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{a_i(\\theta-b_i)}}
@@ -34,7 +35,7 @@ def icc(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
     return c + ((d - c) / (1 + _icc_exponent(theta, a, b)))
 
 
-def inf(theta: float, a: float, b: float, c: float=0, d: float=1) -> float:
+def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     """Calculates the information value of an item using the Item Response Theory
     four-parameter logistic model function [Ayala2009]_, [Magis13]_:
 
@@ -93,7 +94,7 @@ def var(theta: float, items: numpy.ndarray) -> float:
 
     :param theta: a proficiency value.
     :param items: a matrix containing item parameters.
-    :returns: the variance of proficency estimation at `theta` for a test represented by `items`.
+    :returns: the variance of proficiency estimation at `theta` for a test represented by `items`.
     """
     try:
         return 1 / test_info(theta, items)
@@ -105,7 +106,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
     """Computes the standard error of estimation (:math:`SEE`) of a test at a
     specific :math:`\\theta` value [Ayala2009]_:
 
-    .. math:: SEE = \\sqrt{frac{1}{I(\\theta)}}
+    .. math:: SEE = \\sqrt{\\frac{1}{I(\\theta)}}
 
     where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
 
@@ -165,12 +166,6 @@ def max_info(a: float=1, b: float=0, c: float=0, d: float=1) -> float:
     :param b: item difficulty parameter
     :param c: item pseudo-guessing parameter
     :param d: item upper asymptote
-    :param title: plot title
-    :param ptype: 'icc' for the item characteristic curve, 'iic' for the item
-                  information curve or 'both' for both curves in the same plot
-    :param filepath: saves the plot in the given path
-    :param show: whether the generated plot is to be shown
-
     """
     # for explanations on finding the following values, see referenced work in function description
     u = -(3 / 4) + ((c + d - 2 * c * d) / 2)
@@ -229,7 +224,7 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
             administered_items[i][3]
         )
 
-        # The original funtion is as follows, but since log(0) is undefined, a math domain error occurs
+        # The original function is as follows, but since log(0) is undefined, a math domain error occurs
         # LL += (response_vector[i] * math.log(p)) + (
         #     (1 - response_vector[i]) * math.log(1 - p))
 
@@ -301,7 +296,7 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     return items
 
 
-def validate_item_bank(items: numpy.ndarray, raise_err: bool=False):
+def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
     """Validates the shape and parameters in the item matrix so that it conforms to the standard
     used by catsim. The item matrix must have dimension nx4, in which column 1 represents item
     discrimination, column 2 represents item difficulty, column 3 represents the
