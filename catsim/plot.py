@@ -120,13 +120,14 @@ def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str
         from catsim.cat import generate_item_bank
         from catsim import plot
         items = generate_item_bank(100)
-        plot.gen3D_dataset_scatter(items)
+        plot.gen3d_dataset_scatter(items)
 
     :param items: the item matrix
     :param title: the scatter plot title
     :param filepath: the path to save the scatter plot
     :param show: whether the generated plot is to be shown
     """
+    assert Axes3D
     irt.validate_item_bank(items)
 
     fig = plt.figure()
