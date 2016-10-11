@@ -346,31 +346,33 @@ class AStratifiedSelector(Selector):
 
     def __init__(self, test_size):
         super().__init__()
+        self._organized_items = None
         self._test_size = test_size
 
     @property
     def test_size(self):
         return self._test_size
 
-    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+    def preprocess(self):
+        # sort item indexes by their discrimination value
+        self._organized_items = self.simulator.items[:, 0].argsort()
+
+    def select(self, index: int) -> int:
         """Returns the index of the next item to be administered.
 
-        :param items: a valid item matrix.
-        :param adminitered_items: a list containing the indexes of items that were already administered to this examinee.
+        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
-
-        # sort item indexes by their discrimination value
-        organized_items = items[:, 0].argsort()
+        administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items) * self._test_size
 
         # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
+        while self._organized_items[pointer] in administered_items:
             pointer += 1
 
-        return organized_items[pointer]
+        return self._organized_items[pointer]
 
 
 class AStratifiedBBlockingSelector(Selector):
@@ -397,13 +399,18 @@ class AStratifiedBBlockingSelector(Selector):
 
     def __init__(self, test_size):
         super().__init__()
+        self._organized_items = None
         self._test_size = test_size
 
     @property
     def test_size(self):
         return self._test_size
 
-    def select(self, items: numpy.ndarray, administered_items: list, est_theta: float=None) -> int:
+    def preprocess(self):
+        # sort item indexes by their difficulty, then their discrimination value
+        self._organized_items = numpy.lexsort((self.simulator.items[:, 0], self.simulator.items[:, 1]))
+
+    def select(self, index: int) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the currente xaminee in the simulator.
@@ -415,10 +422,10 @@ class AStratifiedBBlockingSelector(Selector):
         selected_item = len(administered_items)
 
         # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
-            pointer += self._test_size
+        while self._organized_items[selected_item] in administered_items:
+            selected_item += self._test_size
 
-        return organized_items[pointer]
+        return self._organized_items[selected_item]
 
 
 class MaxInfoStratificationSelector(Selector):
@@ -446,11 +453,18 @@ class MaxInfoStratificationSelector(Selector):
 
     def __init__(self, test_size):
         super().__init__()
+        self._organized_items = None
         self._test_size = test_size
 
     @property
     def test_size(self):
         return self._test_size
+
+    def preprocess(self):
+        # sort item indexes by their maximum information value
+        self._organized_items = numpy.array(
+            [irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[1], item[2], item[3]) for item in
+             self.simulator.items]).argsort()
 
     def select(self, index: int) -> int:
         """Returns the index of the next item to be administered.
@@ -458,27 +472,16 @@ class MaxInfoStratificationSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
-
-        # sort item indexes by their maximum information value
-        organized_items = numpy.array(
-            [
-                irt.inf(
-                    irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[
-                        1
-                    ], item[2], item[3]
-                ) for item in items
-            ]
-        ).argsort()
         administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items) * self._test_size
 
         # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
+        while self._organized_items[pointer] in administered_items:
             pointer += 1
 
-        return organized_items[pointer]
+        return self._organized_items[pointer]
 
 
 class MaxInfoBBlockingSelector(Selector):
@@ -510,11 +513,19 @@ class MaxInfoBBlockingSelector(Selector):
 
     def __init__(self, test_size):
         super().__init__()
+        self._organized_items = None
         self._test_size = test_size
 
     @property
     def test_size(self):
         return self._test_size
+
+    def preprocess(self):
+        # sort item indexes by their theta_max values, then by their maximum information
+        self._organized_items = numpy.lexsort(([irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0],
+                                                        item[1], item[2], item[3]) for item in self.simulator.items],
+                                               [irt.max_info(item[0], item[1], item[2], item[3]) for item in
+                                                self.simulator.items]))
 
     def select(self, index: int) -> int:
         """Returns the index of the next item to be administered.
@@ -522,28 +533,16 @@ class MaxInfoBBlockingSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
-
-        # sort item indexes by their difficulty, then their discrimination value
-        organized_items = numpy.lexsort(
-            (
-                [
-                    irt.inf(
-                        irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[
-                            1
-                        ], item[2], item[3]
-                    ) for item in items
-                ], items[:, 1]
-            )
-        )
+        administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items)
 
         # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
+        while self._organized_items[pointer] in administered_items:
             pointer += self._test_size
 
-        return organized_items[pointer]
+        return self._organized_items[pointer]
 
 
 class The54321Selector(Selector):
