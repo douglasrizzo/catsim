@@ -3,8 +3,8 @@
 import numpy
 
 
-def coef_variation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
-    '''Calculates the coefficientof variation of the rows or columns of a matrix.
+def coef_variation(x: numpy.ndarray, axis: int = 0) -> numpy.ndarray:
+    """Calculates the coefficientof variation of the rows or columns of a matrix.
     The coefficient of variation is given by the standard deviation divided by the mean of a variable:
 
     .. math:: \\frac{\\sigma}{\\mu}
@@ -12,7 +12,7 @@ def coef_variation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
     :param x: the data matrix
     :param axis: `0` to calculate for columns, `1` for rows
     :returns: a vector containing the coefficient of variations along the chosen axis
-    '''
+    """
     if not isinstance(x, numpy.matrix):
         x = numpy.asarray(x)
 
@@ -22,8 +22,7 @@ def coef_variation(x: numpy.ndarray, axis: int=0) -> numpy.ndarray:
     # print('Means:', mean)
     # print('Std. Devs:', stddev)
 
-    result = stddev / \
-        mean if axis == 0 else numpy.transpose(stddev) / numpy.transpose(mean)
+    result = stddev / mean if axis == 0 else numpy.transpose(stddev) / numpy.transpose(mean)
 
     return result
 
@@ -42,7 +41,7 @@ def coef_correlation(x: numpy.ndarray):
     return corr
 
 
-def covariance(x: numpy.ndarray, minus_one: bool=True):
+def covariance(x: numpy.ndarray, minus_one: bool = True):
     """Calculates the covariance matrix of another matrix
 
     :param x: a data matrix
@@ -63,8 +62,7 @@ def covariance(x: numpy.ndarray, minus_one: bool=True):
             _sum = 0
             for iii in range(n_obs):
                 _sum += (x[iii, i] - x_means[i]) * (x[iii, ii] - x_means[ii])
-            covars[i, ii] = covars[ii, i] = _sum / \
-                ((n_obs - 1) if minus_one else n_obs)
+            covars[i, ii] = covars[ii, i] = _sum / ((n_obs - 1) if minus_one else n_obs)
 
     return covars
 
@@ -107,13 +105,13 @@ def scatter_matrix(data: numpy.ndarray) -> numpy.ndarray:
     mean_vector = numpy.mean(data, axis=0)
     scatter = numpy.zeros((data.shape[1], data.shape[1]))
     for i in range(data.shape[0]):
-        scatter += (
-            data[i, :].reshape(data.shape[1], 1) - mean_vector
-        ).dot((data[i, :].reshape(data.shape[1], 1) - mean_vector).T)
+        scatter += (data[i, :].reshape(data.shape[1], 1) - mean_vector).dot(
+            (data[i, :].reshape(data.shape[1], 1) - mean_vector).T)
 
     return scatter
 
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()
