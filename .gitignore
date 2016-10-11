@@ -58,3 +58,6 @@ target/
 
 # Personally, I don't control .ipynb files
 *.ipynb
+
+# PyCharm files
+.idea
