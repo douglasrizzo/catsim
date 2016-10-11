@@ -27,6 +27,9 @@ class RandomInitializer(Initializer):
                         (in this particular order)."""
 
     def __init__(self, dist_type: str='uniform', dist_params: tuple=(-5, 5)):
+    def __str__(self):
+        return 'Random Initializer'
+
         super(RandomInitializer, self).__init__()
 
         available_distributions = ['uniform', 'normal']
@@ -51,7 +54,10 @@ class RandomInitializer(Initializer):
 
 
 class FixedPointInitializer(Initializer):
-    "Initializes every proficiency at the same point."
+    """Initializes every proficiency at the same point."""
+
+    def __str__(self):
+        return 'Fixed Point Initializer'
 
     def __init__(self, start: float):
         super(FixedPointInitializer, self).__init__()

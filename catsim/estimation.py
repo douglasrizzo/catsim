@@ -38,6 +38,8 @@ class HillClimbingEstimator(Estimator):
 
     def __init__(self, precision: int=6, dodd: bool=False, verbose: bool=False):
         super(HillClimbingEstimator, self).__init__()
+    def __str__(self):
+        return 'Hill Climbing Estimator'
         self._precision = precision
         self._verbose = verbose
         self._evaluations = 0
@@ -207,6 +209,9 @@ class DifferentialEvolutionEstimator(Estimator):
                    parameters in the item bank, in case no better bounds for
                    :math:`\\theta` exist.
     """
+
+    def __str__(self):
+        return 'Differential Evolution Estimator'
 
     def __init__(self, bounds: tuple):
         super(DifferentialEvolutionEstimator, self).__init__()

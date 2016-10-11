@@ -34,6 +34,8 @@ class MaxInfoSelector(Selector):
     def select(self, items: numpy.ndarray, administered_items: list, est_theta: float) -> int:
         """Get the indexes of all items that have not yet been administered, calculate
         their information value and pick the one with maximum information
+    def __str__(self):
+        return 'Maximum Information Selector'
 
         :param items: an item matrix in which the first 4 columns represent item discrimination,
                       difficulty, pseudo-guessing and upper asymptote parameters, respectively.
@@ -60,6 +62,9 @@ class LinearSelector(Selector):
     (non-adaptive) test.
 
     :param indexes: the indexes of the items that will be returned in order"""
+
+    def __str__(self):
+        return 'Linear Selector'
 
     def __init__(self, indexes: list):
         super().__init__()
@@ -98,7 +103,10 @@ class RandomSelector(Selector):
 
     :param replace: whether to select an item that has already been selected before for this examinee."""
 
-    def __init__(self, replace: bool=False):
+    def __str__(self):
+        return 'Random Selector'
+
+    def __init__(self, replace: bool = False):
         super().__init__()
         self._replace = replace
 
@@ -149,13 +157,11 @@ class ClusterSelector(Selector):
                       with smallest :math:`r` value.
     """
 
-    def __init__(
-        self,
-        clusters: list,
-        method: str='item_info',
-        r_max: float=1,
-        r_control: str='passive'
-    ):
+    def __str__(self):
+        return 'Cluster Selector'
+
+    def __init__(self, clusters: list, method: str = 'item_info', r_max: float = 1, r_control: str = 'passive'):
+        super().__init__()
         available_methods = ['item_info', 'cluster_info', 'weighted_info']
         if method not in available_methods:
             raise ValueError(
@@ -416,7 +422,12 @@ class AStratifiedSelector(Selector):
 
     .. image:: ../docs/alpha-strat.*
 
-    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+    :param test_size: the number of items the test contains. The selector uses this parameter
+    to create the correct number of strata.
+    """
+
+    def __str__(self):
+        return 'a-Stratified Selector'
 
     def __init__(self, test_size):
         super().__init__()
@@ -462,7 +473,12 @@ class AStratifiedBBlockingSelector(Selector):
 
     .. image:: ../docs/b-blocking.*
 
-    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+    :param test_size: the number of items the test contains. The selector uses this parameter to
+    create the correct number of strata.
+    """
+
+    def __str__(self):
+        return 'a-Stratified b-Blocking Selector'
 
     def __init__(self, test_size):
         super().__init__()
@@ -509,7 +525,12 @@ class MaxInfoStratificationSelector(Selector):
     and maximum information are not positioned in the same place in the proficiency
     scale in 3PL.
 
-    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+    :param test_size: the number of items the test contains. The selector uses this parameter to
+    create the correct number of strata.
+    """
+
+    def __str__(self):
+        return 'Maximum Information Stratification Selector'
 
     def __init__(self, test_size):
         super().__init__()
@@ -568,7 +589,12 @@ class MaxInfoBBlockingSelector(Selector):
 
     .. image:: ../docs/mis-b.*
 
-    :param test_size: the number of items the test contains. The selector uses this parameter to create the correct number of strata."""
+    :param test_size: the number of items the test contains. The selector uses this parameter to
+    create the correct number of strata.
+    """
+
+    def __str__(self):
+        return 'Maximum Information Stratification with b-Blocking Selector'
 
     def __init__(self, test_size):
         super().__init__()
@@ -623,6 +649,9 @@ class The54321Selector(Selector):
     :param test_size: the number of items the test contains. The selector uses
                       this parameter to set the bin size"""
 
+    def __str__(self):
+        return '5-4-3-2-1 Selector'
+
     def __init__(self, test_size):
         super().__init__()
         self._test_size = test_size
@@ -663,8 +692,12 @@ class RandomesqueSelector(Selector):
     items in the item bank, :math:`n` being a predefined value (originally 5, but user-defined
     in this implementation)
 
-    :param bin_size: the number of most informative items to be taken into consideration when randomly selecting one of them.
+    :param bin_size: the number of most informative items to be taken into consideration when
+    randomly selecting one of them.
     """
+
+    def __str__(self):
+        return 'Randomesque Selector'
 
     def __init__(self, bin_size):
         super().__init__()
@@ -710,7 +743,10 @@ class IntervalIntegrationSelector(Selector):
                      integral is calculated from :math:`[-\\infty, \\infty]`.
     """
 
-    def __init__(self, interval: float=None):
+    def __str__(self):
+        return 'Interval Integration Selector'
+
+    def __init__(self, interval: float = None):
         super().__init__()
         self._interval = interval if interval is not None else numpy.inf
 

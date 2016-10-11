@@ -24,6 +24,9 @@ class MaxItemStopper(Stopper):
 
     :param max_itens: the maximum number of items in the test"""
 
+    def __str__(self):
+        return 'Maximum Item Number Initializer'
+
     def __init__(self, max_itens: int):
         super(MaxItemStopper, self).__init__()
         self._max_itens = max_itens
@@ -48,6 +51,9 @@ class MinErrorStopper(Stopper):
     """Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)
 
     :param min_error: the minimum standard error of estimation the test must achieve before stopping"""
+
+    def __str__(self):
+        return 'Minimum Error Initializer'
 
     def __init__(self, min_error: float):
         super(MinErrorStopper, self).__init__()
