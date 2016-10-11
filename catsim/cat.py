@@ -1,8 +1,10 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
-from catsim import irt
+import operator
+
 import numpy
-from collections.abc import Iterable
+
+from catsim import irt
 
 
 def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
@@ -99,14 +101,14 @@ def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
     """
 
     bank_size = items.shape[0]
-    varR = numpy.var(items[:, 3])
+    var_r = numpy.var(items[:, 3])
 
-    T = (bank_size / test_size) * varR + (test_size / bank_size)
+    t = (bank_size / test_size) * var_r + (test_size / bank_size)
 
-    return T
+    return t
 
 
-def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
+def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0.5):
     """Generate a synthetic item bank whose parameters approximately follow
     real-world parameters, as proposed by [Bar10]_.
 
@@ -142,7 +144,7 @@ def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
 
     means = [0, 1.2]
     stds = [1, 0.25]
-    covs = [[stds[0]**2, stds[0] * stds[1] * corr], [stds[0] * stds[1] * corr, stds[1]**2]]
+    covs = [[stds[0] ** 2, stds[0] * stds[1] * corr], [stds[0] * stds[1] * corr, stds[1] ** 2]]
 
     b, a = numpy.random.multivariate_normal(means, covs, n).T
 
