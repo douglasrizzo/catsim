@@ -38,6 +38,7 @@ def item_curve(a: float = 1, b: float = 0, c: float = 0, d: float = 1, title: st
     :param title: plot title
     :param ptype: 'icc' for the item characteristic curve, 'iic' for the item
                   information curve or 'both' for both curves in the same plot
+    :param max_info: whether the point of maximum information should be shown in the plot
     :param filepath: saves the plot in the given path
     :param show: whether the generated plot is to be shown
     """
