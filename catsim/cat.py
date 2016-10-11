@@ -146,6 +146,12 @@ def generate_item_bank(n: int, itemtype: str='4PL', corr: float=0.5):
 
     b, a = numpy.random.multivariate_normal(means, covs, n).T
 
+    # if by chance there is some discrimination value below zero
+    # this makes the problem go away
+    if any(disc < 0 for disc in a):
+        min_disc = min(a)
+        a = [disc + abs(min_disc) for disc in a]
+
     if itemtype not in ['2PL', '3PL', '4PL']:
         a = numpy.ones(n)
 
