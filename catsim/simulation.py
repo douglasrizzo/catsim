@@ -259,11 +259,12 @@ class Simulator:
         if stopper is not None:
             self._stopper = stopper
 
-        for s in [initializer, selector, estimator, stopper]:
+        for s in [self._initializer, self._selector, self._estimator, self._stopper]:
             s.simulator = self
 
         if verbose:
-            print(('Starting simulation: {0} {1} {2} {3}'.format(initializer, selector, estimator, stopper)))
+            print(('Starting simulation: {0} {1} {2} {3}'.format(self._initializer, self._selector, self._estimator,
+                                                                 self._stopper)))
 
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
