@@ -3,10 +3,6 @@ import math
 import numpy
 
 
-def _icc_exponent(theta, a, b):
-    return math.exp(-a * (theta - b))
-
-
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     """Item Response Theory four-parameter logistic function [Ayala2009]_, [Magis13]_:
 
@@ -32,7 +28,7 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
               :math:`0\\leq d \\leq 1`, but items considered good usually have
               :math:`d \\approx 1`.
     """
-    return c + ((d - c) / (1 + _icc_exponent(theta, a, b)))
+    return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
 
 
 def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -64,7 +60,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     :returns: the information value of the item at the designated `theta` point."""
     p = icc(theta, a, b, c, d)
 
-    return (math.pow(a, 2) * math.pow(p - c, 2) * math.pow(d - p, 2)) / (math.pow(d - c, 2) * p * (1 - p))
+    return (a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))
 
 
 def test_info(theta: float, items: numpy.ndarray):
