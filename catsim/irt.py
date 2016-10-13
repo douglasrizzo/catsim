@@ -173,7 +173,7 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
     return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
-def logLik(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
+def log_likelihood(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
     """Calculates the log-likelihood of an estimated proficiency, given a
     response vector and the parameters of the answered items [Ayala2009]_.
 
@@ -229,11 +229,11 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
     return ll
 
 
-def negativelogLik(est_theta: float, *args) -> float:
+def negative_log_likelihood(est_theta: float, *args) -> float:
     """Function used by :py:mod:`scipy.optimize` optimization functions that tend to minimize
     values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
     value, given a response vector and the parameters of the administered items. The value of
-    :py:func:`negativelogLik` is simply the value of :math:`-` :py:func:`logLik` or, mathematically:
+    :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood` or, mathematically:
 
     .. math:: - \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I)
 
@@ -245,7 +245,7 @@ def negativelogLik(est_theta: float, *args) -> float:
     :param administered_items numpy.ndarray: a numpy array containing the parameters of the answered items
     :returns: negative log-likelihood of a given proficiency value, given the responses to the administered items
     """
-    return -logLik(est_theta, args[0], args[1])
+    return -log_likelihood(est_theta, args[0], args[1])
 
 
 def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:

@@ -20,6 +20,7 @@ class MaxItemStopper(Stopper):
         """Checks whether the test reached its stopping criterion for the given user
 
         :param index: the index of the current examinee
+        :param administered_items: a list containing the indexes of items that were already administered
         :returns: `True` if the test met its stopping criterion, else `False`"""
 
         if (index is None or self.simulator is None) and administered_items is None:
@@ -51,6 +52,8 @@ class MinErrorStopper(Stopper):
         """Checks whether the test reached its stopping criterion
 
         :param index: the index of the current examinee
+        :param administered_items: a list containing the indexes of items that were already administered
+        :param theta: a float containing the a proficiency value to which the error will be calculated
         :returns: `True` if the test met its stopping criterion, else `False`"""
 
         if (index is None or self.simulator is None) and (administered_items is None or theta is None):

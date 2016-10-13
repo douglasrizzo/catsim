@@ -122,6 +122,10 @@ class Simulator:
         self._duration = 0
         self._items = items
 
+        self._bias = None
+        self._mse = None
+        self._rmse = None
+
         self._initializer = initializer
         self._selector = selector
         self._estimator = estimator

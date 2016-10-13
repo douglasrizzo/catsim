@@ -58,6 +58,9 @@ class HillClimbingEstimator(Estimator):
          test for the given examinee.
 
         :param index: index of the current examinee in the simulator
+        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param administered_items: a list containing the indexes of items that were already administered
+        :param est_theta: a float containing the current estimated proficiency
         :returns: the current :math:`\\hat\\theta`
         """
         if (index is None or self.simulator is None) and (
@@ -101,7 +104,7 @@ class HillClimbingEstimator(Estimator):
 
             for ii in intervals:
                 self._evaluations += 1
-                ll = irt.logLik(ii, response_vector, items[administered_items])
+                ll = irt.log_likelihood(ii, response_vector, items[administered_items])
                 if ll > max_ll:
                     max_ll = ll
 
@@ -169,6 +172,9 @@ class DifferentialEvolutionEstimator(Estimator):
         that minimizes the negative log-likelihood function, given the current state of the
         test for the given examinee.
 
+        :param response_vector: a boolean list containing the examinee's answers to the administered items
+        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param administered_items: a list containing the indexes of items that were already administered
         :param index: index of the current examinee in the simulator
         :returns: the current :math:`\\hat\\theta`
         """
@@ -184,7 +190,7 @@ class DifferentialEvolutionEstimator(Estimator):
 
         self._calls += 1
 
-        res = differential_evolution(irt.negativelogLik, bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
+        res = differential_evolution(irt.negative_log_likelihood, bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
                                      args=(response_vector, items[administered_items]))
 
         self._evaluations = res.nfev

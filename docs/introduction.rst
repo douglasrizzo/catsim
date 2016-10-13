@@ -140,7 +140,7 @@ In Python, an example of a list that may be used as a valid dichotomous response
 
 >>> response_vector = [1,1,1,0,1,1,0,1,0,0,1,0,0,0,1,0]
 
-Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the :math:`\hat\theta` value that maximizes the *log-likelihood* function, presented in :py:func:`catsim.irt.logLik`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's proficiencies to estimate new values for them.
+Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the :math:`\hat\theta` value that maximizes the *log-likelihood* function, presented in :py:func:`catsim.irt.log_likelihood`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's proficiencies to estimate new values for them.
 
 In :py:mod:`catsim`, proficiency estimation procedures can be found in the :py:mod:`catsim.estimation` module.
 

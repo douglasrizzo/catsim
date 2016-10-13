@@ -90,10 +90,10 @@ def test_simulations():
                         items = generate_item_bank(bank_size, itemtype=logistic_model)
                         yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
-                    for stopper in [MinErrorStopper(.4)]:
-                        for selector in infinite_selectors:
-                            items = generate_item_bank(bank_size, itemtype=logistic_model)
-                            yield one_simulation, items, examinees, initializer, selector, estimator, stopper
+                for stopper in [MinErrorStopper(.4), MaxItemStopper(test_size)]:
+                    for selector in infinite_selectors:
+                        items = generate_item_bank(bank_size, itemtype=logistic_model)
+                        yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
 def test_cism():
