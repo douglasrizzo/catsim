@@ -388,18 +388,23 @@ class AStratifiedSelector(Selector):
     def test_size(self):
         return self._test_size
 
+    @staticmethod
+    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+        return items[:, 0].argsort()
+
     def preprocess(self):
         # sort item indexes by their discrimination value
-        self._organized_items = self.simulator.items[:, 0].argsort()
+        self._organized_items = __class__.sort_items(self.simulator.items)
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
+        :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
-        if (index is None or self.simulator is None) and (administered_items is None):
+        if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
@@ -409,11 +414,13 @@ class AStratifiedSelector(Selector):
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items) * self._test_size
 
+        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
+
         # if the selected item has already been administered, select the next one
-        while self._organized_items[pointer] in administered_items:
+        while organized_items[pointer] in administered_items:
             pointer += 1
 
-        return self._organized_items[pointer]
+        return organized_items[pointer]
 
 
 class AStratifiedBBlockingSelector(Selector):
@@ -447,18 +454,23 @@ class AStratifiedBBlockingSelector(Selector):
     def test_size(self):
         return self._test_size
 
+    @staticmethod
+    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+        return numpy.lexsort((items[:, 0], items[:, 1]))
+
     def preprocess(self):
-        # sort item indexes by their difficulty, then their discrimination value
-        self._organized_items = numpy.lexsort((self.simulator.items[:, 0], self.simulator.items[:, 1]))
+        # sort item indexes by their discrimination value
+        self._organized_items = __class__.sort_items(self.simulator.items)
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
+        :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
-        if (index is None or self.simulator is None) and (administered_items is None):
+        if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
@@ -468,11 +480,13 @@ class AStratifiedBBlockingSelector(Selector):
         # select the item in the correct layer, according to the point in the test the examinee is
         selected_item = len(administered_items)
 
+        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
+
         # if the selected item has already been administered, select the next one
-        while self._organized_items[selected_item] in administered_items:
+        while organized_items[selected_item] in administered_items:
             selected_item += self._test_size
 
-        return self._organized_items[selected_item]
+        return organized_items[selected_item]
 
 
 class MaxInfoStratificationSelector(Selector):
@@ -507,20 +521,25 @@ class MaxInfoStratificationSelector(Selector):
     def test_size(self):
         return self._test_size
 
-    def preprocess(self):
-        # sort item indexes by their maximum information value
-        self._organized_items = numpy.array(
+    @staticmethod
+    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+        return numpy.array(
             [irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[1], item[2], item[3]) for item in
-             self.simulator.items]).argsort()
+             items]).argsort()
+
+    def preprocess(self):
+        # sort item indexes by their discrimination value
+        self._organized_items = __class__.sort_items(self.simulator.items)
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
+        :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
-        if (index is None or self.simulator is None) and (administered_items is None):
+        if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
@@ -530,11 +549,13 @@ class MaxInfoStratificationSelector(Selector):
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items) * self._test_size
 
+        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
+
         # if the selected item has already been administered, select the next one
-        while self._organized_items[pointer] in administered_items:
+        while organized_items[pointer] in administered_items:
             pointer += 1
 
-        return self._organized_items[pointer]
+        return organized_items[pointer]
 
 
 class MaxInfoBBlockingSelector(Selector):
@@ -573,21 +594,25 @@ class MaxInfoBBlockingSelector(Selector):
     def test_size(self):
         return self._test_size
 
+    @staticmethod
+    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+        return numpy.lexsort(([irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[1], item[2],
+                                       item[3]) for item in items],
+                              [irt.max_info(item[0], item[1], item[2], item[3]) for item in items]))
+
     def preprocess(self):
-        # sort item indexes by their theta_max values, then by their maximum information
-        self._organized_items = numpy.lexsort(([irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0],
-                                                        item[1], item[2], item[3]) for item in self.simulator.items],
-                                               [irt.max_info(item[0], item[1], item[2], item[3]) for item in
-                                                self.simulator.items]))
+        # sort item indexes by their discrimination value
+        self._organized_items = __class__.sort_items(self.simulator.items)
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
+        :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
-        if (index is None or self.simulator is None) and (administered_items is None):
+        if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
@@ -597,11 +622,13 @@ class MaxInfoBBlockingSelector(Selector):
         # select the item in the correct layer, according to the point in the test the examinee is
         pointer = len(administered_items)
 
+        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
+
         # if the selected item has already been administered, select the next one
-        while self._organized_items[pointer] in administered_items:
+        while organized_items[pointer] in administered_items:
             pointer += self._test_size
 
-        return self._organized_items[pointer]
+        return organized_items[pointer]
 
 
 class The54321Selector(Selector):
@@ -630,7 +657,7 @@ class The54321Selector(Selector):
         return self._test_size
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None) -> int:
+               est_theta: float = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -684,7 +711,7 @@ class RandomesqueSelector(Selector):
         return self._bin_size
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None) -> int:
+               est_theta: float = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -738,7 +765,7 @@ class IntervalIntegrationSelector(Selector):
         return self._interval
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None) -> int:
+               est_theta: float = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
