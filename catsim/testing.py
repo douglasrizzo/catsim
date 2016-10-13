@@ -78,7 +78,7 @@ def test_simulations():
 
     initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
     infinite_selectors = [MaxInfoSelector(), RandomSelector()]  # , IntervalIntegrationSelector(0.3)]
-    finite_selectors = [LinearSelector(list(numpy.random.randint(bank_size, size=test_size))),
+    finite_selectors = [LinearSelector(list(numpy.random.choice(bank_size, size=test_size, replace=False))),
                         AStratifiedSelector(test_size), AStratifiedBBlockingSelector(test_size),
                         MaxInfoStratificationSelector(test_size), MaxInfoBBlockingSelector(test_size),
                         The54321Selector(test_size), RandomesqueSelector(5)]
@@ -90,14 +90,15 @@ def test_simulations():
                 for stopper in [MaxItemStopper(test_size)]:
                     for selector in finite_selectors:
                         items = generate_item_bank(bank_size, itemtype=logistic_model)
-                        responses = cat.random_response_vector(random.randint(1, test_size))
-                        administered_items = numpy.random.choice(bank_size, len(responses), replace=False)
-                        est_theta = initializers[0].initialize()
 
-                        selector.select(items=items, administered_items=administered_items, est_theta=est_theta)
-                        estimator.estimate(items=items, administered_items=administered_items,
-                                           response_vector=responses, est_theta=est_theta)
-                        stopper.stop(administered_items=items[administered_items], theta=est_theta)
+                        for i in range(10):
+                            responses = cat.random_response_vector(random.randint(1, test_size - 1))
+                            administered_items = numpy.random.choice(bank_size, len(responses), replace=False)
+                            est_theta = initializers[0].initialize()
+                            selector.select(items=items, administered_items=administered_items, est_theta=est_theta)
+                            estimator.estimate(items=items, administered_items=administered_items,
+                                               response_vector=responses, est_theta=est_theta)
+                            stopper.stop(administered_items=items[administered_items], theta=est_theta)
 
                         yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
