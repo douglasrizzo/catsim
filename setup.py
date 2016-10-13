@@ -31,7 +31,7 @@ setup(
         'numpy', 'scipy', 'matplotlib', 'scikit-learn', 'json_tricks'
     ],
     extras_require = dict(
-        testing=['nose', 'nose-cov'],
+        testing=['nose', 'nose-cov', 'sklearn'],
     ),
     license='GPLv2'
 )

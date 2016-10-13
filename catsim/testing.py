@@ -1,6 +1,7 @@
 import unittest
 
 import numpy
+from sklearn.cluster import KMeans
 
 from catsim import cat, irt, stats, plot
 from catsim.cat import generate_item_bank
@@ -97,8 +98,6 @@ def test_simulations():
 
 
 def test_cism():
-    from sklearn.cluster import KMeans
-
     examinees = 10
     initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
     estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8))]
