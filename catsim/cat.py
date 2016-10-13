@@ -3,6 +3,7 @@
 import operator
 
 import numpy
+import random
 
 from catsim import irt
 
@@ -168,6 +169,10 @@ def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0.5):
         d = numpy.ones(n)
 
     return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
+
+
+def random_response_vector(size: int):
+    return [bool(random.getrandbits(1)) for _ in range(size)]
 
 
 if __name__ == '__main__':
