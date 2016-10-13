@@ -30,5 +30,8 @@ setup(
     install_requires=[
         'numpy', 'scipy', 'matplotlib', 'scikit-learn', 'json_tricks'
     ],
+    extras_require = dict(
+        testing=['nose', 'nose-cov'],
+    ),
     license='GPLv2'
 )
