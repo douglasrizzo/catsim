@@ -18,10 +18,10 @@ class MaxInfoSelector(Selector):
                est_theta: float = None) -> int:
         """Returns the index of the next item to be administered.
 
+        :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (
@@ -67,8 +67,8 @@ class LinearSelector(Selector):
     def select(self, index: int = None, administered_items: list = None) -> int:
         """Returns the index of the next item to be administered.
 
-        :param administered_items: a list containing the indexes of items that were already administered
         :param index: the index of the current examinee in the simulator.
+        :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (administered_items is None):
@@ -104,9 +104,9 @@ class RandomSelector(Selector):
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None) -> int:
         """Returns the index of the next item to be administered.
 
+        :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (items is None or administered_items is None):
@@ -178,10 +178,10 @@ class ClusterSelector(Selector):
                est_theta: float = None) -> int:
         """Returns the index of the next item to be administered.
 
+        :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (
@@ -395,8 +395,8 @@ class AStratifiedSelector(Selector):
     def select(self, index: int = None, administered_items: list = None) -> int:
         """Returns the index of the next item to be administered.
 
-        :param administered_items: a list containing the indexes of items that were already administered
         :param index: the index of the current examinee in the simulator.
+        :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (administered_items is None):
@@ -454,8 +454,8 @@ class AStratifiedBBlockingSelector(Selector):
     def select(self, index: int = None, administered_items: list = None) -> int:
         """Returns the index of the next item to be administered.
 
-        :param administered_items: a list containing the indexes of items that were already administered
         :param index: the index of the current examinee in the simulator.
+        :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (administered_items is None):
@@ -516,8 +516,8 @@ class MaxInfoStratificationSelector(Selector):
     def select(self, index: int = None, administered_items: list = None) -> int:
         """Returns the index of the next item to be administered.
 
-        :param administered_items: a list containing the indexes of items that were already administered
         :param index: the index of the current examinee in the simulator.
+        :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (administered_items is None):
@@ -583,8 +583,8 @@ class MaxInfoBBlockingSelector(Selector):
     def select(self, index: int = None, administered_items: list = None) -> int:
         """Returns the index of the next item to be administered.
 
-        :param administered_items: a list containing the indexes of items that were already administered
         :param index: the index of the current examinee in the simulator.
+        :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (administered_items is None):
@@ -633,10 +633,10 @@ class The54321Selector(Selector):
                est_theta: float = None) -> int:
         """Returns the index of the next item to be administered.
 
+        :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (
@@ -687,10 +687,10 @@ class RandomesqueSelector(Selector):
                est_theta: float = None) -> int:
         """Returns the index of the next item to be administered.
 
+        :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (
@@ -741,10 +741,10 @@ class IntervalIntegrationSelector(Selector):
                est_theta: float = None) -> int:
         """Returns the index of the next item to be administered.
 
+        :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied.
         """
         if (index is None or self.simulator is None) and (
