@@ -78,7 +78,7 @@ def test_simulations():
 
     initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
     infinite_selectors = [MaxInfoSelector(), RandomSelector()]  # , IntervalIntegrationSelector(0.3)]
-    finite_selectors = [LinearSelector(list(numpy.random.randint(bank_size, size=test_size))),
+    finite_selectors = [LinearSelector(list(numpy.random.choice(bank_size, size=test_size, replace=False))),
                         AStratifiedSelector(test_size), AStratifiedBBlockingSelector(test_size),
                         MaxInfoStratificationSelector(test_size), MaxInfoBBlockingSelector(test_size),
                         The54321Selector(test_size), RandomesqueSelector(5)]
