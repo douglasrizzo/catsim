@@ -212,7 +212,7 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
     # try:
     for i in range(len(response_vector)):
         p = icc(est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
-            administered_items[i][3])
+                administered_items[i][3])
 
         # The original function is as follows, but since log(0) is undefined, a math domain error occurs
         # LL += (response_vector[i] * math.log(p)) + (

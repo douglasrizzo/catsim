@@ -227,7 +227,7 @@ class Simulator:
             raise ValueError('Examinees must be an int or list')
 
     def simulate(self, initializer: Initializer = None, selector: Selector = None, estimator: Estimator = None,
-            stopper: Stopper = None, verbose: bool = False):
+                 stopper: Stopper = None, verbose: bool = False):
         """Simulates a computerized adaptive testing application to one or more examinees
 
         :param initializer: an initializer that selects examinees :math:`\\theta_0`
@@ -284,7 +284,7 @@ class Simulator:
                 # simulates the examinee's response via the four-parameter
                 # logistic function
                 response = irt.icc(true_theta, self.items[selected_item][0], self.items[selected_item][1],
-                    self.items[selected_item][2], self.items[selected_item][3]) >= numpy.random.uniform()
+                                   self.items[selected_item][2], self.items[selected_item][3]) >= numpy.random.uniform()
 
                 self._response_vectors[current_examinee].append(response)
 
