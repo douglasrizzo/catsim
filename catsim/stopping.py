@@ -16,20 +16,20 @@ class MaxItemStopper(Stopper):
         super(MaxItemStopper, self).__init__()
         self._max_itens = max_itens
 
-    def stop(self, index: int = None, administered_items: list = None) -> bool:
+    def stop(self, index: int = None, administered_items: numpy.ndarray = None, **kwargs) -> bool:
         """Checks whether the test reached its stopping criterion for the given user
 
         :param index: the index of the current examinee
-        :param administered_items: a list containing the indexes of items that were already administered
+        :param administered_items: a matrix containing the parameters of items that were already administered
         :returns: `True` if the test met its stopping criterion, else `False`"""
 
         if (index is None or self.simulator is None) and administered_items is None:
             raise ValueError
 
         if administered_items is None:
-            administered_items = self.simulator.administered_items[index]
+            administered_items = self.simulator.items[self.simulator.administered_items[index]]
 
-        n_itens = len(administered_items)
+        n_itens = administered_items.shape[0]
         if n_itens > self._max_itens:
             raise ValueError('More items than permitted were administered: {0} > {1}'.format(n_itens, self._max_itens))
 
@@ -48,11 +48,11 @@ class MinErrorStopper(Stopper):
         super(MinErrorStopper, self).__init__()
         self._min_error = min_error
 
-    def stop(self, index: int = None, administered_items: numpy.ndarray = None, theta: float = None) -> bool:
+    def stop(self, index: int = None, administered_items: numpy.ndarray = None, theta: float = None, **kwargs) -> bool:
         """Checks whether the test reached its stopping criterion
 
         :param index: the index of the current examinee
-        :param administered_items: a list containing the indexes of items that were already administered
+        :param administered_items: a matrix containing the parameters of items that were already administered
         :param theta: a float containing the a proficiency value to which the error will be calculated
         :returns: `True` if the test met its stopping criterion, else `False`"""
 

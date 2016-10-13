@@ -15,7 +15,7 @@ class MaxInfoSelector(Selector):
         return 'Maximum Information Selector'
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None) -> int:
+               est_theta: float = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -64,7 +64,7 @@ class LinearSelector(Selector):
     def current(self):
         return self._current
 
-    def select(self, index: int = None, administered_items: list = None) -> int:
+    def select(self, index: int = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -101,7 +101,7 @@ class RandomSelector(Selector):
         super().__init__()
         self._replace = replace
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None) -> int:
+    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -175,7 +175,7 @@ class ClusterSelector(Selector):
         self._r_control = r_control
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None) -> int:
+               est_theta: float = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -392,7 +392,7 @@ class AStratifiedSelector(Selector):
         # sort item indexes by their discrimination value
         self._organized_items = self.simulator.items[:, 0].argsort()
 
-    def select(self, index: int = None, administered_items: list = None) -> int:
+    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -451,7 +451,7 @@ class AStratifiedBBlockingSelector(Selector):
         # sort item indexes by their difficulty, then their discrimination value
         self._organized_items = numpy.lexsort((self.simulator.items[:, 0], self.simulator.items[:, 1]))
 
-    def select(self, index: int = None, administered_items: list = None) -> int:
+    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -513,7 +513,7 @@ class MaxInfoStratificationSelector(Selector):
             [irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[1], item[2], item[3]) for item in
              self.simulator.items]).argsort()
 
-    def select(self, index: int = None, administered_items: list = None) -> int:
+    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -580,7 +580,7 @@ class MaxInfoBBlockingSelector(Selector):
                                                [irt.max_info(item[0], item[1], item[2], item[3]) for item in
                                                 self.simulator.items]))
 
-    def select(self, index: int = None, administered_items: list = None) -> int:
+    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.

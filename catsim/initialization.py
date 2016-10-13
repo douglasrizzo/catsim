@@ -25,7 +25,7 @@ class RandomInitializer(Initializer):
         self._dist_type = dist_type
         self._dist_params = dist_params
 
-    def initialize(self, index: int) -> float:
+    def initialize(self, index: int = None, **kwargs) -> float:
         """Generates a value using the chosen distribution and parameters
 
         :param index: the index of the current examinee. This parameter is not used by this method.
@@ -49,7 +49,7 @@ class FixedPointInitializer(Initializer):
         super(FixedPointInitializer, self).__init__()
         self._start = start
 
-    def initialize(self, index: int) -> float:
+    def initialize(self, index: int = None, **kwargs) -> float:
         """Returns the same proficiency value that was passed to the constructor of the initializer
 
         :param index: the index of the current examinee. This parameter is not used by this method.
