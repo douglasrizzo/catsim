@@ -198,8 +198,6 @@ def logLik(est_theta: float, response_vector: list, administered_items: numpy.nd
     """
     if len(response_vector) != administered_items.shape[0]:
         raise ValueError('Response vector and administered items must have the same number of items')
-    # print(response_vector)
-    # print(set(response_vector) - set([True, False]))
     if len(set(response_vector) - {True, False}) > 0:
         raise ValueError('Response vector must contain only Boolean elements')
 

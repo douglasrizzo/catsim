@@ -52,30 +52,41 @@ class HillClimbingEstimator(Estimator):
         :returns: boolean value indicating if Dodd's method will be used or not."""
         return self._dodd
 
-    def estimate(self, index: int) -> float:
+    def estimate(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
+                 response_vector: list = None, est_theta: float = None) -> int:
         """Returns the theta value that minimizes the negative log-likelihood function, given the current state of the
          test for the given examinee.
 
         :param index: index of the current examinee in the simulator
         :returns: the current :math:`\\hat\\theta`
         """
+        if (index is None or self.simulator is None) and (
+                                items is None and administered_items is None or response_vector is None or est_theta is None):
+            raise ValueError(
+                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+
+        if items is None and administered_items is None and response_vector is None and est_theta is None:
+            items = self.simulator.items
+            administered_items = self.simulator.administered_items[index]
+            response_vector = self.simulator.response_vectors[index]
+            est_theta = self.simulator.latest_estimations[index]
+
         self._calls += 1
 
-        if len(set(self.simulator.response_vectors[index])) == 1 and self._dodd:
-            return cat.dodd(self.simulator.latest_estimations[index], self.simulator.items,
-                            self.simulator.response_vectors[index][-1])
+        if len(set(response_vector)) == 1 and self._dodd:
+            return cat.dodd(est_theta, self.simulator.items, response_vector[-1])
 
-        if set(self.simulator.response_vectors[index]) == 1:
+        if set(response_vector) == 1:
             return float('inf')
-        elif set(self.simulator.response_vectors[index]) == 0:
+        elif set(response_vector) == 0:
             return float('-inf')
 
-        if len(self.simulator.administered_items[index]) > 0:
-            lbound = min(self.simulator.items[self.simulator.administered_items[index]][:, 1])
-            ubound = max(self.simulator.items[self.simulator.administered_items[index]][:, 1])
+        if len(administered_items) > 0:
+            lbound = min(items[administered_items][:, 1])
+            ubound = max(items[administered_items][:, 1])
         else:
-            lbound = min(self.simulator.items[:, 1])
-            ubound = max(self.simulator.items[:, 1])
+            lbound = min(items[:, 1])
+            ubound = max(items[:, 1])
 
         best_theta = -float('inf')
         max_ll = -float('inf')
@@ -90,8 +101,7 @@ class HillClimbingEstimator(Estimator):
 
             for ii in intervals:
                 self._evaluations += 1
-                ll = irt.logLik(ii, self.simulator.response_vectors[index],
-                                self.simulator.items[self.simulator.administered_items[index]])
+                ll = irt.logLik(ii, response_vector, items[administered_items])
                 if ll > max_ll:
                     max_ll = ll
 
@@ -153,7 +163,8 @@ class DifferentialEvolutionEstimator(Estimator):
         :returns: average number of function evaluations"""
         return self._evaluations / self._calls
 
-    def estimate(self, index: int) -> float:
+    def estimate(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
+                 response_vector: list = None) -> int:
         """Uses :py:func:`scipy.optimize.differential_evolution` to return the theta value
         that minimizes the negative log-likelihood function, given the current state of the
         test for the given examinee.
@@ -161,11 +172,20 @@ class DifferentialEvolutionEstimator(Estimator):
         :param index: index of the current examinee in the simulator
         :returns: the current :math:`\\hat\\theta`
         """
+        if (index is None or self.simulator is None) and (
+                            items is None and administered_items is None or response_vector is None):
+            raise ValueError(
+                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+
+        if items is None and administered_items is None and response_vector is None:
+            items = self.simulator.items
+            administered_items = self.simulator.administered_items[index]
+            response_vector = self.simulator.response_vectors[index]
 
         self._calls += 1
 
-        res = differential_evolution(irt.negativelogLik, bounds=[[self._lower_bound * 2, self._upper_bound * 2]], args=(
-        self.simulator.response_vectors[index], self.simulator.items[self.simulator.administered_items[index]]))
+        res = differential_evolution(irt.negativelogLik, bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
+                                     args=(response_vector, items[administered_items]))
 
         self._evaluations = res.nfev
 

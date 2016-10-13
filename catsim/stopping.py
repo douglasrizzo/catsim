@@ -1,3 +1,5 @@
+import numpy
+
 from catsim import irt
 from catsim.simulation import Stopper
 
@@ -14,13 +16,19 @@ class MaxItemStopper(Stopper):
         super(MaxItemStopper, self).__init__()
         self._max_itens = max_itens
 
-    def stop(self, index: int) -> bool:
+    def stop(self, index: int = None, administered_items: list = None) -> bool:
         """Checks whether the test reached its stopping criterion for the given user
 
         :param index: the index of the current examinee
         :returns: `True` if the test met its stopping criterion, else `False`"""
 
-        n_itens = len(self.simulator.administered_items[index])
+        if (index is None or self.simulator is None) and administered_items is None:
+            raise ValueError
+
+        if administered_items is None:
+            administered_items = self.simulator.administered_items[index]
+
+        n_itens = len(administered_items)
         if n_itens > self._max_itens:
             raise ValueError('More items than permitted were administered: {0} > {1}'.format(n_itens, self._max_itens))
 
@@ -39,13 +47,20 @@ class MinErrorStopper(Stopper):
         super(MinErrorStopper, self).__init__()
         self._min_error = min_error
 
-    def stop(self, index: int) -> bool:
+    def stop(self, index: int = None, administered_items: numpy.ndarray = None, theta: float = None) -> bool:
         """Checks whether the test reached its stopping criterion
 
         :param index: the index of the current examinee
         :returns: `True` if the test met its stopping criterion, else `False`"""
-        if len(self.simulator.estimations[index]) == 0:
+
+        if (index is None or self.simulator is None) and (administered_items is None or theta is None):
+            raise ValueError
+
+        if administered_items is None and theta is None:
+            theta = self.simulator.latest_estimations[index]
+            administered_items = self.simulator.items[self.simulator.administered_items[index]]
+
+        if theta is None:
             return False
 
-        theta = self.simulator.estimations[index][-1]
-        return irt.see(theta, self.simulator.items[self.simulator.administered_items[index]]) < self._min_error
+        return irt.see(theta, administered_items) < self._min_error
