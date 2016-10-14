@@ -413,13 +413,25 @@ class AStratifiedSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
-        pointer = len(administered_items) * self._test_size
+        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
+
+        try:
+            pointer = slices[len(administered_items)]
+            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
+                len(administered_items) + 1]
+        except IndexError:
+            raise ValueError(
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
+                    self, len(administered_items), self._test_size, len(slices)))
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
         # if the selected item has already been administered, select the next one
         while organized_items[pointer] in administered_items:
             pointer += 1
+            if pointer == max_pointer:
+                raise ValueError(
+                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
 
         return organized_items[pointer]
 
@@ -480,15 +492,27 @@ class AStratifiedBBlockingSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
-        selected_item = len(administered_items)
+        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
+
+        try:
+            pointer = slices[len(administered_items)]
+            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
+                len(administered_items) + 1]
+        except IndexError:
+            raise ValueError(
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
+                    self, len(administered_items), self._test_size, len(slices)))
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
         # if the selected item has already been administered, select the next one
-        while organized_items[selected_item] in administered_items:
-            selected_item += self._test_size
+        while organized_items[pointer] in administered_items:
+            pointer += 1
+            if pointer == max_pointer:
+                raise ValueError(
+                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
 
-        return organized_items[selected_item]
+        return organized_items[pointer]
 
 
 class MaxInfoStratificationSelector(Selector):
@@ -550,13 +574,25 @@ class MaxInfoStratificationSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
-        pointer = len(administered_items) * self._test_size
+        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
+
+        try:
+            pointer = slices[len(administered_items)]
+            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
+                len(administered_items) + 1]
+        except IndexError:
+            raise ValueError(
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
+                    self, len(administered_items), self._test_size, len(slices)))
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
         # if the selected item has already been administered, select the next one
         while organized_items[pointer] in administered_items:
             pointer += 1
+            if pointer == max_pointer:
+                raise ValueError(
+                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
 
         return organized_items[pointer]
 
@@ -624,13 +660,25 @@ class MaxInfoBBlockingSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
-        pointer = len(administered_items)
+        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
+
+        try:
+            pointer = slices[len(administered_items)]
+            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
+                len(administered_items) + 1]
+        except IndexError:
+            raise ValueError(
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
+                    self, len(administered_items), self._test_size, len(slices)))
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
         # if the selected item has already been administered, select the next one
         while organized_items[pointer] in administered_items:
-            pointer += self._test_size
+            pointer += 1
+            if pointer == max_pointer:
+                raise ValueError(
+                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
 
         return organized_items[pointer]
 
