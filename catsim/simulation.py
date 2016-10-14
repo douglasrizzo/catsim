@@ -116,7 +116,7 @@ class Simulator:
                  estimator: Estimator = None, stopper: Stopper = None):
         irt.validate_item_bank(items)
 
-        # adds a column for each item's exposure rate and their cluster membership
+        # adds a column for each item's exposure rate
         items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
         self._duration = 0
@@ -267,8 +267,9 @@ class Simulator:
             s.simulator = self
 
         if verbose:
-            print(('Starting simulation: {0} {1} {2} {3}'.format(self._initializer, self._selector, self._estimator,
-                                                                 self._stopper)))
+            print(('Starting simulation: {0} {1} {2} {3} {4} items'.format(self._initializer, self._selector,
+                                                                           self._estimator, self._stopper,
+                                                                           self._items.shape[0])))
 
         start_time = int(round(time.time() * 1000))
         for current_examinee, true_theta in enumerate(self.examinees):
