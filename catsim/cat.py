@@ -109,7 +109,7 @@ def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
     return t
 
 
-def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0.5):
+def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0):
     """Generate a synthetic item bank whose parameters approximately follow
     real-world parameters, as proposed by [Bar10]_.
 
