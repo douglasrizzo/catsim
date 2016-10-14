@@ -301,8 +301,8 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
     if len(items.shape) == 1:
         err += 'Item matrix has only one dimension.'
     elif items.shape[1] > 4:
-        print('\nItem matrix has more than 4 columns. catsim tends to add additional\
-            columns to the matriz during the simulation, so it\'s not a good idea to keep them.')
+        print('\nItem matrix has more than 4 columns. catsim tends to add \
+            columns to the matrix during the simulation, so it\'s not a good idea to keep them.')
     elif items.shape[1] < 4:
         if items.shape[1] == 1:
             err += '\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns'
