@@ -408,7 +408,8 @@ class AStratifiedSelector(Selector):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
-        if administered_items is None:
+        if items is None and administered_items is None:
+            items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
@@ -474,7 +475,8 @@ class AStratifiedBBlockingSelector(Selector):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
-        if administered_items is None:
+        if items is None and administered_items is None:
+            items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
@@ -543,7 +545,8 @@ class MaxInfoStratificationSelector(Selector):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
-        if administered_items is None:
+        if items is None and administered_items is None:
+            items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
@@ -616,7 +619,8 @@ class MaxInfoBBlockingSelector(Selector):
             raise ValueError(
                 'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
 
-        if administered_items is None:
+        if items is None and administered_items is None:
+            items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
 
         # select the item in the correct layer, according to the point in the test the examinee is
