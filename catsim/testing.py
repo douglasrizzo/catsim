@@ -71,6 +71,7 @@ def one_simulation(items, examinees, initializer, selector, estimator, stopper):
 def test_simulations():
     examinees = 100
     test_sizes = [20]
+        # [a for a in range(2, 31)][::-1]
     bank_sizes = [500]
 
     logistic_models = [  # '1PL', '2PL',

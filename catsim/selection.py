@@ -118,7 +118,9 @@ class RandomSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         if len(administered_items) >= items.shape[0] and not self._replace:
-            raise ValueError('A new item was asked for, but there are no more items to present.')
+            raise ValueError(
+                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}',
+                len(administered_items), items.shape[0])
 
         if self._replace:
             return numpy.random.choice(items.shape[0])
