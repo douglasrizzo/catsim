@@ -1,3 +1,5 @@
+from warnings import warn
+
 import numpy
 from scipy.integrate import quad
 
@@ -79,10 +81,11 @@ class LinearSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         if set(self._indexes).issubset(set(administered_items)):
-            raise ValueError(
+            warn(
                 'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'.format(
                     self._current, sorted(self._indexes), len(self._indexes), sorted(administered_items),
                     len(administered_items)))
+            return None
 
         selected_item = [x for x in self._indexes if x not in administered_items][0]
 
@@ -118,9 +121,10 @@ class RandomSelector(Selector):
             administered_items = self.simulator.administered_items[index]
 
         if len(administered_items) >= items.shape[0] and not self._replace:
-            raise ValueError(
-                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}',
-                len(administered_items), items.shape[0])
+            warn(
+                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}'.format(
+                    len(administered_items), items.shape[0]))
+            return None
 
         if self._replace:
             return numpy.random.choice(items.shape[0])
@@ -422,9 +426,10 @@ class AStratifiedSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -501,9 +506,10 @@ class AStratifiedBBlockingSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -583,9 +589,10 @@ class MaxInfoStratificationSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -669,9 +676,10 @@ class MaxInfoBBlockingSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -738,7 +746,8 @@ class The54321Selector(Selector):
         bin_size = self._test_size - len(administered_items)
 
         if len(organized_items) == 0:
-            raise ValueError('There are no more items to apply.')
+            warn('There are no more items to apply.')
+            return None
 
         return numpy.random.choice(organized_items[0:bin_size])
 
@@ -790,7 +799,8 @@ class RandomesqueSelector(Selector):
                            x not in administered_items]
 
         if len(organized_items) == 0:
-            raise ValueError('There are no more items to apply.')
+            warn('There are no more items to apply.')
+            return None
 
         return numpy.random.choice(list(organized_items)[:self._bin_size])
 
@@ -844,6 +854,7 @@ class IntervalIntegrationSelector(Selector):
                                                    items]).argsort() if x not in administered_items]
 
         if len(organized_items) == 0:
-            raise ValueError('There are no more items to apply.')
+            warn('There are no more items to apply.')
+            return None
 
         return list(organized_items)[0]

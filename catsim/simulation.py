@@ -281,11 +281,12 @@ class Simulator:
             self._estimations[current_examinee].append(est_theta)
 
             while not self._stopper.stop(current_examinee):
-                try:
-                    selected_item = self._selector.select(current_examinee)
-                except:
-                    print((len(self._administered_items[current_examinee])))
-                    raise
+                selected_item = self._selector.select(current_examinee)
+
+                # if the selector returns None, it means the selector and not the stopper, is asking the test to stop
+                # this happens e.g. if the item bank or or the available strata end before the minimum error is achieved
+                if selected_item is None:
+                    break
 
                 # simulates the examinee's response via the four-parameter
                 # logistic function
