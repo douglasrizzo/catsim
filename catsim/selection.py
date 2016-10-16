@@ -43,6 +43,7 @@ class MaxInfoSelector(Selector):
 
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
+            return None
 
         return valid_indexes[0]
 
