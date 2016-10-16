@@ -1,3 +1,5 @@
+from warnings import warn
+
 import numpy
 from scipy.integrate import quad
 
@@ -22,12 +24,12 @@ class MaxInfoSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         if (index is None or self.simulator is None) and (
                             items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -38,6 +40,9 @@ class MaxInfoSelector(Selector):
         inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]]
         valid_indexes = [item_index for (inf_value, item_index) in
                          sorted(zip(inf_values, valid_indexes), key=lambda pair: pair[0], reverse=True)]
+
+        if len(valid_indexes) == 0:
+            warn('There are no more items to be applied.')
 
         return valid_indexes[0]
 
@@ -69,20 +74,21 @@ class LinearSelector(Selector):
 
         :param index: the index of the current examinee in the simulator.
         :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         if (index is None or self.simulator is None) and (administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if administered_items is None:
             administered_items = self.simulator.administered_items[index]
 
         if set(self._indexes).issubset(set(administered_items)):
-            raise ValueError(
+            warn(
                 'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'.format(
                     self._current, sorted(self._indexes), len(self._indexes), sorted(administered_items),
                     len(administered_items)))
+            return None
 
         selected_item = [x for x in self._indexes if x not in administered_items][0]
 
@@ -107,20 +113,21 @@ class RandomSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None:
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
 
         if len(administered_items) >= items.shape[0] and not self._replace:
-            raise ValueError(
-                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}',
-                len(administered_items), items.shape[0])
+            warn(
+                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}'.format(
+                    len(administered_items), items.shape[0]))
+            return None
 
         if self._replace:
             return numpy.random.choice(items.shape[0])
@@ -189,7 +196,7 @@ class ClusterSelector(Selector):
         if (index is None or self.simulator is None) and (
                             items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -404,11 +411,11 @@ class AStratifiedSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
         if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None:
             items = self.simulator.items
@@ -422,9 +429,10 @@ class AStratifiedSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -483,11 +491,11 @@ class AStratifiedBBlockingSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
         if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None:
             items = self.simulator.items
@@ -501,9 +509,10 @@ class AStratifiedBBlockingSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -565,11 +574,11 @@ class MaxInfoStratificationSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
         if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None:
             items = self.simulator.items
@@ -583,9 +592,10 @@ class MaxInfoStratificationSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -651,11 +661,11 @@ class MaxInfoBBlockingSelector(Selector):
         :param index: the index of the current examinee in the simulator.
         :param items: a matrix containing item parameters
         :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
         if (index is None or self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None:
             items = self.simulator.items
@@ -669,9 +679,10 @@ class MaxInfoBBlockingSelector(Selector):
             max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
                 len(administered_items) + 1]
         except IndexError:
-            raise ValueError(
+            warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
                     self, len(administered_items), self._test_size, len(slices)))
+            return None
 
         organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
 
@@ -718,12 +729,12 @@ class The54321Selector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         if (index is None or self.simulator is None) and (
                             items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -738,7 +749,8 @@ class The54321Selector(Selector):
         bin_size = self._test_size - len(administered_items)
 
         if len(organized_items) == 0:
-            raise ValueError('There are no more items to apply.')
+            warn('There are no more items to apply.')
+            return None
 
         return numpy.random.choice(organized_items[0:bin_size])
 
@@ -772,12 +784,12 @@ class RandomesqueSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         if (index is None or self.simulator is None) and (
                             items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -790,7 +802,8 @@ class RandomesqueSelector(Selector):
                            x not in administered_items]
 
         if len(organized_items) == 0:
-            raise ValueError('There are no more items to apply.')
+            warn('There are no more items to apply.')
+            return None
 
         return numpy.random.choice(list(organized_items)[:self._bin_size])
 
@@ -826,12 +839,12 @@ class IntervalIntegrationSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
-        :returns: index of the next item to be applied.
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         if (index is None or self.simulator is None) and (
                             items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -844,6 +857,7 @@ class IntervalIntegrationSelector(Selector):
                                                    items]).argsort() if x not in administered_items]
 
         if len(organized_items) == 0:
-            raise ValueError('There are no more items to apply.')
+            warn('There are no more items to apply.')
+            return None
 
         return list(organized_items)[0]

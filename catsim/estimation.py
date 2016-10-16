@@ -66,7 +66,7 @@ class HillClimbingEstimator(Estimator):
         if (index is None or self.simulator is None) and (
                                 items is None and administered_items is None or response_vector is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and response_vector is None and est_theta is None:
             items = self.simulator.items
@@ -181,7 +181,7 @@ class DifferentialEvolutionEstimator(Estimator):
         if (index is None or self.simulator is None) and (
                             items is None and administered_items is None or response_vector is None):
             raise ValueError(
-                'Either pass an index for the simulator, or the item bank, administered_items and est_theta to select the next item independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
 
         if items is None and administered_items is None and response_vector is None:
             items = self.simulator.items
