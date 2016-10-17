@@ -150,6 +150,90 @@ def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str
         plt.show()
 
 
+def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, filepath: str = None,
+                  show: bool = True, flag: str = 'b'):
+    """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
+    the `y` axis represents their exposure rates. an examinee's test progress.
+
+    .. plot::
+
+        from catsim.cat import generate_item_bank
+        from catsim import plot
+        from catsim.initialization import RandomInitializer
+        from catsim.selection import MaxInfoSelector
+        from catsim.estimation import HillClimbingEstimator
+        from catsim.stopping import MaxItemStopper
+        from catsim.simulation import Simulator
+
+        s = Simulator(generate_item_bank(100), 10)
+        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))
+        plot.item_exposure(simulator=s)
+
+    :param flag: a string representing one of the item parameters to use on the x axis, or 'hist' for a default
+                 matplotlib histogram of the item exposures.
+    :param title: the plot title.
+    :param simulator: a simulator which has already simulated a series of CATs,
+                      containing estimations to the examinees' proficiencies and
+                      a list of administered items for each examinee.
+    :param items: an item matrix containing item parameters and their exposure rate in the last column.
+    :param filepath: the path to save the plot
+    :param show: whether the generated plot is to be shown
+    """
+    if simulator is None and items is None:
+        raise ValueError('Not a single plottable object was passed.')
+
+    plt.figure()
+
+    if title is not None:
+        plt.title(title, size=18)
+
+    if simulator is not None:
+        items = simulator.items
+
+    if items.shape[1] != 5:
+        raise ValueError('The item matrix is supposed to have 5 columns, the last one representing item exposure rates')
+
+    if flag not in ['a', 'b', 'c', 'd', 'hist']:
+        raise ValueError('Unsupported order value.')
+
+    if flag in 'abcd':
+        if flag == 'a':
+            parameter = items[:, 0]
+            xlabel = 'Item discrimination'
+        elif flag == 'b':
+            parameter = items[:, 1]
+            xlabel = 'Item difficulty'
+        elif flag == 'c':
+            parameter = items[:, 2]
+            xlabel = 'Item Guessing'
+        else:
+            parameter = items[:, 3]
+            xlabel = 'Item upper asymptote'
+
+        bar_width = (max(parameter) - min(parameter)) / items.shape[0] * 3
+        plt.bar(parameter, items[:, 4], width=bar_width)
+        plt.xlabel(xlabel)
+        plt.ylabel('Item exposure')
+
+    else:
+        plt.hist(items[:, 4])
+
+    plt.legend(loc='best')
+
+    if filepath is not None:
+        dir = os.path.dirname(filepath)
+        if len(dir) > 0 and not os.path.exists(dir):
+            os.makedirs(os.path.dirname(filepath))
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+
+    if show:
+        plt.show()
+
+
+def theta_hist(title: str = None, simulator: Simulator = None, thetas: list = None):
+    pass
+
+
 def test_progress(title: str = None, simulator: Simulator = None, index: int = None, thetas: list = None,
                   administered_items: numpy.ndarray = None, true_theta: float = None, info: bool = False,
                   var: bool = False, see: bool = False, reliability: bool = False, filepath: str = None,
@@ -252,7 +336,8 @@ def test_progress(title: str = None, simulator: Simulator = None, index: int = N
     plt.legend(loc='best')
 
     if filepath is not None:
-        if not os.path.exists(os.path.dirname(filepath)):
+        dir = os.path.dirname(filepath)
+        if len(dir) > 0 and not os.path.exists(dir):
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
 
