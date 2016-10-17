@@ -43,6 +43,11 @@ def test_plots():
 
     plot.gen3d_dataset_scatter(items=s.items, show=False)
     plot.test_progress(title='Test progress', simulator=s, index=0, info=True, see=True, reliability=True, show=False)
+    plot.item_exposure(title='Test progress', simulator=s, show=False, flag='a')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, flag='b')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, flag='c')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, flag='d')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, flag='hist')
 
     # close all plots after testing
     close('all')
