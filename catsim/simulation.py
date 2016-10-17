@@ -228,8 +228,10 @@ class Simulator:
                 self._examinees = numpy.random.normal(0, 1, x)
         elif type(x) == list:
             self._examinees = numpy.array(x)
+        elif type(x) == numpy.ndarray and x.ndim == 1:
+            self._examinees = x
         else:
-            raise ValueError('Examinees must be an int or list')
+            raise ValueError('Examinees must be an int, list of floats or one-dimensional numpy array')
 
     def simulate(self, initializer: Initializer = None, selector: Selector = None, estimator: Estimator = None,
                  stopper: Stopper = None, verbose: bool = False):
