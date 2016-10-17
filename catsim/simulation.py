@@ -304,14 +304,13 @@ class Simulator:
                 # estimate the new theta using the given estimator
                 est_theta = self._estimator.estimate(current_examinee)
 
-                # flatten the list of lists so that we can count occurrences of items easier
-                flattened_administered_items = [administered_item for administered_list in self._administered_items for
-                                                administered_item in administered_list]
+                # count occurrences of this item in all tests
+                item_occurrences = numpy.sum(
+                    [selected_item in administered_list for administered_list in self._administered_items])
 
                 # update the exposure value for this item
-                # r = number of tests item has been used / total number of tests
-                self.items[selected_item, 4] = numpy.sum(flattened_administered_items == selected_item) / len(
-                    self.examinees)
+                # r = number of tests item has been used on / total number of tests
+                self.items[selected_item, 4] = item_occurrences / len(self.examinees)
 
                 self._estimations[current_examinee].append(est_theta)
 
