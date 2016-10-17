@@ -117,7 +117,8 @@ class Simulator:
         irt.validate_item_bank(items)
 
         # adds a column for each item's exposure rate
-        items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
+        if (items.shape[1] < 5):
+            items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
         self._duration = 0
         self._items = items
