@@ -213,9 +213,9 @@ class ClusterSelector(Selector):
         if self._method == 'item_info':
             infos = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items]
 
-            while selected_cluster is None:
-                if max(infos) == float('-inf'):
-                    break
+            evaluated_items = []
+
+            while selected_cluster is None and len(evaluated_items) < len(infos):
 
                 # find item with maximum information
                 max_info_item = infos.index(max(infos))
@@ -228,7 +228,7 @@ class ClusterSelector(Selector):
                 # if all items in the same cluster as the selected have been used,
                 # get the next item with maximum information
                 if set(valid_indexes).issubset(set(administered_items)):
-                    infos[max_info_item] = float('-inf')
+                    evaluated_items += valid_indexes
                 else:
                     selected_cluster = self._clusters[max_info_item]
 
@@ -237,7 +237,7 @@ class ClusterSelector(Selector):
             # selected
             if self._method == 'cluster_info':
                 cluster_infos = ClusterSelector.sum_cluster_infos(est_theta, items, self._clusters)
-            elif self._method == 'weighted_info':
+            else:
                 cluster_infos = ClusterSelector.weighted_cluster_infos(est_theta, items, self._clusters)
 
             # sorts clusters descending by their information values
