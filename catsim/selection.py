@@ -249,7 +249,7 @@ class ClusterSelector(Selector):
 
             # walks through the sorted clusters in order
             for i in range(len(sorted_clusters)):
-                valid_indexes = numpy.nonzero(items[:, 4] == sorted_clusters[i])[0]
+                valid_indexes = numpy.nonzero([r == sorted_clusters[i] for r in items[:, 4]])[0]
 
                 # checks if at least one item from this cluster has not
                 # been administered to this examinee yet
@@ -270,8 +270,9 @@ class ClusterSelector(Selector):
 
         # gets the indexes and information values from the items in the
         # selected cluster that have not been administered
-        valid_indexes = [index for index in numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0]
-                         if index not in administered_items]
+        valid_indexes = [index for index in
+                         numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0] if
+                         index not in administered_items]
 
         # gets the indexes and information values from the items in the
         # selected cluster with r < rmax that have not been
@@ -315,7 +316,7 @@ class ClusterSelector(Selector):
         cluster_infos = numpy.zeros((len(set(clusters))))
 
         for cluster in set(clusters):
-            cluster_indexes = numpy.nonzero(clusters == cluster)[0]
+            cluster_indexes = numpy.nonzero([c == cluster for c in clusters])[0]
 
             for item in items[cluster_indexes]:
                 cluster_infos[cluster] += irt.inf(theta, item[0], item[1], item[2], item[3])
