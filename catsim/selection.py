@@ -270,15 +270,14 @@ class ClusterSelector(Selector):
 
         # gets the indexes and information values from the items in the
         # selected cluster that have not been administered
-        valid_indexes = numpy.array(
-            list(set(numpy.nonzero(self._clusters == selected_cluster)[0]) - set(administered_items)))
+        valid_indexes = [index for index in numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0]
+                         if index not in administered_items]
 
         # gets the indexes and information values from the items in the
         # selected cluster with r < rmax that have not been
         # administered
-        valid_indexes_low_r = numpy.array(list(
-            set(numpy.nonzero((self._clusters == selected_cluster) & (items[:, 4] < self._r_max))[0]) - set(
-                administered_items)))
+        valid_indexes_low_r = [index for index in valid_indexes if
+                               items[index, 4] < self._r_max and index not in administered_items]
 
         if len(valid_indexes_low_r) > 0:
             # sort both items and their indexes by their information
