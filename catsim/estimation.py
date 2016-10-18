@@ -58,8 +58,10 @@ class HillClimbingEstimator(Estimator):
          test for the given examinee.
 
         :param index: index of the current examinee in the simulator
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
+        :param response_vector: a boolean list containing the examinee's answers to the administered items
         :param est_theta: a float containing the current estimated proficiency
         :returns: the current :math:`\\hat\\theta`
         """
@@ -173,9 +175,9 @@ class DifferentialEvolutionEstimator(Estimator):
         test for the given examinee.
 
         :param index: index of the current examinee in the simulator
-        :param response_vector: a boolean list containing the examinee's answers to the administered items
         :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
+        :param response_vector: a boolean list containing the examinee's answers to the administered items
         :returns: the current :math:`\\hat\\theta`
         """
         if (index is None or self.simulator is None) and (

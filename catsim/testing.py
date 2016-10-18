@@ -1,16 +1,13 @@
 import random
 import unittest
 
-import numpy
 from sklearn.cluster import KMeans
 
-from catsim import cat, irt, stats, plot
+from catsim import cat, stats, plot
 from catsim.cat import generate_item_bank
-from catsim.estimation import HillClimbingEstimator, DifferentialEvolutionEstimator
-from catsim.initialization import RandomInitializer, FixedPointInitializer
-from catsim.selection import AStratifiedSelector, RandomesqueSelector, AStratifiedBBlockingSelector, MaxInfoSelector, \
-    RandomSelector, The54321Selector, MaxInfoBBlockingSelector, MaxInfoStratificationSelector, LinearSelector, \
-    ClusterSelector
+from catsim.estimation import *
+from catsim.initialization import *
+from catsim.selection import *
 from catsim.simulation import Simulator
 from catsim.stopping import MaxItemStopper, MinErrorStopper
 
@@ -43,14 +40,16 @@ def test_plots():
 
     plot.gen3d_dataset_scatter(items=s.items, show=False)
     plot.test_progress(title='Test progress', simulator=s, index=0, info=True, see=True, reliability=True, show=False)
+    plot.item_exposure(title='Test progress', simulator=s, show=False)
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='a')
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='b')
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='c')
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='d')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='a', plot_type='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='b', plot_type='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='c', plot_type='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='d', plot_type='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='a', ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='b', ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='c', ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='d', ptype='line')
 
     # close all plots after testing
     close('all')
