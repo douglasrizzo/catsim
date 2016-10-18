@@ -87,21 +87,21 @@ class HillClimbingEstimator(Estimator):
             return float('-inf')
 
         if len(administered_items) > 0:
-            lbound = min(items[administered_items][:, 1])
-            ubound = max(items[administered_items][:, 1])
+            lower_bound = min(items[administered_items][:, 1])
+            upper_bound = max(items[administered_items][:, 1])
         else:
-            lbound = min(items[:, 1])
-            ubound = max(items[:, 1])
+            lower_bound = min(items[:, 1])
+            upper_bound = max(items[:, 1])
 
-        best_theta = -float('inf')
-        max_ll = -float('inf')
+        best_theta = float('-inf')
+        max_ll = float('-inf')
 
         self._evaluations = 0
 
         for _ in range(10):
-            intervals = numpy.linspace(lbound, ubound, 10)
+            intervals = numpy.linspace(lower_bound, upper_bound, 10)
             if self._verbose:
-                print(('Bounds: ' + str(lbound) + ' ' + str(ubound)))
+                print(('Bounds: ' + str(lower_bound) + ' ' + str(upper_bound)))
                 print(('Interval size: ' + str(intervals[1] - intervals[0])))
 
             for ii in intervals:
@@ -119,8 +119,8 @@ class HillClimbingEstimator(Estimator):
                     best_theta = ii
 
                 else:
-                    lbound = best_theta - (intervals[1] - intervals[0])
-                    ubound = ii
+                    lower_bound = best_theta - (intervals[1] - intervals[0])
+                    upper_bound = ii
                     break
 
         return best_theta
