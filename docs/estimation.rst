@@ -8,8 +8,8 @@ types of ways of estimating :math:`\hat\theta`: and these are the Bayesian
 methods and maximum-likelihood ones.
 
 Maximum-likelihood methods choose the :math:`\hat\theta` value that maximizes
-the likelihood (see :py:func:log_likelihood) of an examinee having a certain response
-vector, given the corresponding item parameters.
+the likelihood (see :py:func:`catsim.irt.log_likelihood`) of an examinee having
+a certain response vector, given the corresponding item parameters.
 
 Bayesian methods used *a priori* information (usually assuming proficiency and
 parameter distributions) to make new estimations. The knowledge of new
@@ -61,7 +61,8 @@ necessarily) more efficient estimators.
 
         for response_vector in response_vectors:
             ll_line = [irt.log_likelihood(theta, response_vector, items) for theta in thetas]
-            max_LL = estimator.estimate(response_vector, items, 0)
+            max_LL = estimator.estimate(items=items, administered_items=range(20),
+                                        response_vector=response_vector, est_theta=0)
             best_theta = irt.log_likelihood(max_LL, response_vector, items)
             plt.plot(thetas, ll_line)
             plt.plot(max_LL, best_theta, 'o', label = str(sum(response_vector)) + ' correct, '+r'$\hat{\theta} \approx $' + format(round(max_LL, 5)))

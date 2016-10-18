@@ -43,14 +43,16 @@ def test_plots():
 
     plot.gen3d_dataset_scatter(items=s.items, show=False)
     plot.test_progress(title='Test progress', simulator=s, index=0, info=True, see=True, reliability=True, show=False)
+    plot.item_exposure(title='Test progress', simulator=s, show=False)
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='a')
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='b')
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='c')
     plot.item_exposure(title='Test progress', simulator=s, show=False, par='d')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='a', plot_type='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='b', plot_type='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='c', plot_type='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='d', plot_type='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='a', ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='b', ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='c', ptype='line')
+    plot.item_exposure(title='Test progress', simulator=s, show=False, par='d', ptype='line')
 
     # close all plots after testing
     close('all')

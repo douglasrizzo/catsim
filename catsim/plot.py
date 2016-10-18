@@ -150,8 +150,8 @@ def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str
         plt.show()
 
 
-def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, filepath: str = None,
-                  show: bool = True, par: str = None, plot_type: str = 'bar'):
+def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, par: str = None, ptype: str = 'bar', filepath: str = None,
+                  show: bool = True):
     """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
     the `y` axis represents their exposure rates. an examinee's test progress.
 
@@ -168,17 +168,17 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))
         plot.item_exposure(title='Exposures', simulator=s, par='b')
-        plot.item_exposure(title='Exposures', simulator=s, plot_type='line')
+        plot.item_exposure(title='Exposures', simulator=s, ptype='line')
 
-    :param flag: a string representing one of the item parameters to use on the x axis, or 'hist' for a default
-                 matplotlib histogram of the item exposures.
     :param title: the plot title.
-    :param simulator: a simulator which has already simulated a series of CATs,
-                      containing estimations to the examinees' proficiencies and
-                      a list of administered items for each examinee.
+    :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees'
+                      proficiencies and a list of administered items for each examinee.
     :param items: an item matrix containing item parameters and their exposure rate in the last column.
-    :param filepath: the path to save the plot
-    :param show: whether the generated plot is to be shown
+    :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`
+                to use the default order of the item bank.
+    :param ptype: plot type. Either 'bar' or 'line'.
+    :param filepath: the path to save the plot.
+    :param show: whether the generated plot is to be shown.
     """
     if simulator is None and items is None:
         raise ValueError('Not a single plottable object was passed.')
@@ -196,7 +196,7 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
 
     if par is not None and par not in ['a', 'b', 'c', 'd']:
         raise ValueError('Unsupported parameter.')
-    if plot_type not in ['line', 'bar']:
+    if ptype not in ['line', 'bar']:
         raise ValueError('Unsupported plot type.')
 
     if par == 'a':
@@ -215,7 +215,7 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
         parameter = numpy.array(range(items.shape[0]))
         xlabel = 'Items'
 
-    if plot_type == 'bar':
+    if ptype == 'bar':
         bar_width = (max(parameter) - min(parameter)) / items.shape[0] * 3
         plt.bar(parameter, items[:, 4], width=bar_width)
     else:
@@ -261,12 +261,8 @@ def test_progress(title: str = None, simulator: Simulator = None, index: int = N
         from catsim.stopping import MaxItemStopper
         from catsim.simulation import Simulator
 
-        initializer = RandomInitializer()
-        selector = MaxInfoSelector()
-        estimator = HillClimbingEstimator()
-        stopper = MaxItemStopper(20)
         s = Simulator(generate_item_bank(100), 10)
-        s.simulate(initializer, selector, estimator, stopper)
+        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))
         plot.test_progress(simulator=s, index=0)
         plot.test_progress(simulator=s, index=0, info=True, var=True, see=True)
 
