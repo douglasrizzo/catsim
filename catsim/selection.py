@@ -214,6 +214,9 @@ class ClusterSelector(Selector):
             infos = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items]
 
             while selected_cluster is None:
+                if max(infos) == float('-inf'):
+                    break
+
                 # find item with maximum information
                 max_info_item = infos.index(max(infos))
 
@@ -256,6 +259,11 @@ class ClusterSelector(Selector):
                     # the for loop ends with the cluster that has a) the maximum
                     # information possible and b) at least one item that has not
                     # yet been administered
+
+        # if the test size gets larger than the item bank size, end the test
+        if selected_cluster is None:
+            warn("There are no more items to be applied.")
+            return None
 
         # in this part, an item is chosen from the cluster that was
         # selected above
