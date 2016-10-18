@@ -151,7 +151,7 @@ def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str
 
 
 def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, filepath: str = None,
-                  show: bool = True, flag: str = 'b'):
+                  show: bool = True, par: str = None, plot_type: str = 'bar'):
     """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
     the `y` axis represents their exposure rates. an examinee's test progress.
 
@@ -167,7 +167,8 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
 
         s = Simulator(generate_item_bank(100), 10)
         s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))
-        plot.item_exposure(simulator=s)
+        plot.item_exposure(title='Exposures', simulator=s, par='b')
+        plot.item_exposure(title='Exposures', simulator=s, plot_type='line')
 
     :param flag: a string representing one of the item parameters to use on the x axis, or 'hist' for a default
                  matplotlib histogram of the item exposures.
@@ -193,31 +194,36 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
     if items.shape[1] != 5:
         raise ValueError('The item matrix is supposed to have 5 columns, the last one representing item exposure rates')
 
-    if flag not in ['a', 'b', 'c', 'd', 'hist']:
-        raise ValueError('Unsupported order value.')
+    if par is not None and par not in ['a', 'b', 'c', 'd']:
+        raise ValueError('Unsupported parameter.')
+    if plot_type not in ['line', 'bar']:
+        raise ValueError('Unsupported plot type.')
 
-    if flag in 'abcd':
-        if flag == 'a':
-            parameter = items[:, 0]
-            xlabel = 'Item discrimination'
-        elif flag == 'b':
-            parameter = items[:, 1]
-            xlabel = 'Item difficulty'
-        elif flag == 'c':
-            parameter = items[:, 2]
-            xlabel = 'Item Guessing'
-        else:
-            parameter = items[:, 3]
-            xlabel = 'Item upper asymptote'
+    if par == 'a':
+        parameter = items[:, 0]
+        xlabel = 'Item discrimination'
+    elif par == 'b':
+        parameter = items[:, 1]
+        xlabel = 'Item difficulty'
+    elif par == 'c':
+        parameter = items[:, 2]
+        xlabel = 'Item Guessing'
+    elif par == 'd':
+        parameter = items[:, 3]
+        xlabel = 'Item upper asymptote'
+    else:
+        parameter = numpy.array(range(items.shape[0]))
+        xlabel = 'Items'
 
+    if plot_type == 'bar':
         bar_width = (max(parameter) - min(parameter)) / items.shape[0] * 3
         plt.bar(parameter, items[:, 4], width=bar_width)
-        plt.xlabel(xlabel)
-        plt.ylabel('Item exposure')
-
     else:
-        plt.hist(items[:, 4])
+        indexes = parameter.argsort()
+        plt.plot(items[:, 4][indexes])
 
+    plt.xlabel(xlabel)
+    plt.ylabel('Item exposure')
     plt.legend(loc='best')
 
     if filepath is not None:
