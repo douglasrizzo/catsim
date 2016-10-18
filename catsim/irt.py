@@ -201,30 +201,12 @@ def log_likelihood(est_theta: float, response_vector: list, administered_items: 
     if len(set(response_vector) - {True, False}) > 0:
         raise ValueError('Response vector must contain only Boolean elements')
 
-    ll = 0
+    ps = [icc(est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
+              administered_items[i][3]) for i in range(len(response_vector))]
 
-    # try:
-    for i in range(len(response_vector)):
-        p = icc(est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
-                administered_items[i][3])
+    assert all(p >= 0 for p in ps)  # sanity check
 
-        # The original function is as follows, but since log(0) is undefined, a math domain error occurs
-        # LL += (response_vector[i] * math.log(p)) + (
-        #     (1 - response_vector[i]) * math.log(1 - p))
-
-        if p < 0:
-            print(('p = ' + str(p)))
-
-        # This way, no error occurs, at the expense of some conditional checks
-        if response_vector[i]:
-            ll += math.log(p)
-        else:
-            try:
-                ll += math.log(1 - p)
-            except:
-                print(('p = ' + str(p)))
-                print(('1 - p = ' + str(1 - p)))
-                print(('log(1 - p) = ' + str(math.log(1 - p))))
+    ll = sum([math.log(ps[i]) if response_vector[i] else math.log(1 - ps[i]) for i in range(len(response_vector))])
 
     return ll
 
