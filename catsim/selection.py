@@ -21,7 +21,8 @@ class MaxInfoSelector(Selector):
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
@@ -112,7 +113,8 @@ class RandomSelector(Selector):
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
@@ -189,7 +191,8 @@ class ClusterSelector(Selector):
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied.
@@ -298,7 +301,8 @@ class ClusterSelector(Selector):
         """Returns the sum of item informations, separated by cluster
 
         :param theta: an examinee's :math:`\\theta` value
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param clusters: a list containing item cluster memberships, represented by integers
         :returns: list containing the sum of item information values for each cluster"""
         cluster_infos = numpy.zeros((len(set(clusters))))
@@ -317,7 +321,8 @@ class ClusterSelector(Selector):
         The weight is the number of items in each cluster.
 
         :param theta: an examinee's :math:`\\theta` value
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param clusters: a list containing item cluster memberships, represented by integers
         :returns: list containing the sum of item information values for each cluster,
                   divided by the number of items in each cluster"""
@@ -333,7 +338,8 @@ class ClusterSelector(Selector):
     def sum_cluster_params(items: numpy.ndarray, c: list):
         """Returns the sum of item parameter values for each cluster cluster
 
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param c: a list containing clustering memeberships.
         :returns: a matrix containing the sum of each parameter by cluster. Lines are clusters, columns are parameters.
         """
@@ -727,7 +733,8 @@ class The54321Selector(Selector):
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
@@ -782,7 +789,8 @@ class RandomesqueSelector(Selector):
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
@@ -837,7 +845,8 @@ class IntervalIntegrationSelector(Selector):
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters in the format that `catsim` understands (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.

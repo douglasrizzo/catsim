@@ -150,8 +150,8 @@ def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str
         plt.show()
 
 
-def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, par: str = None, ptype: str = 'bar', filepath: str = None,
-                  show: bool = True):
+def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, par: str = None,
+                  ptype: str = 'bar', filepath: str = None, show: bool = True):
     """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
     the `y` axis represents their exposure rates. an examinee's test progress.
 
@@ -227,17 +227,13 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
     plt.legend(loc='best')
 
     if filepath is not None:
-        dir = os.path.dirname(filepath)
-        if len(dir) > 0 and not os.path.exists(dir):
+        filedir = os.path.dirname(filepath)
+        if len(filedir) > 0 and not os.path.exists(filedir):
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
 
     if show:
         plt.show()
-
-
-def theta_hist(title: str = None, simulator: Simulator = None, thetas: list = None):
-    pass
 
 
 def test_progress(title: str = None, simulator: Simulator = None, index: int = None, thetas: list = None,
@@ -338,8 +334,8 @@ def test_progress(title: str = None, simulator: Simulator = None, index: int = N
     plt.legend(loc='best')
 
     if filepath is not None:
-        dir = os.path.dirname(filepath)
-        if len(dir) > 0 and not os.path.exists(dir):
+        filedir = os.path.dirname(filepath)
+        if len(filedir) > 0 and not os.path.exists(filedir):
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight', dpi=300)
 
