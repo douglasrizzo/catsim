@@ -281,26 +281,18 @@ class ClusterSelector(Selector):
                                items[index, 4] < self._r_max and index not in administered_items]
 
         if len(valid_indexes_low_r) > 0:
-            # sort both items and their indexes by their information
-            # value
+            # return the item with maximum information from the ones available
             inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes_low_r]]
-            valid_indexes_low_r = [item_index for (inf_value, item_index) in
-                                   sorted(zip(inf_values, valid_indexes_low_r), key=lambda pair: pair[0], reverse=True)]
-
-            selected_item = valid_indexes_low_r[0]
+            selected_item = valid_indexes_low_r[inf_values.index(max(inf_values))]
 
         # if all items in the selected cluster have exceed their r values,
         # select the one with smallest r, regardless of information
         else:
             if self._r_control == 'passive':
                 inf_values = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items[valid_indexes]]
-                valid_indexes = [item_index for (inf_value, item_index) in
-                                 sorted(zip(inf_values, valid_indexes), key=lambda pair: pair[0], reverse=True)]
-            elif self._r_control == 'aggressive':
-                valid_indexes = [item_index for (r, item_index) in
-                                 sorted(zip(items[valid_indexes, 4], valid_indexes), key=lambda pair: pair[0])]
-
-            selected_item = valid_indexes[0]
+                selected_item = valid_indexes[inf_values.index(max(inf_values))]
+            else:
+                selected_item = valid_indexes[items[:, 4].index(min(items[:, 4]))]
 
         return selected_item
 
