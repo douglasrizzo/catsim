@@ -120,20 +120,26 @@ def test_simulations():
 
 
 def test_cism():
-    examinees = 10
-    initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
-    estimators = [HillClimbingEstimator(), DifferentialEvolutionEstimator((-8, 8))]
-    stoppers = [MaxItemStopper(20), MinErrorStopper(.4)]
+    examinees = 100
+    test_sizes = [20, 100]
+    bank_sizes = [500, 5000]
 
-    for initializer in initializers:
-        for estimator in estimators:
-            for stopper in stoppers:
-                items = generate_item_bank(5000)
-                clusters = list(KMeans(n_clusters=8).fit_predict(items))
-                ClusterSelector.weighted_cluster_infos(0, items, clusters)
-                ClusterSelector.avg_cluster_params(items, clusters)
-                selector = ClusterSelector(clusters=clusters, r_max=.2)
-                yield one_simulation, items, examinees, initializer, selector, estimator, stopper
+    for bank_size in bank_sizes:
+        for test_size in test_sizes:
+
+            initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
+            estimators = [HillClimbingEstimator()]
+            stoppers = [MaxItemStopper(test_size), MinErrorStopper(.4)]
+
+            for initializer in initializers:
+                for estimator in estimators:
+                    for stopper in stoppers:
+                        items = generate_item_bank(bank_size)
+                        clusters = list(KMeans(n_clusters=8).fit_predict(items))
+                        ClusterSelector.weighted_cluster_infos(0, items, clusters)
+                        ClusterSelector.avg_cluster_params(items, clusters)
+                        selector = ClusterSelector(clusters=clusters, r_max=.2)
+                        yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
 if __name__ == '__main__':
