@@ -1,3 +1,4 @@
+from abc import abstractmethod, ABCMeta
 from warnings import warn
 
 import numpy
@@ -376,24 +377,9 @@ class ClusterSelector(Selector):
         return averages
 
 
-class AStratifiedSelector(Selector):
-    """Implementation of the :math:`\\alpha`-stratified selector proposed by
-    [Chang99]_, in which the item bank is sorted in ascending order according to the
-    items discrimination parameter and then separated into :math:`K` strata
-    (:math:`K` being the test size), each stratum containing gradually higher
-    average discrimination. The :math:`\\alpha`-stratified selector then selects the
-    first non-administered item from stratum :math:`k`, in which :math:`k`
-    represents the position in the test of the current item the examinee is being
-    presented.
-
-    .. image:: ../docs/alpha-strat.*
-
-    :param test_size: the number of items the test contains. The selector uses this parameter
-    to create the correct number of strata.
-    """
-
+class StratifiedSelector(Selector, metaclass=ABCMeta):
     def __str__(self):
-        return 'a-Stratified Selector'
+        return 'General Stratified Selector'
 
     def __init__(self, test_size):
         super().__init__()
@@ -405,8 +391,9 @@ class AStratifiedSelector(Selector):
         return self._test_size
 
     @staticmethod
+    @abstractmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        return items[:, 0].argsort()
+        pass
 
     def preprocess(self):
         # sort item indexes by their discrimination value
@@ -441,7 +428,7 @@ class AStratifiedSelector(Selector):
                     self, len(administered_items), self._test_size, len(slices)))
             return None
 
-        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
+        organized_items = self._organized_items if self._organized_items is not None else self.sort_items(items)
 
         # if the selected item has already been administered, select the next one
         while organized_items[pointer] in administered_items:
@@ -453,7 +440,34 @@ class AStratifiedSelector(Selector):
         return organized_items[pointer]
 
 
-class AStratifiedBBlockingSelector(Selector):
+class AStratifiedSelector(StratifiedSelector):
+    """Implementation of the :math:`\\alpha`-stratified selector proposed by
+    [Chang99]_, in which the item bank is sorted in ascending order according to the
+    items discrimination parameter and then separated into :math:`K` strata
+    (:math:`K` being the test size), each stratum containing gradually higher
+    average discrimination. The :math:`\\alpha`-stratified selector then selects the
+    first non-administered item from stratum :math:`k`, in which :math:`k`
+    represents the position in the test of the current item the examinee is being
+    presented.
+
+    .. image:: ../docs/alpha-strat.*
+
+    :param test_size: the number of items the test contains. The selector uses this parameter
+    to create the correct number of strata.
+    """
+
+    def __str__(self):
+        return 'a-Stratified Selector'
+
+    def __init__(self, test_size):
+        super().__init__(test_size)
+
+    @staticmethod
+    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+        return items[:, 0].argsort()
+
+
+class AStratifiedBBlockingSelector(StratifiedSelector):
     """Implementation of the :math:`\\alpha`-stratified selector with :math:`b`
     blocking proposed by [Chang2001]_, in which the item bank is sorted in ascending
     order according to the items difficulty parameter and then separated into
@@ -476,64 +490,14 @@ class AStratifiedBBlockingSelector(Selector):
         return 'a-Stratified b-Blocking Selector'
 
     def __init__(self, test_size):
-        super().__init__()
-        self._organized_items = None
-        self._test_size = test_size
-
-    @property
-    def test_size(self):
-        return self._test_size
+        super().__init__(test_size)
 
     @staticmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
         return numpy.lexsort((items[:, 0], items[:, 1]))
 
-    def preprocess(self):
-        # sort item indexes by their discrimination value
-        self._organized_items = __class__.sort_items(self.simulator.items)
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
-        """Returns the index of the next item to be administered.
-
-        :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters
-        :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
-        """
-        if (index is None or self.simulator is None) and (items is None or administered_items is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
-
-        if items is None and administered_items is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-
-        # select the item in the correct layer, according to the point in the test the examinee is
-        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
-
-        try:
-            pointer = slices[len(administered_items)]
-            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
-                len(administered_items) + 1]
-        except IndexError:
-            warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
-                    self, len(administered_items), self._test_size, len(slices)))
-            return None
-
-        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
-
-        # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
-            pointer += 1
-            if pointer == max_pointer:
-                raise ValueError(
-                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
-
-        return organized_items[pointer]
-
-
-class MaxInfoStratificationSelector(Selector):
+class MaxInfoStratificationSelector(StratifiedSelector):
     """Implementation of the maximum information stratification (MIS) selector
     proposed by [Bar06]_, in which the item bank is sorted in ascending order
     according to the items maximum information and then separated into :math:`K`
@@ -557,13 +521,7 @@ class MaxInfoStratificationSelector(Selector):
         return 'Maximum Information Stratification Selector'
 
     def __init__(self, test_size):
-        super().__init__()
-        self._organized_items = None
-        self._test_size = test_size
-
-    @property
-    def test_size(self):
-        return self._test_size
+        super().__init__(test_size)
 
     @staticmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
@@ -571,52 +529,8 @@ class MaxInfoStratificationSelector(Selector):
             [irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[1], item[2], item[3]) for item in
              items]).argsort()
 
-    def preprocess(self):
-        # sort item indexes by their discrimination value
-        self._organized_items = __class__.sort_items(self.simulator.items)
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
-        """Returns the index of the next item to be administered.
-
-        :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters
-        :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
-        """
-        if (index is None or self.simulator is None) and (items is None or administered_items is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
-
-        if items is None and administered_items is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-
-        # select the item in the correct layer, according to the point in the test the examinee is
-        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
-
-        try:
-            pointer = slices[len(administered_items)]
-            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
-                len(administered_items) + 1]
-        except IndexError:
-            warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
-                    self, len(administered_items), self._test_size, len(slices)))
-            return None
-
-        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
-
-        # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
-            pointer += 1
-            if pointer == max_pointer:
-                raise ValueError(
-                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
-
-        return organized_items[pointer]
-
-
-class MaxInfoBBlockingSelector(Selector):
+class MaxInfoBBlockingSelector(StratifiedSelector):
     """Implementation of the maximum information stratification with :math:`b`
     blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted
     in ascending order according to the items difficulty parameter and then
@@ -644,63 +558,13 @@ class MaxInfoBBlockingSelector(Selector):
         return 'Maximum Information Stratification with b-Blocking Selector'
 
     def __init__(self, test_size):
-        super().__init__()
-        self._organized_items = None
-        self._test_size = test_size
-
-    @property
-    def test_size(self):
-        return self._test_size
+        super().__init__(test_size)
 
     @staticmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
         return numpy.lexsort(([irt.inf(irt.max_info(item[0], item[1], item[2], item[3]), item[0], item[1], item[2],
                                        item[3]) for item in items],
                               [irt.max_info(item[0], item[1], item[2], item[3]) for item in items]))
-
-    def preprocess(self):
-        # sort item indexes by their discrimination value
-        self._organized_items = __class__.sort_items(self.simulator.items)
-
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
-        """Returns the index of the next item to be administered.
-
-        :param index: the index of the current examinee in the simulator.
-        :param items: a matrix containing item parameters
-        :param administered_items: a list containing the indexes of items that were already administered
-        :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
-        """
-        if (index is None or self.simulator is None) and (items is None or administered_items is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
-
-        if items is None and administered_items is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-
-        # select the item in the correct layer, according to the point in the test the examinee is
-        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
-
-        try:
-            pointer = slices[len(administered_items)]
-            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
-                len(administered_items) + 1]
-        except IndexError:
-            warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
-                    self, len(administered_items), self._test_size, len(slices)))
-            return None
-
-        organized_items = self._organized_items if self._organized_items is not None else __class__.sort_items(items)
-
-        # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
-            pointer += 1
-            if pointer == max_pointer:
-                raise ValueError(
-                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
-
-        return organized_items[pointer]
 
 
 class The54321Selector(Selector):
