@@ -86,7 +86,7 @@ class LinearSelector(Selector):
         if administered_items is None:
             administered_items = self.simulator.administered_items[index]
 
-        if set(self._indexes).issubset(set(administered_items)):
+        if set(self._indexes) <= set(administered_items):
             warn(
                 'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'.format(
                     self._current, sorted(self._indexes), len(self._indexes), sorted(administered_items),
@@ -228,7 +228,7 @@ class ClusterSelector(Selector):
 
                 # if all items in the same cluster as the selected have been used,
                 # get the next item with maximum information
-                if set(valid_indexes).issubset(set(administered_items)):
+                if set(valid_indexes) <= set(administered_items):
                     evaluated_items += valid_indexes
                 else:
                     selected_cluster = self._clusters[max_info_item]
