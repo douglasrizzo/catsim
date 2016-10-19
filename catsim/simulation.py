@@ -38,7 +38,7 @@ class Simulable(metaclass=ABCMeta):
         pass
 
 
-class Initializer(Simulable):
+class Initializer(Simulable, metaclass=ABCMeta):
     """Base class for CAT initializers"""
 
     def __init__(self):
@@ -54,7 +54,7 @@ class Initializer(Simulable):
         pass
 
 
-class Selector(Simulable):
+class Selector(Simulable, metaclass=ABCMeta):
     """Base class representing a CAT item selector."""
 
     def __init__(self):
@@ -70,7 +70,7 @@ class Selector(Simulable):
         pass
 
 
-class Estimator(Simulable):
+class Estimator(Simulable, metaclass=ABCMeta):
     """Base class for proficiency estimators"""
 
     def __init__(self):
@@ -87,7 +87,7 @@ class Estimator(Simulable):
         pass
 
 
-class Stopper(Simulable):
+class Stopper(Simulable, metaclass=ABCMeta):
     """Base class for CAT stop criterion"""
 
     def __init__(self):
