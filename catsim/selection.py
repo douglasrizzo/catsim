@@ -209,30 +209,42 @@ class ClusterSelector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         selected_cluster = None
+        existent_clusters = set(self._clusters)
         # this part of the code selects the cluster from which the item at
         # the current point of the test will be chosen
         if self._method == 'item_info':
-            infos = [irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items]
+            # get the item indexes sorted by their information value
+            infos = numpy.array([irt.inf(est_theta, i[0], i[1], i[2], i[3]) for i in items]).argsort()[::-1]
 
-            evaluated_items = []
+            evaluated_clusters = set()
 
-            while selected_cluster is None and len(evaluated_items) < len(infos):
+            # iterate over every item in order of information value
+            for i in range(items.shape[0]):
+                # get the current non-examined item
+                max_info_item = infos[i]
 
-                # find item with maximum information
-                max_info_item = infos.index(max(infos))
+                # if the cluster of the current item has already been fully examined, go to the next item
+                if self._clusters[max_info_item] in evaluated_clusters:
+                    continue
 
-                # gets the indexes of all the items in the same cluster
-                # as the current selected item that have not been
-                # administered
-                valid_indexes = [i for i, x in enumerate(self._clusters) if x == self._clusters[max_info_item]]
+                # get the indexes of all items in the same cluster as the current item
+                items_in_cluster = numpy.nonzero([x == self._clusters[max_info_item] for x in self._clusters])[0]
 
-                # if all items in the same cluster as the selected have been used,
-                # get the next item with maximum information
-                if set(valid_indexes) <= set(administered_items):
-                    evaluated_items += valid_indexes
-                    print(evaluated_items)
-                else:
-                    selected_cluster = self._clusters[max_info_item]
+                # if all the items in the current cluster have already been administered (it happens, theoretically),
+                # add this cluster to the list of fully evaluated clusters
+                if set(items_in_cluster) <= set(administered_items):
+                    evaluated_clusters.add(self._clusters[max_info_item])
+
+                    # if all clusters have been evaluated, the loop ends and the method returns None somewhere below
+                    if evaluated_clusters == existent_clusters:
+                        break
+
+                    # else, if there are still items and clusters to be explored, keep going
+                    continue
+
+                # if the algorithm gets here, it means this cluster can be used
+                selected_cluster = self._clusters[max_info_item]
+                break
 
         elif self._method in ['cluster_info', 'weighted_info']:
             # calculates the cluster information, depending on the method
