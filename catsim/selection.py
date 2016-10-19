@@ -230,6 +230,7 @@ class ClusterSelector(Selector):
                 # get the next item with maximum information
                 if set(valid_indexes) <= set(administered_items):
                     evaluated_items += valid_indexes
+                    print(evaluated_items)
                 else:
                     selected_cluster = self._clusters[max_info_item]
 
