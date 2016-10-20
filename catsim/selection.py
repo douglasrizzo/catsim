@@ -218,7 +218,6 @@ class ClusterSelector(Selector):
 
             evaluated_clusters = set()
 
-            print('Entered main loop...')
             # iterate over every item in order of information value
             for i in range(items.shape[0]):
                 # get the current non-examined item
@@ -246,7 +245,6 @@ class ClusterSelector(Selector):
                 # if the algorithm gets here, it means this cluster can be used
                 selected_cluster = self._clusters[max_info_item]
                 break
-            print('Exited main loop!')
 
         elif self._method in ['cluster_info', 'weighted_info']:
             # calculates the cluster information, depending on the method
