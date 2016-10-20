@@ -20,8 +20,8 @@ def one_simulation(items, examinees, initializer, selector, estimator, stopper):
 
 def test_cism():
     examinees = 100
-    test_sizes = [10]
-    bank_sizes = [1000]
+    test_sizes = [20]
+    bank_sizes = [500]
 
     for bank_size in bank_sizes:
         for test_size in test_sizes:
@@ -51,7 +51,7 @@ def test_simulations():
     for bank_size in bank_sizes:
         for test_size in test_sizes:
             initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
-            infinite_selectors = [MaxInfoSelector(), RandomSelector(), IntervalIntegrationSelector(0.3)]
+            infinite_selectors = [MaxInfoSelector(), RandomSelector()]
             finite_selectors = [LinearSelector(list(numpy.random.choice(bank_size, size=test_size, replace=False))),
                                 AStratifiedSelector(test_size), AStratifiedBBlockingSelector(test_size),
                                 MaxInfoStratificationSelector(test_size), MaxInfoBBlockingSelector(test_size),
@@ -65,7 +65,7 @@ def test_simulations():
                                 items = generate_item_bank(bank_size, itemtype=logistic_model)
                                 responses = cat.random_response_vector(random.randint(1, test_size - 1))
                                 administered_items = numpy.random.choice(bank_size, len(responses), replace=False)
-                                est_theta = initializers[0].initialize()
+                                est_theta = initializer.initialize()
                                 selector.select(items=items, administered_items=administered_items,
                                                 est_theta=est_theta)
                                 estimator.estimate(items=items, administered_items=administered_items,
