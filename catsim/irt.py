@@ -1,6 +1,8 @@
 import math
 
+import numexpr
 import numpy
+from numpy import pi
 
 
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -29,6 +31,23 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
               :math:`d \\approx 1`.
     """
     return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
+
+
+def split_params(items: numpy.ndarray):
+    return items[:, 0], items[:, 1], items[:, 2], items[:, 3]
+
+
+def icc_numpy(theta: float, items: numpy.ndarray) -> numpy.ndarray:
+    a, b, c, d = split_params(items)
+
+    return numexpr.evaluate('c + ((d - c) / (1 + exp((-a * (theta - b)))))')
+
+
+def inf_numpy(theta: float, items: numpy.ndarray):
+    a, b, c, d = split_params(items)
+    p = icc_numpy(theta, items)
+
+    return numexpr.evaluate('(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))')
 
 
 def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -75,7 +94,7 @@ def test_info(theta: float, items: numpy.ndarray):
     :param items: a matrix containing item parameters.
     :returns: the test information at `theta` for a test represented by `items`.
     """
-    return sum([inf(theta, item[0], item[1], item[2], item[3]) for item in items])
+    return numpy.sum(inf_numpy(theta, items))
 
 
 def var(theta: float, items: numpy.ndarray) -> float:
@@ -173,6 +192,19 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
     return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
+def max_info_numpy(items: numpy.ndarray):
+    a, b, c, d = split_params(items)
+    assert pi
+
+    u = numexpr.evaluate('-(3 / 4) + ((c + d - 2 * c * d) / 2)')
+    v = numexpr.evaluate('(c + d - 1) / 4')
+    x_star = numexpr.evaluate(
+        '2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5'
+    )
+
+    return numexpr.evaluate('b + (1 / a) * log((x_star - c) / (d - x_star))')
+
+
 def log_likelihood(est_theta: float, response_vector: list, administered_items: numpy.ndarray) -> float:
     """Calculates the log-likelihood of an estimated proficiency, given a
     response vector and the parameters of the answered items [Ayala2009]_.
@@ -201,12 +233,16 @@ def log_likelihood(est_theta: float, response_vector: list, administered_items: 
     if len(set(response_vector) - {True, False}) > 0:
         raise ValueError('Response vector must contain only Boolean elements')
 
-    ps = [icc(est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
-              administered_items[i][3]) for i in range(len(response_vector))]
+    ps = icc_numpy(est_theta, administered_items)
 
-    assert all(p >= 0 for p in ps)  # sanity check
+    ll = numexpr.evaluate('sum(where(response_vector, log(ps), log(1-ps)))')
 
-    ll = sum([math.log(ps[i]) if response_vector[i] else math.log(1 - ps[i]) for i in range(len(response_vector))])
+    # ps = [icc(est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
+    #           administered_items[i][3]) for i in range(len(response_vector))]
+
+    # assert all(p >= 0 for p in ps)  # sanity check
+    #
+    # ll = sum([math.log(ps[i]) if response_vector[i] else math.log(1 - ps[i]) for i in range(len(response_vector))])
 
     return ll
 
