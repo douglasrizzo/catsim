@@ -33,18 +33,34 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
 
 
-def split_params(items: numpy.ndarray):
+def _split_params(items: numpy.ndarray):
+    """Split the item matrix parameters into columns.
+
+    :param items: an item matrix with four columns representing four parameters.
+    :returns: a 4-tuple with each column in a different slot."""
     return items[:, 0], items[:, 1], items[:, 2], items[:, 3]
 
 
 def icc_numpy(theta: float, items: numpy.ndarray) -> numpy.ndarray:
-    a, b, c, d = split_params(items)
+    """Implementation of :py:func:`icc` using :py:package:`numpy` and :py:package:`numexpr` in which the characteristic
+    function for all items in a `numpy.ndarray` are calculated at once.
+
+    :param theta: the individual's proficiency value.
+    :param items: array containing the four item parameters.
+    :returns: an array of all item characteristic functions, given the current ``theta``"""
+    a, b, c, d = _split_params(items)
 
     return numexpr.evaluate('c + ((d - c) / (1 + exp((-a * (theta - b)))))')
 
 
 def inf_numpy(theta: float, items: numpy.ndarray):
-    a, b, c, d = split_params(items)
+    """Implementation of :py:func:`inf` using :py:package:`numpy` and :py:package:`numexpr` in which the information
+    value for all items in a `numpy.ndarray` are calculated at once.
+
+    :param theta: the individual's proficiency value.
+    :param items: array containing the four item parameters.
+    :returns: an array of all item information values, given the current ``theta``"""
+    a, b, c, d = _split_params(items)
     p = icc_numpy(theta, items)
 
     return numexpr.evaluate('(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))')
@@ -193,7 +209,12 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
 
 
 def max_info_numpy(items: numpy.ndarray):
-    a, b, c, d = split_params(items)
+    """Implementation of :py:func:`max_info` using :py:package:`numpy` and :py:package:`numexpr` in which the theta
+    value that maximizes the information function for all items is returned in a `numpy.ndarray`.
+
+    :param items: array containing the four item parameters.
+    :returns: an array of all theta values that maximize the information function of each item."""
+    a, b, c, d = _split_params(items)
     assert pi
 
     u = numexpr.evaluate('-(3 / 4) + ((c + d - 2 * c * d) / 2)')
@@ -233,15 +254,7 @@ def log_likelihood(est_theta: float, response_vector: list, administered_items: 
         raise ValueError('Response vector must contain only Boolean elements')
 
     ps = icc_numpy(est_theta, administered_items)
-
-    ll = numexpr.evaluate('sum(where(response_vector, log(ps), log(1-ps)))')
-
-    # ps = [icc(est_theta, administered_items[i][0], administered_items[i][1], administered_items[i][2],
-    #           administered_items[i][3]) for i in range(len(response_vector))]
-
-    # assert all(p >= 0 for p in ps)  # sanity check
-    #
-    # ll = sum([math.log(ps[i]) if response_vector[i] else math.log(1 - ps[i]) for i in range(len(response_vector))])
+    ll = numexpr.evaluate('sum(where(response_vector, log(ps), log(1 - ps)))')
 
     return ll
 

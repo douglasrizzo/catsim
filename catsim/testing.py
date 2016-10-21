@@ -20,7 +20,7 @@ def one_simulation(items, examinees, initializer, selector, estimator, stopper):
 
 def test_cism():
     examinees = 100
-    test_sizes = [20]
+    test_sizes = [30]
     bank_sizes = [500]
 
     for bank_size in bank_sizes:
@@ -43,7 +43,7 @@ def test_cism():
 
 def test_simulations():
     examinees = 100
-    test_sizes = [20]
+    test_sizes = [30]
     bank_sizes = [500]
 
     logistic_models = ['4PL']
