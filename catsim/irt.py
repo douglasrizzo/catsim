@@ -199,8 +199,7 @@ def max_info_numpy(items: numpy.ndarray):
     u = numexpr.evaluate('-(3 / 4) + ((c + d - 2 * c * d) / 2)')
     v = numexpr.evaluate('(c + d - 1) / 4')
     x_star = numexpr.evaluate(
-        '2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5'
-    )
+        '2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5')
 
     return numexpr.evaluate('b + (1 / a) * log((x_star - c) / (d - x_star))')
 

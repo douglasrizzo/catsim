@@ -8,7 +8,7 @@ install:
 	python3 setup.py install
 tests:
 ifneq '$USER' 'travis'
-	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim --processes=$(grep -c ^processor /proc/cpuinfo)
+	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
 else
 	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
 endif
