@@ -39,7 +39,7 @@ class MaxInfoSelector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         valid_indexes = [x for x in range(items.shape[0]) if x not in administered_items]
-        inf_values = irt.inf_numpy(est_theta, items[valid_indexes])
+        inf_values = irt.inf_hpc(est_theta, items[valid_indexes])
         valid_indexes = [item_index for (inf_value, item_index) in
                          sorted(zip(inf_values, valid_indexes), key=lambda pair: pair[0], reverse=True)]
 
@@ -214,7 +214,7 @@ class ClusterSelector(Selector):
         # the current point of the test will be chosen
         if self._method == 'item_info':
             # get the item indexes sorted by their information value
-            infos = irt.inf_numpy(est_theta, items).argsort()[::-1]
+            infos = irt.inf_hpc(est_theta, items).argsort()[::-1]
 
             evaluated_clusters = set()
 
@@ -296,14 +296,14 @@ class ClusterSelector(Selector):
 
         if len(valid_indexes_low_r) > 0:
             # return the item with maximum information from the ones available
-            inf_values = irt.inf_numpy(est_theta, items[valid_indexes_low_r])
+            inf_values = irt.inf_hpc(est_theta, items[valid_indexes_low_r])
             selected_item = valid_indexes_low_r[numpy.nonzero(inf_values == max(inf_values))[0]]
 
         # if all items in the selected cluster have exceed their r values,
         # select the one with smallest r, regardless of information
         else:
             if self._r_control == 'passive':
-                inf_values = irt.inf_numpy(est_theta, items[valid_indexes])
+                inf_values = irt.inf_hpc(est_theta, items[valid_indexes])
                 selected_item = valid_indexes[numpy.nonzero(inf_values == max(inf_values))[0]]
             else:
                 selected_item = valid_indexes[items[:, 4].index(min(items[:, 4]))]
@@ -538,8 +538,8 @@ class MaxInfoStratificationSelector(StratifiedSelector):
 
     @staticmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        maxinfo = irt.max_info_numpy(items)
-        return irt.inf_numpy(maxinfo, items).argsort()
+        maxinfo = irt.max_info_hpc(items)
+        return irt.inf_hpc(maxinfo, items).argsort()
 
 
 class MaxInfoBBlockingSelector(StratifiedSelector):
@@ -574,8 +574,8 @@ class MaxInfoBBlockingSelector(StratifiedSelector):
 
     @staticmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        maxinfo=irt.max_info_numpy(items)
-        return numpy.lexsort((irt.inf_numpy(maxinfo, items),
+        maxinfo=irt.max_info_hpc(items)
+        return numpy.lexsort((irt.inf_hpc(maxinfo, items),
                               maxinfo))
 
 
@@ -626,7 +626,7 @@ class The54321Selector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by their information value and remove indexes of administered items
-        organized_items = [x for x in irt.inf_numpy(est_theta, items).argsort() if x not in administered_items]
+        organized_items = [x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items]
 
         bin_size = self._test_size - len(administered_items)
 
@@ -680,7 +680,7 @@ class RandomesqueSelector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by their information value and remove indexes of administered items
-        organized_items = [x for x in irt.inf_numpy(est_theta, items).argsort() if x not in administered_items]
+        organized_items = [x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items]
 
         if len(organized_items) == 0:
             warn('There are no more items to apply.')

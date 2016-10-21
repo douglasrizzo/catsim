@@ -50,9 +50,9 @@ necessarily) more efficient estimators.
     randBinList = lambda n: [np.random.randint(0,2) for b in range(1,n+1)]
     items = generate_item_bank(20)
     items = items[items[:,1].argsort()] # order by difficulty ascending
-    r0 = [1] * 7 + [0] * 13
-    r1 = [1] * 10 + [0] * 10
-    r2 = [1] * 15 + [0] * 5
+    r0 = [True] * 7 + [False] * 13
+    r1 = [True] * 10 + [False] * 10
+    r2 = [True] * 15 + [False] * 5
     response_vectors = [r0, r1, r2]
     thetas = np.arange(-6.,6.,.1)
 
