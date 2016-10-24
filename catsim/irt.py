@@ -98,7 +98,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     return (a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))
 
 
-def test_info(theta: float, items: numpy.ndarray):
+def test_info(theta: float, items: numpy.ndarray) -> float:
     """Computes the test information of a test at a specific :math:`\\theta` value [Ayala2009]_:
 
     .. math:: I(\\theta) = \\sum_{j \\in J} I_j(\\theta)
