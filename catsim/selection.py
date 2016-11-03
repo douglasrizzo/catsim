@@ -60,7 +60,7 @@ class LinearSelector(FiniteSelector):
         return 'Linear Selector'
 
     def __init__(self, indexes: list):
-        super().__init__()
+        super().__init__(len(indexes))
         self._indexes = indexes
         self._current = 0
 
