@@ -171,6 +171,22 @@ class ClusterSelector(Selector):
     def __str__(self):
         return 'Cluster Selector'
 
+    @property
+    def r_max(self):
+        return self._r_max
+
+    @property
+    def clusters(self):
+        return self._clusters
+
+    @property
+    def method(self):
+        return self._method
+
+    @property
+    def r_control(self):
+        return self._r_control
+
     def __init__(self, clusters: list, method: str = 'item_info', r_max: float = 1, r_control: str = 'passive'):
         super().__init__()
         available_methods = ['item_info', 'cluster_info', 'weighted_info']
