@@ -2,6 +2,7 @@
 application of adaptive tests. Most of this module is based on the work of
 [Bar10]_."""
 
+import datetime
 import time
 from abc import ABCMeta, abstractmethod
 
@@ -297,13 +298,13 @@ class Simulator:
                                                                            self._estimator, self._stopper,
                                                                            self._items.shape[0])))
 
-        start_time = int(round(time.time() * 1000))
+        start_time = time.time()
         for current_examinee, true_theta in enumerate(self.examinees):
 
             if verbose:
-                print('{0}/{1} examinees... ({2})'.format(current_examinee + 1, len(self.examinees), "%0.2f" % (
-                    (round(time.time() * 1000) - start_time) / (current_examinee + 1) * (
-                        len(self.examinees) - current_examinee + 1)) + ' ms remaining'))
+                print('{0}/{1} examinees... ({2})'.format(current_examinee + 1, len(self.examinees), datetime.timedelta(
+                    seconds=(time.time() - start_time) / (current_examinee + 1) * (
+                        len(self.examinees) - current_examinee + 1))) + ' remaining')
 
             est_theta = self._initializer.initialize(current_examinee)
             self._estimations[current_examinee].append(est_theta)
