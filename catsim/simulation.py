@@ -70,6 +70,23 @@ class Selector(Simulable, metaclass=ABCMeta):
         pass
 
 
+class FiniteSelector(Selector, metaclass=ABCMeta):
+    """Base class representing a CAT item selector."""
+
+    def __init__(self, test_size):
+        self._test_size = test_size
+        self._overlap_rate = None
+        super().__init__()
+
+    @property
+    def test_size(self):
+        return self._test_size
+
+    @property
+    def overlap_rate(self) -> float:
+        return self._overlap_rate
+
+
 class Estimator(Simulable, metaclass=ABCMeta):
     """Base class for proficiency estimators"""
 
@@ -126,6 +143,7 @@ class Simulator:
         self._bias = None
         self._mse = None
         self._rmse = None
+        self._overlap_rate = None
 
         self._initializer = initializer
         self._selector = selector
@@ -177,6 +195,11 @@ class Simulator:
     def duration(self) -> float:
         """Duration of the simulation, in milliseconds."""
         return self._duration
+
+    @property
+    def overlap_rate(self) -> float:
+        """Overlap rate of the test, if it is of finite length."""
+        return self._overlap_rate
 
     @property
     def initializer(self) -> Initializer:
@@ -279,8 +302,8 @@ class Simulator:
 
             if verbose:
                 print('{0}/{1} examinees... ({2})'.format(current_examinee + 1, len(self.examinees), "%0.2f" % (
-                (round(time.time() * 1000) - start_time) / (current_examinee + 1) * (
-                len(self.examinees) - current_examinee + 1)) + ' ms remaining'))
+                    (round(time.time() * 1000) - start_time) / (current_examinee + 1) * (
+                        len(self.examinees) - current_examinee + 1)) + ' ms remaining'))
 
             est_theta = self._initializer.initialize(current_examinee)
             self._estimations[current_examinee].append(est_theta)
@@ -324,6 +347,9 @@ class Simulator:
         self._bias = cat.bias(self.examinees, self.latest_estimations)
         self._mse = cat.mse(self.examinees, self.latest_estimations)
         self._rmse = cat.rmse(self.examinees, self.latest_estimations)
+
+        if type(selector) is FiniteSelector:
+            self._overlap_rate = cat.overlap_rate(self.items, selector.test_size)
 
 
 if __name__ == '__main__':

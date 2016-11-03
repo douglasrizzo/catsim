@@ -1,11 +1,11 @@
-from abc import abstractmethod, ABCMeta
+from abc import abstractmethod
 from warnings import warn
 
 import numpy
 from scipy.integrate import quad
 
 from catsim import irt
-from catsim.simulation import Selector
+from catsim.simulation import Selector, FiniteSelector
 
 
 class MaxInfoSelector(Selector):
@@ -50,7 +50,7 @@ class MaxInfoSelector(Selector):
         return valid_indexes[0]
 
 
-class LinearSelector(Selector):
+class LinearSelector(FiniteSelector):
     """Selector that returns item indexes in a linear order, simulating a standard
     (non-adaptive) test.
 
@@ -390,18 +390,13 @@ class ClusterSelector(Selector):
         return averages
 
 
-class StratifiedSelector(Selector, metaclass=ABCMeta):
+class StratifiedSelector(FiniteSelector):
     def __str__(self):
         return 'General Stratified Selector'
 
     def __init__(self, test_size):
-        super().__init__()
+        super().__init__(test_size)
         self._organized_items = None
-        self._test_size = test_size
-
-    @property
-    def test_size(self):
-        return self._test_size
 
     @staticmethod
     @abstractmethod
@@ -574,12 +569,11 @@ class MaxInfoBBlockingSelector(StratifiedSelector):
 
     @staticmethod
     def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        maxinfo=irt.max_info_hpc(items)
-        return numpy.lexsort((irt.inf_hpc(maxinfo, items),
-                              maxinfo))
+        maxinfo = irt.max_info_hpc(items)
+        return numpy.lexsort((irt.inf_hpc(maxinfo, items), maxinfo))
 
 
-class The54321Selector(Selector):
+class The54321Selector(FiniteSelector):
     """Implementation of the 5-4-3-2-1 selector proposed by [McBride83]_, in which,
     at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin
     containing the :math:`K-k` most informative items in the bank, given the current
@@ -597,12 +591,7 @@ class The54321Selector(Selector):
         return '5-4-3-2-1 Selector'
 
     def __init__(self, test_size):
-        super().__init__()
-        self._test_size = test_size
-
-    @property
-    def test_size(self):
-        return self._test_size
+        super().__init__(test_size)
 
     def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
                est_theta: float = None, **kwargs) -> int:
