@@ -1,6 +1,0 @@
-<map id="inheritanceb6f22deed1" name="inheritanceb6f22deed1">
-<area shape="rect" id="node1" href="#catsim.estimation.DifferentialEvolutionEstimator" target="_top" title="Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log&#45;likelihood function" alt="" coords="461,5,763,28"/>
-<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Estimator" target="_top" title="Base class for proficiency estimators" alt="" coords="234,28,417,51"/>
-<area shape="rect" id="node3" href="#catsim.estimation.HillClimbingEstimator" target="_top" title="Estimator that uses a hill&#45;climbing algorithm to maximize the likelihood function" alt="" coords="486,50,739,73"/>
-<area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,28,190,51"/>
-</map>
