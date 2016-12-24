@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Estimation Methods – catsim.estimation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="None" href="index.html"/>
+        <link rel="next" title="Stopping Criteria – catsim.stopping" href="stopping.html"/>
+        <link rel="prev" title="Item Selection Methods – catsim.selection" href="selection.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> catsim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.13.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods &#8211; <code class="docutils literal"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods &#8211; <code class="docutils literal"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Estimation Methods &#8211; <code class="docutils literal"><span class="pre">catsim.estimation</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#comparison-between-estimators">Comparison between estimators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria &#8211; <code class="docutils literal"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation &#8211; <code class="docutils literal"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions &#8211; <code class="docutils literal"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions &#8211; <code class="docutils literal"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions &#8211; <code class="docutils literal"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions &#8211; <code class="docutils literal"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">catsim</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Estimation Methods &#8211; <code class="docutils literal"><span class="pre">catsim.estimation</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/estimation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="estimation-methods-catsim-estimation">
+<h1>Estimation Methods &#8211; <a class="reference internal" href="#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal"><span class="pre">catsim.estimation</span></code></a><a class="headerlink" href="#estimation-methods-catsim-estimation" title="Permalink to this headline">¶</a></h1>
+<p>Estimators are the objects responsible for estimating of examinees
+proficiency values, given a dichotomous (binary) response vector and an array of
+the items answered by the examinee. In the domain of IRT, there are two main
+types of ways of estimating <span class="math">\(\hat\theta\)</span>: and these are the Bayesian
+methods and maximum-likelihood ones.</p>
+<p>Maximum-likelihood methods choose the <span class="math">\(\hat\theta\)</span> value that maximizes
+the likelihood (see <a class="reference internal" href="irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal"><span class="pre">catsim.irt.log_likelihood()</span></code></a>) of an examinee having
+a certain response vector, given the corresponding item parameters.</p>
+<p>Bayesian methods used <em>a priori</em> information (usually assuming proficiency and
+parameter distributions) to make new estimations. The knowledge of new
+estimations is then used to make new assumptions about the parameter
+distributions, refining future estimations.</p>
+<p>All implemented classes in this module inherit from a base abstract class
+<code class="xref py py-class docutils literal"><span class="pre">Estimator</span></code>. <code class="xref py py-class docutils literal"><span class="pre">Simulator</span></code> allows that a custom estimator be
+used during the simulation, as long as it also inherits from
+<code class="xref py py-class docutils literal"><span class="pre">Estimator</span></code>.</p>
+digraph inheritanceb6f22deed1 {
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;catsim.estimation.DifferentialEvolutionEstimator&quot; [URL=&quot;#catsim.estimation.DifferentialEvolutionEstimator&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function&quot;];
+  &quot;catsim.simulation.Estimator&quot; -&gt; &quot;catsim.estimation.DifferentialEvolutionEstimator&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;catsim.estimation.HillClimbingEstimator&quot; [URL=&quot;#catsim.estimation.HillClimbingEstimator&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Estimator that uses a hill-climbing algorithm to maximize the likelihood function&quot;];
+  &quot;catsim.simulation.Estimator&quot; -&gt; &quot;catsim.estimation.HillClimbingEstimator&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;catsim.simulation.Estimator&quot; [URL=&quot;simulation.html#catsim.simulation.Estimator&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class for proficiency estimators&quot;];
+  &quot;catsim.simulation.Simulable&quot; -&gt; &quot;catsim.simulation.Estimator&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;catsim.simulation.Simulable&quot; [URL=&quot;simulation.html#catsim.simulation.Simulable&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class representing one of the Simulator components that will receive a reference back to it.&quot;];
+}
+<p><code class="xref py py-mod docutils literal"><span class="pre">catsim</span></code> implements a few types of maximum-likelihood estimators.</p>
+<span class="target" id="module-catsim.estimation"></span><dl class="class">
+<dt id="catsim.estimation.DifferentialEvolutionEstimator">
+<em class="property">class </em><code class="descclassname">catsim.estimation.</code><code class="descname">DifferentialEvolutionEstimator</code><span class="sig-paren">(</span><em>bounds: tuple</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal"><span class="pre">catsim.simulation.Estimator</span></code></a></p>
+<p>Estimator that uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v0.18.1)"><code class="xref py py-func docutils literal"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to minimize the negative log-likelihood function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>bounds</strong> &#8211; a tuple containing both lower and upper bounds for the differential
+evolution algorithm search space. In theory, it is best if they
+represent the minimum and maximum possible <span class="math">\(\theta\)</span> values;
+in practice, one could also use the smallest and largest difficulty
+parameters in the item bank, in case no better bounds for
+<span class="math">\(\theta\)</span> exist.</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations">
+<code class="descname">avg_evaluations</code><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average number of function evaluations for all tests the estimator has been used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">average number of function evaluations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.estimation.DifferentialEvolutionEstimator.calls">
+<code class="descname">calls</code><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.calls" title="Permalink to this definition">¶</a></dt>
+<dd><p>How many times the estimator has been called to maximize/minimize the log-likelihood function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of times the estimator has been called to maximize/minimize the log-likelihood function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catsim.estimation.DifferentialEvolutionEstimator.estimate">
+<code class="descname">estimate</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>items: numpy.ndarray = None</em>, <em>administered_items: list = None</em>, <em>response_vector: list = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v0.18.1)"><code class="xref py py-func docutils literal"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to return the theta value
+that minimizes the negative log-likelihood function, given the current state of the
+test for the given examinee.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">float</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<code class="docutils literal"><span class="pre">int</span></code>) &#8211; index of the current examinee in the simulator</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.11)"><code class="xref py py-class docutils literal"><span class="pre">ndarray</span></code></a>) &#8211; a matrix containing item parameters in the format that <cite>catsim</cite> understands
+(see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</li>
+<li><strong>administered_items</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list containing the indexes of items that were already administered</li>
+<li><strong>response_vector</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a boolean list containing the examinee&#8217;s answers to the administered items</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the current <span class="math">\(\hat\theta\)</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.estimation.DifferentialEvolutionEstimator.evaluations">
+<code class="descname">evaluations</code><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.evaluations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of times the estimator has evaluated the log-likelihood function during its existence</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of function evaluations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.estimation.HillClimbingEstimator">
+<em class="property">class </em><code class="descclassname">catsim.estimation.</code><code class="descname">HillClimbingEstimator</code><span class="sig-paren">(</span><em>precision: int = 6</em>, <em>dodd: bool = False</em>, <em>verbose: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal"><span class="pre">catsim.simulation.Estimator</span></code></a></p>
+<p>Estimator that uses a hill-climbing algorithm to maximize the likelihood function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>precision</strong> &#8211; number of decimal points of precision</li>
+<li><strong>verbose</strong> &#8211; verbosity level of the maximization method</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="catsim.estimation.HillClimbingEstimator.avg_evaluations">
+<code class="descname">avg_evaluations</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Average number of function evaluations for all tests the estimator has been used</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">average number of function evaluations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.estimation.HillClimbingEstimator.calls">
+<code class="descname">calls</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.calls" title="Permalink to this definition">¶</a></dt>
+<dd><p>How many times the estimator has been called to maximize/minimize the log-likelihood function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of times the estimator has been called to maximize/minimize the log-likelihood function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.estimation.HillClimbingEstimator.dodd">
+<code class="descname">dodd</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.dodd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether Dodd&#8217;s method will be called by estimator in case the response vector
+is composed solely of right or wrong answers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean value indicating if Dodd&#8217;s method will be used or not.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catsim.estimation.HillClimbingEstimator.estimate">
+<code class="descname">estimate</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>items: numpy.ndarray = None</em>, <em>administered_items: list = None</em>, <em>response_vector: list = None</em>, <em>est_theta: float = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</dt>
+<dd>test for the given examinee.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">float</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<code class="docutils literal"><span class="pre">int</span></code>) &#8211; index of the current examinee in the simulator</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.11)"><code class="xref py py-class docutils literal"><span class="pre">ndarray</span></code></a>) &#8211; a matrix containing item parameters in the format that <cite>catsim</cite> understands
+(see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</li>
+<li><strong>administered_items</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list containing the indexes of items that were already administered</li>
+<li><strong>response_vector</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a boolean list containing the examinee&#8217;s answers to the administered items</li>
+<li><strong>est_theta</strong> (<code class="docutils literal"><span class="pre">float</span></code>) &#8211; a float containing the current estimated proficiency</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the current <span class="math">\(\hat\theta\)</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.estimation.HillClimbingEstimator.evaluations">
+<code class="descname">evaluations</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.evaluations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of times the estimator has evaluated the log-likelihood function during its existence</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">number of function evaluations</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="comparison-between-estimators">
+<h2>Comparison between estimators<a class="headerlink" href="#comparison-between-estimators" title="Permalink to this headline">¶</a></h2>
+<p>The plots below show a comparison of the different estimator available. Given
+three dichotomous (binary) response vectors with different numbers of correct
+answers, all the estimators find values for <span class="math">\(\hat\theta\)</span> that maximize the
+log-likelihood function. Some estimators evaluate the log-likelihood less times
+than others, while reaching similar results, which may make them (although not
+necessarily) more efficient estimators.</p>
+<p>(<a class="reference external" href=".//estimation-1.py">Source code</a>)</p>
+<div class="figure" id="id1">
+<img alt="_images/estimation-1_00.png" src="_images/estimation-1_00.png" />
+<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">(<a class="reference external" href=".//estimation-1_00.png">png</a>, <a class="reference external" href=".//estimation-1_00.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-1_00.pdf">pdf</a>)</span></p>
+</div>
+<div class="figure" id="id2">
+<img alt="_images/estimation-1_01.png" src="_images/estimation-1_01.png" />
+<p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">(<a class="reference external" href=".//estimation-1_01.png">png</a>, <a class="reference external" href=".//estimation-1_01.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-1_01.pdf">pdf</a>)</span></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="stopping.html" class="btn btn-neutral float-right" title="Stopping Criteria – catsim.stopping" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="selection.html" class="btn btn-neutral" title="Item Selection Methods – catsim.selection" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Douglas De Rizzo Meneghetti.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.13.3',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
