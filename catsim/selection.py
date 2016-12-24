@@ -474,7 +474,7 @@ class AStratifiedSelector(StratifiedSelector):
     represents the position in the test of the current item the examinee is being
     presented.
 
-    .. image:: ../sphinx/alpha-strat.*
+    .. image:: ../docs/alpha-strat.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter
     to create the correct number of strata.
@@ -504,7 +504,7 @@ class AStratifiedBBlockingSelector(StratifiedSelector):
     bank, and so on. This method tries to balance the distribution of both
     parameters between all strata, after perceiving that they are correlated.
 
-    .. image:: ../sphinx/b-blocking.*
+    .. image:: ../docs/b-blocking.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to
     create the correct number of strata.
@@ -530,7 +530,7 @@ class MaxInfoStratificationSelector(StratifiedSelector):
     non-administered item from stratum :math:`k`, in which :math:`k` represents the
     position in the test of the current item the examinee is being presented.
 
-    .. image:: ../sphinx/mis.*
+    .. image:: ../docs/mis.*
 
     This method claims to work better than the :math:`a`-stratified method by
     [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty
@@ -571,7 +571,7 @@ class MaxInfoBBlockingSelector(StratifiedSelector):
     positioned in the same place in the proficiency scale in 3PL. This may also
     apply, although not mentioned by the authors, for the 4PL.
 
-    .. image:: ../sphinx/mis-b.*
+    .. image:: ../docs/mis-b.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to
     create the correct number of strata.
