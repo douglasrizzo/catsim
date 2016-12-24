@@ -53,7 +53,7 @@ class HillClimbingEstimator(Estimator):
         return self._dodd
 
     def estimate(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-                 response_vector: list = None, est_theta: float = None, **kwargs) -> int:
+                 response_vector: list = None, est_theta: float = None, **kwargs) -> float:
         """Returns the theta value that minimizes the negative log-likelihood function, given the current state of the
          test for the given examinee.
 
@@ -169,7 +169,7 @@ class DifferentialEvolutionEstimator(Estimator):
         return self._evaluations / self._calls
 
     def estimate(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-                 response_vector: list = None, **kwargs) -> int:
+                 response_vector: list = None, **kwargs) -> float:
         """Uses :py:func:`scipy.optimize.differential_evolution` to return the theta value
         that minimizes the negative log-likelihood function, given the current state of the
         test for the given examinee.
