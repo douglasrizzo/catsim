@@ -28,10 +28,11 @@ setup(
     url='https://douglasrizzo.github.io/catsim',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
-        'numpy', 'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks'
+        'numpy', 'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm'
     ],
-    extras_require = dict(
+    extras_require=dict(
         testing=['nose', 'nose-cov', 'sklearn'],
+        docs=['Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme']
     ),
     license='LGPLv3'
 )
