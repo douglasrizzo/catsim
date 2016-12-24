@@ -32,7 +32,7 @@ setup(
     ],
     extras_require=dict(
         testing=['nose', 'nose-cov', 'sklearn'],
-        docs=['Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme']
+        docs=['Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'bibtex-pygments-lexer']
     ),
     license='LGPLv3'
 )
