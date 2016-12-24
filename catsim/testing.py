@@ -58,10 +58,10 @@ def test_simulations():
                                 The54321Selector(test_size), RandomesqueSelector(5)]
 
             for logistic_model in logistic_models:
-                for selector in finite_selectors:
-                    for initializer in [FixedPointInitializer(0)]:
-                        for estimator in [HillClimbingEstimator()]:
-                            for stopper in [MaxItemStopper(test_size)]:
+                for initializer in [FixedPointInitializer(0)]:
+                    for estimator in [HillClimbingEstimator()]:
+                        for stopper in [MaxItemStopper(test_size)]:
+                            for selector in finite_selectors:
                                 items = generate_item_bank(bank_size, itemtype=logistic_model)
                                 responses = cat.random_response_vector(random.randint(1, test_size - 1))
                                 administered_items = numpy.random.choice(bank_size, len(responses), replace=False)
