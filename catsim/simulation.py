@@ -4,6 +4,7 @@ application of adaptive tests. Most of this module is based on the work of
 
 import datetime
 import time
+import tqdm
 from abc import ABCMeta, abstractmethod
 
 import numpy
@@ -299,12 +300,12 @@ class Simulator:
                                                                            self._items.shape[0])))
 
         start_time = time.time()
+        pbar = tqdm.tqdm(total=len(self.examinees))
+
         for current_examinee, true_theta in enumerate(self.examinees):
 
             if verbose:
-                print('{0}/{1} examinees... ({2})'.format(current_examinee + 1, len(self.examinees), datetime.timedelta(
-                    seconds=(time.time() - start_time) / (current_examinee + 1) * (
-                        len(self.examinees) - current_examinee + 1))) + ' remaining')
+                pbar.update()
 
             est_theta = self._initializer.initialize(current_examinee)
             self._estimations[current_examinee].append(est_theta)
@@ -340,7 +341,8 @@ class Simulator:
 
                 self._estimations[current_examinee].append(est_theta)
 
-        self._duration = int(round(time.time() * 1000)) - start_time
+        self._duration = (time.time() - start_time) / 1000
+        pbar.close()
 
         if verbose:
             print('Simulation took {0} milliseconds'.format(self._duration))
