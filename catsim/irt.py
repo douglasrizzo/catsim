@@ -209,7 +209,7 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
 
 
 def max_info_hpc(items: numpy.ndarray):
-    """Implementation of :py:func:`max_info` using :py:package:`numpy` and :py:package:`numexpr` in which the theta
+    """Implementation of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr` in which the theta
     value that maximizes the information function for all items is returned in a `numpy.ndarray`.
 
     :param items: array containing the four item parameters.
