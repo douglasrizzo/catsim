@@ -164,17 +164,13 @@ distributions, refining future estimations.</p>
 <code class="xref py py-class docutils literal"><span class="pre">Estimator</span></code>. <code class="xref py py-class docutils literal"><span class="pre">Simulator</span></code> allows that a custom estimator be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal"><span class="pre">Estimator</span></code>.</p>
-digraph inheritanceb6f22deed1 {
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;catsim.estimation.DifferentialEvolutionEstimator&quot; [URL=&quot;#catsim.estimation.DifferentialEvolutionEstimator&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function&quot;];
-  &quot;catsim.simulation.Estimator&quot; -&gt; &quot;catsim.estimation.DifferentialEvolutionEstimator&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.estimation.HillClimbingEstimator&quot; [URL=&quot;#catsim.estimation.HillClimbingEstimator&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Estimator that uses a hill-climbing algorithm to maximize the likelihood function&quot;];
-  &quot;catsim.simulation.Estimator&quot; -&gt; &quot;catsim.estimation.HillClimbingEstimator&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.simulation.Estimator&quot; [URL=&quot;simulation.html#catsim.simulation.Estimator&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class for proficiency estimators&quot;];
-  &quot;catsim.simulation.Simulable&quot; -&gt; &quot;catsim.simulation.Estimator&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.simulation.Simulable&quot; [URL=&quot;simulation.html#catsim.simulation.Simulable&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class representing one of the Simulator components that will receive a reference back to it.&quot;];
-}
+<img src="_images/inheritance-1ee12e436a37131462e837dc58e526b5fdf9e1e5.png" alt="Inheritance diagram of catsim.estimation" usemap="#inheritanceb6f22deed1" class="inheritance"/>
+<map id="inheritanceb6f22deed1" name="inheritanceb6f22deed1">
+<area shape="rect" id="node1" href="#catsim.estimation.DifferentialEvolutionEstimator" target="_top" title="Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log&#45;likelihood function" alt="" coords="461,5,763,28"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Estimator" target="_top" title="Base class for proficiency estimators" alt="" coords="234,28,417,51"/>
+<area shape="rect" id="node3" href="#catsim.estimation.HillClimbingEstimator" target="_top" title="Estimator that uses a hill&#45;climbing algorithm to maximize the likelihood function" alt="" coords="486,50,739,73"/>
+<area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,28,190,51"/>
+</map>
 <p><code class="xref py py-mod docutils literal"><span class="pre">catsim</span></code> implements a few types of maximum-likelihood estimators.</p>
 <span class="target" id="module-catsim.estimation"></span><dl class="class">
 <dt id="catsim.estimation.DifferentialEvolutionEstimator">

@@ -149,17 +149,13 @@
 <code class="xref py py-class docutils literal"><span class="pre">Stopper</span></code>. <code class="xref py py-class docutils literal"><span class="pre">Simulator</span></code> allows that a custom stopping criterion be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal"><span class="pre">Stopper</span></code>.</p>
-digraph inheritance76f349e9d6 {
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;catsim.simulation.Simulable&quot; [URL=&quot;simulation.html#catsim.simulation.Simulable&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class representing one of the Simulator components that will receive a reference back to it.&quot;];
-  &quot;catsim.simulation.Stopper&quot; [URL=&quot;simulation.html#catsim.simulation.Stopper&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class for CAT stop criterion&quot;];
-  &quot;catsim.simulation.Simulable&quot; -&gt; &quot;catsim.simulation.Stopper&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.stopping.MaxItemStopper&quot; [URL=&quot;#catsim.stopping.MaxItemStopper&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Stopping criterion for maximum number of items in a test&quot;];
-  &quot;catsim.simulation.Stopper&quot; -&gt; &quot;catsim.stopping.MaxItemStopper&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.stopping.MinErrorStopper&quot; [URL=&quot;#catsim.stopping.MinErrorStopper&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)&quot;];
-  &quot;catsim.simulation.Stopper&quot; -&gt; &quot;catsim.stopping.MinErrorStopper&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-}
+<img src="_images/inheritance-a6ddd31ba7e252bbdb84edbd873a2b711ddc01c0.png" alt="Inheritance diagram of catsim.stopping" usemap="#inheritance76f349e9d6" class="inheritance"/>
+<map id="inheritance76f349e9d6" name="inheritance76f349e9d6">
+<area shape="rect" id="node1" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,31,208,56"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stop criterion" alt="" coords="256,31,447,56"/>
+<area shape="rect" id="node3" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion for maximum number of items in a test" alt="" coords="495,5,729,31"/>
+<area shape="rect" id="node4" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)" alt="" coords="496,55,728,80"/>
+</map>
 <span class="target" id="module-catsim.stopping"></span><dl class="class">
 <dt id="catsim.stopping.MaxItemStopper">
 <em class="property">class </em><code class="descclassname">catsim.stopping.</code><code class="descname">MaxItemStopper</code><span class="sig-paren">(</span><em>max_itens: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper" title="Permalink to this definition">¶</a></dt>

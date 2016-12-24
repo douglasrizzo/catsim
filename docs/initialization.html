@@ -149,17 +149,13 @@
 <code class="xref py py-class docutils literal"><span class="pre">Initializer</span></code>. <code class="xref py py-class docutils literal"><span class="pre">Simulator</span></code> allows that a custom initializer be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal"><span class="pre">Initializer</span></code>.</p>
-digraph inheritance51267be144 {
-rankdir=LR;
-size=&quot;8.0, 12.0&quot;;
-  &quot;catsim.initialization.FixedPointInitializer&quot; [URL=&quot;#catsim.initialization.FixedPointInitializer&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Initializes every proficiency at the same point.&quot;];
-  &quot;catsim.simulation.Initializer&quot; -&gt; &quot;catsim.initialization.FixedPointInitializer&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.initialization.RandomInitializer&quot; [URL=&quot;#catsim.initialization.RandomInitializer&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Randomly initializes the first estimate of an examinee's proficiency&quot;];
-  &quot;catsim.simulation.Initializer&quot; -&gt; &quot;catsim.initialization.RandomInitializer&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.simulation.Initializer&quot; [URL=&quot;simulation.html#catsim.simulation.Initializer&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class for CAT initializers&quot;];
-  &quot;catsim.simulation.Simulable&quot; -&gt; &quot;catsim.simulation.Initializer&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
-  &quot;catsim.simulation.Simulable&quot; [URL=&quot;simulation.html#catsim.simulation.Simulable&quot;,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5)&quot;,target=&quot;_top&quot;,tooltip=&quot;Base class representing one of the Simulator components that will receive a reference back to it.&quot;];
-}
+<img src="_images/inheritance-7b231892f8a02e535b182e4b6d70a4e2722818e9.png" alt="Inheritance diagram of catsim.initialization" usemap="#inheritance51267be144" class="inheritance"/>
+<map id="inheritance51267be144" name="inheritance51267be144">
+<area shape="rect" id="node1" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initializes every proficiency at the same point." alt="" coords="496,5,763,31"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers" alt="" coords="255,31,448,56"/>
+<area shape="rect" id="node3" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initializes the first estimate of an examinee&#39;s proficiency" alt="" coords="501,54,757,80"/>
+<area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,31,207,56"/>
+</map>
 <span class="target" id="module-catsim.initialization"></span><dl class="class">
 <dt id="catsim.initialization.FixedPointInitializer">
 <em class="property">class </em><code class="descclassname">catsim.initialization.</code><code class="descname">FixedPointInitializer</code><span class="sig-paren">(</span><em>start: float</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer" title="Permalink to this definition">¶</a></dt>

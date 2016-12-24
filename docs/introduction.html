@@ -226,7 +226,7 @@
 <div class="section" id="the-cat-lifecycle">
 <h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Permalink to this headline">¶</a></h3>
 <p>In general, a computerized adaptive test has a very well-defined lifecycle:</p>
-digraph cat_simple {
+<img src="_images/graphviz-22200423f6f4f324fc72989987784ee7d6a74c7e.png" alt="digraph cat_simple {
     bgcolor=&quot;transparent&quot;;
     rankdir=TB;
     a[label=&lt;START&gt;, shape=box];
@@ -240,7 +240,8 @@ digraph cat_simple {
     a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; f;
     f -&gt; g[label=&lt;YES&gt;];
     f -&gt; c[label=&lt;NO&gt;];
-}<ol class="arabic simple">
+}" />
+<ol class="arabic simple">
 <li>The examinee&#8217;s initial proficiency is estimated;</li>
 <li>An item is selected based on the current proficiency estimation;</li>
 <li>The proficiency is reestimated based on the answers to all items up until now;</li>
