@@ -33,5 +33,5 @@ setup(
     extras_require = dict(
         testing=['nose', 'nose-cov', 'sklearn'],
     ),
-    license='GPLv2'
+    license='LGPLv3'
 )
