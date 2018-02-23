@@ -313,14 +313,14 @@ class ClusterSelector(Selector):
         if len(valid_indexes_low_r) > 0:
             # return the item with maximum information from the ones available
             inf_values = irt.inf_hpc(est_theta, items[valid_indexes_low_r])
-            selected_item = valid_indexes_low_r[numpy.nonzero(inf_values == max(inf_values))[0]]
+            selected_item = valid_indexes_low_r[numpy.nonzero(inf_values == max(inf_values))[0][0]]
 
         # if all items in the selected cluster have exceed their r values,
         # select the one with smallest r, regardless of information
         else:
             if self._r_control == 'passive':
                 inf_values = irt.inf_hpc(est_theta, items[valid_indexes])
-                selected_item = valid_indexes[numpy.nonzero(inf_values == max(inf_values))[0]]
+                selected_item = valid_indexes[numpy.nonzero(inf_values == max(inf_values))[0][0]]
             else:
                 selected_item = valid_indexes[items[:, 4].index(min(items[:, 4]))]
 
