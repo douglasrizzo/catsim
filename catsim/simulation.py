@@ -195,7 +195,7 @@ class Simulator:
 
     @property
     def duration(self) -> float:
-        """Duration of the simulation, in milliseconds."""
+        """Duration of the simulation, in seconds."""
         return self._duration
 
     @property
@@ -341,11 +341,11 @@ class Simulator:
 
                 self._estimations[current_examinee].append(est_theta)
 
-        self._duration = (time.time() - start_time) / 1000
+        self._duration = (time.time() - start_time)
         pbar.close()
 
         if verbose:
-            print('Simulation took {0} milliseconds'.format(self._duration))
+            print('Simulation took {0} seconds'.format(self._duration))
 
         self._bias = cat.bias(self.examinees, self.latest_estimations)
         self._mse = cat.mse(self.examinees, self.latest_estimations)
