@@ -298,9 +298,9 @@ class Simulator:
             print(('Starting simulation: {0} {1} {2} {3} {4} items'.format(self._initializer, self._selector,
                                                                            self._estimator, self._stopper,
                                                                            self._items.shape[0])))
+            pbar = tqdm.tqdm(total=len(self.examinees))
 
         start_time = time.time()
-        pbar = tqdm.tqdm(total=len(self.examinees))
 
         for current_examinee, true_theta in enumerate(self.examinees):
 
@@ -342,9 +342,9 @@ class Simulator:
                 self._estimations[current_examinee].append(est_theta)
 
         self._duration = (time.time() - start_time)
-        pbar.close()
 
         if verbose:
+            pbar.close()
             print('Simulation took {0} seconds'.format(self._duration))
 
         self._bias = cat.bias(self.examinees, self.latest_estimations)
