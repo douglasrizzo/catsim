@@ -15,8 +15,17 @@ def __column(matrix, i):
     return [row[i] for row in matrix]
 
 
-def item_curve(a: float = 1, b: float = 0, c: float = 0, d: float = 1, title: str = None, ptype: str = 'icc',
-               max_info=True, filepath: str = None, show: bool = True):
+def item_curve(
+    a: float = 1,
+    b: float = 0,
+    c: float = 0,
+    d: float = 1,
+    title: str = None,
+    ptype: str = 'icc',
+    max_info=True,
+    filepath: str = None,
+    show: bool = True
+):
     """Plots 'Item Response Theory'-related item plots
 
     .. plot::
@@ -61,8 +70,12 @@ def item_curve(a: float = 1, b: float = 0, c: float = 0, d: float = 1, title: st
             plt.title(title, size=18)
 
         plt.annotate(
-            '$a = ' + format(a) + '$\n$b = ' + format(b) + '$\n$c = ' + format(c) + '$\n$d = ' + format(d) + '$',
-            bbox=dict(facecolor='white', alpha=1), xy=(.75, .05), xycoords='axes fraction')
+            '$a = ' + format(a) + '$\n$b = ' + format(b) + '$\n$c = ' + format(c) + '$\n$d = ' +
+            format(d) + '$',
+            bbox=dict(facecolor='white', alpha=1),
+            xy=(.75, .05),
+            xycoords='axes fraction'
+        )
         plt.xlabel(r'$\theta$')
         plt.grid()
 
@@ -100,8 +113,12 @@ def item_curve(a: float = 1, b: float = 0, c: float = 0, d: float = 1, title: st
             ax1.set_title(title, size=18)
 
         ax2.annotate(
-            '$a = ' + format(a) + '$\n$b = ' + format(b) + '$\n$c = ' + format(c) + '$\n$d = ' + format(d) + '$',
-            bbox=dict(facecolor='white', alpha=1), xy=(.75, .05), xycoords='axes fraction')
+            '$a = ' + format(a) + '$\n$b = ' + format(b) + '$\n$c = ' + format(c) + '$\n$d = ' +
+            format(d) + '$',
+            bbox=dict(facecolor='white', alpha=1),
+            xy=(.75, .05),
+            xycoords='axes fraction'
+        )
 
     if filepath is not None:
         if not os.path.exists(os.path.dirname(filepath)):
@@ -112,7 +129,9 @@ def item_curve(a: float = 1, b: float = 0, c: float = 0, d: float = 1, title: st
         plt.show()
 
 
-def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str = None, show: bool = True):
+def gen3d_dataset_scatter(
+    items: numpy.ndarray, title: str = None, filepath: str = None, show: bool = True
+):
     """Generate the item matrix tridimensional dataset scatter plot
 
     .. plot::
@@ -150,8 +169,15 @@ def gen3d_dataset_scatter(items: numpy.ndarray, title: str = None, filepath: str
         plt.show()
 
 
-def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.ndarray = None, par: str = None,
-                  ptype: str = 'bar', filepath: str = None, show: bool = True):
+def item_exposure(
+    title: str = None,
+    simulator: Simulator = None,
+    items: numpy.ndarray = None,
+    par: str = None,
+    ptype: str = 'bar',
+    filepath: str = None,
+    show: bool = True
+):
     """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
     the `y` axis represents their exposure rates. an examinee's test progress.
 
@@ -192,7 +218,9 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
         items = simulator.items
 
     if items.shape[1] != 5:
-        raise ValueError('The item matrix is supposed to have 5 columns, the last one representing item exposure rates')
+        raise ValueError(
+            'The item matrix is supposed to have 5 columns, the last one representing item exposure rates'
+        )
 
     if par is not None and par not in ['a', 'b', 'c', 'd']:
         raise ValueError('Unsupported parameter.')
@@ -236,10 +264,20 @@ def item_exposure(title: str = None, simulator: Simulator = None, items: numpy.n
         plt.show()
 
 
-def test_progress(title: str = None, simulator: Simulator = None, index: int = None, thetas: list = None,
-                  administered_items: numpy.ndarray = None, true_theta: float = None, info: bool = False,
-                  var: bool = False, see: bool = False, reliability: bool = False, filepath: str = None,
-                  show: bool = True):
+def test_progress(
+    title: str = None,
+    simulator: Simulator = None,
+    index: int = None,
+    thetas: list = None,
+    administered_items: numpy.ndarray = None,
+    true_theta: float = None,
+    info: bool = False,
+    var: bool = False,
+    see: bool = False,
+    reliability: bool = False,
+    filepath: str = None,
+    show: bool = True
+):
     """Generates a plot representing an examinee's test progress. Note that,
     while some functions increase or decrease monotonically, like test information
     and standard error of estimation, the plot calculates these values using the
@@ -298,11 +336,17 @@ def test_progress(title: str = None, simulator: Simulator = None, index: int = N
         administered_items = simulator.items[simulator.administered_items[index]]
         true_theta = simulator.examinees[index]
 
-    if thetas is not None and administered_items is not None and len(thetas) - 1 != len(administered_items[:, 1]):
-        raise ValueError('Number of latest_estimations and administered items is not the same. They should be.')
+    if thetas is not None and administered_items is not None and len(thetas) - 1 != len(
+        administered_items[:, 1]
+    ):
+        raise ValueError(
+            'Number of latest_estimations and administered items is not the same. They should be.'
+        )
 
     # len(thetas) - 1 because the first item is made by the initializer
-    xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
+    xs = list(range(len(thetas))) if thetas is not None else list(
+        range(len(administered_items[:, 1]))
+    )
 
     if thetas is not None:
         plt.plot(xs, thetas, label=r'$\hat{\theta}$')

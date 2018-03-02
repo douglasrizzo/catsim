@@ -52,8 +52,15 @@ class HillClimbingEstimator(Estimator):
         :returns: boolean value indicating if Dodd's method will be used or not."""
         return self._dodd
 
-    def estimate(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-                 response_vector: list = None, est_theta: float = None, **kwargs) -> float:
+    def estimate(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        response_vector: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> float:
         """Returns the theta value that minimizes the negative log-likelihood function, given the current state of the
          test for the given examinee.
 
@@ -66,9 +73,12 @@ class HillClimbingEstimator(Estimator):
         :returns: the current :math:`\\hat\\theta`
         """
         if (index is None or self.simulator is None) and (
-                                items is None and administered_items is None or response_vector is None or est_theta is None):
+            items is None and administered_items is None or response_vector is None or
+            est_theta is None
+        ):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and response_vector is None and est_theta is None:
             items = self.simulator.items
@@ -111,7 +121,13 @@ class HillClimbingEstimator(Estimator):
                     max_ll = ll
 
                     if self._verbose:
-                        print(('Iteration: {0}, Theta: {1}, LL: {2}'.format(self._evaluations, ii, ll)))
+                        print(
+                            (
+                                'Iteration: {0}, Theta: {1}, LL: {2}'.format(
+                                    self._evaluations, ii, ll
+                                )
+                            )
+                        )
 
                     if abs(best_theta - ii) < float('1e-' + str(self._precision)):
                         return ii
@@ -168,8 +184,14 @@ class DifferentialEvolutionEstimator(Estimator):
         :returns: average number of function evaluations"""
         return self._evaluations / self._calls
 
-    def estimate(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-                 response_vector: list = None, **kwargs) -> float:
+    def estimate(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        response_vector: list = None,
+        **kwargs
+    ) -> float:
         """Uses :py:func:`scipy.optimize.differential_evolution` to return the theta value
         that minimizes the negative log-likelihood function, given the current state of the
         test for the given examinee.
@@ -181,10 +203,11 @@ class DifferentialEvolutionEstimator(Estimator):
         :param response_vector: a boolean list containing the examinee's answers to the administered items
         :returns: the current :math:`\\hat\\theta`
         """
-        if (index is None or self.simulator is None) and (
-                            items is None and administered_items is None or response_vector is None):
+        if (index is None or self.simulator is None
+            ) and (items is None and administered_items is None or response_vector is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and response_vector is None:
             items = self.simulator.items
@@ -193,8 +216,11 @@ class DifferentialEvolutionEstimator(Estimator):
 
         self._calls += 1
 
-        res = differential_evolution(irt.negative_log_likelihood, bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
-                                     args=(response_vector, items[administered_items]))
+        res = differential_evolution(
+            irt.negative_log_likelihood,
+            bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
+            args=(response_vector, items[administered_items])
+        )
 
         self._evaluations = res.nfev
 

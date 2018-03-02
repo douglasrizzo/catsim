@@ -17,8 +17,14 @@ class MaxInfoSelector(Selector):
     def __str__(self):
         return 'Maximum Information Selector'
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -28,10 +34,11 @@ class MaxInfoSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (
-                            items is None or administered_items is None or est_theta is None):
+        if (index is None or self.simulator is None
+            ) and (items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -40,8 +47,10 @@ class MaxInfoSelector(Selector):
 
         valid_indexes = [x for x in range(items.shape[0]) if x not in administered_items]
         inf_values = irt.inf_hpc(est_theta, items[valid_indexes])
-        valid_indexes = [item_index for (inf_value, item_index) in
-                         sorted(zip(inf_values, valid_indexes), key=lambda pair: pair[0], reverse=True)]
+        valid_indexes = [
+            item_index for (inf_value, item_index) in
+            sorted(zip(inf_values, valid_indexes), key=lambda pair: pair[0], reverse=True)
+        ]
 
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
@@ -81,16 +90,20 @@ class LinearSelector(FiniteSelector):
         """
         if (index is None or self.simulator is None) and (administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if administered_items is None:
             administered_items = self.simulator.administered_items[index]
 
         if set(self._indexes) <= set(administered_items):
             warn(
-                'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'.format(
-                    self._current, sorted(self._indexes), len(self._indexes), sorted(administered_items),
-                    len(administered_items)))
+                'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'.
+                format(
+                    self._current, sorted(self._indexes), len(self._indexes),
+                    sorted(administered_items), len(administered_items)
+                )
+            )
             return None
 
         selected_item = [x for x in self._indexes if x not in administered_items][0]
@@ -110,7 +123,13 @@ class RandomSelector(Selector):
         super().__init__()
         self._replace = replace
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -119,9 +138,11 @@ class RandomSelector(Selector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (items is None or administered_items is None):
+        if (index is None or
+            self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None:
             items = self.simulator.items
@@ -129,8 +150,9 @@ class RandomSelector(Selector):
 
         if len(administered_items) >= items.shape[0] and not self._replace:
             warn(
-                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}'.format(
-                    len(administered_items), items.shape[0]))
+                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}'.
+                format(len(administered_items), items.shape[0])
+            )
             return None
 
         if self._replace:
@@ -187,24 +209,42 @@ class ClusterSelector(Selector):
     def r_control(self):
         return self._r_control
 
-    def __init__(self, clusters: list, method: str = 'item_info', r_max: float = 1, r_control: str = 'passive'):
+    def __init__(
+        self,
+        clusters: list,
+        method: str = 'item_info',
+        r_max: float = 1,
+        r_control: str = 'passive'
+    ):
         super().__init__()
         available_methods = ['item_info', 'cluster_info', 'weighted_info']
         if method not in available_methods:
             raise ValueError(
-                '{0} is not a valid cluster selection method; choose one from {1}'.format(method, available_methods))
+                '{0} is not a valid cluster selection method; choose one from {1}'.format(
+                    method, available_methods
+                )
+            )
         available_rcontrol = ['passive', 'aggressive']
         if r_control not in available_rcontrol:
-            raise ValueError('{0} is not a valid item exposure control method; choose one from {1}'.format(r_control,
-                                                                                                           available_rcontrol))
+            raise ValueError(
+                '{0} is not a valid item exposure control method; choose one from {1}'.format(
+                    r_control, available_rcontrol
+                )
+            )
 
         self._clusters = clusters
         self._method = method
         self._r_max = r_max
         self._r_control = r_control
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -214,10 +254,11 @@ class ClusterSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied.
         """
-        if (index is None or self.simulator is None) and (
-                            items is None or administered_items is None or est_theta is None):
+        if (index is None or self.simulator is None
+            ) and (items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -244,7 +285,9 @@ class ClusterSelector(Selector):
                     continue
 
                 # get the indexes of all items in the same cluster as the current item
-                items_in_cluster = numpy.nonzero([x == self._clusters[max_info_item] for x in self._clusters])[0]
+                items_in_cluster = numpy.nonzero(
+                    [x == self._clusters[max_info_item] for x in self._clusters]
+                )[0]
 
                 # if all the items in the current cluster have already been administered (it happens, theoretically),
                 # add this cluster to the list of fully evaluated clusters
@@ -268,14 +311,23 @@ class ClusterSelector(Selector):
             if self._method == 'cluster_info':
                 cluster_infos = ClusterSelector.sum_cluster_infos(est_theta, items, self._clusters)
             else:
-                cluster_infos = ClusterSelector.weighted_cluster_infos(est_theta, items, self._clusters)
+                cluster_infos = ClusterSelector.weighted_cluster_infos(
+                    est_theta, items, self._clusters
+                )
 
             # sorts clusters descending by their information values
             # this type of sorting was seem on
             # http://stackoverflow.com/a/6618543
-            sorted_clusters = numpy.array([cluster for (inf_value, cluster) in
-                                           sorted(zip(cluster_infos, set(self._clusters)), key=lambda pair: pair[0],
-                                                  reverse=True)], dtype=float)
+            sorted_clusters = numpy.array(
+                [
+                    cluster for (inf_value, cluster) in sorted(
+                        zip(cluster_infos, set(self._clusters)),
+                        key=lambda pair: pair[0],
+                        reverse=True
+                    )
+                ],
+                dtype=float
+            )
 
             # walks through the sorted clusters in order
             for i in range(len(sorted_clusters)):
@@ -300,15 +352,20 @@ class ClusterSelector(Selector):
 
         # gets the indexes and information values from the items in the
         # selected cluster that have not been administered
-        valid_indexes = [index for index in
-                         numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0] if
-                         index not in administered_items]
+        valid_indexes = [
+            index
+            for index in numpy.nonzero([cluster == selected_cluster
+                                        for cluster in self._clusters])[0]
+            if index not in administered_items
+        ]
 
         # gets the indexes and information values from the items in the
         # selected cluster with r < rmax that have not been
         # administered
-        valid_indexes_low_r = [index for index in valid_indexes if
-                               items[index, 4] < self._r_max and index not in administered_items]
+        valid_indexes_low_r = [
+            index for index in valid_indexes
+            if items[index, 4] < self._r_max and index not in administered_items
+        ]
 
         if len(valid_indexes_low_r) > 0:
             # return the item with maximum information from the ones available
@@ -407,6 +464,7 @@ class ClusterSelector(Selector):
 
 
 class StratifiedSelector(FiniteSelector):
+
     def __str__(self):
         return 'General Stratified Selector'
 
@@ -423,7 +481,13 @@ class StratifiedSelector(FiniteSelector):
         # sort item indexes by their discrimination value
         self._organized_items = __class__.sort_items(self.simulator.items)
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -431,9 +495,11 @@ class StratifiedSelector(FiniteSelector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
-        if (index is None or self.simulator is None) and (items is None or administered_items is None):
+        if (index is None or
+            self.simulator is None) and (items is None or administered_items is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None:
             items = self.simulator.items
@@ -444,22 +510,29 @@ class StratifiedSelector(FiniteSelector):
 
         try:
             pointer = slices[len(administered_items)]
-            max_pointer = items.shape[0] if len(administered_items) == self._test_size - 1 else slices[
-                len(administered_items) + 1]
+            max_pointer = items.shape[0] if len(
+                administered_items
+            ) == self._test_size - 1 else slices[len(administered_items) + 1]
         except IndexError:
             warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".format(
-                    self, len(administered_items), self._test_size, len(slices)))
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".
+                format(self, len(administered_items), self._test_size, len(slices))
+            )
             return None
 
-        organized_items = self._organized_items if self._organized_items is not None else self.sort_items(items)
+        organized_items = self._organized_items if self._organized_items is not None else self.sort_items(
+            items
+        )
 
         # if the selected item has already been administered, select the next one
         while organized_items[pointer] in administered_items:
             pointer += 1
             if pointer == max_pointer:
                 raise ValueError(
-                    'There are no more items to be selected from stratum {0}'.format(slices[len(administered_items)]))
+                    'There are no more items to be selected from stratum {0}'.format(
+                        slices[len(administered_items)]
+                    )
+                )
 
         return organized_items[pointer]
 
@@ -609,8 +682,14 @@ class The54321Selector(FiniteSelector):
     def __init__(self, test_size):
         super().__init__(test_size)
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -620,10 +699,11 @@ class The54321Selector(FiniteSelector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (
-                            items is None or administered_items is None or est_theta is None):
+        if (index is None or self.simulator is None
+            ) and (items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -631,7 +711,9 @@ class The54321Selector(FiniteSelector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by their information value and remove indexes of administered items
-        organized_items = [x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items]
+        organized_items = [
+            x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items
+        ]
 
         bin_size = self._test_size - len(administered_items)
 
@@ -663,8 +745,14 @@ class RandomesqueSelector(Selector):
     def bin_size(self):
         return self._bin_size
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -674,10 +762,11 @@ class RandomesqueSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (
-                            items is None or administered_items is None or est_theta is None):
+        if (index is None or self.simulator is None
+            ) and (items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -685,7 +774,9 @@ class RandomesqueSelector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by their information value and remove indexes of administered items
-        organized_items = [x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items]
+        organized_items = [
+            x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items
+        ]
 
         if len(organized_items) == 0:
             warn('There are no more items to apply.')
@@ -717,8 +808,14 @@ class IntervalIntegrationSelector(Selector):
     def interval(self):
         return self._interval
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -728,10 +825,11 @@ class IntervalIntegrationSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (
-                            items is None or administered_items is None or est_theta is None):
+        if (index is None or self.simulator is None
+            ) and (items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
@@ -739,9 +837,18 @@ class IntervalIntegrationSelector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by the integral of the information function and remove indexes of administered items
-        organized_items = [x for x in numpy.array([quad(irt.inf, est_theta - self._interval, est_theta + self._interval,
-                                                        args=(item[0], item[1], item[2], item[3]))[0] for item in
-                                                   items]).argsort() if x not in administered_items]
+        organized_items = [
+            x for x in numpy.array(
+                [
+                    quad(
+                        irt.inf,
+                        est_theta - self._interval,
+                        est_theta + self._interval,
+                        args=(item[0], item[1], item[2], item[3])
+                    )[0] for item in items
+                ]
+            ).argsort() if x not in administered_items
+        ]
 
         if len(organized_items) == 0:
             warn('There are no more items to apply.')

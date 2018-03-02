@@ -106,7 +106,8 @@ def scatter_matrix(data: numpy.ndarray) -> numpy.ndarray:
     scatter = numpy.zeros((data.shape[1], data.shape[1]))
     for i in range(data.shape[0]):
         scatter += (data[i, :].reshape(data.shape[1], 1) - mean_vector).dot(
-            (data[i, :].reshape(data.shape[1], 1) - mean_vector).T)
+            (data[i, :].reshape(data.shape[1], 1) - mean_vector).T
+        )
 
     return scatter
 

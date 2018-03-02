@@ -131,8 +131,15 @@ class Simulator:
                       :math:`\\theta_0` values
     """
 
-    def __init__(self, items: numpy.ndarray, examinees, initializer: Initializer = None, selector: Selector = None,
-                 estimator: Estimator = None, stopper: Stopper = None):
+    def __init__(
+        self,
+        items: numpy.ndarray,
+        examinees,
+        initializer: Initializer = None,
+        selector: Selector = None,
+        estimator: Estimator = None,
+        stopper: Stopper = None
+    ):
         irt.validate_item_bank(items)
 
         # adds a column for each item's exposure rate
@@ -256,10 +263,18 @@ class Simulator:
         elif type(x) == numpy.ndarray and x.ndim == 1:
             self._examinees = x
         else:
-            raise ValueError('Examinees must be an int, list of floats or one-dimensional numpy array')
+            raise ValueError(
+                'Examinees must be an int, list of floats or one-dimensional numpy array'
+            )
 
-    def simulate(self, initializer: Initializer = None, selector: Selector = None, estimator: Estimator = None,
-                 stopper: Stopper = None, verbose: bool = False):
+    def simulate(
+        self,
+        initializer: Initializer = None,
+        selector: Selector = None,
+        estimator: Estimator = None,
+        stopper: Stopper = None,
+        verbose: bool = False
+    ):
         """Simulates a computerized adaptive testing application to one or more examinees
 
         :param initializer: an initializer that selects examinees :math:`\\theta_0`
@@ -295,9 +310,14 @@ class Simulator:
             s.simulator = self
 
         if verbose:
-            print(('Starting simulation: {0} {1} {2} {3} {4} items'.format(self._initializer, self._selector,
-                                                                           self._estimator, self._stopper,
-                                                                           self._items.shape[0])))
+            print(
+                (
+                    'Starting simulation: {0} {1} {2} {3} {4} items'.format(
+                        self._initializer, self._selector, self._estimator, self._stopper,
+                        self._items.shape[0]
+                    )
+                )
+            )
             pbar = tqdm.tqdm(total=len(self.examinees))
 
         start_time = time.time()
@@ -320,8 +340,10 @@ class Simulator:
 
                 # simulates the examinee's response via the four-parameter
                 # logistic function
-                response = irt.icc(true_theta, self.items[selected_item][0], self.items[selected_item][1],
-                                   self.items[selected_item][2], self.items[selected_item][3]) >= numpy.random.uniform()
+                response = irt.icc(
+                    true_theta, self.items[selected_item][0], self.items[selected_item][1],
+                    self.items[selected_item][2], self.items[selected_item][3]
+                ) >= numpy.random.uniform()
 
                 self._response_vectors[current_examinee].append(response)
 
@@ -333,7 +355,11 @@ class Simulator:
 
                 # count occurrences of this item in all tests
                 item_occurrences = numpy.sum(
-                    [selected_item in administered_list for administered_list in self._administered_items])
+                    [
+                        selected_item in administered_list
+                        for administered_list in self._administered_items
+                    ]
+                )
 
                 # update the exposure value for this item
                 # r = number of tests item has been used on / total number of tests
