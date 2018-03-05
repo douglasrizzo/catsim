@@ -2,16 +2,15 @@ language: python
 python:
 - '3.4'
 - '3.5'
+- '3.6'
 addons:
   apt:
     packages:
       - graphviz
 install:
 - sudo apt-get update
-# install Miniconda conditionally, dependeing on the Python version in the VM
-- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-  -O miniconda.sh; else wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-  -O miniconda.sh; fi
+# install Miniconda conditionally, depending on the Python version in the VM
+- wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
 - bash miniconda.sh -b -p $HOME/miniconda
 - export PATH="$HOME/miniconda/bin:$PATH"
 - hash -r
