@@ -51,7 +51,7 @@ def test_simulations():
     for bank_size in bank_sizes:
         for test_size in test_sizes:
             initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
-            infinite_selectors = [MaxInfoSelector(), RandomSelector(), UrrySelector]
+            infinite_selectors = [MaxInfoSelector(), RandomSelector(), UrrySelector()]
             finite_selectors = [
                 LinearSelector(list(numpy.random.choice(bank_size, size=test_size, replace=False))),
                 AStratifiedSelector(test_size),
