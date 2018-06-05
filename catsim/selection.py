@@ -59,6 +59,49 @@ class MaxInfoSelector(Selector):
         return valid_indexes[0]
 
 
+
+class UrrySelector(Selector):
+    """Selector that returns the item whose difficulty parameter is closest to the examinee's proficiency"""
+
+    def __init__(self):
+        super().__init__()
+
+    def __str__(self):
+        return 'Urry Selector'
+
+    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
+               est_theta: float = None, **kwargs) -> int:
+        """Returns the index of the next item to be administered.
+
+        :param index: the index of the current examinee in the simulator.
+        :param items: a matrix containing item parameters in the format that `catsim` understands
+                      (see: :py:func:`catsim.cat.generate_item_bank`)
+        :param administered_items: a list containing the indexes of items that were already administered
+        :param est_theta: a float containing the current estimated proficiency
+        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
+        """
+        if (index is None or self.simulator is None) and (
+                            items is None or administered_items is None or est_theta is None):
+            raise ValueError(
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+
+        if items is None and administered_items is None and est_theta is None:
+            items = self.simulator.items
+            administered_items = self.simulator.administered_items[index]
+            est_theta = self.simulator.latest_estimations[index]
+
+        valid_indexes = [x for x in range(items.shape[0]) if x not in administered_items]
+        b_differences = [abs(est_theta - item[1]) for item in items[valid_indexes]]
+        valid_indexes = [item_index for (inf_value, item_index) in
+                         sorted(zip(b_differences, valid_indexes), key=lambda pair: pair[0], reverse=False)]
+
+        if len(valid_indexes) == 0:
+            warn('There are no more items to be applied.')
+            return None
+
+        return valid_indexes[0]
+
+
 class LinearSelector(FiniteSelector):
     """Selector that returns item indexes in a linear order, simulating a standard
     (non-adaptive) test.
