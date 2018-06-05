@@ -81,7 +81,7 @@ class FiniteSelector(Selector, metaclass=ABCMeta):
         super().__init__()
 
     @property
-    def test_size(self):
+    def test_size(self) -> int:
         return self._test_size
 
     @property
