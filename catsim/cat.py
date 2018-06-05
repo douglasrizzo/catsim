@@ -39,7 +39,7 @@ def bias(actual: list, predicted: list):
     .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
 
     where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
-    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+    :math:`\\theta_i` is examinee :math:`i` actual proficiency.
 
     :param actual: a list or 1-D numpy array containing the true proficiency values
     :param predicted: a list or 1-D numpy array containing the estimated proficiency values
