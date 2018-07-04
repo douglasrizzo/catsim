@@ -28,7 +28,7 @@ setup(
     url='https://douglasrizzo.github.io/catsim',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
-        'numpy', 'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm'
+        'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm', 'numpy'
     ],
     extras_require=dict(
         testing=['nose', 'nose-cov', 'sklearn'],
