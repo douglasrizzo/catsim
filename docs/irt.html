@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.13.4
+                0.13.5
               </div>
             
           
@@ -170,7 +170,7 @@
 <dt id="catsim.irt.icc">
 <code class="descclassname">catsim.irt.</code><code class="descname">icc</code><span class="sig-paren">(</span><em>theta: float</em>, <em>a: float</em>, <em>b: float</em>, <em>c: float = 0</em>, <em>d: float = 1</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#icc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.icc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Item Response Theory four-parameter logistic function <a class="reference internal" href="references.html#ayala2009" id="id1">[Ayala2009]</a>, <a class="reference internal" href="references.html#magis13" id="id2">[Magis13]</a>:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{a_i(\theta-b_i)}}\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -181,20 +181,20 @@
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the individual’s proficiency value. This parameter value has
-no boundary, but if a distribution of the form <span class="math notranslate">\(N(0, 1)\)</span> was
-used to estimate the parameters, then <span class="math notranslate">\(-4 \leq \theta \leq
+no boundary, but if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was
+used to estimate the parameters, then <span class="math notranslate nohighlight">\(-4 \leq \theta \leq
 4\)</span>.</li>
 <li><strong>a</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the discrimination parameter of the item, usually a positive
-value in which <span class="math notranslate">\(0.8 \leq a \leq 2.5\)</span>.</li>
+value in which <span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>.</li>
 <li><strong>b</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the item difficulty parameter. This parameter value has no
 boundaries, but it is necessary that it be in the same value space
-as <cite>theta</cite> (usually <span class="math notranslate">\(-4 \leq b \leq 4\)</span>).</li>
+as <cite>theta</cite> (usually <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>).</li>
 <li><strong>c</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the item pseudo-guessing parameter. Being a probability,
-<span class="math notranslate">\(0\leq c \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate">\(c \leq 0.2\)</span>.</li>
+<span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>, but items considered good usually have
+<span class="math notranslate nohighlight">\(c \leq 0.2\)</span>.</li>
 <li><strong>d</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the item upper asymptote. Being a probability,
-<span class="math notranslate">\(0\leq d \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate">\(d \approx 1\)</span>.</li>
+<span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but items considered good usually have
+<span class="math notranslate nohighlight">\(d \approx 1\)</span>.</li>
 </ul>
 </td>
 </tr>
@@ -232,7 +232,7 @@ function for all items in a <cite>numpy.ndarray</cite> are calculated at once.</
 <code class="descclassname">catsim.irt.</code><code class="descname">inf</code><span class="sig-paren">(</span><em>theta: float</em>, <em>a: float</em>, <em>b: float</em>, <em>c: float = 0</em>, <em>d: float = 1</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#inf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.inf" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the information value of an item using the Item Response Theory
 four-parameter logistic model function <a class="reference internal" href="references.html#ayala2009" id="id3">[Ayala2009]</a>, <a class="reference internal" href="references.html#magis13" id="id4">[Magis13]</a>:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -244,19 +244,19 @@ four-parameter logistic model function <a class="reference internal" href="refer
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the individual’s proficiency value. This parameter value has
 no boundary, but if a distribution of the form
-<span class="math notranslate">\(N(0, 1)\)</span> was used to estimate the parameters, then
-<span class="math notranslate">\(-4 \leq \theta \leq 4\)</span>.</li>
+<span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the parameters, then
+<span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</li>
 <li><strong>a</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the discrimination parameter of the item, usually a positive
-value in which <span class="math notranslate">\(0.8 \leq a \leq 2.5\)</span>.</li>
+value in which <span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>.</li>
 <li><strong>b</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the item difficulty parameter. This parameter value has no
-boundary, but if a distribution of the form <span class="math notranslate">\(N(0, 1)\)</span> was
-used to estimate the parameters, then <span class="math notranslate">\(-4 \leq b \leq 4\)</span>.</li>
+boundary, but if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was
+used to estimate the parameters, then <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>.</li>
 <li><strong>c</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the item pseudo-guessing parameter. Being a probability,
-<span class="math notranslate">\(0\leq c \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate">\(c \leq 0.2\)</span>.</li>
+<span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>, but items considered good usually have
+<span class="math notranslate nohighlight">\(c \leq 0.2\)</span>.</li>
 <li><strong>d</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the item upper asymptote. Being a probability,
-<span class="math notranslate">\(0\leq d \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate">\(d \approx 1\)</span>.</li>
+<span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but items considered good usually have
+<span class="math notranslate nohighlight">\(d \approx 1\)</span>.</li>
 </ul>
 </td>
 </tr>
@@ -294,16 +294,16 @@ value for all items in a <cite>numpy.ndarray</cite> are calculated at once.</p>
 <code class="descclassname">catsim.irt.</code><code class="descname">log_likelihood</code><span class="sig-paren">(</span><em>est_theta: float</em>, <em>response_vector: list</em>, <em>administered_items: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.log_likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the log-likelihood of an estimated proficiency, given a
 response vector and the parameters of the answered items <a class="reference internal" href="references.html#ayala2009" id="id5">[Ayala2009]</a>.</p>
-<p>The likelihood function of a given <span class="math notranslate">\(\theta\)</span> value given the answers to <span class="math notranslate">\(I\)</span> items is given by:</p>
-<div class="math notranslate">
+<p>The likelihood function of a given <span class="math notranslate nohighlight">\(\theta\)</span> value given the answers to <span class="math notranslate nohighlight">\(I\)</span> items is given by:</p>
+<div class="math notranslate nohighlight">
 \[L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}\]</div>
-<p>For mathematical reasons, finding the maximum of <span class="math notranslate">\(L(X_{Ij}\)</span> includes using the
-product rule of derivations. Since <span class="math notranslate">\(L(X_{Ij}\)</span> has <span class="math notranslate">\(j\)</span> parts, it can be quite
+<p>For mathematical reasons, finding the maximum of <span class="math notranslate nohighlight">\(L(X_{Ij}\)</span> includes using the
+product rule of derivations. Since <span class="math notranslate nohighlight">\(L(X_{Ij}\)</span> has <span class="math notranslate nohighlight">\(j\)</span> parts, it can be quite
 complicated to do so. Also, for computational reasons, the product of probabilities can
 quickly tend to 0, so it is common to use the log-likelihood in maximization/minimization
 problems, transforming the product of probabilities in a sum of probabilities:</p>
 <blockquote>
-<div><div class="math notranslate">
+<div><div class="math notranslate nohighlight">
 \[\log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I
 \left\lbrace x_{ij} \log P_{ij}(\theta)+ (1 - x_{ij}) \log
 Q_{ij}(\theta) \right\rbrace\]</div>
@@ -332,19 +332,19 @@ Q_{ij}(\theta) \right\rbrace\]</div>
 <dl class="function">
 <dt id="catsim.irt.max_info">
 <code class="descclassname">catsim.irt.</code><code class="descname">max_info</code><span class="sig-paren">(</span><em>a: float = 1</em>, <em>b: float = 0</em>, <em>c: float = 0</em>, <em>d: float = 1</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#max_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.max_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the <span class="math notranslate">\(\theta\)</span> value to which the item with the given parameters
+<dd><p>Returns the <span class="math notranslate nohighlight">\(\theta\)</span> value to which the item with the given parameters
 gives maximum information. For the 1-parameter and 2-parameter
-logistic models, this <span class="math notranslate">\(\theta\)</span> corresponds to where <span class="math notranslate">\(b = 0.5\)</span>.
+logistic models, this <span class="math notranslate nohighlight">\(\theta\)</span> corresponds to where <span class="math notranslate nohighlight">\(b = 0.5\)</span>.
 In the 3-parameter and 4-parameter logistic models, however, this value is given
 by (<a class="reference internal" href="references.html#magis13" id="id6">[Magis13]</a>)</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[argmax_{\theta}I(\theta) = b + \frac{1}{a} log \left(\frac{x^* - c}{d - x^*}\right)\]</div>
 <p>where</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[x^* = 2 \sqrt{\frac{-u}{3}} cos\left\{\frac{1}{3}acos\left(-\frac{v}{2}\sqrt{\frac{27}{-u^3}}\right)+\frac{4 \pi}{3}\right\} + 0.5\]</div>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[u = -\frac{3}{4} + \frac{c + d - 2cd}{2}\]</div>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[v = -\frac{c + d - 1}{4}\]</div>
 <p>A few results can be seen in the plots below:</p>
 <p>(<a class="reference external" href=".//irt-1.py">Source code</a>)</p>
@@ -398,8 +398,8 @@ value that maximizes the information function for all items is returned in a <ci
 <dd><p>Function used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.1.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to minimize
 values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
 value, given a response vector and the parameters of the administered items. The value of
-<a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a> is simply the value of <span class="math notranslate">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a> or, mathematically:</p>
-<div class="math notranslate">
+<a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a> is simply the value of <span class="math notranslate nohighlight">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a> or, mathematically:</p>
+<div class="math notranslate nohighlight">
 \[- \log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I)\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -462,12 +462,12 @@ items simulate the 3-parameter logistic model.</p>
 <dt id="catsim.irt.reliability">
 <code class="descclassname">catsim.irt.</code><code class="descname">reliability</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#reliability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.reliability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes test reliability <a class="reference internal" href="references.html#thissen00" id="id7">[Thissen00]</a>, given by:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[Rel = 1 - \frac{1}{I(\theta)}\]</div>
 <p>Test reliability is a measure of internal consistency for the test, similar
-to Cronbach’s <span class="math notranslate">\(\alpha\)</span> in Classical Test Theory. Its value is always
+to Cronbach’s <span class="math notranslate nohighlight">\(\alpha\)</span> in Classical Test Theory. Its value is always
 lower than 1, with values close to 1 indicating good reliability. If
-<span class="math notranslate">\(I(\theta) &lt; 1\)</span>, <span class="math notranslate">\(Rel &lt; 0\)</span> and in these cases it does not make
+<span class="math notranslate nohighlight">\(I(\theta) &lt; 1\)</span>, <span class="math notranslate nohighlight">\(Rel &lt; 0\)</span> and in these cases it does not make
 sense, but usually the application of additional items solves this problem.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -489,11 +489,11 @@ sense, but usually the application of additional items solves this problem.</p>
 <dl class="function">
 <dt id="catsim.irt.see">
 <code class="descclassname">catsim.irt.</code><code class="descname">see</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#see"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.see" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the standard error of estimation (<span class="math notranslate">\(SEE\)</span>) of a test at a
-specific <span class="math notranslate">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id8">[Ayala2009]</a>:</p>
-<div class="math notranslate">
+<dd><p>Computes the standard error of estimation (<span class="math notranslate nohighlight">\(SEE\)</span>) of a test at a
+specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id8">[Ayala2009]</a>:</p>
+<div class="math notranslate nohighlight">
 \[SEE = \sqrt{\frac{1}{I(\theta)}}\]</div>
-<p>where <span class="math notranslate">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
+<p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -517,11 +517,11 @@ specific <span class="math notranslate">\(\theta\)</span> value <a class="refere
 <dl class="function">
 <dt id="catsim.irt.test_info">
 <code class="descclassname">catsim.irt.</code><code class="descname">test_info</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#test_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.test_info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the test information of a test at a specific <span class="math notranslate">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id9">[Ayala2009]</a>:</p>
-<div class="math notranslate">
+<dd><p>Computes the test information of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id9">[Ayala2009]</a>:</p>
+<div class="math notranslate nohighlight">
 \[I(\theta) = \sum_{j \in J} I_j(\theta)\]</div>
-<p>where <span class="math notranslate">\(J\)</span> is the set of items in the test and <span class="math notranslate">\(I_j(\theta)\)</span> is the
-item information of <span class="math notranslate">\(j\)</span> at aspecific <span class="math notranslate">\(\theta\)</span> value.</p>
+<p>where <span class="math notranslate nohighlight">\(J\)</span> is the set of items in the test and <span class="math notranslate nohighlight">\(I_j(\theta)\)</span> is the
+item information of <span class="math notranslate nohighlight">\(j\)</span> at aspecific <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -550,7 +550,7 @@ used by catsim. The item matrix must have dimension nx4, in which column 1 repre
 discrimination, column 2 represents item difficulty, column 3 represents the
 pseudo-guessing parameter and column 4 represents the item upper asymptote.</p>
 <p>The item matrix must have at least one line, exactly four columns and
-<span class="math notranslate">\(\forall i \in I , a_i &gt; 0 \wedge 0 &lt; c_i &lt; 1 \wedge 0 &lt; d_i &lt; 1\)</span></p>
+<span class="math notranslate nohighlight">\(\forall i \in I , a_i &gt; 0 \wedge 0 &lt; c_i &lt; 1 \wedge 0 &lt; d_i &lt; 1\)</span></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -569,11 +569,11 @@ just print the error message to standard output.</li>
 <dl class="function">
 <dt id="catsim.irt.var">
 <code class="descclassname">catsim.irt.</code><code class="descname">var</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#var"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.var" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the variance (<span class="math notranslate">\(Var\)</span>) of the proficiency estimate of a test at a
-specific <span class="math notranslate">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id10">[Ayala2009]</a>:</p>
-<div class="math notranslate">
+<dd><p>Computes the variance (<span class="math notranslate nohighlight">\(Var\)</span>) of the proficiency estimate of a test at a
+specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id10">[Ayala2009]</a>:</p>
+<div class="math notranslate nohighlight">
 \[Var = \frac{1}{I(\theta)}\]</div>
-<p>where <span class="math notranslate">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
+<p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -638,7 +638,7 @@ specific <span class="math notranslate">\(\theta\)</span> value <a class="refere
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.13.4',
+            VERSION:'0.13.5',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

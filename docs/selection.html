@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.13.4
+                0.13.5
               </div>
             
           
@@ -189,12 +189,12 @@ used during the simulation, as long as it also inherits from
 <dt id="catsim.selection.AStratifiedBBlockingSelector">
 <em class="property">class </em><code class="descclassname">catsim.selection.</code><code class="descname">AStratifiedBBlockingSelector</code><span class="sig-paren">(</span><em>test_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#AStratifiedBBlockingSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.AStratifiedBBlockingSelector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
-<p>Implementation of the <span class="math notranslate">\(\alpha\)</span>-stratified selector with <span class="math notranslate">\(b\)</span>
+<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector with <span class="math notranslate nohighlight">\(b\)</span>
 blocking proposed by <a class="reference internal" href="references.html#chang2001" id="id1">[Chang2001]</a>, in which the item bank is sorted in ascending
 order according to the items difficulty parameter and then separated into
-<span class="math notranslate">\(M\)</span> strata, each stratum containing gradually higher average difficulty.</p>
-<p>Each of the <span class="math notranslate">\(M\)</span> strata is then again separated into <span class="math notranslate">\(K\)</span>
-sub-strata (<span class="math notranslate">\(k\)</span> being the test size), according to their
+<span class="math notranslate nohighlight">\(M\)</span> strata, each stratum containing gradually higher average difficulty.</p>
+<p>Each of the <span class="math notranslate nohighlight">\(M\)</span> strata is then again separated into <span class="math notranslate nohighlight">\(K\)</span>
+sub-strata (<span class="math notranslate nohighlight">\(k\)</span> being the test size), according to their
 discrimination. The final item bank is then ordered such that the first
 sub-strata of each strata forms the first strata of the new ordered item
 bank, and so on. This method tries to balance the distribution of both
@@ -215,12 +215,12 @@ parameters between all strata, after perceiving that they are correlated.</p>
 <dt id="catsim.selection.AStratifiedSelector">
 <em class="property">class </em><code class="descclassname">catsim.selection.</code><code class="descname">AStratifiedSelector</code><span class="sig-paren">(</span><em>test_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#AStratifiedSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.AStratifiedSelector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
-<p>Implementation of the <span class="math notranslate">\(\alpha\)</span>-stratified selector proposed by
+<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector proposed by
 <a class="reference internal" href="references.html#chang99" id="id2">[Chang99]</a>, in which the item bank is sorted in ascending order according to the
-items discrimination parameter and then separated into <span class="math notranslate">\(K\)</span> strata
-(<span class="math notranslate">\(K\)</span> being the test size), each stratum containing gradually higher
-average discrimination. The <span class="math notranslate">\(\alpha\)</span>-stratified selector then selects the
-first non-administered item from stratum <span class="math notranslate">\(k\)</span>, in which <span class="math notranslate">\(k\)</span>
+items discrimination parameter and then separated into <span class="math notranslate nohighlight">\(K\)</span> strata
+(<span class="math notranslate nohighlight">\(K\)</span> being the test size), each stratum containing gradually higher
+average discrimination. The <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector then selects the
+first non-administered item from stratum <span class="math notranslate nohighlight">\(k\)</span>, in which <span class="math notranslate nohighlight">\(k\)</span>
 represents the position in the test of the current item the examinee is being
 presented.</p>
 <img alt="../docs/alpha-strat.*" src="../docs/alpha-strat.*" />
@@ -269,10 +269,10 @@ sum of information is maximum. The weighted equals the
 number of items in the cluster;</p>
 </div></blockquote>
 </li>
-<li><strong>r_control</strong> – if <cite>passive</cite> and all items <span class="math notranslate">\(i\)</span> in the selected
-cluster have <span class="math notranslate">\(r_i &gt; r^{max}\)</span>, applies the item with
+<li><strong>r_control</strong> – if <cite>passive</cite> and all items <span class="math notranslate nohighlight">\(i\)</span> in the selected
+cluster have <span class="math notranslate nohighlight">\(r_i &gt; r^{max}\)</span>, applies the item with
 maximum information; if <cite>aggressive</cite>, applies the item
-with smallest <span class="math notranslate">\(r\)</span> value.</li>
+with smallest <span class="math notranslate nohighlight">\(r\)</span> value.</li>
 </ul>
 </td>
 </tr>
@@ -280,7 +280,7 @@ with smallest <span class="math notranslate">\(r\)</span> value.</li>
 </table>
 <dl class="staticmethod">
 <dt id="catsim.selection.ClusterSelector.avg_cluster_params">
-<em class="property">static </em><code class="descname">avg_cluster_params</code><span class="sig-paren">(</span><em>c: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.avg_cluster_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.avg_cluster_params" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">avg_cluster_params</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em>, <em>c: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.avg_cluster_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.avg_cluster_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the average values of item parameters by cluster</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -329,7 +329,7 @@ Lines are clusters, columns are parameters.</p>
 
 <dl class="staticmethod">
 <dt id="catsim.selection.ClusterSelector.sum_cluster_infos">
-<em class="property">static </em><code class="descname">sum_cluster_infos</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em>, <em>clusters: list</em><span class="sig-paren">)</span> &#x2192; list<a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">sum_cluster_infos</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em>, <em>clusters: list</em><span class="sig-paren">)</span> &#x2192; list<a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sum of item informations, separated by cluster</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -339,7 +339,7 @@ Lines are clusters, columns are parameters.</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – an examinee’s <span class="math notranslate">\(\theta\)</span> value</li>
+<li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</li>
 <li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</li>
 <li><strong>clusters</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing item cluster memberships, represented by integers</li>
@@ -355,7 +355,7 @@ Lines are clusters, columns are parameters.</p>
 
 <dl class="staticmethod">
 <dt id="catsim.selection.ClusterSelector.sum_cluster_params">
-<em class="property">static </em><code class="descname">sum_cluster_params</code><span class="sig-paren">(</span><em>c: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_params" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">sum_cluster_params</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em>, <em>c: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sum of item parameter values for each cluster cluster</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -377,7 +377,7 @@ Lines are clusters, columns are parameters.</p>
 
 <dl class="staticmethod">
 <dt id="catsim.selection.ClusterSelector.weighted_cluster_infos">
-<em class="property">static </em><code class="descname">weighted_cluster_infos</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em>, <em>clusters: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">weighted_cluster_infos</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em>, <em>clusters: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the weighted sum of item informations, separated by cluster.
 The weight is the number of items in each cluster.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -385,7 +385,7 @@ The weight is the number of items in each cluster.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – an examinee’s <span class="math notranslate">\(\theta\)</span> value</li>
+<li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</li>
 <li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</li>
 <li><strong>clusters</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing item cluster memberships, represented by integers</li>
@@ -408,16 +408,16 @@ divided by the number of items in each cluster</p>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
 <p>Implementation of an interval integration selector in which, at every step of
 the test, the item that maximizes the information function integral at a
-predetermined <code class="docutils literal notranslate"><span class="pre">interval</span></code> <span class="math notranslate">\(\delta\)</span> above and below the current
-<span class="math notranslate">\(\hat\theta\)</span> is chosen.</p>
-<div class="math notranslate">
+predetermined <code class="docutils literal notranslate"><span class="pre">interval</span></code> <span class="math notranslate nohighlight">\(\delta\)</span> above and below the current
+<span class="math notranslate nohighlight">\(\hat\theta\)</span> is chosen.</p>
+<div class="math notranslate nohighlight">
 \[argmax_{i \in I} \int_{\hat\theta - \delta}^{\hat\theta - \delta}I_i(\hat\theta)\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>interval</strong> – the interval of the integral. If no interval is passed, the
-integral is calculated from <span class="math notranslate">\([-\infty, \infty]\)</span>.</td>
+integral is calculated from <span class="math notranslate nohighlight">\([-\infty, \infty]\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -494,18 +494,18 @@ integral is calculated from <span class="math notranslate">\([-\infty, \infty]\)
 <dt id="catsim.selection.MaxInfoBBlockingSelector">
 <em class="property">class </em><code class="descclassname">catsim.selection.</code><code class="descname">MaxInfoBBlockingSelector</code><span class="sig-paren">(</span><em>test_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoBBlockingSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoBBlockingSelector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
-<p>Implementation of the maximum information stratification with <span class="math notranslate">\(b\)</span>
+<p>Implementation of the maximum information stratification with <span class="math notranslate nohighlight">\(b\)</span>
 blocking (MIS-B) selector proposed by <a class="reference internal" href="references.html#bar06" id="id3">[Bar06]</a>, in which the item bank is sorted
 in ascending order according to the items difficulty parameter and then
-separated into <span class="math notranslate">\(M\)</span> strata, each stratum containing gradually higher
+separated into <span class="math notranslate nohighlight">\(M\)</span> strata, each stratum containing gradually higher
 average difficulty.</p>
-<p>Each of the <span class="math notranslate">\(M\)</span> strata is then again separated into <span class="math notranslate">\(K\)</span>
-sub-strata (<span class="math notranslate">\(k\)</span> being the test size), according to the items maximum
+<p>Each of the <span class="math notranslate nohighlight">\(M\)</span> strata is then again separated into <span class="math notranslate nohighlight">\(K\)</span>
+sub-strata (<span class="math notranslate nohighlight">\(k\)</span> being the test size), according to the items maximum
 information. The final item bank is then ordered such that the first
 sub-strata of each strata forms the first strata of the new ordered item
 bank, and so on. This method tries to balance the distribution of both
-parameters between all strata and works better than the <span class="math notranslate">\(a\)</span>-stratified
-with <span class="math notranslate">\(b\)</span> blocking method by <a class="reference internal" href="references.html#chang2001" id="id4">[Chang2001]</a> for the three-parameter
+parameters between all strata and works better than the <span class="math notranslate nohighlight">\(a\)</span>-stratified
+with <span class="math notranslate nohighlight">\(b\)</span> blocking method by <a class="reference internal" href="references.html#chang2001" id="id4">[Chang2001]</a> for the three-parameter
 logistic model of IRT, since item difficulty and maximum information are not
 positioned in the same place in the proficiency scale in 3PL. This may also
 apply, although not mentioned by the authors, for the 4PL.</p>
@@ -561,13 +561,13 @@ apply, although not mentioned by the authors, for the 4PL.</p>
 <dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
 <p>Implementation of the maximum information stratification (MIS) selector
 proposed by <a class="reference internal" href="references.html#bar06" id="id5">[Bar06]</a>, in which the item bank is sorted in ascending order
-according to the items maximum information and then separated into <span class="math notranslate">\(K\)</span>
-strata (<span class="math notranslate">\(K\)</span> being the test size), each stratum containing items with
+according to the items maximum information and then separated into <span class="math notranslate nohighlight">\(K\)</span>
+strata (<span class="math notranslate nohighlight">\(K\)</span> being the test size), each stratum containing items with
 gradually higher maximum information. The MIS selector then selects the first
-non-administered item from stratum <span class="math notranslate">\(k\)</span>, in which <span class="math notranslate">\(k\)</span> represents the
+non-administered item from stratum <span class="math notranslate nohighlight">\(k\)</span>, in which <span class="math notranslate nohighlight">\(k\)</span> represents the
 position in the test of the current item the examinee is being presented.</p>
 <img alt="../docs/mis.*" src="../docs/mis.*" />
-<p>This method claims to work better than the <span class="math notranslate">\(a\)</span>-stratified method by
+<p>This method claims to work better than the <span class="math notranslate nohighlight">\(a\)</span>-stratified method by
 <a class="reference internal" href="references.html#chang99" id="id6">[Chang99]</a> for the three-parameter logistic model of IRT, since item difficulty
 and maximum information are not positioned in the same place in the proficiency
 scale in 3PL.</p>
@@ -628,8 +628,8 @@ scale in 3PL.</p>
 <em class="property">class </em><code class="descclassname">catsim.selection.</code><code class="descname">RandomesqueSelector</code><span class="sig-paren">(</span><em>bin_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
 <p>Implementation of the randomesque selector proposed by <a class="reference internal" href="references.html#kingsbury89" id="id7">[Kingsbury89]</a>, in which,
-at every step of the test, an item is randomly chosen from the <span class="math notranslate">\(n\)</span> most informative
-items in the item bank, <span class="math notranslate">\(n\)</span> being a predefined value (originally 5, but user-defined
+at every step of the test, an item is randomly chosen from the <span class="math notranslate nohighlight">\(n\)</span> most informative
+items in the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a predefined value (originally 5, but user-defined
 in this implementation)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -714,11 +714,11 @@ attributed to <cite>simulator</cite>, this method is called again, guaranteeing 
 <em class="property">class </em><code class="descclassname">catsim.selection.</code><code class="descname">The54321Selector</code><span class="sig-paren">(</span><em>test_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#The54321Selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.FiniteSelector</span></code></a></p>
 <p>Implementation of the 5-4-3-2-1 selector proposed by <a class="reference internal" href="references.html#mcbride83" id="id8">[McBride83]</a>, in which,
-at each step <span class="math notranslate">\(k\)</span> of a test of size <span class="math notranslate">\(K\)</span>, an item is chosen from a bin
-containing the <span class="math notranslate">\(K-k\)</span> most informative items in the bank, given the current
-<span class="math notranslate">\(\hat\theta\)</span>. As the test progresses, the bin gets smaller and more
+at each step <span class="math notranslate nohighlight">\(k\)</span> of a test of size <span class="math notranslate nohighlight">\(K\)</span>, an item is chosen from a bin
+containing the <span class="math notranslate nohighlight">\(K-k\)</span> most informative items in the bank, given the current
+<span class="math notranslate nohighlight">\(\hat\theta\)</span>. As the test progresses, the bin gets smaller and more
 informative items have a higher probability of being chosen by the end of the
-test, when the estimation of ‘<span class="math notranslate">\(\hat\theta\)</span> is more precise. The
+test, when the estimation of ‘<span class="math notranslate nohighlight">\(\hat\theta\)</span> is more precise. The
 5-4-3-2-1 selector can be viewed as a specialization of the
 <a class="reference internal" href="#catsim.selection.RandomesqueSelector" title="catsim.selection.RandomesqueSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.RandomesqueSelector</span></code></a>, in which the bin size of most
 informative items gets smaller as the test progresses.</p>
@@ -838,7 +838,7 @@ this parameter to set the bin size</td>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.13.4',
+            VERSION:'0.13.5',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

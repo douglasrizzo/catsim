@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.13.4
+                0.13.5
               </div>
             
           
@@ -185,7 +185,7 @@ application of adaptive tests. Most of this module is based on the work of
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – index of the current examinee in the simulator</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the current <span class="math notranslate">\(\hat\theta\)</span></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -206,7 +206,7 @@ application of adaptive tests. Most of this module is based on the work of
 <dl class="method">
 <dt id="catsim.simulation.Initializer.initialize">
 <code class="descname">initialize</code><span class="sig-paren">(</span><em>index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Initializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Selects an examinee’s initial <span class="math notranslate">\(\theta\)</span> value</p>
+<dd><p>Selects an examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -215,7 +215,7 @@ application of adaptive tests. Most of this module is based on the work of
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">examinee’s initial <span class="math notranslate">\(\theta\)</span> value</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value</td>
 </tr>
 </tbody>
 </table>
@@ -273,9 +273,9 @@ simulation process and simulates one or more computerized adaptive tests</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>items</strong> – a matrix containing item parameters</li>
-<li><strong>examinees</strong> – an integer with the number of examinees, whose real <span class="math notranslate">\(\theta\)</span> values will be
+<li><strong>examinees</strong> – an integer with the number of examinees, whose real <span class="math notranslate nohighlight">\(\theta\)</span> values will be
 sampled from a normal distribution; or a :py:type:list containing said
-<span class="math notranslate">\(\theta_0\)</span> values</li>
+<span class="math notranslate nohighlight">\(\theta_0\)</span> values</li>
 </ul>
 </td>
 </tr>
@@ -305,14 +305,14 @@ information on estimation bias, see <a class="reference internal" href="cat.html
 <dl class="attribute">
 <dt id="catsim.simulation.Simulator.estimations">
 <code class="descname">estimations</code><a class="headerlink" href="#catsim.simulation.Simulator.estimations" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of lists containing all estimated <span class="math notranslate">\(\hat\theta\)</span> values
+<dd><p>List of lists containing all estimated <span class="math notranslate nohighlight">\(\hat\theta\)</span> values
 for all examinees during each step of the test.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="catsim.simulation.Simulator.examinees">
 <code class="descname">examinees</code><a class="headerlink" href="#catsim.simulation.Simulator.examinees" title="Permalink to this definition">¶</a></dt>
-<dd><p>List containing examinees true proficiency values (<span class="math notranslate">\(\theta\)</span>).</p>
+<dd><p>List containing examinees true proficiency values (<span class="math notranslate nohighlight">\(\theta\)</span>).</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -326,7 +326,7 @@ matrix.</p>
 <dl class="attribute">
 <dt id="catsim.simulation.Simulator.latest_estimations">
 <code class="descname">latest_estimations</code><a class="headerlink" href="#catsim.simulation.Simulator.latest_estimations" title="Permalink to this definition">¶</a></dt>
-<dd><p>Final estimated <span class="math notranslate">\(\hat\theta\)</span> values for all examinees.</p>
+<dd><p>Final estimated <span class="math notranslate nohighlight">\(\hat\theta\)</span> values for all examinees.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -368,7 +368,7 @@ called. For more information on the root mean-squared error of estimation, see
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>initializer</strong> (<a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code></a>) – an initializer that selects examinees <span class="math notranslate">\(\theta_0\)</span></li>
+<li><strong>initializer</strong> (<a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code></a>) – an initializer that selects examinees <span class="math notranslate nohighlight">\(\theta_0\)</span></li>
 <li><strong>selector</strong> (<a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a>) – a selector that selects new items to be presented to examinees</li>
 <li><strong>estimator</strong> (<a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimator</span></code></a>) – an estimator that reestimates examinees proficiencies after each item is applied</li>
 <li><strong>stopper</strong> (<a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code></a>) – an object with a stopping criteria for the test</li>
@@ -464,7 +464,7 @@ Good for longer simulations.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.13.4',
+            VERSION:'0.13.5',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
