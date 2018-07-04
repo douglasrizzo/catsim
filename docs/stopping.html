@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Stopping Criteria – catsim.stopping</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" />
+    <link rel="prev" title="Estimation Methods – catsim.estimation" href="estimation.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> catsim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.13.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/stopping.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="stopping-criteria-catsim-stopping">
+<h1>Stopping Criteria – <a class="reference internal" href="#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a><a class="headerlink" href="#stopping-criteria-catsim-stopping" title="Permalink to this headline">¶</a></h1>
+<p>All implemented classes in this module inherit from a base abstract class
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom stopping criterion be
+used during the simulation, as long as it also inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code>.</p>
+<img src="_images/inheritance-a6ddd31ba7e252bbdb84edbd873a2b711ddc01c0.png" alt="Inheritance diagram of catsim.stopping" usemap="#inheritance76f349e9d6" class="inheritance"/>
+<map id="inheritance76f349e9d6" name="inheritance76f349e9d6">
+<area shape="rect" id="node1" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,31,213,56"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stop criterion" alt="" coords="261,31,455,56"/>
+<area shape="rect" id="node3" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion for maximum number of items in a test" alt="" coords="503,5,740,31"/>
+<area shape="rect" id="node4" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)" alt="" coords="504,55,739,80"/>
+</map><span class="target" id="module-catsim.stopping"></span><dl class="class">
+<dt id="catsim.stopping.MaxItemStopper">
+<em class="property">class </em><code class="descclassname">catsim.stopping.</code><code class="descname">MaxItemStopper</code><span class="sig-paren">(</span><em>max_itens: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Stopper</span></code></a></p>
+<p>Stopping criterion for maximum number of items in a test</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max_itens</strong> – the maximum number of items in the test</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="catsim.stopping.MaxItemStopper.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>administered_items: numpy.ndarray = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the test reached its stopping criterion for the given user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</li>
+<li><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing the parameters of items that were already administered</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.stopping.MinErrorStopper">
+<em class="property">class </em><code class="descclassname">catsim.stopping.</code><code class="descname">MinErrorStopper</code><span class="sig-paren">(</span><em>min_error: float</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Stopper</span></code></a></p>
+<p>Stopping criterion for minimum standard error of estimation (see <a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>min_error</strong> – the minimum standard error of estimation the test must achieve before stopping</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="catsim.stopping.MinErrorStopper.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>administered_items: numpy.ndarray = None</em>, <em>theta: float = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the test reached its stopping criterion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</li>
+<li><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing the parameters of items that were already administered</li>
+<li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the a proficiency value to which the error will be calculated</li>
+</ul>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="simulation.html" class="btn btn-neutral float-right" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="estimation.html" class="btn btn-neutral" title="Estimation Methods – catsim.estimation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.13.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

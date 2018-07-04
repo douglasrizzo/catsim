@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catsim.initialization</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> catsim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.13.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>catsim.initialization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catsim.initialization</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="n">Initializer</span>
+
+
+<div class="viewcode-block" id="RandomInitializer"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.RandomInitializer">[docs]</a><span class="k">class</span> <span class="nc">RandomInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Randomly initializes the first estimate of an examinee&#39;s proficiency</span>
+
+<span class="sd">    :param dist_type: either `uniform` or `normal`</span>
+<span class="sd">    :param dist_params: a tuple containing minimum and maximum values for the</span>
+<span class="sd">                        uniform distribution (in no particular order) or the average</span>
+<span class="sd">                        and standard deviation values for the normal distribution</span>
+<span class="sd">                        (in this particular order).&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Random Initializer&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="n">dist_params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RandomInitializer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="n">available_distributions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="s1">&#39;normal&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dist_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_distributions</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> not in available distributions </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">available_distributions</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">=</span> <span class="n">dist_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span> <span class="o">=</span> <span class="n">dist_params</span>
+
+<div class="viewcode-block" id="RandomInitializer.initialize"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.RandomInitializer.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Generates a value using the chosen distribution and parameters</span>
+
+<span class="sd">        :param index: the index of the current examinee. This parameter is not used by this method.</span>
+<span class="sd">        :returns: a proficiency value generated from the chosen distribution using the passed parameters&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="s1">&#39;uniform&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="s1">&#39;normal&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="FixedPointInitializer"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.FixedPointInitializer">[docs]</a><span class="k">class</span> <span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initializes every proficiency at the same point.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;Fixed Point Initializer&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param start: the starting point for every examinee</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FixedPointInitializer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
+
+<div class="viewcode-block" id="FixedPointInitializer.initialize"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the same proficiency value that was passed to the constructor of the initializer</span>
+
+<span class="sd">        :param index: the index of the current examinee. This parameter is not used by this method.</span>
+<span class="sd">        :returns: the same proficiency value that was passed to the constructor of the initializer&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.13.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,606 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catsim.plot</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> catsim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.13.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>catsim.plot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catsim.plot</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module with functions for plotting IRT-related results.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
+
+<span class="kn">from</span> <span class="nn">catsim</span> <span class="k">import</span> <span class="n">irt</span>
+<span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="n">Simulator</span>
+
+
+<span class="k">def</span> <span class="nf">__column</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns columns from a bidimensional Python list (a list of lists)&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">matrix</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="item_curve"><a class="viewcode-back" href="../../plot.html#catsim.plot.item_curve">[docs]</a><span class="k">def</span> <span class="nf">item_curve</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ptype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;icc&#39;</span><span class="p">,</span>
+    <span class="n">max_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots &#39;Item Response Theory&#39;-related item plots</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        from catsim.cat import generate_item_bank</span>
+<span class="sd">        from catsim import plot</span>
+<span class="sd">        item = generate_item_bank(1)[0]</span>
+<span class="sd">        plot.item_curve(item[0], item[1], item[2], item[3], ptype=&#39;icc&#39;)</span>
+<span class="sd">        plot.item_curve(item[0], item[1], item[2], item[3], ptype=&#39;iic&#39;)</span>
+<span class="sd">        plot.item_curve(item[0], item[1], item[2], item[3], ptype=&#39;both&#39;)</span>
+
+<span class="sd">    When both curves are plotted in the same figure, the figure has no grid,</span>
+<span class="sd">    since each curve has a different scale.</span>
+
+<span class="sd">    :param a: item discrimination parameter</span>
+<span class="sd">    :param b: item difficulty parameter</span>
+<span class="sd">    :param c: item pseudo-guessing parameter</span>
+<span class="sd">    :param d: item upper asymptote</span>
+<span class="sd">    :param title: plot title</span>
+<span class="sd">    :param ptype: &#39;icc&#39; for the item characteristic curve, &#39;iic&#39; for the item</span>
+<span class="sd">                  information curve or &#39;both&#39; for both curves in the same plot</span>
+<span class="sd">    :param max_info: whether the point of maximum information should be shown in the plot</span>
+<span class="sd">    :param filepath: saves the plot in the given path</span>
+<span class="sd">    :param show: whether the generated plot is to be shown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">available_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;icc&#39;</span><span class="p">,</span> <span class="s1">&#39;iic&#39;</span><span class="p">,</span> <span class="s1">&#39;both&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">ptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_types</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="si">{0}</span><span class="se">\&#39;</span><span class="s1"> not in available plot types: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ptype</span><span class="p">,</span> <span class="n">available_types</span><span class="p">))</span>
+
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;double&#39;</span><span class="p">)</span>
+    <span class="n">p_thetas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">i_thetas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">theta</span> <span class="ow">in</span> <span class="n">thetas</span><span class="p">:</span>
+        <span class="n">p_thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+        <span class="n">i_thetas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">irt</span><span class="o">.</span><span class="n">inf</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">ptype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;icc&#39;</span><span class="p">,</span> <span class="s1">&#39;iic&#39;</span><span class="p">]:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+            <span class="s1">&#39;$a = &#39;</span> <span class="o">+</span> <span class="nb">format</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$b = &#39;</span> <span class="o">+</span> <span class="nb">format</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$c = &#39;</span> <span class="o">+</span> <span class="nb">format</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$d = &#39;</span> <span class="o">+</span>
+            <span class="nb">format</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$&#39;</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="o">.</span><span class="mi">75</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">),</span>
+            <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;axes fraction&#39;</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\theta$&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;icc&#39;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$P(\theta)$&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">p_thetas</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$P(\theta)$&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;iic&#39;</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$I(\theta)$&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">i_thetas</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$I(\theta)$&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">max_info</span><span class="p">:</span>
+                <span class="n">aux</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">max_info</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;both&#39;</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\theta$&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$P(\theta)$&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">p_thetas</span><span class="p">,</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$P(\theta)$&#39;</span><span class="p">)</span>
+        <span class="c1"># Make the y-axis label and tick labels match the line color.</span>
+        <span class="k">for</span> <span class="n">tl</span> <span class="ow">in</span> <span class="n">ax1</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">():</span>
+            <span class="n">tl</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+
+        <span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$I(\theta)$&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">thetas</span><span class="p">,</span> <span class="n">i_thetas</span><span class="p">,</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$I(\theta)$&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">tl</span> <span class="ow">in</span> <span class="n">ax2</span><span class="o">.</span><span class="n">get_yticklabels</span><span class="p">():</span>
+            <span class="n">tl</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_info</span><span class="p">:</span>
+            <span class="n">aux</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">max_info</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf</span><span class="p">(</span><span class="n">aux</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+        <span class="n">ax2</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span>
+            <span class="s1">&#39;$a = &#39;</span> <span class="o">+</span> <span class="nb">format</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$b = &#39;</span> <span class="o">+</span> <span class="nb">format</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$c = &#39;</span> <span class="o">+</span> <span class="nb">format</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$</span><span class="se">\n</span><span class="s1">$d = &#39;</span> <span class="o">+</span>
+            <span class="nb">format</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$&#39;</span><span class="p">,</span>
+            <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="o">.</span><span class="mi">75</span><span class="p">,</span> <span class="o">.</span><span class="mi">05</span><span class="p">),</span>
+            <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;axes fraction&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="gen3d_dataset_scatter"><a class="viewcode-back" href="../../plot.html#catsim.plot.gen3d_dataset_scatter">[docs]</a><span class="k">def</span> <span class="nf">gen3d_dataset_scatter</span><span class="p">(</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate the item matrix tridimensional dataset scatter plot</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        from catsim.cat import generate_item_bank</span>
+<span class="sd">        from catsim import plot</span>
+<span class="sd">        items = generate_item_bank(100)</span>
+<span class="sd">        plot.gen3d_dataset_scatter(items)</span>
+
+<span class="sd">    :param items: the item matrix</span>
+<span class="sd">    :param title: the scatter plot title</span>
+<span class="sd">    :param filepath: the path to save the scatter plot</span>
+<span class="sd">    :param show: whether the generated plot is to be shown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">Axes3D</span>
+    <span class="n">irt</span><span class="o">.</span><span class="n">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">&#39;3d&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]),</span> <span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]),</span> <span class="nb">list</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="item_exposure"><a class="viewcode-back" href="../../plot.html#catsim.plot.item_exposure">[docs]</a><span class="k">def</span> <span class="nf">item_exposure</span><span class="p">(</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">par</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ptype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while</span>
+<span class="sd">    the `y` axis represents their exposure rates. an examinee&#39;s test progress.</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        from catsim.cat import generate_item_bank</span>
+<span class="sd">        from catsim import plot</span>
+<span class="sd">        from catsim.initialization import RandomInitializer</span>
+<span class="sd">        from catsim.selection import MaxInfoSelector</span>
+<span class="sd">        from catsim.estimation import HillClimbingEstimator</span>
+<span class="sd">        from catsim.stopping import MaxItemStopper</span>
+<span class="sd">        from catsim.simulation import Simulator</span>
+
+<span class="sd">        s = Simulator(generate_item_bank(100), 10)</span>
+<span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))</span>
+<span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, par=&#39;b&#39;)</span>
+<span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, ptype=&#39;line&#39;)</span>
+
+<span class="sd">    :param title: the plot title.</span>
+<span class="sd">    :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees&#39;</span>
+<span class="sd">                      proficiencies and a list of administered items for each examinee.</span>
+<span class="sd">    :param items: an item matrix containing item parameters and their exposure rate in the last column.</span>
+<span class="sd">    :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`</span>
+<span class="sd">                to use the default order of the item bank.</span>
+<span class="sd">    :param ptype: plot type. Either &#39;bar&#39; or &#39;line&#39;.</span>
+<span class="sd">    :param filepath: the path to save the plot.</span>
+<span class="sd">    :param show: whether the generated plot is to be shown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a single plottable object was passed.&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">items</span>
+
+    <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;The item matrix is supposed to have 5 columns, the last one representing item exposure rates&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">par</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported parameter.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported plot type.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Item discrimination&#39;</span>
+    <span class="k">elif</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Item difficulty&#39;</span>
+    <span class="k">elif</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Item Guessing&#39;</span>
+    <span class="k">elif</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Item upper asymptote&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Items&#39;</span>
+
+    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span><span class="p">:</span>
+        <span class="n">bar_width</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="o">/</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">bar_width</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">][</span><span class="n">indexes</span><span class="p">])</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Item exposure&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filedir</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filedir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="test_progress"><a class="viewcode-back" href="../../plot.html#catsim.plot.test_progress">[docs]</a><span class="k">def</span> <span class="nf">test_progress</span><span class="p">(</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">thetas</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">var</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">see</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">reliability</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates a plot representing an examinee&#39;s test progress. Note that,</span>
+<span class="sd">    while some functions increase or decrease monotonically, like test information</span>
+<span class="sd">    and standard error of estimation, the plot calculates these values using the</span>
+<span class="sd">    examinee&#39;s proficiency estimated at that given time of the test. This means</span>
+<span class="sd">    that a test that was tought to be informative at a given point may not be as</span>
+<span class="sd">    informative after new estimates are done.</span>
+
+<span class="sd">    .. plot::</span>
+
+<span class="sd">        from catsim.cat import generate_item_bank</span>
+<span class="sd">        from catsim import plot</span>
+<span class="sd">        from catsim.initialization import RandomInitializer</span>
+<span class="sd">        from catsim.selection import MaxInfoSelector</span>
+<span class="sd">        from catsim.estimation import HillClimbingEstimator</span>
+<span class="sd">        from catsim.stopping import MaxItemStopper</span>
+<span class="sd">        from catsim.simulation import Simulator</span>
+
+<span class="sd">        s = Simulator(generate_item_bank(100), 10)</span>
+<span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))</span>
+<span class="sd">        plot.test_progress(simulator=s, index=0)</span>
+<span class="sd">        plot.test_progress(simulator=s, index=0, info=True, var=True, see=True)</span>
+
+<span class="sd">    :param title: the plot title.</span>
+<span class="sd">    :param simulator: a simulator which has already simulated a series of CATs,</span>
+<span class="sd">                      containing estimations to the examinees&#39; proficiencies and</span>
+<span class="sd">                      a list of administered items for each examinee.</span>
+<span class="sd">    :param index: the index of the examinee in the simulator whose plot is to be done.</span>
+<span class="sd">    :param thetas: if a :py:class:`Simulator` is not passed, then a list of proficiency</span>
+<span class="sd">                   estimations can be manually passed to the function.</span>
+<span class="sd">    :param administered_items: if a :py:class:`Simulator` is not passed, then a</span>
+<span class="sd">                               matrix of administered items, represented by their</span>
+<span class="sd">                               parameters, can be manually passed to the function.</span>
+<span class="sd">    :param true_theta: the value of the examinee&#39;s true proficiency. If it is passed,</span>
+<span class="sd">                       it will be shown on the plot, otherwise not.</span>
+<span class="sd">    :param info: plot test information. It only works if both proficiencies and</span>
+<span class="sd">                 administered items are passed.</span>
+<span class="sd">    :param var: plot the estimation variance during the test. It only</span>
+<span class="sd">                works if both proficiencies and administered items are passed.</span>
+<span class="sd">    :param see: plot the standard error of estimation during the test. It only</span>
+<span class="sd">               works if both proficiencies and administered items are passed.</span>
+<span class="sd">    :param reliability: plot the test reliability. It only works if both proficiencies</span>
+<span class="sd">                        and administered items are passed.</span>
+<span class="sd">    :param filepath: the path to save the plot</span>
+<span class="sd">    :param show: whether the generated plot is to be shown</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a single plottable object was passed.&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">thetas</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">administered_items</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
+        <span class="n">true_theta</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">examinees</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
+        <span class="n">administered_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Number of latest_estimations and administered items is not the same. They should be.&#39;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># len(thetas) - 1 because the first item is made by the initializer</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">thetas</span><span class="p">)))</span> <span class="k">if</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\hat{\theta}$&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">difficulties</span> <span class="o">=</span> <span class="n">administered_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">difficulties</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Item difficulty&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">true_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">true_theta</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\theta$&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># calculate and plot test information, var, standard error and reliability</span>
+        <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
+            <span class="n">infos</span> <span class="o">=</span> <span class="p">[</span><span class="n">irt</span><span class="o">.</span><span class="n">test_info</span><span class="p">(</span><span class="n">thetas</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">administered_items</span><span class="p">[:</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">infos</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$I(\theta)$&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">var</span><span class="p">:</span>
+            <span class="n">varss</span> <span class="o">=</span> <span class="p">[</span><span class="n">irt</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">thetas</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">administered_items</span><span class="p">[:</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">varss</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$Var$&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">see</span><span class="p">:</span>
+            <span class="n">sees</span> <span class="o">=</span> <span class="p">[</span><span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">thetas</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">administered_items</span><span class="p">[:</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">sees</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$SEE$&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reliability</span><span class="p">:</span>
+            <span class="n">reliabilities</span> <span class="o">=</span> <span class="p">[</span><span class="n">irt</span><span class="o">.</span><span class="n">reliability</span><span class="p">(</span><span class="n">thetas</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">administered_items</span><span class="p">[:</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xs</span><span class="p">]</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">reliabilities</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Reliability&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Items&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filedir</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filedir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.13.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,491 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Computerized Adaptive Testing Simulation – catsim.simulation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Item Response Theory Functions – catsim.irt" href="irt.html" />
+    <link rel="prev" title="Stopping Criteria – catsim.stopping" href="stopping.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> catsim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.13.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/simulation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-catsim.simulation">
+<span id="computerized-adaptive-testing-simulation-catsim-simulation"></span><h1>Computerized Adaptive Testing Simulation – <a class="reference internal" href="#module-catsim.simulation" title="catsim.simulation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a><a class="headerlink" href="#module-catsim.simulation" title="Permalink to this headline">¶</a></h1>
+<p>Module containing functions relevant to the process of simulating the
+application of adaptive tests. Most of this module is based on the work of
+<a class="reference internal" href="references.html#bar10" id="id1">[Bar10]</a>.</p>
+<dl class="class">
+<dt id="catsim.simulation.Estimator">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">Estimator</code><a class="reference internal" href="_modules/catsim/simulation.html#Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for proficiency estimators</p>
+<dl class="method">
+<dt id="catsim.simulation.Estimator.estimate">
+<code class="descname">estimate</code><span class="sig-paren">(</span><em>index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Estimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator.estimate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</dt>
+<dd>test for the given examinee.</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">float</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – index of the current examinee in the simulator</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the current <span class="math notranslate">\(\hat\theta\)</span></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.simulation.FiniteSelector">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">FiniteSelector</code><span class="sig-paren">(</span><em>test_size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#FiniteSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.FiniteSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class representing a CAT item selector.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.simulation.Initializer">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">Initializer</code><a class="reference internal" href="_modules/catsim/simulation.html#Initializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for CAT initializers</p>
+<dl class="method">
+<dt id="catsim.simulation.Initializer.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Initializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects an examinee’s initial <span class="math notranslate">\(\theta\)</span> value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">float</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">examinee’s initial <span class="math notranslate">\(\theta\)</span> value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.simulation.Selector">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">Selector</code><a class="reference internal" href="_modules/catsim/simulation.html#Selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Selector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class representing a CAT item selector.</p>
+<dl class="method">
+<dt id="catsim.simulation.Selector.select">
+<code class="descname">select</code><span class="sig-paren">(</span><em>index: int</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/simulation.html#Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Selector.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the index of the next item to be administered.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">index of the next item to be applied or <cite>None</cite> if there are no more items to be presented.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.simulation.Simulable">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">Simulable</code><a class="reference internal" href="_modules/catsim/simulation.html#Simulable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class representing one of the Simulator components that will receive a reference back to it.</p>
+<dl class="method">
+<dt id="catsim.simulation.Simulable.preprocess">
+<code class="descname">preprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulable.preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulable.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this method to initialize any static values the <cite>Simulable</cite> might use for the duration of the
+simulation. <cite>preprocess</cite> is called after a value is set for the <cite>simulator</cite> property. If a new value if
+attributed to <cite>simulator</cite>, this method is called again, guaranteeing that internal properties of the
+<cite>Simulable</cite> are re-initialized as necessary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.simulation.Simulator">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">Simulator</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em>, <em>examinees</em>, <em>initializer: catsim.simulation.Initializer = None</em>, <em>selector: catsim.simulation.Selector = None</em>, <em>estimator: catsim.simulation.Estimator = None</em>, <em>stopper: catsim.simulation.Stopper = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing the simulator. It gathers several objects that describe the full
+simulation process and simulates one or more computerized adaptive tests</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>items</strong> – a matrix containing item parameters</li>
+<li><strong>examinees</strong> – an integer with the number of examinees, whose real <span class="math notranslate">\(\theta\)</span> values will be
+sampled from a normal distribution; or a :py:type:list containing said
+<span class="math notranslate">\(\theta_0\)</span> values</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.administered_items">
+<code class="descname">administered_items</code><a class="headerlink" href="#catsim.simulation.Simulator.administered_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of lists containing the indexes of items administered to each
+examinee during the simulation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.bias">
+<code class="descname">bias</code><a class="headerlink" href="#catsim.simulation.Simulator.bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bias between the estimated and true proficiencies. This property is only
+available after <a class="reference internal" href="#catsim.simulation.Simulator.simulate" title="catsim.simulation.Simulator.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> has been successfully called. For more
+information on estimation bias, see <a class="reference internal" href="cat.html#catsim.cat.bias" title="catsim.cat.bias"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.bias()</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.duration">
+<code class="descname">duration</code><a class="headerlink" href="#catsim.simulation.Simulator.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duration of the simulation, in seconds.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.estimations">
+<code class="descname">estimations</code><a class="headerlink" href="#catsim.simulation.Simulator.estimations" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of lists containing all estimated <span class="math notranslate">\(\hat\theta\)</span> values
+for all examinees during each step of the test.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.examinees">
+<code class="descname">examinees</code><a class="headerlink" href="#catsim.simulation.Simulator.examinees" title="Permalink to this definition">¶</a></dt>
+<dd><p>List containing examinees true proficiency values (<span class="math notranslate">\(\theta\)</span>).</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.items">
+<code class="descname">items</code><a class="headerlink" href="#catsim.simulation.Simulator.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Item matrix used by the simulator. If the simulation already
+occurred, a column containing item exposure rates will be added to the
+matrix.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.latest_estimations">
+<code class="descname">latest_estimations</code><a class="headerlink" href="#catsim.simulation.Simulator.latest_estimations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Final estimated <span class="math notranslate">\(\hat\theta\)</span> values for all examinees.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.mse">
+<code class="descname">mse</code><a class="headerlink" href="#catsim.simulation.Simulator.mse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean-squared error between the estimated and true proficiencies. This
+property is only available after <a class="reference internal" href="#catsim.simulation.Simulator.simulate" title="catsim.simulation.Simulator.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> has been successfully
+called. For more information on the mean-squared error of estimation, see
+<a class="reference internal" href="cat.html#catsim.cat.mse" title="catsim.cat.mse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.mse()</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.overlap_rate">
+<code class="descname">overlap_rate</code><a class="headerlink" href="#catsim.simulation.Simulator.overlap_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlap rate of the test, if it is of finite length.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.response_vectors">
+<code class="descname">response_vectors</code><a class="headerlink" href="#catsim.simulation.Simulator.response_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of boolean lists containing the examinees answers to all items.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="catsim.simulation.Simulator.rmse">
+<code class="descname">rmse</code><a class="headerlink" href="#catsim.simulation.Simulator.rmse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Root mean-squared error between the estimated and true proficiencies. This
+property is only available after <a class="reference internal" href="#catsim.simulation.Simulator.simulate" title="catsim.simulation.Simulator.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> has been successfully
+called. For more information on the root mean-squared error of estimation, see
+<a class="reference internal" href="cat.html#catsim.cat.rmse" title="catsim.cat.rmse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.rmse()</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catsim.simulation.Simulator.simulate">
+<code class="descname">simulate</code><span class="sig-paren">(</span><em>initializer: catsim.simulation.Initializer = None</em>, <em>selector: catsim.simulation.Selector = None</em>, <em>estimator: catsim.simulation.Estimator = None</em>, <em>stopper: catsim.simulation.Stopper = None</em>, <em>verbose: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simulates a computerized adaptive testing application to one or more examinees</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>initializer</strong> (<a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code></a>) – an initializer that selects examinees <span class="math notranslate">\(\theta_0\)</span></li>
+<li><strong>selector</strong> (<a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a>) – a selector that selects new items to be presented to examinees</li>
+<li><strong>estimator</strong> (<a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimator</span></code></a>) – an estimator that reestimates examinees proficiencies after each item is applied</li>
+<li><strong>stopper</strong> (<a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code></a>) – an object with a stopping criteria for the test</li>
+<li><strong>verbose</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether to periodically print a message regarding the progress of the simulation.
+Good for longer simulations.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="k">import</span> <span class="n">RandomInitializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="k">import</span> <span class="n">MaxInfoSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.estimation</span> <span class="k">import</span> <span class="n">HillClimbingEstimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.stopping</span> <span class="k">import</span> <span class="n">MaxItemStopper</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="n">Simulator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.cat</span> <span class="k">import</span> <span class="n">generate_item_bank</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Simulator</span><span class="p">(</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catsim.simulation.Stopper">
+<em class="property">class </em><code class="descclassname">catsim.simulation.</code><code class="descname">Stopper</code><a class="reference internal" href="_modules/catsim/simulation.html#Stopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Stopper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for CAT stop criterion</p>
+<dl class="method">
+<dt id="catsim.simulation.Stopper.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>index: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/simulation.html#Stopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Stopper.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the test reached its stopping criterion for the given user</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">bool</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="irt.html" class="btn btn-neutral float-right" title="Item Response Theory Functions – catsim.irt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="stopping.html" class="btn btn-neutral" title="Stopping Criteria – catsim.stopping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.13.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,504 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Initialization Methods – catsim.initialization" href="initialization.html" />
+    <link rel="prev" title="catsim – Computerized Adaptive Testing Simulator" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> catsim
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.13.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#item-response-theory-models">Item Response Theory Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-item-matrix">The Item Matrix</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#computerized-adaptive-tests">Computerized adaptive tests</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-cat-lifecycle">The CAT Lifecycle</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#initialization">Initialization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#item-selection">Item Selection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#proficiency-estimation">Proficiency Estimation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stopping-criterion">Stopping Criterion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#running-simulations">Running simulations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#autonomous-usage">Autonomous usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Introduction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Assessment instruments are widely used to measure individuals <em>latent traits</em>, that is, internal characteristics that cannot be directly measured. An example of such assessment instruments are educational and psychological tests. Each test is composed of a series of items and an examinee’s answers to these items allow for the measurement of one or more of his or hers latent traits. When a latent trait is expressed in numerical form, it is called an <em>ability</em> or <em>proficiency</em>.</p>
+<p>Ordinary tests, hereon called linear tests, are applied using the orthodox paper and pencil strategy, in which tests are printed and all examinees are presented with the same items in the same order. One of the drawbacks of this methodology is that both individuals with high and low proficiencies must answer all items in order to have their proficiency estimated. An individual with high proficiency might get bored of answering the whole test if it only contains items that he or she considers easy; on the other hand, an individual of low proficiency might get frustrated if he is confronted by items considered and hard and might give up on the test or answer the items without paying attention.</p>
+<p>With these concerns in mind, a new paradigm in assessment emerged in the 70s. Initially named <em>tailored testing</em> in <a class="reference internal" href="references.html#lord77" id="id1">[Lord77]</a>, these were tests in which items were chosen to be presented to the examinee in real time, based on the examinee’s responses to previous items. The name was changed to computerized adaptive testing (CAT) due to the advances in techonology that facilitated the application of such a testing methodology using electronic devices, like computers and tablets.</p>
+<p>In a CAT, the examinee’s proficiency is evaluated after the response of each item. The new proficiency is then used to select a new item, closer to the examinee’s real proficiency. This method of test application has several advantages compared to the traditional paper-and-pencil method, since high-proficiency examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low proficiency level.</p>
+<p>Finally, the advent of CAT allowed for researchers to create their own variant ways of starting a test, choosing items, estimating proficiencies and stopping the test. Fortunately, the mathematical formalization provided by Item Response Theory (IRT) allows for tests to be computationally simulated and the different methodologies of applying a CAT to be compared under different constraints. Packages with these functionalities already exist in the R language (<a class="reference internal" href="references.html#magis12" id="id2">[Magis12]</a>) but not yet in Python. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was created to fill this gap, using the facilities of established scientific packages such as <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code>, as well as the object-oriented programming paradigm supported by Python to create a simple, comprehensive and user-extendable CAT simulation package.</p>
+<div class="section" id="item-response-theory-models">
+<h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Permalink to this headline">¶</a></h2>
+<p>As a CAT simulator, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory (<a class="reference internal" href="references.html#lord68" id="id3">[Lord68]</a> and <a class="reference internal" href="references.html#rasch66" id="id4">[Rasch66]</a>), a series of models created in the second part of the 20th century with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models’ parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals’ proficiencies by allocating them in proficiency scales, inspiring as well as justifying its use in adaptive testing.</p>
+<p>The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single proficiency (or dimension of knowledge). The instrument, in turn, is composed of <em>items</em> in which examinees manifest their latent traits when answering them.</p>
+<p>In unidimensional IRT models, an examinee’s proficiency is represented as <span class="math notranslate">\(\theta\)</span>. Usually <span class="math notranslate">\(-\inf &lt; \theta &lt; \inf\)</span>, but since the scale of <span class="math notranslate">\(\theta\)</span> is up to the individuals creating the instrument, it is common for the values to be around the normal distribution <span class="math notranslate">\(N(0; 1)\)</span>, such that <span class="math notranslate">\(-4 &lt; \theta &lt; 4\)</span>.Additionally, <span class="math notranslate">\(\hat\theta\)</span> is the estimate of <span class="math notranslate">\(\theta\)</span>. Since a latent trait can’t be measured directly, estimates need to be made, which tend to get closer to the theorically real <span class="math notranslate">\(\theta\)</span> as the test progresses in length.</p>
+<p>Under the logistic models of IRT, an item is represented by the following parameters:</p>
+<blockquote>
+<div><ul class="simple">
+<li><span class="math notranslate">\(a\)</span> represents an item’s <em>discrimination</em> parameter, that is, how well it discriminates individuals who answer the item correctly (or, in an alternative interpretation, individuals who agree with the idea of the item) and those who don’t. An item with a high <span class="math notranslate">\(a\)</span> value tends to be answered correctly by all individuals whose <span class="math notranslate">\(\theta\)</span> is above the items difficulty level and wrongly by all the others; as this value gets lower, this threshold gets blurry and the item starts not to be as informative. It is common for <span class="math notranslate">\(a &gt; 0\)</span>.</li>
+<li><span class="math notranslate">\(b\)</span> represents an item’s <em>difficulty</em> parameter. This parameter, which is measured in the same scale as <span class="math notranslate">\(\theta\)</span>, shows at which point of the proficiency scale an item is more informative, that is, where it discriminates the individuals who agree and those who disagree with the item. Since <span class="math notranslate">\(b\)</span> and <span class="math notranslate">\(\theta\)</span> are measured in the same scale, <span class="math notranslate">\(b\)</span> follows the same distributions as <span class="math notranslate">\(\theta\)</span>. For a CAT, it is good for an item bank to have as many items as possible in all difficulty levels, so that the CAT may select the best item for each individual in all ability levels.</li>
+<li><span class="math notranslate">\(c\)</span> represents an item’s <em>pseudo-guessing</em> parameter. This parameter denotes what is the probability of individuals with low proficiency values to still answer the item correctly. Since <span class="math notranslate">\(c\)</span> is a probability, <span class="math notranslate">\(0 &lt; c \leq 1\)</span>, but the lower the value of this parameter, the better the item is considered.</li>
+<li><span class="math notranslate">\(d\)</span> represents an item’s <em>upper asymptote</em>. This parameter denotes what is the probability of individuals with high proficiency values to still answer the item incorrectly. Since <span class="math notranslate">\(d\)</span> is a probability, <span class="math notranslate">\(0 &lt; d \leq 1\)</span>, but the higher the value of this parameter, the better the item is considered.</li>
+</ul>
+</div></blockquote>
+<p>For a set of items <span class="math notranslate">\(I\)</span>, when <span class="math notranslate">\(\forall i \in I, c_i = 0\)</span>, the three-parameter logistic model is reduced to the two-parameter logistic model. Additionally, if all values of <span class="math notranslate">\(a\)</span> are equal, the two-parameter logistic model is reduced to the one-parameter logistic model. Finally, when <span class="math notranslate">\(\forall i \in I, a_i = 1\)</span>, we have the Rasch model (<a class="reference internal" href="references.html#rasch66" id="id5">[Rasch66]</a>). Thus, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> is able of treating all of the logistic models presented above, since the underlying functions of all logistic models related to test simulations are the same, given the correct item paramaters.</p>
+<p>Under IRT, the probability of an examinee with a given <span class="math notranslate">\(\hat\theta\)</span> value to answer item <span class="math notranslate">\(i\)</span> correctly, given the item parameters, is given by (<a class="reference internal" href="references.html#ayala2009" id="id6">[Ayala2009]</a>, <a class="reference internal" href="references.html#magis13" id="id7">[Magis13]</a>)</p>
+<div class="math notranslate">
+\[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{a_i(\theta-b_i)}}.\]</div>
+<p>The information this item gives is calculated as (<a class="reference internal" href="references.html#ayala2009" id="id8">[Ayala2009]</a>, <a class="reference internal" href="references.html#magis13" id="id9">[Magis13]</a>)</p>
+<div class="math notranslate">
+\[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.\]</div>
+<p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s proficiency.</p>
+<p>(<a class="reference external" href=".//introduction-1.py">Source code</a>, <a class="reference external" href=".//introduction-1.png">png</a>, <a class="reference external" href=".//introduction-1.hires.png">hires.png</a>, <a class="reference external" href=".//introduction-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="_images/introduction-1.png" src="_images/introduction-1.png" />
+</div>
+<p>The sum of the information of all items in a test is called <em>test information</em> <a class="reference internal" href="references.html#ayala2009" id="id10">[Ayala2009]</a>:</p>
+<div class="math notranslate">
+\[I(\theta) = \sum_{j \in J} I_j(\theta).\]</div>
+<p>The amount of error in the estimate of an examinee’s proficiency after a test is called the <em>standard error of estimation</em> <a class="reference internal" href="references.html#ayala2009" id="id11">[Ayala2009]</a> and it is given by</p>
+<div class="math notranslate">
+\[SEE = \sqrt{\frac{1}{I(\theta)}}\]</div>
+<p>Since the denominator in the calculation of the <span class="math notranslate">\(SEE\)</span> is <span class="math notranslate">\(I(\theta)\)</span>, it is clear to see that the more items an examinee answers, the smaller SEE gets.</p>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> provides these functions in the <a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt()</span></code></a> module.</p>
+<div class="section" id="the-item-matrix">
+<h3>The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Permalink to this headline">¶</a></h3>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, a collection of items is represented as a <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the <em>item matrix</em>. The most important features of the items are situated in the first three columns of the matrix, which represent the parameters <span class="math notranslate">\(a\)</span>, <span class="math notranslate">\(b\)</span> and <span class="math notranslate">\(c\)</span>, respectively. Item matrices can be generated via the <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a> function as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;2PL&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These examples depict the generation of an array of five items according to the different logistic models. In the last example, parameters <span class="math notranslate">\(a\)</span> and <span class="math notranslate">\(b\)</span> have a correlation of <span class="math notranslate">\(0.5\)</span>, an adjustment that may be useful in case simulations require it <a class="reference internal" href="references.html#chang2001" id="id12">[Chang2001]</a>.</p>
+<p>After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as <span class="math notranslate">\(r\)</span>. Its value denotes how many times an item has been used and it is calculated as follows:</p>
+<div class="math notranslate">
+\[r_i = \frac{q_i}{N}\]</div>
+<p>Where <span class="math notranslate">\(q_i\)</span> represents the number of tests item <span class="math notranslate">\(i\)</span> has been used on and <span class="math notranslate">\(N\)</span> is the total number of tests applied.</p>
+</div>
+</div>
+<div class="section" id="computerized-adaptive-tests">
+<h2>Computerized adaptive tests<a class="headerlink" href="#computerized-adaptive-tests" title="Permalink to this headline">¶</a></h2>
+<p>Unlike linear tests, in which items are sequentially presented to examinees and their proficiency estimated at the end of the test, in a computerized adaptive test (CAT), an examinees’ proficiency is calculated after the response of each item. The updated knowledge of an examinee’s proficiency at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduce the standard error of estimation of their proficiency at a faster rate. This behavior</p>
+<div class="section" id="the-cat-lifecycle">
+<h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Permalink to this headline">¶</a></h3>
+<p>In general, a computerized adaptive test has a very well-defined lifecycle:</p>
+<img src="_images/graphviz-22200423f6f4f324fc72989987784ee7d6a74c7e.png" alt="digraph cat_simple {
+    bgcolor=&quot;transparent&quot;;
+    rankdir=TB;
+    a[label=&lt;START&gt;, shape=box];
+    b[label=&lt;Initial proficiency&lt;br/&gt;estimation&gt;];
+    c[label=&lt;Item selection and &lt;br/&gt;administration&gt;];
+    d[label=&lt;Capture answer&gt;];
+    e[label=&lt;Proficiency estimation&gt;];
+    rank=same;
+    f[label=&lt;Stopping criterion&lt;br/&gt;reached?&gt;, shape=diamond];
+    g[label=&lt;END&gt;, shape=box];
+    a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; f;
+    f -&gt; g[label=&lt;YES&gt;];
+    f -&gt; c[label=&lt;NO&gt;];
+}" />
+<ol class="arabic simple">
+<li>The examinee’s initial proficiency is estimated;</li>
+<li>An item is selected based on the current proficiency estimation;</li>
+<li>The proficiency is reestimated based on the answers to all items up until now;</li>
+<li><strong>If</strong> a stopping criterion is met, stop the test. <strong>Else</strong> go back to step 2.</li>
+</ol>
+<p>There is a considerable amount of literature covering these four phases proposed by many authors. In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, each phase is separated in its own module, which makes it easy to create simulations combining different methods for each phase. Each module will be explained separately, along with its API.</p>
+<div class="section" id="initialization">
+<h4>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">¶</a></h4>
+<p>The initialization procedure is done only once during each examinee’s test. In it, the initial value of an examinee’s proficiency <span class="math notranslate">\(\hat\theta_0\)</span> is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (<code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedInitializer</span></code>); it can be chosen randomly from a probability distribution (<a class="reference internal" href="initialization.html#catsim.initialization.RandomInitializer" title="catsim.initialization.RandomInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.RandomInitializer</span></code></a>); the place in the item bank with items of more information can be chosen to initialize <span class="math notranslate">\(\hat\theta_0\)</span> etc.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, initialization procedures can be found in the <a class="reference internal" href="initialization.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a> module.</p>
+</div>
+<div class="section" id="item-selection">
+<h4>Item Selection<a class="headerlink" href="#item-selection" title="Permalink to this headline">¶</a></h4>
+<p>With a set value for <span class="math notranslate">\(\hat\theta\)</span>, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate <span class="math notranslate">\(\hat\theta\)</span>.</p>
+<p>Item selection methods are diverse. The most famous method is to choose the item that maximizes the <em>gain of information</em>, represented by <a class="reference internal" href="selection.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, an examinee’s response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of <span class="math notranslate">\(p\)</span> is given by the IRT logistic model characteristic function (<a class="reference internal" href="irt.html#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.icc()</span></code></a>), given by:</p>
+<div class="math notranslate">
+\[P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{a_i(\theta-b_i)}}\]</div>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, item selection procedures can be found in the <a class="reference internal" href="selection.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> module.</p>
+</div>
+<div class="section" id="proficiency-estimation">
+<h4>Proficiency Estimation<a class="headerlink" href="#proficiency-estimation" title="Permalink to this headline">¶</a></h4>
+<p>Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee’s <span class="math notranslate">\(\hat\theta\)</span>. This value reflects the examinee’s proficiency, given his or hers answers up until that point of the test.</p>
+<p>In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">response_vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the <span class="math notranslate">\(\hat\theta\)</span> value that maximizes the <em>log-likelihood</em> function, presented in <a class="reference internal" href="irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee’s proficiencies to estimate new values for them.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, proficiency estimation procedures can be found in the <a class="reference internal" href="estimation.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a> module.</p>
+</div>
+<div class="section" id="stopping-criterion">
+<h4>Stopping Criterion<a class="headerlink" href="#stopping-criterion" title="Permalink to this headline">¶</a></h4>
+<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold etc. Both of these stopping criteria are implemented as <a class="reference internal" href="stopping.html#catsim.stopping.MaxItemStopper" title="catsim.stopping.MaxItemStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxItemStopper</span></code></a> and <a class="reference internal" href="stopping.html#catsim.stopping.MaxItemStopper" title="catsim.stopping.MaxItemStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxItemStopper</span></code></a>, respectively.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, test stopping criteria can be found in the <a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> module.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="package-architecture">
+<h1>Package architecture<a class="headerlink" href="#package-architecture" title="Permalink to this headline">¶</a></h1>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was built using an object-oriented architecture, an uncommon feat for scientific packages in Python, but which introduces many benefits for its maintenance and expansion. As explained in previous sessions, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module’s respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on <a class="reference internal" href="#modules-classes"><span class="std std-numref">Table 1</span></a>.</p>
+<table border="1" class="docutils" id="modules-classes">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Modules and their corresponding abstract classes</span><a class="headerlink" href="#modules-classes" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="41%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Module</th>
+<th class="head">Abstract class</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference internal" href="initialization.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></td>
+<td><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.Initializer</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="selection.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></td>
+<td><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.Selector</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="estimation.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></td>
+<td><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.Estimator</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></td>
+<td><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.Stopper</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> components can be used in one of two ways: as part of a simulation or autonomously. This section will present examples of both.</p>
+<p>First, import the package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># this function generates an item bank, in case the user cannot provide one</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.cat</span> <span class="k">import</span> <span class="n">generate_item_bank</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># simulation package contains the Simulator and all abstract classes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># initialization package contains different initial proficiency estimation strategies</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># selection package contains different item selection strategies</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># estimation package contains different proficiency estimation methods</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.estimation</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># stopping package contains different stopping criteria for the CAT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.stopping</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">catsim.plot</span> <span class="k">as</span> <span class="nn">catplot</span>
+</pre></div>
+</div>
+<div class="section" id="running-simulations">
+<h2>Running simulations<a class="headerlink" href="#running-simulations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># generate an item bank</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bank_size</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="n">generate_item_bank</span><span class="p">(</span><span class="n">bank_size</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting simulation 1...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># simulate 10 examinees taking a CAT, given the generated item bank,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># a random proficiency initializer, maximum information item selector,</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># hill climbing proficiency estimator and stopping criterion of 20 items</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bias:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean squared error:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">mse</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Root mean squared error:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">rmse</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">examinee_index</span><span class="o">=</span><span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Accessing examinee&#39;</span><span class="p">,</span> <span class="n">examinee_index</span><span class="p">,</span> <span class="s1">&#39;results...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    True proficiency:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">examinees</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Items administered:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Responses:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">response_vectors</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Proficiency estimation during each step of the test:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">estimations</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting simulation 2...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># examinees can also be passed as 1D numpy arrays or Python lists containing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># their proficiency values</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># this example uses a stopping criterion of minimum error</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">examinees</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">examinees</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting simulation 3...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># catsim can also simulate linear (non-adaptive) tests by using a linear item selector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indexes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">50</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">LinearSelector</span><span class="p">(</span><span class="n">indexes</span><span class="p">),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">see</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="autonomous-usage">
+<h2>Autonomous usage<a class="headerlink" href="#autonomous-usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># generating an item bank</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Generating item bank...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bank_size</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="n">generate_item_bank</span><span class="p">(</span><span class="n">bank_size</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># creating dummy response patterns and selecting item indexes to pass as administered items</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating dummy examinee data...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">administered_items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1435</span><span class="p">,</span> <span class="mi">3221</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">881</span><span class="p">]</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Creating simulation components...&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a random proficiency initializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a maximum information item selector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a hill climbing proficiency estimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># create a stopping criterion that will make tests stop after 20 items</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># manually initialize an examinee&#39;s proficiency as a float variable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">est_theta</span> <span class="o">=</span> <span class="n">initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Examinee initial proficiency:&#39;</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get an estimated theta, given the answers to the dummy items</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">new_theta</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="o">=</span><span class="n">responses</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Estimated proficiency, given answered items:&#39;</span><span class="p">,</span> <span class="n">new_theta</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get the index of the next item to be administered to the current examinee, given the answers they have already given to the previous dummy items</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">item_index</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Next item to be administered:&#39;</span><span class="p">,</span> <span class="n">item_index</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># get a boolean value pointing out whether the test should stop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_stop</span> <span class="o">=</span> <span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">administered_items</span><span class="o">=</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">],</span> <span class="n">theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Should the test be stopped:&#39;</span><span class="p">,</span> <span class="n">_stop</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="initialization.html" class="btn btn-neutral float-right" title="Initialization Methods – catsim.initialization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="catsim – Computerized Adaptive Testing Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.13.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
