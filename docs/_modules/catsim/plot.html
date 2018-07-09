@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                0.13.5
+                0.13.6
               </div>
             
           
@@ -353,6 +353,7 @@
 
 <span class="sd">        s = Simulator(generate_item_bank(100), 10)</span>
 <span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))</span>
+<span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, ptype=&#39;hist&#39;)</span>
 <span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, par=&#39;b&#39;)</span>
 <span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, ptype=&#39;line&#39;)</span>
 
@@ -361,8 +362,8 @@
 <span class="sd">                      proficiencies and a list of administered items for each examinee.</span>
 <span class="sd">    :param items: an item matrix containing item parameters and their exposure rate in the last column.</span>
 <span class="sd">    :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`</span>
-<span class="sd">                to use the default order of the item bank.</span>
-<span class="sd">    :param ptype: plot type. Either &#39;bar&#39; or &#39;line&#39;.</span>
+<span class="sd">                to use the default order of the item bank. Please note that, if `ptype=&#39;hist&#39;`, no sorting will be done.</span>
+<span class="sd">    :param ptype: plot type. Either &#39;bar&#39;, &#39;hist&#39; or &#39;line&#39;.</span>
 <span class="sd">    :param filepath: the path to save the plot.</span>
 <span class="sd">    :param show: whether the generated plot is to be shown.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -384,7 +385,7 @@
 
     <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">par</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported parameter.&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">ptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;hist&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported plot type.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
@@ -403,15 +404,21 @@
         <span class="n">parameter</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Items&#39;</span>
 
-    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span><span class="p">:</span>
-        <span class="n">bar_width</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="o">/</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">bar_width</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;hist&#39;</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Item exposure&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Items&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">indexes</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">][</span><span class="n">indexes</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span><span class="p">:</span>
+            <span class="n">bar_width</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="o">/</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">bar_width</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">][</span><span class="n">indexes</span><span class="p">])</span>
 
-    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Item exposure&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Item exposure&#39;</span><span class="p">)</span>
+
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -579,7 +586,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.13.5',
+            VERSION:'0.13.6',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
