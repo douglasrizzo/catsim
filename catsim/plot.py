@@ -121,7 +121,9 @@ def item_curve(
         )
 
     if filepath is not None:
-        if not os.path.exists(os.path.dirname(filepath)):
+        # if os.path.dirname(filepath) is empty, it means the user passed the name
+        # of the file instead of a path, e.g. 'plot.pdf' instead '~/Downloads/plot.pdf'
+        if len(os.path.dirname(filepath)) > 0 and not os.path.exists(os.path.dirname(filepath)):
             os.makedirs(os.path.dirname(filepath))
         plt.savefig(filepath, bbox_inches='tight')
 
