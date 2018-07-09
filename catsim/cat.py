@@ -159,7 +159,7 @@ def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0):
         a = numpy.ones(n)
 
     if itemtype in ['3PL', '4PL']:
-        c = numpy.random.normal(.25, .02, n)
+        c = numpy.random.normal(.25, .02, n).clip(min=0)
     else:
         c = numpy.zeros(n)
 
