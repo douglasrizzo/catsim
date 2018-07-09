@@ -251,6 +251,8 @@ class Simulator:
 
     @examinees.setter
     def examinees(self, x):
+        # generate examinees from a normal distribution
+        # if an int was passed
         if type(x) == int:
             if self._items is not None:
                 mean = numpy.mean(self._items[:, 1])
