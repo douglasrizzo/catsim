@@ -1,7 +1,3 @@
-stage:
-- test
-- deploy
-
 test:
   stage: test
   before_script:
