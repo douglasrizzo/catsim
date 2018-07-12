@@ -389,7 +389,7 @@ class Simulator:
         elif all(len(i) == len_first for i in self._administered_items):
             test_size = len_first
         if test_size is not None:
-            self._overlap_rate = cat.overlap_rate(self.items, test_size)
+            self._overlap_rate = cat.overlap_rate(self.items[:, 4], test_size)
 
 
 if __name__ == '__main__':

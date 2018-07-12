@@ -102,7 +102,7 @@ def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
     """
 
     bank_size = items.shape[0]
-    var_r = numpy.var(items[:, 4])
+    var_r = numpy.var(items)
 
     t = (bank_size / test_size) * var_r + (test_size / bank_size)
 
