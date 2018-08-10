@@ -41,6 +41,19 @@ def _split_params(items: numpy.ndarray):
     return items[:, 0], items[:, 1], items[:, 2], items[:, 3]
 
 
+def detect_model(items: numpy.ndarray) -> int:
+    """Detects which logistic model an item matrix fits into.
+    :param items: an item matrix
+    :return: an int between 1 and 4 denoting the logistic model of the given item matrix
+    """
+    a, b, c, d = _split_params(items)
+
+    if any(d != 1): return 4
+    if any(c != 0): return 3
+    if len(set(a)) == 1: return 2
+    return 1
+
+
 def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
     """Implementation of :py:func:`icc` using :py:mod:`numpy` and :py:mod:`numexpr` in which the characteristic
     function for all items in a `numpy.ndarray` are calculated at once.
@@ -202,13 +215,18 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
               gives maximum information
     """
     # for explanations on finding the following values, see referenced work in function description
-    u = -(3 / 4) + ((c + d - 2 * c * d) / 2)
-    v = (c + d - 1) / 4
-    x_star = 2 * math.sqrt(-u / 3) * math.cos(
-        (1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) + (4 * math.pi / 3)
-    ) + 0.5
+    if d == 1:
+        if c == 0:
+            return b
+        return b + (1 / a) * math.log((1 + math.sqrt(1 + 8 * c)) / 2)
+    else:
+        u = -(3 / 4) + ((c + d - 2 * c * d) / 2)
+        v = (c + d - 1) / 4
+        x_star = 2 * math.sqrt(-u / 3) * math.cos(
+            (1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) + (4 * math.pi / 3)
+        ) + 0.5
 
-    return b + (1 / a) * math.log((x_star - c) / (d - x_star))
+        return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
 def max_info_hpc(items: numpy.ndarray):
@@ -218,15 +236,19 @@ def max_info_hpc(items: numpy.ndarray):
     :param items: array containing the four item parameters.
     :returns: an array of all theta values that maximize the information function of each item."""
     a, b, c, d = _split_params(items)
-    assert pi
 
-    u = numexpr.evaluate('-(3 / 4) + ((c + d - 2 * c * d) / 2)')
-    v = numexpr.evaluate('(c + d - 1) / 4')
-    x_star = numexpr.evaluate(
-        '2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5'
-    )
+    if all(d == 1):
+        if all(c == 0):
+            return b
+        return numexpr.evaluate('b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)')
+    else:
+        u = numexpr.evaluate('-(3 / 4) + ((c + d - 2 * c * d) / 2)')
+        v = numexpr.evaluate('(c + d - 1) / 4')
+        x_star = numexpr.evaluate(
+            '2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5'
+        )
 
-    return numexpr.evaluate('b + (1 / a) * log((x_star - c) / (d - x_star))')
+        return numexpr.evaluate('b + (1 / a) * log((x_star - c) / (d - x_star))')
 
 
 def log_likelihood(
