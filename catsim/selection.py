@@ -8,6 +8,17 @@ from catsim import irt
 from catsim.simulation import Selector, FiniteSelector
 
 
+def _nearest(array: list, value) -> numpy.ndarray:
+    """Returns the indexes of values in `array` that are closest to `value`
+    :param array: an array of numeric values
+    :param value: a numerical value
+    :return: an array containing the indexes of numbers in `array`,
+             according to how close their are to `value`
+    """
+    array = numpy.asarray(array)
+    return numpy.abs(array - value).argsort()
+
+
 class MaxInfoSelector(Selector):
     """Selector that returns the first non-administered item with maximum information, given an estimated theta"""
 
@@ -45,13 +56,17 @@ class MaxInfoSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        valid_indexes = [x for x in range(items.shape[0]) if x not in administered_items]
-        inf_values = irt.inf_hpc(est_theta, items[valid_indexes])
-        valid_indexes = [
-            item_index for (inf_value, item_index) in
-            sorted(zip(inf_values, valid_indexes), key=lambda pair: pair[0], reverse=True)
-        ]
+        # first, we'll order items by their information value
+        if irt.detect_model(items) <= 2:
+            # when the logistic model has the number of parameters <= 2,
+            # all items have highest information where theta = b
+            ordered_items = _nearest(items[:, 1], est_theta)
+        else:
+            # else, we'll have to calculate the theta value where information is maximum
+            inf_values = irt.max_info_hpc(items)
+            ordered_items = _nearest(inf_values, est_theta)
 
+        valid_indexes = [x for x in ordered_items if x not in administered_items]
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
             return None
@@ -69,8 +84,14 @@ class UrrySelector(Selector):
     def __str__(self):
         return 'Urry Selector'
 
-    def select(self, index: int = None, items: numpy.ndarray = None, administered_items: list = None,
-               est_theta: float = None, **kwargs) -> int:
+    def select(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: list = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> int:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -80,20 +101,19 @@ class UrrySelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (
-                            items is None or administered_items is None or est_theta is None):
+        if (index is None or self.simulator is None
+            ) and (items is None or administered_items is None or est_theta is None):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.')
+                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+            )
 
         if items is None and administered_items is None and est_theta is None:
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        valid_indexes = [x for x in range(items.shape[0]) if x not in administered_items]
-        b_differences = [abs(est_theta - item[1]) for item in items[valid_indexes]]
-        valid_indexes = [item_index for (inf_value, item_index) in
-                         sorted(zip(b_differences, valid_indexes), key=lambda pair: pair[0], reverse=False)]
+        ordered_items = _nearest(items[:, 1], est_theta)
+        valid_indexes = [x for x in ordered_items if x not in administered_items]
 
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
@@ -310,11 +330,12 @@ class ClusterSelector(Selector):
 
         selected_cluster = None
         existent_clusters = set(self._clusters)
+
         # this part of the code selects the cluster from which the item at
         # the current point of the test will be chosen
         if self._method == 'item_info':
             # get the item indexes sorted by their information value
-            infos = irt.inf_hpc(est_theta, items).argsort()[::-1]
+            infos = _nearest(irt.max_info_hpc(items), est_theta)
 
             evaluated_clusters = set()
 
