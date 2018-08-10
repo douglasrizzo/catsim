@@ -88,21 +88,23 @@ def rmse(actual: list, predicted: list):
     return numpy.sqrt(mse(actual, predicted))
 
 
-def overlap_rate(items: numpy.ndarray, test_size: int) -> float:
+def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
     """Test overlap rate, an average measure of how much of the test two examinees take is equal [Bar10]_. It is given by:
 
     .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
 
     If, for example :math:`T = 0.5`, it means that the tests of two random examinees have 50% of equal items.
 
-    :param items: a matrix containing, in the 4th column, the number of
+    :param usages: a list or numpy.ndarray containing the number of
                   times each item was used in the tests.
     :param test_size: an integer informing the number of items in a test.
     :returns: test overlap rate.
     """
+    if any(usages > test_size):
+        raise ValueError('There are items that have been used more times than there were tests')
 
-    bank_size = items.shape[0]
-    var_r = numpy.var(items)
+    bank_size = usages.shape[0]
+    var_r = numpy.var(usages)
 
     t = (bank_size / test_size) * var_r + (test_size / bank_size)
 
