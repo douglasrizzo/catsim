@@ -176,7 +176,7 @@ def item_exposure(
     simulator: Simulator = None,
     items: numpy.ndarray = None,
     par: str = None,
-    ptype: str = 'bar',
+    hist: bool = False,
     filepath: str = None,
     show: bool = True
 ):
@@ -204,8 +204,9 @@ def item_exposure(
                       proficiencies and a list of administered items for each examinee.
     :param items: an item matrix containing item parameters and their exposure rate in the last column.
     :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`
-                to use the default order of the item bank. Please note that, if `ptype='hist'`, no sorting will be done.
-    :param ptype: plot type. Either 'bar', 'hist' or 'line'.
+                to use the default order of the item bank. Please note that, if `hist=True`, no sorting will be done.
+    :param hist: if True, plots a histogram of item exposures. Otherwise, plots a dotted line chart of the exposures,
+                 sorted in the x-axis by the parameter chosen in `par`.
     :param filepath: the path to save the plot.
     :param show: whether the generated plot is to be shown.
     """
@@ -227,8 +228,6 @@ def item_exposure(
 
     if par is not None and par not in ['a', 'b', 'c', 'd']:
         raise ValueError('Unsupported parameter.')
-    if ptype not in ['line', 'bar', 'hist']:
-        raise ValueError('Unsupported plot type.')
 
     if par == 'a':
         parameter = items[:, 0]
@@ -246,18 +245,13 @@ def item_exposure(
         parameter = numpy.array(range(items.shape[0]))
         xlabel = 'Items'
 
-    if ptype == 'hist':
+    if hist:
         plt.hist(items[:, 4], max(int(items.shape[0] / 10), 3))
         plt.xlabel('Item exposure')
         plt.ylabel('Items')
     else:
-        if ptype == 'bar':
-            bar_width = (max(parameter) - min(parameter)) / items.shape[0] * 3
-            plt.bar(parameter, items[:, 4], width=bar_width)
-        else:
-            indexes = parameter.argsort()
-            plt.plot(items[:, 4][indexes])
-
+        indexes = parameter.argsort()
+        plt.plot(items[:, 4][indexes], marker='o')
         plt.xlabel(xlabel)
         plt.ylabel('Item exposure')
 

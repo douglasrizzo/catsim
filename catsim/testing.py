@@ -145,16 +145,12 @@ def test_plots():
         reliability=True,
         show=False
     )
-    plot.item_exposure(title='Test progress', simulator=s, show=False)
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='a')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='b')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='c')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='d')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, ptype='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='a', ptype='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='b', ptype='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='c', ptype='line')
-    plot.item_exposure(title='Test progress', simulator=s, show=False, par='d', ptype='line')
+    plot.item_exposure(simulator=s, show=False)
+    plot.item_exposure(simulator=s, show=False, par='a')
+    plot.item_exposure(simulator=s, show=False, par='b')
+    plot.item_exposure(simulator=s, show=False, par='c')
+    plot.item_exposure(simulator=s, show=False, par='d')
+    plot.item_exposure(simulator=s, show=False, hist=True)
 
     # close all plots after testing
     close('all')
