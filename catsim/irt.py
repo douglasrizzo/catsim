@@ -198,6 +198,8 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
     :param b: item difficulty parameter
     :param c: item pseudo-guessing parameter
     :param d: item upper asymptote
+    :returns: the :math:`\\theta` value to which the item with the given parameters
+              gives maximum information
     """
     # for explanations on finding the following values, see referenced work in function description
     u = -(3 / 4) + ((c + d - 2 * c * d) / 2)

@@ -427,14 +427,14 @@ class ClusterSelector(Selector):
         return selected_item
 
     @staticmethod
-    def sum_cluster_infos(theta: float, items: numpy.ndarray, clusters: list) -> list:
-        """Returns the sum of item informations, separated by cluster
+    def sum_cluster_infos(theta: float, items: numpy.ndarray, clusters: list) -> numpy.ndarray:
+        """Returns the sum of item information values, separated by cluster
 
         :param theta: an examinee's :math:`\\theta` value
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param clusters: a list containing item cluster memberships, represented by integers
-        :returns: list containing the sum of item information values for each cluster"""
+        :returns: array containing the sum of item information values for each cluster"""
         cluster_infos = numpy.zeros((len(set(clusters))))
 
         for cluster in set(clusters):
@@ -446,15 +446,15 @@ class ClusterSelector(Selector):
         return cluster_infos
 
     @staticmethod
-    def weighted_cluster_infos(theta: float, items: numpy.ndarray, clusters: list):
-        """Returns the weighted sum of item informations, separated by cluster.
+    def weighted_cluster_infos(theta: float, items: numpy.ndarray, clusters: list) -> numpy.ndarray:
+        """Returns the weighted sum of item information values, separated by cluster.
         The weight is the number of items in each cluster.
 
         :param theta: an examinee's :math:`\\theta` value
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param clusters: a list containing item cluster memberships, represented by integers
-        :returns: list containing the sum of item information values for each cluster,
+        :returns: array containing the sum of item information values for each cluster,
                   divided by the number of items in each cluster"""
         cluster_infos = ClusterSelector.sum_cluster_infos(theta, items, clusters)
         count = numpy.bincount(clusters)
@@ -466,7 +466,7 @@ class ClusterSelector(Selector):
 
     @staticmethod
     def sum_cluster_params(items: numpy.ndarray, c: list):
-        """Returns the sum of item parameter values for each cluster cluster
+        """Returns the sum of item parameter values for each cluster
 
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
