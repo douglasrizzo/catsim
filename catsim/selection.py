@@ -74,7 +74,6 @@ class MaxInfoSelector(Selector):
         return valid_indexes[0]
 
 
-
 class UrrySelector(Selector):
     """Selector that returns the item whose difficulty parameter is closest to the examinee's proficiency"""
 
