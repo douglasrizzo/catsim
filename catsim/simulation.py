@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 
 import numpy
 
-from catsim import cat, irt
+from . import cat, irt
 
 
 class Simulable(metaclass=ABCMeta):

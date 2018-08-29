@@ -1,7 +1,7 @@
 import numpy
 
-from catsim import irt
-from catsim.simulation import Stopper
+from . import irt
+from .simulation import Stopper
 
 
 class MaxItemStopper(Stopper):

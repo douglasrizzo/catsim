@@ -3,13 +3,13 @@ import unittest
 
 from sklearn.cluster import KMeans
 
-from catsim import stats, plot
-from catsim.cat import generate_item_bank
-from catsim.estimation import *
-from catsim.initialization import *
-from catsim.selection import *
-from catsim.simulation import Simulator
-from catsim.stopping import MaxItemStopper, MinErrorStopper
+from . import stats, plot
+from .cat import generate_item_bank
+from .estimation import *
+from .initialization import *
+from .selection import *
+from .simulation import Simulator
+from .stopping import MaxItemStopper, MinErrorStopper
 
 
 def one_simulation(items, examinees, initializer, selector, estimator, stopper):

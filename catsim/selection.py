@@ -4,8 +4,8 @@ from warnings import warn
 import numpy
 from scipy.integrate import quad
 
-from catsim import irt
-from catsim.simulation import Selector, FiniteSelector
+from . import irt
+from .simulation import Selector, FiniteSelector
 
 
 def _nearest(array: list, value) -> numpy.ndarray:

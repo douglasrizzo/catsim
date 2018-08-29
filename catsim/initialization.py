@@ -1,6 +1,6 @@
 import numpy
 
-from catsim.simulation import Initializer
+from .simulation import Initializer
 
 
 class RandomInitializer(Initializer):

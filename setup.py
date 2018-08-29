@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from setuptools import setup, find_packages
-from catsim import __version__
+from . import __version__
 
 setup(
     classifiers=[
