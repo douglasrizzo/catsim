@@ -84,15 +84,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html#package-architecture">Package architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods &#8211; <code class="docutils literal"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods &#8211; <code class="docutils literal"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods &#8211; <code class="docutils literal"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria &#8211; <code class="docutils literal"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation &#8211; <code class="docutils literal"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions &#8211; <code class="docutils literal"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions &#8211; <code class="docutils literal"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions &#8211; <code class="docutils literal"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions &#8211; <code class="docutils literal"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -166,8 +166,8 @@
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
 
-<span class="kn">from</span> <span class="nn">catsim</span> <span class="k">import</span> <span class="n">irt</span>
-<span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="n">Simulator</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">irt</span>
+<span class="kn">from</span> <span class="nn">.simulation</span> <span class="k">import</span> <span class="n">Simulator</span>
 
 
 <span class="k">def</span> <span class="nf">__column</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
@@ -281,7 +281,9 @@
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">filepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
+        <span class="c1"># if os.path.dirname(filepath) is empty, it means the user passed the name</span>
+        <span class="c1"># of the file instead of a path, e.g. &#39;plot.pdf&#39; instead &#39;~/Downloads/plot.pdf&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">)):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
 
@@ -334,7 +336,7 @@
     <span class="n">simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">par</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">ptype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="n">hist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">):</span>
@@ -362,8 +364,9 @@
 <span class="sd">                      proficiencies and a list of administered items for each examinee.</span>
 <span class="sd">    :param items: an item matrix containing item parameters and their exposure rate in the last column.</span>
 <span class="sd">    :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`</span>
-<span class="sd">                to use the default order of the item bank. Please note that, if `ptype=&#39;hist&#39;`, no sorting will be done.</span>
-<span class="sd">    :param ptype: plot type. Either &#39;bar&#39;, &#39;hist&#39; or &#39;line&#39;.</span>
+<span class="sd">                to use the default order of the item bank. Please note that, if `hist=True`, no sorting will be done.</span>
+<span class="sd">    :param hist: if True, plots a histogram of item exposures. Otherwise, plots a dotted line chart of the exposures,</span>
+<span class="sd">                 sorted in the x-axis by the parameter chosen in `par`.</span>
 <span class="sd">    :param filepath: the path to save the plot.</span>
 <span class="sd">    :param show: whether the generated plot is to be shown.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -385,8 +388,6 @@
 
     <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">par</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported parameter.&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="s1">&#39;hist&#39;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unsupported plot type.&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">par</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
         <span class="n">parameter</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
@@ -404,18 +405,13 @@
         <span class="n">parameter</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Items&#39;</span>
 
-    <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;hist&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">hist</span><span class="p">:</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Item exposure&#39;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Items&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="s1">&#39;bar&#39;</span><span class="p">:</span>
-            <span class="n">bar_width</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">parameter</span><span class="p">))</span> <span class="o">/</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">bar_width</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">indexes</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">][</span><span class="n">indexes</span><span class="p">])</span>
-
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">][</span><span class="n">indexes</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Item exposure&#39;</span><span class="p">)</span>
 
@@ -597,7 +593,7 @@
       <script type="text/javascript" src="../../_static/jquery.js"></script>
       <script type="text/javascript" src="../../_static/underscore.js"></script>
       <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

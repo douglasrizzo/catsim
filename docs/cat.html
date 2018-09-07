@@ -86,15 +86,15 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods &#8211; <code class="docutils literal"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods &#8211; <code class="docutils literal"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods &#8211; <code class="docutils literal"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria &#8211; <code class="docutils literal"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation &#8211; <code class="docutils literal"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions &#8211; <code class="docutils literal"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Computerized Adaptive Test-related Functions &#8211; <code class="docutils literal"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions &#8211; <code class="docutils literal"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions &#8211; <code class="docutils literal"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -142,7 +142,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></li>
+      <li>Computerized Adaptive Test-related Functions &#8211; <code class="docutils literal"><span class="pre">catsim.cat</span></code></li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -162,24 +162,24 @@
            <div itemprop="articleBody">
             
   <div class="section" id="module-catsim.cat">
-<span id="computerized-adaptive-test-related-functions-catsim-cat"></span><h1>Computerized Adaptive Test-related Functions – <a class="reference internal" href="#module-catsim.cat" title="catsim.cat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a><a class="headerlink" href="#module-catsim.cat" title="Permalink to this headline">¶</a></h1>
+<span id="computerized-adaptive-test-related-functions-catsim-cat"></span><h1>Computerized Adaptive Test-related Functions &#8211; <a class="reference internal" href="#module-catsim.cat" title="catsim.cat"><code class="xref py py-mod docutils literal"><span class="pre">catsim.cat</span></code></a><a class="headerlink" href="#module-catsim.cat" title="Permalink to this headline">¶</a></h1>
 <p>Functions used specifically during the application/simulation of computerized adaptive tests.</p>
 <dl class="function">
 <dt id="catsim.cat.bias">
 <code class="descclassname">catsim.cat.</code><code class="descname">bias</code><span class="sig-paren">(</span><em>actual: list</em>, <em>predicted: list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#bias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.bias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies <a class="reference internal" href="references.html#chang2001" id="id1">[Chang2001]</a>.
 The value is calculated by:</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated proficiency and
-<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual proficiency.</p>
+<p>where <span class="math">\(\hat{\theta}_i\)</span> is examinee <span class="math">\(i\)</span> estimated proficiency and
+<span class="math">\(\theta_i\)</span> is examinee <span class="math">\(i\)</span> actual proficiency.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>actual</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the true proficiency values</li>
-<li><strong>predicted</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the estimated proficiency values</li>
+<li><strong>actual</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list or 1-D numpy array containing the true proficiency values</li>
+<li><strong>predicted</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list or 1-D numpy array containing the estimated proficiency values</li>
 </ul>
 </td>
 </tr>
@@ -192,10 +192,10 @@ The value is calculated by:</p>
 
 <dl class="function">
 <dt id="catsim.cat.dodd">
-<code class="descclassname">catsim.cat.</code><code class="descname">dodd</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em>, <em>correct: bool</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/cat.html#dodd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.dodd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Method proposed by <a class="reference internal" href="references.html#dod90" id="id2">[Dod90]</a> for the reestimation of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>
+<code class="descclassname">catsim.cat.</code><code class="descname">dodd</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em>, <em>correct: bool</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="_modules/catsim/cat.html#dodd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.dodd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method proposed by <a class="reference internal" href="references.html#dod90" id="id2">[Dod90]</a> for the reestimation of <span class="math">\(\hat{\theta}\)</span>
 when the response vector is composed entirely of 1s or 0s.</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[\begin{split}\hat{\theta}_{t+1} = \left\lbrace \begin{array}{ll}
 \hat{\theta}_t+\frac{b_{max}-\hat{\theta_t}}{2} &amp; \text{if } X_t = 1 \\
 \hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} &amp; \text{if }  X_t = 0
@@ -204,20 +204,20 @@ when the response vector is composed entirely of 1s or 0s.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">float</span></code></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the initial proficiency level</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a numpy array containing the parameters of the items in the
+<li><strong>theta</strong> (<code class="docutils literal"><span class="pre">float</span></code>) &#8211; the initial proficiency level</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><code class="xref py py-class docutils literal"><span class="pre">ndarray</span></code></a>) &#8211; a numpy array containing the parameters of the items in the
 database. This is necessary to capture the maximum and minimum
 difficulty levels necessary for the method.</li>
-<li><strong>correct</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – a boolean value informing whether or not the examinee
+<li><strong>correct</strong> (<code class="docutils literal"><span class="pre">bool</span></code>) &#8211; a boolean value informing whether or not the examinee
 correctly answered the current item.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new estimation for <span class="math notranslate nohighlight">\(\theta\)</span></p>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a new estimation for <span class="math">\(\theta\)</span></p>
 </td>
 </tr>
 </tbody>
@@ -231,33 +231,33 @@ correctly answered the current item.</li>
 real-world parameters, as proposed by <a class="reference internal" href="references.html#bar10" id="id3">[Bar10]</a>.</p>
 <p>Item parameters are extracted from the following probability distributions:</p>
 <ul class="simple">
-<li>discrimination: <span class="math notranslate nohighlight">\(N(1.2, 0.25)\)</span></li>
-<li>difficulty: <span class="math notranslate nohighlight">\(N(0,  1)\)</span></li>
-<li>pseudo-guessing: <span class="math notranslate nohighlight">\(N(0.25, 0.02)\)</span></li>
-<li>upper asymptote: <span class="math notranslate nohighlight">\(U(0.94, 1)\)</span></li>
+<li>discrimination: <span class="math">\(N(1.2, 0.25)\)</span></li>
+<li>difficulty: <span class="math">\(N(0,  1)\)</span></li>
+<li>pseudo-guessing: <span class="math">\(N(0.25, 0.02)\)</span></li>
+<li>upper asymptote: <span class="math">\(U(0.94, 1)\)</span></li>
 </ul>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – how many items are to be generated</li>
-<li><strong>itemtype</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – either <code class="docutils literal notranslate"><span class="pre">1PL</span></code>, <code class="docutils literal notranslate"><span class="pre">2PL</span></code>, <code class="docutils literal notranslate"><span class="pre">3PL</span></code> or <code class="docutils literal notranslate"><span class="pre">4PL</span></code> for the one-, two-,
+<li><strong>n</strong> (<code class="docutils literal"><span class="pre">int</span></code>) &#8211; how many items are to be generated</li>
+<li><strong>itemtype</strong> (<code class="docutils literal"><span class="pre">str</span></code>) &#8211; either <code class="docutils literal"><span class="pre">1PL</span></code>, <code class="docutils literal"><span class="pre">2PL</span></code>, <code class="docutils literal"><span class="pre">3PL</span></code> or <code class="docutils literal"><span class="pre">4PL</span></code> for the one-, two-,
 three- or four-parameter logistic model</li>
-<li><strong>corr</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the correlation between item discrimination and difficulty. If
-<code class="docutils literal notranslate"><span class="pre">itemtype</span> <span class="pre">==</span> <span class="pre">'1PL'</span></code>, it is ignored.</li>
+<li><strong>corr</strong> (<code class="docutils literal"><span class="pre">float</span></code>) &#8211; the correlation between item discrimination and difficulty. If
+<code class="docutils literal"><span class="pre">itemtype</span> <span class="pre">==</span> <span class="pre">'1PL'</span></code>, it is ignored.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">x</span> <span class="pre">4</span></code> numerical matrix containing item parameters</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an <code class="docutils literal"><span class="pre">n</span> <span class="pre">x</span> <span class="pre">4</span></code> numerical matrix containing item parameters</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)">numpy.ndarray</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)">numpy.ndarray</a></p>
 </td>
 </tr>
 </tbody>
 </table>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;2PL&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;4PL&#39;</span><span class="p">)</span>
@@ -272,17 +272,17 @@ three- or four-parameter logistic model</li>
 <dd><p>Mean squared error, a value used when measuring the precision
 with which a computerized adaptive test estimates examinees proficiencies <a class="reference internal" href="references.html#chang2001" id="id4">[Chang2001]</a>.
 The value is calculated by:</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated proficiency and
-<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual proficiency.</p>
+<p>where <span class="math">\(\hat{\theta}_i\)</span> is examinee <span class="math">\(i\)</span> estimated proficiency and
+<span class="math">\(\hat{\theta}_i\)</span> is examinee <span class="math">\(i\)</span> actual proficiency.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>actual</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the true proficiency values</li>
-<li><strong>predicted</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the estimated proficiency values</li>
+<li><strong>actual</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list or 1-D numpy array containing the true proficiency values</li>
+<li><strong>predicted</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list or 1-D numpy array containing the estimated proficiency values</li>
 </ul>
 </td>
 </tr>
@@ -295,22 +295,22 @@ The value is calculated by:</p>
 
 <dl class="function">
 <dt id="catsim.cat.overlap_rate">
-<code class="descclassname">catsim.cat.</code><code class="descname">overlap_rate</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em>, <em>test_size: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catsim.cat.</code><code class="descname">overlap_rate</code><span class="sig-paren">(</span><em>usages: numpy.ndarray</em>, <em>test_size: int</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test overlap rate, an average measure of how much of the test two examinees take is equal <a class="reference internal" href="references.html#bar10" id="id5">[Bar10]</a>. It is given by:</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}\]</div>
-<p>If, for example <span class="math notranslate nohighlight">\(T = 0.5\)</span>, it means that the tests of two random examinees have 50% of equal items.</p>
+<p>If, for example <span class="math">\(T = 0.5\)</span>, it means that the tests of two random examinees have 50% of equal items.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><code class="docutils literal"><span class="pre">float</span></code></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing, in the 4th column, the number of
+<li><strong>usages</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><code class="xref py py-class docutils literal"><span class="pre">ndarray</span></code></a>) &#8211; a list or numpy.ndarray containing the number of
 times each item was used in the tests.</li>
-<li><strong>test_size</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – an integer informing the number of items in a test.</li>
+<li><strong>test_size</strong> (<code class="docutils literal"><span class="pre">int</span></code>) &#8211; an integer informing the number of items in a test.</li>
 </ul>
 </td>
 </tr>
@@ -327,17 +327,17 @@ times each item was used in the tests.</li>
 <dd><p>Root mean squared error, a common value used when measuring the precision
 with which a computerized adaptive test estimates examinees proficiencies <a class="reference internal" href="references.html#bar10" id="id6">[Bar10]</a>.
 The value is calculated by:</p>
-<div class="math notranslate nohighlight">
+<div class="math">
 \[RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated proficiency and
-<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual proficiency.</p>
+<p>where <span class="math">\(\hat{\theta}_i\)</span> is examinee <span class="math">\(i\)</span> estimated proficiency and
+<span class="math">\(\hat{\theta}_i\)</span> is examinee <span class="math">\(i\)</span> actual proficiency.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>actual</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the true proficiency values</li>
-<li><strong>predicted</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the estimated proficiency values</li>
+<li><strong>actual</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list or 1-D numpy array containing the true proficiency values</li>
+<li><strong>predicted</strong> (<code class="docutils literal"><span class="pre">list</span></code>) &#8211; a list or 1-D numpy array containing the estimated proficiency values</li>
 </ul>
 </td>
 </tr>
@@ -403,7 +403,7 @@ The value is calculated by:</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

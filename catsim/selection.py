@@ -613,7 +613,7 @@ class AStratifiedSelector(StratifiedSelector):
     .. image:: ../sphinx/alpha-strat.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter
-    to create the correct number of strata.
+                      to create the correct number of strata.
     """
 
     def __str__(self):
@@ -643,7 +643,7 @@ class AStratifiedBBlockingSelector(StratifiedSelector):
     .. image:: ../sphinx/b-blocking.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to
-    create the correct number of strata.
+                      create the correct number of strata.
     """
 
     def __str__(self):
@@ -674,7 +674,7 @@ class MaxInfoStratificationSelector(StratifiedSelector):
     scale in 3PL.
 
     :param test_size: the number of items the test contains. The selector uses this parameter to
-    create the correct number of strata.
+                      create the correct number of strata.
     """
 
     def __str__(self):
@@ -710,7 +710,7 @@ class MaxInfoBBlockingSelector(StratifiedSelector):
     .. image:: ../sphinx/mis-b.*
 
     :param test_size: the number of items the test contains. The selector uses this parameter to
-    create the correct number of strata.
+                      create the correct number of strata.
     """
 
     def __str__(self):
@@ -794,7 +794,7 @@ class RandomesqueSelector(Selector):
     in this implementation)
 
     :param bin_size: the number of most informative items to be taken into consideration when
-    randomly selecting one of them.
+                     randomly selecting one of them.
     """
 
     def __str__(self):
