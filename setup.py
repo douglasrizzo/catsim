@@ -13,8 +13,6 @@ setup(
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -33,7 +31,7 @@ setup(
         'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm', 'numpy'
     ],
     extras_require=dict(
-        testing=['nose', 'nose-cov', 'sklearn'],
+        testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls'],
         docs=[
             'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme',
             'bibtex-pygments-lexer'

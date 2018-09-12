@@ -1,11 +1,8 @@
 language: python
 python:
-- '3.2'
-- '3.3'
 - '3.4'
 - '3.5'
 - '3.6'
-- '3.7'
 - '3.7-dev'
 addons:
   apt:
@@ -25,10 +22,10 @@ install:
 # - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib
 # - source activate test-environment
 # install remaining packages using pip
-- pip install bibtex-pygments-lexer coverage coveralls nose nose-cov numpydoc python-coveralls Sphinx sphinx_autodoc_annotation sphinx_rtd_theme sphinxcontrib-inheritance
-- pip install .[testing]
 - python --version
 - which python
+- pip install .[testing]
+- if [ '$TRAVIS_PYTHON_VERSION' = '3.6']; then pip install .[docs]; fi
 before_script: # configure a headless display to test plot generation
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"
@@ -47,6 +44,7 @@ deploy:
   password:
     secure: s16kDeSssKMH2mktNDho8nUmVXYFb7OhetMi/ZKl4L0fWaAK8mi/zHRgQCyEF4nOBXZQIiWZJK3eeC0BTKjRopvs6hdLI2P4/FyCgPXLRUiCnC1a6IlwLK/VAiXCdx6vgtlec6m7Lfn80EuL8muwT6+ezY3a2niiDy6oNaY61sjpUqCl6+v8VIlDDOwOf/1NPfbMyhTCLYMl6rf6l/phap+PDuvoDu9l2K7pLXROyH/DtjEHuECsPhNWbmB5wzMeirnfMB23qhD2ibJJIZU3eTQliG07JzVjiNcHmOLAKBUtJoSNrF8RcgphOfB/pnWJYxdzDmhlXWkhrvK500Q+RJBDSbtscNlDPRqCv60VMUZ2tWXsHXaXSe4dsVhIG6sr88zuvPKm4QoUOxm9KkzH/Ybh+ySpirTVWhrjK6UYKTOc5QDvshQryrf2keNAgHF8MznM/yqh0txYIiyAM/RLKv00aCqaBvumvN2HQNPOmouTWM+tZtL3I86iQhf9MdSniRfwYp1f9A3HmruvEc0N9Eaw/VPjOzKvoxwOK8uxr82yZ3wL9V/oTjwHKQ9k1HobKKqWmZzxicUDmFDcUlL1u0X/oh54PYSvLUJpIeOvECdCJQn9SLHFq0A2J5W1u7Omq3E5iw4j+rbQjdymZJzqzNfapueuIPjgQ6PsJF6f0i0=
   on:
-    distributions: sdist bdist_wheel
+    condition: $TRAVIS_PYTHON_VERSION = 3.6
+    tags: true
     repo: douglasrizzo/catsim
-    branch: master
+    distributions: sdist bdist_wheel
