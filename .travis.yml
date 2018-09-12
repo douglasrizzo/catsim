@@ -1,8 +1,12 @@
 language: python
 python:
+- '3.2'
+- '3.3'
 - '3.4'
 - '3.5'
 - '3.6'
+- '3.7'
+- '3.7-dev'
 addons:
   apt:
     packages:
@@ -21,10 +25,10 @@ install:
 - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy scikit-learn matplotlib
 - source activate test-environment
 # install remaining packages using pip
-- pip install coveralls python-coveralls nose-cov Sphinx sphinx_autodoc_annotation numpydoc sphinx_rtd_theme coverage nose sphinxcontrib-inheritance bibtex-pygments-lexer
+- pip install bibtex-pygments-lexer coverage coveralls nose nose-cov numpydoc python-coveralls Sphinx sphinx_autodoc_annotation sphinx_rtd_theme sphinxcontrib-inheritance
+- pip install .[testing]
 - python --version
 - which python
-- make install clean
 before_script: # configure a headless display to test plot generation
 - "export DISPLAY=:99.0"
 - "sh -e /etc/init.d/xvfb start"

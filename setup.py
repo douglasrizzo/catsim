@@ -17,6 +17,8 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Education :: Testing',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)'
     ],
@@ -25,7 +27,7 @@ setup(
     description='Computerized Adaptive Testing Simulator',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
-    url='https://douglasrizzo.github.io/catsim',
+    url='https://douglasrizzo.com.br/catsim',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
         'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm', 'numpy'

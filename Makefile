@@ -5,9 +5,9 @@ clean:
 	find -name *.pyc -delete
 	find -name __pycache__ -delete
 install:
-	pip3 install .
+	pip install .
 tests:
-	pip3 install .[testing]
+	pip install .[testing]
 
 ifneq '$USER' 'travis'
 	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim --processes=$(nproc)
