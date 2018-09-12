@@ -54,10 +54,10 @@ def test_simulations():
             infinite_selectors = [MaxInfoSelector(), RandomSelector(), UrrySelector()]
             finite_selectors = [
                 LinearSelector(list(numpy.random.choice(bank_size, size=test_size, replace=False))),
-                AStratifiedSelector(test_size),
-                AStratifiedBBlockingSelector(test_size),
-                MaxInfoStratificationSelector(test_size),
-                MaxInfoBBlockingSelector(test_size),
+                AStratSelector(test_size),
+                AStratBBlockSelector(test_size),
+                MaxInfoStratSelector(test_size),
+                MaxInfoBBlockSelector(test_size),
                 The54321Selector(test_size),
                 RandomesqueSelector(5)
             ]

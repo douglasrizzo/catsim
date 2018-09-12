@@ -600,7 +600,7 @@ class StratifiedSelector(FiniteSelector):
         return organized_items[pointer]
 
 
-class AStratifiedSelector(StratifiedSelector):
+class AStratSelector(StratifiedSelector):
     """Implementation of the :math:`\\alpha`-stratified selector proposed by
     [Chang99]_, in which the item bank is sorted in ascending order according to the
     items discrimination parameter and then separated into :math:`K` strata
@@ -627,7 +627,7 @@ class AStratifiedSelector(StratifiedSelector):
         return items[:, 0].argsort()
 
 
-class AStratifiedBBlockingSelector(StratifiedSelector):
+class AStratBBlockSelector(StratifiedSelector):
     """Implementation of the :math:`\\alpha`-stratified selector with :math:`b`
     blocking proposed by [Chang2001]_, in which the item bank is sorted in ascending
     order according to the items difficulty parameter and then separated into
@@ -657,7 +657,7 @@ class AStratifiedBBlockingSelector(StratifiedSelector):
         return numpy.lexsort((items[:, 0], items[:, 1]))
 
 
-class MaxInfoStratificationSelector(StratifiedSelector):
+class MaxInfoStratSelector(StratifiedSelector):
     """Implementation of the maximum information stratification (MIS) selector
     proposed by [Bar06]_, in which the item bank is sorted in ascending order
     according to the items maximum information and then separated into :math:`K`
@@ -689,7 +689,7 @@ class MaxInfoStratificationSelector(StratifiedSelector):
         return irt.inf_hpc(maxinfo, items).argsort()
 
 
-class MaxInfoBBlockingSelector(StratifiedSelector):
+class MaxInfoBBlockSelector(StratifiedSelector):
     """Implementation of the maximum information stratification with :math:`b`
     blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted
     in ascending order according to the items difficulty parameter and then
