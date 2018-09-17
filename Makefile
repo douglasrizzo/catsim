@@ -1,9 +1,7 @@
 PACKNAME = catsim
 all: install clean tests
 clean:
-	rm -rf $(PACKNAME).egg-info dist build
-	find -name *.pyc -delete
-	find -name __pycache__ -delete
+	git clean -Xdf
 install:
 	pip install .
 tests:

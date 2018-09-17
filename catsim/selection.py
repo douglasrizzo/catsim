@@ -848,11 +848,10 @@ class RandomesqueSelector(Selector):
         return numpy.random.choice(list(organized_items)[:self._bin_size])
 
 
-class IntervalIntegrationSelector(Selector):
-    """Implementation of an interval integration selector in which, at every step of
-    the test, the item that maximizes the information function integral at a
-    predetermined ``interval`` :math:`\\delta` above and below the current
-    :math:`\\hat\\theta` is chosen.
+class IntervalInfoSelector(Selector):
+    """A selector in which, at every step of the test, the item that maximizes
+    the integral of the information function at a predetermined ``interval``
+    :math:`\\delta` above and below the current :math:`\\hat\\theta` is chosen.
 
     .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta - \\delta}I_i(\\hat\\theta)
 
@@ -861,7 +860,7 @@ class IntervalIntegrationSelector(Selector):
     """
 
     def __str__(self):
-        return 'Interval Integration Selector'
+        return 'Interval Information Selector'
 
     def __init__(self, interval: float = None):
         super().__init__()
