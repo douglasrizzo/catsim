@@ -56,7 +56,7 @@
             
             
               <div class="version">
-                0.13.6
+                0.15.1
               </div>
             
           
@@ -760,7 +760,7 @@
         <span class="k">return</span> <span class="n">organized_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="AStratifiedSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.AStratifiedSelector">[docs]</a><span class="k">class</span> <span class="nc">AStratifiedSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<div class="viewcode-block" id="AStratSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.AStratSelector">[docs]</a><span class="k">class</span> <span class="nc">AStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Implementation of the :math:`\\alpha`-stratified selector proposed by</span>
 <span class="sd">    [Chang99]_, in which the item bank is sorted in ascending order according to the</span>
 <span class="sd">    items discrimination parameter and then separated into :math:`K` strata</span>
@@ -787,7 +787,7 @@
         <span class="k">return</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="AStratifiedBBlockingSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.AStratifiedBBlockingSelector">[docs]</a><span class="k">class</span> <span class="nc">AStratifiedBBlockingSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<div class="viewcode-block" id="AStratBBlockSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.AStratBBlockSelector">[docs]</a><span class="k">class</span> <span class="nc">AStratBBlockSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Implementation of the :math:`\\alpha`-stratified selector with :math:`b`</span>
 <span class="sd">    blocking proposed by [Chang2001]_, in which the item bank is sorted in ascending</span>
 <span class="sd">    order according to the items difficulty parameter and then separated into</span>
@@ -817,7 +817,7 @@
         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">lexsort</span><span class="p">((</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span></div>
 
 
-<div class="viewcode-block" id="MaxInfoStratificationSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratificationSelector">[docs]</a><span class="k">class</span> <span class="nc">MaxInfoStratificationSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<div class="viewcode-block" id="MaxInfoStratSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratSelector">[docs]</a><span class="k">class</span> <span class="nc">MaxInfoStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Implementation of the maximum information stratification (MIS) selector</span>
 <span class="sd">    proposed by [Bar06]_, in which the item bank is sorted in ascending order</span>
 <span class="sd">    according to the items maximum information and then separated into :math:`K`</span>
@@ -849,7 +849,7 @@
         <span class="k">return</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">maxinfo</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="MaxInfoBBlockingSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoBBlockingSelector">[docs]</a><span class="k">class</span> <span class="nc">MaxInfoBBlockingSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<div class="viewcode-block" id="MaxInfoBBlockSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoBBlockSelector">[docs]</a><span class="k">class</span> <span class="nc">MaxInfoBBlockSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Implementation of the maximum information stratification with :math:`b`</span>
 <span class="sd">    blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted</span>
 <span class="sd">    in ascending order according to the items difficulty parameter and then</span>
@@ -1008,11 +1008,10 @@
         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)[:</span><span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">])</span></div></div>
 
 
-<div class="viewcode-block" id="IntervalIntegrationSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.IntervalIntegrationSelector">[docs]</a><span class="k">class</span> <span class="nc">IntervalIntegrationSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Implementation of an interval integration selector in which, at every step of</span>
-<span class="sd">    the test, the item that maximizes the information function integral at a</span>
-<span class="sd">    predetermined ``interval`` :math:`\\delta` above and below the current</span>
-<span class="sd">    :math:`\\hat\\theta` is chosen.</span>
+<div class="viewcode-block" id="IntervalInfoSelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.IntervalInfoSelector">[docs]</a><span class="k">class</span> <span class="nc">IntervalInfoSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A selector in which, at every step of the test, the item that maximizes</span>
+<span class="sd">    the integral of the information function at a predetermined ``interval``</span>
+<span class="sd">    :math:`\\delta` above and below the current :math:`\\hat\\theta` is chosen.</span>
 
 <span class="sd">    .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta - \\delta}I_i(\\hat\\theta)</span>
 
@@ -1021,7 +1020,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;Interval Integration Selector&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;Interval Information Selector&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -1031,7 +1030,7 @@
     <span class="k">def</span> <span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
 
-<div class="viewcode-block" id="IntervalIntegrationSelector.select"><a class="viewcode-back" href="../../selection.html#catsim.selection.IntervalIntegrationSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
+<div class="viewcode-block" id="IntervalInfoSelector.select"><a class="viewcode-back" href="../../selection.html#catsim.selection.IntervalInfoSelector.select">[docs]</a>    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1112,7 +1111,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'0.13.6',
+            VERSION:'0.15.1',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
