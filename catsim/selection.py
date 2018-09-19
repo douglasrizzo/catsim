@@ -20,13 +20,21 @@ def _nearest(array: list, value) -> numpy.ndarray:
 
 
 class MaxInfoSelector(Selector):
-    """Selector that returns the first non-administered item with maximum information, given an estimated theta"""
+    """Selector that returns the first non-administered item with maximum information, given an estimated theta
+       
+    :param r_max: maximum exposure rate for items
+    """
 
-    def __init__(self):
+    def __init__(self, r_max: float = 1):
         super().__init__()
+        self._r_max = r_max
 
     def __str__(self):
         return 'Maximum Information Selector'
+
+    @property
+    def r_max(self):
+        return self._r_max
 
     def select(
         self,
@@ -71,7 +79,16 @@ class MaxInfoSelector(Selector):
             warn('There are no more items to be applied.')
             return None
 
-        return valid_indexes[0]
+        # gets the indexes and information values from the items with r < rmax
+        valid_indexes_low_r = [index for index in valid_indexes if items[index, 4] < self._r_max]
+
+        # return the item with maximum information from the ones available
+        if len(valid_indexes_low_r) > 0:
+            selected_item = valid_indexes_low_r[0]
+        else:
+            selected_item = valid_indexes[0]
+
+        return selected_item
 
 
 class UrrySelector(Selector):
@@ -160,8 +177,8 @@ class LinearSelector(FiniteSelector):
 
         if set(self._indexes) <= set(administered_items):
             warn(
-                'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'.
-                format(
+                'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'
+                .format(
                     self._current, sorted(self._indexes), len(self._indexes),
                     sorted(administered_items), len(administered_items)
                 )
@@ -212,8 +229,8 @@ class RandomSelector(Selector):
 
         if len(administered_items) >= items.shape[0] and not self._replace:
             warn(
-                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}'.
-                format(len(administered_items), items.shape[0])
+                'A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}'
+                .format(len(administered_items), items.shape[0])
             )
             return None
 
@@ -578,8 +595,8 @@ class StratifiedSelector(FiniteSelector):
             ) == self._test_size - 1 else slices[len(administered_items) + 1]
         except IndexError:
             warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}".
-                format(self, len(administered_items), self._test_size, len(slices))
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}"
+                .format(self, len(administered_items), self._test_size, len(slices))
             )
             return None
 
