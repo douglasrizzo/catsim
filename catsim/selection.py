@@ -790,9 +790,9 @@ class The54321Selector(FiniteSelector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        # sort item indexes by their information value and remove indexes of administered items
+        # sort item indexes by their information value descending and remove indexes of administered items
         organized_items = [
-            x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items
+            x for x in (-irt.inf_hpc(est_theta, items)).argsort() if x not in administered_items
         ]
 
         bin_size = self._test_size - len(administered_items)
@@ -853,9 +853,9 @@ class RandomesqueSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        # sort item indexes by their information value and remove indexes of administered items
+        # sort item indexes by their information value descending and remove indexes of administered items
         organized_items = [
-            x for x in irt.inf_hpc(est_theta, items).argsort() if x not in administered_items
+            x for x in (-irt.inf_hpc(est_theta, items)).argsort() if x not in administered_items
         ]
 
         if len(organized_items) == 0:
@@ -915,18 +915,16 @@ class IntervalInfoSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        # sort item indexes by the integral of the information function and remove indexes of administered items
+        # sort item indexes by the integral of the information function descending and remove indexes of administered items
         organized_items = [
-            x for x in numpy.array(
-                [
+            x for x in (-numpy.array([
                     quad(
                         irt.inf,
                         est_theta - self._interval,
                         est_theta + self._interval,
                         args=(item[0], item[1], item[2], item[3])
-                    )[0] for item in items
-                ]
-            ).argsort() if x not in administered_items
+                    )[0] for item in items]
+            )).argsort() if x not in administered_items
         ]
 
         if len(organized_items) == 0:
