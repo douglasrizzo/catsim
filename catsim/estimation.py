@@ -89,7 +89,7 @@ class HillClimbingEstimator(Estimator):
         self._calls += 1
 
         if len(set(response_vector)) == 1 and self._dodd:
-            return cat.dodd(est_theta, self.simulator.items, response_vector[-1])
+            return cat.dodd(est_theta, items, response_vector[-1])
 
         if set(response_vector) == 1:
             return float('inf')
