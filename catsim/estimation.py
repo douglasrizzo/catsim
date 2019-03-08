@@ -87,6 +87,7 @@ class HillClimbingEstimator(Estimator):
             est_theta = self.simulator.latest_estimations[index]
 
         self._calls += 1
+        self._evaluations = 0
 
         if len(set(response_vector)) == 1 and self._dodd:
             return cat.dodd(est_theta, items, response_vector[-1])
@@ -106,38 +107,42 @@ class HillClimbingEstimator(Estimator):
         best_theta = float('-inf')
         max_ll = float('-inf')
 
-        self._evaluations = 0
+        # the estimator starts with rough searches, which get finer with each pass
+        for granularity in range(100):
+            # generate a list of candidate theta values
+            candidates = numpy.linspace(lower_bound, upper_bound, 10)
+            interval_size = candidates[1] - candidates[0]
 
-        for _ in range(10):
-            intervals = numpy.linspace(lower_bound, upper_bound, 10)
             if self._verbose:
-                print(('Bounds: ' + str(lower_bound) + ' ' + str(upper_bound)))
-                print(('Interval size: ' + str(intervals[1] - intervals[0])))
+                print(
+                    'Pass: {0}\n\tBounds: {1} {2}\n\tInterval size: {3}'.format(
+                        granularity + 1, lower_bound, upper_bound, interval_size
+                    )
+                )
 
-            for ii in intervals:
+            # iterate through each candidate
+            for candidate_theta in candidates:
                 self._evaluations += 1
-                ll = irt.log_likelihood(ii, response_vector, items[administered_items])
-                if ll > max_ll:
-                    max_ll = ll
 
+                # check if the LL of the current candidate theta is larger than the best one checked as of yet
+                ll = irt.log_likelihood(candidate_theta, response_vector, items[administered_items])
+                if ll > max_ll:
                     if self._verbose:
                         print(
-                            (
-                                'Iteration: {0}, Theta: {1}, LL: {2}'.format(
-                                    self._evaluations, ii, ll
-                                )
+                            '\t\tTheta: {0}, LL update: {1}'.format(
+                                candidate_theta, abs(ll - max_ll)
                             )
                         )
 
-                    if abs(best_theta - ii) < float('1e-' + str(self._precision)):
-                        return ii
+                    if abs(best_theta - candidate_theta) < float('1e-' + str(self._precision)):
+                        return candidate_theta
 
-                    best_theta = ii
+                    max_ll = ll
+                    best_theta = candidate_theta
 
-                else:
-                    lower_bound = best_theta - (intervals[1] - intervals[0])
-                    upper_bound = ii
-                    break
+            # the bounds of the new candidates are adjusted around the current best theta value
+            lower_bound = best_theta - interval_size
+            upper_bound = best_theta + interval_size
 
         return best_theta
 
