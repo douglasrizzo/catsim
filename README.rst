@@ -43,7 +43,7 @@ Install it using ``pip install catsim``.
 Important links
 ===============
 
-- Official source code repo: https://github.com/douglasrizzo/catsim
+- Official source code repo: https://douglasrizzo.github.io/catsim
 - HTML documentation (stable release): http://douglasrizzo.com.br/catsim
 - Issue tracker: https://github.com/douglasrizzo/catsim/issues
 
