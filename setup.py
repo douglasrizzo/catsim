@@ -41,7 +41,7 @@ setup(
         testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls'],
         docs=[
             'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme',
-            'bibtex-pygments-lexer'
+            'bibtex-pygments-lexer', 'matplotlib'
         ]
     ),
     license='LGPLv3'
