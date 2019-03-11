@@ -106,9 +106,10 @@ class HillClimbingEstimator(Estimator):
 
         best_theta = float('-inf')
         max_ll = float('-inf')
+        
+        # the estimator starts with a rough search, which gets finer with each pass
+        for granularity in range(10):
 
-        # the estimator starts with rough searches, which get finer with each pass
-        for granularity in range(100):
             # generate a list of candidate theta values
             candidates = numpy.linspace(lower_bound, upper_bound, 10)
             interval_size = candidates[1] - candidates[0]
@@ -120,31 +121,46 @@ class HillClimbingEstimator(Estimator):
                     )
                 )
 
+            # we'll use the concave nature of the log-likelihood function
+            # to program a primitive early stopping method in our search
+            previous_ll = float('-inf')
+
             # iterate through each candidate
             for candidate_theta in candidates:
                 self._evaluations += 1
 
+                current_ll = irt.log_likelihood(candidate_theta, response_vector, items[administered_items])
+
+                # we search the function from left to right, so when the
+                # log-likelihood of the current theta is smaller than the one
+                # from the previous theta we tested, it means it's all downhill
+                # from then on, so we stop our search
+                if current_ll < previous_ll:
+                    break
+                previous_ll = current_ll
+
                 # check if the LL of the current candidate theta is larger than the best one checked as of yet
-                ll = irt.log_likelihood(candidate_theta, response_vector, items[administered_items])
-                if ll > max_ll:
+                if current_ll > max_ll:
                     if self._verbose:
-                        print(
-                            '\t\tTheta: {0}, LL update: {1}'.format(
-                                candidate_theta, abs(ll - max_ll)
-                            )
-                        )
+                        print('\t\tTheta: {0}, LL: {1}'.format(candidate_theta, current_ll))
 
                     if abs(best_theta - candidate_theta) < float('1e-' + str(self._precision)):
-                        return candidate_theta
+                        return self._getout(candidate_theta)
 
-                    max_ll = ll
+                    max_ll = current_ll
                     best_theta = candidate_theta
 
             # the bounds of the new candidates are adjusted around the current best theta value
             lower_bound = best_theta - interval_size
             upper_bound = best_theta + interval_size
 
-        return best_theta
+        return self._getout(best_theta)
+
+    def _getout(self, theta:float)->float:
+        if self._verbose:
+            print('{0} evaluations'.format(self._evaluations))
+
+        return theta
 
 
 class DifferentialEvolutionEstimator(Estimator):
