@@ -2,7 +2,7 @@
 ###################################################
 
 .. image:: https://travis-ci.org/douglasrizzo/catsim.svg?branch=master
-    :target: https://travis-ci.org/douglasrizzo/catsim:
+    :target: https://travis-ci.org/douglasrizzo/catsim
     :alt: Build Status
 
 .. image:: https://coveralls.io/repos/github/douglasrizzo/catsim/badge.svg?branch=master
