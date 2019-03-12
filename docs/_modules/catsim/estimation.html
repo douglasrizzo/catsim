@@ -17,32 +17,35 @@
   
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -56,7 +59,7 @@
             
             
               <div class="version">
-                0.15.1
+                0.15.2
               </div>
             
           
@@ -84,15 +87,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html#package-architecture">Package architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html#examples">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods &#8211; <code class="docutils literal"><span class="pre">catsim.initialization</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods &#8211; <code class="docutils literal"><span class="pre">catsim.selection</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods &#8211; <code class="docutils literal"><span class="pre">catsim.estimation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria &#8211; <code class="docutils literal"><span class="pre">catsim.stopping</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation &#8211; <code class="docutils literal"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions &#8211; <code class="docutils literal"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions &#8211; <code class="docutils literal"><span class="pre">catsim.cat</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions &#8211; <code class="docutils literal"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions &#8211; <code class="docutils literal"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -247,9 +250,10 @@
             <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
@@ -265,41 +269,61 @@
 
         <span class="n">best_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
         <span class="n">max_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># the estimator starts with a rough search, which gets finer with each pass</span>
+        <span class="k">for</span> <span class="n">granularity</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># generate a list of candidate theta values</span>
+            <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">interval_size</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-            <span class="n">intervals</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;Bounds: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">upper_bound</span><span class="p">)))</span>
-                <span class="nb">print</span><span class="p">((</span><span class="s1">&#39;Interval size: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">intervals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s1">&#39;Pass: </span><span class="si">{0}</span><span class="se">\n\t</span><span class="s1">Bounds: </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="se">\n\t</span><span class="s1">Interval size: </span><span class="si">{3}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">granularity</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">interval_size</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">:</span>
+            <span class="c1"># we&#39;ll use the concave nature of the log-likelihood function</span>
+            <span class="c1"># to program a primitive early stopping method in our search</span>
+            <span class="n">previous_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+
+            <span class="c1"># iterate through each candidate</span>
+            <span class="k">for</span> <span class="n">candidate_theta</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
-                <span class="k">if</span> <span class="n">ll</span> <span class="o">&gt;</span> <span class="n">max_ll</span><span class="p">:</span>
-                    <span class="n">max_ll</span> <span class="o">=</span> <span class="n">ll</span>
 
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span>
-                            <span class="p">(</span>
-                                <span class="s1">&#39;Iteration: </span><span class="si">{0}</span><span class="s1">, Theta: </span><span class="si">{1}</span><span class="s1">, LL: </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="n">ll</span>
-                                <span class="p">)</span>
-                            <span class="p">)</span>
-                        <span class="p">)</span>
+                <span class="n">current_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
 
-                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">best_theta</span> <span class="o">-</span> <span class="n">ii</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;1e-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_precision</span><span class="p">)):</span>
-                        <span class="k">return</span> <span class="n">ii</span>
-
-                    <span class="n">best_theta</span> <span class="o">=</span> <span class="n">ii</span>
-
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">-</span> <span class="p">(</span><span class="n">intervals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">ii</span>
+                <span class="c1"># we search the function from left to right, so when the</span>
+                <span class="c1"># log-likelihood of the current theta is smaller than the one</span>
+                <span class="c1"># from the previous theta we tested, it means it&#39;s all downhill</span>
+                <span class="c1"># from then on, so we stop our search</span>
+                <span class="k">if</span> <span class="n">current_ll</span> <span class="o">&lt;</span> <span class="n">previous_ll</span><span class="p">:</span>
                     <span class="k">break</span>
+                <span class="n">previous_ll</span> <span class="o">=</span> <span class="n">current_ll</span>
 
-        <span class="k">return</span> <span class="n">best_theta</span></div></div>
+                <span class="c1"># check if the LL of the current candidate theta is larger than the best one checked as of yet</span>
+                <span class="k">if</span> <span class="n">current_ll</span> <span class="o">&gt;</span> <span class="n">max_ll</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">Theta: </span><span class="si">{0}</span><span class="s1">, LL: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">,</span> <span class="n">current_ll</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">best_theta</span> <span class="o">-</span> <span class="n">candidate_theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;1e-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_precision</span><span class="p">)):</span>
+                        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getout</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">)</span>
+
+                    <span class="n">max_ll</span> <span class="o">=</span> <span class="n">current_ll</span>
+                    <span class="n">best_theta</span> <span class="o">=</span> <span class="n">candidate_theta</span>
+
+            <span class="c1"># the bounds of the new candidates are adjusted around the current best theta value</span>
+            <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">-</span> <span class="n">interval_size</span>
+            <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">+</span> <span class="n">interval_size</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getout</span><span class="p">(</span><span class="n">best_theta</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_getout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> evaluations&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">theta</span></div>
 
 
 <div class="viewcode-block" id="DifferentialEvolutionEstimator"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.DifferentialEvolutionEstimator">[docs]</a><span class="k">class</span> <span class="nc">DifferentialEvolutionEstimator</span><span class="p">(</span><span class="n">Estimator</span><span class="p">):</span>
@@ -397,7 +421,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -414,33 +438,16 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.15.1',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="../../_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

@@ -19,8 +19,9 @@ Basic Usage
 
     from catsim.initialization import RandomInitializer
     from catsim.selection import MaxInfoSelector
-    from catsim.reestimation import HillClimbingEstimator
+    from catsim.estimation import HillClimbingEstimator
     from catsim.stopping import MaxItemStopper
+    from catsim.simulation import Simulator
     from catsim.cat import generate_item_bank
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
