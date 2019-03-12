@@ -8,6 +8,5 @@ from catsim.simulation import Simulator
 
 s = Simulator(generate_item_bank(100), 10)
 s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))
-plot.item_exposure(title='Exposures', simulator=s, ptype='hist')
+plot.item_exposure(title='Exposures', simulator=s, hist=True)
 plot.item_exposure(title='Exposures', simulator=s, par='b')
-plot.item_exposure(title='Exposures', simulator=s, ptype='line')

@@ -17,34 +17,38 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Item Selection Methods – catsim.selection" href="selection.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -58,7 +62,7 @@
             
             
               <div class="version">
-                0.15.1
+                0.15.3
               </div>
             
           
@@ -86,15 +90,15 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Initialization Methods &#8211; <code class="docutils literal"><span class="pre">catsim.initialization</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods &#8211; <code class="docutils literal"><span class="pre">catsim.selection</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods &#8211; <code class="docutils literal"><span class="pre">catsim.estimation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria &#8211; <code class="docutils literal"><span class="pre">catsim.stopping</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation &#8211; <code class="docutils literal"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions &#8211; <code class="docutils literal"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions &#8211; <code class="docutils literal"><span class="pre">catsim.cat</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions &#8211; <code class="docutils literal"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions &#8211; <code class="docutils literal"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -142,7 +146,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Initialization Methods &#8211; <code class="docutils literal"><span class="pre">catsim.initialization</span></code></li>
+      <li>Initialization Methods – <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -162,34 +166,33 @@
            <div itemprop="articleBody">
             
   <div class="section" id="initialization-methods-catsim-initialization">
-<h1>Initialization Methods &#8211; <a class="reference internal" href="#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal"><span class="pre">catsim.initialization</span></code></a><a class="headerlink" href="#initialization-methods-catsim-initialization" title="Permalink to this headline">¶</a></h1>
+<h1>Initialization Methods – <a class="reference internal" href="#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><a class="headerlink" href="#initialization-methods-catsim-initialization" title="Permalink to this headline">¶</a></h1>
 <p>All implemented classes in this module inherit from a base abstract class
-<code class="xref py py-class docutils literal"><span class="pre">Initializer</span></code>. <code class="xref py py-class docutils literal"><span class="pre">Simulator</span></code> allows that a custom initializer be
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom initializer be
 used during the simulation, as long as it also inherits from
-<code class="xref py py-class docutils literal"><span class="pre">Initializer</span></code>.</p>
-<img src="_images/inheritance-7b231892f8a02e535b182e4b6d70a4e2722818e9.png" alt="Inheritance diagram of catsim.initialization" usemap="#inheritance51267be144" class="inheritance"/>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code>.</p>
+<div class="graphviz"><img src="_images/inheritance-7b231892f8a02e535b182e4b6d70a4e2722818e9.png" alt="Inheritance diagram of catsim.initialization" usemap="#inheritance51267be144" class="inheritance graphviz" /></div>
 <map id="inheritance51267be144" name="inheritance51267be144">
 <area shape="rect" id="node1" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initializes every proficiency at the same point." alt="" coords="492,5,763,29"/>
 <area shape="rect" id="node2" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers" alt="" coords="250,29,446,54"/>
 <area shape="rect" id="node3" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initializes the first estimate of an examinee&#39;s proficiency" alt="" coords="498,52,757,77"/>
 <area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,29,204,54"/>
-</map>
-<span class="target" id="module-catsim.initialization"></span><dl class="class">
+</map><span class="target" id="module-catsim.initialization"></span><dl class="class">
 <dt id="catsim.initialization.FixedPointInitializer">
 <em class="property">class </em><code class="descclassname">catsim.initialization.</code><code class="descname">FixedPointInitializer</code><span class="sig-paren">(</span><em>start: float</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal"><span class="pre">catsim.simulation.Initializer</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Initializer</span></code></a></p>
 <p>Initializes every proficiency at the same point.</p>
 <dl class="method">
 <dt id="catsim.initialization.FixedPointInitializer.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the same proficiency value that was passed to the constructor of the initializer</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">float</span></code></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">float</span></code></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal"><span class="pre">int</span></code>) &#8211; the index of the current examinee. This parameter is not used by this method.</td>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee. This parameter is not used by this method.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the same proficiency value that was passed to the constructor of the initializer</td>
 </tr>
@@ -202,15 +205,15 @@ used during the simulation, as long as it also inherits from
 <dl class="class">
 <dt id="catsim.initialization.RandomInitializer">
 <em class="property">class </em><code class="descclassname">catsim.initialization.</code><code class="descname">RandomInitializer</code><span class="sig-paren">(</span><em>dist_type: str = 'uniform'</em>, <em>dist_params: tuple = (-5</em>, <em>5)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal"><span class="pre">catsim.simulation.Initializer</span></code></a></p>
-<p>Randomly initializes the first estimate of an examinee&#8217;s proficiency</p>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Initializer</span></code></a></p>
+<p>Randomly initializes the first estimate of an examinee’s proficiency</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dist_type</strong> &#8211; either <cite>uniform</cite> or <cite>normal</cite></li>
-<li><strong>dist_params</strong> &#8211; a tuple containing minimum and maximum values for the
+<li><strong>dist_type</strong> – either <cite>uniform</cite> or <cite>normal</cite></li>
+<li><strong>dist_params</strong> – a tuple containing minimum and maximum values for the
 uniform distribution (in no particular order) or the average
 and standard deviation values for the normal distribution
 (in this particular order).</li>
@@ -221,15 +224,15 @@ and standard deviation values for the normal distribution
 </table>
 <dl class="method">
 <dt id="catsim.initialization.RandomInitializer.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>index: int = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a value using the chosen distribution and parameters</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal"><span class="pre">float</span></code></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">float</span></code></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal"><span class="pre">int</span></code>) &#8211; the index of the current examinee. This parameter is not used by this method.</td>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee. This parameter is not used by this method.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a proficiency value generated from the chosen distribution using the passed parameters</td>
 </tr>
@@ -252,7 +255,7 @@ and standard deviation values for the normal distribution
         <a href="selection.html" class="btn btn-neutral float-right" title="Item Selection Methods – catsim.selection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -261,7 +264,7 @@ and standard deviation values for the normal distribution
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti.
+        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -278,33 +281,16 @@ and standard deviation values for the normal distribution
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'0.15.1',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
