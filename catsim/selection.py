@@ -80,7 +80,7 @@ class MaxInfoSelector(Selector):
             return None
 
         # gets the indexes and information values from the items with r < rmax
-        valid_indexes_low_r = [index for index in valid_indexes if items[index, 4] < self._r_max]
+        valid_indexes_low_r = [index for index in valid_indexes if items[index, 3] < self._r_max]
 
         # return the item with maximum information from the ones available
         if len(valid_indexes_low_r) > 0:
