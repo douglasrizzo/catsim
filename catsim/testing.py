@@ -125,14 +125,11 @@ def test_plots():
 
     for item in s.items[0:10]:
         yield plot.item_curve, item[0], item[1], item[2], item[
-            3
-        ], 'Test plot', 'icc', False, None, False
+            3], 'Test plot', 'icc', False, None, False
         yield plot.item_curve, item[0], item[1], item[2], item[
-            3
-        ], 'Test plot', 'iic', True, None, False
+            3], 'Test plot', 'iic', True, None, False
         yield plot.item_curve, item[0], item[1], item[2], item[
-            3
-        ], 'Test plot', 'both', True, None, False
+            3], 'Test plot', 'both', True, None, False
         close('all')
 
     plot.gen3d_dataset_scatter(items=s.items, show=False)

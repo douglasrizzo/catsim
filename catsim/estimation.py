@@ -106,7 +106,7 @@ class HillClimbingEstimator(Estimator):
 
         best_theta = float('-inf')
         max_ll = float('-inf')
-        
+
         # the estimator starts with a rough search, which gets finer with each pass
         for granularity in range(10):
 
@@ -129,7 +129,9 @@ class HillClimbingEstimator(Estimator):
             for candidate_theta in candidates:
                 self._evaluations += 1
 
-                current_ll = irt.log_likelihood(candidate_theta, response_vector, items[administered_items])
+                current_ll = irt.log_likelihood(
+                    candidate_theta, response_vector, items[administered_items]
+                )
 
                 # we search the function from left to right, so when the
                 # log-likelihood of the current theta is smaller than the one
@@ -156,7 +158,7 @@ class HillClimbingEstimator(Estimator):
 
         return self._getout(best_theta)
 
-    def _getout(self, theta:float)->float:
+    def _getout(self, theta: float) -> float:
         if self._verbose:
             print('{0} evaluations'.format(self._evaluations))
 

@@ -346,9 +346,8 @@ def test_progress(
         )
 
     # len(thetas) - 1 because the first item is made by the initializer
-    xs = list(range(len(thetas))) if thetas is not None else list(
-        range(len(administered_items[:, 1]))
-    )
+    xs = list(range(len(thetas))
+              ) if thetas is not None else list(range(len(administered_items[:, 1])))
 
     if thetas is not None:
         plt.plot(xs, thetas, label=r'$\hat{\theta}$')

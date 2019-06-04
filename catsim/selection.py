@@ -80,7 +80,15 @@ class MaxInfoSelector(Selector):
             return None
 
         # gets the indexes and information values from the items with r < rmax
-        valid_indexes_low_r = [index for index in valid_indexes if items[index, 4] < self._r_max]
+        valid_indexes_low_r = valid_indexes
+        if items.shape[1] < 5:
+            warn(
+                'This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0'
+            )
+        else:
+            valid_indexes_low_r = [
+                index for index in valid_indexes if items[index, 4] < self._r_max
+            ]
 
         # return the item with maximum information from the ones available
         if len(valid_indexes_low_r) > 0:
@@ -440,12 +448,17 @@ class ClusterSelector(Selector):
         ]
 
         # gets the indexes and information values from the items in the
-        # selected cluster with r < rmax that have not been
-        # administered
-        valid_indexes_low_r = [
-            index for index in valid_indexes
-            if items[index, 4] < self._r_max and index not in administered_items
-        ]
+        # selected cluster with r < rmax that have not been administered
+        valid_indexes_low_r = valid_indexes
+        if items.shape[1] < 5:
+            warn(
+                'This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0'
+            )
+        else:
+            valid_indexes_low_r = [
+                index for index in valid_indexes
+                if items[index, 4] < self._r_max and index not in administered_items
+            ]
 
         if len(valid_indexes_low_r) > 0:
             # return the item with maximum information from the ones available
@@ -595,7 +608,7 @@ class StratifiedSelector(FiniteSelector):
             ) == self._test_size - 1 else slices[len(administered_items) + 1]
         except IndexError:
             warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}"
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{1}\nTotal length of the test:\t{2}\nNumber of slices:\t{3}"
                 .format(self, len(administered_items), self._test_size, len(slices))
             )
             return None
@@ -917,14 +930,18 @@ class IntervalInfoSelector(Selector):
 
         # sort item indexes by the integral of the information function descending and remove indexes of administered items
         organized_items = [
-            x for x in (-numpy.array([
-                    quad(
-                        irt.inf,
-                        est_theta - self._interval,
-                        est_theta + self._interval,
-                        args=(item[0], item[1], item[2], item[3])
-                    )[0] for item in items]
-            )).argsort() if x not in administered_items
+            x for x in (
+                -numpy.array(
+                    [
+                        quad(
+                            irt.inf,
+                            est_theta - self._interval,
+                            est_theta + self._interval,
+                            args=(item[0], item[1], item[2], item[3])
+                        )[0] for item in items
+                    ]
+                )
+            ).argsort() if x not in administered_items
         ]
 
         if len(organized_items) == 0:
