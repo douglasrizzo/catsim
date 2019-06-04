@@ -13,8 +13,8 @@ else
 	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
 endif
 upload-test:
-	python setup.py register -r pypitest && python setup.py sdist upload -r pypitest
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 upload:
-	python setup.py register -r pypi && python setup.py sdist upload -r pypi
+	twine upload dist/*
 format: clean
 	-yapf -i -r .
