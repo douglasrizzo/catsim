@@ -917,14 +917,18 @@ class IntervalInfoSelector(Selector):
 
         # sort item indexes by the integral of the information function descending and remove indexes of administered items
         organized_items = [
-            x for x in (-numpy.array([
-                    quad(
-                        irt.inf,
-                        est_theta - self._interval,
-                        est_theta + self._interval,
-                        args=(item[0], item[1], item[2], item[3])
-                    )[0] for item in items]
-            )).argsort() if x not in administered_items
+            x for x in (
+                -numpy.array(
+                    [
+                        quad(
+                            irt.inf,
+                            est_theta - self._interval,
+                            est_theta + self._interval,
+                            args=(item[0], item[1], item[2], item[3])
+                        )[0] for item in items
+                    ]
+                )
+            ).argsort() if x not in administered_items
         ]
 
         if len(organized_items) == 0:
