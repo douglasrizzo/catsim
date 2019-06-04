@@ -80,7 +80,15 @@ class MaxInfoSelector(Selector):
             return None
 
         # gets the indexes and information values from the items with r < rmax
-        valid_indexes_low_r = [index for index in valid_indexes if items[index, 4] < self._r_max]
+        valid_indexes_low_r = valid_indexes
+        if items.shape[1] < 5:
+            warn(
+                'This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0'
+            )
+        else:
+            valid_indexes_low_r = [
+                index for index in valid_indexes if items[index, 4] < self._r_max
+            ]
 
         # return the item with maximum information from the ones available
         if len(valid_indexes_low_r) > 0:
@@ -440,12 +448,17 @@ class ClusterSelector(Selector):
         ]
 
         # gets the indexes and information values from the items in the
-        # selected cluster with r < rmax that have not been
-        # administered
-        valid_indexes_low_r = [
-            index for index in valid_indexes
-            if items[index, 4] < self._r_max and index not in administered_items
-        ]
+        # selected cluster with r < rmax that have not been administered
+        valid_indexes_low_r = valid_indexes
+        if items.shape[1] < 5:
+            warn(
+                'This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0'
+            )
+        else:
+            valid_indexes_low_r = [
+                index for index in valid_indexes
+                if items[index, 4] < self._r_max and index not in administered_items
+            ]
 
         if len(valid_indexes_low_r) > 0:
             # return the item with maximum information from the ones available
