@@ -595,7 +595,7 @@ class StratifiedSelector(FiniteSelector):
             ) == self._test_size - 1 else slices[len(administered_items) + 1]
         except IndexError:
             warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{0}\nTotal length of the test:\t{1}\nNumber of slices:\t{2}"
+                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{1}\nTotal length of the test:\t{2}\nNumber of slices:\t{3}"
                 .format(self, len(administered_items), self._test_size, len(slices))
             )
             return None
