@@ -17,20 +17,13 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -38,16 +31,21 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Initialization Methods – catsim.initialization" href="initialization.html" />
     <link rel="prev" title="catsim – Computerized Adaptive Testing Simulator" href="index.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -61,7 +59,7 @@
             
             
               <div class="version">
-                0.15.3
+                0.15.4
               </div>
             
           
@@ -190,7 +188,7 @@
 <p>Ordinary tests, hereon called linear tests, are applied using the orthodox paper and pencil strategy, in which tests are printed and all examinees are presented with the same items in the same order. One of the drawbacks of this methodology is that both individuals with high and low proficiencies must answer all items in order to have their proficiency estimated. An individual with high proficiency might get bored of answering the whole test if it only contains items that he or she considers easy; on the other hand, an individual of low proficiency might get frustrated if he is confronted by items considered and hard and might give up on the test or answer the items without paying attention.</p>
 <p>With these concerns in mind, a new paradigm in assessment emerged in the 70s. Initially named <em>tailored testing</em> in <a class="reference internal" href="references.html#lord77" id="id1">[Lord77]</a>, these were tests in which items were chosen to be presented to the examinee in real time, based on the examinee’s responses to previous items. The name was changed to computerized adaptive testing (CAT) due to the advances in techonology that facilitated the application of such a testing methodology using electronic devices, like computers and tablets.</p>
 <p>In a CAT, the examinee’s proficiency is evaluated after the response of each item. The new proficiency is then used to select a new item, closer to the examinee’s real proficiency. This method of test application has several advantages compared to the traditional paper-and-pencil method, since high-proficiency examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low proficiency level.</p>
-<p>Finally, the advent of CAT allowed for researchers to create their own variant ways of starting a test, choosing items, estimating proficiencies and stopping the test. Fortunately, the mathematical formalization provided by Item Response Theory (IRT) allows for tests to be computationally simulated and the different methodologies of applying a CAT to be compared under different constraints. Packages with these functionalities already exist in the R language (<a class="reference internal" href="references.html#magis12" id="id2">[Magis12]</a>) but not yet in Python. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was created to fill this gap, using the facilities of established scientific packages such as <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.16)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code>, as well as the object-oriented programming paradigm supported by Python to create a simple, comprehensive and user-extendable CAT simulation package.</p>
+<p>Finally, the advent of CAT allowed for researchers to create their own variant ways of starting a test, choosing items, estimating proficiencies and stopping the test. Fortunately, the mathematical formalization provided by Item Response Theory (IRT) allows for tests to be computationally simulated and the different methodologies of applying a CAT to be compared under different constraints. Packages with these functionalities already exist in the R language (<a class="reference internal" href="references.html#magis12" id="id2">[Magis12]</a>) but not yet in Python. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was created to fill this gap, using the facilities of established scientific packages such as <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.16)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/index.html#module-scipy" title="(in SciPy v1.3.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, as well as the object-oriented programming paradigm supported by Python to create a simple, comprehensive and user-extendable CAT simulation package.</p>
 <div class="section" id="item-response-theory-models">
 <h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Permalink to this headline">¶</a></h2>
 <p>As a CAT simulator, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory (<a class="reference internal" href="references.html#lord68" id="id3">[Lord68]</a> and <a class="reference internal" href="references.html#rasch66" id="id4">[Rasch66]</a>), a series of models created in the second part of the 20th century with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models’ parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals’ proficiencies by allocating them in proficiency scales, inspiring as well as justifying its use in adaptive testing.</p>
@@ -213,7 +211,7 @@
 <div class="math notranslate nohighlight">
 \[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.\]</div>
 <p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s proficiency.</p>
-<p>(<a class="reference external" href=".//introduction-1.py">Source code</a>)</p>
+<p>(<a class="reference external" href=".//introduction-1.py">Source code</a>, <a class="reference external" href=".//introduction-1.png">png</a>, <a class="reference external" href=".//introduction-1.hires.png">hires.png</a>, <a class="reference external" href=".//introduction-1.pdf">pdf</a>)</p>
 <div class="figure">
 <img alt="_images/introduction-1.png" src="_images/introduction-1.png" />
 </div>
@@ -449,7 +447,7 @@
         <a href="initialization.html" class="btn btn-neutral float-right" title="Initialization Methods – catsim.initialization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="catsim – Computerized Adaptive Testing Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="catsim – Computerized Adaptive Testing Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -475,16 +473,26 @@
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

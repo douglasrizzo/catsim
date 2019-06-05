@@ -17,20 +17,13 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
 
+  
+  
     
 
   
+
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -38,16 +31,21 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Computerized Adaptive Test-related Functions – catsim.cat" href="cat.html" />
     <link rel="prev" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
+
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+        <div class="wy-side-nav-search">
           
 
           
@@ -61,7 +59,7 @@
             
             
               <div class="version">
-                0.15.3
+                0.15.4
               </div>
             
           
@@ -412,7 +410,7 @@ value that maximizes the information function for all items is returned in a <ci
 <dl class="function">
 <dt id="catsim.irt.negative_log_likelihood">
 <code class="descclassname">catsim.irt.</code><code class="descname">negative_log_likelihood</code><span class="sig-paren">(</span><em>est_theta: float</em>, <em>*args</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#negative_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.negative_log_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.2.1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to minimize
+<dd><p>Function used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.3.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to minimize
 values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
 value, given a response vector and the parameters of the administered items. The value of
 <a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a> is simply the value of <span class="math notranslate nohighlight">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a> or, mathematically:</p>
@@ -624,7 +622,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
         <a href="cat.html" class="btn btn-neutral float-right" title="Computerized Adaptive Test-related Functions – catsim.cat" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="simulation.html" class="btn btn-neutral float-left" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="simulation.html" class="btn btn-neutral" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -650,16 +648,26 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
   
 
 
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
