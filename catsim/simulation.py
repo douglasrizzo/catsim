@@ -144,7 +144,7 @@ class Simulator:
 
         # adds a column for each item's exposure rate
         if items.shape[1] < 5:
-            items = numpy.append(items, numpy.zeros((items.shape[0])), axis=1)
+            items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
         self._duration = 0
         self._items = items
