@@ -10,6 +10,7 @@ from .simulation import Selector, FiniteSelector
 
 def _nearest(array: list, value) -> numpy.ndarray:
     """Returns the indexes of values in `array` that are closest to `value`
+    
     :param array: an array of numeric values
     :param value: a numerical value
     :return: an array containing the indexes of numbers in `array`,
