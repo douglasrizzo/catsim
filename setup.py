@@ -32,7 +32,7 @@ setup(
     long_description_content_type='text/x-rst',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
-    url='https://douglasrizzo.com.br/catsim',
+    url='https://douglasrizzo.github.io/catsim',
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
         'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm', 'numpy'

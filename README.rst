@@ -44,7 +44,7 @@ Important links
 ===============
 
 - Official source code repo: https://douglasrizzo.github.io/catsim
-- HTML documentation (stable release): http://douglasrizzo.com.br/catsim
+- HTML documentation (stable release): https://douglasrizzo.github.io/catsim
 - Issue tracker: https://github.com/douglasrizzo/catsim/issues
 
 Dependencies
