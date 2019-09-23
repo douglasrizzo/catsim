@@ -17,13 +17,21 @@
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -31,21 +39,16 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Computerized Adaptive Test-related Functions – catsim.cat" href="cat.html" />
     <link rel="prev" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -172,7 +175,7 @@
 <code class="descclassname">catsim.irt.</code><code class="descname">detect_model</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/irt.html#detect_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.detect_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detects which logistic model an item matrix fits into.
 :rtype: <code class="docutils literal notranslate"><span class="pre">int</span></code>
-:type items: <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>
+:type items: <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>
 :param items: an item matrix
 :return: an int between 1 and 4 denoting the logistic model of the given item matrix</p>
 </dd></dl>
@@ -182,7 +185,7 @@
 <code class="descclassname">catsim.irt.</code><code class="descname">icc</code><span class="sig-paren">(</span><em>theta: float</em>, <em>a: float</em>, <em>b: float</em>, <em>c: float = 0</em>, <em>d: float = 1</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/irt.html#icc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.icc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Item Response Theory four-parameter logistic function <a class="reference internal" href="references.html#ayala2009" id="id1">[Ayala2009]</a>, <a class="reference internal" href="references.html#magis13" id="id2">[Magis13]</a>:</p>
 <div class="math notranslate nohighlight">
-\[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{a_i(\theta-b_i)}}\]</div>
+\[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}\]</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -216,18 +219,18 @@ as <cite>theta</cite> (usually <span class="math notranslate nohighlight">\(-4 \
 <dl class="function">
 <dt id="catsim.irt.icc_hpc">
 <code class="descclassname">catsim.irt.</code><code class="descname">icc_hpc</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/catsim/irt.html#icc_hpc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.icc_hpc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> using <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.16)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the characteristic
+<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> using <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.17)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the characteristic
 function for all items in a <cite>numpy.ndarray</cite> are calculated at once.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the individual’s proficiency value.</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – array containing the four item parameters.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – array containing the four item parameters.</li>
 </ul>
 </td>
 </tr>
@@ -281,7 +284,7 @@ used to estimate the parameters, then <span class="math notranslate nohighlight"
 <dl class="function">
 <dt id="catsim.irt.inf_hpc">
 <code class="descclassname">catsim.irt.</code><code class="descname">inf_hpc</code><span class="sig-paren">(</span><em>theta: float</em>, <em>items: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#inf_hpc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.inf_hpc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.inf" title="catsim.irt.inf"><code class="xref py py-func docutils literal notranslate"><span class="pre">inf()</span></code></a> using <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.16)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the information
+<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.inf" title="catsim.irt.inf"><code class="xref py py-func docutils literal notranslate"><span class="pre">inf()</span></code></a> using <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.17)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the information
 value for all items in a <cite>numpy.ndarray</cite> are calculated at once.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -289,7 +292,7 @@ value for all items in a <cite>numpy.ndarray</cite> are calculated at once.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the individual’s proficiency value.</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – array containing the four item parameters.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – array containing the four item parameters.</li>
 </ul>
 </td>
 </tr>
@@ -329,7 +332,7 @@ Q_{ij}(\theta) \right\rbrace\]</div>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – estimated proficiency value.</li>
 <li><strong>response_vector</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a Boolean list containing the response vector.</li>
-<li><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a numpy array containing the parameters of the answered items.</li>
+<li><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a numpy array containing the parameters of the answered items.</li>
 </ul>
 </td>
 </tr>
@@ -393,13 +396,13 @@ gives maximum information</p>
 <dl class="function">
 <dt id="catsim.irt.max_info_hpc">
 <code class="descclassname">catsim.irt.</code><code class="descname">max_info_hpc</code><span class="sig-paren">(</span><em>items: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#max_info_hpc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.max_info_hpc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.max_info" title="catsim.irt.max_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">max_info()</span></code></a> using <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.16)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the theta
+<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.max_info" title="catsim.irt.max_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">max_info()</span></code></a> using <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/index.html#module-numpy" title="(in NumPy v1.17)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the theta
 value that maximizes the information function for all items is returned in a <cite>numpy.ndarray</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – array containing the four item parameters.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – array containing the four item parameters.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">an array of all theta values that maximize the information function of each item.</td>
 </tr>
@@ -463,9 +466,9 @@ items simulate the 3-parameter logistic model.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the item matrix.</td>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the item matrix.</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an nx4 item matrix conforming to the 4 parameter logistic model.</td>
 </tr>
@@ -490,7 +493,7 @@ sense, but usually the application of additional items solves this problem.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a proficiency value.</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
 </ul>
 </td>
 </tr>
@@ -518,7 +521,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a proficiency value.</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
 </ul>
 </td>
 </tr>
@@ -546,7 +549,7 @@ item information of <span class="math notranslate nohighlight">\(j\)</span> at a
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a proficiency value.</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
 </ul>
 </td>
 </tr>
@@ -571,7 +574,7 @@ pseudo-guessing parameter and column 4 represents the item upper asymptote.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the item matrix.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the item matrix.</li>
 <li><strong>raise_err</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether to raise an error in case the validation fails or
 just print the error message to standard output.</li>
 </ul>
@@ -598,7 +601,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
 </tr>
 <tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a proficiency value.</li>
-<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
+<li><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters.</li>
 </ul>
 </td>
 </tr>
@@ -622,7 +625,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
         <a href="cat.html" class="btn btn-neutral float-right" title="Computerized Adaptive Test-related Functions – catsim.cat" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="simulation.html" class="btn btn-neutral" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="simulation.html" class="btn btn-neutral float-left" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -648,26 +651,16 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

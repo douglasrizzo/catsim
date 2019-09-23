@@ -8,7 +8,7 @@ from numpy import pi
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
     """Item Response Theory four-parameter logistic function [Ayala2009]_, [Magis13]_:
 
-    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{a_i(\\theta-b_i)}}
+    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{-a_i(\\theta-b_i)}}
 
     :param theta: the individual's proficiency value. This parameter value has
                   no boundary, but if a distribution of the form :math:`N(0, 1)` was

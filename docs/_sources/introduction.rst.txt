@@ -31,7 +31,7 @@ For a set of items :math:`I`, when :math:`\forall i \in I, c_i = 0`, the three-p
 
 Under IRT, the probability of an examinee with a given :math:`\hat\theta` value to answer item :math:`i` correctly, given the item parameters, is given by ([Ayala2009]_, [Magis13]_)
 
-.. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{a_i(\theta-b_i)}}.
+.. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.
 
 The information this item gives is calculated as ([Ayala2009]_, [Magis13]_)
 
@@ -127,7 +127,7 @@ Item selection methods are diverse. The most famous method is to choose the item
 
 In :py:mod:`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of :math:`p` is given by the IRT logistic model characteristic function (:py:func:`catsim.irt.icc`), given by:
 
-.. math:: P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{a_i(\theta-b_i)}}
+.. math:: P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{-a_i(\theta-b_i)}}
 
 In :py:mod:`catsim`, item selection procedures can be found in the :py:mod:`catsim.selection` module.
 
