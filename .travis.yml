@@ -1,23 +1,21 @@
 language: python
 python:
-- '3.4'
 - '3.5'
 - '3.6'
-- '3.7-dev'
+- '3.7'
+- '3.8-dev'
 addons:
   apt:
     packages:
-      - graphviz
+    - graphviz
+before_install:
+- export MPLBACKEND=Agg
 install:
 - sudo apt-get update
 - python --version
 - which python
 - pip install .[testing]
 - if [ '$TRAVIS_PYTHON_VERSION' = '3.6']; then pip install .[docs]; fi
-before_script: # configure a headless display to test plot generation
-- "export DISPLAY=:99.0"
-- "sh -e /etc/init.d/xvfb start"
-- sleep 3 # give xvfb some time to start
 script: make tests
 after_success:
 - coveralls
