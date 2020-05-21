@@ -61,7 +61,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'catsim'
-copyright = '2018, Douglas De Rizzo Meneghetti'
+copyright = '2020, Douglas De Rizzo Meneghetti'
 author = 'Douglas De Rizzo Meneghetti'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -132,7 +132,12 @@ html_theme = 'sphinx_rtd_theme'
 # html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = []
+# html_theme_path = [edx_theme.get_html_theme_path()]
+html_favicon = 'logo.svg'
+# html_favicon = os.path.join(html_theme_path[0], 'edx_theme', 'static', 'css', 'favicon.ico')
+
+# The name of the Pygments (syntax highlighting) style to use.
+# pygments_style = 'fruity'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -143,7 +148,7 @@ html_title = None
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = None
+html_logo = 'logo.svg'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
