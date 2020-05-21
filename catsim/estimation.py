@@ -92,9 +92,10 @@ class HillClimbingEstimator(Estimator):
         if len(set(response_vector)) == 1 and self._dodd:
             return cat.dodd(est_theta, items, response_vector[-1])
 
-        if set(response_vector) == 1:
+        # TODO may need to check if response_vector is empty
+        if all(response_vector):
             return float('inf')
-        elif set(response_vector) == 0:
+        elif not any(response_vector):
             return float('-inf')
 
         if len(administered_items) > 0:
