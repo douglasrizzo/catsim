@@ -1,8 +1,3 @@
-<p align="center">
-  <img src="sphinx/logo_text.svg?sanitize=true" alt="Logo" />
-</p>
-
-------------------------------------------------------------------------
 
 [![Build Status](https://travis-ci.org/douglasrizzo/catsim.svg?branch=master)](https://travis-ci.org/douglasrizzo/catsim)
 [![Test Coverage](https://coveralls.io/repos/github/douglasrizzo/catsim/badge.svg?branch=master)](https://coveralls.io/github/douglasrizzo/catsim?branch=master)

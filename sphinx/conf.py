@@ -23,6 +23,12 @@ sys.path.insert(0, os.path.abspath('..'))
 
 from catsim import __version__
 
+filenames = ['readme_head.md','readme_body.md']
+with open('../README.md', 'w') as outfile:
+    for fname in filenames:
+        with open(fname) as infile:
+            outfile.write(infile.read())
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
