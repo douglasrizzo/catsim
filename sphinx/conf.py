@@ -38,10 +38,9 @@ with open('../README.md', 'w') as outfile:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.intersphinx', 'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.mathjax',
-    'sphinx.ext.autosummary', 'sphinx.ext.viewcode', 'sphinx.ext.graphviz',
-    'sphinx.ext.inheritance_diagram', 'sphinx_autodoc_annotation',
-    'matplotlib.sphinxext.plot_directive', 'numpydoc'
+    'matplotlib.sphinxext.plot_directive', 'sphinx.ext.autodoc', 'sphinx.ext.doctest',
+    'sphinx.ext.inheritance_diagram', 'sphinx.ext.intersphinx', 'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode', 'numpydoc', 'sphinx_rtd_theme', 'm2r'
 ]
 
 intersphinx_mapping = {
@@ -56,8 +55,7 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'

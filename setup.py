@@ -40,7 +40,7 @@ setup(
     extras_require=dict(
         testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls'],
         docs=[
-            'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme',
+            'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'm2r',
             'bibtex-pygments-lexer', 'matplotlib'
         ]
     ),
