@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Miscellaneous Plotting Functions – catsim.plot" href="plot.html" />
     <link rel="prev" title="Item Response Theory Functions – catsim.irt" href="irt.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -177,8 +185,8 @@ The value is calculated by:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the true proficiency values</p></li>
-<li><p><strong>predicted</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the estimated proficiency values</p></li>
+<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true proficiency values</p></li>
+<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated proficiency values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -198,21 +206,18 @@ when the response vector is composed entirely of 1s or 0s.</p>
 \hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} &amp; \text{if }  X_t = 0
 \end{array} \right\rbrace\end{split}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the initial proficiency level</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a numpy array containing the parameters of the items in the
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> – the initial proficiency level</p></li>
+<li><p><strong>items</strong> – a numpy array containing the parameters of the items in the
 database. This is necessary to capture the maximum and minimum
 difficulty levels necessary for the method.</p></li>
-<li><p><strong>correct</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – a boolean value informing whether or not the examinee
+<li><p><strong>correct</strong> – a boolean value informing whether or not the examinee
 correctly answered the current item.</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a new estimation for <span class="math notranslate nohighlight">\(\theta\)</span></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a new estimation for <span class="math notranslate nohighlight">\(\theta\)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -232,10 +237,10 @@ real-world parameters, as proposed by <a class="reference internal" href="refere
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – how many items are to be generated</p></li>
-<li><p><strong>itemtype</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – either <code class="docutils literal notranslate"><span class="pre">1PL</span></code>, <code class="docutils literal notranslate"><span class="pre">2PL</span></code>, <code class="docutils literal notranslate"><span class="pre">3PL</span></code> or <code class="docutils literal notranslate"><span class="pre">4PL</span></code> for the one-, two-,
+<li><p><strong>n</strong> – how many items are to be generated</p></li>
+<li><p><strong>itemtype</strong> – either <code class="docutils literal notranslate"><span class="pre">1PL</span></code>, <code class="docutils literal notranslate"><span class="pre">2PL</span></code>, <code class="docutils literal notranslate"><span class="pre">3PL</span></code> or <code class="docutils literal notranslate"><span class="pre">4PL</span></code> for the one-, two-,
 three- or four-parameter logistic model</p></li>
-<li><p><strong>corr</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the correlation between item discrimination and difficulty. If
+<li><p><strong>corr</strong> – the correlation between item discrimination and difficulty. If
 <code class="docutils literal notranslate"><span class="pre">itemtype</span> <span class="pre">==</span> <span class="pre">'1PL'</span></code>, it is ignored.</p></li>
 </ul>
 </dd>
@@ -243,7 +248,7 @@ three- or four-parameter logistic model</p></li>
 <dd class="field-even"><p>an <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">x</span> <span class="pre">4</span></code> numerical matrix containing item parameters</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)">numpy.ndarray</a></p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
@@ -268,8 +273,8 @@ The value is calculated by:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the true proficiency values</p></li>
-<li><p><strong>predicted</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the estimated proficiency values</p></li>
+<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true proficiency values</p></li>
+<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated proficiency values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -286,18 +291,15 @@ The value is calculated by:</p>
 \[T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}\]</div>
 <p>If, for example <span class="math notranslate nohighlight">\(T = 0.5\)</span>, it means that the tests of two random examinees have 50% of equal items.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>usages</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a list or numpy.ndarray containing the number of
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>usages</strong> – a list or numpy.ndarray containing the number of
 times each item was used in the tests.</p></li>
-<li><p><strong>test_size</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – an integer informing the number of items in a test.</p></li>
+<li><p><strong>test_size</strong> – an integer informing the number of items in a test.</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>test overlap rate.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>test overlap rate.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -315,8 +317,8 @@ The value is calculated by:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the true proficiency values</p></li>
-<li><p><strong>predicted</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list or 1-D numpy array containing the estimated proficiency values</p></li>
+<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true proficiency values</p></li>
+<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated proficiency values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -338,7 +340,7 @@ The value is calculated by:</p>
         <a href="plot.html" class="btn btn-neutral float-right" title="Miscellaneous Plotting Functions – catsim.plot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="irt.html" class="btn btn-neutral" title="Item Response Theory Functions – catsim.irt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="irt.html" class="btn btn-neutral float-left" title="Item Response Theory Functions – catsim.irt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -347,7 +349,7 @@ The value is calculated by:</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -364,27 +366,16 @@ The value is calculated by:</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

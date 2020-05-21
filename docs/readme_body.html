@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>What’s a CAT</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.15.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>What’s a CAT</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/readme_body.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <a class="reference external image-reference" href="https://travis-ci.org/douglasrizzo/catsim"><img alt="Build Status" src="https://travis-ci.org/douglasrizzo/catsim.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://coveralls.io/github/douglasrizzo/catsim?branch=master"><img alt="Test Coverage" src="https://coveralls.io/repos/github/douglasrizzo/catsim/badge.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://badge.fury.io/py/catsim"><img alt="Latest Version" src="https://badge.fury.io/py/catsim.svg" /></a>
+<a class="reference external image-reference" href="https://landscape.io/github/douglasrizzo/catsim/master"><img alt="Code Health" src="https://landscape.io/github/douglasrizzo/catsim/master/landscape.svg?style=flat" /></a>
+<a class="reference external image-reference" href="https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master"><img alt="Requirements Status" src="https://requires.io/github/douglasrizzo/catsim/requirements.svg?branch=master" /></a>
+<a class="reference external image-reference" href="http://dx.doi.org/10.5281/zenodo.46420"><img alt="Digital Object Identifier" src="https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg" /></a>
+<p><strong>catsim</strong> is a Python package for computerized adaptive testing (CAT)
+simulations. It provides multiple methods for</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">test initialization</a> (selecting the initial proficiency of the examinees)</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/selection.html">item selection</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">proficiency estimation</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/stopping.html">test stopping</a></p></li>
+</ul>
+<p>These methods can either be used in a standalone fashion
+<a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#autonomous-usage">[1]</a>
+to power other software or be used with <em>catsim</em> to simulate the
+application of computerized adaptive tests
+<a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#running-simulations">[2]</a>,
+given a sample of examinees, represented by their proficiency levels,
+and an item bank, represented by their parameters according to some
+<a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory
+model</a>.</p>
+<div class="section" id="what-s-a-cat">
+<h1>What’s a CAT<a class="headerlink" href="#what-s-a-cat" title="Permalink to this headline">¶</a></h1>
+<p>Computerized adaptive tests are educational evaluations, usually taken
+by examinees in a computer or some other digital means, in which the
+examinee’s proficiency is evaluated after the response of each item.
+The new proficiency is then used to select a new item, closer to the
+examinee’s real proficiency. This method of test application has
+several advantages compared to the traditional paper-and-pencil method
+or even linear tests applied electronically, since high-proficiency
+examinees are not required to answer all the easy items in a test,
+answering only the items that actually give some information regarding
+his or hers true knowledge of the subject at matter. A similar, but
+inverse effect happens for those examinees of low proficiency level.</p>
+<p>More information is available <a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html">in the
+docs</a> and over
+at
+<a class="reference external" href="https://en.wikipedia.org/wiki/Computerized_adaptive_testing">Wikipedia</a>.</p>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Install it using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim</span></code>.</p>
+</div>
+<div class="section" id="basic-usage">
+<h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
+<ol class="arabic simple">
+<li><p>Have an <a class="reference external" href="https://douglasrizzo.github.io/catsim/item_matrix.html">item matrix</a>;</p></li>
+<li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
+<li><p>Create an <a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">initializer</a>,
+an item <a class="reference external" href="https://douglasrizzo.github.io/catsim/selection.html">selector</a>, a
+proficiency <a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">estimator</a>
+and a <a class="reference external" href="https://douglasrizzo.github.io/catsim/stopping.html">stopping criterion</a>;</p></li>
+<li><p>Pass them to a <a class="reference external" href="https://douglasrizzo.github.io/catsim/simulation.html">simulator</a>
+and start the simulation.</p></li>
+<li><p>Access the simulator’s properties to get specifics of the results;</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/plot.html">Plot</a> your results.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="kn">import</span> <span class="n">RandomInitializer</span>
+<span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="kn">from</span> <span class="nn">catsim.estimation</span> <span class="kn">import</span> <span class="n">HillClimbingEstimator</span>
+<span class="kn">from</span> <span class="nn">catsim.stopping</span> <span class="kn">import</span> <span class="n">MaxItemStopper</span>
+<span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="kn">import</span> <span class="n">Simulator</span>
+<span class="kn">from</span> <span class="nn">catsim.cat</span> <span class="kn">import</span> <span class="n">generate_item_bank</span>
+<span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
+<span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">Simulator</span><span class="p">(</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+<p>All dependencies are listed on setup.py and should be installed
+automatically.</p>
+<p>To run the tests, you’ll need to install the testing requirements
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[testing]</span></code>.</p>
+<p>To generate the documentation, Sphinx and its dependencies are needed.</p>
+</div>
+<div class="section" id="compatibility">
+<h1>Compatibility<a class="headerlink" href="#compatibility" title="Permalink to this headline">¶</a></h1>
+<p>Since the beginning, <em>catsim</em> has only been compatible with Python 3.4
+upwards.</p>
+</div>
+<div class="section" id="important-links">
+<h1>Important links<a class="headerlink" href="#important-links" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>Official source code repo: <a class="reference external" href="https://github.com/douglasrizzo/catsim">https://github.com/douglasrizzo/catsim</a></p></li>
+<li><p>HTML documentation (stable release):
+<a class="reference external" href="https://douglasrizzo.github.io/catsim">https://douglasrizzo.github.io/catsim</a></p></li>
+<li><p>Issue tracker: <a class="reference external" href="https://github.com/douglasrizzo/catsim/issues">https://github.com/douglasrizzo/catsim/issues</a></p></li>
+</ul>
+</div>
+<div class="section" id="citing-catsim">
+<h1>Citing catsim<a class="headerlink" href="#citing-catsim" title="Permalink to this headline">¶</a></h1>
+<p>You can cite the package using the following bibtex entry:</p>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">catsim</span><span class="p">,</span>
+    <span class="na">author</span> <span class="p">=</span> <span class="s">{{De Rizzo Meneghetti}, Douglas and Aquino Junior, Plinio Thomaz}</span><span class="p">,</span>
+        <span class="na">title</span> <span class="p">=</span> <span class="s">&quot;{Application and Simulation of Computerized Adaptive Tests Through the Package catsim}&quot;</span><span class="p">,</span>
+    <span class="na">journal</span> <span class="p">=</span> <span class="s">{arXiv e-prints}</span><span class="p">,</span>
+    <span class="na">keywords</span> <span class="p">=</span> <span class="s">{Statistics - Applications}</span><span class="p">,</span>
+        <span class="na">year</span> <span class="p">=</span> <span class="m">2017</span><span class="p">,</span>
+        <span class="na">month</span> <span class="p">=</span> <span class="nv">jul</span><span class="p">,</span>
+        <span class="na">eid</span> <span class="p">=</span> <span class="s">{arXiv:1707.03012}</span><span class="p">,</span>
+        <span class="na">pages</span> <span class="p">=</span> <span class="s">{arXiv:1707.03012}</span><span class="p">,</span>
+<span class="na">archivePrefix</span> <span class="p">=</span> <span class="s">{arXiv}</span><span class="p">,</span>
+    <span class="na">eprint</span> <span class="p">=</span> <span class="s">{1707.03012}</span><span class="p">,</span>
+<span class="na">primaryClass</span> <span class="p">=</span> <span class="s">{stat.AP}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

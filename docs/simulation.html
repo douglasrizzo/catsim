@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Item Response Theory Functions – catsim.irt" href="irt.html" />
     <link rel="prev" title="Stopping Criteria – catsim.stopping" href="stopping.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -173,20 +181,17 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class for proficiency estimators</p>
 <dl class="method">
 <dt id="catsim.simulation.Estimator.estimate">
-<em class="property">abstract </em><code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Estimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator.estimate" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Estimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</dt><dd><p>test for the given examinee.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> – index of the current examinee in the simulator</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – index of the current examinee in the simulator</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -205,17 +210,14 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class for CAT initializers</p>
 <dl class="method">
 <dt id="catsim.simulation.Initializer.initialize">
-<em class="property">abstract </em><code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Initializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer.initialize" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/simulation.html#Initializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selects an examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> – the index of the current examinee</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -228,17 +230,14 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class representing a CAT item selector.</p>
 <dl class="method">
 <dt id="catsim.simulation.Selector.select">
-<em class="property">abstract </em><code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/simulation.html#Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Selector.select" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/simulation.html#Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Selector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> – the index of the current examinee in the simulator.</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items to be presented.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items to be presented.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -251,7 +250,7 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class representing one of the Simulator components that will receive a reference back to it.</p>
 <dl class="method">
 <dt id="catsim.simulation.Simulable.preprocess">
-<code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulable.preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulable.preprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulable.preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulable.preprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override this method to initialize any static values the <cite>Simulable</cite> might use for the duration of the
 simulation. <cite>preprocess</cite> is called after a value is set for the <cite>simulator</cite> property. If a new value if
 attributed to <cite>simulator</cite>, this method is called again, guaranteeing that internal properties of the
@@ -355,26 +354,26 @@ called. For more information on the root mean-squared error of estimation, see
 
 <dl class="method">
 <dt id="catsim.simulation.Simulator.simulate">
-<code class="sig-name descname">simulate</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">initializer: catsim.simulation.Initializer = None</em>, <em class="sig-param">selector: catsim.simulation.Selector = None</em>, <em class="sig-param">estimator: catsim.simulation.Estimator = None</em>, <em class="sig-param">stopper: catsim.simulation.Stopper = None</em>, <em class="sig-param">verbose: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator.simulate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">simulate</code><span class="sig-paren">(</span><em class="sig-param">initializer: catsim.simulation.Initializer = None</em>, <em class="sig-param">selector: catsim.simulation.Selector = None</em>, <em class="sig-param">estimator: catsim.simulation.Estimator = None</em>, <em class="sig-param">stopper: catsim.simulation.Stopper = None</em>, <em class="sig-param">verbose: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulates a computerized adaptive testing application to one or more examinees</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>initializer</strong> (<a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code></a>) – an initializer that selects examinees <span class="math notranslate nohighlight">\(\theta_0\)</span></p></li>
-<li><p><strong>selector</strong> (<a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a>) – a selector that selects new items to be presented to examinees</p></li>
-<li><p><strong>estimator</strong> (<a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimator</span></code></a>) – an estimator that reestimates examinees proficiencies after each item is applied</p></li>
-<li><p><strong>stopper</strong> (<a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code></a>) – an object with a stopping criteria for the test</p></li>
-<li><p><strong>verbose</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether to periodically print a message regarding the progress of the simulation.
+<li><p><strong>initializer</strong> – an initializer that selects examinees <span class="math notranslate nohighlight">\(\theta_0\)</span></p></li>
+<li><p><strong>selector</strong> – a selector that selects new items to be presented to examinees</p></li>
+<li><p><strong>estimator</strong> – an estimator that reestimates examinees proficiencies after each item is applied</p></li>
+<li><p><strong>stopper</strong> – an object with a stopping criteria for the test</p></li>
+<li><p><strong>verbose</strong> – whether to periodically print a message regarding the progress of the simulation.
 Good for longer simulations.</p></li>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="kn">import</span> <span class="n">RandomInitializer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="kn">import</span> <span class="n">MaxInfoSelector</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.estimation</span> <span class="kn">import</span> <span class="n">HillClimbingEstimator</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.stopping</span> <span class="kn">import</span> <span class="n">MaxItemStopper</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="kn">import</span> <span class="n">Simulator</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.cat</span> <span class="kn">import</span> <span class="n">generate_item_bank</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="k">import</span> <span class="n">RandomInitializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="k">import</span> <span class="n">MaxInfoSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.estimation</span> <span class="k">import</span> <span class="n">HillClimbingEstimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.stopping</span> <span class="k">import</span> <span class="n">MaxItemStopper</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="n">Simulator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">catsim.cat</span> <span class="k">import</span> <span class="n">generate_item_bank</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
@@ -392,17 +391,14 @@ Good for longer simulations.</p></li>
 <dd><p>Base class for CAT stop criterion</p>
 <dl class="method">
 <dt id="catsim.simulation.Stopper.stop">
-<em class="property">abstract </em><code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/simulation.html#Stopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Stopper.stop" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">index: int</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/simulation.html#Stopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Stopper.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the test reached its stopping criterion for the given user</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> – the index of the current examinee</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
 </dd>
 </dl>
 </dd></dl>
@@ -422,7 +418,7 @@ Good for longer simulations.</p></li>
         <a href="irt.html" class="btn btn-neutral float-right" title="Item Response Theory Functions – catsim.irt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="stopping.html" class="btn btn-neutral" title="Stopping Criteria – catsim.stopping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="stopping.html" class="btn btn-neutral float-left" title="Stopping Criteria – catsim.stopping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -431,7 +427,7 @@ Good for longer simulations.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -448,27 +444,16 @@ Good for longer simulations.</p></li>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

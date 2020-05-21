@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Estimation Methods – catsim.estimation" href="estimation.html" />
     <link rel="prev" title="Initialization Methods – catsim.initialization" href="initialization.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -235,7 +243,7 @@ to create the correct number of strata.</p>
 <p>Cluster-based Item Selection Method.</p>
 <blockquote>
 <div><dl class="citation">
-<dt class="label" id="r58465f2357d7-men15"><span class="brackets">R58465f2357d7-Men15</span></dt>
+<dt class="label" id="r58465f2357d7-men15"><span class="brackets">Men15</span></dt>
 <dd><p>Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes
 adaptativos informatizados baseada em agrupamento por similaridade (Mestrado).
 Centro Universitário da FEI. Retrieved from
@@ -274,8 +282,8 @@ with smallest <span class="math notranslate nohighlight">\(r\)</span> value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – </p></li>
-<li><p><strong>c</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing clustering memeberships.</p></li>
+<li><p><strong>items</strong> – </p></li>
+<li><p><strong>c</strong> – a list containing clustering memeberships.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -287,23 +295,20 @@ Lines are clusters, columns are parameters.</p>
 
 <dl class="method">
 <dt id="catsim.selection.ClusterSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -313,19 +318,16 @@ Lines are clusters, columns are parameters.</p>
 <em class="property">static </em><code class="sig-name descname">sum_cluster_infos</code><span class="sig-paren">(</span><em class="sig-param">theta: float</em>, <em class="sig-param">items: numpy.ndarray</em>, <em class="sig-param">clusters: list</em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sum of item information values, separated by cluster</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>clusters</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing item cluster memberships, represented by integers</p></li>
+<li><p><strong>clusters</strong> – a list containing item cluster memberships, represented by integers</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>array containing the sum of item information values for each cluster</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array containing the sum of item information values for each cluster</p>
 </dd>
 </dl>
 </dd></dl>
@@ -337,9 +339,9 @@ Lines are clusters, columns are parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>c</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing clustering memeberships.</p></li>
+<li><p><strong>c</strong> – a list containing clustering memeberships.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -354,19 +356,16 @@ Lines are clusters, columns are parameters.</p>
 <dd><p>Returns the weighted sum of item information values, separated by cluster.
 The weight is the number of items in each cluster.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>theta</strong> – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>clusters</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing item cluster memberships, represented by integers</p></li>
+<li><p><strong>clusters</strong> – a list containing item cluster memberships, represented by integers</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>array containing the sum of item information values for each cluster,
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array containing the sum of item information values for each cluster,
 divided by the number of items in each cluster</p>
 </dd>
 </dl>
@@ -391,23 +390,20 @@ integral is calculated from <span class="math notranslate nohighlight">\([-\inft
 </dl>
 <dl class="method">
 <dt id="catsim.selection.IntervalInfoSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#IntervalInfoSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#IntervalInfoSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -427,20 +423,17 @@ integral is calculated from <span class="math notranslate nohighlight">\([-\inft
 </dl>
 <dl class="method">
 <dt id="catsim.selection.LinearSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#LinearSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.LinearSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#LinearSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.LinearSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -486,23 +479,20 @@ create the correct number of strata.</p>
 </dl>
 <dl class="method">
 <dt id="catsim.selection.MaxInfoSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#MaxInfoSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#MaxInfoSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -544,22 +534,19 @@ create the correct number of strata.</p>
 </dl>
 <dl class="method">
 <dt id="catsim.selection.RandomSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#RandomSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#RandomSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -582,23 +569,20 @@ randomly selecting one of them.</p>
 </dl>
 <dl class="method">
 <dt id="catsim.selection.RandomesqueSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -611,7 +595,7 @@ randomly selecting one of them.</p>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.FiniteSelector</span></code></a></p>
 <dl class="method">
 <dt id="catsim.selection.StratifiedSelector.preprocess">
-<code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.preprocess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.preprocess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override this method to initialize any static values the <cite>Simulable</cite> might use for the duration of the
 simulation. <cite>preprocess</cite> is called after a value is set for the <cite>simulator</cite> property. If a new value if
 attributed to <cite>simulator</cite>, this method is called again, guaranteeing that internal properties of the
@@ -620,21 +604,18 @@ attributed to <cite>simulator</cite>, this method is called again, guaranteeing 
 
 <dl class="method">
 <dt id="catsim.selection.StratifiedSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more strata to get items from.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more strata to get items from.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -662,23 +643,20 @@ this parameter to set the bin size</p>
 </dl>
 <dl class="method">
 <dt id="catsim.selection.The54321Selector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#The54321Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#The54321Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -692,23 +670,20 @@ this parameter to set the bin size</p>
 <p>Selector that returns the item whose difficulty parameter is closest to the examinee’s proficiency</p>
 <dl class="method">
 <dt id="catsim.selection.UrrySelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#UrrySelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.UrrySelector.select" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="_modules/catsim/selection.html#UrrySelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.UrrySelector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee in the simulator.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -728,7 +703,7 @@ this parameter to set the bin size</p>
         <a href="estimation.html" class="btn btn-neutral float-right" title="Estimation Methods – catsim.estimation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="initialization.html" class="btn btn-neutral" title="Initialization Methods – catsim.initialization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="initialization.html" class="btn btn-neutral float-left" title="Initialization Methods – catsim.initialization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -737,7 +712,7 @@ this parameter to set the bin size</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -754,27 +729,16 @@ this parameter to set the bin size</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

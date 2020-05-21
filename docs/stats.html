@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Contributing" href="contributing.html" />
     <link rel="prev" title="Miscellaneous Plotting Functions – catsim.plot" href="plot.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -168,7 +176,7 @@
 <dl class="function">
 <dt id="catsim.stats.bincount">
 <code class="sig-prename descclassname">catsim.stats.</code><code class="sig-name descname">bincount</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stats.html#bincount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stats.bincount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count the number of occurrences from each integer in a list or 1-D <a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.
+<dd><p>Count the number of occurrences from each integer in a list or 1-D <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.18)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>.
 If there are gaps between the numbers, then the numbers in those gaps are given a 0 value of occurrences.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">bincount</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span>
 <span class="go">array([1, 0, 0, 0, 1, 3, 1, 1, 0, 1], dtype=int32)</span>
@@ -184,17 +192,14 @@ The coefficient of variation is given by the standard deviation divided by the m
 <div class="math notranslate nohighlight">
 \[\frac{\sigma}{\mu}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the data matrix</p></li>
-<li><p><strong>axis</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – <cite>0</cite> to calculate for columns, <cite>1</cite> for rows</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – the data matrix</p></li>
+<li><p><strong>axis</strong> – <cite>0</cite> to calculate for columns, <cite>1</cite> for rows</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a vector containing the coefficient of variations along the chosen axis</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a vector containing the coefficient of variations along the chosen axis</p>
 </dd>
 </dl>
 </dd></dl>
@@ -206,12 +211,12 @@ The coefficient of variation is given by the standard deviation divided by the m
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a data matrix</p></li>
-<li><p><strong>minus_one</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – subtract one from the total number of observations</p></li>
+<li><p><strong>x</strong> – a data matrix</p></li>
+<li><p><strong>minus_one</strong> – subtract one from the total number of observations</p></li>
 </ul>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_iris</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="k">import</span> <span class="n">load_iris</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">load_iris</span><span class="p">()[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">covariance</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">)))</span>
 <span class="go">True</span>
@@ -233,14 +238,11 @@ _{{j=1}}^{n}({\mathbf{x}}_{j}-\overline
 _{{j=1}}^{n}{\mathbf {x}}_{j}{\mathbf {x}}_{j}^{T}\right)-n\overline
 {{\mathbf {x}}}\overline {{\mathbf {x}}}^{T}\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – the data matrix</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>data</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the data matrix</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the scatter matrix of the given data matrix</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the scatter matrix of the given data matrix</p>
 </dd>
 </dl>
 </dd></dl>
@@ -258,7 +260,7 @@ _{{j=1}}^{n}{\mathbf {x}}_{j}{\mathbf {x}}_{j}^{T}\right)-n\overline
         <a href="contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="plot.html" class="btn btn-neutral" title="Miscellaneous Plotting Functions – catsim.plot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="plot.html" class="btn btn-neutral float-left" title="Miscellaneous Plotting Functions – catsim.plot" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -267,7 +269,7 @@ _{{j=1}}^{n}{\mathbf {x}}_{j}{\mathbf {x}}_{j}^{T}\right)-n\overline
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -284,27 +286,16 @@ _{{j=1}}^{n}{\mathbf {x}}_{j}{\mathbf {x}}_{j}^{T}\right)-n\overline
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

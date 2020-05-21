@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Miscellaneous Statistical Functions – catsim.stats" href="stats.html" />
     <link rel="prev" title="Computerized Adaptive Test-related Functions – catsim.cat" href="cat.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -176,10 +184,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – the item matrix</p></li>
-<li><p><strong>title</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – the scatter plot title</p></li>
-<li><p><strong>filepath</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – the path to save the scatter plot</p></li>
-<li><p><strong>show</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether the generated plot is to be shown</p></li>
+<li><p><strong>items</strong> – the item matrix</p></li>
+<li><p><strong>title</strong> – the scatter plot title</p></li>
+<li><p><strong>filepath</strong> – the path to save the scatter plot</p></li>
+<li><p><strong>show</strong> – whether the generated plot is to be shown</p></li>
 </ul>
 </dd>
 </dl>
@@ -207,16 +215,16 @@ since each curve has a different scale.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – item discrimination parameter</p></li>
-<li><p><strong>b</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – item difficulty parameter</p></li>
-<li><p><strong>c</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – item pseudo-guessing parameter</p></li>
-<li><p><strong>d</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – item upper asymptote</p></li>
-<li><p><strong>title</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – plot title</p></li>
-<li><p><strong>ptype</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – ‘icc’ for the item characteristic curve, ‘iic’ for the item
+<li><p><strong>a</strong> – item discrimination parameter</p></li>
+<li><p><strong>b</strong> – item difficulty parameter</p></li>
+<li><p><strong>c</strong> – item pseudo-guessing parameter</p></li>
+<li><p><strong>d</strong> – item upper asymptote</p></li>
+<li><p><strong>title</strong> – plot title</p></li>
+<li><p><strong>ptype</strong> – ‘icc’ for the item characteristic curve, ‘iic’ for the item
 information curve or ‘both’ for both curves in the same plot</p></li>
-<li><p><strong>max_info</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether the point of maximum information should be shown in the plot</p></li>
-<li><p><strong>filepath</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – saves the plot in the given path</p></li>
-<li><p><strong>show</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether the generated plot is to be shown</p></li>
+<li><p><strong>max_info</strong> – whether the point of maximum information should be shown in the plot</p></li>
+<li><p><strong>filepath</strong> – saves the plot in the given path</p></li>
+<li><p><strong>show</strong> – whether the generated plot is to be shown</p></li>
 </ul>
 </dd>
 </dl>
@@ -239,16 +247,16 @@ the <cite>y</cite> axis represents their exposure rates. an examinee’s test pr
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>title</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – the plot title.</p></li>
-<li><p><strong>simulator</strong> (<a class="reference internal" href="simulation.html#catsim.simulation.Simulator" title="catsim.simulation.Simulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code></a>) – a simulator which has already simulated a series of CATs, containing estimations to the examinees’
+<li><p><strong>title</strong> – the plot title.</p></li>
+<li><p><strong>simulator</strong> – a simulator which has already simulated a series of CATs, containing estimations to the examinees’
 proficiencies and a list of administered items for each examinee.</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – an item matrix containing item parameters and their exposure rate in the last column.</p></li>
-<li><p><strong>par</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – a string representing one of the item parameters to order the items by and use on the x axis, or <cite>None</cite>
+<li><p><strong>items</strong> – an item matrix containing item parameters and their exposure rate in the last column.</p></li>
+<li><p><strong>par</strong> – a string representing one of the item parameters to order the items by and use on the x axis, or <cite>None</cite>
 to use the default order of the item bank. Please note that, if <cite>hist=True</cite>, no sorting will be done.</p></li>
-<li><p><strong>hist</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – if True, plots a histogram of item exposures. Otherwise, plots a dotted line chart of the exposures,
+<li><p><strong>hist</strong> – if True, plots a histogram of item exposures. Otherwise, plots a dotted line chart of the exposures,
 sorted in the x-axis by the parameter chosen in <cite>par</cite>.</p></li>
-<li><p><strong>filepath</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – the path to save the plot.</p></li>
-<li><p><strong>show</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether the generated plot is to be shown.</p></li>
+<li><p><strong>filepath</strong> – the path to save the plot.</p></li>
+<li><p><strong>show</strong> – whether the generated plot is to be shown.</p></li>
 </ul>
 </dd>
 </dl>
@@ -275,28 +283,28 @@ informative after new estimates are done.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>title</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – the plot title.</p></li>
-<li><p><strong>simulator</strong> (<a class="reference internal" href="simulation.html#catsim.simulation.Simulator" title="catsim.simulation.Simulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code></a>) – a simulator which has already simulated a series of CATs,
+<li><p><strong>title</strong> – the plot title.</p></li>
+<li><p><strong>simulator</strong> – a simulator which has already simulated a series of CATs,
 containing estimations to the examinees’ proficiencies and
 a list of administered items for each examinee.</p></li>
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the examinee in the simulator whose plot is to be done.</p></li>
-<li><p><strong>thetas</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – if a <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> is not passed, then a list of proficiency
+<li><p><strong>index</strong> – the index of the examinee in the simulator whose plot is to be done.</p></li>
+<li><p><strong>thetas</strong> – if a <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> is not passed, then a list of proficiency
 estimations can be manually passed to the function.</p></li>
-<li><p><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – if a <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> is not passed, then a
+<li><p><strong>administered_items</strong> – if a <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> is not passed, then a
 matrix of administered items, represented by their
 parameters, can be manually passed to the function.</p></li>
-<li><p><strong>true_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – the value of the examinee’s true proficiency. If it is passed,
+<li><p><strong>true_theta</strong> – the value of the examinee’s true proficiency. If it is passed,
 it will be shown on the plot, otherwise not.</p></li>
-<li><p><strong>info</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – plot test information. It only works if both proficiencies and
+<li><p><strong>info</strong> – plot test information. It only works if both proficiencies and
 administered items are passed.</p></li>
-<li><p><strong>var</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – plot the estimation variance during the test. It only
+<li><p><strong>var</strong> – plot the estimation variance during the test. It only
 works if both proficiencies and administered items are passed.</p></li>
-<li><p><strong>see</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – plot the standard error of estimation during the test. It only
+<li><p><strong>see</strong> – plot the standard error of estimation during the test. It only
 works if both proficiencies and administered items are passed.</p></li>
-<li><p><strong>reliability</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – plot the test reliability. It only works if both proficiencies
+<li><p><strong>reliability</strong> – plot the test reliability. It only works if both proficiencies
 and administered items are passed.</p></li>
-<li><p><strong>filepath</strong> (<code class="docutils literal notranslate"><span class="pre">str</span></code>) – the path to save the plot</p></li>
-<li><p><strong>show</strong> (<code class="docutils literal notranslate"><span class="pre">bool</span></code>) – whether the generated plot is to be shown</p></li>
+<li><p><strong>filepath</strong> – the path to save the plot</p></li>
+<li><p><strong>show</strong> – whether the generated plot is to be shown</p></li>
 </ul>
 </dd>
 </dl>
@@ -315,7 +323,7 @@ and administered items are passed.</p></li>
         <a href="stats.html" class="btn btn-neutral float-right" title="Miscellaneous Statistical Functions – catsim.stats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="cat.html" class="btn btn-neutral" title="Computerized Adaptive Test-related Functions – catsim.cat" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="cat.html" class="btn btn-neutral float-left" title="Computerized Adaptive Test-related Functions – catsim.cat" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -324,7 +332,7 @@ and administered items are passed.</p></li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -341,27 +349,16 @@ and administered items are passed.</p></li>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

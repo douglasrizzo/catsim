@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Stopping Criteria – catsim.stopping" href="stopping.html" />
     <link rel="prev" title="Item Selection Methods – catsim.selection" href="selection.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -229,25 +237,22 @@ parameters in the item bank, in case no better bounds for
 
 <dl class="method">
 <dt id="catsim.estimation.DifferentialEvolutionEstimator.estimate">
-<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">response_vector: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">response_vector: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.4.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to return the theta value
 that minimizes the negative log-likelihood function, given the current state of the
 test for the given examinee.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – index of the current examinee in the simulator</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – index of the current examinee in the simulator</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>response_vector</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a boolean list containing the examinee’s answers to the administered items</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>response_vector</strong> – a boolean list containing the examinee’s answers to the administered items</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -314,27 +319,24 @@ is composed solely of right or wrong answers.</p>
 
 <dl class="method">
 <dt id="catsim.estimation.HillClimbingEstimator.estimate">
-<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">response_vector: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">response_vector: list = None</em>, <em class="sig-param">est_theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</dt><dd><p>test for the given examinee.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – index of the current examinee in the simulator</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing item parameters in the format that <cite>catsim</cite> understands
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – index of the current examinee in the simulator</p></li>
+<li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
-<li><p><strong>administered_items</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>response_vector</strong> (<code class="docutils literal notranslate"><span class="pre">list</span></code>) – a boolean list containing the examinee’s answers to the administered items</p></li>
-<li><p><strong>est_theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the current estimated proficiency</p></li>
+<li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
+<li><p><strong>response_vector</strong> – a boolean list containing the examinee’s answers to the administered items</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -383,7 +385,7 @@ necessarily) more efficient estimators.</p>
         <a href="stopping.html" class="btn btn-neutral float-right" title="Stopping Criteria – catsim.stopping" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="selection.html" class="btn btn-neutral" title="Item Selection Methods – catsim.selection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="selection.html" class="btn btn-neutral float-left" title="Item Selection Methods – catsim.selection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -392,7 +394,7 @@ necessarily) more efficient estimators.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -409,27 +411,16 @@ necessarily) more efficient estimators.</p>
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

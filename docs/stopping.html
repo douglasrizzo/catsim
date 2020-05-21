@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" />
     <link rel="prev" title="Estimation Methods – catsim.estimation" href="estimation.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -186,20 +194,17 @@ used during the simulation, as long as it also inherits from
 </dl>
 <dl class="method">
 <dt id="catsim.stopping.MaxItemStopper.stop">
-<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper.stop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the test reached its stopping criterion for the given user</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</p></li>
-<li><p><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing the parameters of items that were already administered</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee</p></li>
+<li><p><strong>administered_items</strong> – a matrix containing the parameters of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
 </dd>
 </dl>
 </dd></dl>
@@ -218,21 +223,18 @@ used during the simulation, as long as it also inherits from
 </dl>
 <dl class="method">
 <dt id="catsim.stopping.MinErrorStopper.stop">
-<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper.stop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the test reached its stopping criterion</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
-</dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee</p></li>
-<li><p><strong>administered_items</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>) – a matrix containing the parameters of items that were already administered</p></li>
-<li><p><strong>theta</strong> (<code class="docutils literal notranslate"><span class="pre">float</span></code>) – a float containing the a proficiency value to which the error will be calculated</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – the index of the current examinee</p></li>
+<li><p><strong>administered_items</strong> – a matrix containing the parameters of items that were already administered</p></li>
+<li><p><strong>theta</strong> – a float containing the a proficiency value to which the error will be calculated</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><cite>True</cite> if the test met its stopping criterion, else <cite>False</cite></p>
 </dd>
 </dl>
 </dd></dl>
@@ -252,7 +254,7 @@ used during the simulation, as long as it also inherits from
         <a href="simulation.html" class="btn btn-neutral float-right" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="estimation.html" class="btn btn-neutral" title="Estimation Methods – catsim.estimation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="estimation.html" class="btn btn-neutral float-left" title="Estimation Methods – catsim.estimation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -261,7 +263,7 @@ used during the simulation, as long as it also inherits from
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -278,27 +280,16 @@ used during the simulation, as long as it also inherits from
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

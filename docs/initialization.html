@@ -13,45 +13,53 @@
 
   
   
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
   
   
 
   
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Item Selection Methods – catsim.selection" href="selection.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
 <body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> catsim
+            <a href="index.html">
           
 
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           
           </a>
 
@@ -181,17 +189,14 @@ used during the simulation, as long as it also inherits from
 <p>Initializes every proficiency at the same point.</p>
 <dl class="method">
 <dt id="catsim.initialization.FixedPointInitializer.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the same proficiency value that was passed to the constructor of the initializer</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> – the index of the current examinee. This parameter is not used by this method.</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee. This parameter is not used by this method.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the same proficiency value that was passed to the constructor of the initializer</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the same proficiency value that was passed to the constructor of the initializer</p>
 </dd>
 </dl>
 </dd></dl>
@@ -216,17 +221,14 @@ and standard deviation values for the normal distribution
 </dl>
 <dl class="method">
 <dt id="catsim.initialization.RandomInitializer.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a value using the chosen distribution and parameters</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>index</strong> – the index of the current examinee. This parameter is not used by this method.</p>
 </dd>
-<dt class="field-even">Parameters</dt>
-<dd class="field-even"><p><strong>index</strong> (<code class="docutils literal notranslate"><span class="pre">int</span></code>) – the index of the current examinee. This parameter is not used by this method.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a proficiency value generated from the chosen distribution using the passed parameters</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a proficiency value generated from the chosen distribution using the passed parameters</p>
 </dd>
 </dl>
 </dd></dl>
@@ -246,7 +248,7 @@ and standard deviation values for the normal distribution
         <a href="selection.html" class="btn btn-neutral float-right" title="Item Selection Methods – catsim.selection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -255,7 +257,7 @@ and standard deviation values for the normal distribution
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Douglas De Rizzo Meneghetti
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
@@ -272,27 +274,16 @@ and standard deviation values for the normal distribution
   
 
 
-  
-
-    
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-
-  
-
-  <script type="text/javascript" src="_static/js/theme.js"></script>
-
   <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>
