@@ -7,6 +7,7 @@
     :maxdepth: 2
 
     introduction.rst
+    examples.rst
     initialization.rst
     selection.rst
     estimation.rst

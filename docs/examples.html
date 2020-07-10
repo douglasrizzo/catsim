@@ -1,0 +1,603 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction to catsim by example</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Initialization Methods – catsim.initialization" href="initialization.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html">
+          
+
+          
+            
+            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.15.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction to catsim by example</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generating-an-item-bank">Generating an item bank</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-simulations">Running simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-simulator">Creating a simulator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#starting-the-simulation">Starting the simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acessing-simulation-results">Acessing simulation results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulation-example-2">Simulation example 2</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulating-non-adaptive-tests">Simulating non-adaptive tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-catsim-objects-outside-of-a-simulator">Using catsim objects outside of a Simulator</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initializing-hat-theta">Initializing <span class="math notranslate nohighlight">\(\hat\theta\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#estimating-a-new-hat-theta">Estimating a new <span class="math notranslate nohighlight">\(\hat\theta\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checking-whether-the-test-should-end">Checking whether the test should end</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#selecting-a-new-item">Selecting a new item</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulating-a-response">Simulating a response</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">catsim</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Introduction to catsim by example</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction-to-catsim-by-example">
+<h1>Introduction to catsim by example<a class="headerlink" href="#introduction-to-catsim-by-example" title="Permalink to this headline">¶</a></h1>
+<p><img alt="image0" src="https://douglasrizzo.com.br/catsim/_static/logo_text.svg" /></p>
+<p>This is a tutorial for
+<a class="reference external" href="https://github.com/douglasrizzo/catsim/">catsim</a>, a Python package
+which allows users to simulate computerized adaptive tests or to use in
+their own applications with the purpose of automating adaptive tests.</p>
+<p>This tutorial was originally developed as a notebook on Google Colab,
+so, if for any reason you are seeing this outside of Colab, you can go
+back to Colab, copy it and test it yourself using <a class="reference external" href="https://colab.research.google.com/drive/14zEWoDudBCXF0NO-qgzoQpWUGBcJ2lPH?usp=sharing">this
+link</a>.</p>
+<p>In this notebook, I’ll exemplify both approaches. The documentation of
+all modules and functions used here are available in the <a class="reference external" href="https://douglasrizzo.com.br/catsim/index.html">catsim
+website</a>.</p>
+<p>First, let’s install catsim and import the relevant modules:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip install catsim
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">catsim</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="mf">0.15</span><span class="o">.</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">numexpr</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">2.7</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">matplotlib</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">3.2</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">scipy</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">1.4</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">tqdm</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">4.41</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">numpy</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">1.18</span><span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">scikit</span><span class="o">-</span><span class="n">learn</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">0.22</span><span class="o">.</span><span class="mf">2.</span><span class="n">post1</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">json</span><span class="o">-</span><span class="n">tricks</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">3.15</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">kiwisolver</span><span class="o">&gt;=</span><span class="mf">1.0</span><span class="o">.</span><span class="mi">1</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">matplotlib</span><span class="o">-&gt;</span><span class="n">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">1.2</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">pyparsing</span><span class="o">!=</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">4</span><span class="p">,</span><span class="o">!=</span><span class="mf">2.1</span><span class="o">.</span><span class="mi">2</span><span class="p">,</span><span class="o">!=</span><span class="mf">2.1</span><span class="o">.</span><span class="mi">6</span><span class="p">,</span><span class="o">&gt;=</span><span class="mf">2.0</span><span class="o">.</span><span class="mi">1</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">matplotlib</span><span class="o">-&gt;</span><span class="n">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">2.4</span><span class="o">.</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">python</span><span class="o">-</span><span class="n">dateutil</span><span class="o">&gt;=</span><span class="mf">2.1</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">matplotlib</span><span class="o">-&gt;</span><span class="n">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">2.8</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">cycler</span><span class="o">&gt;=</span><span class="mf">0.10</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">matplotlib</span><span class="o">-&gt;</span><span class="n">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">0.10</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">joblib</span><span class="o">&gt;=</span><span class="mf">0.11</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">scikit</span><span class="o">-</span><span class="n">learn</span><span class="o">-&gt;</span><span class="n">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">0.15</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Requirement</span> <span class="n">already</span> <span class="n">satisfied</span><span class="p">:</span> <span class="n">six</span><span class="o">&gt;=</span><span class="mf">1.5</span> <span class="ow">in</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span> <span class="p">(</span><span class="kn">from</span> <span class="nn">python</span><span class="o">-</span><span class="n">dateutil</span><span class="o">&gt;=</span><span class="mf">2.1</span><span class="o">-&gt;</span><span class="n">matplotlib</span><span class="o">-&gt;</span><span class="n">catsim</span><span class="p">)</span> <span class="p">(</span><span class="mf">1.12</span><span class="o">.</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># this function generates an item bank, in case the user cannot provide one</span>
+<span class="kn">from</span> <span class="nn">catsim.cat</span> <span class="k">import</span> <span class="n">generate_item_bank</span>
+<span class="c1"># simulation package contains the Simulator and all abstract classes</span>
+<span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="k">import</span> <span class="o">*</span>
+<span class="c1"># initialization package contains different initial proficiency estimation strategies</span>
+<span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="k">import</span> <span class="o">*</span>
+<span class="c1"># selection package contains different item selection strategies</span>
+<span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="k">import</span> <span class="o">*</span>
+<span class="c1"># estimation package contains different proficiency estimation methods</span>
+<span class="kn">from</span> <span class="nn">catsim.estimation</span> <span class="k">import</span> <span class="o">*</span>
+<span class="c1"># stopping package contains different stopping criteria for the CAT</span>
+<span class="kn">from</span> <span class="nn">catsim.stopping</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">catsim.plot</span> <span class="k">as</span> <span class="nn">catplot</span>
+
+<span class="kn">from</span> <span class="nn">catsim.irt</span> <span class="k">import</span> <span class="n">icc</span>
+</pre></div>
+</div>
+<div class="section" id="generating-an-item-bank">
+<h2>Generating an item bank<a class="headerlink" href="#generating-an-item-bank" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">generate_item_bank()</span></code> function provides a convenient way to
+generate realistic item parameter matrices from probability
+distributions.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bank_size</span> <span class="o">=</span> <span class="mi">5000</span>
+<span class="n">items</span> <span class="o">=</span> <span class="n">generate_item_bank</span><span class="p">(</span><span class="n">bank_size</span><span class="p">)</span>
+<span class="n">catplot</span><span class="o">.</span><span class="n">gen3d_dataset_scatter</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/output_4_1.png" src="_images/output_4_1.png" />
+<p>catsim also provides a function to plot the characteristic curve of an
+item. Notice how this item has been generated according to the
+4-parameter logistic model of the Item Response Theory. Item banks under
+different logistic models can be generated by changing the <code class="docutils literal notranslate"><span class="pre">itemtype</span></code>
+parameter of <code class="docutils literal notranslate"><span class="pre">generate_item_bank()</span></code>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">catplot</span><span class="o">.</span><span class="n">item_curve</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/output_6_0.png" src="_images/output_6_0.png" />
+</div>
+<div class="section" id="running-simulations">
+<h2>Running simulations<a class="headerlink" href="#running-simulations" title="Permalink to this headline">¶</a></h2>
+<p>A simulation requires the following objects:</p>
+<ul class="simple">
+<li><p>an item parameter matrix</p></li>
+<li><p>a proficiency initializer, which sets the initial <span class="math notranslate nohighlight">\(\theta\)</span>
+values for examinees</p></li>
+<li><p>an item selector, which selects items to be applied to examinees
+according to some rule</p></li>
+<li><p>a proficiency estimator, which estimates the new <span class="math notranslate nohighlight">\(\theta\)</span>
+values for examinees after an item is answered</p></li>
+<li><p>a “stopper”, an object which checks if the test must be stopped
+according to some rule</p></li>
+</ul>
+<p>We have already created an item parameter matrix, so let’s go ahead and
+create the other objects…</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
+<span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>catsim provides different options for each of the aforementioned types
+of objects in the following modules</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code></p></li>
+</ul>
+<p>Each module also provides an abstract base class which can be inherited
+in order to create new methods that can be used in the simulation
+process.</p>
+<div class="section" id="creating-a-simulator">
+<h3>Creating a simulator<a class="headerlink" href="#creating-a-simulator" title="Permalink to this headline">¶</a></h3>
+<p>The Simulator is the object that takes all of the objects created
+previously and executes a CAT simulation. To represent the examinees,
+The Simulator can receive either an integer, which will be converted to
+a normal distribution, or a 1D <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>, whose values will be
+used as the proficiencies of the examinees.</p>
+<p>Here we will use an integer.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="starting-the-simulation">
+<h3>Starting the simulation<a class="headerlink" href="#starting-the-simulation" title="Permalink to this headline">¶</a></h3>
+<p>To execute the simulations, call the simulate() method of the Simulator
+object.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>0%|          | 0/10 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Starting</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Random</span> <span class="n">Initializer</span> <span class="n">Maximum</span> <span class="n">Information</span> <span class="n">Selector</span> <span class="n">Hill</span> <span class="n">Climbing</span> <span class="n">Estimator</span> <span class="n">Maximum</span> <span class="n">Item</span> <span class="n">Number</span> <span class="n">Initializer</span> <span class="mi">5000</span> <span class="n">items</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>100%|██████████| 10/10 [00:06&lt;00:00,  1.61it/s]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Simulation</span> <span class="n">took</span> <span class="mf">6.196882963180542</span> <span class="n">seconds</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="acessing-simulation-results">
+<h3>Acessing simulation results<a class="headerlink" href="#acessing-simulation-results" title="Permalink to this headline">¶</a></h3>
+<p>After the simulation if over, information is provided through the
+attributes of the Simulator:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bias:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Mean squared error:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">mse</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Root mean squared error:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">rmse</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Bias</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.6381367437011503</span>
+<span class="n">Mean</span> <span class="n">squared</span> <span class="n">error</span><span class="p">:</span> <span class="mf">1.0658065904285774</span>
+<span class="n">Root</span> <span class="n">mean</span> <span class="n">squared</span> <span class="n">error</span><span class="p">:</span> <span class="mf">1.0323790924019032</span>
+</pre></div>
+</div>
+<p>Information for individual examinees can also be accessed through the
+attributes of the Simulator.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">examinee_index</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Accessing examinee&#39;</span><span class="p">,</span> <span class="n">examinee_index</span><span class="p">,</span> <span class="s1">&#39;results...&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    True proficiency:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">examinees</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Items administered:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Responses:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">response_vectors</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;    Proficiency estimation during each step of the test:&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">estimations</span><span class="p">[</span><span class="n">examinee_index</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Accessing</span> <span class="n">examinee</span> <span class="mi">0</span> <span class="n">results</span><span class="o">...</span>
+    <span class="kc">True</span> <span class="n">proficiency</span><span class="p">:</span> <span class="mf">0.5414751481074835</span>
+    <span class="n">Items</span> <span class="n">administered</span><span class="p">:</span> <span class="p">[</span><span class="mi">4025</span><span class="p">,</span> <span class="mi">955</span><span class="p">,</span> <span class="mi">2139</span><span class="p">,</span> <span class="mi">822</span><span class="p">,</span> <span class="mi">4487</span><span class="p">,</span> <span class="mi">1027</span><span class="p">,</span> <span class="mi">4937</span><span class="p">,</span> <span class="mi">3913</span><span class="p">,</span> <span class="mi">2043</span><span class="p">,</span> <span class="mi">3919</span><span class="p">,</span> <span class="mi">257</span><span class="p">,</span> <span class="mi">2473</span><span class="p">,</span> <span class="mi">4671</span><span class="p">,</span> <span class="mi">2054</span><span class="p">,</span> <span class="mi">595</span><span class="p">,</span> <span class="mi">891</span><span class="p">,</span> <span class="mi">1835</span><span class="p">,</span> <span class="mi">2562</span><span class="p">,</span> <span class="mi">3016</span><span class="p">,</span> <span class="mi">4252</span><span class="p">,</span> <span class="mi">1761</span><span class="p">,</span> <span class="mi">3372</span><span class="p">,</span> <span class="mi">2712</span><span class="p">,</span> <span class="mi">460</span><span class="p">,</span> <span class="mi">3260</span><span class="p">,</span> <span class="mi">3086</span><span class="p">,</span> <span class="mi">1178</span><span class="p">,</span> <span class="mi">497</span><span class="p">,</span> <span class="mi">964</span><span class="p">,</span> <span class="mi">2112</span><span class="p">,</span> <span class="mi">1227</span><span class="p">,</span> <span class="mi">1677</span><span class="p">,</span> <span class="mi">2207</span><span class="p">,</span> <span class="mi">2100</span><span class="p">,</span> <span class="mi">4627</span><span class="p">,</span> <span class="mi">4058</span><span class="p">,</span> <span class="mi">2581</span><span class="p">,</span> <span class="mi">3907</span><span class="p">,</span> <span class="mi">2226</span><span class="p">,</span> <span class="mi">1974</span><span class="p">,</span> <span class="mi">4914</span><span class="p">,</span> <span class="mi">3217</span><span class="p">,</span> <span class="mi">3578</span><span class="p">,</span> <span class="mi">2142</span><span class="p">,</span> <span class="mi">3285</span><span class="p">,</span> <span class="mi">544</span><span class="p">,</span> <span class="mi">2778</span><span class="p">,</span> <span class="mi">3385</span><span class="p">,</span> <span class="mi">4045</span><span class="p">,</span> <span class="mi">3203</span><span class="p">]</span>
+    <span class="n">Responses</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+    <span class="n">Proficiency</span> <span class="n">estimation</span> <span class="n">during</span> <span class="n">each</span> <span class="n">step</span> <span class="n">of</span> <span class="n">the</span> <span class="n">test</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.290881850256799</span><span class="p">,</span> <span class="mf">1.1185582463121733</span><span class="p">,</span> <span class="mf">1.1426750754515387</span><span class="p">,</span> <span class="mf">1.152392004763016</span><span class="p">,</span> <span class="mf">0.8478585975418739</span><span class="p">,</span> <span class="mf">0.4479926337335293</span><span class="p">,</span> <span class="mf">0.641966154291048</span><span class="p">,</span> <span class="mf">0.08861641703624935</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.33676949337047307</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6284672286464179</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.24254353500212397</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.05588895716954379</span><span class="p">,</span> <span class="mf">0.23781422550078193</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.07856738832972887</span><span class="p">,</span> <span class="mf">0.06900173994109693</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00818927140111327</span><span class="p">,</span> <span class="mf">0.08081647853080343</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2059494050651548</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.06662882711615933</span><span class="p">,</span> <span class="mf">0.0694427497659949</span><span class="p">,</span> <span class="mf">0.1602322280000182</span><span class="p">,</span> <span class="mf">0.2242606779949324</span><span class="p">,</span> <span class="mf">0.029834676315992844</span><span class="p">,</span> <span class="mf">0.11352163433082992</span><span class="p">,</span> <span class="mf">0.19196183838073103</span><span class="p">,</span> <span class="mf">0.2859930977887069</span><span class="p">,</span> <span class="mf">0.3568651492271788</span><span class="p">,</span> <span class="mf">0.4253513334111963</span><span class="p">,</span> <span class="mf">0.49659712415467017</span><span class="p">,</span> <span class="mf">0.550495358649628</span><span class="p">,</span> <span class="mf">0.6323464559579576</span><span class="p">,</span> <span class="mf">0.5265337388995257</span><span class="p">,</span> <span class="mf">0.5969015825329597</span><span class="p">,</span> <span class="mf">0.6528203742008848</span><span class="p">,</span> <span class="mf">0.713397152262809</span><span class="p">,</span> <span class="mf">0.5942322375242097</span><span class="p">,</span> <span class="mf">0.6579283667855614</span><span class="p">,</span> <span class="mf">0.7147056903933375</span><span class="p">,</span> <span class="mf">0.7761764462137745</span><span class="p">,</span> <span class="mf">0.6677696513724182</span><span class="p">,</span> <span class="mf">0.5800058553505616</span><span class="p">,</span> <span class="mf">0.6026382127897699</span><span class="p">,</span> <span class="mf">0.49656240359066145</span><span class="p">,</span> <span class="mf">0.4051594269457418</span><span class="p">,</span> <span class="mf">0.44256429992588797</span><span class="p">,</span> <span class="mf">0.48015775515631276</span><span class="p">,</span> <span class="mf">0.5390212319550943</span><span class="p">,</span> <span class="mf">0.5687364624305552</span><span class="p">,</span> <span class="mf">0.5987437396643452</span><span class="p">,</span> <span class="mf">0.6255007692640538</span><span class="p">,</span> <span class="mf">0.5540170336970613</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The test progress for an individual examinee can also be plotted using
+the <code class="docutils literal notranslate"><span class="pre">catsim.plot.test_progress(function)</span></code>. The amount of information
+in the chart can be tuned using different arguments for the function.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/output_19_0.png" src="_images/output_19_0.png" />
+</div>
+<div class="section" id="simulation-example-2">
+<h3>Simulation example 2<a class="headerlink" href="#simulation-example-2" title="Permalink to this headline">¶</a></h3>
+<p>This example uses a <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> to represent examinees. We will
+also plot more information than before in our test progress plot, adding
+test information to it.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">examinees</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">examinees</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>0%|          | 0/10 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Starting</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Random</span> <span class="n">Initializer</span> <span class="n">Maximum</span> <span class="n">Information</span> <span class="n">Selector</span> <span class="n">Hill</span> <span class="n">Climbing</span> <span class="n">Estimator</span> <span class="n">Minimum</span> <span class="n">Error</span> <span class="n">Initializer</span> <span class="mi">5000</span> <span class="n">items</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>/usr/local/lib/python3.6/dist-packages/catsim/irt.py:142: RuntimeWarning: divide by zero encountered in double_scalars
+  return 1 / test_info(theta, items)
+100%|██████████| 10/10 [00:08&lt;00:00,  1.17it/s]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Simulation</span> <span class="n">took</span> <span class="mf">8.517879247665405</span> <span class="n">seconds</span>
+</pre></div>
+</div>
+<img alt="_images/output_21_4.png" src="_images/output_21_4.png" />
+</div>
+<div class="section" id="simulating-non-adaptive-tests">
+<h3>Simulating non-adaptive tests<a class="headerlink" href="#simulating-non-adaptive-tests" title="Permalink to this headline">¶</a></h3>
+<p>catsim can also simulate linear (non-adaptive) tests by using a linear
+item selector. The linear selector receives the item indices as
+arguments, retrieves them from the item parameter matrix and applies
+them in order to all examinees.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">indexes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">50</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The following items will be applied to the examinees in this order:&#39;</span><span class="p">,</span> <span class="n">indexes</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">LinearSelector</span><span class="p">(</span><span class="n">indexes</span><span class="p">),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+<span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>0%|          | 0/10 [00:00&lt;?, ?it/s]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">following</span> <span class="n">items</span> <span class="n">will</span> <span class="n">be</span> <span class="n">applied</span> <span class="n">to</span> <span class="n">the</span> <span class="n">examinees</span> <span class="ow">in</span> <span class="n">this</span> <span class="n">order</span><span class="p">:</span> <span class="p">[</span> <span class="mi">652</span> <span class="mi">2786</span>  <span class="mi">780</span>  <span class="mi">991</span>  <span class="mi">144</span> <span class="mi">1243</span> <span class="mi">1911</span> <span class="mi">3797</span> <span class="mi">2951</span> <span class="mi">2007</span> <span class="mi">4802</span>  <span class="mi">976</span>  <span class="mi">580</span> <span class="mi">2206</span>
+ <span class="mi">2114</span> <span class="mi">4296</span> <span class="mi">1986</span> <span class="mi">2475</span> <span class="mi">4521</span> <span class="mi">3988</span> <span class="mi">1870</span> <span class="mi">4695</span> <span class="mi">1645</span> <span class="mi">3558</span> <span class="mi">4620</span> <span class="mi">2817</span> <span class="mi">1809</span> <span class="mi">2585</span>
+ <span class="mi">2289</span> <span class="mi">4930</span>  <span class="mi">255</span> <span class="mi">2673</span> <span class="mi">3841</span> <span class="mi">2980</span> <span class="mi">1105</span> <span class="mi">4027</span>  <span class="mi">475</span> <span class="mi">3932</span>  <span class="mi">730</span> <span class="mi">3937</span>  <span class="mi">522</span> <span class="mi">1925</span>
+  <span class="mi">146</span> <span class="mi">1382</span> <span class="mi">2453</span> <span class="mi">4021</span> <span class="mi">2715</span>  <span class="mi">189</span> <span class="mi">3092</span> <span class="mi">3318</span><span class="p">]</span>
+
+<span class="n">Starting</span> <span class="n">simulation</span><span class="p">:</span> <span class="n">Random</span> <span class="n">Initializer</span> <span class="n">Linear</span> <span class="n">Selector</span> <span class="n">Hill</span> <span class="n">Climbing</span> <span class="n">Estimator</span> <span class="n">Maximum</span> <span class="n">Item</span> <span class="n">Number</span> <span class="n">Initializer</span> <span class="mi">5000</span> <span class="n">items</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>100%|██████████| 10/10 [00:02&lt;00:00,  4.27it/s]
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Simulation</span> <span class="n">took</span> <span class="mf">2.342834949493408</span> <span class="n">seconds</span>
+</pre></div>
+</div>
+<p>Here, we will also plot the estimation error for an examinee’s
+<span class="math notranslate nohighlight">\(\hat\theta\)</span> value during the progress of the test.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">see</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/output_25_0.png" src="_images/output_25_0.png" />
+</div>
+</div>
+<div class="section" id="using-catsim-objects-outside-of-a-simulator">
+<h2>Using catsim objects outside of a Simulator<a class="headerlink" href="#using-catsim-objects-outside-of-a-simulator" title="Permalink to this headline">¶</a></h2>
+<p>The objects provided by catsim can also be used directly, outside of a
+simulation. This allows users to use these objects in their own
+software, to power their own CAT applications.</p>
+<p>Let’s pretend we are in the middle of a test application and create some
+dummy data for an examinee, as well as some objects we will use to
+select the next item for this examinee, re-estimate their proficiency
+and check if the test should be stopped or if a new item should be
+applied to the examinee.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">responses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+<span class="n">administered_items</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1435</span><span class="p">,</span> <span class="mi">3221</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">881</span><span class="p">]</span>
+
+<span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
+<span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This dummy data means that the examinee has answered items 1435, 3221,
+17 and 881 from our item bank (generated at the start of this notebook).
+They have answered the first two items correctly (represented by the
+<code class="docutils literal notranslate"><span class="pre">True</span></code> values in the <code class="docutils literal notranslate"><span class="pre">responses</span></code> list) and two items incorrectly
+(the last values in the list).</p>
+<div class="section" id="initializing-hat-theta">
+<h3>Initializing <span class="math notranslate nohighlight">\(\hat\theta\)</span><a class="headerlink" href="#initializing-hat-theta" title="Permalink to this headline">¶</a></h3>
+<p>Even though this information is already enough to estimate the current
+proficiency of the examinee, we’ll go ahead and use our initializer to
+estimate a dummy initial proficiency anyway.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">est_theta</span> <span class="o">=</span> <span class="n">initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Examinee initial proficiency:&#39;</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Examinee</span> <span class="n">initial</span> <span class="n">proficiency</span><span class="p">:</span> <span class="mf">4.276583972736306</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="estimating-a-new-hat-theta">
+<h3>Estimating a new <span class="math notranslate nohighlight">\(\hat\theta\)</span><a class="headerlink" href="#estimating-a-new-hat-theta" title="Permalink to this headline">¶</a></h3>
+<p>Now, we will use the answers the examinee has given so far (remember,
+we’re pretending they have already answered a few items) to estimate a
+more precise <span class="math notranslate nohighlight">\(\hat\theta\)</span> proficiency for them.</p>
+<p>Internally, the estimator uses the item bank and the indices of the
+administered items to get the relevant item parameters, then uses the
+response vector to know which items the examinee has answered correctly
+and incorrectly to generate the new value for <span class="math notranslate nohighlight">\(\hat\theta\)</span>.</p>
+<p>Some estimators may or may not use the current value of
+<span class="math notranslate nohighlight">\(\hat\theta\)</span> to speed up estimation.</p>
+<p><strong>After getting to the end of the notebook, come back to this cell to
+simulate a new item being applied to this examinee</strong>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_theta</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="o">=</span><span class="n">responses</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Estimated proficiency, given answered items:&#39;</span><span class="p">,</span> <span class="n">new_theta</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Estimated</span> <span class="n">proficiency</span><span class="p">,</span> <span class="n">given</span> <span class="n">answered</span> <span class="n">items</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.8535805779281085</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="checking-whether-the-test-should-end">
+<h3>Checking whether the test should end<a class="headerlink" href="#checking-whether-the-test-should-end" title="Permalink to this headline">¶</a></h3>
+<p>We do not know whether the CAT should select another item to the
+examinee or if the test should end. The stoper will give us this answer
+through the <code class="docutils literal notranslate"><span class="pre">stop()</span></code> method.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">_stop</span> <span class="o">=</span> <span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">administered_items</span><span class="o">=</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">],</span> <span class="n">theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Should the test be stopped:&#39;</span><span class="p">,</span> <span class="n">_stop</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Should</span> <span class="n">the</span> <span class="n">test</span> <span class="n">be</span> <span class="n">stopped</span><span class="p">:</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="selecting-a-new-item">
+<h3>Selecting a new item<a class="headerlink" href="#selecting-a-new-item" title="Permalink to this headline">¶</a></h3>
+<p>The selector takes the item parameter matrix and the current
+<span class="math notranslate nohighlight">\(\hat\theta\)</span> value to select the new item the examinee will
+answer. It uses the indices of administered items to ignore them.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">item_index</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Next item to be administered:&#39;</span><span class="p">,</span> <span class="n">item_index</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Next</span> <span class="n">item</span> <span class="n">to</span> <span class="n">be</span> <span class="n">administered</span><span class="p">:</span> <span class="mi">1629</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">dist</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">catsim</span><span class="o">/</span><span class="n">selection</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">86</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">This</span> <span class="n">selector</span> <span class="n">needs</span> <span class="n">an</span> <span class="n">item</span> <span class="n">matrix</span> <span class="k">with</span> <span class="n">at</span> <span class="n">least</span> <span class="mi">5</span> <span class="n">columns</span><span class="p">,</span> <span class="k">with</span> <span class="n">the</span> <span class="n">last</span> <span class="n">one</span> <span class="n">representing</span> <span class="n">item</span> <span class="n">exposure</span> <span class="n">rate</span><span class="o">.</span> <span class="n">Since</span> <span class="n">this</span> <span class="n">column</span> <span class="ow">is</span> <span class="n">absent</span><span class="p">,</span> <span class="n">it</span> <span class="n">will</span> <span class="n">presume</span> <span class="nb">all</span> <span class="n">items</span> <span class="n">have</span> <span class="n">exposure</span> <span class="n">rates</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="s1">&#39;This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simulating-a-response">
+<h3>Simulating a response<a class="headerlink" href="#simulating-a-response" title="Permalink to this headline">¶</a></h3>
+<p>In order to apply the next item, we need to pretend here that the
+examinee has answered an item. In the real world, this information could
+be fetched by an external application, but here we will use IRT to
+simulate the answer probabilistically.</p>
+<p>(By the way, this is exactly what the Simulator does during
+simulations.)</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">item_index</span><span class="p">]</span>
+<span class="n">prob</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+<span class="n">correct</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">prob</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Probability to correctly answer item:&#39;</span><span class="p">,</span> <span class="n">prob</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Did the user answer the selected item correctly?&#39;</span><span class="p">,</span> <span class="n">correct</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Probability to correctly answer item: 0.7633069064688918
+Did the user answer the selected item correctly? False
+</pre></div>
+</div>
+<p>Finally, we add the index of the administered item to the examinee and
+their answer to the item to our lists and we are ready for the next step
+of the adaptive test.</p>
+<p>Go back to the <strong>“Estimating a new :math:`hattheta`”</strong> step above to
+simulate another step of the CAT.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">administered_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_index</span><span class="p">)</span>
+<span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="initialization.html" class="btn btn-neutral float-right" title="Initialization Methods – catsim.initialization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -94,7 +94,7 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#examples">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction to catsim by example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a><ul>
@@ -202,7 +202,7 @@ used during the simulation, as long as it also inherits from
 <dt id="catsim.estimation.DifferentialEvolutionEstimator">
 <em class="property">class </em><code class="sig-prename descclassname">catsim.estimation.</code><code class="sig-name descname">DifferentialEvolutionEstimator</code><span class="sig-paren">(</span><em class="sig-param">bounds: tuple</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Estimator</span></code></a></p>
-<p>Estimator that uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.4.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to minimize the negative log-likelihood function</p>
+<p>Estimator that uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.5.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to minimize the negative log-likelihood function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>bounds</strong> – a tuple containing both lower and upper bounds for the differential
@@ -238,7 +238,7 @@ parameters in the item bank, in case no better bounds for
 <dl class="method">
 <dt id="catsim.estimation.DifferentialEvolutionEstimator.estimate">
 <code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">administered_items: list = None</em>, <em class="sig-param">response_vector: list = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.estimate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.4.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to return the theta value
+<dd><p>Uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.5.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to return the theta value
 that minimizes the negative log-likelihood function, given the current state of the
 test for the given examinee.</p>
 <dl class="field-list simple">
