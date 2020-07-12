@@ -29,19 +29,19 @@ First, let’s install catsim and import the relevant modules:
 .. parsed-literal::
 
     Requirement already satisfied: catsim in /usr/local/lib/python3.6/dist-packages (0.15.4)
-    Requirement already satisfied: numexpr in /usr/local/lib/python3.6/dist-packages (from catsim) (2.7.1)
-    Requirement already satisfied: matplotlib in /usr/local/lib/python3.6/dist-packages (from catsim) (3.2.2)
-    Requirement already satisfied: scipy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.4.1)
     Requirement already satisfied: tqdm in /usr/local/lib/python3.6/dist-packages (from catsim) (4.41.1)
     Requirement already satisfied: numpy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.18.5)
-    Requirement already satisfied: scikit-learn in /usr/local/lib/python3.6/dist-packages (from catsim) (0.22.2.post1)
     Requirement already satisfied: json-tricks in /usr/local/lib/python3.6/dist-packages (from catsim) (3.15.2)
+    Requirement already satisfied: numexpr in /usr/local/lib/python3.6/dist-packages (from catsim) (2.7.1)
+    Requirement already satisfied: scikit-learn in /usr/local/lib/python3.6/dist-packages (from catsim) (0.22.2.post1)
+    Requirement already satisfied: matplotlib in /usr/local/lib/python3.6/dist-packages (from catsim) (3.2.2)
+    Requirement already satisfied: scipy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.4.1)
+    Requirement already satisfied: joblib>=0.11 in /usr/local/lib/python3.6/dist-packages (from scikit-learn->catsim) (0.15.1)
     Requirement already satisfied: kiwisolver>=1.0.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (1.2.0)
+    Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (0.10.0)
     Requirement already satisfied: pyparsing!=2.0.4,!=2.1.2,!=2.1.6,>=2.0.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (2.4.7)
     Requirement already satisfied: python-dateutil>=2.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (2.8.1)
-    Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (0.10.0)
-    Requirement already satisfied: joblib>=0.11 in /usr/local/lib/python3.6/dist-packages (from scikit-learn->catsim) (0.15.1)
-    Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.6/dist-packages (from python-dateutil>=2.1->matplotlib->catsim) (1.12.0)
+    Requirement already satisfied: six in /usr/local/lib/python3.6/dist-packages (from cycler>=0.10->matplotlib->catsim) (1.12.0)
 
 
 .. code:: ipython3
@@ -59,8 +59,9 @@ First, let’s install catsim and import the relevant modules:
     # stopping package contains different stopping criteria for the CAT
     from catsim.stopping import *
     import catsim.plot as catplot
-    
     from catsim.irt import icc
+    
+    import matplotlib.pyplot as plt
 
 Generating an item bank
 -----------------------
@@ -85,6 +86,32 @@ distributions.
 .. image:: output_4_1.png
 
 
+Visualizing parameter distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``generate_item_bank()`` returns a numpy.ndarray with 4 columns,
+corresponding to the discrimination, difficulty, guessing and
+upper-asymptote parameters of the 4-parameter logistic model of Item
+Response Theory.
+
+We can plot and visualize their distributions like so:
+
+.. code:: ipython3
+
+    fig, axes = plt.subplots(2, 2, figsize=(9,7))
+    _ = axes[0,0].hist(items[:,0], bins=100)
+    _ = axes[0,1].hist(items[:,1], bins=100)
+    _ = axes[1,0].hist(items[:,2], bins=100)
+    _ = axes[1,1].hist(items[:,3], bins=100)
+
+
+
+.. image:: output_6_0.png
+
+
+Visualizing individual items
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 catsim also provides a function to plot the characteristic curve of an
 item. Notice how this item has been generated according to the
 4-parameter logistic model of the Item Response Theory. Item banks under
@@ -98,7 +125,7 @@ parameter of ``generate_item_bank()``.
 
 
 
-.. image:: output_6_0.png
+.. image:: output_8_0.png
 
 
 Running simulations
@@ -185,7 +212,7 @@ object.
 
 .. parsed-literal::
 
-    Simulation took 6.196882963180542 seconds
+    Simulation took 6.206281900405884 seconds
 
 
 .. parsed-literal::
@@ -208,9 +235,9 @@ attributes of the Simulator:
 
 .. parsed-literal::
 
-    Bias: -0.6381367437011503
-    Mean squared error: 1.0658065904285774
-    Root mean squared error: 1.0323790924019032
+    Bias: -0.35394128227922633
+    Mean squared error: 0.9688648393623304
+    Root mean squared error: 0.9843093209770648
 
 
 Information for individual examinees can also be accessed through the
@@ -229,10 +256,10 @@ attributes of the Simulator.
 .. parsed-literal::
 
     Accessing examinee 0 results...
-        True proficiency: 0.5414751481074835
-        Items administered: [4025, 955, 2139, 822, 4487, 1027, 4937, 3913, 2043, 3919, 257, 2473, 4671, 2054, 595, 891, 1835, 2562, 3016, 4252, 1761, 3372, 2712, 460, 3260, 3086, 1178, 497, 964, 2112, 1227, 1677, 2207, 2100, 4627, 4058, 2581, 3907, 2226, 1974, 4914, 3217, 3578, 2142, 3285, 544, 2778, 3385, 4045, 3203]
-        Responses: [True, True, False, False, False, True, False, False, True, True, True, True, False, True, False, True, False, True, True, True, True, False, True, True, True, True, True, True, True, True, False, True, True, True, False, True, True, True, False, False, True, False, False, True, True, True, True, True, True, False]
-        Proficiency estimation during each step of the test: [1.290881850256799, 1.1185582463121733, 1.1426750754515387, 1.152392004763016, 0.8478585975418739, 0.4479926337335293, 0.641966154291048, 0.08861641703624935, -0.33676949337047307, -0.6284672286464179, -0.24254353500212397, -0.05588895716954379, 0.23781422550078193, -0.07856738832972887, 0.06900173994109693, -0.00818927140111327, 0.08081647853080343, -0.2059494050651548, -0.06662882711615933, 0.0694427497659949, 0.1602322280000182, 0.2242606779949324, 0.029834676315992844, 0.11352163433082992, 0.19196183838073103, 0.2859930977887069, 0.3568651492271788, 0.4253513334111963, 0.49659712415467017, 0.550495358649628, 0.6323464559579576, 0.5265337388995257, 0.5969015825329597, 0.6528203742008848, 0.713397152262809, 0.5942322375242097, 0.6579283667855614, 0.7147056903933375, 0.7761764462137745, 0.6677696513724182, 0.5800058553505616, 0.6026382127897699, 0.49656240359066145, 0.4051594269457418, 0.44256429992588797, 0.48015775515631276, 0.5390212319550943, 0.5687364624305552, 0.5987437396643452, 0.6255007692640538, 0.5540170336970613]
+        True proficiency: 0.5490604939976603
+        Items administered: [4118, 1917, 1128, 4248, 767, 3572, 4109, 3500, 2745, 4863, 3602, 498, 4339, 4421, 637, 2096, 2396, 3825, 2518, 4507, 3854, 3987, 2639, 3062, 322, 2248, 2659, 2702, 3104, 1563, 4220, 106, 480, 2405, 645, 1293, 4741, 2167, 4030, 715, 1338, 3210, 3128, 4363, 2786, 4467, 3455, 2496, 4681, 4119]
+        Responses: [False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, False, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, False, True]
+        Proficiency estimation during each step of the test: [-1.9760342267420352, -2.1431976245351447, -2.312866831555607, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.086901001555195, -2.086901001555195, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.0229576943290755, -2.0229576943290755, -2.0229576943290755, -2.0229576943290755, -2.0229576943290755, -1.9922614950981845, -1.9922614950981845, -1.9922614950981845, -1.9922614950981845]
 
 
 The test progress for an individual examinee can also be plotted using
@@ -245,7 +272,7 @@ in the chart can be tuned using different arguments for the function.
 
 
 
-.. image:: output_19_0.png
+.. image:: output_21_0.png
 
 
 Simulation example 2
@@ -277,16 +304,16 @@ test information to it.
 
     /usr/local/lib/python3.6/dist-packages/catsim/irt.py:142: RuntimeWarning: divide by zero encountered in double_scalars
       return 1 / test_info(theta, items)
-    100%|██████████| 10/10 [00:08<00:00,  1.17it/s]
+    100%|██████████| 10/10 [00:09<00:00,  1.10it/s]
 
 
 .. parsed-literal::
 
-    Simulation took 8.517879247665405 seconds
+    Simulation took 9.054187536239624 seconds
 
 
 
-.. image:: output_21_4.png
+.. image:: output_23_4.png
 
 
 Simulating non-adaptive tests
@@ -311,21 +338,21 @@ them in order to all examinees.
 
 .. parsed-literal::
 
-    The following items will be applied to the examinees in this order: [ 652 2786  780  991  144 1243 1911 3797 2951 2007 4802  976  580 2206
-     2114 4296 1986 2475 4521 3988 1870 4695 1645 3558 4620 2817 1809 2585
-     2289 4930  255 2673 3841 2980 1105 4027  475 3932  730 3937  522 1925
-      146 1382 2453 4021 2715  189 3092 3318]
+    The following items will be applied to the examinees in this order: [1808 3466 4943 2352  264 2872 1220  693  222 2573 3660  386  465 2851
+     1291 1090 3371  381 1712 1517 1937 3973 1293  361 1854  196 3144 4630
+     3409 1392 3943 2067 3379 2828 4674  969 2280 3110 1298 2833 1894  454
+     2374 1989 2705 2012 1539 2579 1535 2825]
     
     Starting simulation: Random Initializer Linear Selector Hill Climbing Estimator Maximum Item Number Initializer 5000 items
 
 
 .. parsed-literal::
 
-    100%|██████████| 10/10 [00:02<00:00,  4.27it/s]
+    100%|██████████| 10/10 [00:02<00:00,  4.30it/s]
 
 .. parsed-literal::
 
-    Simulation took 2.342834949493408 seconds
+    Simulation took 2.3253071308135986 seconds
 
 
 .. parsed-literal::
@@ -342,7 +369,7 @@ Here, we will also plot the estimation error for an examinee’s
 
 
 
-.. image:: output_25_0.png
+.. image:: output_27_0.png
 
 
 Using catsim objects outside of a Simulator
@@ -389,7 +416,7 @@ estimate a dummy initial proficiency anyway.
 
 .. parsed-literal::
 
-    Examinee initial proficiency: 4.276583972736306
+    Examinee initial proficiency: 1.0566520569660334
 
 
 Estimating a new :math:`\hat\theta`
@@ -418,7 +445,7 @@ simulate a new item being applied to this examinee**.
 
 .. parsed-literal::
 
-    Estimated proficiency, given answered items: -1.8535805779281085
+    Estimated proficiency, given answered items: -0.8241757698055087
 
 
 Checking whether the test should end
@@ -454,7 +481,7 @@ answer. It uses the indices of administered items to ignore them.
 
 .. parsed-literal::
 
-    Next item to be administered: 1629
+    Next item to be administered: 810
 
 
 .. parsed-literal::
@@ -486,8 +513,8 @@ simulations.)
 
 .. parsed-literal::
 
-    Probability to correctly answer item: 0.7633069064688918
-    Did the user answer the selected item correctly? False
+    Probability to correctly answer item: 0.6551580315429701
+    Did the user answer the selected item correctly? True
 
 
 Finally, we add the index of the administered item to the examinee and

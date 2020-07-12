@@ -152,9 +152,9 @@ Since items in a CAT are selected on-the-fly, a stopping criterion must be chose
 In :py:mod:`catsim`, test stopping criteria can be found in the :py:mod:`catsim.stopping` module.
 
 Package architecture
-********************
+====================
 
-:py:mod:`catsim` was built using an object-oriented architecture, an uncommon feat for scientific packages in Python, but which introduces many benefits for its maintenance and expansion. As explained in previous sessions, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module's respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using :py:mod:`catsim` and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on :numref:`modules_classes`.
+:py:mod:`catsim` was built using an object-oriented architecture,which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module's respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using :py:mod:`catsim` and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on :numref:`modules_classes`.
 
 .. table:: Modules and their corresponding abstract classes
     :name: modules_classes
