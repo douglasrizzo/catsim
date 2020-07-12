@@ -5,7 +5,7 @@ from catsim import __version__
 from os import path
 
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.rst'), encoding='utf-8') as f:
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
@@ -29,7 +29,7 @@ setup(
     version=__version__,
     description='Computerized Adaptive Testing Simulator',
     long_description=long_description,
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
     url='https://douglasrizzo.github.io/catsim',
