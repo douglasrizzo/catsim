@@ -1,5 +1,6 @@
 {
     "python.pythonPath": "/home/dodo/.anaconda3/bin/python",
     "python.formatting.provider": "yapf",
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "restructuredtext.confPath": "${workspaceFolder}/sphinx"
 }

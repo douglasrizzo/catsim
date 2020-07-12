@@ -133,6 +133,7 @@ def test_plots():
         close('all')
 
     plot.gen3d_dataset_scatter(items=s.items, show=False)
+    plot.param_dist(items=s.items, show=False)
     plot.test_progress(
         title='Test progress',
         simulator=s,

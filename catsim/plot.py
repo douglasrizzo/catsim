@@ -24,7 +24,8 @@ def item_curve(
     ptype: str = 'icc',
     max_info=True,
     filepath: str = None,
-    show: bool = True
+    show: bool = True,
+    figsize: tuple = None
 ):
     """Plots 'Item Response Theory'-related item plots
 
@@ -64,7 +65,7 @@ def item_curve(
         i_thetas.append(irt.inf(theta, a, b, c, d))
 
     if ptype in ['icc', 'iic']:
-        plt.figure()
+        plt.figure(figsize=figsize)
 
         if title is not None:
             plt.title(title, size=18)
@@ -91,7 +92,7 @@ def item_curve(
                 plt.plot(aux, irt.inf(aux, a, b, c, d), 'o')
 
     elif ptype == 'both':
-        _, ax1 = plt.subplots()
+        _, ax1 = plt.subplots(figsize=figsize)
 
         ax1.set_xlabel(r'$\theta$', size=16)
         ax1.set_ylabel(r'$P(\theta)$', color='b', size=16)
@@ -132,7 +133,11 @@ def item_curve(
 
 
 def gen3d_dataset_scatter(
-    items: numpy.ndarray, title: str = None, filepath: str = None, show: bool = True
+    items: numpy.ndarray,
+    title: str = None,
+    filepath: str = None,
+    show: bool = True,
+    figsize: tuple = None
 ):
     """Generate the item matrix tridimensional dataset scatter plot
 
@@ -151,7 +156,7 @@ def gen3d_dataset_scatter(
     assert Axes3D
     irt.validate_item_bank(items)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(list(items[:, 0]), list(items[:, 1]), list(items[:, 2]), s=10, c='b')
 
@@ -178,7 +183,8 @@ def item_exposure(
     par: str = None,
     hist: bool = False,
     filepath: str = None,
-    show: bool = True
+    show: bool = True,
+    figsize: tuple = None
 ):
     """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
     the `y` axis represents their exposure rates. an examinee's test progress.
@@ -212,7 +218,7 @@ def item_exposure(
     if simulator is None and items is None:
         raise ValueError('Not a single plottable object was passed.')
 
-    plt.figure()
+    plt.figure(figsize=figsize)
 
     if title is not None:
         plt.title(title, size=18)
@@ -278,7 +284,8 @@ def test_progress(
     see: bool = False,
     reliability: bool = False,
     filepath: str = None,
-    show: bool = True
+    show: bool = True,
+    figsize: tuple = None
 ):
     """Generates a plot representing an examinee's test progress. Note that,
     while some functions increase or decrease monotonically, like test information
@@ -328,7 +335,7 @@ def test_progress(
     if simulator is None and thetas is None and administered_items is None:
         raise ValueError('Not a single plottable object was passed.')
 
-    plt.figure()
+    plt.figure(figsize=figsize)
 
     if title is not None:
         plt.title(title, size=18)
@@ -377,6 +384,25 @@ def test_progress(
     plt.xlabel('Items')
     plt.grid()
     plt.legend(loc='best')
+
+    if filepath is not None:
+        filedir = os.path.dirname(filepath)
+        if len(filedir) > 0 and not os.path.exists(filedir):
+            os.makedirs(os.path.dirname(filepath))
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+
+    if show:
+        plt.show()
+
+
+def param_dist(
+    items: numpy.ndarray, filepath: str = None, show: bool = True, figsize: tuple = None
+):
+    _, axes = plt.subplots(2, 2, figsize=figsize)
+    _ = axes[0, 0].hist(items[:, 0], bins=100)
+    _ = axes[0, 1].hist(items[:, 1], bins=100)
+    _ = axes[1, 0].hist(items[:, 2], bins=100)
+    _ = axes[1, 1].hist(items[:, 3], bins=100)
 
     if filepath is not None:
         filedir = os.path.dirname(filepath)
