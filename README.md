@@ -12,7 +12,7 @@
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
 
 **catsim** is a Python package for computerized adaptive testing (CAT)
-simulations. It provides multiple methods for
+simulations. It provides multiple methods for:
 
 - [test initialization](https://douglasrizzo.github.io/catsim/initialization.html) (selecting the initial proficiency of the examinees)
 - [item selection](https://douglasrizzo.github.io/catsim/selection.html)
@@ -29,8 +29,7 @@ and an item bank, represented by their parameters according to some
 [logistic Item Response Theory
 model](https://douglasrizzo.github.io/catsim/introduction.html#item-response-theory-models).
 
-What\'s a CAT
-=============
+## What's a CAT
 
 Computerized adaptive tests are educational evaluations, usually taken
 by examinees in a computer or some other digital means, in which the
@@ -49,13 +48,13 @@ docs](https://douglasrizzo.github.io/catsim/introduction.html) and over
 at
 [Wikipedia](https://en.wikipedia.org/wiki/Computerized_adaptive_testing).
 
-Installation
-============
+## Installation
 
 Install it using `pip install catsim`.
 
-Basic Usage
-===========
+## Basic Usage
+
+**NEW:** there is now [a Colab Notebook](https://colab.research.google.com/drive/14zEWoDudBCXF0NO-qgzoQpWUGBcJ2lPH?usp=sharing) teaching the basics of catsim!
 
 1.  Have an [item matrix](https://douglasrizzo.github.io/catsim/item_matrix.html);
 2.  Have a sample of examinee proficiencies, or a number of examinees to be generated;
@@ -82,8 +81,7 @@ stopper = MaxItemStopper(20)
 Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
 ```
 
-Dependencies
-============
+## Dependencies
 
 All dependencies are listed on setup.py and should be installed
 automatically.
@@ -93,22 +91,19 @@ To run the tests, you\'ll need to install the testing requirements
 
 To generate the documentation, Sphinx and its dependencies are needed.
 
-Compatibility
-=============
+## Compatibility
 
 Since the beginning, *catsim* has only been compatible with Python 3.4
 upwards.
 
-Important links
-===============
+## Important links
 
 -   Official source code repo: <https://github.com/douglasrizzo/catsim>
 -   HTML documentation (stable release):
     <https://douglasrizzo.github.io/catsim>
 -   Issue tracker: <https://github.com/douglasrizzo/catsim/issues>
 
-Citing catsim
-=============
+## Citing catsim
 
 You can cite the package using the following bibtex entry:
 
