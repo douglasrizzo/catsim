@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.15.5
+                0.15.6
               </div>
             
           
@@ -175,7 +175,7 @@
 <p>Module with functions for plotting IRT-related results.</p>
 <dl class="function">
 <dt id="catsim.plot.gen3d_dataset_scatter">
-<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">gen3d_dataset_scatter</code><span class="sig-paren">(</span><em class="sig-param">items: numpy.ndarray</em>, <em class="sig-param">title: str = None</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#gen3d_dataset_scatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.gen3d_dataset_scatter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">gen3d_dataset_scatter</code><span class="sig-paren">(</span><em class="sig-param">items: numpy.ndarray</em>, <em class="sig-param">title: str = None</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em>, <em class="sig-param">figsize: tuple = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#gen3d_dataset_scatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.gen3d_dataset_scatter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate the item matrix tridimensional dataset scatter plot</p>
 <p>(<a class="reference external" href=".//plot-1.py">Source code</a>, <a class="reference external" href=".//plot-1.png">png</a>, <a class="reference external" href=".//plot-1.hires.png">hires.png</a>, <a class="reference external" href=".//plot-1.pdf">pdf</a>)</p>
 <div class="figure align-default">
@@ -195,7 +195,7 @@
 
 <dl class="function">
 <dt id="catsim.plot.item_curve">
-<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">item_curve</code><span class="sig-paren">(</span><em class="sig-param">a: float = 1</em>, <em class="sig-param">b: float = 0</em>, <em class="sig-param">c: float = 0</em>, <em class="sig-param">d: float = 1</em>, <em class="sig-param">title: str = None</em>, <em class="sig-param">ptype: str = 'icc'</em>, <em class="sig-param">max_info=True</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#item_curve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.item_curve" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">item_curve</code><span class="sig-paren">(</span><em class="sig-param">a: float = 1</em>, <em class="sig-param">b: float = 0</em>, <em class="sig-param">c: float = 0</em>, <em class="sig-param">d: float = 1</em>, <em class="sig-param">title: str = None</em>, <em class="sig-param">ptype: str = 'icc'</em>, <em class="sig-param">max_info=True</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em>, <em class="sig-param">figsize: tuple = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#item_curve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.item_curve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots ‘Item Response Theory’-related item plots</p>
 <p>(<a class="reference external" href=".//plot-2.py">Source code</a>)</p>
 <div class="figure align-default" id="id1">
@@ -232,7 +232,7 @@ information curve or ‘both’ for both curves in the same plot</p></li>
 
 <dl class="function">
 <dt id="catsim.plot.item_exposure">
-<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">item_exposure</code><span class="sig-paren">(</span><em class="sig-param">title: str = None</em>, <em class="sig-param">simulator: catsim.simulation.Simulator = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">par: str = None</em>, <em class="sig-param">hist: bool = False</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#item_exposure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.item_exposure" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">item_exposure</code><span class="sig-paren">(</span><em class="sig-param">title: str = None</em>, <em class="sig-param">simulator: catsim.simulation.Simulator = None</em>, <em class="sig-param">items: numpy.ndarray = None</em>, <em class="sig-param">par: str = None</em>, <em class="sig-param">hist: bool = False</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em>, <em class="sig-param">figsize: tuple = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#item_exposure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.item_exposure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a bar chart for the item bank exposure rate. The <cite>x</cite> axis represents one of the item parameters, while
 the <cite>y</cite> axis represents their exposure rates. an examinee’s test progress.</p>
 <p>(<a class="reference external" href=".//plot-3.py">Source code</a>)</p>
@@ -264,7 +264,7 @@ sorted in the x-axis by the parameter chosen in <cite>par</cite>.</p></li>
 
 <dl class="function">
 <dt id="catsim.plot.test_progress">
-<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">test_progress</code><span class="sig-paren">(</span><em class="sig-param">title: str = None</em>, <em class="sig-param">simulator: catsim.simulation.Simulator = None</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">thetas: list = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">true_theta: float = None</em>, <em class="sig-param">info: bool = False</em>, <em class="sig-param">var: bool = False</em>, <em class="sig-param">see: bool = False</em>, <em class="sig-param">reliability: bool = False</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#test_progress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.test_progress" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.plot.</code><code class="sig-name descname">test_progress</code><span class="sig-paren">(</span><em class="sig-param">title: str = None</em>, <em class="sig-param">simulator: catsim.simulation.Simulator = None</em>, <em class="sig-param">index: int = None</em>, <em class="sig-param">thetas: list = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">true_theta: float = None</em>, <em class="sig-param">info: bool = False</em>, <em class="sig-param">var: bool = False</em>, <em class="sig-param">see: bool = False</em>, <em class="sig-param">reliability: bool = False</em>, <em class="sig-param">filepath: str = None</em>, <em class="sig-param">show: bool = True</em>, <em class="sig-param">figsize: tuple = None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/plot.html#test_progress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.plot.test_progress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a plot representing an examinee’s test progress. Note that,
 while some functions increase or decrease monotonically, like test information
 and standard error of estimation, the plot calculates these values using the

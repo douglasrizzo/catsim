@@ -67,7 +67,7 @@
             
             
               <div class="version">
-                0.15.5
+                0.15.6
               </div>
             
           
@@ -107,9 +107,9 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#package-architecture">Package architecture</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#package-architecture">Package architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction to catsim by example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
@@ -302,10 +302,9 @@
 </div>
 </div>
 </div>
-</div>
 <div class="section" id="package-architecture">
-<h1>Package architecture<a class="headerlink" href="#package-architecture" title="Permalink to this headline">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was built using an object-oriented architecture, an uncommon feat for scientific packages in Python, but which introduces many benefits for its maintenance and expansion. As explained in previous sessions, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module’s respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on <a class="reference internal" href="#modules-classes"><span class="std std-numref">Table 1</span></a>.</p>
+<h2>Package architecture<a class="headerlink" href="#package-architecture" title="Permalink to this headline">¶</a></h2>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was built using an object-oriented architecture,which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module’s respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on <a class="reference internal" href="#modules-classes"><span class="std std-numref">Table 1</span></a>.</p>
 <table class="docutils align-default" id="modules-classes">
 <caption><span class="caption-number">Table 1 </span><span class="caption-text">Modules and their corresponding abstract classes</span><a class="headerlink" href="#modules-classes" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -332,6 +331,7 @@
 </tr>
 </tbody>
 </table>
+</div>
 </div>
 
 
