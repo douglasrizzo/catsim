@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,6 +11,11 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+
+  
   
     <link rel="shortcut icon" href="_static/logo.svg"/>
   
@@ -19,24 +23,21 @@
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" />
@@ -84,6 +85,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -93,7 +95,6 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction to catsim by example</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
@@ -111,6 +112,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -149,7 +151,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></li>
     
@@ -176,15 +178,15 @@
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom stopping criterion be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Stopper</span></code>.</p>
-<div class="graphviz"><img src="_images/inheritance-a6ddd31ba7e252bbdb84edbd873a2b711ddc01c0.png" alt="Inheritance diagram of catsim.stopping" usemap="#inheritance76f349e9d6" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-e675e2796ef946bbb8ee8fb21dacec24dbf4833f.png" alt="Inheritance diagram of catsim.stopping" usemap="#inheritance76f349e9d6" class="inheritance graphviz" /></div>
 <map id="inheritance76f349e9d6" name="inheritance76f349e9d6">
 <area shape="rect" id="node1" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,31,213,56"/>
 <area shape="rect" id="node2" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stop criterion" alt="" coords="261,31,455,56"/>
-<area shape="rect" id="node3" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion for maximum number of items in a test" alt="" coords="503,5,740,31"/>
-<area shape="rect" id="node4" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)" alt="" coords="504,55,739,80"/>
-</map><span class="target" id="module-catsim.stopping"></span><dl class="class">
+<area shape="rect" id="node3" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion for maximum number of items in a test" alt="" coords="503,5,741,31"/>
+<area shape="rect" id="node4" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)" alt="" coords="505,55,739,80"/>
+</map><span class="target" id="module-catsim.stopping"></span><dl class="py class">
 <dt id="catsim.stopping.MaxItemStopper">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.stopping.</code><code class="sig-name descname">MaxItemStopper</code><span class="sig-paren">(</span><em class="sig-param">max_itens: int</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">catsim.stopping.</code><code class="sig-name descname">MaxItemStopper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">max_itens</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Stopper</span></code></a></p>
 <p>Stopping criterion for maximum number of items in a test</p>
 <dl class="field-list simple">
@@ -192,9 +194,9 @@ used during the simulation, as long as it also inherits from
 <dd class="field-odd"><p><strong>max_itens</strong> – the maximum number of items in the test</p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="catsim.stopping.MaxItemStopper.stop">
-<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper.stop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><a class="reference internal" href="_modules/catsim/stopping.html#MaxItemStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MaxItemStopper.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the test reached its stopping criterion for the given user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -211,9 +213,9 @@ used during the simulation, as long as it also inherits from
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="catsim.stopping.MinErrorStopper">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.stopping.</code><code class="sig-name descname">MinErrorStopper</code><span class="sig-paren">(</span><em class="sig-param">min_error: float</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">catsim.stopping.</code><code class="sig-name descname">MinErrorStopper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">min_error</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Stopper" title="catsim.simulation.Stopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Stopper</span></code></a></p>
 <p>Stopping criterion for minimum standard error of estimation (see <a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>)</p>
 <dl class="field-list simple">
@@ -221,9 +223,9 @@ used during the simulation, as long as it also inherits from
 <dd class="field-odd"><p><strong>min_error</strong> – the minimum standard error of estimation the test must achieve before stopping</p>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="catsim.stopping.MinErrorStopper.stop">
-<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param">index: int = None</em>, <em class="sig-param">administered_items: numpy.ndarray = None</em>, <em class="sig-param">theta: float = None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper.stop" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><a class="reference internal" href="_modules/catsim/stopping.html#MinErrorStopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the test reached its stopping criterion</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,11 +265,19 @@ used during the simulation, as long as it also inherits from
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Douglas De Rizzo Meneghetti
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -278,7 +288,6 @@ used during the simulation, as long as it also inherits from
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

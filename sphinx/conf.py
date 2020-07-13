@@ -42,7 +42,7 @@ with open('../README.md', 'w') as outfile:
 extensions = [
     'matplotlib.sphinxext.plot_directive', 'sphinx.ext.autodoc', 'sphinx.ext.doctest',
     'sphinx.ext.inheritance_diagram', 'sphinx.ext.intersphinx', 'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode', 'numpydoc', 'sphinx_rtd_theme', 'm2r'
+    'sphinx.ext.viewcode', 'numpydoc', 'sphinx_rtd_theme', 'm2r2'
 ]
 
 intersphinx_mapping = {

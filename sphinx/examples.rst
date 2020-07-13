@@ -1,5 +1,5 @@
-Introduction to catsim by example
-=================================
+Example usages
+==============
 
 |image0|
 
@@ -21,30 +21,39 @@ First, let’s install catsim and import the relevant modules:
 
 .. |image0| image:: https://douglasrizzo.com.br/catsim/_static/logo_text.svg
 
-.. code:: ipython3
+.. code:: 
 
-    !pip install catsim
+    !pip install -U catsim
 
 
 .. parsed-literal::
 
-    Requirement already satisfied: catsim in /usr/local/lib/python3.6/dist-packages (0.15.4)
-    Requirement already satisfied: tqdm in /usr/local/lib/python3.6/dist-packages (from catsim) (4.41.1)
-    Requirement already satisfied: numpy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.18.5)
-    Requirement already satisfied: json-tricks in /usr/local/lib/python3.6/dist-packages (from catsim) (3.15.2)
-    Requirement already satisfied: numexpr in /usr/local/lib/python3.6/dist-packages (from catsim) (2.7.1)
-    Requirement already satisfied: scikit-learn in /usr/local/lib/python3.6/dist-packages (from catsim) (0.22.2.post1)
-    Requirement already satisfied: matplotlib in /usr/local/lib/python3.6/dist-packages (from catsim) (3.2.2)
-    Requirement already satisfied: scipy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.4.1)
-    Requirement already satisfied: joblib>=0.11 in /usr/local/lib/python3.6/dist-packages (from scikit-learn->catsim) (0.15.1)
-    Requirement already satisfied: kiwisolver>=1.0.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (1.2.0)
-    Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (0.10.0)
-    Requirement already satisfied: pyparsing!=2.0.4,!=2.1.2,!=2.1.6,>=2.0.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (2.4.7)
-    Requirement already satisfied: python-dateutil>=2.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (2.8.1)
-    Requirement already satisfied: six in /usr/local/lib/python3.6/dist-packages (from cycler>=0.10->matplotlib->catsim) (1.12.0)
+    Collecting catsim
+      Downloading https://files.pythonhosted.org/packages/af/46/a803430c2b1711c1793a7aad0ff878a36b0262f34c06a2bbef4156fd78f7/catsim-0.15.6.tar.gz
+    Requirement already satisfied, skipping upgrade: scipy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.4.1)
+    Requirement already satisfied, skipping upgrade: numexpr in /usr/local/lib/python3.6/dist-packages (from catsim) (2.7.1)
+    Requirement already satisfied, skipping upgrade: matplotlib in /usr/local/lib/python3.6/dist-packages (from catsim) (3.2.2)
+    Requirement already satisfied, skipping upgrade: scikit-learn in /usr/local/lib/python3.6/dist-packages (from catsim) (0.22.2.post1)
+    Collecting json_tricks
+      Downloading https://files.pythonhosted.org/packages/5f/09/603c6d30babd527df4851696ebeddce4b6a0bc6468f143b39094c97cd830/json_tricks-3.15.2-py2.py3-none-any.whl
+    Requirement already satisfied, skipping upgrade: tqdm in /usr/local/lib/python3.6/dist-packages (from catsim) (4.41.1)
+    Requirement already satisfied, skipping upgrade: numpy in /usr/local/lib/python3.6/dist-packages (from catsim) (1.18.5)
+    Requirement already satisfied, skipping upgrade: cycler>=0.10 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (0.10.0)
+    Requirement already satisfied, skipping upgrade: pyparsing!=2.0.4,!=2.1.2,!=2.1.6,>=2.0.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (2.4.7)
+    Requirement already satisfied, skipping upgrade: python-dateutil>=2.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (2.8.1)
+    Requirement already satisfied, skipping upgrade: kiwisolver>=1.0.1 in /usr/local/lib/python3.6/dist-packages (from matplotlib->catsim) (1.2.0)
+    Requirement already satisfied, skipping upgrade: joblib>=0.11 in /usr/local/lib/python3.6/dist-packages (from scikit-learn->catsim) (0.15.1)
+    Requirement already satisfied, skipping upgrade: six in /usr/local/lib/python3.6/dist-packages (from cycler>=0.10->matplotlib->catsim) (1.12.0)
+    Building wheels for collected packages: catsim
+      Building wheel for catsim (setup.py) ... [?25l[?25hdone
+      Created wheel for catsim: filename=catsim-0.15.6-cp36-none-any.whl size=32830 sha256=08a8dc366e6722d039f738a2fc64a3faf8fe196729046e1da65380d21b52585a
+      Stored in directory: /root/.cache/pip/wheels/a5/0f/5c/b18a1825e3918b7deaa0b90f1432053e7b41ea21537859e999
+    Successfully built catsim
+    Installing collected packages: json-tricks, catsim
+    Successfully installed catsim-0.15.6 json-tricks-3.15.2
 
 
-.. code:: ipython3
+.. code:: 
 
     # this function generates an item bank, in case the user cannot provide one
     from catsim.cat import generate_item_bank
@@ -70,20 +79,14 @@ The ``generate_item_bank()`` function provides a convenient way to
 generate realistic item parameter matrices from probability
 distributions.
 
-.. code:: ipython3
+.. code:: 
 
     bank_size = 5000
     items = generate_item_bank(bank_size)
     catplot.gen3d_dataset_scatter(items)
 
 
-.. parsed-literal::
-
-    
-
-
-
-.. image:: output_4_1.png
+.. image:: examples_files/examples_4_1.png
 
 
 Visualizing parameter distribution
@@ -96,17 +99,13 @@ Response Theory.
 
 We can plot and visualize their distributions like so:
 
-.. code:: ipython3
+.. code:: 
 
-    fig, axes = plt.subplots(2, 2, figsize=(9,7))
-    _ = axes[0,0].hist(items[:,0], bins=100)
-    _ = axes[0,1].hist(items[:,1], bins=100)
-    _ = axes[1,0].hist(items[:,2], bins=100)
-    _ = axes[1,1].hist(items[:,3], bins=100)
+    catplot.param_dist(items, figsize=(9,7))
 
 
 
-.. image:: output_6_0.png
+.. image:: examples_files/examples_6_0.png
 
 
 Visualizing individual items
@@ -118,14 +117,14 @@ item. Notice how this item has been generated according to the
 different logistic models can be generated by changing the ``itemtype``
 parameter of ``generate_item_bank()``.
 
-.. code:: ipython3
+.. code:: 
 
     a, b, c, d = items[0]
     catplot.item_curve(a,b,c,d)
 
 
 
-.. image:: output_8_0.png
+.. image:: examples_files/examples_8_0.png
 
 
 Running simulations
@@ -146,7 +145,7 @@ A simulation requires the following objects:
 We have already created an item parameter matrix, so let’s go ahead and
 create the other objects…
 
-.. code:: ipython3
+.. code:: 
 
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
@@ -176,14 +175,9 @@ used as the proficiencies of the examinees.
 
 Here we will use an integer.
 
-.. code:: ipython3
+.. code:: 
 
     s = Simulator(items, 10, RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(50))
-
-
-.. parsed-literal::
-
-    
 
 
 Starting the simulation
@@ -192,32 +186,17 @@ Starting the simulation
 To execute the simulations, call the simulate() method of the Simulator
 object.
 
-.. code:: ipython3
+.. code:: 
 
     s.simulate(verbose=True)
 
 
 .. parsed-literal::
 
-      0%|          | 0/10 [00:00<?, ?it/s]
-
-.. parsed-literal::
-
     Starting simulation: Random Initializer Maximum Information Selector Hill Climbing Estimator Maximum Item Number Initializer 5000 items
+    100%|██████████| 10/10 [00:05<00:00,  1.72it/s]
 
-
-.. parsed-literal::
-
-    100%|██████████| 10/10 [00:06<00:00,  1.61it/s]
-
-.. parsed-literal::
-
-    Simulation took 6.206281900405884 seconds
-
-
-.. parsed-literal::
-
-    
+    Simulation took 5.8171546459198 seconds
 
 
 Acessing simulation results
@@ -226,7 +205,7 @@ Acessing simulation results
 After the simulation if over, information is provided through the
 attributes of the Simulator:
 
-.. code:: ipython3
+.. code:: 
 
     print('Bias:', s.bias)
     print('Mean squared error:', s.mse)
@@ -235,15 +214,15 @@ attributes of the Simulator:
 
 .. parsed-literal::
 
-    Bias: -0.35394128227922633
-    Mean squared error: 0.9688648393623304
-    Root mean squared error: 0.9843093209770648
+    Bias: -0.12877908953331357
+    Mean squared error: 0.10927905639507059
+    Root mean squared error: 0.33057382896271537
 
 
 Information for individual examinees can also be accessed through the
 attributes of the Simulator.
 
-.. code:: ipython3
+.. code:: 
 
     examinee_index = 0
     print('Accessing examinee', examinee_index, 'results...')
@@ -256,23 +235,22 @@ attributes of the Simulator.
 .. parsed-literal::
 
     Accessing examinee 0 results...
-        True proficiency: 0.5490604939976603
-        Items administered: [4118, 1917, 1128, 4248, 767, 3572, 4109, 3500, 2745, 4863, 3602, 498, 4339, 4421, 637, 2096, 2396, 3825, 2518, 4507, 3854, 3987, 2639, 3062, 322, 2248, 2659, 2702, 3104, 1563, 4220, 106, 480, 2405, 645, 1293, 4741, 2167, 4030, 715, 1338, 3210, 3128, 4363, 2786, 4467, 3455, 2496, 4681, 4119]
-        Responses: [False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, False, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, False, True]
-        Proficiency estimation during each step of the test: [-1.9760342267420352, -2.1431976245351447, -2.312866831555607, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.088142647139371, -2.086901001555195, -2.086901001555195, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.083050730387461, -2.0229576943290755, -2.0229576943290755, -2.0229576943290755, -2.0229576943290755, -2.0229576943290755, -1.9922614950981845, -1.9922614950981845, -1.9922614950981845, -1.9922614950981845]
+        True proficiency: -0.2816785228767416
+        Items administered: [1794, 0, 3336, 2475, 1879, 1768, 4025, 1222, 900, 2399, 3556, 2287, 2485, 1273, 2391, 3442, 70, 1724, 3589, 1585, 2230, 3714, 2044, 543, 996, 2692, 2566, 3316, 1243, 516, 90, 4784, 2893, 4075, 2514, 3916, 3281, 4946, 3961, 2174, 441, 3505, 142, 4108, 4039, 3970, 3866, 4659, 1801, 3128]
+        Responses: [True, True, False, True, False, True, False, True, True, False, False, True, True, True, False, False, True, False, False, True, True, True, True, True, True, True, False, True, True, True, True, True, False, False, False, False, True, True, True, True, False, True, False, False, True, False, True, True, True, True]
+        Proficiency estimation during each step of the test: [-2.9062367750482476, inf, inf, -0.8645929540106936, -0.4000937535082434, -1.0984746111118635, -0.8523400481400345, -1.2698782015572956, -1.0729249779445948, -0.8448001617230141, -1.065419646674027, -1.3754326555875702, -1.2138690054229484, -1.0891772226836556, -0.9819440114965495, -1.154819511564105, -1.339700019932513, -1.2320382801141416, -1.4062619544561699, -1.5579952313912742, -1.4617917667004856, -1.384430722645969, -1.2949916487176605, -1.2409486213125227, -1.1706229487693933, -1.0933573080599417, -1.0404774627310964, -1.105931582126757, -1.0610697847401798, -1.014087695805288, -0.9576764350218117, -0.9143005089326925, -0.8608950194549864, -0.9180361878629862, -0.9784988359602548, -1.039387055887484, -1.0826369520017567, -1.0414606979162682, -1.0025638352769068, -0.9729843792641382, -0.9241130070522614, -0.9815002657882789, -0.9374991266848149, -1.020429275472375, -1.0972120361274151, -1.0633721669862448, -1.083039048251386, -1.043512265559606, -1.0135620128739955, -0.9841406046060365, -0.9537218651754478]
 
 
 The test progress for an individual examinee can also be plotted using
 the ``catsim.plot.test_progress(function)``. The amount of information
 in the chart can be tuned using different arguments for the function.
 
-.. code:: ipython3
+.. code:: 
 
     catplot.test_progress(simulator=s,index=0)
 
 
-
-.. image:: output_21_0.png
+.. image:: examples_files/examples_21_0.png
 
 
 Simulation example 2
@@ -282,7 +260,7 @@ This example uses a ``numpy.ndarray`` to represent examinees. We will
 also plot more information than before in our test progress plot, adding
 test information to it.
 
-.. code:: ipython3
+.. code:: 
 
     examinees = numpy.random.normal(size=10)
     s = Simulator(items, examinees, RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MinErrorStopper(.3))
@@ -292,28 +270,19 @@ test information to it.
 
 .. parsed-literal::
 
-      0%|          | 0/10 [00:00<?, ?it/s]
-
-.. parsed-literal::
-
-    
     Starting simulation: Random Initializer Maximum Information Selector Hill Climbing Estimator Minimum Error Initializer 5000 items
-
-
-.. parsed-literal::
-
-    /usr/local/lib/python3.6/dist-packages/catsim/irt.py:142: RuntimeWarning: divide by zero encountered in double_scalars
+    
+    python3.6/dist-packages/catsim/irt.py:142: RuntimeWarning: divide by zero encountered in double_scalars
       return 1 / test_info(theta, items)
-    100%|██████████| 10/10 [00:09<00:00,  1.10it/s]
+    100%|██████████| 10/10 [00:07<00:00,  1.33it/s]
 
 
 .. parsed-literal::
 
-    Simulation took 9.054187536239624 seconds
+    Simulation took 7.508302450180054 seconds
 
 
-
-.. image:: output_23_4.png
+.. image:: examples_files/examples_23_3.png
 
 
 Simulating non-adaptive tests
@@ -324,7 +293,7 @@ item selector. The linear selector receives the item indices as
 arguments, retrieves them from the item parameter matrix and applies
 them in order to all examinees.
 
-.. code:: ipython3
+.. code:: 
 
     indexes = numpy.random.choice(items.shape[0], 50, replace=False)
     print('The following items will be applied to the examinees in this order:', indexes)
@@ -334,42 +303,33 @@ them in order to all examinees.
 
 .. parsed-literal::
 
-      0%|          | 0/10 [00:00<?, ?it/s]
-
-.. parsed-literal::
-
-    The following items will be applied to the examinees in this order: [1808 3466 4943 2352  264 2872 1220  693  222 2573 3660  386  465 2851
-     1291 1090 3371  381 1712 1517 1937 3973 1293  361 1854  196 3144 4630
-     3409 1392 3943 2067 3379 2828 4674  969 2280 3110 1298 2833 1894  454
-     2374 1989 2705 2012 1539 2579 1535 2825]
+    The following items will be applied to the examinees in this order: [4869 2944 2371 2000  721  920 4166 1933 3127 1938 4922 2814 4624 1828
+      521 3600 1830 2676 3323 4494 1114 4700  549 2997 1463 1955 2639 2975
+     3313 4093 4930 4368  292 2531 3767  228 1202  554 4671  310 1294 2387
+      142 3150 2717 4207  885 4440  600 1128]
     
     Starting simulation: Random Initializer Linear Selector Hill Climbing Estimator Maximum Item Number Initializer 5000 items
 
+    100%|██████████| 10/10 [00:02<00:00,  4.76it/s]
 
-.. parsed-literal::
-
-    100%|██████████| 10/10 [00:02<00:00,  4.30it/s]
-
-.. parsed-literal::
-
-    Simulation took 2.3253071308135986 seconds
-
-
-.. parsed-literal::
-
-    
+    Simulation took 2.101578950881958 seconds
 
 
 Here, we will also plot the estimation error for an examinee’s
 :math:`\hat\theta` value during the progress of the test.
 
-.. code:: ipython3
+.. code:: 
 
     catplot.test_progress(simulator=s,index=0, info=True, see=True)
 
 
+.. parsed-literal::
 
-.. image:: output_27_0.png
+    /usr/local/lib/python3.6/dist-packages/catsim/irt.py:142: RuntimeWarning: divide by zero encountered in double_scalars
+      return 1 / test_info(theta, items)
+
+
+.. image:: examples_files/examples_27_1.png
 
 
 Using catsim objects outside of a Simulator
@@ -385,7 +345,7 @@ select the next item for this examinee, re-estimate their proficiency
 and check if the test should be stopped or if a new item should be
 applied to the examinee.
 
-.. code:: ipython3
+.. code:: 
 
     responses = [True, True, False, False]
     administered_items = [1435, 3221, 17, 881]
@@ -408,7 +368,7 @@ Even though this information is already enough to estimate the current
 proficiency of the examinee, we’ll go ahead and use our initializer to
 estimate a dummy initial proficiency anyway.
 
-.. code:: ipython3
+.. code:: 
 
     est_theta = initializer.initialize()
     print('Examinee initial proficiency:', est_theta)
@@ -416,7 +376,7 @@ estimate a dummy initial proficiency anyway.
 
 .. parsed-literal::
 
-    Examinee initial proficiency: 1.0566520569660334
+    Examinee initial proficiency: 2.5662180237120156
 
 
 Estimating a new :math:`\hat\theta`
@@ -437,7 +397,7 @@ Some estimators may or may not use the current value of
 **After getting to the end of the notebook, come back to this cell to
 simulate a new item being applied to this examinee**.
 
-.. code:: ipython3
+.. code:: 
 
     new_theta = estimator.estimate(items=items, administered_items=administered_items, response_vector=responses, est_theta=est_theta)
     print('Estimated proficiency, given answered items:', new_theta)
@@ -445,7 +405,7 @@ simulate a new item being applied to this examinee**.
 
 .. parsed-literal::
 
-    Estimated proficiency, given answered items: -0.8241757698055087
+    Estimated proficiency, given answered items: -1.695833205771666
 
 
 Checking whether the test should end
@@ -455,7 +415,7 @@ We do not know whether the CAT should select another item to the
 examinee or if the test should end. The stoper will give us this answer
 through the ``stop()`` method.
 
-.. code:: ipython3
+.. code:: 
 
     _stop = stopper.stop(administered_items=items[administered_items], theta=est_theta)
     print('Should the test be stopped:', _stop)
@@ -473,7 +433,7 @@ The selector takes the item parameter matrix and the current
 :math:`\hat\theta` value to select the new item the examinee will
 answer. It uses the indices of administered items to ignore them.
 
-.. code:: ipython3
+.. code:: 
 
     item_index = selector.select(items=items, administered_items=administered_items, est_theta=est_theta)
     print('Next item to be administered:', item_index)
@@ -481,12 +441,9 @@ answer. It uses the indices of administered items to ignore them.
 
 .. parsed-literal::
 
-    Next item to be administered: 810
+    Next item to be administered: 2245
 
-
-.. parsed-literal::
-
-    /usr/local/lib/python3.6/dist-packages/catsim/selection.py:86: UserWarning: This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0
+    /usr/local/lib/python3.6/dist-packages/catsim/selection.py:87: UserWarning: This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0
       'This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0'
 
 
@@ -501,7 +458,7 @@ simulate the answer probabilistically.
 (By the way, this is exactly what the Simulator does during
 simulations.)
 
-.. code:: ipython3
+.. code:: 
 
     a, b, c, d = items[item_index]
     prob = icc(est_theta, a, b, c, d)
@@ -513,7 +470,7 @@ simulations.)
 
 .. parsed-literal::
 
-    Probability to correctly answer item: 0.6551580315429701
+    Probability to correctly answer item: 0.6605443041512475
     Did the user answer the selected item correctly? True
 
 
@@ -524,7 +481,7 @@ of the adaptive test.
 Go back to the **“Estimating a new :math:`\hat\theta`”** step above to
 simulate another step of the CAT.
 
-.. code:: ipython3
+.. code:: 
 
     administered_items.append(item_index)
     responses.append(correct)

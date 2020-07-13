@@ -18,10 +18,10 @@ setup(
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Education :: Testing',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)'
     ],
@@ -40,7 +40,7 @@ setup(
     extras_require=dict(
         testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls'],
         docs=[
-            'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'm2r',
+            'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'm2r2',
             'bibtex-pygments-lexer', 'matplotlib'
         ]
     ),
