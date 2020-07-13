@@ -3,7 +3,8 @@ python:
 - '3.5'
 - '3.6'
 - '3.7'
-- '3.8-dev'
+- '3.8'
+- '3.9-dev'
 addons:
   apt:
     packages:
@@ -30,7 +31,7 @@ deploy:
   password:
     secure: s16kDeSssKMH2mktNDho8nUmVXYFb7OhetMi/ZKl4L0fWaAK8mi/zHRgQCyEF4nOBXZQIiWZJK3eeC0BTKjRopvs6hdLI2P4/FyCgPXLRUiCnC1a6IlwLK/VAiXCdx6vgtlec6m7Lfn80EuL8muwT6+ezY3a2niiDy6oNaY61sjpUqCl6+v8VIlDDOwOf/1NPfbMyhTCLYMl6rf6l/phap+PDuvoDu9l2K7pLXROyH/DtjEHuECsPhNWbmB5wzMeirnfMB23qhD2ibJJIZU3eTQliG07JzVjiNcHmOLAKBUtJoSNrF8RcgphOfB/pnWJYxdzDmhlXWkhrvK500Q+RJBDSbtscNlDPRqCv60VMUZ2tWXsHXaXSe4dsVhIG6sr88zuvPKm4QoUOxm9KkzH/Ybh+ySpirTVWhrjK6UYKTOc5QDvshQryrf2keNAgHF8MznM/yqh0txYIiyAM/RLKv00aCqaBvumvN2HQNPOmouTWM+tZtL3I86iQhf9MdSniRfwYp1f9A3HmruvEc0N9Eaw/VPjOzKvoxwOK8uxr82yZ3wL9V/oTjwHKQ9k1HobKKqWmZzxicUDmFDcUlL1u0X/oh54PYSvLUJpIeOvECdCJQn9SLHFq0A2J5W1u7Omq3E5iw4j+rbQjdymZJzqzNfapueuIPjgQ6PsJF6f0i0=
   on:
-    condition: $TRAVIS_PYTHON_VERSION = 3.6
+    condition: $TRAVIS_PYTHON_VERSION = 3.7
     tags: true
     repo: douglasrizzo/catsim
     distributions: sdist bdist_wheel
