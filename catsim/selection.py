@@ -884,7 +884,7 @@ class IntervalInfoSelector(Selector):
     the integral of the information function at a predetermined ``interval``
     :math:`\\delta` above and below the current :math:`\\hat\\theta` is chosen.
 
-    .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta - \\delta}I_i(\\hat\\theta)
+    .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta + \\delta}I_i(\\hat\\theta)
 
     :param interval: the interval of the integral. If no interval is passed, the
                      integral is calculated from :math:`[-\\infty, \\infty]`.

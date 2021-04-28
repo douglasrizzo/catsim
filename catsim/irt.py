@@ -43,6 +43,7 @@ def _split_params(items: numpy.ndarray):
 
 def detect_model(items: numpy.ndarray) -> int:
     """Detects which logistic model an item matrix fits into.
+    
     :param items: an item matrix
     :return: an int between 1 and 4 denoting the logistic model of the given item matrix
     """
@@ -261,11 +262,11 @@ def log_likelihood(
 
     .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}
 
-    For mathematical reasons, finding the maximum of :math:`L(X_{Ij}` includes using the
-    product rule of derivations. Since :math:`L(X_{Ij}` has :math:`j` parts, it can be quite
-    complicated to do so. Also, for computational reasons, the product of probabilities can
-    quickly tend to 0, so it is common to use the log-likelihood in maximization/minimization
-    problems, transforming the product of probabilities in a sum of probabilities:
+    Finding the maximum of :math:`L(X_{Ij})` includes using the product rule of derivations.
+    Since :math:`L(X_{Ij})` has :math:`j` parts, it can be quite complicated to do so. Also,
+    for computational reasons, the product of probabilities can quickly tend to 0, so it is
+    common to use the log-likelihood in maximization/minimization problems, transforming the
+    product of probabilities in a sum of probabilities:
 
      .. math:: \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\sum_{i=1} ^ I
                \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
@@ -293,9 +294,7 @@ def negative_log_likelihood(est_theta: float, *args) -> float:
     """Function used by :py:mod:`scipy.optimize` optimization functions that tend to minimize
     values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
     value, given a response vector and the parameters of the administered items. The value of
-    :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood` or, mathematically:
-
-    .. math:: - \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I)
+    :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood`.
 
     :param est_theta: estimated proficiency value
 
@@ -346,8 +345,8 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
     discrimination, column 2 represents item difficulty, column 3 represents the
     pseudo-guessing parameter and column 4 represents the item upper asymptote.
 
-    The item matrix must have at least one line, exactly four columns and
-    :math:`\\forall i \\in I , a_i > 0 \\wedge 0 < c_i < 1 \\wedge 0 < d_i < 1`
+    The item matrix must have at least one line, representing an item, and exactly four columns, representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered valid if, for all items in the matrix,
+    :math:`a > 0 \\wedge 0 < c < 1 \\wedge 0 < d < 1`.
 
     :param items: the item matrix.
     :param raise_err: whether to raise an error in case the validation fails or
