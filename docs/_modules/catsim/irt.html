@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>catsim.irt</title>
   
@@ -19,7 +19,10 @@
   
     <link rel="shortcut icon" href="../../_static/logo.svg"/>
   
+
   
+  
+
   
 
   
@@ -32,7 +35,6 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
@@ -145,6 +147,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -214,6 +218,7 @@
 
 <div class="viewcode-block" id="detect_model"><a class="viewcode-back" href="../../irt.html#catsim.irt.detect_model">[docs]</a><span class="k">def</span> <span class="nf">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Detects which logistic model an item matrix fits into.</span>
+<span class="sd">    </span>
 <span class="sd">    :param items: an item matrix</span>
 <span class="sd">    :return: an int between 1 and 4 denoting the logistic model of the given item matrix</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -432,11 +437,11 @@
 
 <span class="sd">    .. math:: L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\prod_{i=1} ^ I P_{ij}(\\theta)^{X_{ij}} Q_{ij}(\\theta)^{1-X_{ij}}</span>
 
-<span class="sd">    For mathematical reasons, finding the maximum of :math:`L(X_{Ij}` includes using the</span>
-<span class="sd">    product rule of derivations. Since :math:`L(X_{Ij}` has :math:`j` parts, it can be quite</span>
-<span class="sd">    complicated to do so. Also, for computational reasons, the product of probabilities can</span>
-<span class="sd">    quickly tend to 0, so it is common to use the log-likelihood in maximization/minimization</span>
-<span class="sd">    problems, transforming the product of probabilities in a sum of probabilities:</span>
+<span class="sd">    Finding the maximum of :math:`L(X_{Ij})` includes using the product rule of derivations.</span>
+<span class="sd">    Since :math:`L(X_{Ij})` has :math:`j` parts, it can be quite complicated to do so. Also,</span>
+<span class="sd">    for computational reasons, the product of probabilities can quickly tend to 0, so it is</span>
+<span class="sd">    common to use the log-likelihood in maximization/minimization problems, transforming the</span>
+<span class="sd">    product of probabilities in a sum of probabilities:</span>
 
 <span class="sd">     .. math:: \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I) = \\sum_{i=1} ^ I</span>
 <span class="sd">               \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log</span>
@@ -464,9 +469,7 @@
     <span class="sd">&quot;&quot;&quot;Function used by :py:mod:`scipy.optimize` optimization functions that tend to minimize</span>
 <span class="sd">    values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency</span>
 <span class="sd">    value, given a response vector and the parameters of the administered items. The value of</span>
-<span class="sd">    :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood` or, mathematically:</span>
-
-<span class="sd">    .. math:: - \\log L(X_{Ij} | \\theta_j, a_I, b_I, c_I, d_I)</span>
+<span class="sd">    :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood`.</span>
 
 <span class="sd">    :param est_theta: estimated proficiency value</span>
 
@@ -517,8 +520,8 @@
 <span class="sd">    discrimination, column 2 represents item difficulty, column 3 represents the</span>
 <span class="sd">    pseudo-guessing parameter and column 4 represents the item upper asymptote.</span>
 
-<span class="sd">    The item matrix must have at least one line, exactly four columns and</span>
-<span class="sd">    :math:`\\forall i \\in I , a_i &gt; 0 \\wedge 0 &lt; c_i &lt; 1 \\wedge 0 &lt; d_i &lt; 1`</span>
+<span class="sd">    The item matrix must have at least one line, representing an item, and exactly four columns, representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered valid if, for all items in the matrix,</span>
+<span class="sd">    :math:`a &gt; 0 \\wedge 0 &lt; c &lt; 1 \\wedge 0 &lt; d &lt; 1`.</span>
 
 <span class="sd">    :param items: the item matrix.</span>
 <span class="sd">    :param raise_err: whether to raise an error in case the validation fails or</span>
@@ -565,28 +568,25 @@
            
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
+        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

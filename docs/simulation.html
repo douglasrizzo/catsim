@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Computerized Adaptive Testing Simulation – catsim.simulation</title>
   
@@ -19,7 +19,10 @@
   
     <link rel="shortcut icon" href="_static/logo.svg"/>
   
+
   
+  
+
   
 
   
@@ -32,7 +35,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -95,7 +97,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction to catsim by example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -147,6 +149,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -158,7 +162,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/simulation.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -183,7 +187,7 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class for proficiency estimators</p>
 <dl class="py method">
 <dt id="catsim.simulation.Estimator.estimate">
-<em class="property">abstract </em><code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><a class="reference internal" href="_modules/catsim/simulation.html#Estimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator.estimate" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/simulation.html#Estimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</dt><dd><p>test for the given examinee.</p>
 </dd>
@@ -212,7 +216,7 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class for CAT initializers</p>
 <dl class="py method">
 <dt id="catsim.simulation.Initializer.initialize">
-<em class="property">abstract </em><code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><a class="reference internal" href="_modules/catsim/simulation.html#Initializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer.initialize" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/simulation.html#Initializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Initializer.initialize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selects an examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -232,7 +236,7 @@ application of adaptive tests. Most of this module is based on the work of
 <dd><p>Base class representing a CAT item selector.</p>
 <dl class="py method">
 <dt id="catsim.simulation.Selector.select">
-<em class="property">abstract </em><code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a><a class="reference internal" href="_modules/catsim/simulation.html#Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Selector.select" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><a class="reference internal" href="_modules/catsim/simulation.html#Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Selector.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,7 +267,7 @@ attributed to <cite>simulator</cite>, this method is called again, guaranteeing 
 
 <dl class="py class">
 <dt id="catsim.simulation.Simulator">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.simulation.</code><code class="sig-name descname">Simulator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">examinees</span></em>, <em class="sig-param"><span class="n">initializer</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer">catsim.simulation.Initializer</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">selector</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector">catsim.simulation.Selector</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">estimator</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator">catsim.simulation.Estimator</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopper</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper">catsim.simulation.Stopper</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">catsim.simulation.</code><code class="sig-name descname">Simulator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">examinees</span></em>, <em class="sig-param"><span class="n">initializer</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer">catsim.simulation.Initializer</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">selector</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector">catsim.simulation.Selector</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">estimator</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator">catsim.simulation.Estimator</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopper</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper">catsim.simulation.Stopper</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing the simulator. It gathers several objects that describe the full
 simulation process and simulates one or more computerized adaptive tests</p>
 <dl class="field-list simple">
@@ -356,7 +360,7 @@ called. For more information on the root mean-squared error of estimation, see
 
 <dl class="py method">
 <dt id="catsim.simulation.Simulator.simulate">
-<code class="sig-name descname">simulate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">initializer</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer">catsim.simulation.Initializer</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">selector</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector">catsim.simulation.Selector</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">estimator</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator">catsim.simulation.Estimator</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopper</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper">catsim.simulation.Stopper</a></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator.simulate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">simulate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">initializer</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Initializer" title="catsim.simulation.Initializer">catsim.simulation.Initializer</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">selector</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Selector" title="catsim.simulation.Selector">catsim.simulation.Selector</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">estimator</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Estimator" title="catsim.simulation.Estimator">catsim.simulation.Estimator</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">stopper</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#catsim.simulation.Stopper" title="catsim.simulation.Stopper">catsim.simulation.Stopper</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Simulator.simulate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Simulator.simulate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simulates a computerized adaptive testing application to one or more examinees</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -393,7 +397,7 @@ Good for longer simulations.</p></li>
 <dd><p>Base class for CAT stop criterion</p>
 <dl class="py method">
 <dt id="catsim.simulation.Stopper.stop">
-<em class="property">abstract </em><code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a><a class="reference internal" href="_modules/catsim/simulation.html#Stopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Stopper.stop" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">stop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><a class="reference internal" href="_modules/catsim/simulation.html#Stopper.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Stopper.stop" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checks whether the test reached its stopping criterion for the given user</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -414,37 +418,29 @@ Good for longer simulations.</p></li>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="irt.html" class="btn btn-neutral float-right" title="Item Response Theory Functions – catsim.irt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="stopping.html" class="btn btn-neutral float-left" title="Stopping Criteria – catsim.stopping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="irt.html" class="btn btn-neutral float-right" title="Item Response Theory Functions – catsim.irt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="stopping.html" class="btn btn-neutral float-left" title="Stopping Criteria – catsim.stopping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
+        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

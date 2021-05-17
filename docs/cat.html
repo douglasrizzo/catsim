@@ -3,9 +3,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Computerized Adaptive Test-related Functions – catsim.cat</title>
   
@@ -19,7 +19,10 @@
   
     <link rel="shortcut icon" href="_static/logo.svg"/>
   
+
   
+  
+
   
 
   
@@ -32,7 +35,6 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
         <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
@@ -95,7 +97,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Introduction to catsim by example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -147,6 +149,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -158,7 +162,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/cat.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -177,7 +181,7 @@
 <p>Functions used specifically during the application/simulation of computerized adaptive tests.</p>
 <dl class="py function">
 <dt id="catsim.cat.bias">
-<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">bias</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#bias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.bias" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">bias</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#bias"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.bias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies <a class="reference internal" href="references.html#chang2001" id="id1"><span>[Chang2001]</span></a>.
 The value is calculated by:</p>
 <div class="math notranslate nohighlight">
@@ -199,7 +203,7 @@ The value is calculated by:</p>
 
 <dl class="py function">
 <dt id="catsim.cat.dodd">
-<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">dodd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">correct</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><a class="reference internal" href="_modules/catsim/cat.html#dodd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.dodd" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">dodd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">correct</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/cat.html#dodd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.dodd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method proposed by <a class="reference internal" href="references.html#dod90" id="id2"><span>[Dod90]</span></a> for the reestimation of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>
 when the response vector is composed entirely of 1s or 0s.</p>
 <div class="math notranslate nohighlight">
@@ -226,7 +230,7 @@ correctly answered the current item.</p></li>
 
 <dl class="py function">
 <dt id="catsim.cat.generate_item_bank">
-<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">generate_item_bank</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em>, <em class="sig-param"><span class="n">itemtype</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></span> <span class="o">=</span> <span class="default_value">'4PL'</span></em>, <em class="sig-param"><span class="n">corr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#generate_item_bank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.generate_item_bank" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">generate_item_bank</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em>, <em class="sig-param"><span class="n">itemtype</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'4PL'</span></em>, <em class="sig-param"><span class="n">corr</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#generate_item_bank"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.generate_item_bank" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a synthetic item bank whose parameters approximately follow
 real-world parameters, as proposed by <a class="reference internal" href="references.html#bar10" id="id3"><span>[Bar10]</span></a>.</p>
 <p>Item parameters are extracted from the following probability distributions:</p>
@@ -250,7 +254,7 @@ three- or four-parameter logistic model</p></li>
 <dd class="field-even"><p>an <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">x</span> <span class="pre">4</span></code> numerical matrix containing item parameters</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a></p>
 </dd>
 </dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
@@ -264,7 +268,7 @@ three- or four-parameter logistic model</p></li>
 
 <dl class="py function">
 <dt id="catsim.cat.mse">
-<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">mse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#mse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.mse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">mse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#mse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.mse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean squared error, a value used when measuring the precision
 with which a computerized adaptive test estimates examinees proficiencies <a class="reference internal" href="references.html#chang2001" id="id4"><span>[Chang2001]</span></a>.
 The value is calculated by:</p>
@@ -287,7 +291,7 @@ The value is calculated by:</p>
 
 <dl class="py function">
 <dt id="catsim.cat.overlap_rate">
-<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">overlap_rate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">usages</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.19)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">test_size</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)">float</a><a class="reference internal" href="_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">overlap_rate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">usages</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">test_size</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test overlap rate, an average measure of how much of the test two examinees take is equal <a class="reference internal" href="references.html#bar10" id="id5"><span>[Bar10]</span></a>. It is given by:</p>
 <div class="math notranslate nohighlight">
 \[T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}\]</div>
@@ -308,7 +312,7 @@ times each item was used in the tests.</p></li>
 
 <dl class="py function">
 <dt id="catsim.cat.rmse">
-<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">rmse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#rmse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.rmse" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">rmse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/cat.html#rmse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.rmse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Root mean squared error, a common value used when measuring the precision
 with which a computerized adaptive test estimates examinees proficiencies <a class="reference internal" href="references.html#bar10" id="id6"><span>[Bar10]</span></a>.
 The value is calculated by:</p>
@@ -336,37 +340,29 @@ The value is calculated by:</p>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="plot.html" class="btn btn-neutral float-right" title="Miscellaneous Plotting Functions – catsim.plot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="irt.html" class="btn btn-neutral float-left" title="Item Response Theory Functions – catsim.irt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="plot.html" class="btn btn-neutral float-right" title="Miscellaneous Plotting Functions – catsim.plot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="irt.html" class="btn btn-neutral float-left" title="Item Response Theory Functions – catsim.irt" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, Douglas De Rizzo Meneghetti
+        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
