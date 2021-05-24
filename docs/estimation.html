@@ -32,10 +32,11 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -205,8 +206,8 @@ used during the simulation, as long as it also inherits from
 <area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,27,190,50"/>
 </map><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> implements a few types of maximum-likelihood estimators.</p>
 <span class="target" id="module-catsim.estimation"></span><dl class="py class">
-<dt id="catsim.estimation.DifferentialEvolutionEstimator">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.estimation.</code><code class="sig-name descname">DifferentialEvolutionEstimator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bounds</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.estimation.DifferentialEvolutionEstimator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">DifferentialEvolutionEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Estimator</span></code></a></p>
 <p>Estimator that uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.6.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to minimize the negative log-likelihood function</p>
 <dl class="field-list simple">
@@ -219,9 +220,9 @@ parameters in the item bank, in case no better bounds for
 <span class="math notranslate nohighlight">\(\theta\)</span> exist.</p>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations">
-<em class="property">property </em><code class="sig-name descname">avg_evaluations</code><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">avg_evaluations</span></span><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average number of function evaluations for all tests the estimator has been used</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -230,9 +231,9 @@ parameters in the item bank, in case no better bounds for
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="catsim.estimation.DifferentialEvolutionEstimator.calls">
-<em class="property">property </em><code class="sig-name descname">calls</code><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.calls" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.DifferentialEvolutionEstimator.calls">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">calls</span></span><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.calls" title="Permalink to this definition">¶</a></dt>
 <dd><p>How many times the estimator has been called to maximize/minimize the log-likelihood function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -242,8 +243,8 @@ parameters in the item bank, in case no better bounds for
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.estimation.DifferentialEvolutionEstimator.estimate">
-<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">response_vector</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.estimation.DifferentialEvolutionEstimator.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a><a class="reference internal" href="_modules/catsim/estimation.html#DifferentialEvolutionEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution" title="(in SciPy v1.6.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.differential_evolution()</span></code></a> to return the theta value
 that minimizes the negative log-likelihood function, given the current state of the
 test for the given examinee.</p>
@@ -263,9 +264,9 @@ test for the given examinee.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="catsim.estimation.DifferentialEvolutionEstimator.evaluations">
-<em class="property">property </em><code class="sig-name descname">evaluations</code><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.evaluations" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.DifferentialEvolutionEstimator.evaluations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">evaluations</span></span><a class="headerlink" href="#catsim.estimation.DifferentialEvolutionEstimator.evaluations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Total number of times the estimator has evaluated the log-likelihood function during its existence</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -277,8 +278,8 @@ test for the given examinee.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.estimation.HillClimbingEstimator">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.estimation.</code><code class="sig-name descname">HillClimbingEstimator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">precision</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">6</span></em>, <em class="sig-param"><span class="n">dodd</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.estimation.HillClimbingEstimator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">HillClimbingEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dodd</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Estimator</span></code></a></p>
 <p>Estimator that uses a hill-climbing algorithm to maximize the likelihood function</p>
 <dl class="field-list simple">
@@ -289,9 +290,9 @@ test for the given examinee.</p>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="catsim.estimation.HillClimbingEstimator.avg_evaluations">
-<em class="property">property </em><code class="sig-name descname">avg_evaluations</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.HillClimbingEstimator.avg_evaluations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">avg_evaluations</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average number of function evaluations for all tests the estimator has been used</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -300,9 +301,9 @@ test for the given examinee.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="catsim.estimation.HillClimbingEstimator.calls">
-<em class="property">property </em><code class="sig-name descname">calls</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.calls" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.HillClimbingEstimator.calls">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">calls</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.calls" title="Permalink to this definition">¶</a></dt>
 <dd><p>How many times the estimator has been called to maximize/minimize the log-likelihood function</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -311,9 +312,9 @@ test for the given examinee.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="catsim.estimation.HillClimbingEstimator.dodd">
-<em class="property">property </em><code class="sig-name descname">dodd</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.dodd" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.HillClimbingEstimator.dodd">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dodd</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.dodd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Whether Dodd’s method will be called by estimator in case the response vector
 is composed solely of right or wrong answers.</p>
 <dl class="field-list simple">
@@ -324,8 +325,8 @@ is composed solely of right or wrong answers.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.estimation.HillClimbingEstimator.estimate">
-<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">response_vector</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)">list</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.estimation.HillClimbingEstimator.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a><a class="reference internal" href="_modules/catsim/estimation.html#HillClimbingEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.estimate" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</dt><dd><p>test for the given examinee.</p>
 </dd>
@@ -347,9 +348,9 @@ is composed solely of right or wrong answers.</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="catsim.estimation.HillClimbingEstimator.evaluations">
-<em class="property">property </em><code class="sig-name descname">evaluations</code><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.evaluations" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.HillClimbingEstimator.evaluations">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">evaluations</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#catsim.estimation.HillClimbingEstimator.evaluations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Total number of times the estimator has evaluated the log-likelihood function during its existence</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -370,11 +371,11 @@ than others, while reaching similar results, which may make them (although not
 necessarily) more efficient estimators.</p>
 <p>(<a class="reference external" href=".//estimation-1.py">Source code</a>)</p>
 <div class="figure align-default" id="id1">
-<img alt="_images/estimation-1_00.png" src="_images/estimation-1_00.png" />
+<img alt="_images/estimation-1_00.png" class="plot-directive" src="_images/estimation-1_00.png" />
 <p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">(<a class="reference external" href=".//estimation-1_00.png">png</a>, <a class="reference external" href=".//estimation-1_00.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-1_00.pdf">pdf</a>)</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-default" id="id2">
-<img alt="_images/estimation-1_01.png" src="_images/estimation-1_01.png" />
+<img alt="_images/estimation-1_01.png" class="plot-directive" src="_images/estimation-1_01.png" />
 <p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">(<a class="reference external" href=".//estimation-1_01.png">png</a>, <a class="reference external" href=".//estimation-1_01.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-1_01.pdf">pdf</a>)</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 </div>

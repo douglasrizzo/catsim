@@ -309,23 +309,23 @@ def negative_log_likelihood(est_theta: float, *args) -> float:
 
 def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     """Normalize an item matrix so that it conforms to the standard used by catsim.
-    The item matrix must have dimension nx3, in which column 1 represents item discrimination,
-    column 2 represents item difficulty, column 3 represents the pseudo-guessing parameter and
-    column 4 represents the item upper asymptote.
+    The item matrix must have dimension :math:`n \\times 4`, in which column 1 represents item
+    discrimination, column 2 represents item difficulty, column 3 represents the pseudo-guessing
+    parameter and column 4 represents the item upper asymptote.
 
     If the matrix has one column, it is assumed to be the difficulty column and the other
-    two columns are added such that items simulate the 1-parameter logistic model.
+    three columns are added such that items simulate the 1-parameter logistic model.
 
     If the matrix has two columns, they are assumed to be the discrimination and difficulty
-    columns, respectively. The pseudo-guessing column is added such that items simulate
-    the 2-parameter logistic model.
+    columns, respectively. The pseudo-guessing and upper asymptote columns are added such that
+    items simulate the 2-parameter logistic model.
 
     If the matrix has three columns, they are assumed to be the discrimination, difficulty
     and pseudo-guessing columns, respectively. The upper asymptote column is added such that
     items simulate the 3-parameter logistic model.
 
     :param items: the item matrix.
-    :returns: an nx4 item matrix conforming to the 4 parameter logistic model.
+    :returns: an :math:`n \\times 4` item matrix conforming to the 4 parameter logistic model.
     """
     if len(items.shape) == 1:
         items = numpy.expand_dims(items, axis=0)
