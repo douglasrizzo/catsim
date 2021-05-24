@@ -330,11 +330,11 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
     if len(items.shape) == 1:
         items = numpy.expand_dims(items, axis=0)
     if items.shape[1] == 1:
-        items = numpy.append(numpy.ones((items.shape[0])), items, axis=1)
+        items = numpy.append(numpy.ones((items.shape[0], 1)), items, axis=1)
     if items.shape[1] == 2:
-        items = numpy.append(items, numpy.zeros((items.shape[0])), axis=1)
+        items = numpy.append(items, numpy.zeros((items.shape[0], 1)), axis=1)
     if items.shape[1] == 3:
-        items = numpy.append(items, numpy.ones((items.shape[0])), axis=1)
+        items = numpy.append(items, numpy.ones((items.shape[0], 1)), axis=1)
 
     return items
 
