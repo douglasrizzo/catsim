@@ -62,6 +62,52 @@ class Selector(Simulable, metaclass=ABCMeta):
     def __init__(self):
         super().__init__()
 
+    @staticmethod
+    def _get_non_administered(item_indices: list, administered_item_indices: list) -> list:
+        """Gets a list of items that were not administered from a list of indices
+
+        :param item_indices: a list of integers, corresponding to item indices
+        :type item_indices: list
+        :param administered_item_indices: a list of integers, corresponding to the indices of items that were alredy administered to a given examinee
+        :type administered_item_indices: list
+        :return: a list of items, corresponding to the indices that are in `item_indices` but not in `administered_item_indices`, in the same order they were passed in `item_indices`
+        :rtype: list
+        """
+        return [x for x in item_indices if x not in administered_item_indices]
+
+    @staticmethod
+    def _sort_by_info(items: numpy.ndarray, est_theta: float) -> list:
+        """Sort items by their information value, given a proficiency value
+
+        :param items: an item parameter matrix
+        :type items: numpy.ndarray
+        :param est_theta: an examinee's proficiency
+        :type est_theta: float
+        :return: list containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)
+        :rtype: list
+        """
+        if irt.detect_model(items) <= 2:
+            # when the logistic model has the number of parameters <= 2,
+            # all items have highest information where theta = b
+            ordered_items = Selector._sort_by_b(items, est_theta)
+        else:
+            # else, sort item indexes by their information value descending and remove indexes of administered items
+            ordered_items = [x for x in (-irt.inf_hpc(est_theta, items)).argsort()]
+        return ordered_items
+
+    @staticmethod
+    def _sort_by_b(items: numpy.ndarray, est_theta: float) -> list:
+        """Sort items by how close their difficulty parameter is in relaiton to an examinee's proficiency
+
+        :param items: an item parameter matrix
+        :type items: numpy.ndarray
+        :param est_theta: an examinee's proficiency
+        :type est_theta: float
+        :return: list containing the indices of items, sorted by how close their difficulty parameter is in relaiton to :param:`est_theta` (much like the return of `numpy.argsort`)
+        :rtype: list
+        """
+        return list(numpy.abs(items[:, 1] - est_theta).argsort())
+
     @abstractmethod
     def select(self, index: int) -> int:
         """Returns the index of the next item to be administered.

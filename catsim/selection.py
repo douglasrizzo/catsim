@@ -65,17 +65,10 @@ class MaxInfoSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        # first, we'll order items by their information value
-        if irt.detect_model(items) <= 2:
-            # when the logistic model has the number of parameters <= 2,
-            # all items have highest information where theta = b
-            ordered_items = _nearest(items[:, 1], est_theta)
-        else:
-            # else, we'll have to calculate the theta value where information is maximum
-            inf_values = irt.max_info_hpc(items)
-            ordered_items = _nearest(inf_values, est_theta)
-
-        valid_indexes = [x for x in ordered_items if x not in administered_items]
+        # sort items by their information value
+        ordered_items = self._sort_by_info(items, est_theta)
+        # remove administered ones
+        valid_indexes = self._get_non_administered(ordered_items, administered_items)
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
             return None
