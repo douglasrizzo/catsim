@@ -86,7 +86,7 @@ class Selector(Simulable, metaclass=ABCMeta):
         :return: list containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)
         :rtype: list
         """
-        if irt.detect_model(items) <= 2:
+        if irt.detect_model(items) == 1:
             # when the logistic model has the number of parameters <= 2,
             # all items have highest information where theta = b
             ordered_items = Selector._sort_by_b(items, est_theta)
