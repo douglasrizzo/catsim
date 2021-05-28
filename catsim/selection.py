@@ -8,18 +8,6 @@ from . import irt
 from .simulation import Selector, FiniteSelector
 
 
-def _nearest(array: list, value) -> numpy.ndarray:
-    """Returns the indexes of values in `array` that are closest to `value`
-    
-    :param array: an array of numeric values
-    :param value: a numerical value
-    :return: an array containing the indexes of numbers in `array`,
-             according to how close their are to `value`
-    """
-    array = numpy.asarray(array)
-    return numpy.abs(array - value).argsort()
-
-
 class MaxInfoSelector(Selector):
     """Selector that returns the first non-administered item with maximum information, given an estimated theta
        
@@ -130,8 +118,8 @@ class UrrySelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        ordered_items = _nearest(items[:, 1], est_theta)
-        valid_indexes = [x for x in ordered_items if x not in administered_items]
+        ordered_items = self._sort_by_b(items, est_theta)
+        valid_indexes = self._get_non_administered(ordered_items, administered_items)
 
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
@@ -177,7 +165,9 @@ class LinearSelector(FiniteSelector):
         if administered_items is None:
             administered_items = self.simulator.administered_items[index]
 
-        if set(self._indexes) <= set(administered_items):
+        valid_indexes = self._get_non_administered(self._indexes, administered_items)[0]
+
+        if len(valid_indexes) == 0:
             warn(
                 'A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})'
                 .format(
@@ -187,9 +177,7 @@ class LinearSelector(FiniteSelector):
             )
             return None
 
-        selected_item = [x for x in self._indexes if x not in administered_items][0]
-
-        return selected_item
+        return valid_indexes[0]
 
 
 class RandomSelector(Selector):
@@ -239,7 +227,8 @@ class RandomSelector(Selector):
         if self._replace:
             return numpy.random.choice(items.shape[0])
         else:
-            return numpy.random.choice(list(set(range(items.shape[0])) - set(administered_items)))
+            valid_indexes = self._get_non_administered(range(items.shape[0]), administered_items)
+            return numpy.random.choice(valid_indexes)
 
 
 class ClusterSelector(Selector):
@@ -353,7 +342,7 @@ class ClusterSelector(Selector):
         # the current point of the test will be chosen
         if self._method == 'item_info':
             # get the item indexes sorted by their information value
-            infos = _nearest(irt.max_info_hpc(items), est_theta)
+            infos = self._sort_by_info(items, est_theta)
 
             evaluated_clusters = set()
 
@@ -434,12 +423,10 @@ class ClusterSelector(Selector):
 
         # gets the indexes and information values from the items in the
         # selected cluster that have not been administered
-        valid_indexes = [
-            index
-            for index in numpy.nonzero([cluster == selected_cluster
-                                        for cluster in self._clusters])[0]
-            if index not in administered_items
-        ]
+        valid_indexes = self._get_non_administered(
+            numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0],
+            administered_items
+        )
 
         # gets the indexes and information values from the items in the
         # selected cluster with r < rmax that have not been administered
@@ -798,16 +785,14 @@ class The54321Selector(FiniteSelector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by their information value descending and remove indexes of administered items
-        organized_items = [
-            x for x in (-irt.inf_hpc(est_theta, items)).argsort() if x not in administered_items
-        ]
-
-        bin_size = self._test_size - len(administered_items)
+        ordered_items = self._sort_by_info(items, est_theta)
+        organized_items = self._get_non_administered(ordered_items, administered_items)
 
         if len(organized_items) == 0:
             warn('There are no more items to apply.')
             return None
 
+        bin_size = self._test_size - len(administered_items)
         return numpy.random.choice(organized_items[0:bin_size])
 
 
@@ -861,9 +846,8 @@ class RandomesqueSelector(Selector):
             est_theta = self.simulator.latest_estimations[index]
 
         # sort item indexes by their information value descending and remove indexes of administered items
-        organized_items = [
-            x for x in (-irt.inf_hpc(est_theta, items)).argsort() if x not in administered_items
-        ]
+        ordered_items = self._sort_by_info(items, est_theta)
+        organized_items = self._get_non_administered(ordered_items, administered_items)
 
         if len(organized_items) == 0:
             warn('There are no more items to apply.')
@@ -922,24 +906,24 @@ class IntervalInfoSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
-        # sort item indexes by the integral of the information function descending and remove indexes of administered items
-        organized_items = [
-            x for x in (
-                -numpy.array(
-                    [
-                        quad(
-                            irt.inf,
-                            est_theta - self._interval,
-                            est_theta + self._interval,
-                            args=(item[0], item[1], item[2], item[3])
-                        )[0] for item in items
-                    ]
-                )
-            ).argsort() if x not in administered_items
-        ]
+        # compute the integral of the information function around an examinee's proficiency
+        information_integral = numpy.array(
+            [
+                quad(
+                    irt.inf,
+                    est_theta - self._interval,
+                    est_theta + self._interval,
+                    args=(item[0], item[1], item[2], item[3])
+                )[0] for item in items
+            ]
+        )
+        # sort by that integral in descending order
+        ordered_items = (-information_integral).argsort()
+        # remove administered items
+        organized_items = self._get_non_administered(ordered_items, administered_items)
 
         if len(organized_items) == 0:
             warn('There are no more items to apply.')
             return None
 
-        return list(organized_items)[0]
+        return organized_items[0]
