@@ -165,7 +165,7 @@ class LinearSelector(FiniteSelector):
         if administered_items is None:
             administered_items = self.simulator.administered_items[index]
 
-        valid_indexes = self._get_non_administered(self._indexes, administered_items)[0]
+        valid_indexes = self._get_non_administered(self._indexes, administered_items)
 
         if len(valid_indexes) == 0:
             warn(
