@@ -42,7 +42,8 @@ setup(
         docs=[
             'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'm2r2',
             'bibtex-pygments-lexer', 'matplotlib'
-        ]
+        ],
+        upload=['twine', 'build']
     ),
     license='LGPLv3'
 )
