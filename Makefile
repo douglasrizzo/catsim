@@ -12,9 +12,14 @@ ifneq '$USER' 'travis'
 else
 	nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
 endif
-upload-test:
+upload-test: dist
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-upload:
+upload: dist
 	twine upload dist/*
-format: clean
-	-yapf -i -r .
+format:
+	-yapf -i -r catsim
+dist:
+	python -m build
+docs:
+	pip install .[docs]
+	sphinx-build sphinx docs
