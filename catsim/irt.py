@@ -2,7 +2,6 @@ import math
 
 import numexpr
 import numpy
-from numpy import pi
 
 
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -124,7 +123,7 @@ def test_info(theta: float, items: numpy.ndarray) -> float:
     :param items: a matrix containing item parameters.
     :returns: the test information at `theta` for a test represented by `items`.
     """
-    return numpy.sum(inf_hpc(theta, items))
+    return float(numpy.sum(inf_hpc(theta, items)))
 
 
 def var(theta: float, items: numpy.ndarray) -> float:

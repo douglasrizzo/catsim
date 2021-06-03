@@ -1,9 +1,9 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
 import operator
+import random
 
 import numpy
-import random
 
 from catsim import irt
 

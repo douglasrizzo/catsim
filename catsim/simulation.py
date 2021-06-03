@@ -2,12 +2,11 @@
 application of adaptive tests. Most of this module is based on the work of
 [Bar10]_."""
 
-import datetime
 import time
-import tqdm
 from abc import ABCMeta, abstractmethod
 
 import numpy
+import tqdm
 
 from . import cat, irt
 

@@ -5,7 +5,7 @@ import numpy
 from scipy.integrate import quad
 
 from . import irt
-from .simulation import Selector, FiniteSelector
+from .simulation import FiniteSelector, Selector
 
 
 class MaxInfoSelector(Selector):

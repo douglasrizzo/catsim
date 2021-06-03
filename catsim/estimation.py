@@ -1,7 +1,7 @@
 import numpy
 from scipy.optimize import differential_evolution
 
-from catsim import irt, cat
+from catsim import cat, irt
 from catsim.simulation import Estimator
 
 
