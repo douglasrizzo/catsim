@@ -35,6 +35,9 @@ setup(
     author='Douglas De Rizzo Meneghetti',
     author_email='douglasrizzom@gmail.com',
     url='https://douglasrizzo.github.io/catsim',
+    package_data={
+        'catsim': ['py.typed'],
+    },
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[
         'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm', 'numpy'
