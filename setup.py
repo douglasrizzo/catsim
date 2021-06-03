@@ -40,6 +40,7 @@ setup(
         'scipy', 'numexpr', 'matplotlib', 'scikit-learn', 'json_tricks', 'tqdm', 'numpy'
     ],
     extras_require=dict(
+        dev=['mypy', 'pylama'],
         testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls'],
         docs=[
             'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'm2r2',
