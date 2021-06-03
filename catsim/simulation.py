@@ -4,6 +4,7 @@ application of adaptive tests. Most of this module is based on the work of
 
 import time
 from abc import ABCMeta, abstractmethod
+from typing import Optional, Union
 
 import numpy
 import tqdm
@@ -179,7 +180,7 @@ class Simulator:
     def __init__(
         self,
         items: numpy.ndarray,
-        examinees,
+        examinees: Union[int, list, numpy.ndarray],
         initializer: Initializer = None,
         selector: Selector = None,
         estimator: Estimator = None,
@@ -191,13 +192,13 @@ class Simulator:
         if items.shape[1] < 5:
             items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
-        self._duration = 0
+        self._duration = 0.
         self._items = items
 
-        self._bias = None
-        self._mse = None
-        self._rmse = None
-        self._overlap_rate = None
+        self._bias: float
+        self._mse: float
+        self._rmse: float
+        self._overlap_rate: float
 
         self._initializer = initializer
         self._selector = selector
@@ -207,9 +208,9 @@ class Simulator:
         # `examinees` is passed to its special setter
         self._examinees = self._to_distribution(examinees)
 
-        self._estimations = [[] for _ in range(len(self.examinees))]
-        self._administered_items = [[] for _ in range(len(self.examinees))]
-        self._response_vectors = [[] for _ in range(len(self.examinees))]
+        self._estimations: list = [[] for _ in range(self.examinees.shape[0])]
+        self._administered_items: list = [[] for _ in range(self.examinees.shape[0])]
+        self._response_vectors: list = [[] for _ in range(self.examinees.shape[0])]
 
     @property
     def items(self) -> numpy.ndarray:
@@ -251,19 +252,19 @@ class Simulator:
         return self._overlap_rate
 
     @property
-    def initializer(self) -> Initializer:
+    def initializer(self) -> Optional[Initializer]:
         return self._initializer
 
     @property
-    def selector(self) -> Selector:
+    def selector(self) -> Optional[Selector]:
         return self._selector
 
     @property
-    def estimator(self) -> Estimator:
+    def estimator(self) -> Optional[Estimator]:
         return self._estimator
 
     @property
-    def stopper(self) -> Stopper:
+    def stopper(self) -> Optional[Stopper]:
         return self._stopper
 
     @property

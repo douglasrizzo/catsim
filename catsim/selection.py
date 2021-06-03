@@ -242,7 +242,7 @@ class RandomSelector(Selector):
         if self._replace:
             return numpy.random.choice(items.shape[0])
         else:
-            valid_indexes = self._get_non_administered(range(items.shape[0]), administered_items)
+            valid_indexes = self._get_non_administered(list(range(items.shape[0])), administered_items)
             return numpy.random.choice(valid_indexes)
 
 
