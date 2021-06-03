@@ -32,7 +32,7 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
-def bias(actual: list, predicted: list):
+def bias(actual: list, predicted: list) -> float:
     """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
     The value is calculated by:
 
@@ -47,10 +47,10 @@ def bias(actual: list, predicted: list):
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.mean(list(map(operator.sub, predicted, actual)))
+    return float(numpy.mean(list(map(operator.sub, predicted, actual))))
 
 
-def mse(actual: list, predicted: list):
+def mse(actual: list, predicted: list) -> float:
     """Mean squared error, a value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.
     The value is calculated by:
@@ -66,10 +66,10 @@ def mse(actual: list, predicted: list):
     """
     if len(actual) != len(predicted):
         raise ValueError('actual and predicted vectors need to be the same size')
-    return numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))])
+    return float(numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))]))
 
 
-def rmse(actual: list, predicted: list):
+def rmse(actual: list, predicted: list) -> float:
     """Root mean squared error, a common value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
     The value is calculated by:
@@ -111,7 +111,7 @@ def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
     return t
 
 
-def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0):
+def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0) -> numpy.ndarray:
     """Generate a synthetic item bank whose parameters approximately follow
     real-world parameters, as proposed by [Bar10]_.
 
@@ -173,7 +173,7 @@ def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0):
     return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
 
 
-def random_response_vector(size: int):
+def random_response_vector(size: int) -> list:
     return [bool(random.getrandbits(1)) for _ in range(size)]
 
 
