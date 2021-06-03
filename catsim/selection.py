@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Union
 from warnings import warn
 
 import numpy
@@ -32,7 +33,7 @@ class MaxInfoSelector(Selector):
         administered_items: list = None,
         est_theta: float = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -97,7 +98,7 @@ class UrrySelector(Selector):
         administered_items: list = None,
         est_theta: float = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -150,7 +151,10 @@ class LinearSelector(FiniteSelector):
     def current(self):
         return self._current
 
-    def select(self, index: int = None, administered_items: list = None, **kwargs) -> int:
+    def select(self,
+               index: int = None,
+               administered_items: list = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -198,7 +202,7 @@ class RandomSelector(Selector):
         items: numpy.ndarray = None,
         administered_items: list = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -314,7 +318,7 @@ class ClusterSelector(Selector):
         administered_items: list = None,
         est_theta: float = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -561,7 +565,7 @@ class StratifiedSelector(FiniteSelector):
         items: numpy.ndarray = None,
         administered_items: list = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -763,7 +767,7 @@ class The54321Selector(FiniteSelector):
         administered_items: list = None,
         est_theta: float = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -824,7 +828,7 @@ class RandomesqueSelector(Selector):
         administered_items: list = None,
         est_theta: float = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -885,7 +889,7 @@ class IntervalInfoSelector(Selector):
         administered_items: list = None,
         est_theta: float = None,
         **kwargs
-    ) -> int:
+    ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
