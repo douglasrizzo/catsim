@@ -205,7 +205,7 @@ class Simulator:
         self._stopper = stopper
 
         # `examinees` is passed to its special setter
-        self.examinees = examinees
+        self._examinees = self._to_distribution(examinees)
 
         self._estimations = [[] for _ in range(len(self.examinees))]
         self._administered_items = [[] for _ in range(len(self.examinees))]
@@ -239,11 +239,6 @@ class Simulator:
     def latest_estimations(self) -> list:
         """Final estimated :math:`\\hat\\theta` values for all examinees."""
         return [ests[-1] if len(ests) > 0 else None for ests in self._estimations]
-
-    @property
-    def examinees(self) -> list:
-        """List containing examinees true proficiency values (:math:`\\theta`)."""
-        return self._examinees
 
     @property
     def duration(self) -> float:
@@ -294,25 +289,35 @@ class Simulator:
         :py:func:`catsim.cat.rmse`"""
         return self._rmse
 
+    @property
+    def examinees(self) -> numpy.ndarray:
+        """:py:type:numpy.ndarray containing examinees true proficiency values (:math:`\\theta`)."""
+        return self._examinees
+
     @examinees.setter
-    def examinees(self, x):
+    def examinees(self, x: Union[int, list, numpy.ndarray]):
+        self._examinees = self._to_distribution(x)
+
+    def _to_distribution(self, x):
         # generate examinees from a normal distribution
         # if an int was passed
         if isinstance(x, int):
             if self._items is not None:
                 mean = numpy.mean(self._items[:, 1])
                 stddev = numpy.std(self._items[:, 1])
-                self._examinees = numpy.random.normal(mean, stddev, x)
+                dist = numpy.random.normal(mean, stddev, x)
             else:
-                self._examinees = numpy.random.normal(0, 1, x)
-        elif type(x) == list:
-            self._examinees = numpy.array(x)
-        elif type(x) == numpy.ndarray and x.ndim == 1:
-            self._examinees = x
+                dist = numpy.random.normal(0, 1, x)
+        elif isinstance(x, list):
+            dist = numpy.array(x)
+        elif isinstance(x, numpy.ndarray) and x.ndim == 1:
+            dist = x
         else:
             raise ValueError(
                 'Examinees must be an int, list of floats or one-dimensional numpy array'
             )
+
+        return dist
 
     def simulate(
         self,
