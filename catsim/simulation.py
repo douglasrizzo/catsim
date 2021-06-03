@@ -20,13 +20,13 @@ class Simulable(metaclass=ABCMeta):
 
     @property
     def simulator(self):
-        if self._simulator is not None and type(self._simulator) is not Simulator:
+        if self._simulator is not None and not isinstance(self._simulator, Simulator):
             raise ValueError('simulator has to be of type catsim.simulation.Simulator')
         return self._simulator
 
     @simulator.setter
     def simulator(self, x: 'Simulator'):
-        if type(x) is not Simulator:
+        if not isinstance(x, Simulator):
             raise ValueError('simulator has to be of type catsim.simulation.Simulator')
         self._simulator = x
         self.preprocess()
@@ -298,7 +298,7 @@ class Simulator:
     def examinees(self, x):
         # generate examinees from a normal distribution
         # if an int was passed
-        if type(x) == int:
+        if isinstance(x, int):
             if self._items is not None:
                 mean = numpy.mean(self._items[:, 1])
                 stddev = numpy.std(self._items[:, 1])
@@ -434,7 +434,7 @@ class Simulator:
         # but I did not find it in the literature
         test_size = None
         len_first = len(self._administered_items[0]) if self._administered_items else None
-        if type(selector) is FiniteSelector:
+        if isinstance(selector, FiniteSelector):
             test_size = selector.test_size
         elif all(len(i) == len_first for i in self._administered_items):
             test_size = len_first

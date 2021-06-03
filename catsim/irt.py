@@ -351,7 +351,7 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
     :param raise_err: whether to raise an error in case the validation fails or
                       just print the error message to standard output.
     """
-    if type(items) is not numpy.ndarray:
+    if not isinstance(items, numpy.ndarray):
         raise ValueError('Item matrix is not of type {0}'.format(numpy.ndarray))
 
     err = ''
