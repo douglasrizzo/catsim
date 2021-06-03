@@ -33,10 +33,11 @@ class RandomInitializer(Initializer):
         :param index: the index of the current examinee. This parameter is not used by this method.
         :returns: a proficiency value generated from the chosen distribution using the passed parameters"""
         if self._dist_type == 'uniform':
-            return numpy.random.uniform(min(self._dist_params), max(self._dist_params))
+            theta = numpy.random.uniform(min(self._dist_params), max(self._dist_params))
         elif self._dist_type == 'normal':
-            return numpy.random.normal(self._dist_params[0], self._dist_params[1])
+            theta = numpy.random.normal(self._dist_params[0], self._dist_params[1])
 
+        return theta
 
 class FixedPointInitializer(Initializer):
     """Initializes every proficiency at the same point."""
