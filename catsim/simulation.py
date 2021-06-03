@@ -108,7 +108,7 @@ class Selector(Simulable, metaclass=ABCMeta):
         return list(numpy.abs(items[:, 1] - est_theta).argsort())
 
     @abstractmethod
-    def select(self, index: int) -> int:
+    def select(self, index: int = None) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
