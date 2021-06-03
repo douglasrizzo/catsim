@@ -353,6 +353,11 @@ class Simulator:
         if stopper is not None:
             self._stopper = stopper
 
+        assert self._initializer is not None
+        assert self._selector is not None
+        assert self._estimator is not None
+        assert self._stopper is not None
+
         for s in [self._initializer, self._selector, self._estimator, self._stopper]:
             s.simulator = self
 

@@ -86,6 +86,11 @@ class HillClimbingEstimator(Estimator):
             response_vector = self.simulator.response_vectors[index]
             est_theta = self.simulator.latest_estimations[index]
 
+        assert items is not None
+        assert administered_items is not None
+        assert response_vector is not None
+        assert est_theta is not None
+
         self._calls += 1
         self._evaluations = 0
 
@@ -237,6 +242,10 @@ class DifferentialEvolutionEstimator(Estimator):
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
             response_vector = self.simulator.response_vectors[index]
+
+        assert items is not None
+        assert administered_items is not None
+        assert response_vector is not None
 
         self._calls += 1
 

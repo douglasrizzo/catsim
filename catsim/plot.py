@@ -226,6 +226,8 @@ def item_exposure(
     if simulator is not None:
         items = simulator.items
 
+    assert items is not None
+
     if items.shape[1] != 5:
         raise ValueError(
             'The item matrix is supposed to have 5 columns, the last one representing item exposure rates'
@@ -344,6 +346,10 @@ def test_progress(
         thetas = simulator.estimations[index]
         administered_items = simulator.items[simulator.administered_items[index]]
         true_theta = simulator.examinees[index]
+
+    assert thetas is not None
+    assert administered_items is not None
+    assert true_theta is not None
 
     if thetas is not None and administered_items is not None and len(thetas) - 1 != len(
         administered_items[:, 1]

@@ -54,6 +54,10 @@ class MaxInfoSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
+        assert items is not None
+        assert administered_items is not None
+        assert est_theta is not None
+
         # sort items by their information value
         ordered_items = self._sort_by_info(items, est_theta)
         # remove administered ones
@@ -118,6 +122,10 @@ class UrrySelector(Selector):
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
+
+        assert items is not None
+        assert administered_items is not None
+        assert est_theta is not None
 
         ordered_items = self._sort_by_b(items, est_theta)
         valid_indexes = self._get_non_administered(ordered_items, administered_items)
@@ -220,6 +228,9 @@ class RandomSelector(Selector):
         if items is None and administered_items is None:
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
+
+        assert items is not None
+        assert administered_items is not None
 
         if len(administered_items) >= items.shape[0] and not self._replace:
             warn(
@@ -338,6 +349,10 @@ class ClusterSelector(Selector):
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
+
+        assert items is not None
+        assert administered_items is not None
+        assert est_theta is not None
 
         selected_cluster = None
         existent_clusters = set(self._clusters)
@@ -583,6 +598,9 @@ class StratifiedSelector(FiniteSelector):
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
 
+        assert items is not None
+        assert administered_items is not None
+
         # select the item in the correct layer, according to the point in the test the examinee is
         slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype='i')
 
@@ -788,6 +806,10 @@ class The54321Selector(FiniteSelector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
+        assert items is not None
+        assert administered_items is not None
+        assert est_theta is not None
+
         # sort item indexes by their information value descending and remove indexes of administered items
         ordered_items = self._sort_by_info(items, est_theta)
         organized_items = self._get_non_administered(ordered_items, administered_items)
@@ -849,6 +871,10 @@ class RandomesqueSelector(Selector):
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
 
+        assert items is not None
+        assert administered_items is not None
+        assert est_theta is not None
+
         # sort item indexes by their information value descending and remove indexes of administered items
         ordered_items = self._sort_by_info(items, est_theta)
         organized_items = self._get_non_administered(ordered_items, administered_items)
@@ -909,6 +935,10 @@ class IntervalInfoSelector(Selector):
             items = self.simulator.items
             administered_items = self.simulator.administered_items[index]
             est_theta = self.simulator.latest_estimations[index]
+
+        assert items is not None
+        assert administered_items is not None
+        assert est_theta is not None
 
         # compute the integral of the information function around an examinee's proficiency
         information_integral = numpy.array(
