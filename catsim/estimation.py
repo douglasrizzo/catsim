@@ -72,19 +72,18 @@ class HillClimbingEstimator(Estimator):
         :param est_theta: a float containing the current estimated proficiency
         :returns: the current :math:`\\hat\\theta`
         """
-        if (index is None or self.simulator is None) and (
-            items is None and administered_items is None or response_vector is None or
-            est_theta is None
-        ):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, response_vector, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_response_vector=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                response_vector=response_vector,
+                est_theta=est_theta,
+                **kwargs
             )
-
-        if items is None and administered_items is None and response_vector is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            response_vector = self.simulator.response_vectors[index]
-            est_theta = self.simulator.latest_estimations[index]
 
         self._calls += 1
         self._evaluations = 0
@@ -227,16 +226,16 @@ class DifferentialEvolutionEstimator(Estimator):
         :param response_vector: a boolean list containing the examinee's answers to the administered items
         :returns: the current :math:`\\hat\\theta`
         """
-        if (index is None or self.simulator is None
-            ) and (items is None and administered_items is None or response_vector is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, response_vector = \
+            self._prepare_args(
+                return_items=True,
+                return_response_vector=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                response_vector=response_vector,
+                **kwargs
             )
-
-        if items is None and administered_items is None and response_vector is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            response_vector = self.simulator.response_vectors[index]
 
         self._calls += 1
 
