@@ -44,7 +44,7 @@ setup(
     ],
     extras_require=dict(
         dev=['mypy', 'pylama'],
-        testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls'],
+        testing=['nose', 'nose-cov', 'sklearn', 'coverage', 'coveralls', 'python-coveralls', 'flake8'],
         docs=[
             'Sphinx', 'numpydoc', 'sphinx_autodoc_annotation', 'sphinx_rtd_theme', 'm2r2',
             'bibtex-pygments-lexer', 'matplotlib'
