@@ -2,6 +2,7 @@ import math
 
 import numexpr
 import numpy
+from math import pi
 
 
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -56,7 +57,7 @@ def detect_model(items: numpy.ndarray) -> int:
 
 def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
     """Implementation of :py:func:`icc` using :py:mod:`numpy` and :py:mod:`numexpr` in which the characteristic
-    function for all items in a `numpy.ndarray` are calculated at once.
+    function for all items in a `numpy.ndarray` are computed at once.
 
     :param theta: the individual's proficiency value.
     :param items: array containing the four item parameters.
@@ -68,7 +69,7 @@ def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
 
 def inf_hpc(theta: float, items: numpy.ndarray):
     """Implementation of :py:func:`inf` using :py:mod:`numpy` and :py:mod:`numexpr` in which the information
-    value for all items in a `numpy.ndarray` are calculated at once.
+    values for all items in a `numpy.ndarray` are computed at once.
 
     :param theta: the individual's proficiency value.
     :param items: array containing the four item parameters.
