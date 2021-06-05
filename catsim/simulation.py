@@ -479,7 +479,7 @@ class Simulator:
         self._mse = cat.mse(self.examinees, self.latest_estimations)
         self._rmse = cat.rmse(self.examinees, self.latest_estimations)
 
-        # overlap is calculated only if all examinees answered the same amount of items
+        # overlap is computed only if all examinees answered the same amount of items
         # maybe there is a way to calculate it with tests of different lengths,
         # but I did not find it in the literature
         test_size = None

@@ -34,7 +34,7 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
 
 def bias(actual: list, predicted: list) -> float:
     """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
-    The value is calculated by:
+    The value is computed as:
 
     .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
 
@@ -53,7 +53,7 @@ def bias(actual: list, predicted: list) -> float:
 def mse(actual: list, predicted: list) -> float:
     """Mean squared error, a value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.
-    The value is calculated by:
+    The value is computed as:
 
     .. math:: MSE = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}
 
@@ -72,7 +72,7 @@ def mse(actual: list, predicted: list) -> float:
 def rmse(actual: list, predicted: list) -> float:
     """Root mean squared error, a common value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
-    The value is calculated by:
+    The value is computed as:
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
