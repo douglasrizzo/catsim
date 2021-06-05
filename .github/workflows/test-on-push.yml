@@ -1,4 +1,4 @@
-name: Python package
+name: Unit tests
 
 on: [push]
 
@@ -23,6 +23,6 @@ jobs:
       - name: Test with nose
         run: |
           nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
-      - name: Code civerage with coveralls
+      - name: Code coverage with coveralls
         run: |
           coveralls

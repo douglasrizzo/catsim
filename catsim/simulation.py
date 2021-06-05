@@ -239,10 +239,10 @@ class Simulator:
         self._duration = 0.
         self._items = items
 
-        self._bias: float
-        self._mse: float
-        self._rmse: float
-        self._overlap_rate: float
+        self._bias = 0.
+        self._mse = 0.
+        self._rmse = 0.
+        self._overlap_rate = 0.
 
         self._initializer = initializer
         self._selector = selector
