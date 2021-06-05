@@ -40,21 +40,12 @@ class Simulable(metaclass=ABCMeta):
         pass
 
     def _prepare_args(
-        self,
-        return_items=False,
-        return_response_vector=False,
-        return_est_theta=False,
-        **kwargs
+        self, return_items=False, return_response_vector=False, return_est_theta=False, **kwargs
     ):
-        using_simulator_props = (
-            kwargs.get("index") is not None and
-            self.simulator is not None
-        )
+        using_simulator_props = (kwargs.get("index") is not None and self.simulator is not None)
         if (
-            not using_simulator_props and
-            (
-                kwargs.get("items") is None or
-                kwargs.get("administered_items") is None or
+            not using_simulator_props and (
+                kwargs.get("items") is None or kwargs.get("administered_items") is None or
                 (return_est_theta and kwargs.get("est_theta") is None)
             )
         ):
