@@ -39,6 +39,50 @@ class Simulable(metaclass=ABCMeta):
         `Simulable` are re-initialized as necessary."""
         pass
 
+    def _prepare_args(
+        self,
+        return_items=False,
+        return_response_vector=False,
+        return_est_theta=False,
+        **kwargs
+    ):
+        using_simulator_props = (
+            kwargs.get("index") is not None and
+            self.simulator is not None
+        )
+        if (
+            not using_simulator_props and
+            (
+                kwargs.get("items") is None or
+                kwargs.get("administered_items") is None or
+                (return_est_theta and kwargs.get("est_theta") is None)
+            )
+        ):
+            raise ValueError(
+                'Either pass an index for the simulator or all of the other '
+                'optional parameters to use this component independently.'
+            )
+
+        result = []
+        if using_simulator_props:
+            index = kwargs["index"]
+            if return_items:
+                result.append(self.simulator.items)
+            result.append(self.simulator.administered_items[index])
+            if return_response_vector:
+                result.append(self.simulator.response_vectors[index])
+            if return_est_theta:
+                result.append(self.simulator.latest_estimations[index])
+        else:
+            if return_items:
+                result.append(kwargs["items"])
+            result.append(kwargs["administered_items"])
+            if return_response_vector:
+                result.append(kwargs["response_vector"])
+            if return_est_theta:
+                result.append(kwargs["est_theta"])
+        return tuple(result)
+
 
 class Initializer(Simulable, metaclass=ABCMeta):
     """Base class for CAT initializers"""

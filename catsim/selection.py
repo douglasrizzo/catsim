@@ -43,16 +43,16 @@ class MaxInfoSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None
-            ) and (items is None or administered_items is None or est_theta is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                est_theta=est_theta,
+                **kwargs
             )
-
-        if items is None and administered_items is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            est_theta = self.simulator.latest_estimations[index]
 
         assert items is not None
         assert administered_items is not None
@@ -62,6 +62,7 @@ class MaxInfoSelector(Selector):
         ordered_items = self._sort_by_info(items, est_theta)
         # remove administered ones
         valid_indexes = self._get_non_administered(ordered_items, administered_items)
+
         if len(valid_indexes) == 0:
             warn('There are no more items to be applied.')
             return None
@@ -112,20 +113,20 @@ class UrrySelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None
-            ) and (items is None or administered_items is None or est_theta is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                est_theta=est_theta,
+                **kwargs
             )
 
-        if items is None and administered_items is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            est_theta = self.simulator.latest_estimations[index]
-
-        assert items is not None
-        assert administered_items is not None
         assert est_theta is not None
+        assert administered_items is not None
+        assert items is not None
 
         ordered_items = self._sort_by_b(items, est_theta)
         valid_indexes = self._get_non_administered(ordered_items, administered_items)
@@ -169,13 +170,12 @@ class LinearSelector(FiniteSelector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None) and (administered_items is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        administered_items, = \
+            self._prepare_args(
+                index=index,
+                administered_items=administered_items,
+                **kwargs
             )
-
-        if administered_items is None:
-            administered_items = self.simulator.administered_items[index]
 
         valid_indexes = self._get_non_administered(self._indexes, administered_items)
 
@@ -219,15 +219,14 @@ class RandomSelector(Selector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or
-            self.simulator is None) and (items is None or administered_items is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items = \
+            self._prepare_args(
+                return_items=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                **kwargs
             )
-
-        if items is None and administered_items is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
 
         assert items is not None
         assert administered_items is not None
@@ -339,16 +338,16 @@ class ClusterSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied.
         """
-        if (index is None or self.simulator is None
-            ) and (items is None or administered_items is None or est_theta is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                est_theta=est_theta,
+                **kwargs
             )
-
-        if items is None and administered_items is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            est_theta = self.simulator.latest_estimations[index]
 
         assert items is not None
         assert administered_items is not None
@@ -588,15 +587,14 @@ class StratifiedSelector(FiniteSelector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
-        if (index is None or
-            self.simulator is None) and (items is None or administered_items is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items = \
+            self._prepare_args(
+                return_items=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                **kwargs
             )
-
-        if items is None and administered_items is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
 
         assert items is not None
         assert administered_items is not None
@@ -795,20 +793,20 @@ class The54321Selector(FiniteSelector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None
-            ) and (items is None or administered_items is None or est_theta is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                est_theta=est_theta,
+                **kwargs
             )
 
-        if items is None and administered_items is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            est_theta = self.simulator.latest_estimations[index]
-
-        assert items is not None
-        assert administered_items is not None
         assert est_theta is not None
+        assert administered_items is not None
+        assert items is not None
 
         # sort item indexes by their information value descending and remove indexes of administered items
         ordered_items = self._sort_by_info(items, est_theta)
@@ -860,20 +858,20 @@ class RandomesqueSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None
-            ) and (items is None or administered_items is None or est_theta is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                est_theta=est_theta,
+                **kwargs
             )
 
-        if items is None and administered_items is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            est_theta = self.simulator.latest_estimations[index]
-
-        assert items is not None
-        assert administered_items is not None
         assert est_theta is not None
+        assert administered_items is not None
+        assert items is not None
 
         # sort item indexes by their information value descending and remove indexes of administered items
         ordered_items = self._sort_by_info(items, est_theta)
@@ -925,20 +923,20 @@ class IntervalInfoSelector(Selector):
         :param est_theta: a float containing the current estimated proficiency
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        if (index is None or self.simulator is None
-            ) and (items is None or administered_items is None or est_theta is None):
-            raise ValueError(
-                'Either pass an index for the simulator or all of the other optional parameters to use this component independently.'
+        items, administered_items, est_theta = \
+            self._prepare_args(
+                return_items=True,
+                return_est_theta=True,
+                index=index,
+                items=items,
+                administered_items=administered_items,
+                est_theta=est_theta,
+                **kwargs
             )
 
-        if items is None and administered_items is None and est_theta is None:
-            items = self.simulator.items
-            administered_items = self.simulator.administered_items[index]
-            est_theta = self.simulator.latest_estimations[index]
-
-        assert items is not None
-        assert administered_items is not None
         assert est_theta is not None
+        assert administered_items is not None
+        assert items is not None
 
         # compute the integral of the information function around an examinee's proficiency
         information_integral = numpy.array(
