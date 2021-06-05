@@ -50,7 +50,7 @@ def detect_model(items: numpy.ndarray) -> int:
 
     if any(d != 1): return 4
     if any(c != 0): return 3
-    if len(set(a)) == 1: return 2
+    if len(set(a)) > 1: return 2
     return 1
 
 
