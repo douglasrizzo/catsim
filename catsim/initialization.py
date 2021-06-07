@@ -39,6 +39,7 @@ class RandomInitializer(Initializer):
 
         return theta
 
+
 class FixedPointInitializer(Initializer):
     """Initializes every proficiency at the same point."""
 

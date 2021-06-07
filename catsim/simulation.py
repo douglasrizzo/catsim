@@ -243,9 +243,9 @@ class Simulator:
         # `examinees` is passed to its special setter
         self._examinees = self._to_distribution(examinees)
 
-        self._estimations = [[] for _ in range(self.examinees.shape[0])] # type: list
-        self._administered_items = [[] for _ in range(self.examinees.shape[0])] # type: list
-        self._response_vectors = [[] for _ in range(self.examinees.shape[0])] # type: list
+        self._estimations = [[] for _ in range(self.examinees.shape[0])]  # type: list
+        self._administered_items = [[] for _ in range(self.examinees.shape[0])]  # type: list
+        self._response_vectors = [[] for _ in range(self.examinees.shape[0])]  # type: list
 
     @property
     def items(self) -> numpy.ndarray:
