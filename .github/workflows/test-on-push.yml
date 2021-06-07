@@ -28,7 +28,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Check formatting with yapf
         run: |
-          yapf -q -r catsim
+          yapf -q -r setup.py catsim
       - name: Test with nose
         run: |
           nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
