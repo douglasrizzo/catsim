@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.15.6
+                0.15.7
               </div>
             
           
@@ -229,7 +229,7 @@ as <cite>theta</cite> (usually <span class="math notranslate nohighlight">\(-4 \
 <dt class="sig sig-object py" id="catsim.irt.icc_hpc">
 <span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><span class="pre">numpy.ndarray</span></a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><span class="pre">numpy.ndarray</span></a><a class="reference internal" href="_modules/catsim/irt.html#icc_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc_hpc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v1.20)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the characteristic
-function for all items in a <cite>numpy.ndarray</cite> are calculated at once.</p>
+function for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -280,7 +280,7 @@ used to estimate the parameters, then <span class="math notranslate nohighlight"
 <dt class="sig sig-object py" id="catsim.irt.inf_hpc">
 <span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.20)"><span class="pre">numpy.ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#inf_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf_hpc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of <a class="reference internal" href="#catsim.irt.inf" title="catsim.irt.inf"><code class="xref py py-func docutils literal notranslate"><span class="pre">inf()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v1.20)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the information
-value for all items in a <cite>numpy.ndarray</cite> are calculated at once.</p>
+values for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -559,7 +559,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
+        &#169; Copyright 2021, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>

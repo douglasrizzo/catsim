@@ -32,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.15.6
+                0.15.7
               </div>
             
           
@@ -176,7 +176,7 @@
 <span></span><span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">differential_evolution</span>
 
-<span class="kn">from</span> <span class="nn">catsim</span> <span class="kn">import</span> <span class="n">irt</span><span class="p">,</span> <span class="n">cat</span>
+<span class="kn">from</span> <span class="nn">catsim</span> <span class="kn">import</span> <span class="n">cat</span><span class="p">,</span> <span class="n">irt</span>
 <span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="kn">import</span> <span class="n">Estimator</span>
 
 
@@ -247,19 +247,23 @@
 <span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
 <span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span>
-            <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Either pass an index for the simulator or all of the other optional parameters to use this component independently.&#39;</span>
+        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+                <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+                <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+                <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
+                <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">items</span>
-            <span class="n">administered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-            <span class="n">response_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">response_vectors</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-            <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
@@ -402,16 +406,20 @@
 <span class="sd">        :param response_vector: a boolean list containing the examinee&#39;s answers to the administered items</span>
 <span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Either pass an index for the simulator or all of the other optional parameters to use this component independently.&#39;</span>
+        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+                <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+                <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+                <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">items</span>
-            <span class="n">administered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-            <span class="n">response_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">response_vectors</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
 
@@ -435,7 +443,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
+        &#169; Copyright 2021, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>

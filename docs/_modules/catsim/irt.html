@@ -32,6 +32,7 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -67,7 +68,7 @@
             
             
               <div class="version">
-                0.15.6
+                0.15.7
               </div>
             
           
@@ -176,7 +177,7 @@
 
 <span class="kn">import</span> <span class="nn">numexpr</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">pi</span>
 
 
 <div class="viewcode-block" id="icc"><a class="viewcode-back" href="../../irt.html#catsim.irt.icc">[docs]</a><span class="k">def</span> <span class="nf">icc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -225,13 +226,13 @@
 
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span> <span class="k">return</span> <span class="mi">4</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span> <span class="k">return</span> <span class="mi">3</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="mi">2</span>
     <span class="k">return</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="icc_hpc"><a class="viewcode-back" href="../../irt.html#catsim.irt.icc_hpc">[docs]</a><span class="k">def</span> <span class="nf">icc_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Implementation of :py:func:`icc` using :py:mod:`numpy` and :py:mod:`numexpr` in which the characteristic</span>
-<span class="sd">    function for all items in a `numpy.ndarray` are calculated at once.</span>
+<span class="sd">    function for all items in a `numpy.ndarray` are computed at once.</span>
 
 <span class="sd">    :param theta: the individual&#39;s proficiency value.</span>
 <span class="sd">    :param items: array containing the four item parameters.</span>
@@ -243,7 +244,7 @@
 
 <div class="viewcode-block" id="inf_hpc"><a class="viewcode-back" href="../../irt.html#catsim.irt.inf_hpc">[docs]</a><span class="k">def</span> <span class="nf">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Implementation of :py:func:`inf` using :py:mod:`numpy` and :py:mod:`numexpr` in which the information</span>
-<span class="sd">    value for all items in a `numpy.ndarray` are calculated at once.</span>
+<span class="sd">    values for all items in a `numpy.ndarray` are computed at once.</span>
 
 <span class="sd">    :param theta: the individual&#39;s proficiency value.</span>
 <span class="sd">    :param items: array containing the four item parameters.</span>
@@ -298,7 +299,7 @@
 <span class="sd">    :param items: a matrix containing item parameters.</span>
 <span class="sd">    :returns: the test information at `theta` for a test represented by `items`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="var"><a class="viewcode-back" href="../../irt.html#catsim.irt.var">[docs]</a><span class="k">def</span> <span class="nf">var</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -526,7 +527,7 @@
 <span class="sd">    :param raise_err: whether to raise an error in case the validation fails or</span>
 <span class="sd">                      just print the error message to standard output.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Item matrix is not of type </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">))</span>
 
     <span class="n">err</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -572,7 +573,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
+        &#169; Copyright 2021, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>

@@ -71,7 +71,7 @@
             
             
               <div class="version">
-                0.15.6
+                0.15.7
               </div>
             
           
@@ -219,7 +219,7 @@
 <p>Under IRT, the probability of an examinee with a given <span class="math notranslate nohighlight">\(\hat\theta\)</span> value to answer item <span class="math notranslate nohighlight">\(i\)</span> correctly, given the item parameters, is given by (<a class="reference internal" href="references.html#ayala2009" id="id6"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id7"><span>[Magis13]</span></a>)</p>
 <div class="math notranslate nohighlight">
 \[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.\]</div>
-<p>The information this item gives is calculated as (<a class="reference internal" href="references.html#ayala2009" id="id8"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id9"><span>[Magis13]</span></a>)</p>
+<p>The information this item gives is computed as (<a class="reference internal" href="references.html#ayala2009" id="id8"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id9"><span>[Magis13]</span></a>)</p>
 <div class="math notranslate nohighlight">
 \[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.\]</div>
 <p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s proficiency.</p>
@@ -245,7 +245,7 @@
 </pre></div>
 </div>
 <p>These examples depict the generation of an array of five items according to the different logistic models. In the last example, parameters <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> have a correlation of <span class="math notranslate nohighlight">\(0.5\)</span>, an adjustment that may be useful in case simulations require it <a class="reference internal" href="references.html#chang2001" id="id12"><span>[Chang2001]</span></a>.</p>
-<p>After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as <span class="math notranslate nohighlight">\(r\)</span>. Its value denotes how many times an item has been used and it is calculated as follows:</p>
+<p>After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as <span class="math notranslate nohighlight">\(r\)</span>. Its value denotes how many times an item has been used and it is computed as follows:</p>
 <div class="math notranslate nohighlight">
 \[r_i = \frac{q_i}{N}\]</div>
 <p>Where <span class="math notranslate nohighlight">\(q_i\)</span> represents the number of tests item <span class="math notranslate nohighlight">\(i\)</span> has been used on and <span class="math notranslate nohighlight">\(N\)</span> is the total number of tests applied.</p>
@@ -253,7 +253,7 @@
 </div>
 <div class="section" id="computerized-adaptive-tests">
 <h2>Computerized adaptive tests<a class="headerlink" href="#computerized-adaptive-tests" title="Permalink to this headline">¶</a></h2>
-<p>Unlike linear tests, in which items are sequentially presented to examinees and their proficiency estimated at the end of the test, in a computerized adaptive test (CAT), an examinees’ proficiency is calculated after the response of each item. The updated knowledge of an examinee’s proficiency at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduce the standard error of estimation of their proficiency at a faster rate. This behavior</p>
+<p>Unlike linear tests, in which items are sequentially presented to examinees and their proficiency estimated at the end of the test, in a computerized adaptive test (CAT), an examinees’ proficiency is updated after the response of each item. The updated knowledge of an examinee’s proficiency at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduce the standard error of estimation of their proficiency at a faster rate. This behavior</p>
 <div class="section" id="the-cat-lifecycle">
 <h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Permalink to this headline">¶</a></h3>
 <p>In general, a computerized adaptive test has a very well-defined lifecycle:</p>
@@ -356,7 +356,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Douglas De Rizzo Meneghetti.
+        &#169; Copyright 2021, Douglas De Rizzo Meneghetti.
 
     </p>
   </div>

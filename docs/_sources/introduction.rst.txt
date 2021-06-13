@@ -33,7 +33,7 @@ Under IRT, the probability of an examinee with a given :math:`\hat\theta` value 
 
 .. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.
 
-The information this item gives is calculated as ([Ayala2009]_, [Magis13]_)
+The information this item gives is computed as ([Ayala2009]_, [Magis13]_)
 
 .. math:: I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.
 
@@ -70,7 +70,7 @@ In :py:mod:`catsim`, a collection of items is represented as a :py:class:`numpy.
 
 These examples depict the generation of an array of five items according to the different logistic models. In the last example, parameters :math:`a` and :math:`b` have a correlation of :math:`0.5`, an adjustment that may be useful in case simulations require it [Chang2001]_.
 
-After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as :math:`r`. Its value denotes how many times an item has been used and it is calculated as follows:
+After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as :math:`r`. Its value denotes how many times an item has been used and it is computed as follows:
 
 .. math:: r_i = \frac{q_i}{N}
 
@@ -79,7 +79,7 @@ Where :math:`q_i` represents the number of tests item :math:`i` has been used on
 Computerized adaptive tests
 ===========================
 
-Unlike linear tests, in which items are sequentially presented to examinees and their proficiency estimated at the end of the test, in a computerized adaptive test (CAT), an examinees' proficiency is calculated after the response of each item. The updated knowledge of an examinee's proficiency at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduce the standard error of estimation of their proficiency at a faster rate. This behavior
+Unlike linear tests, in which items are sequentially presented to examinees and their proficiency estimated at the end of the test, in a computerized adaptive test (CAT), an examinees' proficiency is updated after the response of each item. The updated knowledge of an examinee's proficiency at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduce the standard error of estimation of their proficiency at a faster rate. This behavior
 
 The CAT Lifecycle
 -----------------
