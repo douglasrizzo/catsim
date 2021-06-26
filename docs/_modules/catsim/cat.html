@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.15.7
+                0.16
               </div>
             
           
@@ -184,7 +184,7 @@
 
 
 <div class="viewcode-block" id="dodd"><a class="viewcode-back" href="../../cat.html#catsim.cat.dodd">[docs]</a><span class="k">def</span> <span class="nf">dodd</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">correct</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Method proposed by [Dod90]_ for the reestimation of :math:`\\hat{\\theta}`</span>
+    <span class="sd">&quot;&quot;&quot;Method proposed by [Dod90]_ for the estimation of :math:`\\hat{\\theta}`</span>
 <span class="sd">    when the response vector is composed entirely of 1s or 0s.</span>
 
 <span class="sd">    .. math::</span>
@@ -198,8 +198,8 @@
 <span class="sd">    :param items: a numpy array containing the parameters of the items in the</span>
 <span class="sd">                  database. This is necessary to capture the maximum and minimum</span>
 <span class="sd">                  difficulty levels necessary for the method.</span>
-<span class="sd">    :param correct: a boolean value informing whether or not the examinee</span>
-<span class="sd">                    correctly answered the current item.</span>
+<span class="sd">    :param correct: a boolean value informing if the examinee has answered only correctly</span>
+<span class="sd">                    (`True`) or incorrectly (`False`) up until now</span>
 <span class="sd">    :returns: a new estimation for :math:`\\theta`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">b</span> <span class="o">=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
@@ -221,7 +221,7 @@
 <span class="sd">    :returns: the bias between the predicted values and actual values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;actual and predicted vectors need to be the same size&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;actual and predicted vectors need to be the same size&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span><span class="p">))))</span></div>
 
 
@@ -240,7 +240,7 @@
 <span class="sd">    :returns: the mean squared error between the predicted values and actual values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;actual and predicted vectors need to be the same size&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;actual and predicted vectors need to be the same size&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span><span class="p">))]))</span></div>
 
 
@@ -259,7 +259,7 @@
 <span class="sd">    :returns: the root mean squared error between the predicted values and actual values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;actual and predicted vectors need to be the same size&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;actual and predicted vectors need to be the same size&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">))</span></div>
 
 
@@ -276,7 +276,7 @@
 <span class="sd">    :returns: test overlap rate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">usages</span> <span class="o">&gt;</span> <span class="n">test_size</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;There are items that have been used more times than there were tests&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;There are items that have been used more times than there were tests&quot;</span><span class="p">)</span>
 
     <span class="n">bank_size</span> <span class="o">=</span> <span class="n">usages</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">var_r</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">usages</span><span class="p">)</span>
@@ -286,7 +286,7 @@
     <span class="k">return</span> <span class="n">t</span></div>
 
 
-<div class="viewcode-block" id="generate_item_bank"><a class="viewcode-back" href="../../cat.html#catsim.cat.generate_item_bank">[docs]</a><span class="k">def</span> <span class="nf">generate_item_bank</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;4PL&#39;</span><span class="p">,</span> <span class="n">corr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="generate_item_bank"><a class="viewcode-back" href="../../cat.html#catsim.cat.generate_item_bank">[docs]</a><span class="k">def</span> <span class="nf">generate_item_bank</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;4PL&quot;</span><span class="p">,</span> <span class="n">corr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Generate a synthetic item bank whose parameters approximately follow</span>
 <span class="sd">    real-world parameters, as proposed by [Bar10]_.</span>
 
@@ -315,14 +315,17 @@
 <span class="sd">    &gt;&gt;&gt; generate_item_bank(5, &#39;4PL&#39;, corr=0)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">valid_itemtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;1PL&#39;</span><span class="p">,</span> <span class="s1">&#39;2PL&#39;</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">,</span> <span class="s1">&#39;4PL&#39;</span><span class="p">]</span>
+    <span class="n">valid_itemtypes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;1PL&quot;</span><span class="p">,</span> <span class="s2">&quot;2PL&quot;</span><span class="p">,</span> <span class="s2">&quot;3PL&quot;</span><span class="p">,</span> <span class="s2">&quot;4PL&quot;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">itemtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_itemtypes</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Item type not in &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">valid_itemtypes</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Item type not in &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">valid_itemtypes</span><span class="p">))</span>
 
     <span class="n">means</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">]</span>
     <span class="n">stds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">]</span>
-    <span class="n">covs</span> <span class="o">=</span> <span class="p">[[</span><span class="n">stds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">stds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">stds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">corr</span><span class="p">],</span> <span class="p">[</span><span class="n">stds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">stds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">corr</span><span class="p">,</span> <span class="n">stds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">]]</span>
+    <span class="n">covs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="n">stds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">stds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">stds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">corr</span><span class="p">],</span>
+        <span class="p">[</span><span class="n">stds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">stds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">corr</span><span class="p">,</span> <span class="n">stds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">],</span>
+    <span class="p">]</span>
 
     <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">(</span><span class="n">means</span><span class="p">,</span> <span class="n">covs</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
@@ -332,16 +335,16 @@
         <span class="n">min_disc</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
         <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">disc</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">min_disc</span><span class="p">)</span> <span class="k">for</span> <span class="n">disc</span> <span class="ow">in</span> <span class="n">a</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">itemtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;2PL&#39;</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">,</span> <span class="s1">&#39;4PL&#39;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">itemtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;2PL&quot;</span><span class="p">,</span> <span class="s2">&quot;3PL&quot;</span><span class="p">,</span> <span class="s2">&quot;4PL&quot;</span><span class="p">]:</span>
         <span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">itemtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;3PL&#39;</span><span class="p">,</span> <span class="s1">&#39;4PL&#39;</span><span class="p">]:</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="o">.</span><span class="mi">25</span><span class="p">,</span> <span class="o">.</span><span class="mi">02</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">itemtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;3PL&quot;</span><span class="p">,</span> <span class="s2">&quot;4PL&quot;</span><span class="p">]:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">itemtype</span> <span class="o">==</span> <span class="s1">&#39;4PL&#39;</span><span class="p">:</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">.</span><span class="mi">94</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">itemtype</span> <span class="o">==</span> <span class="s2">&quot;4PL&quot;</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.94</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
@@ -352,7 +355,7 @@
     <span class="k">return</span> <span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">getrandbits</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">)]</span>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">doctest</span>
 
     <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>

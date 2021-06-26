@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.15.7
+                0.16
               </div>
             
           
@@ -188,9 +188,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;Hill Climbing Estimator&#39;</span>
+        <span class="k">return</span> <span class="s2">&quot;Hill Climbing Estimator&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dodd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dodd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">precision</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
@@ -247,18 +247,17 @@
 <span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
 <span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-                <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-                <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-                <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-                <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
-                <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">)</span>
+        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+            <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+            <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
+            <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
 
         <span class="k">assert</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -268,42 +267,58 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">summarized_answers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span>
 
-        <span class="c1"># TODO may need to check if response_vector is empty</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">response_vector</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">response_vector</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+        <span class="c1"># enter here if examinee has only answered correctly or incorrectly</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">summarized_answers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">answer</span> <span class="o">=</span> <span class="n">summarized_answers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">lower_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">lower_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-            <span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># if the estimator was initialized with dodd = True,</span>
+            <span class="c1"># use Dodd&#39;s estimation heuristic to return a theta value</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">answer</span><span class="p">)</span>
 
-        <span class="n">best_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
-        <span class="n">max_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+            <span class="c1"># otherwise, return positive or negative infinity,</span>
+            <span class="c1"># in accordance with the definition of the MLE</span>
+            <span class="k">elif</span> <span class="n">answer</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
 
-        <span class="c1"># the estimator starts with a rough search, which gets finer with each pass</span>
+        <span class="c1"># select lower and upper bounds for an interval in which the estimator will</span>
+        <span class="c1"># look for the most probable new theta</span>
+
+        <span class="c1"># these bounds are computed as a the minimum and maximum item difficulties</span>
+        <span class="c1"># in the bank...</span>
+        <span class="n">lower_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># ... plus an arbitrary error margin</span>
+        <span class="n">margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper_bound</span> <span class="o">-</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="n">upper_bound</span> <span class="o">+=</span> <span class="n">margin</span>
+        <span class="n">lower_bound</span> <span class="o">-=</span> <span class="n">margin</span>
+
+        <span class="n">best_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+        <span class="n">max_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+
+        <span class="c1"># the estimator starts with a rough search inside the interval, which gets</span>
+        <span class="c1"># finer with each pass</span>
         <span class="k">for</span> <span class="n">granularity</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
 
-            <span class="c1"># generate a list of candidate theta values</span>
-            <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="c1"># generate a discrete list of candidate theta values inside the interval</span>
+            <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
             <span class="n">interval_size</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="s1">&#39;Pass: </span><span class="si">{0}</span><span class="se">\n\t</span><span class="s1">Bounds: </span><span class="si">{1}</span><span class="s1"> </span><span class="si">{2}</span><span class="se">\n\t</span><span class="s1">Interval size: </span><span class="si">{3}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;Pass: </span><span class="si">{0}</span><span class="se">\n\t</span><span class="s2">Bounds: </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="se">\n\t</span><span class="s2">Interval size: </span><span class="si">{3}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">granularity</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">interval_size</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
 
             <span class="c1"># we&#39;ll use the concave nature of the log-likelihood function</span>
-            <span class="c1"># to program a primitive early stopping method in our search</span>
-            <span class="n">previous_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+            <span class="c1"># to program a primitive early stopping method in our search.</span>
+            <span class="n">previous_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
 
             <span class="c1"># iterate through each candidate</span>
             <span class="k">for</span> <span class="n">candidate_theta</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
@@ -321,26 +336,30 @@
                     <span class="k">break</span>
                 <span class="n">previous_ll</span> <span class="o">=</span> <span class="n">current_ll</span>
 
-                <span class="c1"># check if the LL of the current candidate theta is larger than the best one checked as of yet</span>
+                <span class="c1"># check if the LL of the current candidate theta is larger than</span>
+                <span class="c1"># the best one checked as of yet</span>
                 <span class="k">if</span> <span class="n">current_ll</span> <span class="o">&gt;</span> <span class="n">max_ll</span><span class="p">:</span>
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">Theta: </span><span class="si">{0}</span><span class="s1">, LL: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">,</span> <span class="n">current_ll</span><span class="p">))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{0}</span><span class="s2">, LL: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">,</span> <span class="n">current_ll</span><span class="p">))</span>
 
-                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">best_theta</span> <span class="o">-</span> <span class="n">candidate_theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;1e-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_precision</span><span class="p">)):</span>
+                    <span class="c1"># if the difference between the best theta as of yet and the current theta</span>
+                    <span class="c1"># is negligible, we stop our search and return the current theta, which is</span>
+                    <span class="c1"># better than the as-of-yet best theta</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">best_theta</span> <span class="o">-</span> <span class="n">candidate_theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;1e-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_precision</span><span class="p">)):</span>
                         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getout</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">)</span>
 
                     <span class="n">max_ll</span> <span class="o">=</span> <span class="n">current_ll</span>
                     <span class="n">best_theta</span> <span class="o">=</span> <span class="n">candidate_theta</span>
 
             <span class="c1"># the bounds of the new candidates are adjusted around the current best theta value</span>
-            <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">-</span> <span class="n">interval_size</span>
-            <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">+</span> <span class="n">interval_size</span>
+            <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">-</span> <span class="p">(</span><span class="n">interval_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">+</span> <span class="p">(</span><span class="n">interval_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getout</span><span class="p">(</span><span class="n">best_theta</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_getout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> evaluations&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> evaluations&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">theta</span></div>
 
@@ -357,7 +376,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;Differential Evolution Estimator&#39;</span>
+        <span class="k">return</span> <span class="s2">&quot;Differential Evolution Estimator&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DifferentialEvolutionEstimator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -406,16 +425,15 @@
 <span class="sd">        :param response_vector: a boolean list containing the examinee&#39;s answers to the administered items</span>
 <span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-                <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-                <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-                <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-                <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
-                <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">)</span>
+        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+            <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+            <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
 
         <span class="k">assert</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">assert</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -426,7 +444,7 @@
         <span class="n">res</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span>
             <span class="n">irt</span><span class="o">.</span><span class="n">negative_log_likelihood</span><span class="p">,</span>
             <span class="n">bounds</span><span class="o">=</span><span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]],</span>
-            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">]),</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
