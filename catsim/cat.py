@@ -46,7 +46,7 @@ def bias(actual: list, predicted: list) -> float:
     :returns: the bias between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
-        raise ValueError('actual and predicted vectors need to be the same size')
+        raise ValueError("actual and predicted vectors need to be the same size")
     return float(numpy.mean(list(map(operator.sub, predicted, actual))))
 
 
@@ -65,7 +65,7 @@ def mse(actual: list, predicted: list) -> float:
     :returns: the mean squared error between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
-        raise ValueError('actual and predicted vectors need to be the same size')
+        raise ValueError("actual and predicted vectors need to be the same size")
     return float(numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))]))
 
 
@@ -84,7 +84,7 @@ def rmse(actual: list, predicted: list) -> float:
     :returns: the root mean squared error between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
-        raise ValueError('actual and predicted vectors need to be the same size')
+        raise ValueError("actual and predicted vectors need to be the same size")
     return numpy.sqrt(mse(actual, predicted))
 
 
@@ -101,7 +101,7 @@ def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
     :returns: test overlap rate.
     """
     if any(usages > test_size):
-        raise ValueError('There are items that have been used more times than there were tests')
+        raise ValueError("There are items that have been used more times than there were tests")
 
     bank_size = usages.shape[0]
     var_r = numpy.var(usages)
@@ -111,7 +111,7 @@ def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
     return t
 
 
-def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0) -> numpy.ndarray:
+def generate_item_bank(n: int, itemtype: str = "4PL", corr: float = 0) -> numpy.ndarray:
     """Generate a synthetic item bank whose parameters approximately follow
     real-world parameters, as proposed by [Bar10]_.
 
@@ -140,14 +140,17 @@ def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0) -> numpy.
     >>> generate_item_bank(5, '4PL', corr=0)
     """
 
-    valid_itemtypes = ['1PL', '2PL', '3PL', '4PL']
+    valid_itemtypes = ["1PL", "2PL", "3PL", "4PL"]
 
     if itemtype not in valid_itemtypes:
-        raise ValueError('Item type not in ' + str(valid_itemtypes))
+        raise ValueError("Item type not in " + str(valid_itemtypes))
 
     means = [0, 1.2]
     stds = [1, 0.25]
-    covs = [[stds[0]**2, stds[0] * stds[1] * corr], [stds[0] * stds[1] * corr, stds[1]**2]]
+    covs = [
+        [stds[0]**2, stds[0] * stds[1] * corr],
+        [stds[0] * stds[1] * corr, stds[1]**2],
+    ]
 
     b, a = numpy.random.multivariate_normal(means, covs, n).T
 
@@ -157,16 +160,16 @@ def generate_item_bank(n: int, itemtype: str = '4PL', corr: float = 0) -> numpy.
         min_disc = min(a)
         a = [disc + abs(min_disc) for disc in a]
 
-    if itemtype not in ['2PL', '3PL', '4PL']:
+    if itemtype not in ["2PL", "3PL", "4PL"]:
         a = numpy.ones(n)
 
-    if itemtype in ['3PL', '4PL']:
-        c = numpy.random.normal(.25, .02, n).clip(min=0)
+    if itemtype in ["3PL", "4PL"]:
+        c = numpy.random.normal(0.25, 0.02, n).clip(min=0)
     else:
         c = numpy.zeros(n)
 
-    if itemtype == '4PL':
-        d = numpy.random.uniform(.94, 1, n)
+    if itemtype == "4PL":
+        d = numpy.random.uniform(0.94, 1, n)
     else:
         d = numpy.ones(n)
 
@@ -177,7 +180,7 @@ def random_response_vector(size: int) -> list:
     return [bool(random.getrandbits(1)) for _ in range(size)]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

@@ -13,7 +13,7 @@ class HillClimbingEstimator(Estimator):
     """
 
     def __str__(self):
-        return 'Hill Climbing Estimator'
+        return "Hill Climbing Estimator"
 
     def __init__(self, precision: int = 6, dodd: bool = True, verbose: bool = False):
         super().__init__()
@@ -72,18 +72,17 @@ class HillClimbingEstimator(Estimator):
         :param est_theta: a float containing the current estimated proficiency
         :returns: the current :math:`\\hat\\theta`
         """
-        items, administered_items, response_vector, est_theta = \
-            self._prepare_args(
-                return_items=True,
-                return_response_vector=True,
-                return_est_theta=True,
-                index=index,
-                items=items,
-                administered_items=administered_items,
-                response_vector=response_vector,
-                est_theta=est_theta,
-                **kwargs
-            )
+        items, administered_items, response_vector, est_theta = self._prepare_args(
+            return_items=True,
+            return_response_vector=True,
+            return_est_theta=True,
+            index=index,
+            items=items,
+            administered_items=administered_items,
+            response_vector=response_vector,
+            est_theta=est_theta,
+            **kwargs
+        )
 
         assert items is not None
         assert administered_items is not None
@@ -185,7 +184,7 @@ class HillClimbingEstimator(Estimator):
 
     def _getout(self, theta: float) -> float:
         if self._verbose:
-            print('{0} evaluations'.format(self._evaluations))
+            print("{0} evaluations".format(self._evaluations))
 
         return theta
 
@@ -202,7 +201,7 @@ class DifferentialEvolutionEstimator(Estimator):
     """
 
     def __str__(self):
-        return 'Differential Evolution Estimator'
+        return "Differential Evolution Estimator"
 
     def __init__(self, bounds: tuple):
         super(DifferentialEvolutionEstimator, self).__init__()
@@ -251,16 +250,15 @@ class DifferentialEvolutionEstimator(Estimator):
         :param response_vector: a boolean list containing the examinee's answers to the administered items
         :returns: the current :math:`\\hat\\theta`
         """
-        items, administered_items, response_vector = \
-            self._prepare_args(
-                return_items=True,
-                return_response_vector=True,
-                index=index,
-                items=items,
-                administered_items=administered_items,
-                response_vector=response_vector,
-                **kwargs
-            )
+        items, administered_items, response_vector = self._prepare_args(
+            return_items=True,
+            return_response_vector=True,
+            index=index,
+            items=items,
+            administered_items=administered_items,
+            response_vector=response_vector,
+            **kwargs
+        )
 
         assert response_vector is not None
         assert items is not None
@@ -271,7 +269,7 @@ class DifferentialEvolutionEstimator(Estimator):
         res = differential_evolution(
             irt.negative_log_likelihood,
             bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
-            args=(response_vector, items[administered_items])
+            args=(response_vector, items[administered_items]),
         )
 
         self._evaluations = res.nfev

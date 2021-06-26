@@ -13,15 +13,15 @@ class RandomInitializer(Initializer):
                         (in this particular order)."""
 
     def __str__(self):
-        return 'Random Initializer'
+        return "Random Initializer"
 
-    def __init__(self, dist_type: str = 'uniform', dist_params: tuple = (-5, 5)):
+    def __init__(self, dist_type: str = "uniform", dist_params: tuple = (-5, 5)):
         super(RandomInitializer, self).__init__()
 
-        available_distributions = ['uniform', 'normal']
+        available_distributions = ["uniform", "normal"]
         if dist_type not in available_distributions:
             raise ValueError(
-                '{0} not in available distributions {1}'.format(dist_type, available_distributions)
+                "{0} not in available distributions {1}".format(dist_type, available_distributions)
             )
 
         self._dist_type = dist_type
@@ -32,9 +32,9 @@ class RandomInitializer(Initializer):
 
         :param index: the index of the current examinee. This parameter is not used by this method.
         :returns: a proficiency value generated from the chosen distribution using the passed parameters"""
-        if self._dist_type == 'uniform':
+        if self._dist_type == "uniform":
             theta = numpy.random.uniform(min(self._dist_params), max(self._dist_params))
-        elif self._dist_type == 'normal':
+        elif self._dist_type == "normal":
             theta = numpy.random.normal(self._dist_params[0], self._dist_params[1])
 
         return theta
@@ -44,7 +44,7 @@ class FixedPointInitializer(Initializer):
     """Initializes every proficiency at the same point."""
 
     def __str__(self):
-        return 'Fixed Point Initializer'
+        return "Fixed Point Initializer"
 
     def __init__(self, start: float):
         """

@@ -10,7 +10,7 @@ class MaxItemStopper(Stopper):
     :param max_itens: the maximum number of items in the test"""
 
     def __str__(self):
-        return 'Maximum Item Number Initializer'
+        return "Maximum Item Number Initializer"
 
     def __init__(self, max_itens: int):
         super(MaxItemStopper, self).__init__()
@@ -32,7 +32,7 @@ class MaxItemStopper(Stopper):
         n_itens = administered_items.shape[0]
         if n_itens > self._max_itens:
             raise ValueError(
-                'More items than permitted were administered: {0} > {1}'.format(
+                "More items than permitted were administered: {0} > {1}".format(
                     n_itens, self._max_itens
                 )
             )
@@ -46,7 +46,7 @@ class MinErrorStopper(Stopper):
     :param min_error: the minimum standard error of estimation the test must achieve before stopping"""
 
     def __str__(self):
-        return 'Minimum Error Initializer'
+        return "Minimum Error Initializer"
 
     def __init__(self, min_error: float):
         super(MinErrorStopper, self).__init__()

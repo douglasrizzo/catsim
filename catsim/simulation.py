@@ -22,13 +22,13 @@ class Simulable(metaclass=ABCMeta):
     @property
     def simulator(self):
         if self._simulator is not None and not isinstance(self._simulator, Simulator):
-            raise ValueError('simulator has to be of type catsim.simulation.Simulator')
+            raise ValueError("simulator has to be of type catsim.simulation.Simulator")
         return self._simulator
 
     @simulator.setter
-    def simulator(self, x: 'Simulator'):
+    def simulator(self, x: "Simulator"):
         if not isinstance(x, Simulator):
-            raise ValueError('simulator has to be of type catsim.simulation.Simulator')
+            raise ValueError("simulator has to be of type catsim.simulation.Simulator")
         self._simulator = x
         self.preprocess()
 
@@ -43,15 +43,13 @@ class Simulable(metaclass=ABCMeta):
         self, return_items=False, return_response_vector=False, return_est_theta=False, **kwargs
     ):
         using_simulator_props = (kwargs.get("index") is not None and self.simulator is not None)
-        if (
-            not using_simulator_props and (
-                kwargs.get("items") is None or kwargs.get("administered_items") is None or
-                (return_est_theta and kwargs.get("est_theta") is None)
-            )
+        if not using_simulator_props and (
+            kwargs.get("items") is None or kwargs.get("administered_items") is None or
+            (return_est_theta and kwargs.get("est_theta") is None)
         ):
             raise ValueError(
-                'Either pass an index for the simulator or all of the other '
-                'optional parameters to use this component independently.'
+                "Either pass an index for the simulator or all of the other "
+                "optional parameters to use this component independently."
             )
 
         result = []
@@ -219,7 +217,7 @@ class Simulator:
         initializer: Initializer = None,
         selector: Selector = None,
         estimator: Estimator = None,
-        stopper: Stopper = None
+        stopper: Stopper = None,
     ):
         irt.validate_item_bank(items)
 
@@ -227,13 +225,13 @@ class Simulator:
         if items.shape[1] < 5:
             items = numpy.append(items, numpy.zeros([items.shape[0], 1]), axis=1)
 
-        self._duration = 0.
+        self._duration = 0.0
         self._items = items
 
-        self._bias = 0.
-        self._mse = 0.
-        self._rmse = 0.
-        self._overlap_rate = 0.
+        self._bias = 0.0
+        self._mse = 0.0
+        self._rmse = 0.0
+        self._overlap_rate = 0.0
 
         self._initializer = initializer
         self._selector = selector
@@ -350,7 +348,7 @@ class Simulator:
             dist = x
         else:
             raise ValueError(
-                'Examinees must be an int, list of floats or one-dimensional numpy array'
+                "Examinees must be an int, list of floats or one-dimensional numpy array"
             )
 
         return dist
@@ -361,7 +359,7 @@ class Simulator:
         selector: Selector = None,
         estimator: Estimator = None,
         stopper: Stopper = None,
-        verbose: bool = False
+        verbose: bool = False,
     ):
         """Simulates a computerized adaptive testing application to one or more examinees
 
@@ -405,9 +403,12 @@ class Simulator:
         if verbose:
             print(
                 (
-                    'Starting simulation: {0} {1} {2} {3} {4} items'.format(
-                        self._initializer, self._selector, self._estimator, self._stopper,
-                        self._items.shape[0]
+                    "Starting simulation: {0} {1} {2} {3} {4} items".format(
+                        self._initializer,
+                        self._selector,
+                        self._estimator,
+                        self._stopper,
+                        self._items.shape[0],
                     )
                 )
             )
@@ -433,10 +434,15 @@ class Simulator:
 
                 # simulates the examinee's response via the four-parameter
                 # logistic function
-                response = irt.icc(
-                    true_theta, self.items[selected_item][0], self.items[selected_item][1],
-                    self.items[selected_item][2], self.items[selected_item][3]
-                ) >= numpy.random.uniform()
+                response = (
+                    irt.icc(
+                        true_theta,
+                        self.items[selected_item][0],
+                        self.items[selected_item][1],
+                        self.items[selected_item][2],
+                        self.items[selected_item][3],
+                    ) >= numpy.random.uniform()
+                )
 
                 self._response_vectors[current_examinee].append(response)
 
@@ -460,11 +466,11 @@ class Simulator:
 
                 self._estimations[current_examinee].append(est_theta)
 
-        self._duration = (time.time() - start_time)
+        self._duration = time.time() - start_time
 
         if verbose:
             pbar.close()
-            print('Simulation took {0} seconds'.format(self._duration))
+            print("Simulation took {0} seconds".format(self._duration))
 
         self._bias = cat.bias(self.examinees, self.latest_estimations)
         self._mse = cat.mse(self.examinees, self.latest_estimations)
@@ -474,7 +480,7 @@ class Simulator:
         # maybe there is a way to calculate it with tests of different lengths,
         # but I did not find it in the literature
         test_size = None
-        len_first = len(self._administered_items[0]) if self._administered_items else None
+        len_first = (len(self._administered_items[0]) if self._administered_items else None)
         if isinstance(selector, FiniteSelector):
             test_size = selector.test_size
         elif all(len(i) == len_first for i in self._administered_items):
@@ -483,7 +489,7 @@ class Simulator:
             self._overlap_rate = cat.overlap_rate(self.items[:, 4], test_size)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

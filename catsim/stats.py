@@ -22,7 +22,7 @@ def coef_variation(x: numpy.ndarray, axis: int = 0) -> numpy.ndarray:
     # print('Means:', mean)
     # print('Std. Devs:', stddev)
 
-    result = stddev / mean if axis == 0 else numpy.transpose(stddev) / numpy.transpose(mean)
+    result = (stddev / mean if axis == 0 else numpy.transpose(stddev) / numpy.transpose(mean))
 
     return result
 
@@ -112,7 +112,7 @@ def scatter_matrix(data: numpy.ndarray) -> numpy.ndarray:
     return scatter
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
 
     doctest.testmod()

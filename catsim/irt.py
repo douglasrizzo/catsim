@@ -1,8 +1,8 @@
 import math
+from math import pi
 
 import numexpr
 import numpy
-from math import pi
 
 
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -43,15 +43,18 @@ def _split_params(items: numpy.ndarray):
 
 def detect_model(items: numpy.ndarray) -> int:
     """Detects which logistic model an item matrix fits into.
-    
+
     :param items: an item matrix
     :return: an int between 1 and 4 denoting the logistic model of the given item matrix
     """
     a, b, c, d = _split_params(items)
 
-    if any(d != 1): return 4
-    if any(c != 0): return 3
-    if len(set(a)) > 1: return 2
+    if any(d != 1):
+        return 4
+    if any(c != 0):
+        return 3
+    if len(set(a)) > 1:
+        return 2
     return 1
 
 
@@ -64,7 +67,7 @@ def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
     :returns: an array of all item characteristic functions, given the current ``theta``"""
     a, b, c, d = _split_params(items)
 
-    return numexpr.evaluate('c + ((d - c) / (1 + exp((-a * (theta - b)))))')
+    return numexpr.evaluate("c + ((d - c) / (1 + exp((-a * (theta - b)))))")
 
 
 def inf_hpc(theta: float, items: numpy.ndarray):
@@ -77,7 +80,7 @@ def inf_hpc(theta: float, items: numpy.ndarray):
     a, b, c, d = _split_params(items)
     p = icc_hpc(theta, items)
 
-    return numexpr.evaluate('(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))')
+    return numexpr.evaluate("(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))")
 
 
 def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -142,7 +145,7 @@ def var(theta: float, items: numpy.ndarray) -> float:
     try:
         return 1 / test_info(theta, items)
     except ZeroDivisionError:
-        return float('-inf')
+        return float("-inf")
 
 
 def see(theta: float, items: numpy.ndarray) -> float:
@@ -160,11 +163,11 @@ def see(theta: float, items: numpy.ndarray) -> float:
     try:
         return math.sqrt(var(theta, items))
     except ValueError:
-        return float('inf')
+        return float("inf")
 
 
 def reliability(theta: float, items: numpy.ndarray):
-    """ Computes test reliability [Thissen00]_, given by:
+    """Computes test reliability [Thissen00]_, given by:
 
     .. math:: Rel = 1 - \\frac{1}{I(\\theta)}
 
@@ -223,9 +226,12 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
     else:
         u = -(3 / 4) + ((c + d - 2 * c * d) / 2)
         v = (c + d - 1) / 4
-        x_star = 2 * math.sqrt(-u / 3) * math.cos(
-            (1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) + (4 * math.pi / 3)
-        ) + 0.5
+        x_star = (
+            2 * math.sqrt(-u / 3) * math.cos(
+                (1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) +
+                (4 * math.pi / 3)
+            ) + 0.5
+        )
 
         return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
@@ -241,15 +247,15 @@ def max_info_hpc(items: numpy.ndarray):
     if all(d == 1):
         if all(c == 0):
             return b
-        return numexpr.evaluate('b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)')
+        return numexpr.evaluate("b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)")
     else:
-        u = numexpr.evaluate('-(3 / 4) + ((c + d - 2 * c * d) / 2)')
-        v = numexpr.evaluate('(c + d - 1) / 4')
+        u = numexpr.evaluate("-(3 / 4) + ((c + d - 2 * c * d) / 2)")
+        v = numexpr.evaluate("(c + d - 1) / 4")
         x_star = numexpr.evaluate(
-            '2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5'
+            "2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5"
         )
 
-        return numexpr.evaluate('b + (1 / a) * log((x_star - c) / (d - x_star))')
+        return numexpr.evaluate("b + (1 / a) * log((x_star - c) / (d - x_star))")
 
 
 def log_likelihood(
@@ -279,13 +285,13 @@ def log_likelihood(
     """
     if len(response_vector) != administered_items.shape[0]:
         raise ValueError(
-            'Response vector and administered items must have the same number of items'
+            "Response vector and administered items must have the same number of items"
         )
     if len(set(response_vector) - {True, False}) > 0:
-        raise ValueError('Response vector must contain only Boolean elements')
+        raise ValueError("Response vector must contain only Boolean elements")
 
     ps = icc_hpc(est_theta, administered_items)
-    ll = numexpr.evaluate('sum(where(response_vector, log(ps), log(1 - ps)))')
+    ll = numexpr.evaluate("sum(where(response_vector, log(ps), log(1 - ps)))")
 
     return ll
 
@@ -353,35 +359,35 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
                       just print the error message to standard output.
     """
     if not isinstance(items, numpy.ndarray):
-        raise ValueError('Item matrix is not of type {0}'.format(numpy.ndarray))
+        raise ValueError("Item matrix is not of type {0}".format(numpy.ndarray))
 
-    err = ''
+    err = ""
 
     if len(items.shape) == 1:
-        err += 'Item matrix has only one dimension.'
+        err += "Item matrix has only one dimension."
     elif items.shape[1] > 4:
         print(
-            '\nItem matrix has more than 4 columns. catsim tends to add \
-            columns to the matrix during the simulation, so it\'s not a good idea to keep them.'
+            "\nItem matrix has more than 4 columns. catsim tends to add \
+            columns to the matrix during the simulation, so it's not a good idea to keep them."
         )
     elif items.shape[1] < 4:
         if items.shape[1] == 1:
-            err += '\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns'
+            err += "\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"
         elif items.shape[1] == 2:
-            err += '\nItem matrix has no pseudo-guessing or upper asymptote parameter columns'
+            err += "\nItem matrix has no pseudo-guessing or upper asymptote parameter columns"
         elif items.shape[1] == 3:
-            err += '\nItem matrix has no upper asymptote parameter column'
+            err += "\nItem matrix has no upper asymptote parameter column"
     else:
         if any(items[:, 0] < 0):
-            err += '\nThere are items with discrimination < 0'
+            err += "\nThere are items with discrimination < 0"
         if any(items[:, 2] < 0):
-            err += '\nThere are items with pseudo-guessing < 0'
+            err += "\nThere are items with pseudo-guessing < 0"
         if any(items[:, 2] > 1):
-            err += '\nThere are items with pseudo-guessing > 1'
+            err += "\nThere are items with pseudo-guessing > 1"
         if any(items[:, 3] > 1):
-            err += '\nThere are items with upper asymptote > 1'
+            err += "\nThere are items with upper asymptote > 1"
         if any(items[:, 3] < 0):
-            err += '\nThere are items with upper asymptote < 0'
+            err += "\nThere are items with upper asymptote < 0"
 
     if len(err) > 0 and raise_err:
         raise ValueError(err)

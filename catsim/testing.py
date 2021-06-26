@@ -26,9 +26,9 @@ def test_cism():
     for bank_size in bank_sizes:
         for test_size in test_sizes:
 
-            initializers = [RandomInitializer('uniform', (-5, 5))]
+            initializers = [RandomInitializer("uniform", (-5, 5))]
             estimators = [HillClimbingEstimator()]
-            stoppers = [MaxItemStopper(test_size), MinErrorStopper(.4)]
+            stoppers = [MaxItemStopper(test_size), MinErrorStopper(0.4)]
 
             for initializer in initializers:
                 for estimator in estimators:
@@ -37,7 +37,7 @@ def test_cism():
                         clusters = list(KMeans(n_clusters=8).fit_predict(items))
                         ClusterSelector.weighted_cluster_infos(0, items, clusters)
                         ClusterSelector.avg_cluster_params(items, clusters)
-                        selector = ClusterSelector(clusters=clusters, r_max=.2)
+                        selector = ClusterSelector(clusters=clusters, r_max=0.2)
                         yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
 
@@ -46,11 +46,14 @@ def test_simulations():
     test_sizes = [30]
     bank_sizes = [500]
 
-    logistic_models = ['4PL']
+    logistic_models = ["4PL"]
 
     for bank_size in bank_sizes:
         for test_size in test_sizes:
-            initializers = [RandomInitializer('uniform', (-5, 5)), FixedPointInitializer(0)]
+            initializers = [
+                RandomInitializer("uniform", (-5, 5)),
+                FixedPointInitializer(0),
+            ]
             infinite_selectors = [MaxInfoSelector(), RandomSelector(), UrrySelector()]
             finite_selectors = [
                 LinearSelector(list(numpy.random.choice(bank_size, size=test_size, replace=False))),
@@ -59,7 +62,7 @@ def test_simulations():
                 MaxInfoStratSelector(test_size),
                 MaxInfoBBlockSelector(test_size),
                 The54321Selector(test_size),
-                RandomesqueSelector(5)
+                RandomesqueSelector(5),
             ]
 
             for logistic_model in logistic_models:
@@ -78,21 +81,25 @@ def test_simulations():
                                 selector.select(
                                     items=items,
                                     administered_items=administered_items,
-                                    est_theta=est_theta
+                                    est_theta=est_theta,
                                 )
                                 estimator.estimate(
                                     items=items,
                                     administered_items=administered_items,
                                     response_vector=responses,
-                                    est_theta=est_theta
+                                    est_theta=est_theta,
                                 )
                                 stopper.stop(
-                                    administered_items=items[administered_items], theta=est_theta
+                                    administered_items=items[administered_items],
+                                    theta=est_theta,
                                 )
 
                                 yield one_simulation, items, examinees, initializer, selector, estimator, stopper
 
-                        for stopper in [MinErrorStopper(.4), MaxItemStopper(test_size)]:
+                        for stopper in [
+                            MinErrorStopper(0.4),
+                            MaxItemStopper(test_size),
+                        ]:
                             for selector in infinite_selectors:
                                 items = generate_item_bank(bank_size, itemtype=logistic_model)
                                 yield one_simulation, items, examinees, initializer, selector, estimator, stopper
@@ -100,11 +107,11 @@ def test_simulations():
 
 def test_item_bank_generation():
     for items in [
-        generate_item_bank(5, '1PL'),
-        generate_item_bank(5, '2PL'),
-        generate_item_bank(5, '3PL'),
-        generate_item_bank(5, '3PL', corr=0),
-        generate_item_bank(5, '4PL')
+        generate_item_bank(5, "1PL"),
+        generate_item_bank(5, "2PL"),
+        generate_item_bank(5, "3PL"),
+        generate_item_bank(5, "3PL", corr=0),
+        generate_item_bank(5, "4PL"),
     ]:
         irt.validate_item_bank(items, raise_err=True)
 
@@ -116,6 +123,7 @@ def test_item_bank_generation():
 
 def test_plots():
     from matplotlib.pyplot import close
+
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
     estimator = HillClimbingEstimator()
@@ -125,37 +133,38 @@ def test_plots():
 
     for item in s.items[0:10]:
         yield plot.item_curve, item[0], item[1], item[2], item[
-            3], 'Test plot', 'icc', False, None, False
+            3], "Test plot", "icc", False, None, False
         yield plot.item_curve, item[0], item[1], item[2], item[
-            3], 'Test plot', 'iic', True, None, False
+            3], "Test plot", "iic", True, None, False
         yield plot.item_curve, item[0], item[1], item[2], item[
-            3], 'Test plot', 'both', True, None, False
-        close('all')
+            3], "Test plot", "both", True, None, False
+        close("all")
 
     plot.gen3d_dataset_scatter(items=s.items, show=False)
     plot.param_dist(items=s.items, show=False)
     plot.test_progress(
-        title='Test progress',
+        title="Test progress",
         simulator=s,
         index=0,
         info=True,
         see=True,
         reliability=True,
-        show=False
+        show=False,
     )
     plot.item_exposure(simulator=s, show=False)
-    plot.item_exposure(simulator=s, show=False, par='a')
-    plot.item_exposure(simulator=s, show=False, par='b')
-    plot.item_exposure(simulator=s, show=False, par='c')
-    plot.item_exposure(simulator=s, show=False, par='d')
+    plot.item_exposure(simulator=s, show=False, par="a")
+    plot.item_exposure(simulator=s, show=False, par="b")
+    plot.item_exposure(simulator=s, show=False, par="c")
+    plot.item_exposure(simulator=s, show=False, par="d")
     plot.item_exposure(simulator=s, show=False, hist=True)
 
     # close all plots after testing
-    close('all')
+    close("all")
 
 
 def test_stats():
     import numpy.random as nprnd
+
     for _ in range(10):
         items = generate_item_bank(500)
         stats.coef_variation(items)
@@ -168,5 +177,5 @@ def test_stats():
         stats.bincount(random_integers)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

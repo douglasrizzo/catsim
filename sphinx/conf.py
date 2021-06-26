@@ -21,12 +21,12 @@ import sphinx_rtd_theme
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(".."))
 
 from catsim import __version__
 
-filenames = ['readme_head.md', 'readme_body.md']
-with open('../README.md', 'w') as outfile:
+filenames = ["readme_head.md", "readme_body.md"]
+with open("../README.md", "w") as outfile:
     for fname in filenames:
         with open(fname) as infile:
             outfile.write(infile.read())
@@ -40,35 +40,42 @@ with open('../README.md', 'w') as outfile:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'matplotlib.sphinxext.plot_directive', 'sphinx.ext.autodoc', 'sphinx.ext.doctest',
-    'sphinx.ext.inheritance_diagram', 'sphinx.ext.intersphinx', 'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode', 'numpydoc', 'sphinx_rtd_theme', 'm2r2'
+    "matplotlib.sphinxext.plot_directive",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "numpydoc",
+    "sphinx_rtd_theme",
+    "m2r2",
 ]
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
-    'numpy': ('https://numpy.org/doc/stable/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-    'sklearn': ('https://scikit-learn.org/stable/', None)
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = ['.rst', '.md']
+source_suffix = [".rst", ".md"]
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = 'catsim'
-copyright = '2021, Douglas De Rizzo Meneghetti'
-author = 'Douglas De Rizzo Meneghetti'
+project = "catsim"
+copyright = "2021, Douglas De Rizzo Meneghetti"
+author = "Douglas De Rizzo Meneghetti"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -94,7 +101,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ["_build"]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -112,7 +119,7 @@ exclude_patterns = ['_build']
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []
@@ -130,12 +137,12 @@ numfig_secnum_depth = 0
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'logo_only': True}
+html_theme_options = {"logo_only": True}
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
@@ -152,18 +159,18 @@ html_title = None
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = 'logo_text.svg'
+html_logo = "logo_text.svg"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'logo.svg'
+html_favicon = "logo.svg"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
-html_context = {'css_files': ['_static/css/custom.css']}
+html_static_path = ["_static"]
+html_context = {"css_files": ["_static/css/custom.css"]}
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -226,20 +233,17 @@ html_context = {'css_files': ['_static/css/custom.css']}
 # html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'catsimdoc'
+htmlhelp_basename = "catsimdoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
-    'papersize': 'a4paper',
-
+    "papersize": "a4paper",
     # The font size ('10pt', '11pt' or '12pt').
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     # 'preamble': '',
-
     # Latex figure (float) alignment
     # 'figure_align': 'htbp',
 }
@@ -248,7 +252,13 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'catsim.tex', 'catsim Documentation', 'Douglas De Rizzo Meneghetti', 'manual'),
+    (
+        master_doc,
+        "catsim.tex",
+        "catsim Documentation",
+        "Douglas De Rizzo Meneghetti",
+        "manual",
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -275,7 +285,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, 'catsim', 'catsim Documentation', [author], 1)]
+man_pages = [(master_doc, "catsim", "catsim Documentation", [author], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -287,8 +297,13 @@ man_pages = [(master_doc, 'catsim', 'catsim Documentation', [author], 1)]
 #  dir menu entry, description, category)
 texinfo_documents = [
     (
-        master_doc, 'catsim', 'catsim Documentation', author, 'catsim',
-        'One line description of project.', 'Miscellaneous'
+        master_doc,
+        "catsim",
+        "catsim Documentation",
+        author,
+        "catsim",
+        "One line description of project.",
+        "Miscellaneous",
     ),
 ]
 

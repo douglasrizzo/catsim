@@ -21,11 +21,11 @@ def item_curve(
     c: float = 0,
     d: float = 1,
     title: str = None,
-    ptype: str = 'icc',
+    ptype: str = "icc",
     max_info=True,
     filepath: str = None,
     show: bool = True,
-    figsize: tuple = None
+    figsize: tuple = None,
 ):
     """Plots 'Item Response Theory'-related item plots
 
@@ -52,73 +52,73 @@ def item_curve(
     :param filepath: saves the plot in the given path
     :param show: whether the generated plot is to be shown
     """
-    available_types = ['icc', 'iic', 'both']
+    available_types = ["icc", "iic", "both"]
 
     if ptype not in available_types:
-        raise ValueError('\'{0}\' not in available plot types: {1}'.format(ptype, available_types))
+        raise ValueError("'{0}' not in available plot types: {1}".format(ptype, available_types))
 
-    thetas = numpy.arange(b - 4, b + 4, .1, 'double')
+    thetas = numpy.arange(b - 4, b + 4, 0.1, "double")
     p_thetas = []
     i_thetas = []
     for theta in thetas:
         p_thetas.append(irt.icc(theta, a, b, c, d))
         i_thetas.append(irt.inf(theta, a, b, c, d))
 
-    if ptype in ['icc', 'iic']:
+    if ptype in ["icc", "iic"]:
         plt.figure(figsize=figsize)
 
         if title is not None:
             plt.title(title, size=18)
 
         plt.annotate(
-            '$a = ' + format(a) + '$\n$b = ' + format(b) + '$\n$c = ' + format(c) + '$\n$d = ' +
-            format(d) + '$',
-            bbox=dict(facecolor='white', alpha=1),
-            xy=(.75, .05),
-            xycoords='axes fraction'
+            "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " +
+            format(d) + "$",
+            bbox=dict(facecolor="white", alpha=1),
+            xy=(0.75, 0.05),
+            xycoords="axes fraction",
         )
-        plt.xlabel(r'$\theta$')
+        plt.xlabel(r"$\theta$")
         plt.grid()
 
-        if ptype == 'icc':
-            plt.ylabel(r'$P(\theta)$')
-            plt.plot(thetas, p_thetas, label=r'$P(\theta)$')
+        if ptype == "icc":
+            plt.ylabel(r"$P(\theta)$")
+            plt.plot(thetas, p_thetas, label=r"$P(\theta)$")
 
-        elif ptype == 'iic':
-            plt.ylabel(r'$I(\theta)$')
-            plt.plot(thetas, i_thetas, label=r'$I(\theta)$')
+        elif ptype == "iic":
+            plt.ylabel(r"$I(\theta)$")
+            plt.plot(thetas, i_thetas, label=r"$I(\theta)$")
             if max_info:
                 aux = irt.max_info(a, b, c, d)
-                plt.plot(aux, irt.inf(aux, a, b, c, d), 'o')
+                plt.plot(aux, irt.inf(aux, a, b, c, d), "o")
 
-    elif ptype == 'both':
+    elif ptype == "both":
         _, ax1 = plt.subplots(figsize=figsize)
 
-        ax1.set_xlabel(r'$\theta$', size=16)
-        ax1.set_ylabel(r'$P(\theta)$', color='b', size=16)
-        ax1.plot(thetas, p_thetas, 'b-', label=r'$P(\theta)$')
+        ax1.set_xlabel(r"$\theta$", size=16)
+        ax1.set_ylabel(r"$P(\theta)$", color="b", size=16)
+        ax1.plot(thetas, p_thetas, "b-", label=r"$P(\theta)$")
         # Make the y-axis label and tick labels match the line color.
         for tl in ax1.get_yticklabels():
-            tl.set_color('b')
+            tl.set_color("b")
 
         ax2 = ax1.twinx()
-        ax2.set_ylabel(r'$I(\theta)$', color='r', size=16)
-        ax2.plot(thetas, i_thetas, 'r-', label=r'$I(\theta)$')
+        ax2.set_ylabel(r"$I(\theta)$", color="r", size=16)
+        ax2.plot(thetas, i_thetas, "r-", label=r"$I(\theta)$")
         for tl in ax2.get_yticklabels():
-            tl.set_color('r')
+            tl.set_color("r")
         if max_info:
             aux = irt.max_info(a, b, c, d)
-            plt.plot(aux, irt.inf(aux, a, b, c, d), 'o')
+            plt.plot(aux, irt.inf(aux, a, b, c, d), "o")
 
         if title is not None:
             ax1.set_title(title, size=18)
 
         ax2.annotate(
-            '$a = ' + format(a) + '$\n$b = ' + format(b) + '$\n$c = ' + format(c) + '$\n$d = ' +
-            format(d) + '$',
-            bbox=dict(facecolor='white', alpha=1),
-            xy=(.75, .05),
-            xycoords='axes fraction'
+            "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " +
+            format(d) + "$",
+            bbox=dict(facecolor="white", alpha=1),
+            xy=(0.75, 0.05),
+            xycoords="axes fraction",
         )
 
     if filepath is not None:
@@ -126,7 +126,7 @@ def item_curve(
         # of the file instead of a path, e.g. 'plot.pdf' instead '~/Downloads/plot.pdf'
         if len(os.path.dirname(filepath)) > 0 and not os.path.exists(os.path.dirname(filepath)):
             os.makedirs(os.path.dirname(filepath))
-        plt.savefig(filepath, bbox_inches='tight')
+        plt.savefig(filepath, bbox_inches="tight")
 
     if show:
         plt.show()
@@ -137,7 +137,7 @@ def gen3d_dataset_scatter(
     title: str = None,
     filepath: str = None,
     show: bool = True,
-    figsize: tuple = None
+    figsize: tuple = None,
 ):
     """Generate the item matrix tridimensional dataset scatter plot
 
@@ -157,20 +157,20 @@ def gen3d_dataset_scatter(
     irt.validate_item_bank(items)
 
     fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(list(items[:, 0]), list(items[:, 1]), list(items[:, 2]), s=10, c='b')
+    ax = fig.add_subplot(111, projection="3d")
+    ax.scatter(list(items[:, 0]), list(items[:, 1]), list(items[:, 2]), s=10, c="b")
 
     if title is not None:
         plt.title(title, size=18)
 
-    ax.set_xlabel('a')
-    ax.set_ylabel('b')
-    ax.set_zlabel('c')
+    ax.set_xlabel("a")
+    ax.set_ylabel("b")
+    ax.set_zlabel("c")
 
     if filepath is not None:
         if not os.path.exists(os.path.dirname(filepath)):
             os.makedirs(os.path.dirname(filepath))
-        plt.savefig(filepath, bbox_inches='tight')
+        plt.savefig(filepath, bbox_inches="tight")
 
     if show:
         plt.show()
@@ -184,7 +184,7 @@ def item_exposure(
     hist: bool = False,
     filepath: str = None,
     show: bool = True,
-    figsize: tuple = None
+    figsize: tuple = None,
 ):
     """Generates a bar chart for the item bank exposure rate. The `x` axis represents one of the item parameters, while
     the `y` axis represents their exposure rates. an examinee's test progress.
@@ -216,7 +216,7 @@ def item_exposure(
     :param show: whether the generated plot is to be shown.
     """
     if simulator is None and items is None:
-        raise ValueError('Not a single plottable object was passed.')
+        raise ValueError("Not a single plottable object was passed.")
 
     plt.figure(figsize=figsize)
 
@@ -230,45 +230,45 @@ def item_exposure(
 
     if items.shape[1] != 5:
         raise ValueError(
-            'The item matrix is supposed to have 5 columns, the last one representing item exposure rates'
+            "The item matrix is supposed to have 5 columns, the last one representing item exposure rates"
         )
 
-    if par is not None and par not in ['a', 'b', 'c', 'd']:
-        raise ValueError('Unsupported parameter.')
+    if par is not None and par not in ["a", "b", "c", "d"]:
+        raise ValueError("Unsupported parameter.")
 
-    if par == 'a':
+    if par == "a":
         parameter = items[:, 0]
-        xlabel = 'Item discrimination'
-    elif par == 'b':
+        xlabel = "Item discrimination"
+    elif par == "b":
         parameter = items[:, 1]
-        xlabel = 'Item difficulty'
-    elif par == 'c':
+        xlabel = "Item difficulty"
+    elif par == "c":
         parameter = items[:, 2]
-        xlabel = 'Item Guessing'
-    elif par == 'd':
+        xlabel = "Item Guessing"
+    elif par == "d":
         parameter = items[:, 3]
-        xlabel = 'Item upper asymptote'
+        xlabel = "Item upper asymptote"
     else:
         parameter = numpy.array(range(items.shape[0]))
-        xlabel = 'Items'
+        xlabel = "Items"
 
     if hist:
         plt.hist(items[:, 4], max(int(items.shape[0] / 10), 3))
-        plt.xlabel('Item exposure')
-        plt.ylabel('Items')
+        plt.xlabel("Item exposure")
+        plt.ylabel("Items")
     else:
         indexes = parameter.argsort()
-        plt.plot(items[:, 4][indexes], marker='o')
+        plt.plot(items[:, 4][indexes], marker="o")
         plt.xlabel(xlabel)
-        plt.ylabel('Item exposure')
+        plt.ylabel("Item exposure")
 
-    plt.legend(loc='best')
+    plt.legend(loc="best")
 
     if filepath is not None:
         filedir = os.path.dirname(filepath)
         if len(filedir) > 0 and not os.path.exists(filedir):
             os.makedirs(os.path.dirname(filepath))
-        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.savefig(filepath, bbox_inches="tight", dpi=300)
 
     if show:
         plt.show()
@@ -287,7 +287,7 @@ def test_progress(
     reliability: bool = False,
     filepath: str = None,
     show: bool = True,
-    figsize: tuple = None
+    figsize: tuple = None,
 ):
     """Generates a plot representing an examinee's test progress. Note that,
     while some functions increase or decrease monotonically, like test information
@@ -335,7 +335,7 @@ def test_progress(
     :param show: whether the generated plot is to be shown
     """
     if simulator is None and thetas is None and administered_items is None:
-        raise ValueError('Not a single plottable object was passed.')
+        raise ValueError("Not a single plottable object was passed.")
 
     plt.figure(figsize=figsize)
 
@@ -351,51 +351,68 @@ def test_progress(
     assert administered_items is not None
     assert true_theta is not None
 
-    if thetas is not None and administered_items is not None and len(thetas) - 1 != len(
-        administered_items[:, 1]
+    if (
+        thetas is not None and administered_items is not None and
+        len(thetas) - 1 != len(administered_items[:, 1])
     ):
         raise ValueError(
-            'Number of latest_estimations and administered items is not the same. They should be.'
+            "Number of latest_estimations and administered items is not the same. They should be."
         )
 
     # len(thetas) - 1 because the first item is made by the initializer
-    xs = list(range(len(thetas))
-              ) if thetas is not None else list(range(len(administered_items[:, 1])))
+    xs = (
+        list(range(len(thetas)))
+        if thetas is not None else list(range(len(administered_items[:, 1])))
+    )
 
     if thetas is not None:
-        plt.plot(xs, thetas, label=r'$\hat{\theta}$')
+        plt.plot(xs, thetas, label=r"$\hat{\theta}$")
     if administered_items is not None:
         difficulties = administered_items[:, 1]
-        plt.plot(xs[1:], difficulties, label='Item difficulty')
+        plt.plot(xs[1:], difficulties, label="Item difficulty")
     if true_theta is not None:
-        plt.hlines(true_theta, 0, len(xs), label=r'$\theta$')
+        plt.hlines(true_theta, 0, len(xs), label=r"$\theta$")
     if thetas is not None and administered_items is not None:
 
         # calculate and plot test information, var, standard error and reliability
         if info:
-            infos = [irt.test_info(thetas[x], administered_items[:x + 1, ]) for x in xs]
-            plt.plot(xs, infos, label=r'$I(\theta)$')
+            infos = [irt.test_info(
+                thetas[x],
+                administered_items[:x + 1, ],
+            ) for x in xs]
+            plt.plot(xs, infos, label=r"$I(\theta)$")
 
         if var:
-            varss = [irt.var(thetas[x], administered_items[:x + 1, ]) for x in xs]
-            plt.plot(xs, varss, label=r'$Var$')
+            varss = [irt.var(
+                thetas[x],
+                administered_items[:x + 1, ],
+            ) for x in xs]
+            plt.plot(xs, varss, label=r"$Var$")
 
         if see:
-            sees = [irt.see(thetas[x], administered_items[:x + 1, ]) for x in xs]
-            plt.plot(xs, sees, label=r'$SEE$')
+            sees = [irt.see(
+                thetas[x],
+                administered_items[:x + 1, ],
+            ) for x in xs]
+            plt.plot(xs, sees, label=r"$SEE$")
 
         if reliability:
-            reliabilities = [irt.reliability(thetas[x], administered_items[:x + 1, ]) for x in xs]
-            plt.plot(xs, reliabilities, label='Reliability')
-    plt.xlabel('Items')
+            reliabilities = [
+                irt.reliability(
+                    thetas[x],
+                    administered_items[:x + 1, ],
+                ) for x in xs
+            ]
+            plt.plot(xs, reliabilities, label="Reliability")
+    plt.xlabel("Items")
     plt.grid()
-    plt.legend(loc='best')
+    plt.legend(loc="best")
 
     if filepath is not None:
         filedir = os.path.dirname(filepath)
         if len(filedir) > 0 and not os.path.exists(filedir):
             os.makedirs(os.path.dirname(filepath))
-        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.savefig(filepath, bbox_inches="tight", dpi=300)
 
     if show:
         plt.show()
@@ -414,7 +431,7 @@ def param_dist(
         filedir = os.path.dirname(filepath)
         if len(filedir) > 0 and not os.path.exists(filedir):
             os.makedirs(os.path.dirname(filepath))
-        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        plt.savefig(filepath, bbox_inches="tight", dpi=300)
 
     if show:
         plt.show()
