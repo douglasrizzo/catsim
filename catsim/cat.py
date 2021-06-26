@@ -9,7 +9,7 @@ from catsim import irt
 
 
 def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
-    """Method proposed by [Dod90]_ for the reestimation of :math:`\\hat{\\theta}`
+    """Method proposed by [Dod90]_ for the estimation of :math:`\\hat{\\theta}`
     when the response vector is composed entirely of 1s or 0s.
 
     .. math::
@@ -23,8 +23,8 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     :param items: a numpy array containing the parameters of the items in the
                   database. This is necessary to capture the maximum and minimum
                   difficulty levels necessary for the method.
-    :param correct: a boolean value informing whether or not the examinee
-                    correctly answered the current item.
+    :param correct: a boolean value informing if the examinee has answered only correctly
+                    (`True`) or incorrectly (`False`) up until now
     :returns: a new estimation for :math:`\\theta`
     """
     b = items[:, 1]

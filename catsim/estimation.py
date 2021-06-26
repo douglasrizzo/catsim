@@ -15,7 +15,7 @@ class HillClimbingEstimator(Estimator):
     def __str__(self):
         return 'Hill Climbing Estimator'
 
-    def __init__(self, precision: int = 6, dodd: bool = False, verbose: bool = False):
+    def __init__(self, precision: int = 6, dodd: bool = True, verbose: bool = False):
         super().__init__()
         self._precision = precision
         self._verbose = verbose
@@ -93,29 +93,43 @@ class HillClimbingEstimator(Estimator):
         self._calls += 1
         self._evaluations = 0
 
-        if len(set(response_vector)) == 1 and self._dodd:
-            return cat.dodd(est_theta, items, response_vector[-1])
+        summarized_answers = set(response_vector)
 
-        # TODO may need to check if response_vector is empty
-        if all(response_vector):
-            return float('inf')
-        elif not any(response_vector):
-            return float('-inf')
+        # enter here if examinee has only answered correctly or incorrectly
+        if len(summarized_answers) == 1:
+            answer = summarized_answers.pop()
 
-        if len(administered_items) > 0:
+            # if the estimator was initialized with dodd = True,
+            # use Dodd's estimation heuristic to return a theta value
+            if self._dodd:
+                return cat.dodd(est_theta, items, answer)
+
+            # otherwise, return positive or negative infinity,
+            # in accordance with the definition of the MLE
+            elif answer:
+                return float("inf")
+            else:
+                return float("-inf")
+
+        if len(administered_items) > 1:
             lower_bound = min(items[administered_items][:, 1])
             upper_bound = max(items[administered_items][:, 1])
         else:
             lower_bound = min(items[:, 1])
             upper_bound = max(items[:, 1])
 
-        best_theta = float('-inf')
-        max_ll = float('-inf')
+        margin = (upper_bound - lower_bound) / 4
+
+        upper_bound += margin
+        lower_bound -= margin
+
+        best_theta = float("-inf")
+        max_ll = float("-inf")
 
         # the estimator starts with a rough search, which gets finer with each pass
         for granularity in range(10):
 
-            # generate a list of candidate theta values
+            # generate a discrete list of candidate theta values
             candidates = numpy.linspace(lower_bound, upper_bound, 10)
             interval_size = candidates[1] - candidates[0]
 
