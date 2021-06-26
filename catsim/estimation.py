@@ -178,8 +178,8 @@ class HillClimbingEstimator(Estimator):
                     best_theta = candidate_theta
 
             # the bounds of the new candidates are adjusted around the current best theta value
-            lower_bound = best_theta - interval_size
-            upper_bound = best_theta + interval_size
+            lower_bound = best_theta - (interval_size * 2)
+            upper_bound = best_theta + (interval_size * 2)
 
         return self._getout(best_theta)
 
