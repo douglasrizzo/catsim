@@ -111,15 +111,16 @@ class HillClimbingEstimator(Estimator):
             else:
                 return float("-inf")
 
-        if len(administered_items) > 1:
-            lower_bound = min(items[administered_items][:, 1])
-            upper_bound = max(items[administered_items][:, 1])
-        else:
-            lower_bound = min(items[:, 1])
-            upper_bound = max(items[:, 1])
+        # select lower and upper bounds for an interval in which the estimator will
+        # look for the most probable new theta
 
+        # these bounds are computed as a the minimum and maximum item difficulties
+        # in the bank...
+        lower_bound = min(items[:, 1])
+        upper_bound = max(items[:, 1])
+
+        # ... plus an arbitrary error margin
         margin = (upper_bound - lower_bound) / 4
-
         upper_bound += margin
         lower_bound -= margin
 
