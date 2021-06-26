@@ -127,23 +127,24 @@ class HillClimbingEstimator(Estimator):
         best_theta = float("-inf")
         max_ll = float("-inf")
 
-        # the estimator starts with a rough search, which gets finer with each pass
+        # the estimator starts with a rough search inside the interval, which gets
+        # finer with each pass
         for granularity in range(10):
 
-            # generate a discrete list of candidate theta values
-            candidates = numpy.linspace(lower_bound, upper_bound, 10)
+            # generate a discrete list of candidate theta values inside the interval
+            candidates = numpy.linspace(lower_bound, upper_bound, 9)
             interval_size = candidates[1] - candidates[0]
 
             if self._verbose:
                 print(
-                    'Pass: {0}\n\tBounds: {1} {2}\n\tInterval size: {3}'.format(
+                    "Pass: {0}\n\tBounds: {1} {2}\n\tInterval size: {3}".format(
                         granularity + 1, lower_bound, upper_bound, interval_size
                     )
                 )
 
             # we'll use the concave nature of the log-likelihood function
-            # to program a primitive early stopping method in our search
-            previous_ll = float('-inf')
+            # to program a primitive early stopping method in our search.
+            previous_ll = float("-inf")
 
             # iterate through each candidate
             for candidate_theta in candidates:
@@ -161,12 +162,16 @@ class HillClimbingEstimator(Estimator):
                     break
                 previous_ll = current_ll
 
-                # check if the LL of the current candidate theta is larger than the best one checked as of yet
+                # check if the LL of the current candidate theta is larger than
+                # the best one checked as of yet
                 if current_ll > max_ll:
                     if self._verbose:
-                        print('\t\tTheta: {0}, LL: {1}'.format(candidate_theta, current_ll))
+                        print("\t\tTheta: {0}, LL: {1}".format(candidate_theta, current_ll))
 
-                    if abs(best_theta - candidate_theta) < float('1e-' + str(self._precision)):
+                    # if the difference between the best theta as of yet and the current theta
+                    # is negligible, we stop our search and return the current theta, which is
+                    # better than the as-of-yet best theta
+                    if abs(best_theta - candidate_theta) < float("1e-" + str(self._precision)):
                         return self._getout(candidate_theta)
 
                     max_ll = current_ll
