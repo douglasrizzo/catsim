@@ -164,20 +164,5 @@ def test_plots():
     close("all")
 
 
-def test_stats():
-    import numpy.random as nprnd
-
-    for _ in range(10):
-        items = generate_item_bank(500)
-        stats.coef_variation(items)
-        stats.coef_correlation(items)
-        stats.covariance(items)
-        stats.covariance(items, False)
-        stats.scatter_matrix(items)
-
-        random_integers = nprnd.randint(30, size=1000)
-        stats.bincount(random_integers)
-
-
 if __name__ == "__main__":
     unittest.main()

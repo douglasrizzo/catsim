@@ -16,6 +16,5 @@
     irt.rst
     cat.rst
     plot.rst
-    stats.rst
     contributing.rst
     references.rst
