@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 import numpy
-from scipy.optimize import differential_evolution, minimize_scalar
+from scipy.optimize import minimize_scalar
 
 from catsim import cat, irt
 from catsim.simulation import Estimator
@@ -17,7 +17,6 @@ class NumericalSearchEstimator(Estimator):
         "brent",
         "bounded",
         "golden2",
-        "de",
     ]
     golden_ratio = (1 + 5**0.5) / 2
 
@@ -35,7 +34,7 @@ class NumericalSearchEstimator(Estimator):
 
         There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to [Vel20]_. Also check [Brent02]_.
 
-        It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`, as well as :py:func:`scipy.optimize.differential_evolution`.
+        It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`.
 
         Lastly, there is an implementation of a simple hill climbing algorithm.
 
@@ -45,7 +44,7 @@ class NumericalSearchEstimator(Estimator):
         :type dodd: bool, optional
         :param verbose: verbosity level of the maximization method
         :type verbose: bool, optional
-        :param method: the search method to employ, one of `'hillclimbing'`, `'ternary'`, `'dichotomous'`, `'fibonacci'`, `'golden'`, `'brent'`, `'bounded'`, `'golden2'` and `'de'`, defaults to bounded
+        :param method: the search method to employ, one of `'hillclimbing'`, `'ternary'`, `'dichotomous'`, `'fibonacci'`, `'golden'`, `'brent'`, `'bounded'` and `'golden2'`, defaults to bounded
         :type method: str, optional
         """
         super().__init__(verbose)
@@ -165,15 +164,6 @@ class NumericalSearchEstimator(Estimator):
             )
             self._evaluations = res.nfev
             candidate_theta = res.x
-        elif self.__search_method in ["de"]:
-            res = differential_evolution(
-                irt.negative_log_likelihood,
-                bounds=[[lower_bound, upper_bound]],
-                args=(response_vector, items[administered_items]),
-                tol=self._epsilon,
-            )
-            self._evaluations = res.nfev
-            candidate_theta = res.x[0]
 
         if self._verbose:
             print("{0} evaluations".format(self._evaluations))
