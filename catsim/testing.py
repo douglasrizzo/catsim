@@ -3,7 +3,7 @@ import unittest
 
 from sklearn.cluster import KMeans
 
-from . import plot, stats
+from . import plot
 from .cat import generate_item_bank
 from .estimation import *
 from .initialization import *
