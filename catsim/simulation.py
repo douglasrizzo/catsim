@@ -171,8 +171,11 @@ class FiniteSelector(Selector, metaclass=ABCMeta):
 class Estimator(Simulable, metaclass=ABCMeta):
     """Base class for proficiency estimators"""
 
-    def __init__(self):
+    def __init__(self, verbose: bool = False):
         super().__init__()
+        self._calls = 0
+        self._evaluations = 0
+        self._verbose = verbose
 
     @abstractmethod
     def estimate(self, index: int) -> float:
@@ -183,6 +186,27 @@ class Estimator(Simulable, metaclass=ABCMeta):
         :returns: the current :math:`\\hat\\theta`
         """
         pass
+
+    @property
+    def calls(self):
+        """How many times the estimator has been called to maximize/minimize the log-likelihood function
+
+        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
+        return self._calls
+
+    @property
+    def evaluations(self):
+        """Total number of times the estimator has evaluated the log-likelihood function during its existence
+
+        :returns: number of function evaluations"""
+        return self._evaluations
+
+    @property
+    def avg_evaluations(self):
+        """Average number of function evaluations for all tests the estimator has been used
+
+        :returns: average number of function evaluations"""
+        return self._evaluations / self._calls
 
 
 class Stopper(Simulable, metaclass=ABCMeta):

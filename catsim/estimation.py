@@ -1,56 +1,71 @@
+from abc import ABC, abstractmethod
+
 import numpy
-from scipy.optimize import differential_evolution
+from scipy.optimize import differential_evolution, minimize_scalar
 
 from catsim import cat, irt
 from catsim.simulation import Estimator
 
 
-class HillClimbingEstimator(Estimator):
-    """Estimator that uses a hill-climbing algorithm to maximize the likelihood function
-
-    :param precision: number of decimal points of precision
-    :param verbose: verbosity level of the maximization method
-    """
+class UnimodalIntervalSearchEstimator(Estimator):
+    methods = [
+        "hillclimbing",
+        "ternary",
+        "dichotomous",
+        "fibonacci",
+        "golden",
+        "brent",
+        "bounded",
+        "golden2",
+        "de",
+    ]
+    golden_ratio = (1 + 5**0.5) / 2
 
     def __str__(self):
-        return "Hill Climbing Estimator"
+        return "Unimodal Interval Search Estimator ({})".format(self.__search_method)
 
-    def __init__(self, precision: int = 6, dodd: bool = True, verbose: bool = False):
-        super().__init__()
-        self._precision = precision
-        self._verbose = verbose
-        self._evaluations = 0
-        self._calls = 0
+    def __init__(
+        self,
+        precision: int = 6,
+        dodd: bool = True,
+        verbose: bool = False,
+        method="bounded",
+    ):
+        """Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log-likelihood function.
+
+        There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to [Vel20]_. Also check [Brent02]_.
+
+        It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`, as well as :py:func:`scipy.optimize.differential_evolution`.
+
+        Lastly, there is an implementation of a simple hill climbing algorithm.
+
+        :param precision: number of decimal points of precision, defaults to 6
+        :type precision: int, optional
+        :param dodd: whether to employ Dodd's estimation heuristic when the response vector only has one kind of response (all correct or all incorrect), defaults to True
+        :type dodd: bool, optional
+        :param verbose: verbosity level of the maximization method
+        :type verbose: bool, optional
+        :param method: the search method to employ, one of `'hillclimbing'`, `'ternary'`, `'dichotomous'`, `'fibonacci'`, `'golden'`, `'brent'`, `'bounded'`, `'golden2'` and `'de'`, defaults to bounded
+        :type method: str, optional
+        """
+        super().__init__(verbose)
+
+        if precision < 1:
+            raise ValueError(
+                "precision for numerical estimator must be an integer larger than 1, {} was passed".
+                format(precision)
+            )
+
+        if method not in UnimodalIntervalSearchEstimator.methods:
+            raise ValueError(
+                "Parameter 'method' must be one of {}".format(
+                    UnimodalIntervalSearchEstimator.methods
+                )
+            )
+
+        self._epsilon = float("1e-" + str(precision))
         self._dodd = dodd
-
-    @property
-    def calls(self) -> float:
-        """How many times the estimator has been called to maximize/minimize the log-likelihood function
-
-        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
-        return self._calls
-
-    @property
-    def evaluations(self) -> float:
-        """Total number of times the estimator has evaluated the log-likelihood function during its existence
-
-        :returns: number of function evaluations"""
-        return self._evaluations
-
-    @property
-    def avg_evaluations(self) -> float:
-        """Average number of function evaluations for all tests the estimator has been used
-
-        :returns: average number of function evaluations"""
-        return self._evaluations / self._calls
-
-    @property
-    def dodd(self) -> bool:
-        """Whether Dodd's method will be called by estimator in case the response vector
-        is composed solely of right or wrong answers.
-
-        :returns: boolean value indicating if Dodd's method will be used or not."""
-        return self._dodd
+        self.__search_method = method
 
     def estimate(
         self,
@@ -101,14 +116,16 @@ class HillClimbingEstimator(Estimator):
             # if the estimator was initialized with dodd = True,
             # use Dodd's estimation heuristic to return a theta value
             if self._dodd:
-                return cat.dodd(est_theta, items, answer)
+                candidate_theta = cat.dodd(est_theta, items, answer)
 
             # otherwise, return positive or negative infinity,
             # in accordance with the definition of the MLE
             elif answer:
-                return float("inf")
+                candidate_theta = float("inf")
             else:
-                return float("-inf")
+                candidate_theta = float("-inf")
+
+            return candidate_theta
 
         # select lower and upper bounds for an interval in which the estimator will
         # look for the most probable new theta
@@ -119,10 +136,55 @@ class HillClimbingEstimator(Estimator):
         upper_bound = max(items[:, 1])
 
         # ... plus an arbitrary error margin
-        margin = (upper_bound - lower_bound) / 4
+        margin = (upper_bound - lower_bound) / 3
         upper_bound += margin
         lower_bound -= margin
 
+        if self.__search_method == "hillclimbing":
+            candidate_theta = self._solve_hill_climbing(
+                upper_bound, lower_bound, response_vector, items, administered_items
+            )
+        elif self.__search_method in ["ternary", "dichotomous"]:
+            candidate_theta = self._solve_ternary_dichotomous(
+                upper_bound, lower_bound, response_vector, items, administered_items
+            )
+        elif self.__search_method == "fibonacci":
+            candidate_theta = self._solve_fibonacci(
+                upper_bound, lower_bound, response_vector, items, administered_items
+            )
+        elif self.__search_method == "golden2":
+            candidate_theta = self._solve_golden_section(
+                upper_bound, lower_bound, response_vector, items, administered_items
+            )
+        elif self.__search_method in ["brent", "bounded", "golden"]:
+            res = minimize_scalar(
+                irt.negative_log_likelihood,
+                bracket=(lower_bound, upper_bound),
+                bounds=(lower_bound, upper_bound),
+                method=self.__search_method,
+                args=(response_vector, items[administered_items]),
+                tol=self._epsilon if self.__search_method != "bounded" else None,
+            )
+            self._evaluations = res.nfev
+            candidate_theta = res.x
+        elif self.__search_method in ["de"]:
+            res = differential_evolution(
+                irt.negative_log_likelihood,
+                bounds=[[lower_bound, upper_bound]],
+                args=(response_vector, items[administered_items]),
+                tol=self._epsilon,
+            )
+            self._evaluations = res.nfev
+            candidate_theta = res.x[0]
+
+        if self._verbose:
+            print("{0} evaluations".format(self._evaluations))
+
+        return candidate_theta
+
+    def _solve_hill_climbing(
+        self, upper_bound, lower_bound, response_vector, items, administered_items
+    ):
         best_theta = float("-inf")
         max_ll = float("-inf")
 
@@ -170,8 +232,9 @@ class HillClimbingEstimator(Estimator):
                     # if the difference between the best theta as of yet and the current theta
                     # is negligible, we stop our search and return the current theta, which is
                     # better than the as-of-yet best theta
-                    if abs(best_theta - candidate_theta) < float("1e-" + str(self._precision)):
-                        return self._getout(candidate_theta)
+                    if abs(best_theta - candidate_theta) < self._epsilon:
+                        best_theta = candidate_theta
+                        break
 
                     max_ll = current_ll
                     best_theta = candidate_theta
@@ -179,99 +242,133 @@ class HillClimbingEstimator(Estimator):
             # the bounds of the new candidates are adjusted around the current best theta value
             lower_bound = best_theta - (interval_size * 2)
             upper_bound = best_theta + (interval_size * 2)
+        return best_theta
 
-        return self._getout(best_theta)
+    def _solve_ternary_dichotomous(self, b, a, response_vector, items, administered_items):
+        error = float("inf")
+        while error >= self._epsilon:
+            self._evaluations += 2
 
-    def _getout(self, theta: float) -> float:
-        if self._verbose:
-            print("{0} evaluations".format(self._evaluations))
+            if self.__search_method == "ternary":
+                c = (b + 2 * a) / 3
+                d = (2 * b + a) / 3
+            elif self.__search_method == "dichotomous":
+                m = (a + b) / 2
+                c = m - (self._epsilon / 2)
+                d = m + (self._epsilon / 2)
 
-        return theta
+            left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+            right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
 
+            if left_side_ll >= right_side_ll:
+                b = d
+            else:
+                a = c
 
-class DifferentialEvolutionEstimator(Estimator):
-    """Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function
+            assert a <= c <= d <= b
 
-    :param bounds: a tuple containing both lower and upper bounds for the differential
-                   evolution algorithm search space. In theory, it is best if they
-                   represent the minimum and maximum possible :math:`\\theta` values;
-                   in practice, one could also use the smallest and largest difficulty
-                   parameters in the item bank, in case no better bounds for
-                   :math:`\\theta` exist.
-    """
+            candidate_theta = (b + a) / 2
 
-    def __str__(self):
-        return "Differential Evolution Estimator"
+            error = abs(b - a)
+            if self.__search_method == "dichotomous":
+                error /= 2
 
-    def __init__(self, bounds: tuple):
-        super(DifferentialEvolutionEstimator, self).__init__()
-        self._lower_bound = min(bounds)
-        self._upper_bound = max(bounds)
-        self._evaluations = 0
-        self._calls = 0
+            if self._verbose:
+                print(
+                    "\t\tTheta: {0}, LL: {1}".format(
+                        candidate_theta, max(left_side_ll, right_side_ll)
+                    )
+                )
+        return candidate_theta
+
+    def _solve_fibonacci(self, b, a, response_vector, items, administered_items):
+        fib = [1, 1]
+        n = 1
+
+        # while (upper_bound - lower_bound) / fib[-1] > .001:
+        while (b - a) / fib[-1] > self._epsilon:
+            n += 1
+            fib.append(fib[-1] + fib[-2])
+
+        c = a + (fib[n - 2] / fib[n]) * (b - a)
+        d = a + (fib[n - 1] / fib[n]) * (b - a)
+
+        left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+        right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+        self._evaluations += 2
+
+        while n != 2:
+            self._evaluations += 1
+
+            n -= 1
+
+            if left_side_ll >= right_side_ll:
+                b = d
+                d = c
+                c = a + (fib[n - 2] / fib[n]) * (b - a)
+
+                right_side_ll = left_side_ll
+                left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+            else:
+                a = c
+                c = d
+                d = a + (fib[n - 1] / fib[n]) * (b - a)
+
+                left_side_ll = right_side_ll
+                right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+
+            # assert a <= c <= d <= b
+
+            if self._verbose:
+                print(
+                    "\t\tTheta: {0}, LL: {1}".format((b + a) / 2, max(left_side_ll, right_side_ll))
+                )
+        return (b + a) / 2
+
+    def _solve_golden_section(self, b, a, response_vector, items, administered_items):
+        c = b + (a - b) / UnimodalIntervalSearchEstimator.golden_ratio
+        d = a + (b - a) / UnimodalIntervalSearchEstimator.golden_ratio
+
+        left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+        right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+
+        while abs(b - a) > self._epsilon:
+            self._evaluations += 1
+
+            if left_side_ll >= right_side_ll:
+                b = d
+                d = c
+                c = b + (a - b) / UnimodalIntervalSearchEstimator.golden_ratio
+
+                right_side_ll = left_side_ll
+                left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+            else:
+                a = c
+                c = d
+                d = a + (b - a) / UnimodalIntervalSearchEstimator.golden_ratio
+
+                left_side_ll = right_side_ll
+                right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+
+            assert a < c <= d < b
+
+            if self._verbose:
+                print(
+                    "\t\tTheta: {0}, LL: {1}".format((b + a) / 2, max(left_side_ll, right_side_ll))
+                )
+        return (b + a) / 2
 
     @property
-    def calls(self):
-        """How many times the estimator has been called to maximize/minimize the log-likelihood function
+    def dodd(self) -> bool:
+        """Whether Dodd's method will be called by estimator in case the response vector
+        is composed solely of right or wrong answers.
 
-        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function"""
-        return self._calls
-
-    @property
-    def evaluations(self):
-        """Total number of times the estimator has evaluated the log-likelihood function during its existence
-
-        :returns: number of function evaluations"""
-        return self._evaluations
+        :returns: boolean value indicating if Dodd's method will be used or not."""
+        return self._dodd
 
     @property
-    def avg_evaluations(self):
-        """Average number of function evaluations for all tests the estimator has been used
+    def method(self) -> str:
+        """Get the estimator search method selected during instantiation.
 
-        :returns: average number of function evaluations"""
-        return self._evaluations / self._calls
-
-    def estimate(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: list = None,
-        response_vector: list = None,
-        **kwargs
-    ) -> float:
-        """Uses :py:func:`scipy.optimize.differential_evolution` to return the theta value
-        that minimizes the negative log-likelihood function, given the current state of the
-        test for the given examinee.
-
-        :param index: index of the current examinee in the simulator
-        :param items: a matrix containing item parameters in the format that `catsim` understands
-                      (see: :py:func:`catsim.cat.generate_item_bank`)
-        :param administered_items: a list containing the indexes of items that were already administered
-        :param response_vector: a boolean list containing the examinee's answers to the administered items
-        :returns: the current :math:`\\hat\\theta`
-        """
-        items, administered_items, response_vector = self._prepare_args(
-            return_items=True,
-            return_response_vector=True,
-            index=index,
-            items=items,
-            administered_items=administered_items,
-            response_vector=response_vector,
-            **kwargs
-        )
-
-        assert response_vector is not None
-        assert items is not None
-        assert administered_items is not None
-
-        self._calls += 1
-
-        res = differential_evolution(
-            irt.negative_log_likelihood,
-            bounds=[[self._lower_bound * 2, self._upper_bound * 2]],
-            args=(response_vector, items[administered_items]),
-        )
-
-        self._evaluations = res.nfev
-
-        return res.x[0]
+        :returns: search method"""
+        return self.__search_method
