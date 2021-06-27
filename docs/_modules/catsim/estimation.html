@@ -32,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.16
+                0.17.0
               </div>
             
           
@@ -104,7 +104,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -173,70 +172,83 @@
            <div itemprop="articleBody">
             
   <h1>Source code for catsim.estimation</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">differential_evolution</span>
+<span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize_scalar</span>
 
 <span class="kn">from</span> <span class="nn">catsim</span> <span class="kn">import</span> <span class="n">cat</span><span class="p">,</span> <span class="n">irt</span>
 <span class="kn">from</span> <span class="nn">catsim.simulation</span> <span class="kn">import</span> <span class="n">Estimator</span>
 
 
-<div class="viewcode-block" id="HillClimbingEstimator"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.HillClimbingEstimator">[docs]</a><span class="k">class</span> <span class="nc">HillClimbingEstimator</span><span class="p">(</span><span class="n">Estimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Estimator that uses a hill-climbing algorithm to maximize the likelihood function</span>
-
-<span class="sd">    :param precision: number of decimal points of precision</span>
-<span class="sd">    :param verbose: verbosity level of the maximization method</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="NumericalSearchEstimator"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.NumericalSearchEstimator">[docs]</a><span class="k">class</span> <span class="nc">NumericalSearchEstimator</span><span class="p">(</span><span class="n">Estimator</span><span class="p">):</span>
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;hillclimbing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;ternary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dichotomous&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fibonacci&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;golden&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;brent&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bounded&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;golden2&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">golden_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">5</span><span class="o">**</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Hill Climbing Estimator&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Numerical Search Estimator (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">dodd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">precision</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">precision</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="n">dodd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;bounded&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log-likelihood function.</span>
+
+<span class="sd">        There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to [Vel20]_. Also check [Brent02]_.</span>
+
+<span class="sd">        It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`.</span>
+
+<span class="sd">        Lastly, there is an implementation of a simple hill climbing algorithm.</span>
+
+<span class="sd">        :param precision: number of decimal points of precision, defaults to 6</span>
+<span class="sd">        :type precision: int, optional</span>
+<span class="sd">        :param dodd: whether to employ Dodd&#39;s estimation heuristic when the response vector only has one kind of response (all correct or all incorrect), defaults to True</span>
+<span class="sd">        :type dodd: bool, optional</span>
+<span class="sd">        :param verbose: verbosity level of the maximization method</span>
+<span class="sd">        :type verbose: bool, optional</span>
+<span class="sd">        :param method: the search method to employ, one of `&#39;hillclimbing&#39;`, `&#39;ternary&#39;`, `&#39;dichotomous&#39;`, `&#39;fibonacci&#39;`, `&#39;golden&#39;`, `&#39;brent&#39;`, `&#39;bounded&#39;` and `&#39;golden2&#39;`, defaults to bounded</span>
+<span class="sd">        :type method: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">precision</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;precision for numerical estimator must be an integer larger than 1, </span><span class="si">{}</span><span class="s2"> was passed&quot;</span><span class="o">.</span>
+                <span class="nb">format</span><span class="p">(</span><span class="n">precision</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">methods</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Parameter &#39;method&#39; must be one of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">methods</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;1e-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">precision</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span> <span class="o">=</span> <span class="n">dodd</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">=</span> <span class="n">method</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">calls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;How many times the estimator has been called to maximize/minimize the log-likelihood function</span>
-
-<span class="sd">        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Total number of times the estimator has evaluated the log-likelihood function during its existence</span>
-
-<span class="sd">        :returns: number of function evaluations&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">avg_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Average number of function evaluations for all tests the estimator has been used</span>
-
-<span class="sd">        :returns: average number of function evaluations&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dodd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Whether Dodd&#39;s method will be called by estimator in case the response vector</span>
-<span class="sd">        is composed solely of right or wrong answers.</span>
-
-<span class="sd">        :returns: boolean value indicating if Dodd&#39;s method will be used or not.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span>
-
-<div class="viewcode-block" id="HillClimbingEstimator.estimate"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.HillClimbingEstimator.estimate">[docs]</a>    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span>
+<div class="viewcode-block" id="NumericalSearchEstimator.estimate"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.NumericalSearchEstimator.estimate">[docs]</a>    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">administered_items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">response_vector</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</span>
+        <span class="sd">&quot;&quot;&quot;Returns the theta value that maximizes the log-likelihood function, given the current state of the</span>
 <span class="sd">         test for the given examinee.</span>
 
 <span class="sd">        :param index: index of the current examinee in the simulator</span>
@@ -276,14 +288,16 @@
             <span class="c1"># if the estimator was initialized with dodd = True,</span>
             <span class="c1"># use Dodd&#39;s estimation heuristic to return a theta value</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">answer</span><span class="p">)</span>
+                <span class="n">candidate_theta</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">answer</span><span class="p">)</span>
 
             <span class="c1"># otherwise, return positive or negative infinity,</span>
             <span class="c1"># in accordance with the definition of the MLE</span>
             <span class="k">elif</span> <span class="n">answer</span><span class="p">:</span>
-                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+                <span class="n">candidate_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+                <span class="n">candidate_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">candidate_theta</span>
 
         <span class="c1"># select lower and upper bounds for an interval in which the estimator will</span>
         <span class="c1"># look for the most probable new theta</span>
@@ -294,10 +308,46 @@
         <span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
 
         <span class="c1"># ... plus an arbitrary error margin</span>
-        <span class="n">margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper_bound</span> <span class="o">-</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="n">margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper_bound</span> <span class="o">-</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
         <span class="n">upper_bound</span> <span class="o">+=</span> <span class="n">margin</span>
         <span class="n">lower_bound</span> <span class="o">-=</span> <span class="n">margin</span>
 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;hillclimbing&quot;</span><span class="p">:</span>
+            <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_hill_climbing</span><span class="p">(</span>
+                <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ternary&quot;</span><span class="p">,</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">]:</span>
+            <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_ternary_dichotomous</span><span class="p">(</span>
+                <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;fibonacci&quot;</span><span class="p">:</span>
+            <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_fibonacci</span><span class="p">(</span>
+                <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;golden2&quot;</span><span class="p">:</span>
+            <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_golden_section</span><span class="p">(</span>
+                <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;brent&quot;</span><span class="p">,</span> <span class="s2">&quot;bounded&quot;</span><span class="p">,</span> <span class="s2">&quot;golden&quot;</span><span class="p">]:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
+                <span class="n">irt</span><span class="o">.</span><span class="n">negative_log_likelihood</span><span class="p">,</span>
+                <span class="n">bracket</span><span class="o">=</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">),</span>
+                <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">),</span>
+                <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">]),</span>
+                <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">!=</span> <span class="s2">&quot;bounded&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
+            <span class="n">candidate_theta</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> evaluations&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">candidate_theta</span></div>
+
+    <span class="k">def</span> <span class="nf">_solve_hill_climbing</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span>
+    <span class="p">):</span>
         <span class="n">best_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
         <span class="n">max_ll</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
 
@@ -345,8 +395,9 @@
                     <span class="c1"># if the difference between the best theta as of yet and the current theta</span>
                     <span class="c1"># is negligible, we stop our search and return the current theta, which is</span>
                     <span class="c1"># better than the as-of-yet best theta</span>
-                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">best_theta</span> <span class="o">-</span> <span class="n">candidate_theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;1e-&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_precision</span><span class="p">)):</span>
-                        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getout</span><span class="p">(</span><span class="n">candidate_theta</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">best_theta</span> <span class="o">-</span> <span class="n">candidate_theta</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span><span class="p">:</span>
+                        <span class="n">best_theta</span> <span class="o">=</span> <span class="n">candidate_theta</span>
+                        <span class="k">break</span>
 
                     <span class="n">max_ll</span> <span class="o">=</span> <span class="n">current_ll</span>
                     <span class="n">best_theta</span> <span class="o">=</span> <span class="n">candidate_theta</span>
@@ -354,102 +405,136 @@
             <span class="c1"># the bounds of the new candidates are adjusted around the current best theta value</span>
             <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">-</span> <span class="p">(</span><span class="n">interval_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">best_theta</span> <span class="o">+</span> <span class="p">(</span><span class="n">interval_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">best_theta</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getout</span><span class="p">(</span><span class="n">best_theta</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">_solve_ternary_dichotomous</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">error</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
 
-    <span class="k">def</span> <span class="nf">_getout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> evaluations&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;ternary&quot;</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">m</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">theta</span></div>
+            <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+            <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
 
+            <span class="k">if</span> <span class="n">left_side_ll</span> <span class="o">&gt;=</span> <span class="n">right_side_ll</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">d</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">c</span>
 
-<div class="viewcode-block" id="DifferentialEvolutionEstimator"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.DifferentialEvolutionEstimator">[docs]</a><span class="k">class</span> <span class="nc">DifferentialEvolutionEstimator</span><span class="p">(</span><span class="n">Estimator</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Estimator that uses :py:func:`scipy.optimize.differential_evolution` to minimize the negative log-likelihood function</span>
+            <span class="k">assert</span> <span class="n">a</span> <span class="o">&lt;=</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">b</span>
 
-<span class="sd">    :param bounds: a tuple containing both lower and upper bounds for the differential</span>
-<span class="sd">                   evolution algorithm search space. In theory, it is best if they</span>
-<span class="sd">                   represent the minimum and maximum possible :math:`\\theta` values;</span>
-<span class="sd">                   in practice, one could also use the smallest and largest difficulty</span>
-<span class="sd">                   parameters in the item bank, in case no better bounds for</span>
-<span class="sd">                   :math:`\\theta` exist.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+            <span class="n">candidate_theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Differential Evolution Estimator&quot;</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">/=</span> <span class="mi">2</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">DifferentialEvolutionEstimator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{0}</span><span class="s2">, LL: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">candidate_theta</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span> <span class="n">right_side_ll</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">candidate_theta</span>
+
+    <span class="k">def</span> <span class="nf">_solve_fibonacci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">):</span>
+        <span class="n">fib</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c1"># while (upper_bound - lower_bound) / fib[-1] &gt; .001:</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">fib</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">fib</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fib</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">fib</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">fib</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">fib</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">fib</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">fib</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+
+        <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+        <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
+
+        <span class="k">while</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">left_side_ll</span> <span class="o">&gt;=</span> <span class="n">right_side_ll</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">d</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">fib</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">fib</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+
+                <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">left_side_ll</span>
+                <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">d</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">fib</span><span class="p">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">fib</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+
+                <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">right_side_ll</span>
+                <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+
+            <span class="c1"># assert a &lt;= c &lt;= d &lt;= b</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{0}</span><span class="s2">, LL: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span> <span class="n">right_side_ll</span><span class="p">))</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">_solve_golden_section</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">golden_ratio</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">golden_ratio</span>
+
+        <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+        <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+
+        <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">left_side_ll</span> <span class="o">&gt;=</span> <span class="n">right_side_ll</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">d</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">golden_ratio</span>
+
+                <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">left_side_ll</span>
+                <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">c</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="n">d</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">golden_ratio</span>
+
+                <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">right_side_ll</span>
+                <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">])</span>
+
+            <span class="k">assert</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">b</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{0}</span><span class="s2">, LL: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span> <span class="n">right_side_ll</span><span class="p">))</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">calls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;How many times the estimator has been called to maximize/minimize the log-likelihood function</span>
+    <span class="k">def</span> <span class="nf">dodd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Whether Dodd&#39;s method will be called by estimator in case the response vector</span>
+<span class="sd">        is composed solely of right or wrong answers.</span>
 
-<span class="sd">        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total number of times the estimator has evaluated the log-likelihood function during its existence</span>
-
-<span class="sd">        :returns: number of function evaluations&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span>
+<span class="sd">        :returns: boolean value indicating if Dodd&#39;s method will be used or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">avg_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Average number of function evaluations for all tests the estimator has been used</span>
+    <span class="k">def</span> <span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the estimator search method selected during instantiation.</span>
 
-<span class="sd">        :returns: average number of function evaluations&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
-
-<div class="viewcode-block" id="DifferentialEvolutionEstimator.estimate"><a class="viewcode-back" href="../../estimation.html#catsim.estimation.DifferentialEvolutionEstimator.estimate">[docs]</a>    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Uses :py:func:`scipy.optimize.differential_evolution` to return the theta value</span>
-<span class="sd">        that minimizes the negative log-likelihood function, given the current state of the</span>
-<span class="sd">        test for the given examinee.</span>
-
-<span class="sd">        :param index: index of the current examinee in the simulator</span>
-<span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
-<span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
-<span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param response_vector: a boolean list containing the examinee&#39;s answers to the administered items</span>
-<span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-            <span class="n">return_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
-            <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-            <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span>
-
-        <span class="k">assert</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">assert</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
-
-        <span class="n">res</span> <span class="o">=</span> <span class="n">differential_evolution</span><span class="p">(</span>
-            <span class="n">irt</span><span class="o">.</span><span class="n">negative_log_likelihood</span><span class="p">,</span>
-            <span class="n">bounds</span><span class="o">=</span><span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lower_bound</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper_bound</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]],</span>
-            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">]),</span>
-        <span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
-
-        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div></div>
+<span class="sd">        :returns: search method&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span></div>
 </pre></div>
 
            </div>

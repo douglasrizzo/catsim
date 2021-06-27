@@ -56,7 +56,9 @@ necessarily) more efficient estimators.
     response_vectors = [r0, r1, r2]
     thetas = np.arange(-6.,6.,.1)
 
-    for estimator in [DifferentialEvolutionEstimator((-8, 8)), HillClimbingEstimator()]:
+    for estimator in [
+            NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods
+        ]:
         plt.figure()
 
         for response_vector in response_vectors:
@@ -68,7 +70,7 @@ necessarily) more efficient estimators.
             plt.plot(max_LL, best_theta, 'o', label = str(sum(response_vector)) + ' correct, '+r'$\hat{\theta} \approx $' + format(round(max_LL, 5)))
             plt.xlabel(r'$\theta$', size=16)
             plt.ylabel(r'$\log L(\theta)$', size=16)
-            plt.title('MLE -- {0} ({1} avg. evals)'.format(type(estimator).__name__, round(estimator.avg_evaluations)))
+            plt.title('{0} ({1} avg. evals)'.format(estimator.method, round(estimator.avg_evaluations)))
             plt.legend(loc='best')
 
         plt.show()

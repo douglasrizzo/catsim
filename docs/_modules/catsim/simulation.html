@@ -32,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.16
+                0.17.0
               </div>
             
           
@@ -104,7 +104,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -179,7 +178,7 @@
 
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">import</span> <span class="nn">tqdm</span>
@@ -271,15 +270,17 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_non_administered</span><span class="p">(</span><span class="n">item_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">administered_item_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_get_non_administered</span><span class="p">(</span>
+        <span class="n">item_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">administered_item_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Gets a list of items that were not administered from a list of indices</span>
 
 <span class="sd">        :param item_indices: a list of integers, corresponding to item indices</span>
-<span class="sd">        :type item_indices: list</span>
+<span class="sd">        :type item_indices: List[int]</span>
 <span class="sd">        :param administered_item_indices: a list of integers, corresponding to the indices of items that were alredy administered to a given examinee</span>
-<span class="sd">        :type administered_item_indices: list</span>
+<span class="sd">        :type administered_item_indices: List[int]</span>
 <span class="sd">        :return: a list of items, corresponding to the indices that are in `item_indices` but not in `administered_item_indices`, in the same order they were passed in `item_indices`</span>
-<span class="sd">        :rtype: list</span>
+<span class="sd">        :rtype: List[int]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item_indices</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">administered_item_indices</span><span class="p">]</span>
 
@@ -291,8 +292,8 @@
 <span class="sd">        :type items: numpy.ndarray</span>
 <span class="sd">        :param est_theta: an examinee&#39;s proficiency</span>
 <span class="sd">        :type est_theta: float</span>
-<span class="sd">        :return: list containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)</span>
-<span class="sd">        :rtype: list</span>
+<span class="sd">        :return: List[int] containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)</span>
+<span class="sd">        :rtype: List[int]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">irt</span><span class="o">.</span><span class="n">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># when the logistic model has the number of parameters &lt;= 2,</span>
@@ -312,7 +313,7 @@
 <span class="sd">        :param est_theta: an examinee&#39;s proficiency</span>
 <span class="sd">        :type est_theta: float</span>
 <span class="sd">        :return: list containing the indices of items, sorted by how close their difficulty parameter is in relaiton to :param:`est_theta` (much like the return of `numpy.argsort`)</span>
-<span class="sd">        :rtype: list</span>
+<span class="sd">        :rtype: List[int]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">())</span>
 
@@ -346,8 +347,11 @@
 <div class="viewcode-block" id="Estimator"><a class="viewcode-back" href="../../simulation.html#catsim.simulation.Estimator">[docs]</a><span class="k">class</span> <span class="nc">Estimator</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for proficiency estimators&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
 <div class="viewcode-block" id="Estimator.estimate"><a class="viewcode-back" href="../../simulation.html#catsim.simulation.Estimator.estimate">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -357,7 +361,28 @@
 <span class="sd">        :param index: index of the current examinee in the simulator</span>
 <span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">calls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;How many times the estimator has been called to maximize/minimize the log-likelihood function</span>
+
+<span class="sd">        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Total number of times the estimator has evaluated the log-likelihood function during its existence</span>
+
+<span class="sd">        :returns: number of function evaluations&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">avg_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Average number of function evaluations for all tests the estimator has been used</span>
+
+<span class="sd">        :returns: average number of function evaluations&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span></div>
 
 
 <div class="viewcode-block" id="Stopper"><a class="viewcode-back" href="../../simulation.html#catsim.simulation.Stopper">[docs]</a><span class="k">class</span> <span class="nc">Stopper</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
@@ -416,9 +441,13 @@
         <span class="c1"># `examinees` is passed to its special setter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">examinees</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>  <span class="c1"># type: list</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>  <span class="c1"># type: list</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>  <span class="c1"># type: list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>  <span class="c1"># type: List[List[int]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">]</span>  <span class="c1"># type: List[List[int]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">]</span>  <span class="c1"># type: List[List[bool]]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
@@ -547,13 +576,13 @@
 
 <span class="sd">        &gt;&gt;&gt; from catsim.initialization import RandomInitializer</span>
 <span class="sd">        &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
-<span class="sd">        &gt;&gt;&gt; from catsim.estimation import HillClimbingEstimator</span>
+<span class="sd">        &gt;&gt;&gt; from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">        &gt;&gt;&gt; from catsim.stopping import MaxItemStopper</span>
 <span class="sd">        &gt;&gt;&gt; from catsim.simulation import Simulator</span>
 <span class="sd">        &gt;&gt;&gt; from catsim.cat import generate_item_bank</span>
 <span class="sd">        &gt;&gt;&gt; initializer = RandomInitializer()</span>
 <span class="sd">        &gt;&gt;&gt; selector = MaxInfoSelector()</span>
-<span class="sd">        &gt;&gt;&gt; estimator = HillClimbingEstimator()</span>
+<span class="sd">        &gt;&gt;&gt; estimator = NumericalSearchEstimator()</span>
 <span class="sd">        &gt;&gt;&gt; stopper = MaxItemStopper(20)</span>
 <span class="sd">        &gt;&gt;&gt; Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)</span>
 <span class="sd">        &quot;&quot;&quot;</span>

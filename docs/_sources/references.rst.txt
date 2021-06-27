@@ -66,3 +66,7 @@ Bibliography
 .. [Magis13] Magis, D. (2013). A Note on the Item Information Function of the
    Four-Parameter Logistic Model. Applied Psychological Measurement, 37(4),
    304–315. http://doi.org/10.1177/0146621613475471
+
+.. [Brent02] Brent, R. P. (2002). Algorithms for minimization without derivatives (Unabridged republication of the work publ. by Prentice-Hall ... 1973). Dover Publications.
+
+.. [Veliz20] Veliz, O. (2020). Minimization. https://www.youtube.com/watch?v=9xp1XWmJ_Wo&list=PLb0Tx2oJWuYIXLHAjQgko2fZtJ_NxnV-x&index=8

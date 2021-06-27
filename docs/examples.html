@@ -32,11 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -71,7 +70,7 @@
             
             
               <div class="version">
-                0.16
+                0.17.0
               </div>
             
           
@@ -130,7 +129,6 @@
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -316,7 +314,7 @@ according to some rule</p></li>
 create the other objects…</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
 <span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">NumericalSearchEstimator</span><span class="p">()</span>
 <span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -339,7 +337,7 @@ The Simulator can receive either an integer, which will be converted to
 a normal distribution, or a 1D <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>, whose values will be
 used as the proficiencies of the examinees.</p>
 <p>Here we will use an integer.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">NumericalSearchEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -402,7 +400,7 @@ in the chart can be tuned using different arguments for the function.</p>
 also plot more information than before in our test progress plot, adding
 test information to it.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">examinees</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">examinees</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">examinees</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">NumericalSearchEstimator</span><span class="p">(),</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">))</span>
 <span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
@@ -427,7 +425,7 @@ arguments, retrieves them from the item parameter matrix and applies
 them in order to all examinees.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">indexes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">50</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The following items will be applied to the examinees in this order:&#39;</span><span class="p">,</span> <span class="n">indexes</span><span class="p">)</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">LinearSelector</span><span class="p">(</span><span class="n">indexes</span><span class="p">),</span> <span class="n">HillClimbingEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">Simulator</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">RandomInitializer</span><span class="p">(),</span> <span class="n">LinearSelector</span><span class="p">(</span><span class="n">indexes</span><span class="p">),</span> <span class="n">NumericalSearchEstimator</span><span class="p">(),</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
 <span class="n">s</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -470,7 +468,7 @@ applied to the examinee.</p>
 
 <span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
 <span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">HillClimbingEstimator</span><span class="p">()</span>
+<span class="n">estimator</span> <span class="o">=</span> <span class="n">NumericalSearchEstimator</span><span class="p">()</span>
 <span class="n">stopper</span> <span class="o">=</span> <span class="n">MaxItemStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 </pre></div>
 </div>

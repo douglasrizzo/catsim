@@ -64,13 +64,13 @@ Install it using `pip install catsim`.
 ```python
 from catsim.initialization import RandomInitializer
 from catsim.selection import MaxInfoSelector
-from catsim.estimation import HillClimbingEstimator
+from catsim.estimation import NumericalSearchEstimator
 from catsim.stopping import MaxItemStopper
 from catsim.simulation import Simulator
 from catsim.cat import generate_item_bank
 initializer = RandomInitializer()
 selector = MaxInfoSelector()
-estimator = HillClimbingEstimator()
+estimator = NumericalSearchEstimator()
 stopper = MaxItemStopper(20)
 Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
 ```

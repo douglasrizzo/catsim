@@ -32,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.16
+                0.17.0
               </div>
             
           
@@ -104,7 +104,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -176,6 +175,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Module with functions for plotting IRT-related results.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
@@ -370,12 +370,12 @@
 <span class="sd">        from catsim import plot</span>
 <span class="sd">        from catsim.initialization import RandomInitializer</span>
 <span class="sd">        from catsim.selection import MaxInfoSelector</span>
-<span class="sd">        from catsim.estimation import HillClimbingEstimator</span>
+<span class="sd">        from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">        from catsim.stopping import MaxItemStopper</span>
 <span class="sd">        from catsim.simulation import Simulator</span>
 
 <span class="sd">        s = Simulator(generate_item_bank(100), 10)</span>
-<span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))</span>
+<span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))</span>
 <span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, hist=True)</span>
 <span class="sd">        plot.item_exposure(title=&#39;Exposures&#39;, simulator=s, par=&#39;b&#39;)</span>
 
@@ -453,7 +453,7 @@
     <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">thetas</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">thetas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -477,12 +477,12 @@
 <span class="sd">        from catsim import plot</span>
 <span class="sd">        from catsim.initialization import RandomInitializer</span>
 <span class="sd">        from catsim.selection import MaxInfoSelector</span>
-<span class="sd">        from catsim.estimation import HillClimbingEstimator</span>
+<span class="sd">        from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">        from catsim.stopping import MaxItemStopper</span>
 <span class="sd">        from catsim.simulation import Simulator</span>
 
 <span class="sd">        s = Simulator(generate_item_bank(100), 10)</span>
-<span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(20))</span>
+<span class="sd">        s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))</span>
 <span class="sd">        plot.test_progress(simulator=s, index=0)</span>
 <span class="sd">        plot.test_progress(simulator=s, index=0, info=True, var=True, see=True)</span>
 

@@ -32,10 +32,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.16
+                0.17.0
               </div>
             
           
@@ -104,7 +104,6 @@
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stats.html">Miscellaneous Statistical Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stats</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -183,7 +182,6 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
- | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -201,48 +199,38 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulation.html#catsim.simulation.Simulator.administered_items">administered_items (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.administered_items">administered_items() (catsim.simulation.Simulator property)</a>
 </li>
       <li><a href="selection.html#catsim.selection.AStratBBlockSelector">AStratBBlockSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.AStratSelector">AStratSelector (class in catsim.selection)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="selection.html#catsim.selection.AStratSelector">AStratSelector (class in catsim.selection)</a>
+</li>
       <li><a href="selection.html#catsim.selection.ClusterSelector.avg_cluster_params">avg_cluster_params() (catsim.selection.ClusterSelector static method)</a>
 </li>
-      <li><a href="estimation.html#catsim.estimation.DifferentialEvolutionEstimator.avg_evaluations">avg_evaluations (catsim.estimation.DifferentialEvolutionEstimator property)</a>
-
-      <ul>
-        <li><a href="estimation.html#catsim.estimation.HillClimbingEstimator.avg_evaluations">(catsim.estimation.HillClimbingEstimator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Estimator.avg_evaluations">avg_evaluations() (catsim.simulation.Estimator property)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulation.html#catsim.simulation.Simulator.bias">bias (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.bias">bias() (catsim.simulation.Simulator property)</a>
+
+      <ul>
+        <li><a href="cat.html#catsim.cat.bias">(in module catsim.cat)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cat.html#catsim.cat.bias">bias() (in module catsim.cat)</a>
-</li>
-      <li><a href="stats.html#catsim.stats.bincount">bincount() (in module catsim.stats)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.DifferentialEvolutionEstimator.calls">calls (catsim.estimation.DifferentialEvolutionEstimator property)</a>
-
-      <ul>
-        <li><a href="estimation.html#catsim.estimation.HillClimbingEstimator.calls">(catsim.estimation.HillClimbingEstimator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Estimator.calls">calls() (catsim.simulation.Estimator property)</a>
 </li>
-      </ul></li>
       <li>
     catsim.cat
 
@@ -271,6 +259,8 @@
         <li><a href="irt.html#module-catsim.irt">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     catsim.plot
 
@@ -278,8 +268,6 @@
         <li><a href="plot.html#module-catsim.plot">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     catsim.selection
 
@@ -295,13 +283,6 @@
 </li>
       </ul></li>
       <li>
-    catsim.stats
-
-      <ul>
-        <li><a href="stats.html#module-catsim.stats">module</a>
-</li>
-      </ul></li>
-      <li>
     catsim.stopping
 
       <ul>
@@ -309,10 +290,6 @@
 </li>
       </ul></li>
       <li><a href="selection.html#catsim.selection.ClusterSelector">ClusterSelector (class in catsim.selection)</a>
-</li>
-      <li><a href="stats.html#catsim.stats.coef_variation">coef_variation() (in module catsim.stats)</a>
-</li>
-      <li><a href="stats.html#catsim.stats.covariance">covariance() (in module catsim.stats)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -322,15 +299,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="irt.html#catsim.irt.detect_model">detect_model() (in module catsim.irt)</a>
 </li>
-      <li><a href="estimation.html#catsim.estimation.DifferentialEvolutionEstimator">DifferentialEvolutionEstimator (class in catsim.estimation)</a>
+      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.dodd">dodd() (catsim.estimation.NumericalSearchEstimator property)</a>
+
+      <ul>
+        <li><a href="cat.html#catsim.cat.dodd">(in module catsim.cat)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.HillClimbingEstimator.dodd">dodd (catsim.estimation.HillClimbingEstimator property)</a>
-</li>
-      <li><a href="cat.html#catsim.cat.dodd">dodd() (in module catsim.cat)</a>
-</li>
-      <li><a href="simulation.html#catsim.simulation.Simulator.duration">duration (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.duration">duration() (catsim.simulation.Simulator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -338,27 +315,21 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.DifferentialEvolutionEstimator.estimate">estimate() (catsim.estimation.DifferentialEvolutionEstimator method)</a>
+      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.estimate">estimate() (catsim.estimation.NumericalSearchEstimator method)</a>
 
       <ul>
-        <li><a href="estimation.html#catsim.estimation.HillClimbingEstimator.estimate">(catsim.estimation.HillClimbingEstimator method)</a>
-</li>
         <li><a href="simulation.html#catsim.simulation.Estimator.estimate">(catsim.simulation.Estimator method)</a>
 </li>
       </ul></li>
-      <li><a href="simulation.html#catsim.simulation.Simulator.estimations">estimations (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.estimations">estimations() (catsim.simulation.Simulator property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="simulation.html#catsim.simulation.Estimator">Estimator (class in catsim.simulation)</a>
 </li>
-      <li><a href="estimation.html#catsim.estimation.DifferentialEvolutionEstimator.evaluations">evaluations (catsim.estimation.DifferentialEvolutionEstimator property)</a>
-
-      <ul>
-        <li><a href="estimation.html#catsim.estimation.HillClimbingEstimator.evaluations">(catsim.estimation.HillClimbingEstimator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Estimator.evaluations">evaluations() (catsim.simulation.Estimator property)</a>
 </li>
-      </ul></li>
-      <li><a href="simulation.html#catsim.simulation.Simulator.examinees">examinees (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.examinees">examinees() (catsim.simulation.Simulator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -383,14 +354,6 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="cat.html#catsim.cat.generate_item_bank">generate_item_bank() (in module catsim.cat)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="H">H</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.HillClimbingEstimator">HillClimbingEstimator (class in catsim.estimation)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -424,7 +387,7 @@
 </li>
       <li><a href="plot.html#catsim.plot.item_exposure">item_exposure() (in module catsim.plot)</a>
 </li>
-      <li><a href="simulation.html#catsim.simulation.Simulator.items">items (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.items">items() (catsim.simulation.Simulator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -432,7 +395,7 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulation.html#catsim.simulation.Simulator.latest_estimations">latest_estimations (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.latest_estimations">latest_estimations() (catsim.simulation.Simulator property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -458,6 +421,8 @@
 </li>
       <li><a href="stopping.html#catsim.stopping.MaxItemStopper">MaxItemStopper (class in catsim.stopping)</a>
 </li>
+      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.method">method() (catsim.estimation.NumericalSearchEstimator property)</a>
+</li>
       <li><a href="stopping.html#catsim.stopping.MinErrorStopper">MinErrorStopper (class in catsim.stopping)</a>
 </li>
       <li>
@@ -478,17 +443,17 @@
 </li>
         <li><a href="simulation.html#module-catsim.simulation">catsim.simulation</a>
 </li>
-        <li><a href="stats.html#module-catsim.stats">catsim.stats</a>
-</li>
         <li><a href="stopping.html#module-catsim.stopping">catsim.stopping</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulation.html#catsim.simulation.Simulator.mse">mse (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.mse">mse() (catsim.simulation.Simulator property)</a>
+
+      <ul>
+        <li><a href="cat.html#catsim.cat.mse">(in module catsim.cat)</a>
 </li>
-      <li><a href="cat.html#catsim.cat.mse">mse() (in module catsim.cat)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -501,18 +466,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="irt.html#catsim.irt.normalize_item_bank">normalize_item_bank() (in module catsim.irt)</a>
 </li>
+      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator">NumericalSearchEstimator (class in catsim.estimation)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulation.html#catsim.simulation.Simulator.overlap_rate">overlap_rate (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.overlap_rate">overlap_rate() (catsim.simulation.Simulator property)</a>
+
+      <ul>
+        <li><a href="cat.html#catsim.cat.overlap_rate">(in module catsim.cat)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cat.html#catsim.cat.overlap_rate">overlap_rate() (in module catsim.cat)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -541,20 +508,20 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="irt.html#catsim.irt.reliability">reliability() (in module catsim.irt)</a>
 </li>
-      <li><a href="simulation.html#catsim.simulation.Simulator.response_vectors">response_vectors (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.response_vectors">response_vectors() (catsim.simulation.Simulator property)</a>
 </li>
-      <li><a href="simulation.html#catsim.simulation.Simulator.rmse">rmse (catsim.simulation.Simulator property)</a>
+      <li><a href="simulation.html#catsim.simulation.Simulator.rmse">rmse() (catsim.simulation.Simulator property)</a>
+
+      <ul>
+        <li><a href="cat.html#catsim.cat.rmse">(in module catsim.cat)</a>
 </li>
-      <li><a href="cat.html#catsim.cat.rmse">rmse() (in module catsim.cat)</a>
-</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stats.html#catsim.stats.scatter_matrix">scatter_matrix() (in module catsim.stats)</a>
-</li>
       <li><a href="irt.html#catsim.irt.see">see() (in module catsim.irt)</a>
 </li>
       <li><a href="selection.html#catsim.selection.ClusterSelector.select">select() (catsim.selection.ClusterSelector method)</a>
