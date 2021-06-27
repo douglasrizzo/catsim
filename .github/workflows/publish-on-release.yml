@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Publish to Pypi
+name: Publish Website and Pypi
 
 on:
   release:
@@ -22,11 +22,27 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.8'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install build
+        pip install build .[docs,dev]
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Generate website with Sphinx
+      run: |
+        sphinx-build sphinx docs -b html
+    - name: Format code
+      run: |
+        isort .
+        black .
+        yapf -i -r .
+    - name: Push changes
+      run: |
+        git config --global user.name 'Douglas Meneghetti'
+        git config --global user.email 'douglasrizzom@gmail.com'
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git commit -am "Automated changes"
+        git push
     - name: Build package
       run: python -m build
     - name: Publish package
