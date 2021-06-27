@@ -149,7 +149,7 @@ create the other objects…
 
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
-    estimator = HillClimbingEstimator()
+    estimator = NumericalSearchEstimator()
     stopper = MaxItemStopper(20)
 
 catsim provides different options for each of the aforementioned types
@@ -177,7 +177,7 @@ Here we will use an integer.
 
 .. code:: 
 
-    s = Simulator(items, 10, RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MaxItemStopper(50))
+    s = Simulator(items, 10, RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(50))
 
 
 Starting the simulation
@@ -263,7 +263,7 @@ test information to it.
 .. code:: 
 
     examinees = numpy.random.normal(size=10)
-    s = Simulator(items, examinees, RandomInitializer(), MaxInfoSelector(), HillClimbingEstimator(), MinErrorStopper(.3))
+    s = Simulator(items, examinees, RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MinErrorStopper(.3))
     s.simulate(verbose=True)
     catplot.test_progress(simulator=s,index=0, info=True)
 
@@ -297,7 +297,7 @@ them in order to all examinees.
 
     indexes = numpy.random.choice(items.shape[0], 50, replace=False)
     print('The following items will be applied to the examinees in this order:', indexes)
-    s = Simulator(items, 10, RandomInitializer(), LinearSelector(indexes), HillClimbingEstimator(), MaxItemStopper(50))
+    s = Simulator(items, 10, RandomInitializer(), LinearSelector(indexes), NumericalSearchEstimator(), MaxItemStopper(50))
     s.simulate(verbose=True)
 
 
@@ -352,7 +352,7 @@ applied to the examinee.
     
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
-    estimator = HillClimbingEstimator()
+    estimator = NumericalSearchEstimator()
     stopper = MaxItemStopper(20)
 
 This dummy data means that the examinee has answered items 1435, 3221,

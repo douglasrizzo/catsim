@@ -27,7 +27,7 @@ def test_cism():
         for test_size in test_sizes:
 
             initializers = [RandomInitializer("uniform", (-5, 5))]
-            estimators = [UnimodalIntervalSearchEstimator()]
+            estimators = [NumericalSearchEstimator()]
             stoppers = [MaxItemStopper(test_size), MinErrorStopper(0.4)]
 
             for initializer in initializers:
@@ -68,8 +68,7 @@ def test_simulations():
             for logistic_model in logistic_models:
                 for initializer in [FixedPointInitializer(0)]:
                     for estimator in [
-                        UnimodalIntervalSearchEstimator(method=m)
-                        for m in UnimodalIntervalSearchEstimator.methods
+                        NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods
                     ]:
                         for stopper in [MaxItemStopper(test_size)]:
                             for selector in finite_selectors:
@@ -129,7 +128,7 @@ def test_plots():
 
     initializer = RandomInitializer()
     selector = MaxInfoSelector()
-    estimator = UnimodalIntervalSearchEstimator()
+    estimator = NumericalSearchEstimator()
     stopper = MaxItemStopper(20)
     s = Simulator(generate_item_bank(100), 10)
     s.simulate(initializer, selector, estimator, stopper, verbose=True)

@@ -57,7 +57,7 @@ necessarily) more efficient estimators.
     thetas = np.arange(-6.,6.,.1)
 
     for estimator in [
-            UnimodalIntervalSearchEstimator(method=m) for m in UnimodalIntervalSearchEstimator.methods
+            NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods
         ]:
         plt.figure()
 

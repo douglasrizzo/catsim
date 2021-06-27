@@ -7,7 +7,7 @@ from catsim import cat, irt
 from catsim.simulation import Estimator
 
 
-class UnimodalIntervalSearchEstimator(Estimator):
+class NumericalSearchEstimator(Estimator):
     methods = [
         "hillclimbing",
         "ternary",
@@ -22,7 +22,7 @@ class UnimodalIntervalSearchEstimator(Estimator):
     golden_ratio = (1 + 5**0.5) / 2
 
     def __str__(self):
-        return "Unimodal Interval Search Estimator ({})".format(self.__search_method)
+        return "Numerical Search Estimator ({})".format(self.__search_method)
 
     def __init__(
         self,
@@ -56,11 +56,9 @@ class UnimodalIntervalSearchEstimator(Estimator):
                 format(precision)
             )
 
-        if method not in UnimodalIntervalSearchEstimator.methods:
+        if method not in NumericalSearchEstimator.methods:
             raise ValueError(
-                "Parameter 'method' must be one of {}".format(
-                    UnimodalIntervalSearchEstimator.methods
-                )
+                "Parameter 'method' must be one of {}".format(NumericalSearchEstimator.methods)
             )
 
         self._epsilon = float("1e-" + str(precision))
@@ -326,8 +324,8 @@ class UnimodalIntervalSearchEstimator(Estimator):
         return (b + a) / 2
 
     def _solve_golden_section(self, b, a, response_vector, items, administered_items):
-        c = b + (a - b) / UnimodalIntervalSearchEstimator.golden_ratio
-        d = a + (b - a) / UnimodalIntervalSearchEstimator.golden_ratio
+        c = b + (a - b) / NumericalSearchEstimator.golden_ratio
+        d = a + (b - a) / NumericalSearchEstimator.golden_ratio
 
         left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
         right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
@@ -338,14 +336,14 @@ class UnimodalIntervalSearchEstimator(Estimator):
             if left_side_ll >= right_side_ll:
                 b = d
                 d = c
-                c = b + (a - b) / UnimodalIntervalSearchEstimator.golden_ratio
+                c = b + (a - b) / NumericalSearchEstimator.golden_ratio
 
                 right_side_ll = left_side_ll
                 left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
             else:
                 a = c
                 c = d
-                d = a + (b - a) / UnimodalIntervalSearchEstimator.golden_ratio
+                d = a + (b - a) / NumericalSearchEstimator.golden_ratio
 
                 left_side_ll = right_side_ll
                 right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
