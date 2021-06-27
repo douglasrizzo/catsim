@@ -1,5 +1,6 @@
 import math
 from math import pi
+from typing import List
 
 import numexpr
 import numpy
@@ -259,7 +260,7 @@ def max_info_hpc(items: numpy.ndarray):
 
 
 def log_likelihood(
-    est_theta: float, response_vector: list, administered_items: numpy.ndarray
+    est_theta: float, response_vector: List[bool], administered_items: numpy.ndarray
 ) -> float:
     """Calculates the log-likelihood of an estimated proficiency, given a
     response vector and the parameters of the answered items [Ayala2009]_.

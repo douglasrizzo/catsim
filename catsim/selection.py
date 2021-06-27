@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Union
+from typing import List, Union
 from warnings import warn
 
 import numpy
@@ -30,7 +30,7 @@ class MaxInfoSelector(Selector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         est_theta: float = None,
         **kwargs
     ) -> Union[int, None]:
@@ -99,7 +99,7 @@ class UrrySelector(Selector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         est_theta: float = None,
         **kwargs
     ) -> Union[int, None]:
@@ -145,7 +145,7 @@ class LinearSelector(FiniteSelector):
     def __str__(self):
         return "Linear Selector"
 
-    def __init__(self, indexes: list):
+    def __init__(self, indexes: List[int]):
         super().__init__(len(indexes))
         self._indexes = indexes
         self._current = 0
@@ -160,7 +160,7 @@ class LinearSelector(FiniteSelector):
 
     def select(self,
                index: int = None,
-               administered_items: list = None,
+               administered_items: List[int] = None,
                **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
@@ -205,7 +205,7 @@ class RandomSelector(Selector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         **kwargs
     ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
@@ -293,7 +293,7 @@ class ClusterSelector(Selector):
 
     def __init__(
         self,
-        clusters: list,
+        clusters: List[int],
         method: str = "item_info",
         r_max: float = 1,
         r_control: str = "passive",
@@ -323,7 +323,7 @@ class ClusterSelector(Selector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         est_theta: float = None,
         **kwargs
     ) -> Union[int, None]:
@@ -473,7 +473,7 @@ class ClusterSelector(Selector):
         return selected_item
 
     @staticmethod
-    def sum_cluster_infos(theta: float, items: numpy.ndarray, clusters: list) -> numpy.ndarray:
+    def sum_cluster_infos(theta: float, items: numpy.ndarray, clusters: List[int]) -> numpy.ndarray:
         """Returns the sum of item information values, separated by cluster
 
         :param theta: an examinee's :math:`\\theta` value
@@ -492,7 +492,9 @@ class ClusterSelector(Selector):
         return cluster_infos
 
     @staticmethod
-    def weighted_cluster_infos(theta: float, items: numpy.ndarray, clusters: list) -> numpy.ndarray:
+    def weighted_cluster_infos(
+        theta: float, items: numpy.ndarray, clusters: List[int]
+    ) -> numpy.ndarray:
         """Returns the weighted sum of item information values, separated by cluster.
         The weight is the number of items in each cluster.
 
@@ -511,7 +513,7 @@ class ClusterSelector(Selector):
         return cluster_infos
 
     @staticmethod
-    def sum_cluster_params(items: numpy.ndarray, c: list):
+    def sum_cluster_params(items: numpy.ndarray, c: List[int]):
         """Returns the sum of item parameter values for each cluster
 
         :param items: a matrix containing item parameters in the format that `catsim` understands
@@ -532,7 +534,7 @@ class ClusterSelector(Selector):
         return averages
 
     @staticmethod
-    def avg_cluster_params(items: numpy.ndarray, c: list):
+    def avg_cluster_params(items: numpy.ndarray, c: List[int]):
         """Returns the average values of item parameters by cluster
 
         :param items:
@@ -574,7 +576,7 @@ class StratifiedSelector(FiniteSelector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         **kwargs
     ) -> Union[int, None]:
         """Returns the index of the next item to be administered.
@@ -777,7 +779,7 @@ class The54321Selector(FiniteSelector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         est_theta: float = None,
         **kwargs
     ) -> Union[int, None]:
@@ -841,7 +843,7 @@ class RandomesqueSelector(Selector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         est_theta: float = None,
         **kwargs
     ) -> Union[int, None]:
@@ -905,7 +907,7 @@ class IntervalInfoSelector(Selector):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
+        administered_items: List[int] = None,
         est_theta: float = None,
         **kwargs
     ) -> Union[int, None]:

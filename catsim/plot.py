@@ -1,6 +1,7 @@
 """Module with functions for plotting IRT-related results."""
 
 import os
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy
@@ -278,7 +279,7 @@ def test_progress(
     title: str = None,
     simulator: Simulator = None,
     index: int = None,
-    thetas: list = None,
+    thetas: List[float] = None,
     administered_items: numpy.ndarray = None,
     true_theta: float = None,
     info: bool = False,

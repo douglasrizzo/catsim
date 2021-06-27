@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 import numpy
 from scipy.optimize import minimize_scalar
@@ -68,12 +69,12 @@ class NumericalSearchEstimator(Estimator):
         self,
         index: int = None,
         items: numpy.ndarray = None,
-        administered_items: list = None,
-        response_vector: list = None,
+        administered_items: List[int] = None,
+        response_vector: List[bool] = None,
         est_theta: float = None,
         **kwargs
     ) -> float:
-        """Returns the theta value that minimizes the negative log-likelihood function, given the current state of the
+        """Returns the theta value that maximizes the log-likelihood function, given the current state of the
          test for the given examinee.
 
         :param index: index of the current examinee in the simulator

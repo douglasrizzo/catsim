@@ -4,7 +4,7 @@ application of adaptive tests. Most of this module is based on the work of
 
 import time
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import numpy
 import tqdm
@@ -96,15 +96,17 @@ class Selector(Simulable, metaclass=ABCMeta):
         super().__init__()
 
     @staticmethod
-    def _get_non_administered(item_indices: list, administered_item_indices: list) -> list:
+    def _get_non_administered(
+        item_indices: List[int], administered_item_indices: List[int]
+    ) -> list:
         """Gets a list of items that were not administered from a list of indices
 
         :param item_indices: a list of integers, corresponding to item indices
-        :type item_indices: list
+        :type item_indices: List[int]
         :param administered_item_indices: a list of integers, corresponding to the indices of items that were alredy administered to a given examinee
-        :type administered_item_indices: list
+        :type administered_item_indices: List[int]
         :return: a list of items, corresponding to the indices that are in `item_indices` but not in `administered_item_indices`, in the same order they were passed in `item_indices`
-        :rtype: list
+        :rtype: List[int]
         """
         return [x for x in item_indices if x not in administered_item_indices]
 
@@ -116,8 +118,8 @@ class Selector(Simulable, metaclass=ABCMeta):
         :type items: numpy.ndarray
         :param est_theta: an examinee's proficiency
         :type est_theta: float
-        :return: list containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)
-        :rtype: list
+        :return: List[int] containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)
+        :rtype: List[int]
         """
         if irt.detect_model(items) == 1:
             # when the logistic model has the number of parameters <= 2,
@@ -137,7 +139,7 @@ class Selector(Simulable, metaclass=ABCMeta):
         :param est_theta: an examinee's proficiency
         :type est_theta: float
         :return: list containing the indices of items, sorted by how close their difficulty parameter is in relaiton to :param:`est_theta` (much like the return of `numpy.argsort`)
-        :rtype: list
+        :rtype: List[int]
         """
         return list(numpy.abs(items[:, 1] - est_theta).argsort())
 
@@ -265,9 +267,13 @@ class Simulator:
         # `examinees` is passed to its special setter
         self._examinees = self._to_distribution(examinees)
 
-        self._estimations = [[] for _ in range(self.examinees.shape[0])]  # type: list
-        self._administered_items = [[] for _ in range(self.examinees.shape[0])]  # type: list
-        self._response_vectors = [[] for _ in range(self.examinees.shape[0])]  # type: list
+        self._estimations = [[] for _ in range(self.examinees.shape[0])]  # type: List[List[int]]
+        self._administered_items = [
+            [] for _ in range(self.examinees.shape[0])
+        ]  # type: List[List[int]]
+        self._response_vectors = [
+            [] for _ in range(self.examinees.shape[0])
+        ]  # type: List[List[bool]]
 
     @property
     def items(self) -> numpy.ndarray:

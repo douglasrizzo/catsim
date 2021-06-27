@@ -2,6 +2,7 @@
 
 import operator
 import random
+from typing import List, Union
 
 import numpy
 
@@ -32,7 +33,10 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
     return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
-def bias(actual: list, predicted: list) -> float:
+def bias(
+    actual: Union[List[float], numpy.ndarray],
+    predicted: Union[List[float], numpy.ndarray],
+) -> float:
     """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
     The value is computed as:
 
@@ -50,7 +54,10 @@ def bias(actual: list, predicted: list) -> float:
     return float(numpy.mean(list(map(operator.sub, predicted, actual))))
 
 
-def mse(actual: list, predicted: list) -> float:
+def mse(
+    actual: Union[List[float], numpy.ndarray],
+    predicted: Union[List[float], numpy.ndarray],
+) -> float:
     """Mean squared error, a value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.
     The value is computed as:
@@ -69,7 +76,10 @@ def mse(actual: list, predicted: list) -> float:
     return float(numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))]))
 
 
-def rmse(actual: list, predicted: list) -> float:
+def rmse(
+    actual: Union[List[float], numpy.ndarray],
+    predicted: Union[List[float], numpy.ndarray],
+) -> float:
     """Root mean squared error, a common value used when measuring the precision
     with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
     The value is computed as:
