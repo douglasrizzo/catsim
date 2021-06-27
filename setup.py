@@ -49,7 +49,7 @@ setup(
         "numpy",
     ],
     extras_require=dict(
-        dev=["mypy", "pylama", "yapf", "toml"],
+        dev=["mypy", "pylama", "yapf", "toml", "black", "isort"],
         testing=[
             "nose",
             "nose-cov",
