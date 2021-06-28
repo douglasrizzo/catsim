@@ -9,6 +9,18 @@ from catsim.simulation import Estimator
 
 
 class NumericalSearchEstimator(Estimator):
+    """Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log-likelihood function. There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to [Veliz20]_. Also check [Brent02]_. It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`.
+
+    :param precision: number of decimal points of precision, defaults to 6
+    :type precision: int, optional
+    :param dodd: whether to employ Dodd's estimation heuristic [Dod90]_ when the response vector only has one kind of response (all correct or all incorrect, see :py:func:`catsim.cat.dodd`), defaults to True
+    :type dodd: bool, optional
+    :param verbose: verbosity level of the maximization method
+    :type verbose: bool, optional
+    :param method: the search method to employ, one of `'ternary'`, `'dichotomous'`, `'fibonacci'`, `'golden'`, `'brent'`, `'bounded'` and `'golden2'`, defaults to bounded
+    :type method: str, optional
+    """
+
     methods = [
         "hillclimbing",
         "ternary",
@@ -31,23 +43,6 @@ class NumericalSearchEstimator(Estimator):
         verbose: bool = False,
         method="bounded",
     ):
-        """Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log-likelihood function.
-
-        There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to [Vel20]_. Also check [Brent02]_.
-
-        It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`.
-
-        Lastly, there is an implementation of a simple hill climbing algorithm.
-
-        :param precision: number of decimal points of precision, defaults to 6
-        :type precision: int, optional
-        :param dodd: whether to employ Dodd's estimation heuristic when the response vector only has one kind of response (all correct or all incorrect), defaults to True
-        :type dodd: bool, optional
-        :param verbose: verbosity level of the maximization method
-        :type verbose: bool, optional
-        :param method: the search method to employ, one of `'hillclimbing'`, `'ternary'`, `'dichotomous'`, `'fibonacci'`, `'golden'`, `'brent'`, `'bounded'` and `'golden2'`, defaults to bounded
-        :type method: str, optional
-        """
         super().__init__(verbose)
 
         if precision < 1:
@@ -349,10 +344,10 @@ class NumericalSearchEstimator(Estimator):
 
     @property
     def dodd(self) -> bool:
-        """Whether Dodd's method will be called by estimator in case the response vector
-        is composed solely of right or wrong answers.
+        """Whether Dodd's estimation heuristic [Dod90]_ will be used by estimator in case the response vector is composed solely of right or wrong answers.
 
-        :returns: boolean value indicating if Dodd's method will be used or not."""
+        :returns: boolean value indicating if Dodd's method will be used or not.
+        :see: :py:func:`catsim.cat.dodd`"""
         return self._dodd
 
     @property
