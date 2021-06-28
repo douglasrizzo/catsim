@@ -316,7 +316,7 @@ them in order to all examinees.
 
 
 Here, we will also plot the estimation error for an examinee’s
-:math:`\hat\theta` value during the progress of the test.
+:math:`\hat{\theta}` value during the progress of the test.
 
 .. code:: 
 
@@ -361,8 +361,8 @@ They have answered the first two items correctly (represented by the
 ``True`` values in the ``responses`` list) and two items incorrectly
 (the last values in the list).
 
-Initializing :math:`\hat\theta`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Initializing :math:`\hat{\theta}`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Even though this information is already enough to estimate the current
 proficiency of the examinee, we’ll go ahead and use our initializer to
@@ -379,20 +379,20 @@ estimate a dummy initial proficiency anyway.
     Examinee initial proficiency: 2.5662180237120156
 
 
-Estimating a new :math:`\hat\theta`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Estimating a new :math:`\hat{\theta}`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now, we will use the answers the examinee has given so far (remember,
 we’re pretending they have already answered a few items) to estimate a
-more precise :math:`\hat\theta` proficiency for them.
+more precise :math:`\hat{\theta}` proficiency for them.
 
 Internally, the estimator uses the item bank and the indices of the
 administered items to get the relevant item parameters, then uses the
 response vector to know which items the examinee has answered correctly
-and incorrectly to generate the new value for :math:`\hat\theta`.
+and incorrectly to generate the new value for :math:`\hat{\theta}`.
 
 Some estimators may or may not use the current value of
-:math:`\hat\theta` to speed up estimation.
+:math:`\hat{\theta}` to speed up estimation.
 
 **After getting to the end of the notebook, come back to this cell to
 simulate a new item being applied to this examinee**.
@@ -430,7 +430,7 @@ Selecting a new item
 ~~~~~~~~~~~~~~~~~~~~
 
 The selector takes the item parameter matrix and the current
-:math:`\hat\theta` value to select the new item the examinee will
+:math:`\hat{\theta}` value to select the new item the examinee will
 answer. It uses the indices of administered items to ignore them.
 
 .. code:: 
@@ -478,7 +478,7 @@ Finally, we add the index of the administered item to the examinee and
 their answer to the item to our lists and we are ready for the next step
 of the adaptive test.
 
-Go back to the **“Estimating a new :math:`\hat\theta`”** step above to
+Go back to the **“Estimating a new :math:`\hat{\theta}`”** step above to
 simulate another step of the CAT.
 
 .. code:: 

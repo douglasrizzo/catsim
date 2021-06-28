@@ -18,7 +18,7 @@ As a CAT simulator, :py:mod:`catsim` borrows many concepts from Item Response Th
 
 The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single proficiency (or dimension of knowledge). The instrument, in turn, is composed of *items* in which examinees manifest their latent traits when answering them.
 
-In unidimensional IRT models, an examinee's proficiency is represented as :math:`\theta`. Usually :math:`-\inf < \theta < \inf`, but since the scale of :math:`\theta` is up to the individuals creating the instrument, it is common for the values to be around the normal distribution :math:`N(0; 1)`, such that :math:`-4 < \theta < 4`.Additionally, :math:`\hat\theta` is the estimate of :math:`\theta`. Since a latent trait can't be measured directly, estimates need to be made, which tend to get closer to the theorically real :math:`\theta` as the test progresses in length.
+In unidimensional IRT models, an examinee's proficiency is represented as :math:`\theta`. Usually :math:`-\inf < \theta < \inf`, but since the scale of :math:`\theta` is up to the individuals creating the instrument, it is common for the values to be around the normal distribution :math:`N(0; 1)`, such that :math:`-4 < \theta < 4`.Additionally, :math:`\hat{\theta}` is the estimate of :math:`\theta`. Since a latent trait can't be measured directly, estimates need to be made, which tend to get closer to the theorically real :math:`\theta` as the test progresses in length.
 
 Under the logistic models of IRT, an item is represented by the following parameters:
 
@@ -29,7 +29,7 @@ Under the logistic models of IRT, an item is represented by the following parame
 
 For a set of items :math:`I`, when :math:`\forall i \in I, c_i = 0`, the three-parameter logistic model is reduced to the two-parameter logistic model. Additionally, if all values of :math:`a` are equal, the two-parameter logistic model is reduced to the one-parameter logistic model. Finally, when :math:`\forall i \in I, a_i = 1`, we have the Rasch model ([Rasch66]_). Thus, :py:mod:`catsim` is able of treating all of the logistic models presented above, since the underlying functions of all logistic models related to test simulations are the same, given the correct item paramaters.
 
-Under IRT, the probability of an examinee with a given :math:`\hat\theta` value to answer item :math:`i` correctly, given the item parameters, is given by ([Ayala2009]_, [Magis13]_)
+Under IRT, the probability of an examinee with a given :math:`\hat{\theta}` value to answer item :math:`i` correctly, given the item parameters, is given by ([Ayala2009]_, [Magis13]_)
 
 .. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.
 
@@ -121,7 +121,7 @@ In :py:mod:`catsim`, initialization procedures can be found in the :py:mod:`cats
 Item Selection
 ^^^^^^^^^^^^^^
 
-With a set value for :math:`\hat\theta`, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate :math:`\hat\theta`.
+With a set value for :math:`\hat{\theta}`, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate :math:`\hat{\theta}`.
 
 Item selection methods are diverse. The most famous method is to choose the item that maximizes the *gain of information*, represented by :py:class:`catsim.selection.MaxInfoSelector`. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.
 
@@ -134,13 +134,13 @@ In :py:mod:`catsim`, item selection procedures can be found in the :py:mod:`cats
 Proficiency Estimation
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's :math:`\hat\theta`. This value reflects the examinee's proficiency, given his or hers answers up until that point of the test.
+Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's :math:`\hat{\theta}`. This value reflects the examinee's proficiency, given his or hers answers up until that point of the test.
 
 In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:
 
 >>> response_vector = [1,1,1,0,1,1,0,1,0,0,1,0,0,0,1,0]
 
-Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the :math:`\hat\theta` value that maximizes the *log-likelihood* function, presented in :py:func:`catsim.irt.log_likelihood`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's proficiencies to estimate new values for them.
+Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the :math:`\hat{\theta}` value that maximizes the *log-likelihood* function, presented in :py:func:`catsim.irt.log_likelihood`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's proficiencies to estimate new values for them.
 
 In :py:mod:`catsim`, proficiency estimation procedures can be found in the :py:mod:`catsim.estimation` module.
 

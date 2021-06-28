@@ -4,10 +4,10 @@ Estimation Methods -- :mod:`catsim.estimation`
 Estimators are the objects responsible for estimating of examinees
 proficiency values, given a dichotomous (binary) response vector and an array of
 the items answered by the examinee. In the domain of IRT, there are two main
-types of ways of estimating :math:`\hat\theta`: and these are the Bayesian
+types of ways of estimating :math:`\hat{\theta}`: and these are the Bayesian
 methods and maximum-likelihood ones.
 
-Maximum-likelihood methods choose the :math:`\hat\theta` value that maximizes
+Maximum-likelihood methods choose the :math:`\hat{\theta}` value that maximizes
 the likelihood (see :py:func:`catsim.irt.log_likelihood`) of an examinee having
 a certain response vector, given the corresponding item parameters.
 
