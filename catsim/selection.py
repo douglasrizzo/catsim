@@ -40,7 +40,7 @@ class MaxInfoSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         items, administered_items, est_theta = self._prepare_args(
@@ -87,7 +87,7 @@ class MaxInfoSelector(Selector):
 
 
 class UrrySelector(Selector):
-    """Selector that returns the item whose difficulty parameter is closest to the examinee's proficiency"""
+    """Selector that returns the item whose difficulty parameter is closest to the examinee's ability"""
 
     def __init__(self):
         super().__init__()
@@ -109,7 +109,7 @@ class UrrySelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         items, administered_items, est_theta = self._prepare_args(
@@ -333,7 +333,7 @@ class ClusterSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: index of the next item to be applied.
         """
         items, administered_items, est_theta = self._prepare_args(
@@ -700,7 +700,7 @@ class MaxInfoStratSelector(StratifiedSelector):
 
     This method claims to work better than the :math:`a`-stratified method by
     [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty
-    and maximum information are not positioned in the same place in the proficiency
+    and maximum information are not positioned in the same place in the ability
     scale in 3PL.
 
     :param test_size: the number of items the test contains. The selector uses this parameter to
@@ -734,7 +734,7 @@ class MaxInfoBBlockSelector(StratifiedSelector):
     parameters between all strata and works better than the :math:`a`-stratified
     with :math:`b` blocking method by [Chang2001]_ for the three-parameter
     logistic model of IRT, since item difficulty and maximum information are not
-    positioned in the same place in the proficiency scale in 3PL. This may also
+    positioned in the same place in the ability scale in 3PL. This may also
     apply, although not mentioned by the authors, for the 4PL.
 
     .. image:: ../sphinx/mis-b.*
@@ -789,7 +789,7 @@ class The54321Selector(FiniteSelector):
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         items, administered_items, est_theta = self._prepare_args(
@@ -853,7 +853,7 @@ class RandomesqueSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         items, administered_items, est_theta = self._prepare_args(
@@ -917,7 +917,7 @@ class IntervalInfoSelector(Selector):
         :param items: a matrix containing item parameters in the format that `catsim` understands
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
         items, administered_items, est_theta = self._prepare_args(
@@ -934,7 +934,7 @@ class IntervalInfoSelector(Selector):
         assert administered_items is not None
         assert items is not None
 
-        # compute the integral of the information function around an examinee's proficiency
+        # compute the integral of the information function around an examinee's ability
         information_integral = numpy.array(
             [
                 quad(

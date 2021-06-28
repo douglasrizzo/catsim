@@ -13,9 +13,9 @@
 **catsim** is a Python package for computerized adaptive testing (CAT)
 simulations. It provides multiple methods for:
 
-- [test initialization](https://douglasrizzo.github.io/catsim/initialization.html) (selecting the initial proficiency of the examinees)
+- [test initialization](https://douglasrizzo.github.io/catsim/initialization.html) (selecting the initial ability of the examinees)
 - [item selection](https://douglasrizzo.github.io/catsim/selection.html)
-- [proficiency estimation](https://douglasrizzo.github.io/catsim/estimation.html)
+- [ability estimation](https://douglasrizzo.github.io/catsim/estimation.html)
 - [test stopping](https://douglasrizzo.github.io/catsim/stopping.html)
 
 These methods can either be used in a standalone fashion
@@ -23,7 +23,7 @@ These methods can either be used in a standalone fashion
 to power other software or be used with *catsim* to simulate the
 application of computerized adaptive tests
 [\[2\]](https://douglasrizzo.github.io/catsim/introduction.html#running-simulations),
-given a sample of examinees, represented by their proficiency levels,
+given a sample of examinees, represented by their ability levels,
 and an item bank, represented by their parameters according to some
 [logistic Item Response Theory
 model](https://douglasrizzo.github.io/catsim/introduction.html#item-response-theory-models).
@@ -32,15 +32,15 @@ model](https://douglasrizzo.github.io/catsim/introduction.html#item-response-the
 
 Computerized adaptive tests are educational evaluations, usually taken
 by examinees in a computer or some other digital means, in which the
-examinee\'s proficiency is evaluated after the response of each item.
-The new proficiency is then used to select a new item, closer to the
-examinee\'s real proficiency. This method of test application has
+examinee\'s ability is evaluated after the response of each item.
+The new ability is then used to select a new item, closer to the
+examinee\'s real ability. This method of test application has
 several advantages compared to the traditional paper-and-pencil method
-or even linear tests applied electronically, since high-proficiency
+or even linear tests applied electronically, since high-ability
 examinees are not required to answer all the easy items in a test,
 answering only the items that actually give some information regarding
 his or hers true knowledge of the subject at matter. A similar, but
-inverse effect happens for those examinees of low proficiency level.
+inverse effect happens for those examinees of low ability level.
 
 More information is available [in the
 docs](https://douglasrizzo.github.io/catsim/introduction.html) and over
@@ -59,7 +59,7 @@ Install it using `pip install catsim`.
 2.  Have a sample of examinee proficiencies, or a number of examinees to be generated;
 3.  Create an [initializer](https://douglasrizzo.github.io/catsim/initialization.html),
     an item [selector](https://douglasrizzo.github.io/catsim/selection.html), a
-    proficiency [estimator](https://douglasrizzo.github.io/catsim/estimation.html)
+    ability [estimator](https://douglasrizzo.github.io/catsim/estimation.html)
     and a [stopping criterion](https://douglasrizzo.github.io/catsim/stopping.html);
 4.  Pass them to a [simulator](https://douglasrizzo.github.io/catsim/simulation.html)
     and start the simulation.

@@ -11,7 +11,7 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 
     .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{-a_i(\\theta-b_i)}}
 
-    :param theta: the individual's proficiency value. This parameter value has
+    :param theta: the individual's ability value. This parameter value has
                   no boundary, but if a distribution of the form :math:`N(0, 1)` was
                   used to estimate the parameters, then :math:`-4 \\leq \\theta \\leq
                   4`.
@@ -63,7 +63,7 @@ def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
     """Implementation of :py:func:`icc` using :py:mod:`numpy` and :py:mod:`numexpr` in which the characteristic
     function for all items in a `numpy.ndarray` are computed at once.
 
-    :param theta: the individual's proficiency value.
+    :param theta: the individual's ability value.
     :param items: array containing the four item parameters.
     :returns: an array of all item characteristic functions, given the current ``theta``"""
     a, b, c, d = _split_params(items)
@@ -75,7 +75,7 @@ def inf_hpc(theta: float, items: numpy.ndarray):
     """Implementation of :py:func:`inf` using :py:mod:`numpy` and :py:mod:`numexpr` in which the information
     values for all items in a `numpy.ndarray` are computed at once.
 
-    :param theta: the individual's proficiency value.
+    :param theta: the individual's ability value.
     :param items: array containing the four item parameters.
     :returns: an array of all item information values, given the current ``theta``"""
     a, b, c, d = _split_params(items)
@@ -90,7 +90,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 
     .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2[1-P(\\theta)]P(\\theta)}
 
-    :param theta: the individual's proficiency value. This parameter value has
+    :param theta: the individual's ability value. This parameter value has
                   no boundary, but if a distribution of the form
                   :math:`N(0, 1)` was used to estimate the parameters, then
                   :math:`-4 \\leq \\theta \\leq 4`.
@@ -124,7 +124,7 @@ def test_info(theta: float, items: numpy.ndarray) -> float:
     where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the
     item information of :math:`j` at aspecific :math:`\\theta` value.
 
-    :param theta: a proficiency value.
+    :param theta: a ability value.
     :param items: a matrix containing item parameters.
     :returns: the test information at `theta` for a test represented by `items`.
     """
@@ -132,16 +132,16 @@ def test_info(theta: float, items: numpy.ndarray) -> float:
 
 
 def var(theta: float, items: numpy.ndarray) -> float:
-    """Computes the variance (:math:`Var`) of the proficiency estimate of a test at a
+    """Computes the variance (:math:`Var`) of the ability estimate of a test at a
     specific :math:`\\theta` value [Ayala2009]_:
 
     .. math:: Var = \\frac{1}{I(\\theta)}
 
     where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
 
-    :param theta: a proficiency value.
+    :param theta: a ability value.
     :param items: a matrix containing item parameters.
-    :returns: the variance of proficiency estimation at `theta` for a test represented by `items`.
+    :returns: the variance of ability estimation at `theta` for a test represented by `items`.
     """
     try:
         return 1 / test_info(theta, items)
@@ -157,7 +157,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
 
     where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).
 
-    :param theta: a proficiency value.
+    :param theta: a ability value.
     :param items: a matrix containing item parameters.
     :returns: the standard error of estimation at `theta` for a test represented by `items`.
     """
@@ -178,7 +178,7 @@ def reliability(theta: float, items: numpy.ndarray):
     :math:`I(\\theta) < 1`, :math:`Rel < 0` and in these cases it does not make
     sense, but usually the application of additional items solves this problem.
 
-    :param theta: a proficiency value.
+    :param theta: a ability value.
     :param items: a matrix containing item parameters.
     :returns: the test reliability at `theta` for a test represented by `items`.
     """
@@ -262,7 +262,7 @@ def max_info_hpc(items: numpy.ndarray):
 def log_likelihood(
     est_theta: float, response_vector: List[bool], administered_items: numpy.ndarray
 ) -> float:
-    """Calculates the log-likelihood of an estimated proficiency, given a
+    """Calculates the log-likelihood of an estimated ability, given a
     response vector and the parameters of the answered items [Ayala2009]_.
 
     The likelihood function of a given :math:`\\theta` value given the answers to :math:`I` items is given by:
@@ -279,10 +279,10 @@ def log_likelihood(
                \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log
                Q_{ij}(\\theta) \\right\\rbrace
 
-    :param est_theta: estimated proficiency value.
+    :param est_theta: estimated ability value.
     :param response_vector: a Boolean list containing the response vector.
     :param administered_items: a numpy array containing the parameters of the answered items.
-    :returns: log-likelihood of a given proficiency value, given the responses to the administered items.
+    :returns: log-likelihood of a given ability value, given the responses to the administered items.
     """
     if len(response_vector) != administered_items.shape[0]:
         raise ValueError(
@@ -299,17 +299,17 @@ def log_likelihood(
 
 def negative_log_likelihood(est_theta: float, *args) -> float:
     """Function used by :py:mod:`scipy.optimize` optimization functions that tend to minimize
-    values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
+    values, instead of maximizing them. Calculates the negative log-likelihood of a ability
     value, given a response vector and the parameters of the administered items. The value of
     :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood`.
 
-    :param est_theta: estimated proficiency value
+    :param est_theta: estimated ability value
 
     args:
 
     :param response_vector list: a Boolean list containing the response vector
     :param administered_items numpy.ndarray: a numpy array containing the parameters of the answered items
-    :returns: negative log-likelihood of a given proficiency value, given the responses to the administered items
+    :returns: negative log-likelihood of a given ability value, given the responses to the administered items
     """
     return -log_likelihood(est_theta, args[0], args[1])
 

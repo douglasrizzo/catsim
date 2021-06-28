@@ -76,7 +76,7 @@ class NumericalSearchEstimator(Estimator):
                       (see: :py:func:`catsim.cat.generate_item_bank`)
         :param administered_items: a list containing the indexes of items that were already administered
         :param response_vector: a boolean list containing the examinee's answers to the administered items
-        :param est_theta: a float containing the current estimated proficiency
+        :param est_theta: a float containing the current estimated ability
         :returns: the current :math:`\\hat\\theta`
         """
         items, administered_items, response_vector, est_theta = self._prepare_args(

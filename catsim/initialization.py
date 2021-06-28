@@ -4,7 +4,7 @@ from .simulation import Initializer
 
 
 class RandomInitializer(Initializer):
-    """Randomly initializes the first estimate of an examinee's proficiency
+    """Randomly initializes the first estimate of an examinee's ability
 
     :param dist_type: either `uniform` or `normal`
     :param dist_params: a tuple containing minimum and maximum values for the
@@ -31,7 +31,7 @@ class RandomInitializer(Initializer):
         """Generates a value using the chosen distribution and parameters
 
         :param index: the index of the current examinee. This parameter is not used by this method.
-        :returns: a proficiency value generated from the chosen distribution using the passed parameters"""
+        :returns: a ability value generated from the chosen distribution using the passed parameters"""
         if self._dist_type == "uniform":
             theta = numpy.random.uniform(min(self._dist_params), max(self._dist_params))
         elif self._dist_type == "normal":
@@ -41,7 +41,7 @@ class RandomInitializer(Initializer):
 
 
 class FixedPointInitializer(Initializer):
-    """Initializes every proficiency at the same point."""
+    """Initializes every ability at the same point."""
 
     def __str__(self):
         return "Fixed Point Initializer"
@@ -54,8 +54,8 @@ class FixedPointInitializer(Initializer):
         self._start = start
 
     def initialize(self, index: int = None, **kwargs) -> float:
-        """Returns the same proficiency value that was passed to the constructor of the initializer
+        """Returns the same ability value that was passed to the constructor of the initializer
 
         :param index: the index of the current examinee. This parameter is not used by this method.
-        :returns: the same proficiency value that was passed to the constructor of the initializer"""
+        :returns: the same ability value that was passed to the constructor of the initializer"""
         return self._start

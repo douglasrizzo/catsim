@@ -20,7 +20,7 @@ def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
         \\hat{\\theta}_t-\\frac{\\hat{\\theta}_t-b_{min}}{2} & \\text{if }  X_t = 0
         \\end{array} \\right\\rbrace
 
-    :param theta: the initial proficiency level
+    :param theta: the initial ability level
     :param items: a numpy array containing the parameters of the items in the
                   database. This is necessary to capture the maximum and minimum
                   difficulty levels necessary for the method.
@@ -42,11 +42,11 @@ def bias(
 
     .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
-    :math:`\\theta_i` is examinee :math:`i` actual proficiency.
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and
+    :math:`\\theta_i` is examinee :math:`i` actual ability.
 
-    :param actual: a list or 1-D numpy array containing the true proficiency values
-    :param predicted: a list or 1-D numpy array containing the estimated proficiency values
+    :param actual: a list or 1-D numpy array containing the true ability values
+    :param predicted: a list or 1-D numpy array containing the estimated ability values
     :returns: the bias between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
@@ -59,16 +59,16 @@ def mse(
     predicted: Union[List[float], numpy.ndarray],
 ) -> float:
     """Mean squared error, a value used when measuring the precision
-    with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.
+    with which a computerized adaptive test estimates examinees abilities [Chang2001]_.
     The value is computed as:
 
     .. math:: MSE = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
-    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and
+    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual ability.
 
-    :param actual: a list or 1-D numpy array containing the true proficiency values
-    :param predicted: a list or 1-D numpy array containing the estimated proficiency values
+    :param actual: a list or 1-D numpy array containing the true ability values
+    :param predicted: a list or 1-D numpy array containing the estimated ability values
     :returns: the mean squared error between the predicted values and actual values.
     """
     if len(actual) != len(predicted):
@@ -81,16 +81,16 @@ def rmse(
     predicted: Union[List[float], numpy.ndarray],
 ) -> float:
     """Root mean squared error, a common value used when measuring the precision
-    with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.
+    with which a computerized adaptive test estimates examinees abilities [Bar10]_.
     The value is computed as:
 
     .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and
-    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.
+    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and
+    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual ability.
 
-    :param actual: a list or 1-D numpy array containing the true proficiency values
-    :param predicted: a list or 1-D numpy array containing the estimated proficiency values
+    :param actual: a list or 1-D numpy array containing the true ability values
+    :param predicted: a list or 1-D numpy array containing the estimated ability values
     :returns: the root mean squared error between the predicted values and actual values.
     """
     if len(actual) != len(predicted):

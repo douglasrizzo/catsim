@@ -112,11 +112,11 @@ class Selector(Simulable, metaclass=ABCMeta):
 
     @staticmethod
     def _sort_by_info(items: numpy.ndarray, est_theta: float) -> list:
-        """Sort items by their information value, given a proficiency value
+        """Sort items by their information value, given a ability value
 
         :param items: an item parameter matrix
         :type items: numpy.ndarray
-        :param est_theta: an examinee's proficiency
+        :param est_theta: an examinee's ability
         :type est_theta: float
         :return: List[int] containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)
         :rtype: List[int]
@@ -132,11 +132,11 @@ class Selector(Simulable, metaclass=ABCMeta):
 
     @staticmethod
     def _sort_by_b(items: numpy.ndarray, est_theta: float) -> list:
-        """Sort items by how close their difficulty parameter is in relaiton to an examinee's proficiency
+        """Sort items by how close their difficulty parameter is in relaiton to an examinee's ability
 
         :param items: an item parameter matrix
         :type items: numpy.ndarray
-        :param est_theta: an examinee's proficiency
+        :param est_theta: an examinee's ability
         :type est_theta: float
         :return: list containing the indices of items, sorted by how close their difficulty parameter is in relaiton to :param:`est_theta` (much like the return of `numpy.argsort`)
         :rtype: List[int]
@@ -171,7 +171,7 @@ class FiniteSelector(Selector, metaclass=ABCMeta):
 
 
 class Estimator(Simulable, metaclass=ABCMeta):
-    """Base class for proficiency estimators"""
+    """Base class for ability estimators"""
 
     def __init__(self, verbose: bool = False):
         super().__init__()
@@ -332,14 +332,14 @@ class Simulator:
 
     @property
     def bias(self) -> float:
-        """Bias between the estimated and true proficiencies. This property is only
+        """Bias between the estimated and true abilities. This property is only
         available after :py:func:`simulate` has been successfully called. For more
         information on estimation bias, see :py:func:`catsim.cat.bias`"""
         return self._bias
 
     @property
     def mse(self) -> float:
-        """Mean-squared error between the estimated and true proficiencies. This
+        """Mean-squared error between the estimated and true abilities. This
         property is only available after :py:func:`simulate` has been successfully
         called. For more information on the mean-squared error of estimation, see
         :py:func:`catsim.cat.mse`"""
@@ -347,7 +347,7 @@ class Simulator:
 
     @property
     def rmse(self) -> float:
-        """Root mean-squared error between the estimated and true proficiencies. This
+        """Root mean-squared error between the estimated and true abilities. This
         property is only available after :py:func:`simulate` has been successfully
         called. For more information on the root mean-squared error of estimation, see
         :py:func:`catsim.cat.rmse`"""
@@ -355,7 +355,7 @@ class Simulator:
 
     @property
     def examinees(self) -> numpy.ndarray:
-        """:py:type:numpy.ndarray containing examinees true proficiency values (:math:`\\theta`)."""
+        """:py:type:numpy.ndarray containing examinees true ability values (:math:`\\theta`)."""
         return self._examinees
 
     @examinees.setter
@@ -395,7 +395,7 @@ class Simulator:
 
         :param initializer: an initializer that selects examinees :math:`\\theta_0`
         :param selector: a selector that selects new items to be presented to examinees
-        :param estimator: an estimator that reestimates examinees proficiencies after each item is applied
+        :param estimator: an estimator that reestimates examinees abilities after each item is applied
         :param stopper: an object with a stopping criteria for the test
         :param verbose: whether to periodically print a message regarding the progress of the simulation.
                         Good for longer simulations.

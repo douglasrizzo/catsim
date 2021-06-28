@@ -63,7 +63,7 @@ class MinErrorStopper(Stopper):
 
         :param index: the index of the current examinee
         :param administered_items: a matrix containing the parameters of items that were already administered
-        :param theta: a float containing the a proficiency value to which the error will be computed
+        :param theta: a float containing the a ability value to which the error will be computed
         :returns: `True` if the test met its stopping criterion, else `False`"""
 
         if (index is None or
