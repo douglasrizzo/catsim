@@ -22,7 +22,6 @@ class NumericalSearchEstimator(Estimator):
     """
 
     methods = [
-        "hillclimbing",
         "ternary",
         "dichotomous",
         "fibonacci",
@@ -133,21 +132,17 @@ class NumericalSearchEstimator(Estimator):
         upper_bound += margin
         lower_bound -= margin
 
-        if self.__search_method == "hillclimbing":
-            candidate_theta = self._solve_hill_climbing(
-                upper_bound, lower_bound, response_vector, items, administered_items
-            )
-        elif self.__search_method in ["ternary", "dichotomous"]:
+        if self.__search_method in ["ternary", "dichotomous"]:
             candidate_theta = self._solve_ternary_dichotomous(
-                upper_bound, lower_bound, response_vector, items, administered_items
+                upper_bound, lower_bound, response_vector, items[administered_items]
             )
         elif self.__search_method == "fibonacci":
             candidate_theta = self._solve_fibonacci(
-                upper_bound, lower_bound, response_vector, items, administered_items
+                upper_bound, lower_bound, response_vector, items[administered_items]
             )
         elif self.__search_method == "golden2":
             candidate_theta = self._solve_golden_section(
-                upper_bound, lower_bound, response_vector, items, administered_items
+                upper_bound, lower_bound, response_vector, items[administered_items]
             )
         elif self.__search_method in ["brent", "bounded", "golden"]:
             res = minimize_scalar(
@@ -166,69 +161,26 @@ class NumericalSearchEstimator(Estimator):
 
         return candidate_theta
 
-    def _solve_hill_climbing(
-        self, upper_bound, lower_bound, response_vector, items, administered_items
+    def _solve_ternary_dichotomous(
+        self,
+        b: float,
+        a: float,
+        response_vector: List[bool],
+        item_params: numpy.ndarray,
     ):
-        best_theta = float("-inf")
-        max_ll = float("-inf")
+        """Uses the ternary or dichotomous search methods to find the ability that maximizes the log-likelihood of the given response vector and item parameters
 
-        # the estimator starts with a rough search inside the interval, which gets
-        # finer with each pass
-        for granularity in range(10):
-
-            # generate a discrete list of candidate theta values inside the interval
-            candidates = numpy.linspace(lower_bound, upper_bound, 9)
-            interval_size = candidates[1] - candidates[0]
-
-            if self._verbose:
-                print(
-                    "Pass: {0}\n\tBounds: {1} {2}\n\tInterval size: {3}".format(
-                        granularity + 1, lower_bound, upper_bound, interval_size
-                    )
-                )
-
-            # we'll use the concave nature of the log-likelihood function
-            # to program a primitive early stopping method in our search.
-            previous_ll = float("-inf")
-
-            # iterate through each candidate
-            for candidate_theta in candidates:
-                self._evaluations += 1
-
-                current_ll = irt.log_likelihood(
-                    candidate_theta, response_vector, items[administered_items]
-                )
-
-                # we search the function from left to right, so when the
-                # log-likelihood of the current theta is smaller than the one
-                # from the previous theta we tested, it means it's all downhill
-                # from then on, so we stop our search
-                if current_ll < previous_ll:
-                    break
-                previous_ll = current_ll
-
-                # check if the LL of the current candidate theta is larger than
-                # the best one checked as of yet
-                if current_ll > max_ll:
-                    if self._verbose:
-                        print("\t\tTheta: {0}, LL: {1}".format(candidate_theta, current_ll))
-
-                    # if the difference between the best theta as of yet and the current theta
-                    # is negligible, we stop our search and return the current theta, which is
-                    # better than the as-of-yet best theta
-                    if abs(best_theta - candidate_theta) < self._epsilon:
-                        best_theta = candidate_theta
-                        break
-
-                    max_ll = current_ll
-                    best_theta = candidate_theta
-
-            # the bounds of the new candidates are adjusted around the current best theta value
-            lower_bound = best_theta - (interval_size * 2)
-            upper_bound = best_theta + (interval_size * 2)
-        return best_theta
-
-    def _solve_ternary_dichotomous(self, b, a, response_vector, items, administered_items):
+        :param upper_bound: the upper bound to search for the ability, in the ability/difficulty scale
+        :type upper_bound: float
+        :param lower_bound: the lower bound to search for the ability, in the ability/difficulty scale
+        :type lower_bound: float
+        :param response_vector: the responses given to the answered items
+        :type response_vector: List[bool]
+        :param item_params: the parameter matrix of the answered items
+        :type item_params: numpy.ndarray
+        :return: the estimated ability
+        :rtype: float
+        """
         error = float("inf")
         while error >= self._epsilon:
             self._evaluations += 2
@@ -241,8 +193,8 @@ class NumericalSearchEstimator(Estimator):
                 c = m - (self._epsilon / 2)
                 d = m + (self._epsilon / 2)
 
-            left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
-            right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+            left_side_ll = irt.log_likelihood(c, response_vector, item_params)
+            right_side_ll = irt.log_likelihood(d, response_vector, item_params)
 
             if left_side_ll >= right_side_ll:
                 b = d
@@ -265,7 +217,26 @@ class NumericalSearchEstimator(Estimator):
                 )
         return candidate_theta
 
-    def _solve_fibonacci(self, b, a, response_vector, items, administered_items):
+    def _solve_fibonacci(
+        self,
+        b: float,
+        a: float,
+        response_vector: List[bool],
+        item_params: numpy.ndarray,
+    ):
+        """Uses the Fibonacci search method to find the ability that maximizes the log-likelihood of the given response vector and item parameters
+
+        :param upper_bound: the upper bound to search for the ability, in the ability/difficulty scale
+        :type upper_bound: float
+        :param lower_bound: the lower bound to search for the ability, in the ability/difficulty scale
+        :type lower_bound: float
+        :param response_vector: the responses given to the answered items
+        :type response_vector: List[bool]
+        :param item_params: the parameter matrix of the answered items
+        :type item_params: numpy.ndarray
+        :return: the estimated ability
+        :rtype: float
+        """
         fib = [1, 1]
         n = 1
 
@@ -277,8 +248,8 @@ class NumericalSearchEstimator(Estimator):
         c = a + (fib[n - 2] / fib[n]) * (b - a)
         d = a + (fib[n - 1] / fib[n]) * (b - a)
 
-        left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
-        right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+        left_side_ll = irt.log_likelihood(c, response_vector, item_params)
+        right_side_ll = irt.log_likelihood(d, response_vector, item_params)
         self._evaluations += 2
 
         while n != 2:
@@ -292,14 +263,14 @@ class NumericalSearchEstimator(Estimator):
                 c = a + (fib[n - 2] / fib[n]) * (b - a)
 
                 right_side_ll = left_side_ll
-                left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+                left_side_ll = irt.log_likelihood(c, response_vector, item_params)
             else:
                 a = c
                 c = d
                 d = a + (fib[n - 1] / fib[n]) * (b - a)
 
                 left_side_ll = right_side_ll
-                right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+                right_side_ll = irt.log_likelihood(d, response_vector, item_params)
 
             # assert a <= c <= d <= b
 
@@ -309,12 +280,31 @@ class NumericalSearchEstimator(Estimator):
                 )
         return (b + a) / 2
 
-    def _solve_golden_section(self, b, a, response_vector, items, administered_items):
+    def _solve_golden_section(
+        self,
+        b: float,
+        a: float,
+        response_vector: List[bool],
+        item_params: numpy.ndarray,
+    ):
+        """Uses the golden-section search method to find the ability that maximizes the log-likelihood of the given response vector and item parameters
+
+        :param upper_bound: the upper bound to search for the ability, in the ability/difficulty scale
+        :type upper_bound: float
+        :param lower_bound: the lower bound to search for the ability, in the ability/difficulty scale
+        :type lower_bound: float
+        :param response_vector: the responses given to the answered items
+        :type response_vector: List[bool]
+        :param item_params: the parameter matrix of the answered items
+        :type item_params: numpy.ndarray
+        :return: the estimated ability
+        :rtype: float
+        """
         c = b + (a - b) / NumericalSearchEstimator.golden_ratio
         d = a + (b - a) / NumericalSearchEstimator.golden_ratio
 
-        left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
-        right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+        left_side_ll = irt.log_likelihood(c, response_vector, item_params)
+        right_side_ll = irt.log_likelihood(d, response_vector, item_params)
 
         while abs(b - a) > self._epsilon:
             self._evaluations += 1
@@ -325,14 +315,14 @@ class NumericalSearchEstimator(Estimator):
                 c = b + (a - b) / NumericalSearchEstimator.golden_ratio
 
                 right_side_ll = left_side_ll
-                left_side_ll = irt.log_likelihood(c, response_vector, items[administered_items])
+                left_side_ll = irt.log_likelihood(c, response_vector, item_params)
             else:
                 a = c
                 c = d
                 d = a + (b - a) / NumericalSearchEstimator.golden_ratio
 
                 left_side_ll = right_side_ll
-                right_side_ll = irt.log_likelihood(d, response_vector, items[administered_items])
+                right_side_ll = irt.log_likelihood(d, response_vector, item_params)
 
             assert a < c <= d < b
 
