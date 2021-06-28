@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -97,7 +97,6 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -183,7 +182,7 @@ application of adaptive tests. Most of this module is based on the work of
 <dl class="py class">
 <dt id="catsim.simulation.Estimator">
 <em class="property">class </em><code class="sig-prename descclassname">catsim.simulation.</code><code class="sig-name descname">Estimator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">verbose</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/simulation.html#Estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.simulation.Estimator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for proficiency estimators</p>
+<dd><p>Base class for ability estimators</p>
 <dl class="py method">
 <dt id="catsim.simulation.Estimator.avg_evaluations">
 <em class="property">property </em><code class="sig-name descname">avg_evaluations</code><a class="headerlink" href="#catsim.simulation.Estimator.avg_evaluations" title="Permalink to this definition">¶</a></dt>
@@ -322,7 +321,7 @@ examinee during the simulation.</p>
 <dl class="py method">
 <dt id="catsim.simulation.Simulator.bias">
 <em class="property">property </em><code class="sig-name descname">bias</code><a class="headerlink" href="#catsim.simulation.Simulator.bias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bias between the estimated and true proficiencies. This property is only
+<dd><p>Bias between the estimated and true abilities. This property is only
 available after <a class="reference internal" href="#catsim.simulation.Simulator.simulate" title="catsim.simulation.Simulator.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> has been successfully called. For more
 information on estimation bias, see <a class="reference internal" href="cat.html#catsim.cat.bias" title="catsim.cat.bias"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.bias()</span></code></a></p>
 </dd></dl>
@@ -343,7 +342,7 @@ for all examinees during each step of the test.</p>
 <dl class="py method">
 <dt id="catsim.simulation.Simulator.examinees">
 <em class="property">property </em><code class="sig-name descname">examinees</code><a class="headerlink" href="#catsim.simulation.Simulator.examinees" title="Permalink to this definition">¶</a></dt>
-<dd><p>:py:type:numpy.ndarray containing examinees true proficiency values (<span class="math notranslate nohighlight">\(\theta\)</span>).</p>
+<dd><p>:py:type:numpy.ndarray containing examinees true ability values (<span class="math notranslate nohighlight">\(\theta\)</span>).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -363,7 +362,7 @@ matrix.</p>
 <dl class="py method">
 <dt id="catsim.simulation.Simulator.mse">
 <em class="property">property </em><code class="sig-name descname">mse</code><a class="headerlink" href="#catsim.simulation.Simulator.mse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mean-squared error between the estimated and true proficiencies. This
+<dd><p>Mean-squared error between the estimated and true abilities. This
 property is only available after <a class="reference internal" href="#catsim.simulation.Simulator.simulate" title="catsim.simulation.Simulator.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> has been successfully
 called. For more information on the mean-squared error of estimation, see
 <a class="reference internal" href="cat.html#catsim.cat.mse" title="catsim.cat.mse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.mse()</span></code></a></p>
@@ -384,7 +383,7 @@ called. For more information on the mean-squared error of estimation, see
 <dl class="py method">
 <dt id="catsim.simulation.Simulator.rmse">
 <em class="property">property </em><code class="sig-name descname">rmse</code><a class="headerlink" href="#catsim.simulation.Simulator.rmse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Root mean-squared error between the estimated and true proficiencies. This
+<dd><p>Root mean-squared error between the estimated and true abilities. This
 property is only available after <a class="reference internal" href="#catsim.simulation.Simulator.simulate" title="catsim.simulation.Simulator.simulate"><code class="xref py py-func docutils literal notranslate"><span class="pre">simulate()</span></code></a> has been successfully
 called. For more information on the root mean-squared error of estimation, see
 <a class="reference internal" href="cat.html#catsim.cat.rmse" title="catsim.cat.rmse"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.rmse()</span></code></a></p>
@@ -399,7 +398,7 @@ called. For more information on the root mean-squared error of estimation, see
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>initializer</strong> – an initializer that selects examinees <span class="math notranslate nohighlight">\(\theta_0\)</span></p></li>
 <li><p><strong>selector</strong> – a selector that selects new items to be presented to examinees</p></li>
-<li><p><strong>estimator</strong> – an estimator that reestimates examinees proficiencies after each item is applied</p></li>
+<li><p><strong>estimator</strong> – an estimator that reestimates examinees abilities after each item is applied</p></li>
 <li><p><strong>stopper</strong> – an object with a stopping criteria for the test</p></li>
 <li><p><strong>verbose</strong> – whether to periodically print a message regarding the progress of the simulation.
 Good for longer simulations.</p></li>

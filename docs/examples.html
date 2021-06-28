@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -112,8 +112,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#using-catsim-objects-outside-of-a-simulator">Using catsim objects outside of a Simulator</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#initializing-hat-theta">Initializing <span class="math notranslate nohighlight">\(\hat\theta\)</span></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#estimating-a-new-hat-theta">Estimating a new <span class="math notranslate nohighlight">\(\hat\theta\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initializing-hat-theta">Initializing <span class="math notranslate nohighlight">\(\hat{\theta}\)</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#estimating-a-new-hat-theta">Estimating a new <span class="math notranslate nohighlight">\(\hat{\theta}\)</span></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#checking-whether-the-test-should-end">Checking whether the test should end</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#selecting-a-new-item">Selecting a new item</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simulating-a-response">Simulating a response</a></li>
@@ -442,7 +442,7 @@ Simulation took 2.101578950881958 seconds
 </pre></div>
 </div>
 <p>Here, we will also plot the estimation error for an examinee’s
-<span class="math notranslate nohighlight">\(\hat\theta\)</span> value during the progress of the test.</p>
+<span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value during the progress of the test.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">catplot</span><span class="o">.</span><span class="n">test_progress</span><span class="p">(</span><span class="n">simulator</span><span class="o">=</span><span class="n">s</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">see</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -478,7 +478,7 @@ They have answered the first two items correctly (represented by the
 <code class="docutils literal notranslate"><span class="pre">True</span></code> values in the <code class="docutils literal notranslate"><span class="pre">responses</span></code> list) and two items incorrectly
 (the last values in the list).</p>
 <div class="section" id="initializing-hat-theta">
-<h3>Initializing <span class="math notranslate nohighlight">\(\hat\theta\)</span><a class="headerlink" href="#initializing-hat-theta" title="Permalink to this headline">¶</a></h3>
+<h3>Initializing <span class="math notranslate nohighlight">\(\hat{\theta}\)</span><a class="headerlink" href="#initializing-hat-theta" title="Permalink to this headline">¶</a></h3>
 <p>Even though this information is already enough to estimate the current
 proficiency of the examinee, we’ll go ahead and use our initializer to
 estimate a dummy initial proficiency anyway.</p>
@@ -491,16 +491,16 @@ estimate a dummy initial proficiency anyway.</p>
 </div>
 </div>
 <div class="section" id="estimating-a-new-hat-theta">
-<h3>Estimating a new <span class="math notranslate nohighlight">\(\hat\theta\)</span><a class="headerlink" href="#estimating-a-new-hat-theta" title="Permalink to this headline">¶</a></h3>
+<h3>Estimating a new <span class="math notranslate nohighlight">\(\hat{\theta}\)</span><a class="headerlink" href="#estimating-a-new-hat-theta" title="Permalink to this headline">¶</a></h3>
 <p>Now, we will use the answers the examinee has given so far (remember,
 we’re pretending they have already answered a few items) to estimate a
-more precise <span class="math notranslate nohighlight">\(\hat\theta\)</span> proficiency for them.</p>
+more precise <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> proficiency for them.</p>
 <p>Internally, the estimator uses the item bank and the indices of the
 administered items to get the relevant item parameters, then uses the
 response vector to know which items the examinee has answered correctly
-and incorrectly to generate the new value for <span class="math notranslate nohighlight">\(\hat\theta\)</span>.</p>
+and incorrectly to generate the new value for <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>.</p>
 <p>Some estimators may or may not use the current value of
-<span class="math notranslate nohighlight">\(\hat\theta\)</span> to speed up estimation.</p>
+<span class="math notranslate nohighlight">\(\hat{\theta}\)</span> to speed up estimation.</p>
 <p><strong>After getting to the end of the notebook, come back to this cell to
 simulate a new item being applied to this examinee</strong>.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">new_theta</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="o">=</span><span class="n">responses</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
@@ -527,7 +527,7 @@ through the <code class="docutils literal notranslate"><span class="pre">stop()<
 <div class="section" id="selecting-a-new-item">
 <h3>Selecting a new item<a class="headerlink" href="#selecting-a-new-item" title="Permalink to this headline">¶</a></h3>
 <p>The selector takes the item parameter matrix and the current
-<span class="math notranslate nohighlight">\(\hat\theta\)</span> value to select the new item the examinee will
+<span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value to select the new item the examinee will
 answer. It uses the indices of administered items to ignore them.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">item_index</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Next item to be administered:&#39;</span><span class="p">,</span> <span class="n">item_index</span><span class="p">)</span>
@@ -563,7 +563,7 @@ Did the user answer the selected item correctly? True
 <p>Finally, we add the index of the administered item to the examinee and
 their answer to the item to our lists and we are ready for the next step
 of the adaptive test.</p>
-<p>Go back to the <strong>“Estimating a new :math:`hattheta`”</strong> step above to
+<p>Go back to the <strong>“Estimating a new :math:`hat{theta}`”</strong> step above to
 simulate another step of the CAT.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">administered_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_index</span><span class="p">)</span>
 <span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correct</span><span class="p">)</span>

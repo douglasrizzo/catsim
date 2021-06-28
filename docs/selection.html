@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -97,7 +97,6 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -181,7 +180,7 @@
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom selector be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code>.</p>
-<div class="graphviz"><img src="_images/inheritance-a870fdea87b791a0914b2aa21dec54cfe477329d.png" alt="Inheritance diagram of catsim.selection" usemap="#inheritance57e12ee8dd" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-879beb97c43f9d76e86d4ab156c8347baa356c19.png" alt="Inheritance diagram of catsim.selection" usemap="#inheritance57e12ee8dd" class="inheritance graphviz" /></div>
 <map id="inheritance57e12ee8dd" name="inheritance57e12ee8dd">
 <area shape="rect" id="node1" href="#catsim.selection.AStratBBlockSelector" target="_top" title="Implementation of the :math:`alpha`&#45;stratified selector with :math:`b`" alt="" coords="615,3,762,17"/>
 <area shape="rect" id="node2" href="#catsim.selection.StratifiedSelector" target="_top" title="catsim.selection.StratifiedSelector" alt="" coords="451,43,584,56"/>
@@ -195,7 +194,7 @@ used during the simulation, as long as it also inherits from
 <area shape="rect" id="node10" href="#catsim.selection.MaxInfoSelector" target="_top" title="Selector that returns the first non&#45;administered item with maximum information, given an estimated theta" alt="" coords="284,96,413,110"/>
 <area shape="rect" id="node12" href="#catsim.selection.RandomSelector" target="_top" title="Selector that randomly selects items for application." alt="" coords="284,123,414,136"/>
 <area shape="rect" id="node13" href="#catsim.selection.RandomesqueSelector" target="_top" title="Implementation of the randomesque selector proposed by [Kingsbury89]_, in which," alt="" coords="273,149,424,163"/>
-<area shape="rect" id="node15" href="#catsim.selection.UrrySelector" target="_top" title="Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s proficiency" alt="" coords="291,176,407,190"/>
+<area shape="rect" id="node15" href="#catsim.selection.UrrySelector" target="_top" title="Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s ability" alt="" coords="291,176,407,190"/>
 <area shape="rect" id="node7" href="#catsim.selection.LinearSelector" target="_top" title="Selector that returns item indexes in a linear order, simulating a standard" alt="" coords="456,69,579,83"/>
 <area shape="rect" id="node14" href="#catsim.selection.The54321Selector" target="_top" title="Implementation of the 5&#45;4&#45;3&#45;2&#45;1 selector proposed by [McBride83]_, in which," alt="" coords="450,96,586,110"/>
 <area shape="rect" id="node16" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="3,96,115,110"/>
@@ -309,7 +308,7 @@ Lines are clusters, columns are parameters.</p>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -404,7 +403,7 @@ integral is computed from <span class="math notranslate nohighlight">\([-\infty,
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -462,7 +461,7 @@ bank, and so on. This method tries to balance the distribution of both
 parameters between all strata and works better than the <span class="math notranslate nohighlight">\(a\)</span>-stratified
 with <span class="math notranslate nohighlight">\(b\)</span> blocking method by <a class="reference internal" href="references.html#chang2001" id="id4"><span>[Chang2001]</span></a> for the three-parameter
 logistic model of IRT, since item difficulty and maximum information are not
-positioned in the same place in the proficiency scale in 3PL. This may also
+positioned in the same place in the ability scale in 3PL. This may also
 apply, although not mentioned by the authors, for the 4PL.</p>
 <img alt="_images/mis-b.svg" src="_images/mis-b.svg" /><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -493,7 +492,7 @@ create the correct number of strata.</p>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -517,7 +516,7 @@ non-administered item from stratum <span class="math notranslate nohighlight">\(
 position in the test of the current item the examinee is being presented.</p>
 <img alt="_images/mis.svg" src="_images/mis.svg" /><p>This method claims to work better than the <span class="math notranslate nohighlight">\(a\)</span>-stratified method by
 <a class="reference internal" href="references.html#chang99" id="id6"><span>[Chang99]</span></a> for the three-parameter logistic model of IRT, since item difficulty
-and maximum information are not positioned in the same place in the proficiency
+and maximum information are not positioned in the same place in the ability
 scale in 3PL.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -583,7 +582,7 @@ randomly selecting one of them.</p>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -657,7 +656,7 @@ this parameter to set the bin size</p>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -672,7 +671,7 @@ this parameter to set the bin size</p>
 <dt id="catsim.selection.UrrySelector">
 <em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">UrrySelector</code><a class="reference internal" href="_modules/catsim/selection.html#UrrySelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.UrrySelector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
-<p>Selector that returns the item whose difficulty parameter is closest to the examinee’s proficiency</p>
+<p>Selector that returns the item whose difficulty parameter is closest to the examinee’s ability</p>
 <dl class="py method">
 <dt id="catsim.selection.UrrySelector.select">
 <code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#UrrySelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.UrrySelector.select" title="Permalink to this definition">¶</a></dt>
@@ -684,7 +683,7 @@ this parameter to set the bin size</p>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
-<li><p><strong>est_theta</strong> – a float containing the current estimated proficiency</p></li>
+<li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -97,7 +97,6 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -185,13 +184,13 @@
 The value is computed as:</p>
 <div class="math notranslate nohighlight">
 \[Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated proficiency and
-<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual proficiency.</p>
+<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
+<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true proficiency values</p></li>
-<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated proficiency values</p></li>
+<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true ability values</p></li>
+<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated ability values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -213,7 +212,7 @@ when the response vector is composed entirely of 1s or 0s.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the initial proficiency level</p></li>
+<li><p><strong>theta</strong> – the initial ability level</p></li>
 <li><p><strong>items</strong> – a numpy array containing the parameters of the items in the
 database. This is necessary to capture the maximum and minimum
 difficulty levels necessary for the method.</p></li>
@@ -269,17 +268,17 @@ three- or four-parameter logistic model</p></li>
 <dt id="catsim.cat.mse">
 <code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">mse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span><span class="p">, </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span><span class="p">, </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/cat.html#mse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.mse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean squared error, a value used when measuring the precision
-with which a computerized adaptive test estimates examinees proficiencies <a class="reference internal" href="references.html#chang2001" id="id4"><span>[Chang2001]</span></a>.
+with which a computerized adaptive test estimates examinees abilities <a class="reference internal" href="references.html#chang2001" id="id4"><span>[Chang2001]</span></a>.
 The value is computed as:</p>
 <div class="math notranslate nohighlight">
 \[MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated proficiency and
-<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual proficiency.</p>
+<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
+<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true proficiency values</p></li>
-<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated proficiency values</p></li>
+<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true ability values</p></li>
+<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated ability values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -313,17 +312,17 @@ times each item was used in the tests.</p></li>
 <dt id="catsim.cat.rmse">
 <code class="sig-prename descclassname">catsim.cat.</code><code class="sig-name descname">rmse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">actual</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span><span class="p">, </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">predicted</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span><span class="p">, </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/cat.html#rmse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.cat.rmse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Root mean squared error, a common value used when measuring the precision
-with which a computerized adaptive test estimates examinees proficiencies <a class="reference internal" href="references.html#bar10" id="id6"><span>[Bar10]</span></a>.
+with which a computerized adaptive test estimates examinees abilities <a class="reference internal" href="references.html#bar10" id="id6"><span>[Bar10]</span></a>.
 The value is computed as:</p>
 <div class="math notranslate nohighlight">
 \[RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated proficiency and
-<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual proficiency.</p>
+<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
+<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true proficiency values</p></li>
-<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated proficiency values</p></li>
+<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true ability values</p></li>
+<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated ability values</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -95,7 +95,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -194,7 +193,7 @@
 <span class="sd">        \\hat{\\theta}_t-\\frac{\\hat{\\theta}_t-b_{min}}{2} &amp; \\text{if }  X_t = 0</span>
 <span class="sd">        \\end{array} \\right\\rbrace</span>
 
-<span class="sd">    :param theta: the initial proficiency level</span>
+<span class="sd">    :param theta: the initial ability level</span>
 <span class="sd">    :param items: a numpy array containing the parameters of the items in the</span>
 <span class="sd">                  database. This is necessary to capture the maximum and minimum</span>
 <span class="sd">                  difficulty levels necessary for the method.</span>
@@ -216,11 +215,11 @@
 
 <span class="sd">    .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}</span>
 
-<span class="sd">    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and</span>
-<span class="sd">    :math:`\\theta_i` is examinee :math:`i` actual proficiency.</span>
+<span class="sd">    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and</span>
+<span class="sd">    :math:`\\theta_i` is examinee :math:`i` actual ability.</span>
 
-<span class="sd">    :param actual: a list or 1-D numpy array containing the true proficiency values</span>
-<span class="sd">    :param predicted: a list or 1-D numpy array containing the estimated proficiency values</span>
+<span class="sd">    :param actual: a list or 1-D numpy array containing the true ability values</span>
+<span class="sd">    :param predicted: a list or 1-D numpy array containing the estimated ability values</span>
 <span class="sd">    :returns: the bias between the predicted values and actual values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
@@ -233,16 +232,16 @@
     <span class="n">predicted</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Mean squared error, a value used when measuring the precision</span>
-<span class="sd">    with which a computerized adaptive test estimates examinees proficiencies [Chang2001]_.</span>
+<span class="sd">    with which a computerized adaptive test estimates examinees abilities [Chang2001]_.</span>
 <span class="sd">    The value is computed as:</span>
 
 <span class="sd">    .. math:: MSE = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}</span>
 
-<span class="sd">    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and</span>
-<span class="sd">    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.</span>
+<span class="sd">    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and</span>
+<span class="sd">    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual ability.</span>
 
-<span class="sd">    :param actual: a list or 1-D numpy array containing the true proficiency values</span>
-<span class="sd">    :param predicted: a list or 1-D numpy array containing the estimated proficiency values</span>
+<span class="sd">    :param actual: a list or 1-D numpy array containing the true ability values</span>
+<span class="sd">    :param predicted: a list or 1-D numpy array containing the estimated ability values</span>
 <span class="sd">    :returns: the mean squared error between the predicted values and actual values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
@@ -255,16 +254,16 @@
     <span class="n">predicted</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Root mean squared error, a common value used when measuring the precision</span>
-<span class="sd">    with which a computerized adaptive test estimates examinees proficiencies [Bar10]_.</span>
+<span class="sd">    with which a computerized adaptive test estimates examinees abilities [Bar10]_.</span>
 <span class="sd">    The value is computed as:</span>
 
 <span class="sd">    .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}</span>
 
-<span class="sd">    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated proficiency and</span>
-<span class="sd">    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual proficiency.</span>
+<span class="sd">    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and</span>
+<span class="sd">    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual ability.</span>
 
-<span class="sd">    :param actual: a list or 1-D numpy array containing the true proficiency values</span>
-<span class="sd">    :param predicted: a list or 1-D numpy array containing the estimated proficiency values</span>
+<span class="sd">    :param actual: a list or 1-D numpy array containing the true ability values</span>
+<span class="sd">    :param predicted: a list or 1-D numpy array containing the estimated ability values</span>
 <span class="sd">    :returns: the root mean squared error between the predicted values and actual values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>

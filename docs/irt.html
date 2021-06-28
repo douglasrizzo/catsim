@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -97,7 +97,6 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -178,7 +177,7 @@
   <div class="section" id="item-response-theory-functions-catsim-irt">
 <h1>Item Response Theory Functions – <a class="reference internal" href="#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><a class="headerlink" href="#item-response-theory-functions-catsim-irt" title="Permalink to this headline">¶</a></h1>
 <p>Item Response Theory is a group of statistical tools created with the purpose of measuring latent traits, like personality traits or knowledge in specific areas. IRT allows for the creation of a measuring instrument (the test), under which every examinee may be positioned and compared with others. The measuring instrument is created by items, which can be most commonly represented as tasks in a test.</p>
-<p>On the mathematical domain, IRT allows us to calculate the probability with which an examinee might answer an item correctly. For that both items and examinees are modelled using numerical parameters. This allows for the estimation and analysis of examinees proficiencies on the same scale as items difficulties. It also allows for the quality of items to be judged by the values of their parameters.</p>
+<p>On the mathematical domain, IRT allows us to calculate the probability with which an examinee might answer an item correctly. For that both items and examinees are modelled using numerical parameters. This allows for the estimation and analysis of examinees abilities on the same scale as items difficulties. It also allows for the quality of items to be judged by the values of their parameters.</p>
 <p>This module contains functions pertaining to the Item Response Theory logistic models.</p>
 <span class="target" id="module-catsim.irt"></span><dl class="py function">
 <dt id="catsim.irt.detect_model">
@@ -203,7 +202,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s proficiency value. This parameter value has
+<li><p><strong>theta</strong> – the individual’s ability value. This parameter value has
 no boundary, but if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was
 used to estimate the parameters, then <span class="math notranslate nohighlight">\(-4 \leq \theta \leq
 4\)</span>.</p></li>
@@ -231,7 +230,7 @@ function for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s proficiency value.</p></li>
+<li><p><strong>theta</strong> – the individual’s ability value.</p></li>
 <li><p><strong>items</strong> – array containing the four item parameters.</p></li>
 </ul>
 </dd>
@@ -251,7 +250,7 @@ four-parameter logistic model function <a class="reference internal" href="refer
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s proficiency value. This parameter value has
+<li><p><strong>theta</strong> – the individual’s ability value. This parameter value has
 no boundary, but if a distribution of the form
 <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the parameters, then
 <span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</p></li>
@@ -282,7 +281,7 @@ values for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s proficiency value.</p></li>
+<li><p><strong>theta</strong> – the individual’s ability value.</p></li>
 <li><p><strong>items</strong> – array containing the four item parameters.</p></li>
 </ul>
 </dd>
@@ -295,7 +294,7 @@ values for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
 <dl class="py function">
 <dt id="catsim.irt.log_likelihood">
 <code class="sig-prename descclassname">catsim.irt.</code><code class="sig-name descname">log_likelihood</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="n">response_vector</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/irt.html#log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.log_likelihood" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the log-likelihood of an estimated proficiency, given a
+<dd><p>Calculates the log-likelihood of an estimated ability, given a
 response vector and the parameters of the answered items <a class="reference internal" href="references.html#ayala2009" id="id5"><span>[Ayala2009]</span></a>.</p>
 <p>The likelihood function of a given <span class="math notranslate nohighlight">\(\theta\)</span> value given the answers to <span class="math notranslate nohighlight">\(I\)</span> items is given by:</p>
 <div class="math notranslate nohighlight">
@@ -314,13 +313,13 @@ Q_{ij}(\theta) \right\rbrace\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>est_theta</strong> – estimated proficiency value.</p></li>
+<li><p><strong>est_theta</strong> – estimated ability value.</p></li>
 <li><p><strong>response_vector</strong> – a Boolean list containing the response vector.</p></li>
 <li><p><strong>administered_items</strong> – a numpy array containing the parameters of the answered items.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>log-likelihood of a given proficiency value, given the responses to the administered items.</p>
+<dd class="field-even"><p>log-likelihood of a given ability value, given the responses to the administered items.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -346,11 +345,11 @@ by (<a class="reference internal" href="references.html#magis13" id="id6"><span>
 <p>(<a class="reference external" href=".//irt-1.py">Source code</a>)</p>
 <div class="figure align-default" id="id11">
 <img alt="_images/irt-1_00.png" class="plot-directive" src="_images/irt-1_00.png" />
-<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">(<a class="reference external" href=".//irt-1_00.png">png</a>, <a class="reference external" href=".//irt-1_00.hires.png">hires.png</a>, <a class="reference external" href=".//irt-1_00.pdf">pdf</a>)</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 8 </span><span class="caption-text">(<a class="reference external" href=".//irt-1_00.png">png</a>, <a class="reference external" href=".//irt-1_00.hires.png">hires.png</a>, <a class="reference external" href=".//irt-1_00.pdf">pdf</a>)</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
 </div>
 <div class="figure align-default" id="id12">
 <img alt="_images/irt-1_01.png" class="plot-directive" src="_images/irt-1_01.png" />
-<p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">(<a class="reference external" href=".//irt-1_01.png">png</a>, <a class="reference external" href=".//irt-1_01.hires.png">hires.png</a>, <a class="reference external" href=".//irt-1_01.pdf">pdf</a>)</span><a class="headerlink" href="#id12" title="Permalink to this image">¶</a></p>
+<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">(<a class="reference external" href=".//irt-1_01.png">png</a>, <a class="reference external" href=".//irt-1_01.hires.png">hires.png</a>, <a class="reference external" href=".//irt-1_01.pdf">pdf</a>)</span><a class="headerlink" href="#id12" title="Permalink to this image">¶</a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -387,12 +386,12 @@ value that maximizes the information function for all items is returned in a <ci
 <dt id="catsim.irt.negative_log_likelihood">
 <code class="sig-prename descclassname">catsim.irt.</code><code class="sig-name descname">negative_log_likelihood</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/irt.html#negative_log_likelihood"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.negative_log_likelihood" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.7.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to minimize
-values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency
+values, instead of maximizing them. Calculates the negative log-likelihood of a ability
 value, given a response vector and the parameters of the administered items. The value of
 <a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a> is simply the value of <span class="math notranslate nohighlight">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>est_theta</strong> – estimated proficiency value</p>
+<dd class="field-odd"><p><strong>est_theta</strong> – estimated ability value</p>
 </dd>
 </dl>
 <p>args:</p>
@@ -404,7 +403,7 @@ value, given a response vector and the parameters of the administered items. The
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>negative log-likelihood of a given proficiency value, given the responses to the administered items</p>
+<dd class="field-even"><p>negative log-likelihood of a given ability value, given the responses to the administered items</p>
 </dd>
 </dl>
 </dd></dl>
@@ -448,7 +447,7 @@ sense, but usually the application of additional items solves this problem.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a proficiency value.</p></li>
+<li><p><strong>theta</strong> – a ability value.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
 </ul>
 </dd>
@@ -469,7 +468,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a proficiency value.</p></li>
+<li><p><strong>theta</strong> – a ability value.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
 </ul>
 </dd>
@@ -490,7 +489,7 @@ item information of <span class="math notranslate nohighlight">\(j\)</span> at a
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a proficiency value.</p></li>
+<li><p><strong>theta</strong> – a ability value.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
 </ul>
 </dd>
@@ -523,7 +522,7 @@ just print the error message to standard output.</p></li>
 <dl class="py function">
 <dt id="catsim.irt.var">
 <code class="sig-prename descclassname">catsim.irt.</code><code class="sig-name descname">var</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/irt.html#var"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.irt.var" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the variance (<span class="math notranslate nohighlight">\(Var\)</span>) of the proficiency estimate of a test at a
+<dd><p>Computes the variance (<span class="math notranslate nohighlight">\(Var\)</span>) of the ability estimate of a test at a
 specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id10"><span>[Ayala2009]</span></a>:</p>
 <div class="math notranslate nohighlight">
 \[Var = \frac{1}{I(\theta)}\]</div>
@@ -531,12 +530,12 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a proficiency value.</p></li>
+<li><p><strong>theta</strong> – a ability value.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the variance of proficiency estimation at <cite>theta</cite> for a test represented by <cite>items</cite>.</p>
+<dd class="field-even"><p>the variance of ability estimation at <cite>theta</cite> for a test represented by <cite>items</cite>.</p>
 </dd>
 </dl>
 </dd></dl>

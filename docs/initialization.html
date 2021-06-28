@@ -43,7 +43,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Item Selection Methods – catsim.selection" href="selection.html" />
-    <link rel="prev" title="Example usages" href="examples.html" /> 
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -70,7 +70,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -97,7 +97,6 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -181,27 +180,27 @@
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom initializer be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code>.</p>
-<div class="graphviz"><img src="_images/inheritance-86bdc2c13bf5bf504a7eeae6124663693546af73.png" alt="Inheritance diagram of catsim.initialization" usemap="#inheritance51267be144" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-c9d0a7e17412dc469b62d867d4812c1638c02761.png" alt="Inheritance diagram of catsim.initialization" usemap="#inheritance51267be144" class="inheritance graphviz" /></div>
 <map id="inheritance51267be144" name="inheritance51267be144">
-<area shape="rect" id="node1" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initializes every proficiency at the same point." alt="" coords="492,5,763,29"/>
+<area shape="rect" id="node1" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initializes every ability at the same point." alt="" coords="492,5,763,29"/>
 <area shape="rect" id="node2" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers" alt="" coords="250,29,446,54"/>
-<area shape="rect" id="node3" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initializes the first estimate of an examinee&#39;s proficiency" alt="" coords="498,52,757,77"/>
+<area shape="rect" id="node3" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initializes the first estimate of an examinee&#39;s ability" alt="" coords="498,52,757,77"/>
 <area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,29,204,54"/>
 </map><span class="target" id="module-catsim.initialization"></span><dl class="py class">
 <dt id="catsim.initialization.FixedPointInitializer">
 <em class="property">class </em><code class="sig-prename descclassname">catsim.initialization.</code><code class="sig-name descname">FixedPointInitializer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Initializer</span></code></a></p>
-<p>Initializes every proficiency at the same point.</p>
+<p>Initializes every ability at the same point.</p>
 <dl class="py method">
 <dt id="catsim.initialization.FixedPointInitializer.initialize">
 <code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the same proficiency value that was passed to the constructor of the initializer</p>
+<dd><p>Returns the same ability value that was passed to the constructor of the initializer</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>index</strong> – the index of the current examinee. This parameter is not used by this method.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the same proficiency value that was passed to the constructor of the initializer</p>
+<dd class="field-even"><p>the same ability value that was passed to the constructor of the initializer</p>
 </dd>
 </dl>
 </dd></dl>
@@ -212,7 +211,7 @@ used during the simulation, as long as it also inherits from
 <dt id="catsim.initialization.RandomInitializer">
 <em class="property">class </em><code class="sig-prename descclassname">catsim.initialization.</code><code class="sig-name descname">RandomInitializer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dist_type</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'uniform'</span></em>, <em class="sig-param"><span class="n">dist_params</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a></span> <span class="o">=</span> <span class="default_value">(- 5, 5)</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Initializer</span></code></a></p>
-<p>Randomly initializes the first estimate of an examinee’s proficiency</p>
+<p>Randomly initializes the first estimate of an examinee’s ability</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -233,7 +232,7 @@ and standard deviation values for the normal distribution
 <dd class="field-odd"><p><strong>index</strong> – the index of the current examinee. This parameter is not used by this method.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>a proficiency value generated from the chosen distribution using the passed parameters</p>
+<dd class="field-even"><p>a ability value generated from the chosen distribution using the passed parameters</p>
 </dd>
 </dl>
 </dd></dl>
@@ -249,7 +248,7 @@ and standard deviation values for the normal distribution
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="selection.html" class="btn btn-neutral float-right" title="Item Selection Methods – catsim.selection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="examples.html" class="btn btn-neutral float-left" title="Example usages" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -95,7 +95,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -178,7 +177,7 @@
 
 
 <div class="viewcode-block" id="RandomInitializer"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.RandomInitializer">[docs]</a><span class="k">class</span> <span class="nc">RandomInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Randomly initializes the first estimate of an examinee&#39;s proficiency</span>
+    <span class="sd">&quot;&quot;&quot;Randomly initializes the first estimate of an examinee&#39;s ability</span>
 
 <span class="sd">    :param dist_type: either `uniform` or `normal`</span>
 <span class="sd">    :param dist_params: a tuple containing minimum and maximum values for the</span>
@@ -205,7 +204,7 @@
         <span class="sd">&quot;&quot;&quot;Generates a value using the chosen distribution and parameters</span>
 
 <span class="sd">        :param index: the index of the current examinee. This parameter is not used by this method.</span>
-<span class="sd">        :returns: a proficiency value generated from the chosen distribution using the passed parameters&quot;&quot;&quot;</span>
+<span class="sd">        :returns: a ability value generated from the chosen distribution using the passed parameters&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="s2">&quot;uniform&quot;</span><span class="p">:</span>
             <span class="n">theta</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">))</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="s2">&quot;normal&quot;</span><span class="p">:</span>
@@ -215,7 +214,7 @@
 
 
 <div class="viewcode-block" id="FixedPointInitializer"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.FixedPointInitializer">[docs]</a><span class="k">class</span> <span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Initializes every proficiency at the same point.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Initializes every ability at the same point.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Fixed Point Initializer&quot;</span>
@@ -228,10 +227,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
 
 <div class="viewcode-block" id="FixedPointInitializer.initialize"><a class="viewcode-back" href="../../initialization.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the same proficiency value that was passed to the constructor of the initializer</span>
+        <span class="sd">&quot;&quot;&quot;Returns the same ability value that was passed to the constructor of the initializer</span>
 
 <span class="sd">        :param index: the index of the current examinee. This parameter is not used by this method.</span>
-<span class="sd">        :returns: the same proficiency value that was passed to the constructor of the initializer&quot;&quot;&quot;</span>
+<span class="sd">        :returns: the same ability value that was passed to the constructor of the initializer&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span></div></div>
 </pre></div>
 

@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -95,7 +95,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -185,7 +184,7 @@
 
 <span class="sd">    .. math:: P(X_i = 1| \\theta) = c_i + \\frac{d_i-c_i}{1+ e^{-a_i(\\theta-b_i)}}</span>
 
-<span class="sd">    :param theta: the individual&#39;s proficiency value. This parameter value has</span>
+<span class="sd">    :param theta: the individual&#39;s ability value. This parameter value has</span>
 <span class="sd">                  no boundary, but if a distribution of the form :math:`N(0, 1)` was</span>
 <span class="sd">                  used to estimate the parameters, then :math:`-4 \\leq \\theta \\leq</span>
 <span class="sd">                  4`.</span>
@@ -237,7 +236,7 @@
     <span class="sd">&quot;&quot;&quot;Implementation of :py:func:`icc` using :py:mod:`numpy` and :py:mod:`numexpr` in which the characteristic</span>
 <span class="sd">    function for all items in a `numpy.ndarray` are computed at once.</span>
 
-<span class="sd">    :param theta: the individual&#39;s proficiency value.</span>
+<span class="sd">    :param theta: the individual&#39;s ability value.</span>
 <span class="sd">    :param items: array containing the four item parameters.</span>
 <span class="sd">    :returns: an array of all item characteristic functions, given the current ``theta``&quot;&quot;&quot;</span>
     <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
@@ -249,7 +248,7 @@
     <span class="sd">&quot;&quot;&quot;Implementation of :py:func:`inf` using :py:mod:`numpy` and :py:mod:`numexpr` in which the information</span>
 <span class="sd">    values for all items in a `numpy.ndarray` are computed at once.</span>
 
-<span class="sd">    :param theta: the individual&#39;s proficiency value.</span>
+<span class="sd">    :param theta: the individual&#39;s ability value.</span>
 <span class="sd">    :param items: array containing the four item parameters.</span>
 <span class="sd">    :returns: an array of all item information values, given the current ``theta``&quot;&quot;&quot;</span>
     <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
@@ -264,7 +263,7 @@
 
 <span class="sd">    .. math:: I_i(\\theta) = \\frac{a^2[(P(\\theta)-c)]^2[d - P(\\theta)]^2}{(d-c)^2[1-P(\\theta)]P(\\theta)}</span>
 
-<span class="sd">    :param theta: the individual&#39;s proficiency value. This parameter value has</span>
+<span class="sd">    :param theta: the individual&#39;s ability value. This parameter value has</span>
 <span class="sd">                  no boundary, but if a distribution of the form</span>
 <span class="sd">                  :math:`N(0, 1)` was used to estimate the parameters, then</span>
 <span class="sd">                  :math:`-4 \\leq \\theta \\leq 4`.</span>
@@ -298,7 +297,7 @@
 <span class="sd">    where :math:`J` is the set of items in the test and :math:`I_j(\\theta)` is the</span>
 <span class="sd">    item information of :math:`j` at aspecific :math:`\\theta` value.</span>
 
-<span class="sd">    :param theta: a proficiency value.</span>
+<span class="sd">    :param theta: a ability value.</span>
 <span class="sd">    :param items: a matrix containing item parameters.</span>
 <span class="sd">    :returns: the test information at `theta` for a test represented by `items`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -306,16 +305,16 @@
 
 
 <div class="viewcode-block" id="var"><a class="viewcode-back" href="../../irt.html#catsim.irt.var">[docs]</a><span class="k">def</span> <span class="nf">var</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Computes the variance (:math:`Var`) of the proficiency estimate of a test at a</span>
+    <span class="sd">&quot;&quot;&quot;Computes the variance (:math:`Var`) of the ability estimate of a test at a</span>
 <span class="sd">    specific :math:`\\theta` value [Ayala2009]_:</span>
 
 <span class="sd">    .. math:: Var = \\frac{1}{I(\\theta)}</span>
 
 <span class="sd">    where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).</span>
 
-<span class="sd">    :param theta: a proficiency value.</span>
+<span class="sd">    :param theta: a ability value.</span>
 <span class="sd">    :param items: a matrix containing item parameters.</span>
-<span class="sd">    :returns: the variance of proficiency estimation at `theta` for a test represented by `items`.</span>
+<span class="sd">    :returns: the variance of ability estimation at `theta` for a test represented by `items`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
@@ -331,7 +330,7 @@
 
 <span class="sd">    where :math:`I(\\theta)` is the test information (see :py:func:`test_info`).</span>
 
-<span class="sd">    :param theta: a proficiency value.</span>
+<span class="sd">    :param theta: a ability value.</span>
 <span class="sd">    :param items: a matrix containing item parameters.</span>
 <span class="sd">    :returns: the standard error of estimation at `theta` for a test represented by `items`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -352,7 +351,7 @@
 <span class="sd">    :math:`I(\\theta) &lt; 1`, :math:`Rel &lt; 0` and in these cases it does not make</span>
 <span class="sd">    sense, but usually the application of additional items solves this problem.</span>
 
-<span class="sd">    :param theta: a proficiency value.</span>
+<span class="sd">    :param theta: a ability value.</span>
 <span class="sd">    :param items: a matrix containing item parameters.</span>
 <span class="sd">    :returns: the test reliability at `theta` for a test represented by `items`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -436,7 +435,7 @@
 <div class="viewcode-block" id="log_likelihood"><a class="viewcode-back" href="../../irt.html#catsim.irt.log_likelihood">[docs]</a><span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">administered_items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Calculates the log-likelihood of an estimated proficiency, given a</span>
+    <span class="sd">&quot;&quot;&quot;Calculates the log-likelihood of an estimated ability, given a</span>
 <span class="sd">    response vector and the parameters of the answered items [Ayala2009]_.</span>
 
 <span class="sd">    The likelihood function of a given :math:`\\theta` value given the answers to :math:`I` items is given by:</span>
@@ -453,10 +452,10 @@
 <span class="sd">               \\left\\lbrace x_{ij} \\log P_{ij}(\\theta)+ (1 - x_{ij}) \\log</span>
 <span class="sd">               Q_{ij}(\\theta) \\right\\rbrace</span>
 
-<span class="sd">    :param est_theta: estimated proficiency value.</span>
+<span class="sd">    :param est_theta: estimated ability value.</span>
 <span class="sd">    :param response_vector: a Boolean list containing the response vector.</span>
 <span class="sd">    :param administered_items: a numpy array containing the parameters of the answered items.</span>
-<span class="sd">    :returns: log-likelihood of a given proficiency value, given the responses to the administered items.</span>
+<span class="sd">    :returns: log-likelihood of a given ability value, given the responses to the administered items.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span> <span class="o">!=</span> <span class="n">administered_items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -473,17 +472,17 @@
 
 <div class="viewcode-block" id="negative_log_likelihood"><a class="viewcode-back" href="../../irt.html#catsim.irt.negative_log_likelihood">[docs]</a><span class="k">def</span> <span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Function used by :py:mod:`scipy.optimize` optimization functions that tend to minimize</span>
-<span class="sd">    values, instead of maximizing them. Calculates the negative log-likelihood of a proficiency</span>
+<span class="sd">    values, instead of maximizing them. Calculates the negative log-likelihood of a ability</span>
 <span class="sd">    value, given a response vector and the parameters of the administered items. The value of</span>
 <span class="sd">    :py:func:`negative_log_likelihood` is simply the value of :math:`-` :py:func:`log_likelihood`.</span>
 
-<span class="sd">    :param est_theta: estimated proficiency value</span>
+<span class="sd">    :param est_theta: estimated ability value</span>
 
 <span class="sd">    args:</span>
 
 <span class="sd">    :param response_vector list: a Boolean list containing the response vector</span>
 <span class="sd">    :param administered_items numpy.ndarray: a numpy array containing the parameters of the answered items</span>
-<span class="sd">    :returns: negative log-likelihood of a given proficiency value, given the responses to the administered items</span>
+<span class="sd">    :returns: negative log-likelihood of a given ability value, given the responses to the administered items</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="o">-</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 

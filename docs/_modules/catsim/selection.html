@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -95,7 +95,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -214,7 +213,7 @@
 <span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
 <span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
+<span class="sd">        :param est_theta: a float containing the current estimated ability</span>
 <span class="sd">        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
@@ -261,7 +260,7 @@
 
 
 <div class="viewcode-block" id="UrrySelector"><a class="viewcode-back" href="../../selection.html#catsim.selection.UrrySelector">[docs]</a><span class="k">class</span> <span class="nc">UrrySelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s proficiency&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s ability&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -283,7 +282,7 @@
 <span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
 <span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
+<span class="sd">        :param est_theta: a float containing the current estimated ability</span>
 <span class="sd">        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
@@ -507,7 +506,7 @@
 <span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
 <span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
+<span class="sd">        :param est_theta: a float containing the current estimated ability</span>
 <span class="sd">        :returns: index of the next item to be applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
@@ -874,7 +873,7 @@
 
 <span class="sd">    This method claims to work better than the :math:`a`-stratified method by</span>
 <span class="sd">    [Chang99]_ for the three-parameter logistic model of IRT, since item difficulty</span>
-<span class="sd">    and maximum information are not positioned in the same place in the proficiency</span>
+<span class="sd">    and maximum information are not positioned in the same place in the ability</span>
 <span class="sd">    scale in 3PL.</span>
 
 <span class="sd">    :param test_size: the number of items the test contains. The selector uses this parameter to</span>
@@ -908,7 +907,7 @@
 <span class="sd">    parameters between all strata and works better than the :math:`a`-stratified</span>
 <span class="sd">    with :math:`b` blocking method by [Chang2001]_ for the three-parameter</span>
 <span class="sd">    logistic model of IRT, since item difficulty and maximum information are not</span>
-<span class="sd">    positioned in the same place in the proficiency scale in 3PL. This may also</span>
+<span class="sd">    positioned in the same place in the ability scale in 3PL. This may also</span>
 <span class="sd">    apply, although not mentioned by the authors, for the 4PL.</span>
 
 <span class="sd">    .. image:: ../sphinx/mis-b.*</span>
@@ -963,7 +962,7 @@
 <span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
 <span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
+<span class="sd">        :param est_theta: a float containing the current estimated ability</span>
 <span class="sd">        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
@@ -1027,7 +1026,7 @@
 <span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
 <span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
+<span class="sd">        :param est_theta: a float containing the current estimated ability</span>
 <span class="sd">        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
@@ -1091,7 +1090,7 @@
 <span class="sd">        :param items: a matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">                      (see: :py:func:`catsim.cat.generate_item_bank`)</span>
 <span class="sd">        :param administered_items: a list containing the indexes of items that were already administered</span>
-<span class="sd">        :param est_theta: a float containing the current estimated proficiency</span>
+<span class="sd">        :param est_theta: a float containing the current estimated ability</span>
 <span class="sd">        :returns: index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
@@ -1108,7 +1107,7 @@
         <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">assert</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
-        <span class="c1"># compute the integral of the information function around an examinee&#39;s proficiency</span>
+        <span class="c1"># compute the integral of the information function around an examinee&#39;s ability</span>
         <span class="n">information_integral</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">quad</span><span class="p">(</span>

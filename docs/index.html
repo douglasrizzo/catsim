@@ -69,7 +69,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -96,7 +96,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -184,9 +183,9 @@
 <p><strong>catsim</strong> is a Python package for computerized adaptive testing (CAT)
 simulations. It provides multiple methods for:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">test initialization</a> (selecting the initial proficiency of the examinees)</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/selection.html">item selection</a></p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">proficiency estimation</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">ability estimation</a></p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/stopping.html">test stopping</a></p></li>
 </ul>
 <p>These methods can either be used in a standalone fashion
@@ -194,7 +193,7 @@ simulations. It provides multiple methods for:</p>
 to power other software or be used with <em>catsim</em> to simulate the
 application of computerized adaptive tests
 <a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#running-simulations">[2]</a>,
-given a sample of examinees, represented by their proficiency levels,
+given a sample of examinees, represented by their ability levels,
 and an item bank, represented by their parameters according to some
 <a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory
 model</a>.</p>
@@ -202,15 +201,15 @@ model</a>.</p>
 <h2>What’s a CAT<a class="headerlink" href="#what-s-a-cat" title="Permalink to this headline">¶</a></h2>
 <p>Computerized adaptive tests are educational evaluations, usually taken
 by examinees in a computer or some other digital means, in which the
-examinee's proficiency is evaluated after the response of each item.
-The new proficiency is then used to select a new item, closer to the
-examinee's real proficiency. This method of test application has
+examinee's ability is evaluated after the response of each item.
+The new ability is then used to select a new item, closer to the
+examinee's real ability. This method of test application has
 several advantages compared to the traditional paper-and-pencil method
-or even linear tests applied electronically, since high-proficiency
+or even linear tests applied electronically, since high-ability
 examinees are not required to answer all the easy items in a test,
 answering only the items that actually give some information regarding
 his or hers true knowledge of the subject at matter. A similar, but
-inverse effect happens for those examinees of low proficiency level.</p>
+inverse effect happens for those examinees of low ability level.</p>
 <p>More information is available <a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html">in the
 docs</a> and over
 at
@@ -228,7 +227,7 @@ at
 <li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
 <li><p>Create an <a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">initializer</a>,
 an item <a class="reference external" href="https://douglasrizzo.github.io/catsim/selection.html">selector</a>, a
-proficiency <a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">estimator</a>
+ability <a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">estimator</a>
 and a <a class="reference external" href="https://douglasrizzo.github.io/catsim/stopping.html">stopping criterion</a>;</p></li>
 <li><p>Pass them to a <a class="reference external" href="https://douglasrizzo.github.io/catsim/simulation.html">simulator</a>
 and start the simulation.</p></li>
@@ -295,12 +294,6 @@ upwards.</p>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#item-response-theory-models">Item Response Theory Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#computerized-adaptive-tests">Computerized adaptive tests</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#package-architecture">Package architecture</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usages</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#generating-an-item-bank">Generating an item bank</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#running-simulations">Running simulations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples.html#using-catsim-objects-outside-of-a-simulator">Using catsim objects outside of a Simulator</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>

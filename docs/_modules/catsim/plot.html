@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -95,7 +95,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -381,7 +380,7 @@
 
 <span class="sd">    :param title: the plot title.</span>
 <span class="sd">    :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees&#39;</span>
-<span class="sd">                      proficiencies and a list of administered items for each examinee.</span>
+<span class="sd">                      abilities and a list of administered items for each examinee.</span>
 <span class="sd">    :param items: an item matrix containing item parameters and their exposure rate in the last column.</span>
 <span class="sd">    :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`</span>
 <span class="sd">                to use the default order of the item bank. Please note that, if `hist=True`, no sorting will be done.</span>
@@ -467,7 +466,7 @@
     <span class="sd">&quot;&quot;&quot;Generates a plot representing an examinee&#39;s test progress. Note that,</span>
 <span class="sd">    while some functions increase or decrease monotonically, like test information</span>
 <span class="sd">    and standard error of estimation, the plot calculates these values using the</span>
-<span class="sd">    examinee&#39;s proficiency estimated at that given time of the test. This means</span>
+<span class="sd">    examinee&#39;s ability estimated at that given time of the test. This means</span>
 <span class="sd">    that a test that was tought to be informative at a given point may not be as</span>
 <span class="sd">    informative after new estimates are done.</span>
 
@@ -488,23 +487,23 @@
 
 <span class="sd">    :param title: the plot title.</span>
 <span class="sd">    :param simulator: a simulator which has already simulated a series of CATs,</span>
-<span class="sd">                      containing estimations to the examinees&#39; proficiencies and</span>
+<span class="sd">                      containing estimations to the examinees&#39; abilities and</span>
 <span class="sd">                      a list of administered items for each examinee.</span>
 <span class="sd">    :param index: the index of the examinee in the simulator whose plot is to be done.</span>
-<span class="sd">    :param thetas: if a :py:class:`Simulator` is not passed, then a list of proficiency</span>
+<span class="sd">    :param thetas: if a :py:class:`Simulator` is not passed, then a list of ability</span>
 <span class="sd">                   estimations can be manually passed to the function.</span>
 <span class="sd">    :param administered_items: if a :py:class:`Simulator` is not passed, then a</span>
 <span class="sd">                               matrix of administered items, represented by their</span>
 <span class="sd">                               parameters, can be manually passed to the function.</span>
-<span class="sd">    :param true_theta: the value of the examinee&#39;s true proficiency. If it is passed,</span>
+<span class="sd">    :param true_theta: the value of the examinee&#39;s true ability. If it is passed,</span>
 <span class="sd">                       it will be shown on the plot, otherwise not.</span>
-<span class="sd">    :param info: plot test information. It only works if both proficiencies and</span>
+<span class="sd">    :param info: plot test information. It only works if both abilities and</span>
 <span class="sd">                 administered items are passed.</span>
 <span class="sd">    :param var: plot the estimation variance during the test. It only</span>
-<span class="sd">                works if both proficiencies and administered items are passed.</span>
+<span class="sd">                works if both abilities and administered items are passed.</span>
 <span class="sd">    :param see: plot the standard error of estimation during the test. It only</span>
-<span class="sd">               works if both proficiencies and administered items are passed.</span>
-<span class="sd">    :param reliability: plot the test reliability. It only works if both proficiencies</span>
+<span class="sd">               works if both abilities and administered items are passed.</span>
+<span class="sd">    :param reliability: plot the test reliability. It only works if both abilities</span>
 <span class="sd">                        and administered items are passed.</span>
 <span class="sd">    :param filepath: the path to save the plot</span>
 <span class="sd">    :param show: whether the generated plot is to be shown</span>

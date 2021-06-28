@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                0.17.0
+                0.17.1
               </div>
             
           
@@ -95,7 +95,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Example usages</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
@@ -286,11 +285,11 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_sort_by_info</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sort items by their information value, given a proficiency value</span>
+        <span class="sd">&quot;&quot;&quot;Sort items by their information value, given a ability value</span>
 
 <span class="sd">        :param items: an item parameter matrix</span>
 <span class="sd">        :type items: numpy.ndarray</span>
-<span class="sd">        :param est_theta: an examinee&#39;s proficiency</span>
+<span class="sd">        :param est_theta: an examinee&#39;s ability</span>
 <span class="sd">        :type est_theta: float</span>
 <span class="sd">        :return: List[int] containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)</span>
 <span class="sd">        :rtype: List[int]</span>
@@ -306,11 +305,11 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_sort_by_b</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sort items by how close their difficulty parameter is in relaiton to an examinee&#39;s proficiency</span>
+        <span class="sd">&quot;&quot;&quot;Sort items by how close their difficulty parameter is in relaiton to an examinee&#39;s ability</span>
 
 <span class="sd">        :param items: an item parameter matrix</span>
 <span class="sd">        :type items: numpy.ndarray</span>
-<span class="sd">        :param est_theta: an examinee&#39;s proficiency</span>
+<span class="sd">        :param est_theta: an examinee&#39;s ability</span>
 <span class="sd">        :type est_theta: float</span>
 <span class="sd">        :return: list containing the indices of items, sorted by how close their difficulty parameter is in relaiton to :param:`est_theta` (much like the return of `numpy.argsort`)</span>
 <span class="sd">        :rtype: List[int]</span>
@@ -345,7 +344,7 @@
 
 
 <div class="viewcode-block" id="Estimator"><a class="viewcode-back" href="../../simulation.html#catsim.simulation.Estimator">[docs]</a><span class="k">class</span> <span class="nc">Estimator</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base class for proficiency estimators&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Base class for ability estimators&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -506,14 +505,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Bias between the estimated and true proficiencies. This property is only</span>
+        <span class="sd">&quot;&quot;&quot;Bias between the estimated and true abilities. This property is only</span>
 <span class="sd">        available after :py:func:`simulate` has been successfully called. For more</span>
 <span class="sd">        information on estimation bias, see :py:func:`catsim.cat.bias`&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Mean-squared error between the estimated and true proficiencies. This</span>
+        <span class="sd">&quot;&quot;&quot;Mean-squared error between the estimated and true abilities. This</span>
 <span class="sd">        property is only available after :py:func:`simulate` has been successfully</span>
 <span class="sd">        called. For more information on the mean-squared error of estimation, see</span>
 <span class="sd">        :py:func:`catsim.cat.mse`&quot;&quot;&quot;</span>
@@ -521,7 +520,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Root mean-squared error between the estimated and true proficiencies. This</span>
+        <span class="sd">&quot;&quot;&quot;Root mean-squared error between the estimated and true abilities. This</span>
 <span class="sd">        property is only available after :py:func:`simulate` has been successfully</span>
 <span class="sd">        called. For more information on the root mean-squared error of estimation, see</span>
 <span class="sd">        :py:func:`catsim.cat.rmse`&quot;&quot;&quot;</span>
@@ -529,7 +528,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;:py:type:numpy.ndarray containing examinees true proficiency values (:math:`\\theta`).&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;:py:type:numpy.ndarray containing examinees true ability values (:math:`\\theta`).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span>
 
     <span class="nd">@examinees</span><span class="o">.</span><span class="n">setter</span>
@@ -569,7 +568,7 @@
 
 <span class="sd">        :param initializer: an initializer that selects examinees :math:`\\theta_0`</span>
 <span class="sd">        :param selector: a selector that selects new items to be presented to examinees</span>
-<span class="sd">        :param estimator: an estimator that reestimates examinees proficiencies after each item is applied</span>
+<span class="sd">        :param estimator: an estimator that reestimates examinees abilities after each item is applied</span>
 <span class="sd">        :param stopper: an object with a stopping criteria for the test</span>
 <span class="sd">        :param verbose: whether to periodically print a message regarding the progress of the simulation.</span>
 <span class="sd">                        Good for longer simulations.</span>
