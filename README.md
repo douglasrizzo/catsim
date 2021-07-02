@@ -107,17 +107,16 @@ upwards.
 You can cite the package using the following bibtex entry:
 
 ```bibtex
-@article{catsim,
-    author = {{De Rizzo Meneghetti}, Douglas and Aquino Junior, Plinio Thomaz},
-        title = "{Application and Simulation of Computerized Adaptive Tests Through the Package catsim}",
-    journal = {arXiv e-prints},
-    keywords = {Statistics - Applications},
-        year = 2017,
-        month = jul,
-        eid = {arXiv:1707.03012},
-        pages = {arXiv:1707.03012},
-archivePrefix = {arXiv},
-    eprint = {1707.03012},
-primaryClass = {stat.AP}
+@article{Meneghetti2018,
+  title = {Application and {{Simulation}} of {{Computerized Adaptive Tests Through}} the {{Package}} Catsim},
+  author = {Meneghetti, Douglas De Rizzo and Junior, Plinio Thomaz Aquino},
+  year = {2018},
+  month = jul,
+  archiveprefix = {arXiv},
+  copyright = {All rights reserved},
+  eprint = {1707.03012},
+  eprinttype = {arxiv},
+  journal = {arXiv:1707.03012 [stat]},
+  primaryclass = {stat}
 }
 ```
