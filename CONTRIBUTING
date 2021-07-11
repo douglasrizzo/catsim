@@ -12,21 +12,15 @@ Psychometrics
 
 **catsim** still has a way to go before it can be considered a mature package. Here is a list of features that may be of interest:
 
-* Bayesian estimators (maybe using `PyMC <https://pymc-devs.github.io/pymc/>`_);
-* Test evaluation indexes;
-* Comparison between simulation results (for example [Barr2010]_);
+* Bayesian ability estimators (maybe using `PyMC <https://pymc-devs.github.io/pymc/>`_);
+* Other test evaluation methods;
+* Comparisons between simulation results (for example [Barr2010]_);
 * Other information functions, selection methods based on intervals or areas of information etc. (see [Lind2010]_).
-
-Software architecture
-=====================
-
-If you think you have a better idea on how classes should be arranged so as to make the package more comprehensive and extensible, your contribution is also accepted. But be aware that major changes in the software may affect other users and the package will only be released to the public if it is tested accordingly.
 
 Unit testing
 ============
 
-If you are interested in making a contribution to **catsim**, make sure it is contemplated in the package testing module. If new features require new unit tests, don't hesitate in making them.
-If you think there is something already in the package that is worth testing, you are welcome to create a unit test for it.
+If you are interested in making a contribution to **catsim**, I'd encourage you to also contribute with unit tests in the package's testing module.
 
 How to contribute
 =================
@@ -35,7 +29,7 @@ How to contribute
 
 **Contributing ideas:** file an `issue on GitHub <https://github.com/douglasrizzo/catsim/issues>`_, label it as an **enhancement** and describe as thoroughly as possible what could be done.
 
-**Blaming us:** file an `issue on GitHub <https://github.com/douglasrizzo/catsim/issues>`_ describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.
+**Blaming me:** file an `issue on GitHub <https://github.com/douglasrizzo/catsim/issues>`_ describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.
 
 .. [Lind2010] Linden, W. J. V. D., & Pashley, J. P. Item Selection and Ability Estimation in Adaptive Testing. _In_ Linden, W. J. V. D., & Glas, C. A. W. (2010). Elements of Adaptive Testing. New York, NY, USA: Springer New York.
 

@@ -77,18 +77,19 @@ Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator
 
 ## Dependencies
 
-All dependencies are listed on setup.py and should be installed
+All dependencies are listed on `setup.py` and should be installed
 automatically.
 
 To run the tests, you\'ll need to install the testing requirements
 `pip install catsim[testing]`.
 
-To generate the documentation, Sphinx and its dependencies are needed.
+To generate the documentation, install the necessary dependencies with `pip install catsim[docs]`.
+
+To ensure code is valid and formatted before submission, install the necessary development dependencies with `pip install catsim[dev]`.
 
 ## Compatibility
 
-Since the beginning, *catsim* has only been compatible with Python 3.4
-upwards.
+*catsim* is compatible and tested against Python 3.5, 3.6, 3.7, 3.8 and 3.9.
 
 ## Important links
 
@@ -103,16 +104,14 @@ You can cite the package using the following bibtex entry:
 
 ```bibtex
 @article{catsim,
-    author = {{De Rizzo Meneghetti}, Douglas and Aquino Junior, Plinio Thomaz},
-        title = "{Application and Simulation of Computerized Adaptive Tests Through the Package catsim}",
-    journal = {arXiv e-prints},
-    keywords = {Statistics - Applications},
-        year = 2017,
-        month = jul,
-        eid = {arXiv:1707.03012},
-        pages = {arXiv:1707.03012},
-archivePrefix = {arXiv},
-    eprint = {1707.03012},
-primaryClass = {stat.AP}
+  author = {Meneghetti, Douglas De Rizzo and Aquino Junior, Plinio Thomaz},
+  title = {Application and simulation of computerized adaptive tests through the package catsim},
+  year = 2018,
+  month = jul,
+  archiveprefix = {arXiv},
+  eprint = {1707.03012},
+  eprinttype = {arxiv},
+  journal = {arXiv:1707.03012 [stat]},
+  primaryclass = {stat}
 }
 ```
