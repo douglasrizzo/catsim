@@ -34,7 +34,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Douglas De Rizzo Meneghetti",
     author_email="douglasrizzom@gmail.com",
-    url="https://douglasrizzo.github.io/catsim",
+    url="https://douglasrizzo.com.br/catsim",
     package_data={
         "catsim": ["py.typed"],
     },
