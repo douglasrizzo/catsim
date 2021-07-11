@@ -115,3 +115,11 @@ You can cite the package using the following bibtex entry:
   primaryclass = {stat}
 }
 ```
+
+## If you are looking for IRT item parameter estimation...
+
+_catsim_ does not implement item parameter estimation. I have had great joy outsourcing that functionality to the [mirt](https://cran.r-project.org/web//packages/mirt/) R package along the years. However, since many users request packages with item parameter estimation capabilities in the Python ecosystem, here are a few links. While I have not used them personally, specialized packages like these are hard to come by, so I hope these are helpful.
+
+- [eribean/girth](https://github.com/eribean/girth)
+- [eribean/girth_mcmc](https://github.com/eribean/girth_mcmc)
+- [nd-ball/py-irt](https://github.com/nd-ball/py-irt)
