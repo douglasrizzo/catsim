@@ -180,19 +180,19 @@
 <p><strong>catsim</strong> is a Python package for computerized adaptive testing (CAT)
 simulations. It provides multiple methods for:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/selection.html">item selection</a></p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">ability estimation</a></p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/stopping.html">test stopping</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">item selection</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">ability estimation</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">test stopping</a></p></li>
 </ul>
 <p>These methods can either be used in a standalone fashion
-<a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#autonomous-usage">[1]</a>
+<a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#autonomous-usage">[1]</a>
 to power other software or be used with <em>catsim</em> to simulate the
 application of computerized adaptive tests
-<a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#running-simulations">[2]</a>,
+<a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#running-simulations">[2]</a>,
 given a sample of examinees, represented by their ability levels,
 and an item bank, represented by their parameters according to some
-<a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory
+<a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory
 model</a>.</p>
 <div class="section" id="what-s-a-cat">
 <h1>What’s a CAT<a class="headerlink" href="#what-s-a-cat" title="Permalink to this headline">¶</a></h1>
@@ -207,7 +207,7 @@ examinees are not required to answer all the easy items in a test,
 answering only the items that actually give some information regarding
 his or hers true knowledge of the subject at matter. A similar, but
 inverse effect happens for those examinees of low ability level.</p>
-<p>More information is available <a class="reference external" href="https://douglasrizzo.github.io/catsim/introduction.html">in the
+<p>More information is available <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html">in the
 docs</a> and over
 at
 <a class="reference external" href="https://en.wikipedia.org/wiki/Computerized_adaptive_testing">Wikipedia</a>.</p>
@@ -220,16 +220,16 @@ at
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
 <p><strong>NEW:</strong> there is now <a class="reference external" href="https://colab.research.google.com/drive/14zEWoDudBCXF0NO-qgzoQpWUGBcJ2lPH?usp=sharing">a Colab Notebook</a> teaching the basics of catsim!</p>
 <ol class="arabic simple">
-<li><p>Have an <a class="reference external" href="https://douglasrizzo.github.io/catsim/item_matrix.html">item matrix</a>;</p></li>
+<li><p>Have an <a class="reference external" href="https://douglasrizzo.com.br/catsim/item_matrix.html">item matrix</a>;</p></li>
 <li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
-<li><p>Create an <a class="reference external" href="https://douglasrizzo.github.io/catsim/initialization.html">initializer</a>,
-an item <a class="reference external" href="https://douglasrizzo.github.io/catsim/selection.html">selector</a>, a
-ability <a class="reference external" href="https://douglasrizzo.github.io/catsim/estimation.html">estimator</a>
-and a <a class="reference external" href="https://douglasrizzo.github.io/catsim/stopping.html">stopping criterion</a>;</p></li>
-<li><p>Pass them to a <a class="reference external" href="https://douglasrizzo.github.io/catsim/simulation.html">simulator</a>
+<li><p>Create an <a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">initializer</a>,
+an item <a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">selector</a>, a
+ability <a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">estimator</a>
+and a <a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">stopping criterion</a>;</p></li>
+<li><p>Pass them to a <a class="reference external" href="https://douglasrizzo.com.br/catsim/simulation.html">simulator</a>
 and start the simulation.</p></li>
 <li><p>Access the simulator's properties to get specifics of the results;</p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.github.io/catsim/plot.html">Plot</a> your results.</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/plot.html">Plot</a> your results.</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">catsim.initialization</span> <span class="kn">import</span> <span class="n">RandomInitializer</span>
 <span class="kn">from</span> <span class="nn">catsim.selection</span> <span class="kn">import</span> <span class="n">MaxInfoSelector</span>
@@ -247,23 +247,23 @@ and start the simulation.</p></li>
 </div>
 <div class="section" id="dependencies">
 <h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
-<p>All dependencies are listed on setup.py and should be installed
+<p>All dependencies are listed on <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> and should be installed
 automatically.</p>
 <p>To run the tests, you'll need to install the testing requirements
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[testing]</span></code>.</p>
-<p>To generate the documentation, Sphinx and its dependencies are needed.</p>
+<p>To generate the documentation, install the necessary dependencies with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[docs]</span></code>.</p>
+<p>To ensure code is valid and formatted before submission, install the necessary development dependencies with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[dev]</span></code>.</p>
 </div>
 <div class="section" id="compatibility">
 <h1>Compatibility<a class="headerlink" href="#compatibility" title="Permalink to this headline">¶</a></h1>
-<p>Since the beginning, <em>catsim</em> has only been compatible with Python 3.4
-upwards.</p>
+<p><em>catsim</em> is compatible and tested against Python 3.5, 3.6, 3.7, 3.8 and 3.9.</p>
 </div>
 <div class="section" id="important-links">
 <h1>Important links<a class="headerlink" href="#important-links" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>Official source code repo: <a class="reference external" href="https://github.com/douglasrizzo/catsim">https://github.com/douglasrizzo/catsim</a></p></li>
 <li><p>HTML documentation (stable release):
-<a class="reference external" href="https://douglasrizzo.github.io/catsim">https://douglasrizzo.github.io/catsim</a></p></li>
+<a class="reference external" href="https://douglasrizzo.com.br/catsim">https://douglasrizzo.com.br/catsim</a></p></li>
 <li><p>Issue tracker: <a class="reference external" href="https://github.com/douglasrizzo/catsim/issues">https://github.com/douglasrizzo/catsim/issues</a></p></li>
 </ul>
 </div>
@@ -271,20 +271,27 @@ upwards.</p>
 <h1>Citing catsim<a class="headerlink" href="#citing-catsim" title="Permalink to this headline">¶</a></h1>
 <p>You can cite the package using the following bibtex entry:</p>
 <div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">catsim</span><span class="p">,</span>
-    <span class="na">author</span> <span class="p">=</span> <span class="s">{{De Rizzo Meneghetti}, Douglas and Aquino Junior, Plinio Thomaz}</span><span class="p">,</span>
-        <span class="na">title</span> <span class="p">=</span> <span class="s">&quot;{Application and Simulation of Computerized Adaptive Tests Through the Package catsim}&quot;</span><span class="p">,</span>
-    <span class="na">journal</span> <span class="p">=</span> <span class="s">{arXiv e-prints}</span><span class="p">,</span>
-    <span class="na">keywords</span> <span class="p">=</span> <span class="s">{Statistics - Applications}</span><span class="p">,</span>
-        <span class="na">year</span> <span class="p">=</span> <span class="m">2017</span><span class="p">,</span>
-        <span class="na">month</span> <span class="p">=</span> <span class="nv">jul</span><span class="p">,</span>
-        <span class="na">eid</span> <span class="p">=</span> <span class="s">{arXiv:1707.03012}</span><span class="p">,</span>
-        <span class="na">pages</span> <span class="p">=</span> <span class="s">{arXiv:1707.03012}</span><span class="p">,</span>
-<span class="na">archivePrefix</span> <span class="p">=</span> <span class="s">{arXiv}</span><span class="p">,</span>
-    <span class="na">eprint</span> <span class="p">=</span> <span class="s">{1707.03012}</span><span class="p">,</span>
-<span class="na">primaryClass</span> <span class="p">=</span> <span class="s">{stat.AP}</span>
+  <span class="na">author</span> <span class="p">=</span> <span class="s">{Meneghetti, Douglas De Rizzo and Aquino Junior, Plinio Thomaz}</span><span class="p">,</span>
+  <span class="na">title</span> <span class="p">=</span> <span class="s">{Application and simulation of computerized adaptive tests through the package catsim}</span><span class="p">,</span>
+  <span class="na">year</span> <span class="p">=</span> <span class="m">2018</span><span class="p">,</span>
+  <span class="na">month</span> <span class="p">=</span> <span class="nv">jul</span><span class="p">,</span>
+  <span class="na">archiveprefix</span> <span class="p">=</span> <span class="s">{arXiv}</span><span class="p">,</span>
+  <span class="na">eprint</span> <span class="p">=</span> <span class="s">{1707.03012}</span><span class="p">,</span>
+  <span class="na">eprinttype</span> <span class="p">=</span> <span class="s">{arxiv}</span><span class="p">,</span>
+  <span class="na">journal</span> <span class="p">=</span> <span class="s">{arXiv:1707.03012 [stat]}</span><span class="p">,</span>
+  <span class="na">primaryclass</span> <span class="p">=</span> <span class="s">{stat}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="if-you-are-looking-for-irt-item-parameter-estimation">
+<h1>If you are looking for IRT item parameter estimation…<a class="headerlink" href="#if-you-are-looking-for-irt-item-parameter-estimation" title="Permalink to this headline">¶</a></h1>
+<p><em>catsim</em> does not implement item parameter estimation. I have had great joy outsourcing that functionality to the <a class="reference external" href="https://cran.r-project.org/web//packages/mirt/">mirt</a> R package along the years. However, since many users request packages with item parameter estimation capabilities in the Python ecosystem, here are a few links. While I have not used them personally, specialized packages like these are hard to come by, so I hope these are helpful.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/eribean/girth">eribean/girth</a></p></li>
+<li><p><a class="reference external" href="https://github.com/eribean/girth_mcmc">eribean/girth_mcmc</a></p></li>
+<li><p><a class="reference external" href="https://github.com/nd-ball/py-irt">nd-ball/py-irt</a></p></li>
+</ul>
 </div>
 
 
