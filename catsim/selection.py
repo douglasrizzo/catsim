@@ -559,18 +559,25 @@ class StratifiedSelector(FiniteSelector):
     def __str__(self):
         return "General Stratified Selector"
 
-    def __init__(self, test_size):
+    def __init__(self, test_size, sort_once):
         super().__init__(test_size)
-        self._organized_items = None
+        self._sort_once = sort_once
+        self._presorted_items = None
 
-    @staticmethod
     @abstractmethod
-    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+    def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
         pass
 
+    def postsort_items(
+        self, items: numpy.ndarray, using_simulator_props: bool, **kwargs
+    ) -> numpy.ndarray:
+        if using_simulator_props:
+            return self._presorted_items
+        else:
+            return self.presort_items(items)
+
     def preprocess(self):
-        # sort item indexes by their discrimination value
-        self._organized_items = __class__.sort_items(self.simulator.items)
+        self._presorted_items = self.presort_items(self.simulator.items)
 
     def select(
         self,
@@ -586,26 +593,23 @@ class StratifiedSelector(FiniteSelector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more strata to get items from.
         """
-        items, administered_items = self._prepare_args(
+        items, administered_items, est_theta = self._prepare_args(
             return_items=True,
             index=index,
             items=items,
             administered_items=administered_items,
+            return_est_theta=True,
             **kwargs
         )
 
         assert items is not None
         assert administered_items is not None
-
-        # select the item in the correct layer, according to the point in the test the examinee is
-        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype="i")
+        assert est_theta is not None
 
         try:
-            pointer = slices[len(administered_items)]
-            max_pointer = (
-                items.shape[0] if len(administered_items) == self._test_size -
-                1 else slices[len(administered_items) + 1]
-            )
+            # select the item in the correct layer, according to the point in the test the examinee is
+            stratum_index = len(administered_items)
+            slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
         except IndexError:
             warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{1}\nTotal length of the test:\t{2}\nNumber of slices:\t{3}"
@@ -613,12 +617,16 @@ class StratifiedSelector(FiniteSelector):
             )
             return None
 
-        organized_items = (
-            self._organized_items if self._organized_items is not None else self.sort_items(items)
-        )
+        using_simulator_props = index is not None
+
+        if using_simulator_props and self._sort_once:
+            sorted_items = self._presorted_items
+        else:
+            kwargs['using_simulator_props'] = using_simulator_props
+            sorted_items = self.postsort_items(items, using_simulator_props, est_theta=est_theta)
 
         # if the selected item has already been administered, select the next one
-        while organized_items[pointer] in administered_items:
+        while sorted_items[pointer] in administered_items:
             pointer += 1
             if pointer == max_pointer:
                 raise ValueError(
@@ -627,7 +635,16 @@ class StratifiedSelector(FiniteSelector):
                     )
                 )
 
-        return organized_items[pointer]
+        return sorted_items[pointer]
+
+    def _get_stratum(self, items: numpy.ndarray, stratum_index: int) -> numpy.ndarray:
+        slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype="i")
+        pointer = slices[stratum_index]
+        max_pointer = (
+            items.shape[0] if stratum_index == self._test_size - 1 else slices[stratum_index + 1]
+        )
+
+        return slices, pointer, max_pointer
 
 
 class AStratSelector(StratifiedSelector):
@@ -650,10 +667,9 @@ class AStratSelector(StratifiedSelector):
         return "a-Stratified Selector"
 
     def __init__(self, test_size):
-        super().__init__(test_size)
+        super().__init__(test_size, True)
 
-    @staticmethod
-    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
+    def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
         return items[:, 0].argsort()
 
 
@@ -680,11 +696,26 @@ class AStratBBlockSelector(StratifiedSelector):
         return "a-Stratified b-Blocking Selector"
 
     def __init__(self, test_size):
-        super().__init__(test_size)
+        super().__init__(test_size, True)
 
-    @staticmethod
-    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        return numpy.lexsort((items[:, 0], items[:, 1]))
+    def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+        # sort items by their b values, in ascending order
+        presorted_items = items[:, 1].argsort()
+
+        final_indices = []
+        for stratum_index in range(self._test_size):
+            slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
+            indices_current_stratum = presorted_items[pointer:max_pointer]
+            items_current_stratum = items[indices_current_stratum]
+            sorted_indices_current_stratum = items_current_stratum[:, 0].argsort()
+            # sort the items in the current stratum by their discrimination values, in ascending order
+            global_sorted_indices_current_stratum = indices_current_stratum[
+                sorted_indices_current_stratum]
+            final_indices.extend(global_sorted_indices_current_stratum)
+
+        # sort the item bank first by the items maximum information, ascending
+        # then by their information to the examinee's cuirrent theta, descending
+        return numpy.array(final_indices)
 
 
 class MaxInfoStratSelector(StratifiedSelector):
@@ -711,15 +742,42 @@ class MaxInfoStratSelector(StratifiedSelector):
         return "Maximum Information Stratification Selector"
 
     def __init__(self, test_size):
-        super().__init__(test_size)
+        super().__init__(test_size, False)
 
-    @staticmethod
-    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        maxinfo = irt.max_info_hpc(items)
-        return irt.inf_hpc(maxinfo, items).argsort()
+    def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+        # get the theta values in which items are maximally informative
+        theta_maxinfo = irt.max_info_hpc(items)
+        # get the information values for all items at their maximum points
+        item_maxinfo = irt.inf_hpc(theta_maxinfo, items)
+        # globally sort item bank by item max information
+        return item_maxinfo.argsort()
+
+    def postsort_items(
+        self, items: numpy.ndarray, using_simulator_props: bool, est_theta: float
+    ) -> numpy.ndarray:
+        if using_simulator_props:
+            presorted_items = self._presorted_items
+        else:
+            presorted_items = self.presort_items(items)
+
+        # get the information of all items for the current estimated theta
+        info_current_theta = irt.inf_hpc(est_theta, items)
+
+        final_indices = []
+        for stratum_index in range(self._test_size):
+            slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
+            items_current_stratum = presorted_items[pointer:max_pointer]
+            info_items_current_stratum_current_theta = -info_current_theta[items_current_stratum]
+            items_current_stratum_sorted_by_info = items_current_stratum[
+                info_items_current_stratum_current_theta.argsort()]
+            final_indices.extend(items_current_stratum_sorted_by_info)
+
+        # sort the item bank first by the items maximum information, ascending
+        # then by their information to the examinee's cuirrent theta, descending
+        return numpy.array(final_indices)
 
 
-class MaxInfoBBlockSelector(StratifiedSelector):
+class MaxInfoBBlockSelector(MaxInfoStratSelector):
     """Implementation of the maximum information stratification with :math:`b`
     blocking (MIS-B) selector proposed by [Bar06]_, in which the item bank is sorted
     in ascending order according to the items difficulty parameter and then
@@ -746,13 +804,27 @@ class MaxInfoBBlockSelector(StratifiedSelector):
     def __str__(self):
         return "Maximum Information Stratification with b-Blocking Selector"
 
-    def __init__(self, test_size):
-        super().__init__(test_size)
+    def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+        # get the theta values in which items are maximally informative
+        theta_maxinfo = irt.max_info_hpc(items)
+        # sort items by theta
+        presorted_items = theta_maxinfo.argsort()
+        # get the information values for all items at their maximum points
+        item_maxinfo = irt.inf_hpc(theta_maxinfo, items[presorted_items])
 
-    @staticmethod
-    def sort_items(items: numpy.ndarray) -> numpy.ndarray:
-        maxinfo = irt.max_info_hpc(items)
-        return numpy.lexsort((irt.inf_hpc(maxinfo, items), maxinfo))
+        final_indices = []
+        for stratum_index in range(self._test_size):
+            slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
+            indices_current_stratum = presorted_items[pointer:max_pointer]
+            # sort items in the current stratum by maximum information, in ascending order
+            sorted_indices_current_stratum = item_maxinfo[indices_current_stratum].argsort()
+            global_sorted_indices_current_stratum = indices_current_stratum[
+                sorted_indices_current_stratum]
+            final_indices.extend(global_sorted_indices_current_stratum)
+
+        # sanity check to make sure all indices are present and unique
+        assert len(final_indices) == len(set(final_indices))
+        return numpy.array(final_indices)
 
 
 class The54321Selector(FiniteSelector):
