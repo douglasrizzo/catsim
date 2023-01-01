@@ -1,15 +1,13 @@
 import random
-import unittest
-
 from sklearn.cluster import KMeans
 
-from . import plot
-from .cat import generate_item_bank
-from .estimation import *
-from .initialization import *
-from .selection import *
-from .simulation import Simulator
-from .stopping import MaxItemStopper, MinErrorStopper
+from catsim import plot
+from catsim.cat import generate_item_bank
+from catsim.estimation import *
+from catsim.initialization import *
+from catsim.selection import *
+from catsim.simulation import Simulator
+from catsim.stopping import MaxItemStopper, MinErrorStopper
 
 
 def one_simulation(items, examinees, initializer, selector, estimator, stopper):
@@ -164,5 +162,8 @@ def test_plots():
     close("all")
 
 
-if __name__ == "__main__":
-    unittest.main()
+# if __name__ == "__main__":
+#     unittest.main()
+    # test_item_bank_generation()
+    # test_simulations()
+    # test_plots()
