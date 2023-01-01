@@ -37,13 +37,7 @@ license.file = "COPYING.LESSER"
 
 [project.optional-dependencies]
 dev = ["mypy", "pylama", "yapf", "black", "isort"]
-testing = [
-    "nose",
-    "nose-cov",
-    "sklearn",
-    "flake8",
-    "yapf",
-]
+testing = ["nose", "nose-cov", "sklearn", "flake8", "yapf"]
 docs = [
     "Sphinx",
     "numpydoc",
