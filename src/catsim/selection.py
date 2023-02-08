@@ -755,22 +755,27 @@ class MaxInfoStratSelector(StratifiedSelector):
     def postsort_items(
         self, items: numpy.ndarray, using_simulator_props: bool, est_theta: float
     ) -> numpy.ndarray:
+        # recover items presorted by the first rule
         if using_simulator_props:
             presorted_items = self._presorted_items
         else:
             presorted_items = self.presort_items(items)
 
-        # get the information of all items for the current estimated theta
-        info_current_theta = irt.inf_hpc(est_theta, items)
-
+        # run through each stratum and sort items in descending order according to
+        # their information for the current theta value
         final_indices = []
         for stratum_index in range(self._test_size):
+            # grab stratum pointers
             slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
-            items_current_stratum = presorted_items[pointer:max_pointer]
-            info_items_current_stratum_current_theta = -info_current_theta[items_current_stratum]
-            items_current_stratum_sorted_by_info = items_current_stratum[
-                info_items_current_stratum_current_theta.argsort()]
-            final_indices.extend(items_current_stratum_sorted_by_info)
+            item_indices_current_stratum = presorted_items[pointer:max_pointer]# item indices for the current stratum
+            items_current_stratum:numpy.ndarray = items[item_indices_current_stratum] # item params for the current stratum
+            # their information for this theta
+            info_items_current_stratum_current_theta:numpy.ndarray = irt.inf_hpc(
+                est_theta, items_current_stratum
+            )
+            item_indices_current_stratum_sorted_by_info = item_indices_current_stratum[
+                (-info_items_current_stratum_current_theta).argsort()]
+            final_indices.extend(item_indices_current_stratum_sorted_by_info)
 
         # sort the item bank first by the items maximum information, ascending
         # then by their information to the examinee's cuirrent theta, descending
