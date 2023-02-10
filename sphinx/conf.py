@@ -18,12 +18,12 @@ import sys
 
 import sphinx_rtd_theme
 
+from catsim import __version__
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
-
-from catsim import __version__
 
 filenames = ["readme_head.md", "readme_body.md"]
 with open("../README.md", "w") as outfile:
@@ -49,15 +49,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "numpydoc",
     "sphinx_rtd_theme",
-    "m2r2",
-]
+    "m2r2", ]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
-}
+    "sklearn": ("https://scikit-learn.org/stable/", None), }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -258,8 +256,7 @@ latex_documents = [
         "catsim Documentation",
         "Douglas De Rizzo Meneghetti",
         "manual",
-    ),
-]
+    ), ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -304,8 +301,7 @@ texinfo_documents = [
         "catsim",
         "One line description of project.",
         "Miscellaneous",
-    ),
-]
+    ), ]
 
 # Documents to append as an appendix to all manuals.
 # texinfo_appendices = []

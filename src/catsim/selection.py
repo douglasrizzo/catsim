@@ -26,14 +26,12 @@ class MaxInfoSelector(Selector):
     def r_max(self):
         return self._r_max
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        est_theta: float = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               est_theta: float = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -69,13 +67,11 @@ class MaxInfoSelector(Selector):
         # gets the indexes and information values from the items with r < rmax
         valid_indexes_low_r = valid_indexes
         if items.shape[1] < 5:
-            warn(
-                "This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0"
-            )
+            warn("This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0"
+                )
         else:
             valid_indexes_low_r = [
-                index for index in valid_indexes if items[index, 4] < self._r_max
-            ]
+                index for index in valid_indexes if items[index, 4] < self._r_max]
 
         # return the item with maximum information from the ones available
         if len(valid_indexes_low_r) > 0:
@@ -95,14 +91,12 @@ class UrrySelector(Selector):
     def __str__(self):
         return "Urry Selector"
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        est_theta: float = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               est_theta: float = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -168,8 +162,9 @@ class LinearSelector(FiniteSelector):
         :param administered_items: a list containing the indexes of items that were already administered
         :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
         """
-        (administered_items,
-         ) = self._prepare_args(index=index, administered_items=administered_items, **kwargs)
+        (administered_items, ) = self._prepare_args(index=index,
+                                                    administered_items=administered_items,
+                                                    **kwargs)
 
         valid_indexes = self._get_non_administered(self._indexes, administered_items)
 
@@ -182,8 +177,7 @@ class LinearSelector(FiniteSelector):
                     len(self._indexes),
                     sorted(administered_items),
                     len(administered_items),
-                )
-            )
+                ))
             return None
 
         return valid_indexes[0]
@@ -201,13 +195,11 @@ class RandomSelector(Selector):
         super().__init__()
         self._replace = replace
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -230,16 +222,14 @@ class RandomSelector(Selector):
         if len(administered_items) >= items.shape[0] and not self._replace:
             warn(
                 "A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}"
-                .format(len(administered_items), items.shape[0])
-            )
+                .format(len(administered_items), items.shape[0]))
             return None
 
         if self._replace:
             return numpy.random.choice(items.shape[0])
         else:
-            valid_indexes = self._get_non_administered(
-                list(range(items.shape[0])), administered_items
-            )
+            valid_indexes = self._get_non_administered(list(range(items.shape[0])),
+                                                       administered_items)
             return numpy.random.choice(valid_indexes)
 
 
@@ -303,30 +293,24 @@ class ClusterSelector(Selector):
         if method not in available_methods:
             raise ValueError(
                 "{0} is not a valid cluster selection method; choose one from {1}".format(
-                    method, available_methods
-                )
-            )
+                    method, available_methods))
         available_rcontrol = ["passive", "aggressive"]
         if r_control not in available_rcontrol:
             raise ValueError(
                 "{0} is not a valid item exposure control method; choose one from {1}".format(
-                    r_control, available_rcontrol
-                )
-            )
+                    r_control, available_rcontrol))
 
         self._clusters = clusters
         self._method = method
         self._r_max = r_max
         self._r_control = r_control
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        est_theta: float = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               est_theta: float = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -371,9 +355,8 @@ class ClusterSelector(Selector):
                     continue
 
                 # get the indexes of all items in the same cluster as the current item
-                items_in_cluster = numpy.nonzero(
-                    [x == self._clusters[max_info_item] for x in self._clusters]
-                )[0]
+                items_in_cluster = numpy.nonzero([
+                    x == self._clusters[max_info_item] for x in self._clusters])[0]
 
                 # if all the items in the current cluster have already been administered (it happens, theoretically),
                 # add this cluster to the list of fully evaluated clusters
@@ -398,8 +381,7 @@ class ClusterSelector(Selector):
                 cluster_infos = ClusterSelector.sum_cluster_infos(est_theta, items, self._clusters)
             else:
                 cluster_infos = ClusterSelector.weighted_cluster_infos(
-                    est_theta, items, self._clusters
-                )
+                    est_theta, items, self._clusters)
 
             # sorts clusters descending by their information values
             # this type of sorting was seem on
@@ -410,8 +392,7 @@ class ClusterSelector(Selector):
                         zip(cluster_infos, set(self._clusters)),
                         key=lambda pair: pair[0],
                         reverse=True,
-                    )
-                ],
+                    )],
                 dtype=float,
             )
 
@@ -447,14 +428,12 @@ class ClusterSelector(Selector):
         # selected cluster with r < rmax that have not been administered
         valid_indexes_low_r = valid_indexes
         if items.shape[1] < 5:
-            warn(
-                "This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0"
-            )
+            warn("This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0"
+                )
         else:
             valid_indexes_low_r = [
                 index for index in valid_indexes
-                if items[index, 4] < self._r_max and index not in administered_items
-            ]
+                if items[index, 4] < self._r_max and index not in administered_items]
 
         if len(valid_indexes_low_r) > 0:
             # return the item with maximum information from the ones available
@@ -492,9 +471,8 @@ class ClusterSelector(Selector):
         return cluster_infos
 
     @staticmethod
-    def weighted_cluster_infos(
-        theta: float, items: numpy.ndarray, clusters: List[int]
-    ) -> numpy.ndarray:
+    def weighted_cluster_infos(theta: float, items: numpy.ndarray,
+                               clusters: List[int]) -> numpy.ndarray:
         """Returns the weighted sum of item information values, separated by cluster.
         The weight is the number of items in each cluster.
 
@@ -568,9 +546,8 @@ class StratifiedSelector(FiniteSelector):
     def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
         pass
 
-    def postsort_items(
-        self, items: numpy.ndarray, using_simulator_props: bool, **kwargs
-    ) -> numpy.ndarray:
+    def postsort_items(self, items: numpy.ndarray, using_simulator_props: bool,
+                       **kwargs) -> numpy.ndarray:
         if using_simulator_props:
             return self._presorted_items
         else:
@@ -579,13 +556,11 @@ class StratifiedSelector(FiniteSelector):
     def preprocess(self):
         self._presorted_items = self.presort_items(self.simulator.items)
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -613,8 +588,7 @@ class StratifiedSelector(FiniteSelector):
         except IndexError:
             warn(
                 "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{1}\nTotal length of the test:\t{2}\nNumber of slices:\t{3}"
-                .format(self, len(administered_items), self._test_size, len(slices))
-            )
+                .format(self, len(administered_items), self._test_size, len(slices)))
             return None
 
         using_simulator_props = index is not None
@@ -622,27 +596,23 @@ class StratifiedSelector(FiniteSelector):
         if using_simulator_props and self._sort_once:
             sorted_items = self._presorted_items
         else:
-            kwargs['using_simulator_props'] = using_simulator_props
+            kwargs["using_simulator_props"] = using_simulator_props
             sorted_items = self.postsort_items(items, using_simulator_props, est_theta=est_theta)
 
         # if the selected item has already been administered, select the next one
         while sorted_items[pointer] in administered_items:
             pointer += 1
             if pointer == max_pointer:
-                raise ValueError(
-                    "There are no more items to be selected from stratum {0}".format(
-                        slices[len(administered_items)]
-                    )
-                )
+                raise ValueError("There are no more items to be selected from stratum {0}".format(
+                    slices[len(administered_items)]))
 
         return sorted_items[pointer]
 
     def _get_stratum(self, items: numpy.ndarray, stratum_index: int) -> numpy.ndarray:
         slices = numpy.linspace(0, items.shape[0], self._test_size, endpoint=False, dtype="i")
         pointer = slices[stratum_index]
-        max_pointer = (
-            items.shape[0] if stratum_index == self._test_size - 1 else slices[stratum_index + 1]
-        )
+        max_pointer = (items.shape[0] if stratum_index == self._test_size -
+                       1 else slices[stratum_index + 1])
 
         return slices, pointer, max_pointer
 
@@ -752,9 +722,8 @@ class MaxInfoStratSelector(StratifiedSelector):
         # globally sort item bank by item max information
         return item_maxinfo.argsort()
 
-    def postsort_items(
-        self, items: numpy.ndarray, using_simulator_props: bool, est_theta: float
-    ) -> numpy.ndarray:
+    def postsort_items(self, items: numpy.ndarray, using_simulator_props: bool,
+                       est_theta: float) -> numpy.ndarray:
         # recover items presorted by the first rule
         if using_simulator_props:
             presorted_items = self._presorted_items
@@ -767,14 +736,15 @@ class MaxInfoStratSelector(StratifiedSelector):
         for stratum_index in range(self._test_size):
             # grab stratum pointers
             slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
-            item_indices_current_stratum = presorted_items[pointer:max_pointer]# item indices for the current stratum
-            items_current_stratum:numpy.ndarray = items[item_indices_current_stratum] # item params for the current stratum
+            item_indices_current_stratum = presorted_items[
+                pointer:max_pointer]  # item indices for the current stratum
+            items_current_stratum: numpy.ndarray = items[
+                item_indices_current_stratum]  # item params for the current stratum
             # their information for this theta
-            info_items_current_stratum_current_theta:numpy.ndarray = irt.inf_hpc(
-                est_theta, items_current_stratum
-            )
-            item_indices_current_stratum_sorted_by_info = item_indices_current_stratum[
-                (-info_items_current_stratum_current_theta).argsort()]
+            info_items_current_stratum_current_theta: numpy.ndarray = irt.inf_hpc(
+                est_theta, items_current_stratum)
+            item_indices_current_stratum_sorted_by_info = item_indices_current_stratum[(
+                -info_items_current_stratum_current_theta).argsort()]
             final_indices.extend(item_indices_current_stratum_sorted_by_info)
 
         # sort the item bank first by the items maximum information, ascending
@@ -852,14 +822,12 @@ class The54321Selector(FiniteSelector):
     def __init__(self, test_size):
         super().__init__(test_size)
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        est_theta: float = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               est_theta: float = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -916,14 +884,12 @@ class RandomesqueSelector(Selector):
     def bin_size(self):
         return self._bin_size
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        est_theta: float = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               est_theta: float = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -980,14 +946,12 @@ class IntervalInfoSelector(Selector):
     def interval(self):
         return self._interval
 
-    def select(
-        self,
-        index: int = None,
-        items: numpy.ndarray = None,
-        administered_items: List[int] = None,
-        est_theta: float = None,
-        **kwargs
-    ) -> Union[int, None]:
+    def select(self,
+               index: int = None,
+               items: numpy.ndarray = None,
+               administered_items: List[int] = None,
+               est_theta: float = None,
+               **kwargs) -> Union[int, None]:
         """Returns the index of the next item to be administered.
 
         :param index: the index of the current examinee in the simulator.
@@ -1012,16 +976,13 @@ class IntervalInfoSelector(Selector):
         assert items is not None
 
         # compute the integral of the information function around an examinee's ability
-        information_integral = numpy.array(
-            [
-                quad(
-                    irt.inf,
-                    est_theta - self._interval,
-                    est_theta + self._interval,
-                    args=(item[0], item[1], item[2], item[3]),
-                )[0] for item in items
-            ]
-        )
+        information_integral = numpy.array([
+            quad(
+                irt.inf,
+                est_theta - self._interval,
+                est_theta + self._interval,
+                args=(item[0], item[1], item[2], item[3]),
+            )[0] for item in items])
         # sort by that integral in descending order
         ordered_items = (-information_integral).argsort()
         # remove administered items

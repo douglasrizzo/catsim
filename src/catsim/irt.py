@@ -1,5 +1,4 @@
 import math
-from math import pi
 from typing import List
 
 import numexpr
@@ -227,12 +226,9 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
     else:
         u = -(3 / 4) + ((c + d - 2 * c * d) / 2)
         v = (c + d - 1) / 4
-        x_star = (
-            2 * math.sqrt(-u / 3) * math.cos(
-                (1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) +
-                (4 * math.pi / 3)
-            ) + 0.5
-        )
+        x_star = (2 * math.sqrt(-u / 3) *
+                  math.cos((1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) +
+                           (4 * math.pi / 3)) + 0.5)
 
         return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
@@ -259,9 +255,8 @@ def max_info_hpc(items: numpy.ndarray):
         return numexpr.evaluate("b + (1 / a) * log((x_star - c) / (d - x_star))")
 
 
-def log_likelihood(
-    est_theta: float, response_vector: List[bool], administered_items: numpy.ndarray
-) -> float:
+def log_likelihood(est_theta: float, response_vector: List[bool],
+                   administered_items: numpy.ndarray) -> float:
     """Calculates the log-likelihood of an estimated ability, given a
     response vector and the parameters of the answered items [Ayala2009]_.
 
@@ -285,9 +280,7 @@ def log_likelihood(
     :returns: log-likelihood of a given ability value, given the responses to the administered items.
     """
     if len(response_vector) != administered_items.shape[0]:
-        raise ValueError(
-            "Response vector and administered items must have the same number of items"
-        )
+        raise ValueError("Response vector and administered items must have the same number of items")
     if len(set(response_vector) - {True, False}) > 0:
         raise ValueError("Response vector must contain only Boolean elements")
 
@@ -367,10 +360,8 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
     if len(items.shape) == 1:
         err += "Item matrix has only one dimension."
     elif items.shape[1] > 4:
-        print(
-            "\nItem matrix has more than 4 columns. catsim tends to add \
-            columns to the matrix during the simulation, so it's not a good idea to keep them."
-        )
+        print("\nItem matrix has more than 4 columns. catsim tends to add \
+            columns to the matrix during the simulation, so it's not a good idea to keep them.")
     elif items.shape[1] < 4:
         if items.shape[1] == 1:
             err += "\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"

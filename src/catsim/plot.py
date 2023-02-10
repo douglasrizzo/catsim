@@ -352,19 +352,14 @@ def test_progress(
     assert administered_items is not None
     assert true_theta is not None
 
-    if (
-        thetas is not None and administered_items is not None and
-        len(thetas) - 1 != len(administered_items[:, 1])
-    ):
+    if (thetas is not None and administered_items is not None and
+            len(thetas) - 1 != len(administered_items[:, 1])):
         raise ValueError(
-            "Number of latest_estimations and administered items is not the same. They should be."
-        )
+            "Number of latest_estimations and administered items is not the same. They should be.")
 
     # len(thetas) - 1 because the first item is made by the initializer
-    xs = (
-        list(range(len(thetas)))
-        if thetas is not None else list(range(len(administered_items[:, 1])))
-    )
+    xs = (list(range(len(thetas))) if thetas is not None else list(
+        range(len(administered_items[:, 1]))))
 
     if thetas is not None:
         plt.plot(xs, thetas, label=r"$\hat{\theta}$")
@@ -379,21 +374,24 @@ def test_progress(
         if info:
             infos = [irt.test_info(
                 thetas[x],
-                administered_items[:x + 1, ],
+                administered_items[:x + 1,
+                                  ],
             ) for x in xs]
             plt.plot(xs, infos, label=r"$I(\theta)$")
 
         if var:
             varss = [irt.var(
                 thetas[x],
-                administered_items[:x + 1, ],
+                administered_items[:x + 1,
+                                  ],
             ) for x in xs]
             plt.plot(xs, varss, label=r"$Var$")
 
         if see:
             sees = [irt.see(
                 thetas[x],
-                administered_items[:x + 1, ],
+                administered_items[:x + 1,
+                                  ],
             ) for x in xs]
             plt.plot(xs, sees, label=r"$SEE$")
 
@@ -401,9 +399,9 @@ def test_progress(
             reliabilities = [
                 irt.reliability(
                     thetas[x],
-                    administered_items[:x + 1, ],
-                ) for x in xs
-            ]
+                    administered_items[:x + 1,
+                                      ],
+                ) for x in xs]
             plt.plot(xs, reliabilities, label="Reliability")
     plt.xlabel("Items")
     plt.grid()
@@ -419,9 +417,10 @@ def test_progress(
         plt.show()
 
 
-def param_dist(
-    items: numpy.ndarray, filepath: str = None, show: bool = True, figsize: tuple = None
-):
+def param_dist(items: numpy.ndarray,
+               filepath: str = None,
+               show: bool = True,
+               figsize: tuple = None):
     _, axes = plt.subplots(2, 2, figsize=figsize)
     _ = axes[0, 0].hist(items[:, 0], bins=100)
     _ = axes[0, 1].hist(items[:, 1], bins=100)

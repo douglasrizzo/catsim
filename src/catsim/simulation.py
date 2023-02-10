@@ -37,20 +37,18 @@ class Simulable(metaclass=ABCMeta):
         simulation. `preprocess` is called after a value is set for the `simulator` property. If a new value if
         attributed to `simulator`, this method is called again, guaranteeing that internal properties of the
         `Simulable` are re-initialized as necessary."""
-        pass
 
-    def _prepare_args(
-        self, return_items=False, return_response_vector=False, return_est_theta=False, **kwargs
-    ):
-        using_simulator_props = (kwargs.get("index") is not None and self.simulator is not None)
-        if not using_simulator_props and (
-            kwargs.get("items") is None or kwargs.get("administered_items") is None or
-            (return_est_theta and kwargs.get("est_theta") is None)
-        ):
-            raise ValueError(
-                "Either pass an index for the simulator or all of the other "
-                "optional parameters to use this component independently."
-            )
+    def _prepare_args(self,
+                      return_items=False,
+                      return_response_vector=False,
+                      return_est_theta=False,
+                      **kwargs):
+        using_simulator_props = kwargs.get("index") is not None and self.simulator is not None
+        if not using_simulator_props and (kwargs.get("items") is None or
+                                          kwargs.get("administered_items") is None or
+                                          (return_est_theta and kwargs.get("est_theta") is None)):
+            raise ValueError("Either pass an index for the simulator or all of the other "
+                             "optional parameters to use this component independently.")
 
         result = []
         if using_simulator_props:
@@ -86,7 +84,6 @@ class Initializer(Simulable, metaclass=ABCMeta):
         :param index: the index of the current examinee
         :returns: examinee's initial :math:`\\theta` value
         """
-        pass
 
 
 class Selector(Simulable, metaclass=ABCMeta):
@@ -96,9 +93,8 @@ class Selector(Simulable, metaclass=ABCMeta):
         super().__init__()
 
     @staticmethod
-    def _get_non_administered(
-        item_indices: List[int], administered_item_indices: List[int]
-    ) -> list:
+    def _get_non_administered(item_indices: List[int],
+                              administered_item_indices: List[int]) -> list:
         """Gets a list of items that were not administered from a list of indices
 
         :param item_indices: a list of integers, corresponding to item indices
@@ -150,7 +146,6 @@ class Selector(Simulable, metaclass=ABCMeta):
         :param index: the index of the current examinee in the simulator.
         :returns: index of the next item to be applied or `None` if there are no more items to be presented.
         """
-        pass
 
 
 class FiniteSelector(Selector, metaclass=ABCMeta):
@@ -187,7 +182,6 @@ class Estimator(Simulable, metaclass=ABCMeta):
         :param index: index of the current examinee in the simulator
         :returns: the current :math:`\\hat\\theta`
         """
-        pass
 
     @property
     def calls(self):
@@ -223,7 +217,6 @@ class Stopper(Simulable, metaclass=ABCMeta):
 
         :param index: the index of the current examinee
         :returns: `True` if the test met its stopping criterion, else `False`"""
-        pass
 
 
 class Simulator:
@@ -269,11 +262,9 @@ class Simulator:
 
         self._estimations = [[] for _ in range(self.examinees.shape[0])]  # type: List[List[int]]
         self._administered_items = [
-            [] for _ in range(self.examinees.shape[0])
-        ]  # type: List[List[int]]
-        self._response_vectors = [
-            [] for _ in range(self.examinees.shape[0])
-        ]  # type: List[List[bool]]
+            [] for _ in range(self.examinees.shape[0])]  # type: List[List[int]]
+        self._response_vectors = [[]
+                                  for _ in range(self.examinees.shape[0])]  # type: List[List[bool]]
 
     @property
     def items(self) -> numpy.ndarray:
@@ -378,8 +369,7 @@ class Simulator:
             dist = x
         else:
             raise ValueError(
-                "Examinees must be an int, list of floats or one-dimensional numpy array"
-            )
+                "Examinees must be an int, list of floats or one-dimensional numpy array")
 
         return dist
 
@@ -431,17 +421,13 @@ class Simulator:
             s.simulator = self
 
         if verbose:
-            print(
-                (
-                    "Starting simulation: {0} {1} {2} {3} {4} items".format(
-                        self._initializer,
-                        self._selector,
-                        self._estimator,
-                        self._stopper,
-                        self._items.shape[0],
-                    )
-                )
-            )
+            print(("Starting simulation: {0} {1} {2} {3} {4} items".format(
+                self._initializer,
+                self._selector,
+                self._estimator,
+                self._stopper,
+                self._items.shape[0],
+            )))
             pbar = tqdm.tqdm(total=len(self.examinees))
 
         start_time = time.time()
@@ -464,15 +450,13 @@ class Simulator:
 
                 # simulates the examinee's response via the four-parameter
                 # logistic function
-                response = (
-                    irt.icc(
-                        true_theta,
-                        self.items[selected_item][0],
-                        self.items[selected_item][1],
-                        self.items[selected_item][2],
-                        self.items[selected_item][3],
-                    ) >= numpy.random.uniform()
-                )
+                response = (irt.icc(
+                    true_theta,
+                    self.items[selected_item][0],
+                    self.items[selected_item][1],
+                    self.items[selected_item][2],
+                    self.items[selected_item][3],
+                ) >= numpy.random.uniform())
 
                 self._response_vectors[current_examinee].append(response)
 
@@ -483,12 +467,9 @@ class Simulator:
                 est_theta = self._estimator.estimate(current_examinee)
 
                 # count occurrences of this item in all tests
-                item_occurrences = numpy.sum(
-                    [
-                        selected_item in administered_list
-                        for administered_list in self._administered_items
-                    ]
-                )
+                item_occurrences = numpy.sum([
+                    selected_item in administered_list
+                    for administered_list in self._administered_items])
 
                 # update the exposure value for this item
                 # r = number of tests item has been used on / total number of tests
@@ -510,7 +491,7 @@ class Simulator:
         # maybe there is a way to calculate it with tests of different lengths,
         # but I did not find it in the literature
         test_size = None
-        len_first = (len(self._administered_items[0]) if self._administered_items else None)
+        len_first = len(self._administered_items[0]) if self._administered_items else None
         if isinstance(selector, FiniteSelector):
             test_size = selector.test_size
         elif all(len(i) == len_first for i in self._administered_items):
