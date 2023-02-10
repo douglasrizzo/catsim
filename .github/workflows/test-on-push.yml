@@ -30,6 +30,6 @@ jobs:
         run: |
           pip install .[testing]
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Test with nose
+      - name: Test with pytest
         run: |
-          nosetests -s --cov-config .coveragerc --with-coverage --cover-package=catsim
+          pytest

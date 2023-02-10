@@ -36,8 +36,8 @@ readme = "README.md"
 license.file = "COPYING.LESSER"
 
 [project.optional-dependencies]
-dev = ["mypy", "pylama", "yapf", "black", "isort"]
-testing = ["nose", "nose-cov", "sklearn", "flake8", "yapf"]
+dev = ["mypy", "pylama", "autoflake", "yapf", "black", "isort"]
+testing = ["pytest", "sklearn", "flake8", "yapf"]
 docs = [
     "Sphinx",
     "numpydoc",
