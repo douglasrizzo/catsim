@@ -145,7 +145,7 @@ class NumericalSearchEstimator(Estimator):
             res = minimize_scalar(
                 irt.negative_log_likelihood,
                 bracket=(lower_bound, upper_bound),
-                bounds=(lower_bound, upper_bound),
+                bounds=(lower_bound, upper_bound) if self.__search_method == "bounded" else None,
                 method=self.__search_method,
                 args=(response_vector, items[administered_items]),
                 tol=self._epsilon if self.__search_method != "bounded" else None,
