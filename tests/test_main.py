@@ -44,7 +44,7 @@ def test_cism(
     stopper: Stopper,
 ):
     items = generate_item_bank(bank_size)
-    clusters = list(KMeans(n_clusters=8).fit_predict(items))
+    clusters = list(KMeans(n_clusters=8, n_init="auto").fit_predict(items))
     ClusterSelector.weighted_cluster_infos(0, items, clusters)
     ClusterSelector.avg_cluster_params(items, clusters)
     selector = ClusterSelector(clusters=clusters, r_max=0.2)
