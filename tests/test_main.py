@@ -106,8 +106,7 @@ def test_finite_selectors(
 
 
 @pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("test_size", [30])
-@pytest.mark.parametrize("bank_size", [500])
+@pytest.mark.parametrize("bank_size", [5000])
 @pytest.mark.parametrize("logistic_model", ["4PL"])
 @pytest.mark.parametrize(
     "initializer",
@@ -132,7 +131,6 @@ def test_finite_selectors(
 )
 def test_infinite_selectors(
     examinees: int,
-    test_size: int,
     bank_size: int,
     logistic_model: str,
     initializer: Initializer,
@@ -141,7 +139,7 @@ def test_infinite_selectors(
     stopper: Stopper,
 ):
     items = generate_item_bank(bank_size, itemtype=logistic_model)
-    responses = cat.random_response_vector(random.randint(1, test_size - 1))
+    responses = cat.random_response_vector(random.randint(1, bank_size // 20))
     administered_items = np.random.choice(bank_size, len(responses), replace=False)
     est_theta = initializer.initialize()
     selector.select(
