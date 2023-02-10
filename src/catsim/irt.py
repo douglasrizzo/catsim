@@ -1,4 +1,6 @@
 import math
+
+from math import pi # noqa # pylint: disable=unused-import
 from typing import List
 
 import numexpr
@@ -361,7 +363,7 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False):
         err += "Item matrix has only one dimension."
     elif items.shape[1] > 4:
         print("\nItem matrix has more than 4 columns. catsim tends to add \
-            columns to the matrix during the simulation, so it's not a good idea to keep them.")
+            columns to the matrix during the simulation, so it's not a good idea to keep them."                                                                                               )
     elif items.shape[1] < 4:
         if items.shape[1] == 1:
             err += "\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"
