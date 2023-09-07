@@ -25,10 +25,15 @@ from catsim.simulation import Estimator, Initializer, Selector, Simulator, Stopp
 from catsim.stopping import MaxItemStopper, MinErrorStopper
 
 
-def one_simulation(items, examinees, initializer, selector, estimator, stopper):
-    s = Simulator(items, examinees)
-    s.simulate(initializer, selector, estimator, stopper, verbose=True)
-    cat.rmse(s.examinees, s.latest_estimations)
+def one_simulation(
+    items: np.ndarray,
+    examinees: int,
+    initializer: Initializer,
+    selector: Selector,
+    estimator: Estimator,
+    stopper: Stopper,
+):
+    Simulator(items, examinees).simulate(initializer, selector, estimator, stopper, verbose=True)
 
 
 @pytest.mark.parametrize("examinees", [100])
