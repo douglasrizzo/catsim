@@ -83,7 +83,7 @@ def test_finite_selectors(
         MaxInfoStratSelector(test_size),
         MaxInfoBBlockSelector(test_size),
         The54321Selector(test_size),
-        RandomesqueSelector(test_size / 6), ]
+        RandomesqueSelector(test_size // 6), ]
     stopper = MaxItemStopper(test_size)
 
     for selector in finite_selectors:
