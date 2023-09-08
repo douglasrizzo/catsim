@@ -37,6 +37,16 @@ class MaxItemStopper(Stopper):
 
         return n_itens == self._max_itens
 
+    @property
+    def max_itens(self) -> int:
+        """
+        Get the maximum number of items the Stopper is configured to administer.
+
+        :return: int
+            The maximum number of items the Stopper is configured to administer.
+        """
+        return self._max_itens
+
 
 class MinErrorStopper(Stopper):
     """Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)

@@ -151,7 +151,8 @@ def test_infinite_selectors(
     stopper: Stopper,
 ):
     items = generate_item_bank(bank_size, itemtype=logistic_model)
-    responses = cat.random_response_vector(random.randint(1, bank_size // 20))
+    max_administered_items = stopper.max_itens if type(stopper) == MaxItemStopper else bank_size
+    responses = cat.random_response_vector(random.randint(1, max_administered_items))
     administered_items = np.random.choice(bank_size, len(responses), replace=False)
     est_theta = initializer.initialize()
     selector.select(
