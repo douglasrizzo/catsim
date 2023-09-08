@@ -20,8 +20,9 @@ class RandomInitializer(Initializer):
 
         available_distributions = ["uniform", "normal"]
         if dist_type not in available_distributions:
-            raise ValueError("{0} not in available distributions {1}".format(
-                dist_type, available_distributions))
+            raise ValueError(
+                "{0} not in available distributions {1}".format(dist_type, available_distributions)
+            )
 
         self._dist_type = dist_type
         self._dist_params = dist_params
@@ -30,7 +31,8 @@ class RandomInitializer(Initializer):
         """Generates a value using the chosen distribution and parameters
 
         :param index: the index of the current examinee. This parameter is not used by this method.
-        :returns: a ability value generated from the chosen distribution using the passed parameters"""
+        :returns: a ability value generated from the chosen distribution using the passed parameters
+        """
         if self._dist_type == "uniform":
             theta = numpy.random.uniform(min(self._dist_params), max(self._dist_params))
         elif self._dist_type == "normal":

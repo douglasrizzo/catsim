@@ -158,8 +158,9 @@ def generate_item_bank(n: int, itemtype: str = "4PL", corr: float = 0) -> numpy.
     means = [0, 1.2]
     stds = [1, 0.25]
     covs = [
-        [stds[0]**2, stds[0] * stds[1] * corr],
-        [stds[0] * stds[1] * corr, stds[1]**2], ]
+        [stds[0] ** 2, stds[0] * stds[1] * corr],
+        [stds[0] * stds[1] * corr, stds[1] ** 2],
+    ]
 
     b, a = numpy.random.multivariate_normal(means, covs, n).T
 

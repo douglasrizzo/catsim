@@ -64,10 +64,12 @@ def test_cism(
     "initializer",
     [
         RandomInitializer("uniform", (-5, 5)),
-        FixedPointInitializer(0), ],
+        FixedPointInitializer(0),
+    ],
 )
 @pytest.mark.parametrize(
-    "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods])
+    "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods]
+)
 def test_finite_selectors(
     examinees: int,
     test_size: int,
@@ -83,7 +85,8 @@ def test_finite_selectors(
         MaxInfoStratSelector(test_size),
         MaxInfoBBlockSelector(test_size),
         The54321Selector(test_size),
-        RandomesqueSelector(test_size // 6), ]
+        RandomesqueSelector(test_size // 6),
+    ]
     stopper = MaxItemStopper(test_size)
 
     for selector in finite_selectors:
@@ -117,22 +120,26 @@ def test_finite_selectors(
     "initializer",
     [
         RandomInitializer("uniform", (-5, 5)),
-        FixedPointInitializer(0), ],
+        FixedPointInitializer(0),
+    ],
 )
 @pytest.mark.parametrize(
     "selector",
     [
         MaxInfoSelector(),
         RandomSelector(),
-        UrrySelector(), ],
+        UrrySelector(),
+    ],
 )
 @pytest.mark.parametrize(
-    "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods])
+    "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods]
+)
 @pytest.mark.parametrize(
     "stopper",
     [
         MaxItemStopper(30),
-        MinErrorStopper(0.4), ],
+        MinErrorStopper(0.4),
+    ],
 )
 def test_infinite_selectors(
     examinees: int,
@@ -162,17 +169,17 @@ def test_infinite_selectors(
         administered_items=items[administered_items],
         theta=est_theta,
     )
-
     one_simulation(items, examinees, initializer, selector, estimator, stopper)
 
 
 def test_item_bank_generation():
     for items in [
-            generate_item_bank(5, "1PL"),
-            generate_item_bank(5, "2PL"),
-            generate_item_bank(5, "3PL"),
-            generate_item_bank(5, "3PL", corr=0),
-            generate_item_bank(5, "4PL"), ]:
+        generate_item_bank(5, "1PL"),
+        generate_item_bank(5, "2PL"),
+        generate_item_bank(5, "3PL"),
+        generate_item_bank(5, "3PL", corr=0),
+        generate_item_bank(5, "4PL"),
+    ]:
         irt.validate_item_bank(items, raise_err=True)
     items = np.zeros(100)
     irt.validate_item_bank(items)

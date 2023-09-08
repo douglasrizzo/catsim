@@ -49,13 +49,15 @@ extensions = [
     "sphinx.ext.viewcode",
     "numpydoc",
     "sphinx_rtd_theme",
-    "m2r2", ]
+    "m2r2",
+]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None), }
+    "sklearn": ("https://scikit-learn.org/stable/", None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -256,7 +258,8 @@ latex_documents = [
         "catsim Documentation",
         "Douglas De Rizzo Meneghetti",
         "manual",
-    ), ]
+    ),
+]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -301,7 +304,8 @@ texinfo_documents = [
         "catsim",
         "One line description of project.",
         "Miscellaneous",
-    ), ]
+    ),
+]
 
 # Documents to append as an appendix to all manuals.
 # texinfo_appendices = []

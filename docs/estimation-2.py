@@ -18,18 +18,19 @@ for estimator in [NumericalSearchEstimator(method=m) for m in NumericalSearchEst
 
     for response_vector in response_vectors:
         ll_line = [irt.log_likelihood(theta, response_vector, items) for theta in thetas]
-        max_LL = estimator.estimate(items=items,
-                                    administered_items=range(20),
-                                    response_vector=response_vector,
-                                    est_theta=0)
+        max_LL = estimator.estimate(
+            items=items, administered_items=range(20), response_vector=response_vector, est_theta=0
+        )
         best_theta = irt.log_likelihood(max_LL, response_vector, items)
         plt.plot(thetas, ll_line)
         plt.plot(
             max_LL,
             best_theta,
             "o",
-            label=str(sum(response_vector)) + " correct, " + r"$\hat{\theta} \approx $" +
-            format(round(max_LL, 5)),
+            label=str(sum(response_vector))
+            + " correct, "
+            + r"$\hat{\theta} \approx $"
+            + format(round(max_LL, 5)),
         )
         plt.xlabel(r"$\theta$", size=16)
         plt.ylabel(r"$\log L(\theta)$", size=16)

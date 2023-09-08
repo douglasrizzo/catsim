@@ -27,7 +27,8 @@ class NumericalSearchEstimator(Estimator):
         "golden",
         "brent",
         "bounded",
-        "golden2", ]
+        "golden2",
+    ]
     golden_ratio = (1 + 5**0.5) / 2
 
     def __str__(self):
@@ -44,24 +45,29 @@ class NumericalSearchEstimator(Estimator):
 
         if precision < 1:
             raise ValueError(
-                "precision for numerical estimator must be an integer larger than 1, {} was passed".
-                format(precision))
+                "precision for numerical estimator must be an integer larger than 1, {} was passed".format(
+                    precision
+                )
+            )
 
         if method not in NumericalSearchEstimator.methods:
-            raise ValueError("Parameter 'method' must be one of {}".format(
-                NumericalSearchEstimator.methods))
+            raise ValueError(
+                "Parameter 'method' must be one of {}".format(NumericalSearchEstimator.methods)
+            )
 
         self._epsilon = float("1e-" + str(precision))
         self._dodd = dodd
         self.__search_method = method
 
-    def estimate(self,
-                 index: int = None,
-                 items: numpy.ndarray = None,
-                 administered_items: List[int] = None,
-                 response_vector: List[bool] = None,
-                 est_theta: float = None,
-                 **kwargs) -> float:
+    def estimate(
+        self,
+        index: int = None,
+        items: numpy.ndarray = None,
+        administered_items: List[int] = None,
+        response_vector: List[bool] = None,
+        est_theta: float = None,
+        **kwargs
+    ) -> float:
         """Returns the theta value that maximizes the log-likelihood function, given the current state of the
          test for the given examinee.
 
@@ -82,7 +88,7 @@ class NumericalSearchEstimator(Estimator):
             administered_items=administered_items,
             response_vector=response_vector,
             est_theta=est_theta,
-            **kwargs
+            **kwargs,
         )
 
         assert items is not None
@@ -127,20 +133,17 @@ class NumericalSearchEstimator(Estimator):
         lower_bound -= margin
 
         if self.__search_method in ["ternary", "dichotomous"]:
-            candidate_theta = self._solve_ternary_dichotomous(upper_bound,
-                                                              lower_bound,
-                                                              response_vector,
-                                                              items[administered_items])
+            candidate_theta = self._solve_ternary_dichotomous(
+                upper_bound, lower_bound, response_vector, items[administered_items]
+            )
         elif self.__search_method == "fibonacci":
-            candidate_theta = self._solve_fibonacci(upper_bound,
-                                                    lower_bound,
-                                                    response_vector,
-                                                    items[administered_items])
+            candidate_theta = self._solve_fibonacci(
+                upper_bound, lower_bound, response_vector, items[administered_items]
+            )
         elif self.__search_method == "golden2":
-            candidate_theta = self._solve_golden_section(upper_bound,
-                                                         lower_bound,
-                                                         response_vector,
-                                                         items[administered_items])
+            candidate_theta = self._solve_golden_section(
+                upper_bound, lower_bound, response_vector, items[administered_items]
+            )
         elif self.__search_method in ["brent", "bounded", "golden"]:
             res = minimize_scalar(
                 irt.negative_log_likelihood,
@@ -207,8 +210,11 @@ class NumericalSearchEstimator(Estimator):
                 error /= 2
 
             if self._verbose:
-                print("\t\tTheta: {0}, LL: {1}".format(candidate_theta,
-                                                       max(left_side_ll, right_side_ll)))
+                print(
+                    "\t\tTheta: {0}, LL: {1}".format(
+                        candidate_theta, max(left_side_ll, right_side_ll)
+                    )
+                )
         return candidate_theta
 
     def _solve_fibonacci(
@@ -269,8 +275,9 @@ class NumericalSearchEstimator(Estimator):
             # assert a <= c <= d <= b
 
             if self._verbose:
-                print("\t\tTheta: {0}, LL: {1}".format((b + a) / 2,
-                                                       max(left_side_ll, right_side_ll)))
+                print(
+                    "\t\tTheta: {0}, LL: {1}".format((b + a) / 2, max(left_side_ll, right_side_ll))
+                )
         return (b + a) / 2
 
     def _solve_golden_section(
@@ -320,8 +327,9 @@ class NumericalSearchEstimator(Estimator):
             assert a < c <= d < b
 
             if self._verbose:
-                print("\t\tTheta: {0}, LL: {1}".format((b + a) / 2,
-                                                       max(left_side_ll, right_side_ll)))
+                print(
+                    "\t\tTheta: {0}, LL: {1}".format((b + a) / 2, max(left_side_ll, right_side_ll))
+                )
         return (b + a) / 2
 
     @property
