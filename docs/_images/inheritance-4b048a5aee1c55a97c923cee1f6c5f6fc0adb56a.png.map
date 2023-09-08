@@ -1,5 +1,0 @@
-<map id="inheritanceb6f22deed1" name="inheritanceb6f22deed1">
-<area shape="rect" id="node1" href="#catsim.estimation.NumericalSearchEstimator" target="_top" title="Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log&#45;likelihood function. There are implementations of ternary search, dichotomous search, Fibonacci search and golden&#45;section search, according to [Veliz20]_. Also check [Brent02]_. It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`." alt="" coords="472,5,763,28"/>
-<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Estimator" target="_top" title="Base class for proficiency estimators" alt="" coords="239,5,428,28"/>
-<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,5,195,28"/>
-</map>

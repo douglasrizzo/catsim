@@ -1,6 +1,6 @@
 <map id="inheritance76f349e9d6" name="inheritance76f349e9d6">
-<area shape="rect" id="node1" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,31,213,56"/>
-<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stop criterion" alt="" coords="261,31,455,56"/>
-<area shape="rect" id="node3" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion for maximum number of items in a test" alt="" coords="503,5,741,31"/>
-<area shape="rect" id="node4" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)" alt="" coords="505,55,739,80"/>
+<area shape="rect" id="node1" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,32,213,60"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stop criterion" alt="" coords="261,32,453,60"/>
+<area shape="rect" id="node3" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion for maximum number of items in a test" alt="" coords="501,5,738,33"/>
+<area shape="rect" id="node4" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`)" alt="" coords="503,57,737,85"/>
 </map>

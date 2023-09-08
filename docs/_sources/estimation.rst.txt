@@ -95,7 +95,7 @@ The charts below show the :math:`\hat{\theta}` found by the different estimation
             plt.plot(max_LL, best_theta, 'o', label = str(sum(response_vector)) + ' correct, '+r'$\hat{\theta} \approx $' + format(round(max_LL, 5)))
             plt.xlabel(r'$\theta$', size=16)
             plt.ylabel(r'$\log L(\theta)$', size=16)
-            plt.title('{0} ({1} avg. evals)'.format(estimator.method, round(estimator.avg_evaluations)))
+            plt.title(f"{estimator.method} ({round(estimator.avg_evaluations)} avg. evals)")
             plt.legend(loc='best')
 
         plt.show()

@@ -1,104 +1,106 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Item Selection Methods – catsim.selection</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>Item Selection Methods – catsim.selection &mdash; catsim 0.17.3 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
     <link rel="shortcut icon" href="_static/logo.svg"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=3bc55ee7"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Estimation Methods – catsim.estimation" href="estimation.html" />
     <link rel="prev" title="Initialization Methods – catsim.initialization" href="initialization.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html">
           
-
-          
+          <a href="index.html">
             
-            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
-          
+              <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
-                0.17.1
+                0.17.3
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.AStratBBlockSelector"><code class="docutils literal notranslate"><span class="pre">AStratBBlockSelector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.AStratSelector"><code class="docutils literal notranslate"><span class="pre">AStratSelector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.ClusterSelector"><code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.ClusterSelector.avg_cluster_params"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.avg_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.ClusterSelector.select"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.select()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.ClusterSelector.sum_cluster_infos"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.sum_cluster_infos()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.ClusterSelector.sum_cluster_params"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.sum_cluster_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.ClusterSelector.weighted_cluster_infos"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.weighted_cluster_infos()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.IntervalInfoSelector"><code class="docutils literal notranslate"><span class="pre">IntervalInfoSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.IntervalInfoSelector.select"><code class="docutils literal notranslate"><span class="pre">IntervalInfoSelector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.LinearSelector"><code class="docutils literal notranslate"><span class="pre">LinearSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.LinearSelector.select"><code class="docutils literal notranslate"><span class="pre">LinearSelector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.MaxInfoBBlockSelector"><code class="docutils literal notranslate"><span class="pre">MaxInfoBBlockSelector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.MaxInfoSelector"><code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.MaxInfoSelector.select"><code class="docutils literal notranslate"><span class="pre">MaxInfoSelector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.MaxInfoStratSelector"><code class="docutils literal notranslate"><span class="pre">MaxInfoStratSelector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.RandomSelector"><code class="docutils literal notranslate"><span class="pre">RandomSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.RandomSelector.select"><code class="docutils literal notranslate"><span class="pre">RandomSelector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.RandomesqueSelector"><code class="docutils literal notranslate"><span class="pre">RandomesqueSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.RandomesqueSelector.select"><code class="docutils literal notranslate"><span class="pre">RandomesqueSelector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.StratifiedSelector"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.StratifiedSelector.preprocess"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector.preprocess()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.StratifiedSelector.select"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.The54321Selector"><code class="docutils literal notranslate"><span class="pre">The54321Selector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.The54321Selector.select"><code class="docutils literal notranslate"><span class="pre">The54321Selector.select()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.selection.UrrySelector"><code class="docutils literal notranslate"><span class="pre">UrrySelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.selection.UrrySelector.select"><code class="docutils literal notranslate"><span class="pre">UrrySelector.select()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
@@ -109,99 +111,58 @@
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">catsim</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/selection.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="item-selection-methods-catsim-selection">
-<h1>Item Selection Methods – <a class="reference internal" href="#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a><a class="headerlink" href="#item-selection-methods-catsim-selection" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="item-selection-methods-catsim-selection">
+<h1>Item Selection Methods – <a class="reference internal" href="#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a><a class="headerlink" href="#item-selection-methods-catsim-selection" title="Link to this heading"></a></h1>
 <p>All implemented classes in this module inherit from a base abstract class
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom selector be
 used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code>.</p>
-<div class="graphviz"><img src="_images/inheritance-879beb97c43f9d76e86d4ab156c8347baa356c19.png" alt="Inheritance diagram of catsim.selection" usemap="#inheritance57e12ee8dd" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-272db7f0762367483902ba20ed1cfada665dbd54.png" alt="Inheritance diagram of catsim.selection" usemap="#inheritance57e12ee8dd" class="inheritance graphviz" /></div>
 <map id="inheritance57e12ee8dd" name="inheritance57e12ee8dd">
-<area shape="rect" id="node1" href="#catsim.selection.AStratBBlockSelector" target="_top" title="Implementation of the :math:`alpha`&#45;stratified selector with :math:`b`" alt="" coords="615,3,762,17"/>
-<area shape="rect" id="node2" href="#catsim.selection.StratifiedSelector" target="_top" title="catsim.selection.StratifiedSelector" alt="" coords="451,43,584,56"/>
-<area shape="rect" id="node3" href="#catsim.selection.AStratSelector" target="_top" title="Implementation of the :math:`alpha`&#45;stratified selector proposed by" alt="" coords="627,30,750,43"/>
-<area shape="rect" id="node9" href="#catsim.selection.MaxInfoBBlockSelector" target="_top" title="Implementation of the maximum information stratification with :math:`b`" alt="" coords="612,56,765,70"/>
-<area shape="rect" id="node11" href="#catsim.selection.MaxInfoStratSelector" target="_top" title="Implementation of the maximum information stratification (MIS) selector" alt="" coords="615,83,762,97"/>
-<area shape="rect" id="node4" href="#catsim.selection.ClusterSelector" target="_top" title="Cluster&#45;based Item Selection Method." alt="" coords="286,16,411,30"/>
-<area shape="rect" id="node5" href="simulation.html#catsim.simulation.Selector" target="_top" title="Base class representing a CAT item selector." alt="" coords="141,96,247,110"/>
-<area shape="rect" id="node6" href="#catsim.selection.IntervalInfoSelector" target="_top" title="A selector in which, at every step of the test, the item that maximizes" alt="" coords="278,43,419,56"/>
-<area shape="rect" id="node8" href="simulation.html#catsim.simulation.FiniteSelector" target="_top" title="Base class representing a CAT item selector." alt="" coords="286,69,411,83"/>
-<area shape="rect" id="node10" href="#catsim.selection.MaxInfoSelector" target="_top" title="Selector that returns the first non&#45;administered item with maximum information, given an estimated theta" alt="" coords="284,96,413,110"/>
-<area shape="rect" id="node12" href="#catsim.selection.RandomSelector" target="_top" title="Selector that randomly selects items for application." alt="" coords="284,123,414,136"/>
-<area shape="rect" id="node13" href="#catsim.selection.RandomesqueSelector" target="_top" title="Implementation of the randomesque selector proposed by [Kingsbury89]_, in which," alt="" coords="273,149,424,163"/>
-<area shape="rect" id="node15" href="#catsim.selection.UrrySelector" target="_top" title="Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s ability" alt="" coords="291,176,407,190"/>
-<area shape="rect" id="node7" href="#catsim.selection.LinearSelector" target="_top" title="Selector that returns item indexes in a linear order, simulating a standard" alt="" coords="456,69,579,83"/>
-<area shape="rect" id="node14" href="#catsim.selection.The54321Selector" target="_top" title="Implementation of the 5&#45;4&#45;3&#45;2&#45;1 selector proposed by [McBride83]_, in which," alt="" coords="450,96,586,110"/>
-<area shape="rect" id="node16" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="3,96,115,110"/>
+<area shape="rect" id="node1" href="#catsim.selection.AStratBBlockSelector" target="_top" title="Implementation of the :math:`alpha`&#45;stratified selector with :math:`b`" alt="" coords="499,2,619,15"/>
+<area shape="rect" id="node2" href="#catsim.selection.StratifiedSelector" target="_top" title="catsim.selection.StratifiedSelector" alt="" coords="369,25,477,38"/>
+<area shape="rect" id="node3" href="#catsim.selection.AStratSelector" target="_top" title="Implementation of the :math:`alpha`&#45;stratified selector proposed by" alt="" coords="509,25,609,38"/>
+<area shape="rect" id="node10" href="#catsim.selection.MaxInfoStratSelector" target="_top" title="Implementation of the maximum information stratification (MIS) selector" alt="" coords="499,48,619,61"/>
+<area shape="rect" id="node4" href="#catsim.selection.ClusterSelector" target="_top" title="Cluster&#45;based Item Selection Method." alt="" coords="234,2,336,15"/>
+<area shape="rect" id="node5" href="simulation.html#catsim.simulation.Selector" target="_top" title="Base class representing a CAT item selector." alt="" coords="115,71,202,84"/>
+<area shape="rect" id="node6" href="#catsim.selection.IntervalInfoSelector" target="_top" title="A selector in which, at every step of the test, the item that maximizes" alt="" coords="227,25,342,38"/>
+<area shape="rect" id="node8" href="simulation.html#catsim.simulation.FiniteSelector" target="_top" title="Base class representing a CAT item selector." alt="" coords="234,48,336,61"/>
+<area shape="rect" id="node11" href="#catsim.selection.MaxInfoSelector" target="_top" title="Selector that returns the first non&#45;administered item with maximum information, given an estimated theta" alt="" coords="232,71,338,84"/>
+<area shape="rect" id="node12" href="#catsim.selection.RandomSelector" target="_top" title="Selector that randomly selects items for application." alt="" coords="232,94,338,107"/>
+<area shape="rect" id="node13" href="#catsim.selection.RandomesqueSelector" target="_top" title="Implementation of the randomesque selector proposed by [Kingsbury89]_, in which," alt="" coords="223,117,346,130"/>
+<area shape="rect" id="node15" href="#catsim.selection.UrrySelector" target="_top" title="Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s ability" alt="" coords="238,140,332,153"/>
+<area shape="rect" id="node7" href="#catsim.selection.LinearSelector" target="_top" title="Selector that returns item indexes in a linear order, simulating a standard" alt="" coords="373,48,473,61"/>
+<area shape="rect" id="node14" href="#catsim.selection.The54321Selector" target="_top" title="Implementation of the 5&#45;4&#45;3&#45;2&#45;1 selector proposed by [McBride83]_, in which," alt="" coords="368,71,478,84"/>
+<area shape="rect" id="node9" href="#catsim.selection.MaxInfoBBlockSelector" target="_top" title="Implementation of the maximum information stratification with :math:`b`" alt="" coords="640,48,766,61"/>
+<area shape="rect" id="node16" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="2,71,94,84"/>
 </map><span class="target" id="module-catsim.selection"></span><dl class="py class">
-<dt id="catsim.selection.AStratBBlockSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">AStratBBlockSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#AStratBBlockSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.AStratBBlockSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.AStratBBlockSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">AStratBBlockSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#AStratBBlockSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratBBlockSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a></p>
 <p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector with <span class="math notranslate nohighlight">\(b\)</span>
 blocking proposed by <a class="reference internal" href="references.html#chang2001" id="id1"><span>[Chang2001]</span></a>, in which the item bank is sorted in ascending
 order according to the items difficulty parameter and then separated into
@@ -213,7 +174,7 @@ sub-strata of each strata forms the first strata of the new ordered item
 bank, and so on. This method tries to balance the distribution of both
 parameters between all strata, after perceiving that they are correlated.</p>
 <img alt="_images/b-blocking.svg" src="_images/b-blocking.svg" /><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>test_size</strong> – the number of items the test contains. The selector uses this parameter to
 create the correct number of strata.</p>
 </dd>
@@ -221,9 +182,9 @@ create the correct number of strata.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.AStratSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">AStratSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#AStratSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.AStratSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.AStratSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">AStratSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#AStratSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a></p>
 <p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector proposed by
 <a class="reference internal" href="references.html#chang99" id="id2"><span>[Chang99]</span></a>, in which the item bank is sorted in ascending order according to the
 items discrimination parameter and then separated into <span class="math notranslate nohighlight">\(K\)</span> strata
@@ -233,7 +194,7 @@ first non-administered item from stratum <span class="math notranslate nohighlig
 represents the position in the test of the current item the examinee is being
 presented.</p>
 <img alt="_images/alpha-strat.svg" src="_images/alpha-strat.svg" /><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>test_size</strong> – the number of items the test contains. The selector uses this parameter
 to create the correct number of strata.</p>
 </dd>
@@ -241,22 +202,22 @@ to create the correct number of strata.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.ClusterSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">ClusterSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clusters</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">method</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'item_info'</span></em>, <em class="sig-param"><span class="n">r_max</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">r_control</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span> <span class="o">=</span> <span class="default_value">'passive'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.ClusterSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ClusterSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'item_info'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'passive'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
 <p>Cluster-based Item Selection Method.</p>
 <blockquote>
-<div><dl class="citation">
-<dt class="label" id="r58465f2357d7-men15"><span class="brackets">Men15</span></dt>
-<dd><p>Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes
+<div><div class="citation" id="r58465f2357d7-men15" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Men15<span class="fn-bracket">]</span></span>
+<p>Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes
 adaptativos informatizados baseada em agrupamento por similaridade (Mestrado).
 Centro Universitário da FEI. Retrieved from
 <a class="reference external" href="https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade">https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade</a></p>
-</dd>
-</dl>
+</div>
+</div>
 </div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>clusters</strong> – a list containing item cluster memberships</p></li>
 <li><p><strong>r_max</strong> – maximum exposure rate for items</p></li>
@@ -280,17 +241,17 @@ with smallest <span class="math notranslate nohighlight">\(r\)</span> value.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.ClusterSelector.avg_cluster_params">
-<em class="property">static </em><code class="sig-name descname">avg_cluster_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">c</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.avg_cluster_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.avg_cluster_params" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.avg_cluster_params">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">avg_cluster_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.avg_cluster_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.avg_cluster_params" title="Link to this definition"></a></dt>
 <dd><p>Returns the average values of item parameters by cluster</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>items</strong> – </p></li>
 <li><p><strong>c</strong> – a list containing clustering memeberships.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a matrix containing the average values of each parameter by cluster.
 Lines are clusters, columns are parameters.</p>
 </dd>
@@ -298,11 +259,11 @@ Lines are clusters, columns are parameters.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.selection.ClusterSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -311,18 +272,18 @@ Lines are clusters, columns are parameters.</p>
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.selection.ClusterSelector.sum_cluster_infos">
-<em class="property">static </em><code class="sig-name descname">sum_cluster_infos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">clusters</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.sum_cluster_infos">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sum_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Link to this definition"></a></dt>
 <dd><p>Returns the sum of item information values, separated by cluster</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -330,37 +291,37 @@ Lines are clusters, columns are parameters.</p>
 <li><p><strong>clusters</strong> – a list containing item cluster memberships, represented by integers</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>array containing the sum of item information values for each cluster</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.selection.ClusterSelector.sum_cluster_params">
-<em class="property">static </em><code class="sig-name descname">sum_cluster_params</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">c</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_params" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.sum_cluster_params">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sum_cluster_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.sum_cluster_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_params" title="Link to this definition"></a></dt>
 <dd><p>Returns the sum of item parameter values for each cluster</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
 (see: <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a>)</p></li>
 <li><p><strong>c</strong> – a list containing clustering memeberships.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a matrix containing the sum of each parameter by cluster. Lines are clusters, columns are parameters.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.selection.ClusterSelector.weighted_cluster_infos">
-<em class="property">static </em><code class="sig-name descname">weighted_cluster_infos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">theta</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a></span></em>, <em class="sig-param"><span class="n">clusters</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.weighted_cluster_infos">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weighted_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Link to this definition"></a></dt>
 <dd><p>Returns the weighted sum of item information values, separated by cluster.
 The weight is the number of items in each cluster.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> – an examinee’s <span class="math notranslate nohighlight">\(\theta\)</span> value</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -368,7 +329,7 @@ The weight is the number of items in each cluster.</p>
 <li><p><strong>clusters</strong> – a list containing item cluster memberships, represented by integers</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>array containing the sum of item information values for each cluster,
 divided by the number of items in each cluster</p>
 </dd>
@@ -378,26 +339,26 @@ divided by the number of items in each cluster</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.IntervalInfoSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">IntervalInfoSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interval</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#IntervalInfoSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.IntervalInfoSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">IntervalInfoSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#IntervalInfoSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
 <p>A selector in which, at every step of the test, the item that maximizes
 the integral of the information function at a predetermined <code class="docutils literal notranslate"><span class="pre">interval</span></code>
 <span class="math notranslate nohighlight">\(\delta\)</span> above and below the current <span class="math notranslate nohighlight">\(\hat\theta\)</span> is chosen.</p>
 <div class="math notranslate nohighlight">
 \[argmax_{i \in I} \int_{\hat\theta - \delta}^{\hat\theta + \delta}I_i(\hat\theta)\]</div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>interval</strong> – the interval of the integral. If no interval is passed, the
 integral is computed from <span class="math notranslate nohighlight">\([-\infty, \infty]\)</span>.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.IntervalInfoSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#IntervalInfoSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.IntervalInfoSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#IntervalInfoSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -406,7 +367,7 @@ integral is computed from <span class="math notranslate nohighlight">\([-\infty,
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -415,28 +376,28 @@ integral is computed from <span class="math notranslate nohighlight">\([-\infty,
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.LinearSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">LinearSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">indexes</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#LinearSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.LinearSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.FiniteSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.LinearSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">LinearSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indexes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#LinearSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.LinearSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></a></p>
 <p>Selector that returns item indexes in a linear order, simulating a standard
 (non-adaptive) test.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>indexes</strong> – the indexes of the items that will be returned in order</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.LinearSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#LinearSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.LinearSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.LinearSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#LinearSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.LinearSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -445,9 +406,9 @@ integral is computed from <span class="math notranslate nohighlight">\([-\infty,
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.MaxInfoBBlockSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">MaxInfoBBlockSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoBBlockSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoBBlockSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.MaxInfoBBlockSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">MaxInfoBBlockSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoBBlockSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MaxInfoBBlockSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catsim.selection.MaxInfoStratSelector" title="catsim.selection.MaxInfoStratSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxInfoStratSelector</span></code></a></p>
 <p>Implementation of the maximum information stratification with <span class="math notranslate nohighlight">\(b\)</span>
 blocking (MIS-B) selector proposed by <a class="reference internal" href="references.html#bar06" id="id3"><span>[Bar06]</span></a>, in which the item bank is sorted
 in ascending order according to the items difficulty parameter and then
@@ -464,7 +425,7 @@ logistic model of IRT, since item difficulty and maximum information are not
 positioned in the same place in the ability scale in 3PL. This may also
 apply, although not mentioned by the authors, for the 4PL.</p>
 <img alt="_images/mis-b.svg" src="_images/mis-b.svg" /><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>test_size</strong> – the number of items the test contains. The selector uses this parameter to
 create the correct number of strata.</p>
 </dd>
@@ -472,21 +433,21 @@ create the correct number of strata.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.MaxInfoSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">MaxInfoSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">r_max</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a></span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.MaxInfoSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">MaxInfoSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MaxInfoSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
 <p>Selector that returns the first non-administered item with maximum information, given an estimated theta</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>r_max</strong> – maximum exposure rate for items</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.MaxInfoSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.MaxInfoSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MaxInfoSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -495,7 +456,7 @@ create the correct number of strata.</p>
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -504,9 +465,9 @@ create the correct number of strata.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.MaxInfoStratSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">MaxInfoStratSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoStratSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.MaxInfoStratSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.StratifiedSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.MaxInfoStratSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">MaxInfoStratSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#MaxInfoStratSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MaxInfoStratSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catsim.selection.StratifiedSelector" title="catsim.selection.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a></p>
 <p>Implementation of the maximum information stratification (MIS) selector
 proposed by <a class="reference internal" href="references.html#bar06" id="id5"><span>[Bar06]</span></a>, in which the item bank is sorted in ascending order
 according to the items maximum information and then separated into <span class="math notranslate nohighlight">\(K\)</span>
@@ -519,7 +480,7 @@ position in the test of the current item the examinee is being presented.</p>
 and maximum information are not positioned in the same place in the ability
 scale in 3PL.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>test_size</strong> – the number of items the test contains. The selector uses this parameter to
 create the correct number of strata.</p>
 </dd>
@@ -527,21 +488,21 @@ create the correct number of strata.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.RandomSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">RandomSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">replace</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#RandomSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.RandomSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">RandomSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replace</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#RandomSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.RandomSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
 <p>Selector that randomly selects items for application.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>replace</strong> – whether to select an item that has already been selected before for this examinee.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.RandomSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#RandomSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.RandomSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#RandomSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.RandomSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -549,7 +510,7 @@ create the correct number of strata.</p>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -558,25 +519,25 @@ create the correct number of strata.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.RandomesqueSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">RandomesqueSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bin_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">RandomesqueSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
 <p>Implementation of the randomesque selector proposed by <a class="reference internal" href="references.html#kingsbury89" id="id7"><span>[Kingsbury89]</span></a>, in which,
 at every step of the test, an item is randomly chosen from the <span class="math notranslate nohighlight">\(n\)</span> most informative
 items in the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a predefined value (originally 5, but user-defined
 in this implementation)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>bin_size</strong> – the number of most informative items to be taken into consideration when
 randomly selecting one of them.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.RandomesqueSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#RandomesqueSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -585,7 +546,7 @@ randomly selecting one of them.</p>
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -594,12 +555,12 @@ randomly selecting one of them.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.StratifiedSelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">StratifiedSelector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.FiniteSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.StratifiedSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">StratifiedSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_once</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></a></p>
 <dl class="py method">
-<dt id="catsim.selection.StratifiedSelector.preprocess">
-<code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.preprocess" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.StratifiedSelector.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.preprocess" title="Link to this definition"></a></dt>
 <dd><p>Override this method to initialize any static values the <cite>Simulable</cite> might use for the duration of the
 simulation. <cite>preprocess</cite> is called after a value is set for the <cite>simulator</cite> property. If a new value if
 attributed to <cite>simulator</cite>, this method is called again, guaranteeing that internal properties of the
@@ -607,18 +568,18 @@ attributed to <cite>simulator</cite>, this method is called again, guaranteeing 
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.selection.StratifiedSelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.StratifiedSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#StratifiedSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters</p></li>
 <li><p><strong>administered_items</strong> – a list containing the indexes of items that were already administered</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more strata to get items from.</p>
 </dd>
 </dl>
@@ -627,9 +588,9 @@ attributed to <cite>simulator</cite>, this method is called again, guaranteeing 
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.The54321Selector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">The54321Selector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">test_size</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#The54321Selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.FiniteSelector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.The54321Selector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">The54321Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/selection.html#The54321Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.FiniteSelector" title="catsim.simulation.FiniteSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></a></p>
 <p>Implementation of the 5-4-3-2-1 selector proposed by <a class="reference internal" href="references.html#mcbride83" id="id8"><span>[McBride83]</span></a>, in which,
 at each step <span class="math notranslate nohighlight">\(k\)</span> of a test of size <span class="math notranslate nohighlight">\(K\)</span>, an item is chosen from a bin
 containing the <span class="math notranslate nohighlight">\(K-k\)</span> most informative items in the bank, given the current
@@ -640,17 +601,17 @@ test, when the estimation of ‘<span class="math notranslate nohighlight">\(\ha
 <a class="reference internal" href="#catsim.selection.RandomesqueSelector" title="catsim.selection.RandomesqueSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.RandomesqueSelector</span></code></a>, in which the bin size of most
 informative items gets smaller as the test progresses.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>test_size</strong> – the number of items the test contains. The selector uses
 this parameter to set the bin size</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="catsim.selection.The54321Selector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#The54321Selector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.The54321Selector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#The54321Selector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -659,7 +620,7 @@ this parameter to set the bin size</p>
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -668,16 +629,16 @@ this parameter to set the bin size</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="catsim.selection.UrrySelector">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.selection.</code><code class="sig-name descname">UrrySelector</code><a class="reference internal" href="_modules/catsim/selection.html#UrrySelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.UrrySelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Selector</span></code></a></p>
+<dt class="sig sig-object py" id="catsim.selection.UrrySelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">UrrySelector</span></span><a class="reference internal" href="_modules/catsim/selection.html#UrrySelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.UrrySelector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Selector" title="catsim.simulation.Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">Selector</span></code></a></p>
 <p>Selector that returns the item whose difficulty parameter is closest to the examinee’s ability</p>
 <dl class="py method">
-<dt id="catsim.selection.UrrySelector.select">
-<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><a class="reference internal" href="_modules/catsim/selection.html#UrrySelector.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.selection.UrrySelector.select" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.selection.UrrySelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/selection.html#UrrySelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.UrrySelector.select" title="Link to this definition"></a></dt>
 <dd><p>Returns the index of the next item to be administered.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – the index of the current examinee in the simulator.</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -686,7 +647,7 @@ this parameter to set the bin size</p>
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
 </dd>
 </dl>
@@ -694,54 +655,37 @@ this parameter to set the bin size</p>
 
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="estimation.html" class="btn btn-neutral float-right" title="Estimation Methods – catsim.estimation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="initialization.html" class="btn btn-neutral float-left" title="Initialization Methods – catsim.initialization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="estimation.html" class="btn btn-neutral float-right" title="Estimation Methods – catsim.estimation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Douglas De Rizzo Meneghetti.
-
-    </p>
+    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

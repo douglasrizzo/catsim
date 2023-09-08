@@ -1,105 +1,66 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Estimation Methods – catsim.estimation</title>
-  
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
-
-  
-  
+  <title>Estimation Methods – catsim.estimation &mdash; catsim 0.17.3 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
     <link rel="shortcut icon" href="_static/logo.svg"/>
-  
-
-  
-  
-
-  
-
-  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-
-    
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=3bc55ee7"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Stopping Criteria – catsim.stopping" href="stopping.html" />
     <link rel="prev" title="Item Selection Methods – catsim.selection" href="selection.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html">
           
-
-          
+          <a href="index.html">
             
-            <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
-          
+              <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
-                0.17.1
+                0.17.3
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.estimation.NumericalSearchEstimator"><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.estimation.NumericalSearchEstimator.dodd"><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator.dodd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.estimation.NumericalSearchEstimator.estimate"><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator.estimate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#catsim.estimation.NumericalSearchEstimator.method"><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator.method</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#comparison-between-estimators">Comparison between estimators</a></li>
 </ul>
 </li>
@@ -112,73 +73,32 @@
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">catsim</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="_sources/estimation.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="estimation-methods-catsim-estimation">
-<h1>Estimation Methods – <a class="reference internal" href="#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a><a class="headerlink" href="#estimation-methods-catsim-estimation" title="Permalink to this headline">¶</a></h1>
+             
+  <section id="estimation-methods-catsim-estimation">
+<h1>Estimation Methods – <a class="reference internal" href="#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a><a class="headerlink" href="#estimation-methods-catsim-estimation" title="Link to this heading"></a></h1>
 <p>Estimators are the objects responsible for estimating of examinees
 ability values, given a dichotomous (binary) response vector and an array of
 the items answered by the examinee. In the domain of IRT, there are two main
@@ -197,48 +117,48 @@ used during the simulation, as long as it also inherits from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Estimator</span></code>.</p>
 <div class="graphviz"><img src="_images/inheritance-3c21b9a63a3a641c53ace2cee0b541ef0439000c.png" alt="Inheritance diagram of catsim.estimation" usemap="#inheritanceb6f22deed1" class="inheritance graphviz" /></div>
 <map id="inheritanceb6f22deed1" name="inheritanceb6f22deed1">
-<area shape="rect" id="node1" href="#catsim.estimation.NumericalSearchEstimator" target="_top" title="Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log&#45;likelihood function. There are implementations of ternary search, dichotomous search, Fibonacci search and golden&#45;section search, according to [Veliz20]_. Also check [Brent02]_. It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`." alt="" coords="472,5,763,28"/>
-<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Estimator" target="_top" title="Base class for ability estimators" alt="" coords="239,5,428,28"/>
-<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,5,195,28"/>
+<area shape="rect" id="node1" href="#catsim.estimation.NumericalSearchEstimator" target="_top" title="Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log&#45;likelihood function. There are implementations of ternary search, dichotomous search, Fibonacci search and golden&#45;section search, according to [Veliz20]_. Also check [Brent02]_. It is also possible to use the methods from :py:func:`scipy.optimize.minimize_scalar`." alt="" coords="472,5,763,30"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Estimator" target="_top" title="Base class for ability estimators" alt="" coords="239,5,428,30"/>
+<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,5,195,30"/>
 </map><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> implements a few types of maximum-likelihood estimators.</p>
 <span class="target" id="module-catsim.estimation"></span><dl class="py class">
-<dt id="catsim.estimation.NumericalSearchEstimator">
-<em class="property">class </em><code class="sig-prename descclassname">catsim.estimation.</code><code class="sig-name descname">NumericalSearchEstimator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">precision</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">6</span></em>, <em class="sig-param"><span class="n">dodd</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></span> <span class="o">=</span> <span class="default_value">False</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'bounded'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#NumericalSearchEstimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.Estimator</span></code></a></p>
-<p>Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log-likelihood function. There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to <a class="reference internal" href="references.html#veliz20" id="id1"><span>[Veliz20]</span></a>. Also check <a class="reference internal" href="references.html#brent02" id="id2"><span>[Brent02]</span></a>. It is also possible to use the methods from <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar" title="(in SciPy v1.7.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize_scalar()</span></code></a>.</p>
+<dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">NumericalSearchEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">precision</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dodd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bounded'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation.html#NumericalSearchEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Estimator" title="catsim.simulation.Estimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimator</span></code></a></p>
+<p>Estimator that implements multiple search algorithms in unimodal functions to find the maximum of the log-likelihood function. There are implementations of ternary search, dichotomous search, Fibonacci search and golden-section search, according to <a class="reference internal" href="references.html#veliz20" id="id1"><span>[Veliz20]</span></a>. Also check <a class="reference internal" href="references.html#brent02" id="id2"><span>[Brent02]</span></a>. It is also possible to use the methods from <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar" title="(in SciPy v1.11.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize_scalar()</span></code></a>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>precision</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – number of decimal points of precision, defaults to 6</p></li>
-<li><p><strong>dodd</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to employ Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id3"><span>[Dod90]</span></a> when the response vector only has one kind of response (all correct or all incorrect, see <a class="reference internal" href="cat.html#catsim.cat.dodd" title="catsim.cat.dodd"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.dodd()</span></code></a>), defaults to True</p></li>
-<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – verbosity level of the maximization method</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – the search method to employ, one of <cite>‘ternary’</cite>, <cite>‘dichotomous’</cite>, <cite>‘fibonacci’</cite>, <cite>‘golden’</cite>, <cite>‘brent’</cite>, <cite>‘bounded’</cite> and <cite>‘golden2’</cite>, defaults to bounded</p></li>
+<li><p><strong>precision</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – number of decimal points of precision, defaults to 6</p></li>
+<li><p><strong>dodd</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to employ Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id3"><span>[Dod90]</span></a> when the response vector only has one kind of response (all correct or all incorrect, see <a class="reference internal" href="cat.html#catsim.cat.dodd" title="catsim.cat.dodd"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.dodd()</span></code></a>), defaults to True</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – verbosity level of the maximization method</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – the search method to employ, one of <cite>‘ternary’</cite>, <cite>‘dichotomous’</cite>, <cite>‘fibonacci’</cite>, <cite>‘golden’</cite>, <cite>‘brent’</cite>, <cite>‘bounded’</cite> and <cite>‘golden2’</cite>, defaults to bounded</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="catsim.estimation.NumericalSearchEstimator.dodd">
-<em class="property">property </em><code class="sig-name descname">dodd</code><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.dodd" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator.dodd">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dodd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.dodd" title="Link to this definition"></a></dt>
 <dd><p>Whether Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id4"><span>[Dod90]</span></a> will be used by estimator in case the response vector is composed solely of right or wrong answers.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>boolean value indicating if Dodd’s method will be used or not.</p>
 </dd>
-<dt class="field-even">See</dt>
+<dt class="field-even">See<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="cat.html#catsim.cat.dodd" title="catsim.cat.dodd"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.dodd()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="catsim.estimation.NumericalSearchEstimator.estimate">
-<code class="sig-name descname">estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">index</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.21)">numpy.ndarray</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">administered_items</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">response_vector</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>List<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a><span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">est_theta</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.9)">float</a><a class="reference internal" href="_modules/catsim/estimation.html#NumericalSearchEstimator.estimate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.estimate" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/estimation.html#NumericalSearchEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.estimate" title="Link to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Returns the theta value that maximizes the log-likelihood function, given the current state of the</dt><dd><p>test for the given examinee.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> – index of the current examinee in the simulator</p></li>
 <li><p><strong>items</strong> – a matrix containing item parameters in the format that <cite>catsim</cite> understands
@@ -248,18 +168,18 @@ used during the simulation, as long as it also inherits from
 <li><p><strong>est_theta</strong> – a float containing the current estimated ability</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the current <span class="math notranslate nohighlight">\(\hat\theta\)</span></p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="catsim.estimation.NumericalSearchEstimator.method">
-<em class="property">property </em><code class="sig-name descname">method</code><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.method" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator.method">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.method" title="Link to this definition"></a></dt>
 <dd><p>Get the estimator search method selected during instantiation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>search method</p>
 </dd>
 </dl>
@@ -267,92 +187,89 @@ used during the simulation, as long as it also inherits from
 
 </dd></dl>
 
-<div class="section" id="comparison-between-estimators">
-<h2>Comparison between estimators<a class="headerlink" href="#comparison-between-estimators" title="Permalink to this headline">¶</a></h2>
+<section id="comparison-between-estimators">
+<h2>Comparison between estimators<a class="headerlink" href="#comparison-between-estimators" title="Link to this heading"></a></h2>
 <p>The chart below displays the execution times of the same simulation (100 examinees, an item bank of 300 questions and 20 items per test) using different <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> estimation methods.</p>
-<p>(<a class="reference external" href=".//estimation-1.py">Source code</a>, <a class="reference external" href=".//estimation-1.png">png</a>, <a class="reference external" href=".//estimation-1.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-1.pdf">pdf</a>)</p>
-<div class="figure align-default">
-<img alt="_images/estimation-1.png" src="_images/estimation-1.png" />
-</div>
+<p>(<a class="reference download internal" download="" href="_downloads/50b92d17eac6e1f4d2d5647b38d74dda/estimation-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/72ecba51c68d67fabb8dc86b2cc71974/estimation-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/92abb477c13e9e4a5a413102f7ed33e0/estimation-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/d3cd5f67e4a8b878429e8a37c0d99ef0/estimation-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="_images/estimation-1.png" class="plot-directive" src="_images/estimation-1.png" />
+</figure>
 <p>The charts below show the <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function . The main difference among them is in the number of calls to <a class="reference internal" href="irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>. Methods that require less calls to maximize the function are usually more time efficient.</p>
-<p>(<a class="reference external" href=".//estimation-2.py">Source code</a>)</p>
-<div class="figure align-default" id="id5">
-<img alt="_images/estimation-2_00.png" src="_images/estimation-2_00.png" />
-<p class="caption"><span class="caption-number">Fig. 1 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_00.png">png</a>, <a class="reference external" href=".//estimation-2_00.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_00.pdf">pdf</a>)</span><a class="headerlink" href="#id5" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id6">
-<img alt="_images/estimation-2_01.png" src="_images/estimation-2_01.png" />
-<p class="caption"><span class="caption-number">Fig. 2 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_01.png">png</a>, <a class="reference external" href=".//estimation-2_01.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_01.pdf">pdf</a>)</span><a class="headerlink" href="#id6" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id7">
-<img alt="_images/estimation-2_02.png" src="_images/estimation-2_02.png" />
-<p class="caption"><span class="caption-number">Fig. 3 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_02.png">png</a>, <a class="reference external" href=".//estimation-2_02.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_02.pdf">pdf</a>)</span><a class="headerlink" href="#id7" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id8">
-<img alt="_images/estimation-2_03.png" src="_images/estimation-2_03.png" />
-<p class="caption"><span class="caption-number">Fig. 4 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_03.png">png</a>, <a class="reference external" href=".//estimation-2_03.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_03.pdf">pdf</a>)</span><a class="headerlink" href="#id8" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id9">
-<img alt="_images/estimation-2_04.png" src="_images/estimation-2_04.png" />
-<p class="caption"><span class="caption-number">Fig. 5 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_04.png">png</a>, <a class="reference external" href=".//estimation-2_04.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_04.pdf">pdf</a>)</span><a class="headerlink" href="#id9" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id10">
-<img alt="_images/estimation-2_05.png" src="_images/estimation-2_05.png" />
-<p class="caption"><span class="caption-number">Fig. 6 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_05.png">png</a>, <a class="reference external" href=".//estimation-2_05.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_05.pdf">pdf</a>)</span><a class="headerlink" href="#id10" title="Permalink to this image">¶</a></p>
-</div>
-<div class="figure align-default" id="id11">
-<img alt="_images/estimation-2_06.png" src="_images/estimation-2_06.png" />
-<p class="caption"><span class="caption-number">Fig. 7 </span><span class="caption-text">(<a class="reference external" href=".//estimation-2_06.png">png</a>, <a class="reference external" href=".//estimation-2_06.hires.png">hires.png</a>, <a class="reference external" href=".//estimation-2_06.pdf">pdf</a>)</span><a class="headerlink" href="#id11" title="Permalink to this image">¶</a></p>
-</div>
-</div>
-</div>
+<p>(<a class="reference download internal" download="" href="_downloads/9f27cb4c09424509f7d123ca8db56ce7/estimation-2.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<figure class="align-default" id="id5">
+<img alt="_images/estimation-2_00.png" class="plot-directive" src="_images/estimation-2_00.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/92ada30f84861233b94921c7875c87e4/estimation-2_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/d8daab18451d11c2933f29f34eb39447/estimation-2_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/5798a0f8ff97a103b81dc38c519d5689/estimation-2_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id6">
+<img alt="_images/estimation-2_01.png" class="plot-directive" src="_images/estimation-2_01.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 2 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/16c084a39911fac50926dbba0c91d700/estimation-2_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/a958a4f3ddb5716dcac875aca9e01738/estimation-2_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/5bc2a2f16502c1263d4a8b46db9973bd/estimation-2_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id6" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id7">
+<img alt="_images/estimation-2_02.png" class="plot-directive" src="_images/estimation-2_02.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/fcbb4ed09354c4a5b154a751c9233cec/estimation-2_02.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/ed5edf3a2d68c6d7a0660c1403e79eb8/estimation-2_02.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/a687239bfcd63e13aaed66c33ce89c03/estimation-2_02.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id7" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id8">
+<img alt="_images/estimation-2_03.png" class="plot-directive" src="_images/estimation-2_03.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 4 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/365f69944588fd0b6bb5a52009d998e5/estimation-2_03.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/1245b50dbfbdb815689eee413bf3ec40/estimation-2_03.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/606c39a5e2a84dd068d22bd88dcfd710/estimation-2_03.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id9">
+<img alt="_images/estimation-2_04.png" class="plot-directive" src="_images/estimation-2_04.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/a2e0cd16294d95d19461e96716dd7935/estimation-2_04.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/528b2a299235db62fee3e86b05e07465/estimation-2_04.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/f18c07403a39a4828a37f48875b0badc/estimation-2_04.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id10">
+<img alt="_images/estimation-2_05.png" class="plot-directive" src="_images/estimation-2_05.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/ea0b8c7c1be2e8b7b09821ddb0b8dabe/estimation-2_05.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/b0031f74da745122625955a56e039532/estimation-2_05.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/6da7a729d86dc1afd3c992e0845515bf/estimation-2_05.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id10" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="id11">
+<img alt="_images/estimation-2_06.png" class="plot-directive" src="_images/estimation-2_06.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/e0b97a63e3fdd42a9393d48f4f3e96b0/estimation-2_06.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/12b794a5ee940dcee70436dd830c5270/estimation-2_06.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/2eb10b883920f94ce8c4cd1ae6a0ae73/estimation-2_06.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id11" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="stopping.html" class="btn btn-neutral float-right" title="Stopping Criteria – catsim.stopping" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="selection.html" class="btn btn-neutral float-left" title="Item Selection Methods – catsim.selection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="stopping.html" class="btn btn-neutral float-right" title="Stopping Criteria – catsim.stopping" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Douglas De Rizzo Meneghetti.
-
-    </p>
+    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -1,6 +1,6 @@
 <map id="inheritance51267be144" name="inheritance51267be144">
-<area shape="rect" id="node1" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initializes every ability at the same point." alt="" coords="492,5,763,29"/>
-<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers" alt="" coords="250,29,446,54"/>
-<area shape="rect" id="node3" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initializes the first estimate of an examinee&#39;s ability" alt="" coords="498,52,757,77"/>
-<area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,29,204,54"/>
+<area shape="rect" id="node1" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initializes every ability at the same point." alt="" coords="492,5,763,32"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers" alt="" coords="250,31,446,57"/>
+<area shape="rect" id="node3" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initializes the first estimate of an examinee&#39;s ability" alt="" coords="498,55,757,82"/>
+<area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="5,31,204,57"/>
 </map>
