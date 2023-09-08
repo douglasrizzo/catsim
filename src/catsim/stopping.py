@@ -32,9 +32,7 @@ class MaxItemStopper(Stopper):
         n_itens = administered_items.shape[0]
         if n_itens > self._max_itens:
             raise ValueError(
-                "More items than permitted were administered: {0} > {1}".format(
-                    n_itens, self._max_itens
-                )
+                f"More items than permitted were administered: {n_itens} > {self._max_itens}"
             )
 
         return n_itens == self._max_itens

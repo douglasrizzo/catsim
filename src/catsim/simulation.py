@@ -429,15 +429,7 @@ class Simulator:
 
         if verbose:
             print(
-                (
-                    "Starting simulation: {0} {1} {2} {3} {4} items".format(
-                        self._initializer,
-                        self._selector,
-                        self._estimator,
-                        self._stopper,
-                        self._items.shape[0],
-                    )
-                )
+                f"Starting simulation: {self._initializer} {self._selector} {self._estimator} {self._stopper} {self._items.shape[0]} items"
             )
             pbar = tqdm.tqdm(total=len(self.examinees))
 
@@ -497,7 +489,7 @@ class Simulator:
 
         if verbose:
             pbar.close()
-            print("Simulation took {0} seconds".format(self._duration))
+            print(f"Simulation took {self._duration} seconds")
 
         self._bias = cat.bias(self.examinees, self.latest_estimations)
         self._mse = cat.mse(self.examinees, self.latest_estimations)

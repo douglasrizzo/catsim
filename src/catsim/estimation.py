@@ -32,7 +32,7 @@ class NumericalSearchEstimator(Estimator):
     golden_ratio = (1 + 5**0.5) / 2
 
     def __str__(self):
-        return "Numerical Search Estimator ({})".format(self.__search_method)
+        return f"Numerical Search Estimator ({self.__search_method})"
 
     def __init__(
         self,
@@ -45,14 +45,12 @@ class NumericalSearchEstimator(Estimator):
 
         if precision < 1:
             raise ValueError(
-                "precision for numerical estimator must be an integer larger than 1, {} was passed".format(
-                    precision
-                )
+                f"precision for numerical estimator must be an integer larger than 1, {precision} was passed"
             )
 
         if method not in NumericalSearchEstimator.methods:
             raise ValueError(
-                "Parameter 'method' must be one of {}".format(NumericalSearchEstimator.methods)
+                f"Parameter 'method' must be one of {NumericalSearchEstimator.methods}"
             )
 
         self._epsilon = float("1e-" + str(precision))
@@ -157,7 +155,7 @@ class NumericalSearchEstimator(Estimator):
             candidate_theta = res.x
 
         if self._verbose:
-            print("{0} evaluations".format(self._evaluations))
+            print(f"{self._evaluations} evaluations")
 
         return candidate_theta
 
@@ -210,11 +208,7 @@ class NumericalSearchEstimator(Estimator):
                 error /= 2
 
             if self._verbose:
-                print(
-                    "\t\tTheta: {0}, LL: {1}".format(
-                        candidate_theta, max(left_side_ll, right_side_ll)
-                    )
-                )
+                print(f"\t\tTheta: {candidate_theta}, LL: {max(left_side_ll, right_side_ll)}")
         return candidate_theta
 
     def _solve_fibonacci(
@@ -275,9 +269,7 @@ class NumericalSearchEstimator(Estimator):
             # assert a <= c <= d <= b
 
             if self._verbose:
-                print(
-                    "\t\tTheta: {0}, LL: {1}".format((b + a) / 2, max(left_side_ll, right_side_ll))
-                )
+                print(f"\t\tTheta: {(b + a) / 2}, LL: {max(left_side_ll, right_side_ll)}")
         return (b + a) / 2
 
     def _solve_golden_section(
@@ -327,9 +319,7 @@ class NumericalSearchEstimator(Estimator):
             assert a < c <= d < b
 
             if self._verbose:
-                print(
-                    "\t\tTheta: {0}, LL: {1}".format((b + a) / 2, max(left_side_ll, right_side_ll))
-                )
+                print(f"\t\tTheta: {(b + a) / 2}, LL: {max(left_side_ll, right_side_ll)}")
         return (b + a) / 2
 
     @property

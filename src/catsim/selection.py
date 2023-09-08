@@ -175,13 +175,10 @@ class LinearSelector(FiniteSelector):
 
         if len(valid_indexes) == 0:
             warn(
-                "A new index was asked for, but there are no more item indexes to present.\nCurrent item:\t\t\t{0}\nItems to be administered:\t{1} (size: {2})\nAdministered items:\t\t{3} (size: {4})".format(
-                    self._current,
-                    sorted(self._indexes),
-                    len(self._indexes),
-                    sorted(administered_items),
-                    len(administered_items),
-                )
+                f"A new index was asked for, but there are no more item indexes to present.\n"
+                f"Current item:\t\t\t{self._current}\n"
+                f"Items to be administered:\t{sorted(self._indexes)} (size: {len(self._indexes)})\n"
+                f"Administered items:\t\t{sorted(administered_items)} (size: {len(administered_items)})"
             )
             return None
 
@@ -229,9 +226,8 @@ class RandomSelector(Selector):
 
         if len(administered_items) >= items.shape[0] and not self._replace:
             warn(
-                "A new item was asked for, but there are no more items to present.\nAdministered items:\t{0}\nItem bank size:\t{1}".format(
-                    len(administered_items), items.shape[0]
-                )
+                "A new item was asked for, but there are no more items to present.\n"
+                f"Administered items:\t{len(administered_items)}\nItem bank size:\t{items.shape[0]}"
             )
             return None
 
@@ -303,16 +299,12 @@ class ClusterSelector(Selector):
         available_methods = ["item_info", "cluster_info", "weighted_info"]
         if method not in available_methods:
             raise ValueError(
-                "{0} is not a valid cluster selection method; choose one from {1}".format(
-                    method, available_methods
-                )
+                f"{method} is not a valid cluster selection method; choose one from {available_methods}"
             )
         available_rcontrol = ["passive", "aggressive"]
         if r_control not in available_rcontrol:
             raise ValueError(
-                "{0} is not a valid item exposure control method; choose one from {1}".format(
-                    r_control, available_rcontrol
-                )
+                f"{r_control} is not a valid item exposure control method; choose one from {available_rcontrol}"
             )
 
         self._clusters = clusters
@@ -608,15 +600,16 @@ class StratifiedSelector(FiniteSelector):
         assert administered_items is not None
         assert est_theta is not None
 
+        # select the item in the correct layer, according to the point in the test the examinee is
+        stratum_index = len(administered_items)
         try:
-            # select the item in the correct layer, according to the point in the test the examinee is
-            stratum_index = len(administered_items)
             slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
         except IndexError:
             warn(
-                "{0}: test size is larger than was informed to the selector\nLength of administered items:\t{1}\nTotal length of the test:\t{2}\nNumber of slices:\t{3}".format(
-                    self, len(administered_items), self._test_size, len(slices)
-                )
+                f"{self}: test size is larger than was informed to the selector\n"
+                f"Length of administered items:\t{len(administered_items)}\n"
+                f"Total length of the test:\t{self._test_size}\n"
+                f"Number of slices:\t{len(slices)}"
             )
             return None
 
@@ -633,9 +626,7 @@ class StratifiedSelector(FiniteSelector):
             pointer += 1
             if pointer == max_pointer:
                 raise ValueError(
-                    "There are no more items to be selected from stratum {0}".format(
-                        slices[len(administered_items)]
-                    )
+                    f"There are no more items to be selected from stratum {slices[len(administered_items)]}"
                 )
 
         return sorted_items[pointer]

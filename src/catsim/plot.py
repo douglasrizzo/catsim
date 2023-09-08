@@ -56,7 +56,7 @@ def item_curve(
     available_types = ["icc", "iic", "both"]
 
     if ptype not in available_types:
-        raise ValueError("'{0}' not in available plot types: {1}".format(ptype, available_types))
+        raise ValueError(f"'{ptype}' not in available plot types: {available_types}")
 
     thetas = numpy.arange(b - 4, b + 4, 0.1, "double")
     p_thetas = []
