@@ -7,7 +7,6 @@
 [![Unit tests](https://github.com/douglasrizzo/catsim/actions/workflows/test-on-push.yml/badge.svg)](https://github.com/douglasrizzo/catsim/actions/workflows/test-on-push.yml)
 [![Test Coverage](https://coveralls.io/repos/github/douglasrizzo/catsim/badge.svg?branch=master)](https://coveralls.io/github/douglasrizzo/catsim?branch=master)
 [![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
-[![Requirements Status](https://requires.io/github/douglasrizzo/catsim/requirements.svg?branch=master)](https://requires.io/github/douglasrizzo/catsim/requirements/?branch=master)
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
 
 **catsim** is a Python package for computerized adaptive testing (CAT)
@@ -53,7 +52,7 @@ Install it using `pip install catsim`.
 
 ## Basic Usage
 
-**NEW:** there is now [a Colab Notebook](https://colab.research.google.com/drive/1dBcpXxHuc9YXv9yGllxlahx585hEmdbn?usp=sharing) teaching the basics of catsim!
+**NEW:** there is now [a Colab Notebook](https://colab.research.google.com/drive/14zEWoDudBCXF0NO-qgzoQpWUGBcJ2lPH?usp=sharing) teaching the basics of catsim!
 
 1.  Have an [item matrix](https://douglasrizzo.com.br/catsim/item_matrix.html);
 2.  Have a sample of examinee proficiencies, or a number of examinees to be generated;
