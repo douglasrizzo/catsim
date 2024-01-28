@@ -360,11 +360,11 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
   """
   if len(items.shape) == 1:
     items = numpy.expand_dims(items, axis=0)
-  if items.shape[1] == NumParams.PL1:
+  if items.shape[1] == NumParams.PL1.value:
     items = numpy.append(numpy.ones((items.shape[0], 1)), items, axis=1)
-  if items.shape[1] == NumParams.PL2:
+  if items.shape[1] == NumParams.PL2.value:
     items = numpy.append(items, numpy.zeros((items.shape[0], 1)), axis=1)
-  if items.shape[1] == NumParams.PL3:
+  if items.shape[1] == NumParams.PL3.value:
     items = numpy.append(items, numpy.ones((items.shape[0], 1)), axis=1)
 
   return items
@@ -396,17 +396,17 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False) -> None:
 
   if len(items.shape) == 1:
     err += "Item matrix has only one dimension."
-  elif items.shape[1] > NumParams.PL4:
+  elif items.shape[1] > NumParams.PL4.value:
     print(
       "\nItem matrix has more than 4 columns. catsim tends to add \
             columns to the matrix during the simulation, so it's not a good idea to keep them."
     )
-  elif items.shape[1] < NumParams.PL4:
-    if items.shape[1] == NumParams.PL1:
+  elif items.shape[1] < NumParams.PL4.value:
+    if items.shape[1] == NumParams.PL1.value:
       err += "\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"
-    elif items.shape[1] == NumParams.PL2:
+    elif items.shape[1] == NumParams.PL2.value:
       err += "\nItem matrix has no pseudo-guessing or upper asymptote parameter columns"
-    elif items.shape[1] == NumParams.PL3:
+    elif items.shape[1] == NumParams.PL3.value:
       err += "\nItem matrix has no upper asymptote parameter column"
   else:
     if any(items[:, 0] < 0):
