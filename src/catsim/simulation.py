@@ -42,7 +42,7 @@ class Simulable(ABC):
     self._simulator = x
     self.preprocess()
 
-  @abstractmethod()
+  @abstractmethod
   def preprocess(self) -> None:
     """Override this method to initialize any values the `Simulable` might use for the duration of the simulation.
 
