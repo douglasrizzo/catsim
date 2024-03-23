@@ -1,5 +1,4 @@
 # !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # catsim documentation build configuration file, created by
 # sphinx-quickstart on Sun Jun 14 23:12:17 2015.
@@ -25,9 +24,9 @@ sys.path.insert(0, os.path.abspath(".."))
 
 filenames = ["readme_head.md", "readme_body.md"]
 with open("../README.md", "w") as outfile:
-    for fname in filenames:
-        with open(fname) as infile:
-            outfile.write(infile.read())
+  for fname in filenames:
+    with open(fname) as infile:
+      outfile.write(infile.read())
 
 # -- General configuration ------------------------------------------------
 
@@ -38,23 +37,23 @@ with open("../README.md", "w") as outfile:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "matplotlib.sphinxext.plot_directive",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.doctest",
-    "sphinx.ext.inheritance_diagram",
-    "sphinx.ext.intersphinx",
-    "sphinx.ext.mathjax",
-    "sphinx.ext.viewcode",
-    "numpydoc",
-    "sphinx_rtd_theme",
-    "m2r2",
+  "matplotlib.sphinxext.plot_directive",
+  "sphinx.ext.autodoc",
+  "sphinx.ext.doctest",
+  "sphinx.ext.inheritance_diagram",
+  "sphinx.ext.intersphinx",
+  "sphinx.ext.mathjax",
+  "sphinx.ext.viewcode",
+  "numpydoc",
+  "sphinx_rtd_theme",
+  "m2r2",
 ]
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
-    "sklearn": ("https://scikit-learn.org/stable/", None),
+  "python": ("https://docs.python.org/3", None),
+  "numpy": ("https://numpy.org/doc/stable/", None),
+  "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+  "sklearn": ("https://scikit-learn.org/stable/", None),
 }
 
 version = "0.17.3"
@@ -238,27 +237,27 @@ htmlhelp_basename = "catsimdoc"
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    "papersize": "a4paper",
-    # The font size ('10pt', '11pt' or '12pt').
-    # 'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    # 'preamble': '',
-    # Latex figure (float) alignment
-    # 'figure_align': 'htbp',
+  # The paper size ('letterpaper' or 'a4paper').
+  "papersize": "a4paper",
+  # The font size ('10pt', '11pt' or '12pt').
+  # 'pointsize': '10pt',
+  # Additional stuff for the LaTeX preamble.
+  # 'preamble': '',
+  # Latex figure (float) alignment
+  # 'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (
-        master_doc,
-        "catsim.tex",
-        "catsim Documentation",
-        "Douglas De Rizzo Meneghetti",
-        "manual",
-    ),
+  (
+    master_doc,
+    "catsim.tex",
+    "catsim Documentation",
+    "Douglas De Rizzo Meneghetti",
+    "manual",
+  ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -296,15 +295,15 @@ man_pages = [(master_doc, "catsim", "catsim Documentation", [author], 1)]
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (
-        master_doc,
-        "catsim",
-        "catsim Documentation",
-        author,
-        "catsim",
-        "One line description of project.",
-        "Miscellaneous",
-    ),
+  (
+    master_doc,
+    "catsim",
+    "catsim Documentation",
+    author,
+    "catsim",
+    "One line description of project.",
+    "Miscellaneous",
+  ),
 ]
 
 # Documents to append as an appendix to all manuals.
