@@ -5,7 +5,7 @@ import pytest
 from catsim import cat, irt, plot
 from catsim.cat import generate_item_bank
 from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer, RandomInitializer
+from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -37,7 +37,7 @@ def one_simulation(
 
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("bank_size", [500])
-@pytest.mark.parametrize("initializer", [RandomInitializer("uniform", (-5, 5))])
+@pytest.mark.parametrize("initializer", [RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))])
 @pytest.mark.parametrize("estimator", [NumericalSearchEstimator()])
 @pytest.mark.parametrize("stopper", [MaxItemStopper(30), MinErrorStopper(0.4)])
 def test_cism(
@@ -62,7 +62,7 @@ def test_cism(
 @pytest.mark.parametrize(
   "initializer",
   [
-    RandomInitializer("uniform", (-5, 5)),
+    RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5)),
     FixedPointInitializer(0),
   ],
 )
@@ -77,8 +77,9 @@ def test_finite_selectors(
   initializer: Initializer,
   estimator: Estimator,
 ):
+  rng = np.random.default_rng()
   finite_selectors = [
-    LinearSelector(list(np.random.choice(bank_size, size=test_size, replace=False))),
+    LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False))),
     AStratSelector(test_size),
     AStratBBlockSelector(test_size),
     MaxInfoStratSelector(test_size),
@@ -91,7 +92,7 @@ def test_finite_selectors(
   for selector in finite_selectors:
     items = generate_item_bank(bank_size, itemtype=logistic_model)
     responses = cat.random_response_vector(random.randint(1, test_size - 1))
-    administered_items = np.random.choice(bank_size, len(responses), replace=False)
+    administered_items = rng.choice(bank_size, len(responses), replace=False)
     est_theta = initializer.initialize()
     selector.select(
       items=items,
@@ -118,7 +119,7 @@ def test_finite_selectors(
 @pytest.mark.parametrize(
   "initializer",
   [
-    RandomInitializer("uniform", (-5, 5)),
+    RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5)),
     FixedPointInitializer(0),
   ],
 )
@@ -149,10 +150,11 @@ def test_infinite_selectors(
   estimator: Estimator,
   stopper: Stopper,
 ):
+  rng = np.random.default_rng()
   items = generate_item_bank(bank_size, itemtype=logistic_model)
   max_administered_items = stopper.max_itens if type(stopper) == MaxItemStopper else bank_size
   responses = cat.random_response_vector(random.randint(1, max_administered_items))
-  administered_items = np.random.choice(bank_size, len(responses), replace=False)
+  administered_items = rng.choice(bank_size, len(responses), replace=False)
   est_theta = initializer.initialize()
   selector.select(
     items=items,

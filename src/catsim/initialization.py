@@ -37,9 +37,10 @@ class RandomInitializer(Initializer):
     :type dist_params: tuple, optional
     """
     super().__init__()
+    assert isinstance(dist_type, InitializationDistribution), "dist_type must be an InitializationDistribution"
     self._dist_type = dist_type
     self._dist_params = dist_params
-    self.__rng = numpy.random.default_rng(1337)
+    self.__rng = numpy.random.default_rng()
 
   def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:
     """Generates a value using the chosen distribution and parameters.

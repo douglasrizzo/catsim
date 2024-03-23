@@ -1,5 +1,6 @@
 import math
 from enum import Enum
+from math import pi  # noqa: F401
 from typing import Any
 
 import numexpr

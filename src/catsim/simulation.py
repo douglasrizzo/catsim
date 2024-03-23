@@ -333,13 +333,14 @@ class Simulator:
     self._estimator = estimator
     self._stopper = stopper
 
+    self.__rng = numpy.random.default_rng()
+
     # `examinees` is passed to its special setter
     self._examinees = self._to_distribution(examinees)
 
     self._estimations: list[list[int]] = [[] for _ in range(self.examinees.shape[0])]
     self._administered_items: list[list[int]] = [[] for _ in range(self.examinees.shape[0])]
     self._response_vectors: list[list[bool]] = [[] for _ in range(self.examinees.shape[0])]
-    self.__rng = numpy.random.default_rng()
 
   @property
   def items(self) -> numpy.ndarray:
