@@ -66,7 +66,7 @@ def test_cism(
     FixedPointInitializer(0),
   ],
 )
-@pytest.mark.parametrize("estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.__methods])
+@pytest.mark.parametrize("estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods])
 def test_finite_selectors(
   examinees: int,
   test_size: int,
