@@ -13,7 +13,7 @@ import tqdm
 from . import cat, irt
 
 
-class Simulable(ABC):
+class Simulable:
   """Base class representing one of the Simulator components that will receive a reference back to it."""
 
   def __init__(self) -> None:
@@ -42,7 +42,6 @@ class Simulable(ABC):
     self._simulator = x
     self.preprocess()
 
-  @abstractmethod
   def preprocess(self) -> None:
     """Override this method to initialize any values the `Simulable` might use for the duration of the simulation.
 
@@ -526,7 +525,8 @@ class Simulator:
 
     if verbose:
       print(
-        f"Starting simulation: {self._initializer} {self._selector} {self._estimator} {self._stopper} {self._items.shape[0]} items"
+        f"Starting simulation: {self._initializer} {self._selector} "
+        f"{self._estimator} {self._stopper} {self._items.shape[0]} items"
       )
       pbar = tqdm.tqdm(total=len(self.examinees))
 
