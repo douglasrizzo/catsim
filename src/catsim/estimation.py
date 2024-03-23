@@ -31,7 +31,7 @@ class NumericalSearchEstimator(Estimator):
   golden_ratio = (1 + 5**0.5) / 2
 
   @staticmethod
-  def methods() -> frozenset[str]:
+  def available_methods() -> frozenset[str]:
     """Get a set of available estimation methods.
 
     :return: Set of available estimation methods.

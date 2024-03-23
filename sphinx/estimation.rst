@@ -51,7 +51,7 @@ The chart below displays the execution times of the same simulation (100 examine
     test_size = 20
     thetas = np.random.normal(0,1,examinees)
     sim_times = {}
-    for m in NumericalSearchEstimator.methods:
+    for m in NumericalSearchEstimator.available_methods():
         simulator = Simulator(items, thetas,FixedPointInitializer(0),MaxInfoSelector(), NumericalSearchEstimator(method=m),MaxItemStopper(test_size))
         simulator.simulate(verbose=True)
         sim_times[m] = simulator.duration
@@ -82,7 +82,7 @@ The charts below show the :math:`\hat{\theta}` found by the different estimation
     thetas = np.arange(-6.,6.,.1)
 
     for estimator in [
-            NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods
+            NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.available_methods()
         ]:
         plt.figure()
 
