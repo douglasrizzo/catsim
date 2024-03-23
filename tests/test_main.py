@@ -128,7 +128,7 @@ def test_finite_selectors(
     UrrySelector(),
   ],
 )
-@pytest.mark.parametrize("estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.__methods])
+@pytest.mark.parametrize("estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.methods])
 @pytest.mark.parametrize(
   "stopper",
   [
