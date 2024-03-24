@@ -210,8 +210,7 @@ def test_plots():
     plot.item_curve(item[0], item[1], item[2], item[3], "Test plot", "both", True, None, False)
     close("all")
 
-  plot.gen3d_dataset_scatter(items=s.items, show=False)
-  plot.param_dist(items=s.items, show=False)
+  plot.gen3d_dataset_scatter(items=s.items)
   plot.test_progress(
     title="Test progress",
     simulator=s,
@@ -219,7 +218,6 @@ def test_plots():
     info=True,
     see=True,
     reliability=True,
-    show=False,
   )
   plot.item_exposure(simulator=s, show=False)
   plot.item_exposure(simulator=s, show=False, par="a")
