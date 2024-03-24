@@ -42,9 +42,10 @@ Both of these functions are graphically represented in the following figure. It 
 .. plot::
 
     from catsim.cat import generate_item_bank
-    from catsim import plot
+    from catsim.plot import item_curve, PlotType
+
     item = generate_item_bank(1)[0]
-    plot.item_curve(item[0], item[1], item[2], item[3], ptype='both')
+    item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH)
 
 The sum of the information of all items in a test is called *test information* [Ayala2009]_:
 
