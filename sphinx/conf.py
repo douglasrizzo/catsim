@@ -56,7 +56,7 @@ intersphinx_mapping = {
   "sklearn": ("https://scikit-learn.org/stable/", None),
 }
 
-version = "0.17.3"
+version = "0.18.0"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
