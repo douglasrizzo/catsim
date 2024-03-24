@@ -1,7 +1,6 @@
 import math
 from enum import Enum
 from math import pi  # noqa: F401
-from typing import Any
 
 import numexpr
 import numpy
@@ -20,20 +19,29 @@ class NumParams(Enum):
 
 
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
-  """Compute the Item Response Theory four-parameter logistic function.
+  r"""Compute the Item Response Theory four-parameter logistic function [Magis13]_.
 
-  :param theta: the individual's ability value.
-  :type theta: float
-  :param a: the discrimination parameter of the item.
-  :type a: float
-  :param b: the item difficulty parameter.
-  :type b: float
-  :param c: the item pseudo-guessing parameter, defaults to 0.
-  :type c: float, optional
-  :param d: the item upper asymptote, defaults to 1.
-  :type d: float, optional
-  :return: the probability of the individual responding correctly to the item.
-  :rtype: float
+  .. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}
+
+  :param theta: the individual's ability value. This parameter value has
+                no boundary, but if a distribution of the form :math:`N(0, 1)` was
+                used to estimate the parameters, then :math:`-4 \leq \theta \leq
+                4`.
+
+  :param a: the discrimination parameter of the item, usually a positive
+            value in which :math:`0.8 \leq a \leq 2.5`.
+
+  :param b: the item difficulty parameter. This parameter value has no
+            boundaries, but it is necessary that it be in the same value space
+            as `theta` (usually :math:`-4 \leq b \leq 4`).
+
+  :param c: the item pseudo-guessing parameter. Being a probability,
+            :math:`0\leq c \leq 1`, but items considered good usually have
+            :math:`c \leq 0.2`.
+
+  :param d: the item upper asymptote. Being a probability,
+            :math:`0\leq d \leq 1`, but items considered good usually have
+            :math:`d \approx 1`.
   """
   return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
 
@@ -50,7 +58,7 @@ def _split_params(items: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray, n
 
 
 def detect_model(items: numpy.ndarray) -> int:
-  """Detects which logistic model an item matrix fits into.
+  """Detect which logistic model an item matrix fits into.
 
   :param items: an item matrix
   :return: an int between 1 and 4 denoting the logistic model of the given item matrix
@@ -99,22 +107,31 @@ def inf_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
 def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   r"""Compute the information value of an item using the Item Response Theory four-parameter logistic model function.
 
-  :param theta: the individual's ability value. This parameter value has no boundary, but if a distribution of the form
-                :math:`N(0, 1)` was used to estimate the parameters, then :math:`-4 \leq \theta \leq 4`.
-  :type theta: float
-  :param a: the discrimination parameter of the item, usually a positive value in which :math:`0.8 \leq a \leq 2.5`.
-  :type a: float
-  :param b: the item difficulty parameter. This parameter value has no boundary, but if a distribution of the form
-            :math:`N(0, 1)` was used to estimate the parameters, then :math:`-4 \leq b \leq 4`.
-  :type b: float
-  :param c: the item pseudo-guessing parameter. Being a probability, :math:`0 \leq c \leq 1`, but items considered good
-            usually have :math:`c \leq 0.2`. Defaults to 0.
-  :type c: float, optional
-  :param d: the item upper asymptote. Being a probability, :math:`0 \leq d \leq 1`, but items considered good usually
-            have :math:`d \approx 1`. Defaults to 1.
-  :type d: float, optional
-  :return: The information value of the item at the designated `theta` point.
-  :rtype: float
+  References are given in [Ayala2009]_, [Magis13]_.
+
+  .. math:: I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}
+
+  :param theta: the individual's ability value. This parameter value has
+                no boundary, but if a distribution of the form
+                :math:`N(0, 1)` was used to estimate the parameters, then
+                :math:`-4 \leq \theta \leq 4`.
+
+  :param a: the discrimination parameter of the item, usually a positive
+            value in which :math:`0.8 \leq a \leq 2.5`.
+
+  :param b: the item difficulty parameter. This parameter value has no
+            boundary, but if a distribution of the form :math:`N(0, 1)` was
+            used to estimate the parameters, then :math:`-4 \leq b \leq 4`.
+
+  :param c: the item pseudo-guessing parameter. Being a probability,
+            :math:`0\leq c \leq 1`, but items considered good usually have
+            :math:`c \leq 0.2`.
+
+  :param d: the item upper asymptote. Being a probability,
+            :math:`0\leq d \leq 1`, but items considered good usually have
+            :math:`d \approx 1`.
+
+  :returns: the information value of the item at the designated `theta` point.
   """
   p = icc(theta, a, b, c, d)
 
@@ -122,7 +139,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 
 
 def test_info(theta: float, items: numpy.ndarray) -> float:
-  r"""Compute the test information of a test at a specific :math:`\theta` value.
+  r"""Compute the test information of a test at a specific :math:`\theta` value [Ayala2009]_.
 
   .. math:: I(\theta) = \sum_{j \in J} I_j(\theta)
 
@@ -139,17 +156,13 @@ def test_info(theta: float, items: numpy.ndarray) -> float:
 def var(theta: float, items: numpy.ndarray) -> float:
   r"""Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.
 
-  Reference is given in [Ayala2009]_.
+  .. math:: Var = \frac{1}{I(\theta)}
 
-  Args:
-      theta (float): An ability value.
-      items (numpy.ndarray): A matrix containing item parameters.
+  where :math:`I(\theta)` is the test information (see :py:func:`test_info`).
 
-  Returns:
-      float: The variance of ability estimation at `theta` for a test represented by `items`.
-
-  Raises:
-      ZeroDivisionError: If the test information is zero, returns negative infinity.
+  :param theta: a ability value.
+  :param items: a matrix containing item parameters.
+  :returns: the variance of ability estimation at `theta` for a test represented by `items`.
   """
   try:
     return 1 / test_info(theta, items)
@@ -160,12 +173,13 @@ def var(theta: float, items: numpy.ndarray) -> float:
 def see(theta: float, items: numpy.ndarray) -> float:
   r"""Compute the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\\theta` value [Ayala2009]_.
 
-  Args:
-      theta (float): An ability value.
-      items (numpy.ndarray): A matrix containing item parameters.
+  .. math:: SEE = \sqrt{\frac{1}{I(\theta)}}
 
-  Returns:
-      float: The standard error of estimation at `theta` for a test represented by `items`.
+  where :math:`I(\theta)` is the test information (see :py:func:`test_info`).
+
+  :param theta: a ability value.
+  :param items: a matrix containing item parameters.
+  :returns: the standard error of estimation at `theta` for a test represented by `items`.
   """
   try:
     return math.sqrt(var(theta, items))
@@ -176,19 +190,16 @@ def see(theta: float, items: numpy.ndarray) -> float:
 def reliability(theta: float, items: numpy.ndarray) -> float:
   r"""Compute test reliability [Thissen00]_.
 
-  .. math:: Rel = 1 - \\frac{1}{I(\\theta)}
+  .. math:: Rel = 1 - \frac{1}{I(\theta)}
 
-  Test reliability is a measure of internal consistency for the test, similar to Cronbach's :math:`\\alpha` in Classical
+  Test reliability is a measure of internal consistency for the test, similar to Cronbach's :math:`\alpha` in Classical
   Test Theory. Its value is always lower than 1, with values close to 1 indicating good reliability. If
-  :math:`I(\\theta) < 1`, :math:`Rel < 0` and in these cases it does not make sense, but usually the application of
+  :math:`I(\theta) < 1`, :math:`Rel < 0` and in these cases it does not make sense, but usually the application of
   additional items solves this problem.
 
-  Args:
-    theta: An ability value.
-    items: A matrix containing item parameters.
-
-  Returns:
-    float: The test reliability at `theta` for a test represented by `items`.
+  :param theta: a ability value.
+  :param items: a matrix containing item parameters.
+  :returns: the test reliability at `theta` for a test represented by `items`.
   """
   return 1 - var(theta, items)
 
@@ -217,19 +228,17 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
   .. plot::
 
       from catsim.cat import generate_item_bank
-      from catsim.plot import item_curve, PlotType
+      from catsim import plot
       items = generate_item_bank(2)
       for item in items:
-          item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True)
+          plot.item_curve(item[0], item[1], item[2], item[3], ptype='iic', max_info=True)
 
-  Args:
-    a: item discrimination parameter
-    b: item difficulty parameter
-    c: item pseudo-guessing parameter
-    d: item upper asymptote
-
-  Returns:
-    The theta value to which the item with the given parameters gives maximum information
+  :param a: item discrimination parameter
+  :param b: item difficulty parameter
+  :param c: item pseudo-guessing parameter
+  :param d: item upper asymptote
+  :returns: the :math:`\\theta` value to which the item with the given parameters
+            gives maximum information
   """
   # for explanations on finding the following values, see referenced work in function description
   if d == 1:
@@ -245,64 +254,53 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
     * math.cos((1 / 3) * math.acos(-(v / 2) * math.sqrt(27 / (-math.pow(u, 3)))) + (4 * math.pi / 3))
     + 0.5
   )
+
   return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
 def max_info_hpc(items: numpy.ndarray) -> numpy.ndarray:
   """Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.
 
-  Args:
-    items (numpy.ndarray): Array containing the four item parameters.
-
-  Returns:
-    numpy.ndarray: An array of all theta values that maximize the information function of each item.
+  :param items: array containing the four item parameters.
+  :returns: an array of all theta values that maximize the information function of each item.
   """
-  _a, _b, _c, _d = _split_params(items)
+  _a, b, c, d = _split_params(items)
 
-  if all(_d == 1):
-    if all(_c == 0):
-      return _b
-    return numexpr.evaluate("_b + (1 / _a) * log((1 + sqrt(1 + 8 * _c)) / 2)")
+  if all(d == 1):
+    if all(c == 0):
+      return b
+    return numexpr.evaluate("b + (1 / _a) * log((1 + sqrt(1 + 8 * c)) / 2)")
 
-  _u = numexpr.evaluate("-(3 / 4) + ((_c + _d - 2 * _c * _d) / 2)")
-  _v = numexpr.evaluate("(_c + _d - 1) / 4")
+  _u = numexpr.evaluate("-(3 / 4) + ((c + d - 2 * c * d) / 2)")
+  _v = numexpr.evaluate("(c + d - 1) / 4")
   _x_star = numexpr.evaluate(
     "2 * sqrt(-_u / 3) * cos((1 / 3) * arccos(-(_v / 2) * sqrt(27 / -(_u ** 3))) + (4 * pi / 3)) + 0.5"
   )
 
-  return numexpr.evaluate("_b + (1 / _a) * log((_x_star - _c) / (_d - _x_star))")
+  return numexpr.evaluate("b + (1 / _a) * log((_x_star - c) / (d - _x_star))")
 
 
 def log_likelihood(est_theta: float, response_vector: list[bool], administered_items: numpy.ndarray) -> float:
   r"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.
 
-  Reference is given in [Ayala2009]_.
-
-  The likelihood function of a given :math:`\theta` value given the answers to :math:`I` items is given by:
+  The likelihood function of a given :math:`\theta` value given the answers to :math:`I` items is given by
+  [Ayala2009]_:
 
   .. math:: L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}
 
-  Finding the maximum of :math:`L(X_{Ij})` includes using the product rule of derivations.
-  Since :math:`L(X_{Ij})` has :math:`j` parts, it can be quite complicated to do so. Also,
-  for computational reasons, the product of probabilities can quickly tend to 0, so it is
-  common to use the log-likelihood in maximization/minimization problems, transforming the
-  product of probabilities in a sum of probabilities:
+  Finding the maximum of :math:`L(X_{Ij})` includes using the product rule of derivations. Since :math:`L(X_{Ij})` has
+  :math:`j` parts, it can be quite complicated to do so. Also, for computational reasons, the product of probabilities
+  can quickly tend to 0, so it is common to use the log-likelihood in maximization/minimization problems, transforming
+  the product of probabilities in a sum of probabilities:
 
-   .. math:: \log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I
-             \left\lbrace x_{ij} \log P_{ij}(\theta)+ (1 - x_{ij}) \log
-             Q_{ij}(\theta) \right\rbrace
+   .. math::
+      \log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I \left\lbrace x_{ij} \log P_{ij}(\theta)+
+          (1 - x_{ij}) \log Q_{ij}(\theta) \right\rbrace
 
-  Args:
-    est_theta (float): Estimated ability value.
-    response_vector (List[bool]): A list containing the response vector.
-    administered_items (np.ndarray): An array containing the parameters of the answered items.
-
-  Returns:
-    float: Log-likelihood of a given ability value, given the responses to the administered items.
-
-  Raises:
-    ValueError: If the response vector and administered items do not have the same number of items, or if the response
-    vector contains elements other than True or False.
+  :param est_theta: estimated ability value.
+  :param response_vector: a Boolean list containing the response vector.
+  :param administered_items: a numpy array containing the parameters of the answered items.
+  :returns: log-likelihood of a given ability value, given the responses to the administered items.
   """
   if len(response_vector) != administered_items.shape[0]:
     msg = "Response vector and administered items must have the same number of items"
@@ -314,20 +312,18 @@ def log_likelihood(est_theta: float, response_vector: list[bool], administered_i
   return numexpr.evaluate("sum(where(response_vector, log(_ps), log(1 - _ps)))")
 
 
-def negative_log_likelihood(est_theta: float, *args: tuple[Any, ...]) -> float:
-  """Compute the negative log-likelihood of a ability value, given an array of item parameters and their answers.
+def negative_log_likelihood(est_theta: float, *args: tuple) -> float:
+  """Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.
 
-  This function is used by the functions in :py:mod:`scipy.optimize` that search for minima instead of maxima. Its
-  output is simply the value of :math:`-` :py:func:`log_likelihood`.
+  This function is used by :py:mod:`scipy.optimize` optimization functions that tend to minimize values, instead of
+  maximizing them. Calculates the negative log-likelihood of a ability value, given a response vector and the parameters
+  of the administered items. The value of :py:func:`negative_log_likelihood` is simply the value of
+  :math:`-` :py:func:`log_likelihood`.
 
-  Args:
-    est_theta (float): estimated ability value
-    *args:
-      - response_vector (List[bool]): a Boolean list containing the response vector
-      - administered_items (np.ndarray): a numpy array containing the parameters of the answered items
-
-  Returns:
-    float: negative log-likelihood of a given ability value, given the responses to the administered items
+  :param est_theta: estimated ability value
+  :param response_vector list: a Boolean list containing the response vector
+  :param administered_items numpy.ndarray: a numpy array containing the parameters of the answered items
+  :returns: negative log-likelihood of a given ability value, given the responses to the administered items
   """
   return -log_likelihood(est_theta, args[0], args[1])
 
@@ -350,11 +346,8 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
   and pseudo-guessing columns, respectively. The upper asymptote column is added such that
   items simulate the 3-parameter logistic model.
 
-  Args:
-    items (numpy.ndarray): the item matrix.
-
-  Returns:
-    numpy.ndarray: an :math:`n \times 4` item matrix conforming to the 4 parameter logistic model.
+  :param items: the item matrix.
+  :returns: an :math:`n \times 4` item matrix conforming to the 4 parameter logistic model.
   """
   if len(items.shape) == 1:
     items = numpy.expand_dims(items, axis=0)
@@ -369,22 +362,19 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
 
 
 def validate_item_bank(items: numpy.ndarray, raise_err: bool = False) -> None:
-  r"""Validate the shape and parameters in the item matrix so that it conforms to the standard used by catsim.
+  r"""Validates the shape and parameters in the item matrix so that it conforms to the standard used by catsim.
 
   The item matrix must have dimension nx4, in which column 1 represents item discrimination, column 2 represents item
   difficulty, column 3 represents the pseudo-guessing parameter and column 4 represents the item upper asymptote.
 
   The item matrix must have at least one line, representing an item, and exactly four columns, representing the
-  four discrimination, difficulty, pseudo-guessing and upper asymptote parameters (:math:`a`, :math:`b`, :math:`c` and
+  discrimination, difficulty, pseudo-guessing and upper asymptote parameters (:math:`a`, :math:`b`, :math:`c` and
   :math:`d`), respectively. The item matrix is considered valid if, for all items in the matrix,
-  :math:`a > 0 \wedge 0 < c < 1 \wedge 0 < d < 1`.
+  :math:`a > 0 \\wedge 0 < c < 1 \\wedge 0 < d < 1`.
 
-  Args:
-    items (numpy.ndarray): the item matrix.
-    raise_err (bool): whether to raise a ValueError if validation fails.
-
-  Raises:
-    TypeError: if the item matrix is not of type numpy.ndarray or does not meet catsim standards.
+  :param items: the item matrix.
+  :param raise_err: whether to raise an error in case the validation fails or
+                    just print the error message to standard output.
   """
   if not isinstance(items, numpy.ndarray):
     msg = "Item matrix is not of type numpy.ndarray"
