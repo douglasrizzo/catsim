@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-Provide a snippet that reproduces the bug. Consider hard-coding item parameters, thetas, response vectors etc. The snippet can be a Python file, or code pasted directly in the comment, or even a Colab notebook. See [this example](https://colab.research.google.com/drive/1vhH_X4vUdKfHvTx3LqVrRs-shAeHPsOF) from a previous issue.
+Provide a snippet that reproduces the bug. Consider hard-coding item parameters, thetas, response vectors etc. The snippet can be a Python file, or code pasted directly in the comment ([example](https://github.com/douglasrizzo/catsim/issues/30)), or even a Colab notebook ([example](https://colab.research.google.com/drive/1vhH_X4vUdKfHvTx3LqVrRs-shAeHPsOF)).
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
