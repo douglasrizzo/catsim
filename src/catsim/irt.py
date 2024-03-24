@@ -22,15 +22,18 @@ class NumParams(Enum):
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   """Compute the Item Response Theory four-parameter logistic function.
 
-  Args:
-    theta (float): the individual's ability value.
-    a (float): the discrimination parameter of the item.
-    b (float): the item difficulty parameter.
-    c (float, optional): the item pseudo-guessing parameter.
-    d (float, optional): the item upper asymptote.
-
-  Returns:
-    float: the probability of the individual responding correctly to the item.
+  :param theta: the individual's ability value.
+  :type theta: float
+  :param a: the discrimination parameter of the item.
+  :type a: float
+  :param b: the item difficulty parameter.
+  :type b: float
+  :param c: the item pseudo-guessing parameter, defaults to 0.
+  :type c: float, optional
+  :param d: the item upper asymptote, defaults to 1.
+  :type d: float, optional
+  :return: the probability of the individual responding correctly to the item.
+  :rtype: float
   """
   return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
 
@@ -38,11 +41,10 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 def _split_params(items: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
   """Split the item matrix parameters into columns.
 
-  Args:
-    items (np.ndarray): An item matrix with four columns representing four parameters.
-
-  Returns:
-    tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]: A 4-tuple with each column in a different slot.
+  :param items: An item matrix with four columns representing four parameters.
+  :type items: numpy.ndarray
+  :return: A 4-tuple with each column in a different slot.
+  :rtype: tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]
   """
   return items[:, 0], items[:, 1], items[:, 2], items[:, 3]
 
@@ -67,12 +69,12 @@ def detect_model(items: numpy.ndarray) -> int:
 def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:  # noqa: ARG001
   """Compute item characteristic functions for all items in a numpy array at once.
 
-  Args:
-      theta: the individual's ability value.
-      items: array containing the four item parameters.
-
-  Returns:
-      ndarray: an array of all item characteristic functions, given the current theta
+  :param theta: the individual's ability value.
+  :type theta: float
+  :param items: array containing the four item parameters.
+  :type items: numpy.ndarray
+  :return: an array of all item characteristic functions, given the current theta.
+  :rtype: numpy.ndarray
   """
   _a, _b, _c, _d = _split_params(items)
   return numexpr.evaluate("_c + ((_d - _c) / (1 + exp((-_a * (theta - _b)))))")
@@ -81,12 +83,12 @@ def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:  # noqa: ARG00
 def inf_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
   """Compute the information values for all items in a numpy array using numpy and numexpr.
 
-  Args:
-      theta (float): The individual's ability value.
-      items (numpy.ndarray): Array containing the four item parameters.
-
-  Returns:
-      numpy.ndarray: An array of all item information values, given the current theta.
+  :param theta: The individual's ability value.
+  :type theta: float
+  :param items: _description_
+  :type items: numpy.ndarray
+  :return: Array containing the four item parameters.
+  :rtype: numpy.ndarray
   """
   _a, _b, _c, _d = _split_params(items)
   _p = icc_hpc(theta, items)
@@ -97,27 +99,22 @@ def inf_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
 def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   r"""Compute the information value of an item using the Item Response Theory four-parameter logistic model function.
 
-  References are given in [Ayala2009]_, [Magis13]_.
-
-  Args:
-    theta: the individual's ability value. This parameter value has
-          no boundary, but if a distribution of the form
-          :math:`N(0, 1)` was used to estimate the parameters, then
-          :math:`-4 \leq \theta \leq 4`.
-    a: the discrimination parameter of the item, usually a positive
-      value in which :math:`0.8 \leq a \leq 2.5`.
-    b: the item difficulty parameter. This parameter value has no
-      boundary, but if a distribution of the form :math:`N(0, 1)` was
-      used to estimate the parameters, then :math:`-4 \leq b \leq 4`.
-    c: the item pseudo-guessing parameter. Being a probability,
-      :math:`0 \leq c \leq 1`, but items considered good usually have
-      :math:`c \leq 0.2`.
-    d: the item upper asymptote. Being a probability,
-      :math:`0 \leq d \leq 1`, but items considered good usually have
-      :math:`d \approx 1`.
-
-  Returns:
-    The information value of the item at the designated `theta` point.
+  :param theta: the individual's ability value. This parameter value has no boundary, but if a distribution of the form
+                :math:`N(0, 1)` was used to estimate the parameters, then :math:`-4 \leq \theta \leq 4`.
+  :type theta: float
+  :param a: the discrimination parameter of the item, usually a positive value in which :math:`0.8 \leq a \leq 2.5`.
+  :type a: float
+  :param b: the item difficulty parameter. This parameter value has no boundary, but if a distribution of the form
+            :math:`N(0, 1)` was used to estimate the parameters, then :math:`-4 \leq b \leq 4`.
+  :type b: float
+  :param c: the item pseudo-guessing parameter. Being a probability, :math:`0 \leq c \leq 1`, but items considered good
+            usually have :math:`c \leq 0.2`. Defaults to 0.
+  :type c: float, optional
+  :param d: the item upper asymptote. Being a probability, :math:`0 \leq d \leq 1`, but items considered good usually
+            have :math:`d \approx 1`. Defaults to 1.
+  :type d: float, optional
+  :return: The information value of the item at the designated `theta` point.
+  :rtype: float
   """
   p = icc(theta, a, b, c, d)
 
@@ -129,12 +126,12 @@ def test_info(theta: float, items: numpy.ndarray) -> float:
 
   .. math:: I(\theta) = \sum_{j \in J} I_j(\theta)
 
-  Args:
-    theta: An ability value.
-    items: A matrix containing item parameters.
-
-  Returns:
-    The test information at `theta` for a test represented by `items`.
+  :param theta: An ability value.
+  :type theta: float
+  :param items: A matrix containing item parameters.
+  :type items: numpy.ndarray
+  :return: The test information at `theta` for a test represented by `items`.
+  :rtype: float
   """
   return float(numpy.sum(inf_hpc(theta, items)))
 
@@ -220,10 +217,10 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
   .. plot::
 
       from catsim.cat import generate_item_bank
-      from catsim import plot
+      from catsim.plot import item_curve, PlotType
       items = generate_item_bank(2)
       for item in items:
-          plot.item_curve(item[0], item[1], item[2], item[3], ptype='iic', max_info=True)
+          item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True)
 
   Args:
     a: item discrimination parameter
