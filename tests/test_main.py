@@ -58,7 +58,7 @@ def test_cism(
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("test_size", [30])
 @pytest.mark.parametrize("bank_size", [500])
-@pytest.mark.parametrize("logistic_model", ["4PL"])
+@pytest.mark.parametrize("logistic_model", [irt.NumParams.PL4])
 @pytest.mark.parametrize(
   "initializer",
   [
