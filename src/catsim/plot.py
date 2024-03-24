@@ -1,6 +1,5 @@
 """Module with functions for plotting IRT-related results."""
 
-import pathlib as pl
 from enum import Enum, auto
 
 import matplotlib.pyplot as plt
@@ -24,11 +23,10 @@ def item_curve(
   b: float = 0,
   c: float = 0,
   d: float = 1,
+  ax: plt.Axes | None = None,
   title: str | None = None,
   ptype: PlotType = PlotType.ICC,
   max_info: bool = True,
-  filepath: str | None = None,
-  show: bool = True,
   figsize: tuple | None = None,
 ) -> None:
   """Plot 'Item Response Theory'-related item plots.
@@ -36,11 +34,11 @@ def item_curve(
   .. plot::
 
       from catsim.cat import generate_item_bank
-      from catsim import plot
+      from catsim.plot import item_curve, PlotType
       item = generate_item_bank(1)[0]
-      plot.item_curve(item[0], item[1], item[2], item[3], ptype='icc')
-      plot.item_curve(item[0], item[1], item[2], item[3], ptype='iic')
-      plot.item_curve(item[0], item[1], item[2], item[3], ptype='both')
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC)
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC)
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH)
 
   When both curves are plotted in the same figure, the figure has no grid, since each curve has a different scale.
 
@@ -54,6 +52,9 @@ def item_curve(
   :param filepath: saves the plot in the given path
   :param show: whether the generated plot is to be shown
   """
+  if ax is None:
+    _, ax = plt.subplots(figsize=figsize)
+
   thetas = numpy.arange(b - 4, b + 4, 0.1, "double")
   p_thetas = []
   i_thetas = []
@@ -62,52 +63,51 @@ def item_curve(
     i_thetas.append(irt.inf(theta, a, b, c, d))
 
   if ptype in {PlotType.ICC, PlotType.IIC}:
-    plt.figure(figsize=figsize)
-
     if title is not None:
-      plt.title(title, size=18)
+      ax.set_title(title, size=18)
 
-    plt.annotate(
+    ax.annotate(
       "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " + format(d) + "$",
       bbox={"facecolor": "white", "alpha": 1},
       xy=(0.75, 0.05),
       xycoords="axes fraction",
     )
-    plt.xlabel(r"$\theta$")
-    plt.grid()
+    ax.set_xlabel(r"$\theta$")
+    ax.grid()
 
-    if ptype == "icc":
-      plt.ylabel(r"$P(\theta)$")
-      plt.plot(thetas, p_thetas, label=r"$P(\theta)$")
+    if ptype == PlotType.ICC:
+      ax.set_ylabel(r"$P(\theta)$")
+      ax.plot(thetas, p_thetas, label=r"$P(\theta)$")
 
-    elif ptype == "iic":
-      plt.ylabel(r"$I(\theta)$")
-      plt.plot(thetas, i_thetas, label=r"$I(\theta)$")
+    elif ptype == PlotType.IIC:
+      ax.set_ylabel(r"$I(\theta)$")
+      ax.plot(thetas, i_thetas, label=r"$I(\theta)$")
       if max_info:
         aux = irt.max_info(a, b, c, d)
-        plt.plot(aux, irt.inf(aux, a, b, c, d), "o")
+        ax.plot(aux, irt.inf(aux, a, b, c, d), "o")
 
   elif ptype == PlotType.BOTH:
-    _, ax1 = plt.subplots(figsize=figsize)
+    _, ax = plt.subplots(figsize=figsize)
 
-    ax1.set_xlabel(r"$\theta$", size=16)
-    ax1.set_ylabel(r"$P(\theta)$", color="b", size=16)
-    ax1.plot(thetas, p_thetas, "b-", label=r"$P(\theta)$")
+    ax.set_xlabel(r"$\theta$", size=16)
+    ax.set_ylabel(r"$P(\theta)$", color="b", size=16)
+    ax.plot(thetas, p_thetas, "b-", label=r"$P(\theta)$")
     # Make the y-axis label and tick labels match the line color.
-    for tl in ax1.get_yticklabels():
+    for tl in ax.get_yticklabels():
       tl.set_color("b")
 
-    ax2 = ax1.twinx()
+    ax2 = ax.twinx()
     ax2.set_ylabel(r"$I(\theta)$", color="r", size=16)
     ax2.plot(thetas, i_thetas, "r-", label=r"$I(\theta)$")
     for tl in ax2.get_yticklabels():
       tl.set_color("r")
+
     if max_info:
       aux = irt.max_info(a, b, c, d)
-      plt.plot(aux, irt.inf(aux, a, b, c, d), "o")
+      ax2.plot(aux, irt.inf(aux, a, b, c, d), "o")
 
     if title is not None:
-      ax1.set_title(title, size=18)
+      ax.set_title(title, size=18)
 
     ax2.annotate(
       "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " + format(d) + "$",
@@ -116,25 +116,14 @@ def item_curve(
       xycoords="axes fraction",
     )
 
-  if filepath is not None:
-    filepath = pl.Path(filepath)
-    # if os.path.dirname(filepath) is empty, it means the user passed the name
-    # of the file instead of a path, e.g. 'plot.pdf' instead '~/Downloads/plot.pdf'
-    if len(filepath.parent) > 0:
-      filepath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(filepath, bbox_inches="tight", dpi=300)
-
-  if show:
-    plt.show()
+  return ax
 
 
 def gen3d_dataset_scatter(
   items: numpy.ndarray,
   title: str | None = None,
-  filepath: str | None = None,
-  show: bool = True,
   figsize: tuple | None = None,
-) -> None:
+) -> plt.Axes:
   """Generate the item matrix tridimensional dataset scatter plot.
 
   .. plot::
@@ -157,32 +146,23 @@ def gen3d_dataset_scatter(
   ax.scatter(list(items[:, 0]), list(items[:, 1]), list(items[:, 2]), s=10, c="b")
 
   if title is not None:
-    plt.title(title, size=18)
+    ax.set_title(title, size=18)
 
   ax.set_xlabel("a")
   ax.set_ylabel("b")
   ax.set_zlabel("c")
 
-  if filepath is not None:
-    filepath = pl.Path(filepath)
-    if len(filepath.parent) > 0:
-      filepath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(filepath, bbox_inches="tight", dpi=300)
-
-  if show:
-    plt.show()
+  return ax
 
 
 def item_exposure(
+  ax: plt.Axes | None = None,
   title: str | None = None,
   simulator: Simulator | None = None,
   items: numpy.ndarray | None = None,
   par: str | None = None,
   hist: bool = False,
-  filepath: str | None = None,
-  show: bool = True,
-  figsize: tuple | None = None,
-) -> None:
+) -> plt.Axes:
   """Generate a bar chart for the item bank exposure rate.
 
   The `x` axis represents one of the item parameters, while the `y` axis represents their exposure rates. an examinee's
@@ -218,10 +198,11 @@ def item_exposure(
     msg = "Not a single plottable object was passed. Either 'simulator' or 'items' must be passed."
     raise ValueError(msg)
 
-  plt.figure(figsize=figsize)
+  if ax is None:
+    _, ax = plt.subplots()
 
   if title is not None:
-    plt.title(title, size=18)
+    ax.set_title(title, size=18)
 
   if simulator is not None:
     items = simulator.items
@@ -254,28 +235,22 @@ def item_exposure(
     xlabel = "Items"
 
   if hist:
-    plt.hist(items[:, 4], max(int(items.shape[0] / 10), 3))
-    plt.xlabel("Item exposure")
-    plt.ylabel("Items")
+    ax.hist(items[:, 4], max(int(items.shape[0] / 10), 3))
+    ax.set_xlabel("Item exposure")
+    ax.set_ylabel("Items")
   else:
     indexes = parameter.argsort()
-    plt.plot(items[:, 4][indexes], marker="o")
-    plt.xlabel(xlabel)
-    plt.ylabel("Item exposure")
+    ax.plot(items[:, 4][indexes], marker="o")
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel("Item exposure")
 
   plt.legend(loc="best")
 
-  if filepath is not None:
-    filepath = pl.Path(filepath)
-    if len(filepath.parent) > 0:
-      filepath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(filepath, bbox_inches="tight", dpi=300)
-
-  if show:
-    plt.show()
+  return ax
 
 
 def test_progress(
+  ax: plt.Axes | None = None,
   title: str | None = None,
   simulator: Simulator = None,
   index: int | None = None,
@@ -286,8 +261,6 @@ def test_progress(
   var: bool = False,
   see: bool = False,
   reliability: bool = False,
-  filepath: str | None = None,
-  show: bool = True,
   figsize: tuple | None = None,
 ) -> None:
   """Generates a plot representing an examinee's test progress.
@@ -339,10 +312,11 @@ def test_progress(
     msg = "Not a single plottable object was passed. One of: simulator, thetas, administered_items must be passed."
     raise ValueError(msg)
 
-  plt.figure(figsize=figsize)
+  if ax is None:
+    _, ax = plt.subplots(figsize=figsize)
 
   if title is not None:
-    plt.title(title, size=18)
+    ax.set_title(title, size=18)
 
   if simulator is not None and index is not None:
     thetas = simulator.estimations[index]
@@ -361,12 +335,12 @@ def test_progress(
   xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
 
   if thetas is not None:
-    plt.plot(xs, thetas, label=r"$\hat{\theta}$")
+    ax.plot(xs, thetas, label=r"$\hat{\theta}$")
   if administered_items is not None:
     difficulties = administered_items[:, 1]
-    plt.plot(xs[1:], difficulties, label="Item difficulty")
+    ax.plot(xs[1:], difficulties, label="Item difficulty")
   if true_theta is not None:
-    plt.hlines(true_theta, 0, len(xs), label=r"$\theta$")
+    ax.hlines(true_theta, 0, len(xs), label=r"$\theta$")
   if thetas is not None and administered_items is not None:
     # calculate and plot test information, var, standard error and reliability
     if info:
@@ -377,7 +351,7 @@ def test_progress(
         )
         for x in xs
       ]
-      plt.plot(xs, infos, label=r"$I(\theta)$")
+      ax.plot(xs, infos, label=r"$I(\theta)$")
 
     if var:
       varss = [
@@ -387,7 +361,7 @@ def test_progress(
         )
         for x in xs
       ]
-      plt.plot(xs, varss, label=r"$Var$")
+      ax.plot(xs, varss, label=r"$Var$")
 
     if see:
       sees = [
@@ -397,7 +371,7 @@ def test_progress(
         )
         for x in xs
       ]
-      plt.plot(xs, sees, label=r"$SEE$")
+      ax.plot(xs, sees, label=r"$SEE$")
 
     if reliability:
       reliabilities = [
@@ -407,50 +381,9 @@ def test_progress(
         )
         for x in xs
       ]
-      plt.plot(xs, reliabilities, label="Reliability")
-  plt.xlabel("Items")
-  plt.grid()
-  plt.legend(loc="best")
+      ax.plot(xs, reliabilities, label="Reliability")
+  ax.set_xlabel("Items")
+  ax.grid()
+  ax.legend(loc="best")
 
-  if filepath is not None:
-    filepath = pl.Path(filepath)
-    # if os.path.dirname(filepath) is empty, it means the user passed the name
-    # of the file instead of a path, e.g. 'plot.pdf' instead '~/Downloads/plot.pdf'
-    if len(filepath.parent) > 0:
-      filepath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(filepath, bbox_inches="tight", dpi=300)
-
-  if show:
-    plt.show()
-
-
-def param_dist(
-  items: numpy.ndarray, filepath: str | None = None, show: bool = True, figsize: tuple | None = None
-) -> None:
-  """Plot histograms for the item parameters.
-
-  :param items: Item parameter matrix.
-  :type items: numpy.ndarray
-  :param filepath: Optional filepath to save the plot, defaults to None
-  :type filepath: str | None, optional
-  :param show: Whether to show the plot after generating it, defaults to True
-  :type show: bool, optional
-  :param figsize: Optional figure size, defaults to None
-  :type figsize: tuple | None, optional
-  """
-  _, axes = plt.subplots(2, 2, figsize=figsize)
-  _ = axes[0, 0].hist(items[:, 0], bins=100)
-  _ = axes[0, 1].hist(items[:, 1], bins=100)
-  _ = axes[1, 0].hist(items[:, 2], bins=100)
-  _ = axes[1, 1].hist(items[:, 3], bins=100)
-
-  if filepath is not None:
-    filepath = pl.Path(filepath)
-    # if os.path.dirname(filepath) is empty, it means the user passed the name
-    # of the file instead of a path, e.g. 'plot.pdf' instead '~/Downloads/plot.pdf'
-    if len(filepath.parent) > 0:
-      filepath.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(filepath, bbox_inches="tight", dpi=300)
-
-  if show:
-    plt.show()
+  return ax
