@@ -73,7 +73,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "catsim"
-copyright = "2023, Douglas De Rizzo Meneghetti"
+copyright = "2024, Douglas De Rizzo Meneghetti"
 author = "Douglas De Rizzo Meneghetti"
 
 # The version info for the project you're documenting, acts as replacement for
