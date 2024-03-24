@@ -200,7 +200,7 @@ class FiniteSelector(Selector, ABC):
   def test_size(self) -> int:
     """Get the number of items to be administered in the test.
 
-    :return: Number of items to be administered in the test_
+    :return: Number of items to be administered in the test.
     :rtype: int
     """
     return self._test_size

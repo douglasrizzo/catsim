@@ -33,12 +33,13 @@ def item_curve(
 
   .. plot::
 
+      import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
       from catsim.plot import item_curve, PlotType
       item = generate_item_bank(1)[0]
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC)
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC)
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH)
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC); plt.show()
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC); plt.show()
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH); plt.show()
 
   When both curves are plotted in the same figure, the figure has no grid, since each curve has a different scale.
 
@@ -87,8 +88,6 @@ def item_curve(
         ax.plot(aux, irt.inf(aux, a, b, c, d), "o")
 
   elif ptype == PlotType.BOTH:
-    _, ax = plt.subplots(figsize=figsize)
-
     ax.set_xlabel(r"$\theta$", size=16)
     ax.set_ylabel(r"$P(\theta)$", color="b", size=16)
     ax.plot(thetas, p_thetas, "b-", label=r"$P(\theta)$")
@@ -128,10 +127,11 @@ def gen3d_dataset_scatter(
 
   .. plot::
 
+      import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
       from catsim import plot
       items = generate_item_bank(100)
-      plot.gen3d_dataset_scatter(items)
+      plot.gen3d_dataset_scatter(items); plt.show()
 
   :param items: the item matrix
   :param title: the scatter plot title
@@ -170,6 +170,7 @@ def item_exposure(
 
   .. plot::
 
+      import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
       from catsim import plot
       from catsim.initialization import RandomInitializer
@@ -180,8 +181,8 @@ def item_exposure(
 
       s = Simulator(generate_item_bank(100), 10)
       s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))
-      plot.item_exposure(title='Exposures', simulator=s, hist=True)
-      plot.item_exposure(title='Exposures', simulator=s, par='b')
+      plot.item_exposure(title='Exposures', simulator=s, hist=True); plt.show()
+      plot.item_exposure(title='Exposures', simulator=s, par='b'); plt.show()
 
   :param title: the plot title.
   :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees'
@@ -272,6 +273,7 @@ def test_progress(
 
   .. plot::
 
+      import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
       from catsim import plot
       from catsim.initialization import RandomInitializer
@@ -282,8 +284,8 @@ def test_progress(
 
       s = Simulator(generate_item_bank(100), 10)
       s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))
-      plot.test_progress(simulator=s, index=0)
-      plot.test_progress(simulator=s, index=0, info=True, var=True, see=True)
+      plot.test_progress(simulator=s, index=0); plt.show()
+      plot.test_progress(simulator=s, index=0, info=True, var=True, see=True); plt.show()
 
   :param title: the plot title.
   :param simulator: a simulator which has already simulated a series of CATs,

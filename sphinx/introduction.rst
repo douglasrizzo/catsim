@@ -41,11 +41,12 @@ Both of these functions are graphically represented in the following figure. It 
 
 .. plot::
 
+    import matplotlib.pyplot as plt
     from catsim.cat import generate_item_bank
     from catsim.plot import item_curve, PlotType
 
     item = generate_item_bank(1)[0]
-    item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH)
+    item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH); plt.show()
 
 The sum of the information of all items in a test is called *test information* [Ayala2009]_:
 

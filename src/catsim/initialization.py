@@ -18,8 +18,8 @@ class RandomInitializer(Initializer):
 
   :param dist_type: either `uniform` or `normal`
   :param dist_params: a tuple containing minimum and maximum values for the uniform distribution (in no particular
-  order) or the average and standard deviation values for the normal distribution
-  (in this particular order).
+                      order) or the average and standard deviation values for the normal distribution
+                      (in this particular order).
   """
 
   def __str__(self) -> str:

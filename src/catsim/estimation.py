@@ -17,12 +17,12 @@ class NumericalSearchEstimator(Estimator):
   :param precision: number of decimal points of precision, defaults to 6
   :type precision: int, optional
   :param dodd: whether to employ Dodd's estimation heuristic [Dod90]_ when the response vector only has one kind of
-  response (all correct or all incorrect, see :py:func:`catsim.cat.dodd`), defaults to True
+               response (all correct or all incorrect, see :py:func:`catsim.cat.dodd`), defaults to True
   :type dodd: bool, optional
   :param verbose: verbosity level of the maximization method
   :type verbose: bool, optional
   :param method: the search method to employ, one of `'ternary'`, `'dichotomous'`, `'fibonacci'`, `'golden'`, `'brent'`,
-  `'bounded'` and `'golden2'`, defaults to bounded
+                 `'bounded'` and `'golden2'`, defaults to bounded
   :type method: str, optional
   """
 

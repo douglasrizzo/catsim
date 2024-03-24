@@ -501,7 +501,7 @@ class ClusterSelector(Selector):
                   (see: :py:func:`catsim.cat.generate_item_bank`)
     :param clusters: a list containing item cluster memberships, represented by integers
     :returns: array containing the sum of item information values for each cluster,
-    divided by the number of items in each cluster
+              divided by the number of items in each cluster
     """
     cluster_infos = ClusterSelector.sum_cluster_infos(theta, items, clusters)
     count = numpy.bincount(clusters)
@@ -538,8 +538,8 @@ class ClusterSelector(Selector):
 
     :param items:
     :param c: a list containing clustering memeberships.
-    :returns: a matrix containing the average values of each parameter by cluster.
-    Lines are clusters, columns are parameters.
+    :returns: a matrix containing the average values of each parameter by cluster. Lines are clusters, columns are
+              parameters.
     """
     averages = ClusterSelector.sum_cluster_params(items, c)
 
