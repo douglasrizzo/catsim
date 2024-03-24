@@ -60,8 +60,7 @@ class NumericalSearchEstimator(Estimator):
     :type verbose: bool, optional
     :param method: _description_, defaults to "bounded"
     :type method: str, optional
-    :raises ValueError: _description_
-    :raises ValueError: _description_
+    :raises ValueError: If the parameter `method` is not one of the available methods.
     """
     super().__init__(verbose)
 
@@ -135,11 +134,9 @@ class NumericalSearchEstimator(Estimator):
 
       return candidate_theta
 
-    # select lower and upper bounds for an interval in which the estimator will
-    # look for the most probable new theta
+    # select lower and upper bounds for an interval in which the estimator will look for the most probable new theta
 
-    # these bounds are computed as a the minimum and maximum item difficulties
-    # in the bank...
+    # these bounds are computed as a the minimum and maximum item difficulties in the bank...
     lower_bound = min(items[:, 1])
     upper_bound = max(items[:, 1])
 

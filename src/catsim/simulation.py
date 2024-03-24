@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import numpy
-import tqdm
+from tqdm import tqdm
 
 from . import cat, irt
 
@@ -25,20 +25,20 @@ class Simulable:
   def simulator(self) -> "Simulator":
     """Set or get the simulator object.
 
-    :raises ValueError: If the simulator is not of type catsim.simulation.Simulator.
+    :raises TypeError: If the simulator is not of type catsim.simulation.Simulator.
     :return: The :py:class:`Simulator` instance tied to this Simulable.
     :rtype: Simulator
     """
     if self._simulator is not None and not isinstance(self._simulator, Simulator):
       msg = "simulator has to be of type catsim.simulation.Simulator"
-      raise ValueError(msg)
+      raise TypeError(msg)
     return self._simulator
 
   @simulator.setter
   def simulator(self, x: "Simulator") -> None:
     if not isinstance(x, Simulator):
       msg = "simulator has to be of type catsim.simulation.Simulator"
-      raise ValueError(msg)
+      raise TypeError(msg)
     self._simulator = x
     self.preprocess()
 
@@ -457,7 +457,7 @@ class Simulator:
 
     :param x: Variable representing the number of examinees.
     :type x: int | list[float] | numpy.ndarray
-    :raises ValueError: If the examinees are not an int, list of floats or one-dimensional numpy array.
+    :raises TypeError: If the examinees are not an int, list of floats or one-dimensional numpy array.
     :return: Examinees as a numpy array.
     :rtype: numpy.ndarray
     """
@@ -474,7 +474,7 @@ class Simulator:
       dist = x
     else:
       msg = "Examinees must be an int, list of floats or one-dimensional numpy array"
-      raise ValueError(msg)
+      raise TypeError(msg)
 
     return dist
 
@@ -529,7 +529,7 @@ class Simulator:
         f"Starting simulation: {self._initializer} {self._selector} "
         f"{self._estimator} {self._stopper} {self._items.shape[0]} items"
       )
-      pbar = tqdm.tqdm(total=len(self.examinees))
+      pbar = tqdm(total=len(self.examinees))
 
     start_time = time.time()
 

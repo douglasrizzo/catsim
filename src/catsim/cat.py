@@ -132,7 +132,7 @@ def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
   return (bank_size / test_size) * var_r + (test_size / bank_size)
 
 
-def generate_item_bank(n: int, itemtype: str = "4PL", corr: float = 0) -> numpy.ndarray:
+def generate_item_bank(n: int, itemtype: irt.NumParams = irt.NumParams.PL4, corr: float = 0) -> numpy.ndarray:
   """Generate a synthetic item bank whose parameters approximately follow real-world parameters.
 
   As proposed by [Bar10]_, item parameters are extracted from the following probability distributions:
@@ -153,16 +153,15 @@ def generate_item_bank(n: int, itemtype: str = "4PL", corr: float = 0) -> numpy.
   :return: an ``n x 4`` numerical matrix containing item parameters
   :rtype: numpy.ndarray
 
-  >>> generate_item_bank(5, '1PL')
-  >>> generate_item_bank(5, '2PL')
-  >>> generate_item_bank(5, '3PL')
-  >>> generate_item_bank(5, '4PL')
-  >>> generate_item_bank(5, '4PL', corr=0)
+  >>> generate_item_bank(5, irt.NumParams.PL1)
+  >>> generate_item_bank(5, irt.NumParams.PL2)
+  >>> generate_item_bank(5, irt.NumParams.PL3)
+  >>> generate_item_bank(5, irt.NumParams.PL4)
+  >>> generate_item_bank(5, irt.NumParams.PL4, corr=0)
   """
-  valid_itemtypes = ["1PL", "2PL", "3PL", "4PL"]
-
-  if itemtype not in valid_itemtypes:
-    raise ValueError("Item type not in " + str(valid_itemtypes))
+  if not isinstance(itemtype, irt.NumParams):
+    msg = "itemtype must be of type irt.NumParams"
+    raise TypeError(msg)
 
   means = [0, 1.2]
   stds = [1, 0.25]

@@ -37,7 +37,11 @@ class RandomInitializer(Initializer):
     :type dist_params: tuple, optional
     """
     super().__init__()
-    assert isinstance(dist_type, InitializationDistribution), "dist_type must be an InitializationDistribution"
+
+    if not isinstance(dist_type, InitializationDistribution):
+      msg = "dist_type must be of type InitializationDistribution"
+      raise TypeError(msg)
+
     self._dist_type = dist_type
     self._dist_params = dist_params
     self.__rng = numpy.random.default_rng()

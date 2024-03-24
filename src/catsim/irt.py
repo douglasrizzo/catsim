@@ -387,11 +387,11 @@ def validate_item_bank(items: numpy.ndarray, raise_err: bool = False) -> None:
     raise_err (bool): whether to raise a ValueError if validation fails.
 
   Raises:
-    ValueError: if the item matrix is not of type numpy.ndarray or does not meet catsim standards.
+    TypeError: if the item matrix is not of type numpy.ndarray or does not meet catsim standards.
   """
   if not isinstance(items, numpy.ndarray):
     msg = "Item matrix is not of type numpy.ndarray"
-    raise ValueError(msg)
+    raise TypeError(msg)
 
   err = ""
 

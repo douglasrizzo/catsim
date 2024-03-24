@@ -115,7 +115,7 @@ def test_finite_selectors(
 
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("bank_size", [5000])
-@pytest.mark.parametrize("logistic_model", ["4PL"])
+@pytest.mark.parametrize("logistic_model", [irt.NumParams.PL4])
 @pytest.mark.parametrize(
   "initializer",
   [
@@ -174,17 +174,22 @@ def test_infinite_selectors(
   one_simulation(items, examinees, initializer, selector, estimator, stopper)
 
 
-def test_item_bank_generation():
-  for items in [
-    generate_item_bank(5, "1PL"),
-    generate_item_bank(5, "2PL"),
-    generate_item_bank(5, "3PL"),
-    generate_item_bank(5, "3PL", corr=0),
-    generate_item_bank(5, "4PL"),
-  ]:
-    irt.validate_item_bank(items, raise_err=True)
-  items = np.zeros(100)
-  irt.validate_item_bank(items)
+@pytest.mark.parametrize(
+  "logistic_model",
+  [
+    irt.NumParams.PL1,
+    irt.NumParams.PL2,
+    irt.NumParams.PL3,
+    irt.NumParams.PL4,
+  ],
+)
+@pytest.mark.parametrize(
+  "correlation",
+  [0, 0.3],
+)
+def test_item_bank_generation(logistic_model: irt.NumParams, correlation: float):
+  items = generate_item_bank(5, logistic_model, corr=correlation)
+  irt.validate_item_bank(items, raise_err=True)
   items = irt.normalize_item_bank(items)
   irt.validate_item_bank(items, raise_err=True)
 

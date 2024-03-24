@@ -631,7 +631,7 @@ class StratifiedSelector(FiniteSelector):
       pointer += 1
       if pointer == max_pointer:
         msg = f"There are no more items to be selected from stratum {slices[len(administered_items)]}"
-        raise ValueError(msg)
+        raise RuntimeError(msg)
 
     return sorted_items[pointer]
 
