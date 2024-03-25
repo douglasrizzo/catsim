@@ -46,7 +46,7 @@ class RandomInitializer(Initializer):
     self._dist_params = dist_params
     self.__rng = numpy.random.default_rng()
 
-  def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:
+  def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:  # noqa: ARG002
     """Generates a value using the chosen distribution and parameters.
 
     :param index: the index of the current examinee. This parameter is not used by this method.
@@ -74,7 +74,7 @@ class FixedPointInitializer(Initializer):
     super().__init__()
     self._start = start
 
-  def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:
+  def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:  # noqa: ARG002
     """Returns the same ability value that was passed to the constructor of the initializer.
 
     :param index: the index of the current examinee. This parameter is not used by this method.

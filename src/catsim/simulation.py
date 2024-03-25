@@ -43,7 +43,7 @@ class Simulable:
     self.preprocess()
 
   def preprocess(self) -> None:
-    """Override this method to initialize any values the `Simulable` might use for the duration of the simulation.
+    """Override this method to perform any initialization the `Simulable` might need for the duration of the simulation.
 
     `preprocess` is called after a value is set for the `simulator` property. If a new value if
     attributed to `simulator`, this method is called again, guaranteeing that internal properties of the

@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from typing import Any
-from warnings import warn
 
 import numpy
 from numpy.typing import NDArray
@@ -23,7 +22,7 @@ class MaxInfoSelector(Selector):
     self._r_max = r_max
 
   def __str__(self) -> str:
-    """String representation of the MaxInfoSelector object."""
+    """Returns the name of the selector."""
     return "Maximum Information Selector"
 
   @property
@@ -72,19 +71,17 @@ class MaxInfoSelector(Selector):
     valid_indexes = self._get_non_administered(ordered_items, administered_items)
 
     if len(valid_indexes) == 0:
-      warn("There are no more items to be applied.")
-      return None
+      msg = "There are no more items to apply."
+      raise RuntimeError(msg)
 
     # gets the indexes and information values from the items with r < rmax
     valid_indexes_low_r = valid_indexes
-    if items.shape[1] < 5:
-      warn(
-        "This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate."
-        " Since this column is absent, it will presume all items have exposure rates = 0"
-      )
-    else:
-      valid_indexes_low_r = [index for index in valid_indexes if items[index, 4] < self._r_max]
 
+    if items.shape[1] < 5:  # noqa: PLR2004
+      msg = f"Expected an item matrix with 5 columns, got {items.shape[1]}."
+      raise ValueError(msg)
+
+    valid_indexes_low_r = [index for index in valid_indexes if items[index, 4] < self._r_max]
     # return the item with maximum information from the ones available
     return valid_indexes_low_r[0] if len(valid_indexes_low_r) > 0 else valid_indexes[0]
 
@@ -97,7 +94,7 @@ class UrrySelector(Selector):
     super().__init__()
 
   def __str__(self) -> str:
-    """String representation of the UrrySelector object."""
+    """Returns the name of the selector."""
     return "Urry Selector"
 
   def select(
@@ -135,8 +132,8 @@ class UrrySelector(Selector):
     valid_indexes = self._get_non_administered(ordered_items, administered_items)
 
     if len(valid_indexes) == 0:
-      warn("There are no more items to be applied.")
-      return None
+      msg = "There are no more items to apply."
+      raise RuntimeError(msg)
 
     return valid_indexes[0]
 
@@ -148,7 +145,7 @@ class LinearSelector(FiniteSelector):
   """
 
   def __str__(self) -> str:
-    """String representation of the LinearSelector object."""
+    """Returns the name of the selector."""
     return "Linear Selector"
 
   def __init__(self, indexes: list[int]) -> None:
@@ -177,18 +174,15 @@ class LinearSelector(FiniteSelector):
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
     (administered_items,) = self._prepare_args(index=index, administered_items=administered_items, **kwargs)
-
     valid_indexes = self._get_non_administered(self._indexes, administered_items)
-
     if len(valid_indexes) == 0:
-      warn(
+      msg = (
         f"A new index was asked for, but there are no more item indexes to present.\n"
         f"Current item:\t\t\t{self._current}\n"
         f"Items to be administered:\t{sorted(self._indexes)} (size: {len(self._indexes)})\n"
         f"Administered items:\t\t{sorted(administered_items)} (size: {len(administered_items)})"
       )
-      return None
-
+      raise RuntimeError(msg)
     return valid_indexes[0]
 
 
@@ -199,7 +193,7 @@ class RandomSelector(Selector):
   """
 
   def __str__(self) -> str:
-    """String representation of the RandomSelector object."""
+    """Returns the name of the selector."""
     return "Random Selector"
 
   def __init__(self, replace: bool = False) -> None:
@@ -235,11 +229,8 @@ class RandomSelector(Selector):
     assert administered_items is not None
 
     if len(administered_items) >= items.shape[0] and not self._replace:
-      warn(
-        "A new item was asked for, but there are no more items to present.\n"
-        f"Administered items:\t{len(administered_items)}\nItem bank size:\t{items.shape[0]}"
-      )
-      return None
+      msg = "There are no more items to apply."
+      raise RuntimeError(msg)
 
     if self._replace:
       return self.__rng.choice(items.shape[0])
@@ -277,26 +268,26 @@ class ClusterSelector(Selector):
   """
 
   def __str__(self) -> str:
-    """String representation of the ClusterSelector object."""
+    """Returns the name of the selector."""
     return "Cluster Selector"
 
   @property
-  def r_max(self):
+  def r_max(self) -> float:
     """Return the maximum exposure rate for items the selector accepts."""
     return self._r_max
 
   @property
-  def clusters(self):
+  def clusters(self) -> list[int]:
     """Return the clusters each item belongs to."""
     return self._clusters
 
   @property
-  def method(self):
+  def method(self) -> str:
     """Return the method used for cluster selection."""
     return self._method
 
   @property
-  def r_control(self):
+  def r_control(self) -> str:
     """Return the item exposure control method."""
     return self._r_control
 
@@ -307,6 +298,18 @@ class ClusterSelector(Selector):
     r_max: float = 1,
     r_control: str = "passive",
   ) -> None:
+    """Initialize a ClusterSelector object.
+
+    :param clusters: List of integers defining item cluster associations.
+    :type clusters: list[int]
+    :param method: cluster selection method, one of ["item_info", "cluster_info", "weighted_info"],
+                   defaults to "item_info".
+    :type method: str, optional
+    :param r_max: maximum item exposure rate, defaults to 1.
+    :type r_max: float, optional
+    :param r_control: Item exposure control method, defaults to "passive".
+    :type r_control: str, optional
+    """
     super().__init__()
     available_methods = ["item_info", "cluster_info", "weighted_info"]
     if method not in available_methods:
@@ -430,8 +433,8 @@ class ClusterSelector(Selector):
 
     # if the test size gets larger than the item bank size, end the test
     if selected_cluster is None:
-      warn("There are no more items to be applied.")
-      return None
+      msg = "There are no more items to be applied."
+      raise RuntimeError(msg)
 
     # in this part, an item is chosen from the cluster that was
     # selected above
@@ -446,14 +449,13 @@ class ClusterSelector(Selector):
     # gets the indexes and information values from the items in the
     # selected cluster with r < rmax that have not been administered
     valid_indexes_low_r = valid_indexes
-    if items.shape[1] < 5:
-      warn(
-        "This selector needs an item matrix with at least 5 columns, with the last one representing item exposure rate. Since this column is absent, it will presume all items have exposure rates = 0"
-      )
-    else:
-      valid_indexes_low_r = [
-        index for index in valid_indexes if items[index, 4] < self._r_max and index not in administered_items
-      ]
+    if items.shape[1] < 5:  # noqa: PLR2004
+      msg = f"Expected an item matrix with 5 columns, got {items.shape[1]}."
+      raise ValueError(msg)
+
+    valid_indexes_low_r = [
+      index for index in valid_indexes if items[index, 4] < self._r_max and index not in administered_items
+    ]
 
     if len(valid_indexes_low_r) > 0:
       # return the item with maximum information from the ones available
@@ -555,27 +557,57 @@ class ClusterSelector(Selector):
 
 
 class StratifiedSelector(FiniteSelector):
+  """Abstract class for stratified finite item selection strategies."""
+
   def __str__(self) -> str:
     """Returns the name of the selector."""
     return "General Stratified Selector"
 
   def __init__(self, test_size: int, sort_once: bool) -> None:
+    """Initialize a StratifiedSelector.
+
+    :param test_size: number of items in the test.
+    :type test_size: int
+    :param sort_once: Whether the strategy allows for the item matrix to be presorted.
+    :type sort_once: bool
+    """
     super().__init__(test_size)
     self._sort_once = sort_once
     self._presorted_items = None
 
   @abstractmethod
   def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
-    pass
+    """Presort the item matrix according to the strategy employed by this selector.
+
+    :param items: The item matrix.
+    :type items: numpy.ndarray
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
 
   def postsort_items(
-    self, items: numpy.ndarray, using_simulator_props: bool, **kwargs: dict[str, Any]
+    self,
+    items: numpy.ndarray,
+    using_simulator_props: bool,
+    **kwargs: dict[str, Any],  # noqa: ARG002
   ) -> numpy.ndarray:
+    """Sort the item matrix before selecting each new item.
+
+    This default implementation simply returns the presorted items, or sorts them using the :py:func:`presort_items`
+    method and returns them.
+
+    :param items: The item matrix.
+    :type items: numpy.ndarray
+    :param using_simulator_props: Whether the selector is being executed inside a Simulator.
+    :type using_simulator_props: bool
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
     if using_simulator_props:
       return self._presorted_items
     return self.presort_items(items)
 
-  def preprocess(self) -> None:
+  def preprocess(self) -> None:  # noqa: D102
     self._presorted_items = self.presort_items(self.simulator.items)
 
   def select(
@@ -605,24 +637,26 @@ class StratifiedSelector(FiniteSelector):
     assert administered_items is not None
     assert est_theta is not None
 
-    # select the item in the correct layer, according to the point in the test the examinee is
+    # divide the item matrix into strata and get the stratum in which the examinee is
     stratum_index = len(administered_items)
     try:
       slices, pointer, max_pointer = self._get_stratum(items, stratum_index)
-    except IndexError:
-      warn(
+    except IndexError as ierr:
+      msg = (
         f"{self}: test size is larger than was informed to the selector\n"
         f"Length of administered items:\t{len(administered_items)}\n"
         f"Total length of the test:\t{self._test_size}\n"
         f"Number of slices:\t{len(slices)}"
       )
-      return None
+      raise RuntimeError(msg) from ierr
 
     using_simulator_props = index is not None
 
     if using_simulator_props and self._sort_once:
+      # if running through a simulator and the selector allows presorting, get the presorted item matrix
       sorted_items = self._presorted_items
     else:
+      # allow the selector to resort the item matrix at this point in the test
       kwargs["using_simulator_props"] = using_simulator_props
       sorted_items = self.postsort_items(items, using_simulator_props, est_theta=est_theta)
 
@@ -658,12 +692,25 @@ class AStratSelector(StratifiedSelector):
   """
 
   def __str__(self) -> str:
+    """Returns the name of the selector."""
     return "a-Stratified Selector"
 
   def __init__(self, test_size: int) -> None:
+    """Initialize a AStratSelector object.
+
+    :param test_size: Number of items the test contains.
+    :type test_size: int
+    """
     super().__init__(test_size, True)
 
-  def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+  def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:  # noqa: PLR6301
+    """Presort the item matrix in ascending order according to the discrimination each item.
+
+    :param items: An item matrix.
+    :type items: numpy.ndarray
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
     return items[:, 0].argsort()
 
 
@@ -685,12 +732,25 @@ class AStratBBlockSelector(StratifiedSelector):
   """
 
   def __str__(self) -> str:
+    """Returns the name of the selector."""
     return "a-Stratified b-Blocking Selector"
 
   def __init__(self, test_size: int) -> None:
+    """Initialize a AStratBBlockSelector object.
+
+    :param test_size: Number of items the test contains.
+    :type test_size: int
+    """
     super().__init__(test_size, True)
 
   def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+    """Presort items in ascending order of discrimination each item, then each strata according to item difficulty.
+
+    :param items: An item matrix.
+    :type items: numpy.ndarray
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
     # sort items by their b values, in ascending order
     presorted_items = items[:, 1].argsort()
 
@@ -728,12 +788,25 @@ class MaxInfoStratSelector(StratifiedSelector):
   """
 
   def __str__(self) -> str:
+    """Returns the name of the selector."""
     return "Maximum Information Stratification Selector"
 
   def __init__(self, test_size: int) -> None:
+    """Initialize a MaxInfoStratSelector object.
+
+    :param test_size: Number of items the test contains.
+    :type test_size: int
+    """
     super().__init__(test_size, False)
 
-  def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+  def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:  # noqa: PLR6301
+    """Presort items in ascending order of maximum information.
+
+    :param items: An item matrix.
+    :type items: numpy.ndarray
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
     # get the theta values in which items are maximally informative
     theta_maxinfo = irt.max_info_hpc(items)
     # get the information values for all items at their maximum points
@@ -742,9 +815,19 @@ class MaxInfoStratSelector(StratifiedSelector):
     return item_maxinfo.argsort()
 
   def postsort_items(self, items: numpy.ndarray, using_simulator_props: bool, est_theta: float) -> numpy.ndarray:
+    """Divide the item bank into strata and sort each one in descending order of information for the current theta.
+
+    :param items: The item matrix.
+    :type items: numpy.ndarray
+    :param using_simulator_props: Whether the selector is being executed inside a Simulator.
+    :type using_simulator_props: bool
+    :param est_theta: The current estimate of the examinee's ability.
+    :type est_theta: float
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
     # recover items presorted by the first rule
     presorted_items = self._presorted_items if using_simulator_props else self.presort_items(items)
-
     # run through each stratum and sort items in descending order according to
     # their information for the current theta value
     final_indices = []
@@ -786,9 +869,17 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
   """
 
   def __str__(self) -> str:
+    """Returns the name of the selector."""
     return "Maximum Information Stratification with b-Blocking Selector"
 
   def presort_items(self, items: numpy.ndarray) -> numpy.ndarray:
+    """Presort the item matrix according to the information of each item at their maximum.
+
+    :param items: An item matrix.
+    :type items: numpy.ndarray
+    :return: The sorted item matrix.
+    :rtype: numpy.ndarray
+    """
     # get the theta values in which items are maximally informative
     theta_maxinfo = irt.max_info_hpc(items)
     # sort items by theta
@@ -832,6 +923,7 @@ class The54321Selector(FiniteSelector):
     :type test_size: int
     """
     super().__init__(test_size)
+    self.__rng = numpy.random.default_rng()
 
   def select(
     self,
@@ -869,11 +961,11 @@ class The54321Selector(FiniteSelector):
     organized_items = self._get_non_administered(ordered_items, administered_items)
 
     if len(organized_items) == 0:
-      warn("There are no more items to apply.")
-      return None
+      msg = "There are no more items to apply."
+      raise RuntimeError(msg)
 
     bin_size = self._test_size - len(administered_items)
-    return numpy.random.choice(organized_items[0:bin_size])
+    return self.__rng.choice(organized_items[0:bin_size])
 
 
 class RandomesqueSelector(Selector):
@@ -881,20 +973,26 @@ class RandomesqueSelector(Selector):
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a predefined value (originally 5, but user-defined in this implementation).
-
-  :param bin_size: the number of most informative items to be taken into consideration when
-                   randomly selecting one of them.
   """
 
   def __str__(self) -> str:
+    """Returns the name of the selector."""
     return "Randomesque Selector"
 
-  def __init__(self, bin_size) -> None:
+  def __init__(self, bin_size: int) -> None:
+    """Initialize a RandomesqueSelector object.
+
+    :param bin_size: the number of most informative items to be taken into consideration when
+                     randomly selecting one of them.
+    :type bin_size: int
+    """
     super().__init__()
     self._bin_size = bin_size
+    self.__rng = numpy.random.default_rng()
 
   @property
-  def bin_size(self):
+  def bin_size(self) -> int:
+    """Get the bin size."""
     return self._bin_size
 
   def select(
@@ -933,10 +1031,10 @@ class RandomesqueSelector(Selector):
     organized_items = self._get_non_administered(ordered_items, administered_items)
 
     if len(organized_items) == 0:
-      warn("There are no more items to apply.")
-      return None
+      msg = "There are no more items to apply."
+      raise RuntimeError(msg)
 
-    return numpy.random.choice(list(organized_items)[: self._bin_size])
+    return self.__rng.choice(list(organized_items)[: self._bin_size])
 
 
 class IntervalInfoSelector(Selector):
@@ -947,7 +1045,7 @@ class IntervalInfoSelector(Selector):
   """
 
   def __str__(self) -> str:
-    """String representation of the IntervalInfoSelector object."""
+    """Returns the name of the selector."""
     return "Interval Information Selector"
 
   def __init__(self, interval: float | None = None) -> None:
@@ -961,7 +1059,8 @@ class IntervalInfoSelector(Selector):
     self._interval = interval if interval is not None else numpy.inf
 
   @property
-  def interval(self):
+  def interval(self) -> float:
+    """Get the size of the interval under which the integral of the information function will be computed."""
     return self._interval
 
   def select(
@@ -1011,7 +1110,7 @@ class IntervalInfoSelector(Selector):
     organized_items = self._get_non_administered(ordered_items, administered_items)
 
     if len(organized_items) == 0:
-      warn("There are no more items to apply.")
-      return None
+      msg = "There are no more items to apply."
+      raise RuntimeError(msg)
 
     return organized_items[0]

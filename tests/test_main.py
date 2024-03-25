@@ -21,6 +21,7 @@ from catsim.selection import (
 )
 from catsim.simulation import Estimator, Initializer, Selector, Simulator, Stopper
 from catsim.stopping import MaxItemStopper, MinErrorStopper
+from matplotlib.pyplot import close
 from sklearn.cluster import KMeans
 
 
@@ -31,7 +32,8 @@ def one_simulation(
   selector: Selector,
   estimator: Estimator,
   stopper: Stopper,
-):
+) -> None:
+  """Test a single simulation."""
   Simulator(items, examinees).simulate(initializer, selector, estimator, stopper, verbose=True)
 
 
@@ -46,7 +48,8 @@ def test_cism(
   initializer: Initializer,
   estimator: Estimator,
   stopper: Stopper,
-):
+) -> None:
+  """Test the cluster-based item selection method."""
   items = generate_item_bank(bank_size)
   clusters = list(KMeans(n_clusters=8, n_init="auto").fit_predict(items))
   ClusterSelector.weighted_cluster_infos(0, items, clusters)
@@ -76,7 +79,8 @@ def test_finite_selectors(
   logistic_model: str,
   initializer: Initializer,
   estimator: Estimator,
-):
+) -> None:
+  """Test finite selectors."""
   rng = np.random.default_rng()
   finite_selectors = [
     LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False))),
@@ -149,7 +153,8 @@ def test_infinite_selectors(
   selector: Selector,
   estimator: Estimator,
   stopper: Stopper,
-):
+) -> None:
+  """Test infinite selectors."""
   rng = np.random.default_rng()
   items = generate_item_bank(bank_size, itemtype=logistic_model)
   max_administered_items = stopper.max_itens if type(stopper) == MaxItemStopper else bank_size
@@ -187,16 +192,16 @@ def test_infinite_selectors(
   "correlation",
   [0, 0.3],
 )
-def test_item_bank_generation(logistic_model: irt.NumParams, correlation: float):
+def test_item_bank_generation(logistic_model: irt.NumParams, correlation: float) -> None:
+  """Test item bank generation function."""
   items = generate_item_bank(5, logistic_model, corr=correlation)
   irt.validate_item_bank(items, raise_err=True)
   items = irt.normalize_item_bank(items)
   irt.validate_item_bank(items, raise_err=True)
 
 
-def test_plots():
-  from matplotlib.pyplot import close
-
+def test_plots() -> None:
+  """Test plot functionalities."""
   initializer = RandomInitializer()
   selector = MaxInfoSelector()
   estimator = NumericalSearchEstimator()
