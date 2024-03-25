@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy
 
 from . import irt
@@ -23,7 +25,12 @@ class MaxItemStopper(Stopper):
     super().__init__()
     self._max_itens = max_itens
 
-  def stop(self, index: int | None = None, administered_items: numpy.ndarray = None) -> bool:
+  def stop(
+    self,
+    index: int | None = None,
+    administered_items: numpy.ndarray = None,
+    **kwargs: dict[str, Any],  # noqa: ARG002
+  ) -> bool:
     """Check whether the test reached its stopping criterion for the given user.
 
     :param index: the index of the current examinee
@@ -73,7 +80,11 @@ class MinErrorStopper(Stopper):
     self._min_error = min_error
 
   def stop(
-    self, index: int | None = None, administered_items: numpy.ndarray = None, theta: float | None = None
+    self,
+    index: int | None = None,
+    administered_items: numpy.ndarray = None,
+    theta: float | None = None,
+    **kwargs: dict[str, Any],  # noqa: ARG002
   ) -> bool:
     """Check whether the test reached its stopping criterion.
 
