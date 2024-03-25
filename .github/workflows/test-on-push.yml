@@ -1,9 +1,9 @@
 name: Unit tests
 
-on: [push]
+on: push
 
 jobs:
-  build:
+  pytest:
     runs-on: ubuntu-latest
     strategy:
       matrix:
