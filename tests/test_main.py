@@ -224,12 +224,12 @@ def test_plots() -> None:
     see=True,
     reliability=True,
   )
-  plot.item_exposure(simulator=s, show=False)
-  plot.item_exposure(simulator=s, show=False, par="a")
-  plot.item_exposure(simulator=s, show=False, par="b")
-  plot.item_exposure(simulator=s, show=False, par="c")
-  plot.item_exposure(simulator=s, show=False, par="d")
-  plot.item_exposure(simulator=s, show=False, hist=True)
+  plot.item_exposure(simulator=s)
+  plot.item_exposure(simulator=s, par="a")
+  plot.item_exposure(simulator=s, par="b")
+  plot.item_exposure(simulator=s, par="c")
+  plot.item_exposure(simulator=s, par="d")
+  plot.item_exposure(simulator=s, hist=True)
 
   # close all plots after testing
   close("all")
