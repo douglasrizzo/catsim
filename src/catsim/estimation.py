@@ -1,4 +1,3 @@
-from typing import Any
 
 import numpy
 from scipy.optimize import minimize_scalar
@@ -45,7 +44,7 @@ class NumericalSearchEstimator(Estimator):
 
   def __init__(
     self,
-    tol: int = 1e-6,
+    tol: float = 1e-6,
     dodd: bool = True,
     verbose: bool = False,
     method: str = "bounded",
@@ -75,11 +74,10 @@ class NumericalSearchEstimator(Estimator):
   def estimate(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     response_vector: list[bool] | None = None,
     est_theta: float | None = None,
-    **kwargs: dict[str, Any],
   ) -> float:
     r"""Compute the theta value that maximizes the log-likelihood function for the given examinee in a test.
 
@@ -103,7 +101,6 @@ class NumericalSearchEstimator(Estimator):
       administered_items=administered_items,
       response_vector=response_vector,
       est_theta=est_theta,
-      **kwargs,
     )
 
     assert items is not None

@@ -19,7 +19,7 @@ class Simulable:
   def __init__(self) -> None:
     """Initialize a Simulable object."""
     super(Simulable).__init__()
-    self._simulator: Simulator = None
+    self._simulator: Simulator | None = None
 
   @property
   def simulator(self) -> "Simulator":
