@@ -177,8 +177,8 @@ class LinearSelector(FiniteSelector):
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
     (administered_items,) = self._prepare_args(
-      return_administered_items=True,
-      index=index, administered_items=administered_items, **kwargs)
+      return_administered_items=True, index=index, administered_items=administered_items, **kwargs
+    )
     valid_indexes = self._get_non_administered(self._indexes, administered_items)
     if len(valid_indexes) == 0:
       msg = (

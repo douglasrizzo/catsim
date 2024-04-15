@@ -49,7 +49,7 @@ class RandomInitializer(Initializer):
     :param index: the index of the current examinee. This parameter is not used by this method.
     :returns: a ability value generated from the chosen distribution using the passed parameters
     """
-    (rng, ) = self._prepare_args(return_rng=True, index=index, **kwargs)
+    (rng,) = self._prepare_args(return_rng=True, index=index, **kwargs)
     if self._dist_type == InitializationDistribution.UNIFORM:
       theta = rng.uniform(min(self._dist_params), max(self._dist_params))
     elif self._dist_type == InitializationDistribution.NORMAL:
