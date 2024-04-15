@@ -76,7 +76,7 @@ def test_finite_selectors(
   examinees: int,
   test_size: int,
   bank_size: int,
-  logistic_model: str,
+  logistic_model: irt.NumParams,
   initializer: Initializer,
   estimator: Estimator,
 ) -> None:
@@ -148,7 +148,7 @@ def test_finite_selectors(
 def test_infinite_selectors(
   examinees: int,
   bank_size: int,
-  logistic_model: str,
+  logistic_model: irt.NumParams,
   initializer: Initializer,
   selector: Selector,
   estimator: Estimator,
