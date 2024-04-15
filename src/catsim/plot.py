@@ -262,8 +262,9 @@ def test_progress(
   var: bool = False,
   see: bool = False,
   reliability: bool = False,
+  marker: str | int | None = None,
   figsize: tuple | None = None,
-) -> None:
+) -> plt.Axes:
   """Generates a plot representing an examinee's test progress.
 
   Note that, while some functions increase or decrease monotonically, like test information and standard error of
@@ -287,6 +288,7 @@ def test_progress(
       plot.test_progress(simulator=s, index=0); plt.show()
       plot.test_progress(simulator=s, index=0, info=True, var=True, see=True); plt.show()
 
+  :param ax: axis to use. If none is passed, a figure with the necessary axis will be created.
   :param title: the plot title.
   :param simulator: a simulator which has already simulated a series of CATs,
                     containing estimations to the examinees' abilities and
@@ -307,8 +309,8 @@ def test_progress(
              works if both abilities and administered items are passed.
   :param reliability: plot the test reliability. It only works if both abilities
                       and administered items are passed.
-  :param filepath: the path to save the plot
-  :param show: whether the generated plot is to be shown
+  :param marker:
+  :param figsize: size of the figure to be created, in case no axis is passed.
   """
   if simulator is None and thetas is None and administered_items is None:
     msg = "Not a single plottable object was passed. One of: simulator, thetas, administered_items must be passed."
@@ -337,12 +339,12 @@ def test_progress(
   xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
 
   if thetas is not None:
-    ax.plot(xs, thetas, label=r"$\hat{\theta}$")
+    ax.plot(xs, thetas, label=r"$\hat{\theta}$", marker=marker)
   if administered_items is not None:
     difficulties = administered_items[:, 1]
-    ax.plot(xs[1:], difficulties, label="Item difficulty")
+    ax.plot(xs[1:], difficulties, label="Item difficulty", marker=marker)
   if true_theta is not None:
-    ax.hlines(true_theta, 0, len(xs), label=r"$\theta$")
+    ax.hlines(true_theta, 0, len(xs) - 1, label=r"$\theta$", colors="black", linestyles="dashed")
   if thetas is not None and administered_items is not None:
     # calculate and plot test information, var, standard error and reliability
     if info:
@@ -353,7 +355,7 @@ def test_progress(
         )
         for x in xs
       ]
-      ax.plot(xs, infos, label=r"$I(\theta)$")
+      ax.plot(xs, infos, label=r"$I(\theta)$", marker=marker)
 
     if var:
       varss = [
@@ -363,7 +365,7 @@ def test_progress(
         )
         for x in xs
       ]
-      ax.plot(xs, varss, label=r"$Var$")
+      ax.plot(xs, varss, label=r"$Var$", marker=marker)
 
     if see:
       sees = [
@@ -373,7 +375,7 @@ def test_progress(
         )
         for x in xs
       ]
-      ax.plot(xs, sees, label=r"$SEE$")
+      ax.plot(xs, sees, label=r"$SEE$", marker=marker)
 
     if reliability:
       reliabilities = [
@@ -383,7 +385,7 @@ def test_progress(
         )
         for x in xs
       ]
-      ax.plot(xs, reliabilities, label="Reliability")
+      ax.plot(xs, reliabilities, label="Reliability", marker=marker)
   ax.set_xlabel("Items")
   ax.grid()
   ax.legend(loc="best")
