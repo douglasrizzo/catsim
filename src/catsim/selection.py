@@ -54,6 +54,7 @@ class MaxInfoSelector(Selector):
     """
     items, administered_items, est_theta = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_est_theta=True,
       index=index,
       items=items,
@@ -117,6 +118,7 @@ class UrrySelector(Selector):
     """
     items, administered_items, est_theta = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_est_theta=True,
       index=index,
       items=items,
@@ -174,7 +176,9 @@ class LinearSelector(FiniteSelector):
     :param administered_items: a list containing the indexes of items that were already administered
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    (administered_items,) = self._prepare_args(index=index, administered_items=administered_items, **kwargs)
+    (administered_items,) = self._prepare_args(
+      return_administered_items=True,
+      index=index, administered_items=administered_items, **kwargs)
     valid_indexes = self._get_non_administered(self._indexes, administered_items)
     if len(valid_indexes) == 0:
       msg = (
@@ -201,7 +205,6 @@ class RandomSelector(Selector):
     """Initialize a RandomSelector object."""
     super().__init__()
     self._replace = replace
-    self.__rng = numpy.random.default_rng()
 
   def select(
     self,
@@ -218,8 +221,10 @@ class RandomSelector(Selector):
     :param administered_items: a list containing the indexes of items that were already administered
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    items, administered_items = self._prepare_args(
+    items, administered_items, rng = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
+      return_rng=True,
       index=index,
       items=items,
       administered_items=administered_items,
@@ -234,9 +239,9 @@ class RandomSelector(Selector):
       raise RuntimeError(msg)
 
     if self._replace:
-      return self.__rng.choice(items.shape[0])
+      return rng.choice(items.shape[0])
     valid_indexes = self._get_non_administered(list(range(items.shape[0])), administered_items)
-    return self.__rng.choice(valid_indexes)
+    return rng.choice(valid_indexes)
 
 
 class ClusterSelector(Selector):
@@ -345,6 +350,7 @@ class ClusterSelector(Selector):
     """
     items, administered_items, est_theta = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_est_theta=True,
       index=index,
       items=items,
@@ -627,10 +633,11 @@ class StratifiedSelector(FiniteSelector):
     """
     items, administered_items, est_theta = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
+      return_est_theta=True,
       index=index,
       items=items,
       administered_items=administered_items,
-      return_est_theta=True,
       **kwargs,
     )
 
@@ -924,7 +931,6 @@ class The54321Selector(FiniteSelector):
     :type test_size: int
     """
     super().__init__(test_size)
-    self.__rng = numpy.random.default_rng()
 
   def select(
     self,
@@ -943,9 +949,11 @@ class The54321Selector(FiniteSelector):
     :param est_theta: a float containing the current estimated ability
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    items, administered_items, est_theta = self._prepare_args(
+    items, administered_items, est_theta, rng = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_est_theta=True,
+      return_rng=True,
       index=index,
       items=items,
       administered_items=administered_items,
@@ -966,7 +974,7 @@ class The54321Selector(FiniteSelector):
       raise RuntimeError(msg)
 
     bin_size = self._test_size - len(administered_items)
-    return self.__rng.choice(organized_items[0:bin_size])
+    return rng.choice(organized_items[0:bin_size])
 
 
 class RandomesqueSelector(Selector):
@@ -989,7 +997,6 @@ class RandomesqueSelector(Selector):
     """
     super().__init__()
     self._bin_size = bin_size
-    self.__rng = numpy.random.default_rng()
 
   @property
   def bin_size(self) -> int:
@@ -1013,9 +1020,11 @@ class RandomesqueSelector(Selector):
     :param est_theta: a float containing the current estimated ability
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    items, administered_items, est_theta = self._prepare_args(
+    items, administered_items, est_theta, rng = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_est_theta=True,
+      return_rng=True,
       index=index,
       items=items,
       administered_items=administered_items,
@@ -1035,7 +1044,7 @@ class RandomesqueSelector(Selector):
       msg = "There are no more items to apply."
       raise RuntimeError(msg)
 
-    return self.__rng.choice(list(organized_items)[: self._bin_size])
+    return rng.choice(list(organized_items)[: self._bin_size])
 
 
 class IntervalInfoSelector(Selector):
@@ -1083,6 +1092,7 @@ class IntervalInfoSelector(Selector):
     """
     items, administered_items, est_theta = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_est_theta=True,
       index=index,
       items=items,

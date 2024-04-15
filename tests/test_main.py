@@ -94,25 +94,19 @@ def test_finite_selectors(
   stopper = MaxItemStopper(test_size)
 
   for selector in finite_selectors:
+    rng = np.random.default_rng(1337)
     items = generate_item_bank(bank_size, itemtype=logistic_model)
     responses = cat.random_response_vector(random.randint(1, test_size - 1))
-    administered_items = rng.choice(bank_size, len(responses), replace=False)
-    est_theta = initializer.initialize()
-    selector.select(
-      items=items,
-      administered_items=administered_items,
-      est_theta=est_theta,
-    )
+    administered_items = list(rng.choice(bank_size, len(responses), replace=False))
+    est_theta = initializer.initialize(rng=rng)
+    selector.select(items=items, administered_items=administered_items, est_theta=est_theta, rng=rng)
     estimator.estimate(
       items=items,
       administered_items=administered_items,
       response_vector=responses,
       est_theta=est_theta,
     )
-    stopper.stop(
-      administered_items=items[administered_items],
-      theta=est_theta,
-    )
+    stopper.stop(administered_items=items[administered_items], theta=est_theta, rng=rng)
 
     one_simulation(items, examinees, initializer, selector, estimator, stopper)
 
@@ -160,11 +154,12 @@ def test_infinite_selectors(
   max_administered_items = stopper.max_itens if type(stopper) == MaxItemStopper else bank_size
   responses = cat.random_response_vector(random.randint(1, max_administered_items))
   administered_items = rng.choice(bank_size, len(responses), replace=False)
-  est_theta = initializer.initialize()
+  est_theta = initializer.initialize(rng=rng)
   selector.select(
     items=items,
     administered_items=administered_items,
     est_theta=est_theta,
+    rng=rng,
   )
   estimator.estimate(
     items=items,

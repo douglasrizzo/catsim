@@ -94,6 +94,7 @@ class NumericalSearchEstimator(Estimator):
     """
     items, administered_items, response_vector, est_theta = self._prepare_args(
       return_items=True,
+      return_administered_items=True,
       return_response_vector=True,
       return_est_theta=True,
       index=index,

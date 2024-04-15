@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import Any
 
-import numpy
-
 from .simulation import Initializer
 
 
@@ -44,18 +42,18 @@ class RandomInitializer(Initializer):
 
     self._dist_type = dist_type
     self._dist_params = dist_params
-    self.__rng = numpy.random.default_rng()
 
-  def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:  # noqa: ARG002
+  def initialize(self, index: int | None = None, **kwargs: dict[str, Any]) -> float:
     """Generates a value using the chosen distribution and parameters.
 
     :param index: the index of the current examinee. This parameter is not used by this method.
     :returns: a ability value generated from the chosen distribution using the passed parameters
     """
+    (rng, ) = self._prepare_args(return_rng=True, index=index, **kwargs)
     if self._dist_type == InitializationDistribution.UNIFORM:
-      theta = self.__rng.uniform(min(self._dist_params), max(self._dist_params))
+      theta = rng.uniform(min(self._dist_params), max(self._dist_params))
     elif self._dist_type == InitializationDistribution.NORMAL:
-      theta = self.__rng.normal(self._dist_params[0], self._dist_params[1])
+      theta = rng.normal(self._dist_params[0], self._dist_params[1])
     return theta
 
 

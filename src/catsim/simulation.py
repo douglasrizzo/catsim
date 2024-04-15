@@ -53,8 +53,10 @@ class Simulable:
   def _prepare_args(
     self,
     return_items: bool = False,
+    return_administered_items: bool = False,
     return_response_vector: bool = False,
     return_est_theta: bool = False,
+    return_rng: bool = False,
     **kwargs: dict[str, Any],
   ) -> tuple:
     """Prepare input arguments for all Simulable objects.
@@ -63,41 +65,48 @@ class Simulable:
 
     Parameters:
     :param return_items: bool, whether to return items
+    :param return_administered_items: bool, whether to return administered items
     :param return_response_vector: bool, whether to return response vector
     :param return_est_theta: bool, whether to return estimated theta
+    :param return_rng: bool, whether to return a random number generator
     :param **kwargs: dict[str, Any], additional keyword arguments
     :returns: A tuple containing the specified results based on the conditions.
     """
     using_simulator_props = kwargs.get("index") is not None and self.simulator is not None
-    if not using_simulator_props and (
-      kwargs.get("items") is None
-      or kwargs.get("administered_items") is None
-      or (return_est_theta and kwargs.get("est_theta") is None)
-    ):
-      msg = (
-        "Either pass an index for the simulator or all of the other optional parameters to use this component "
-        "independently."
-      )
-      raise ValueError(msg)
-
     result = []
-    if using_simulator_props:
+    if not using_simulator_props:
+      msg = "No simulator in use, but optional arguments missing: "
+      missing_args = []
+
+      for ret, val in (
+        (return_items, "items"),
+        (return_administered_items, "administered_items"),
+        (return_response_vector, "response_vector"),
+        (return_est_theta, "est_theta"),
+        (return_rng, "rng"),
+      ):
+        if ret:
+          try:
+            result.append(kwargs[val])
+          except KeyError:
+            missing_args.append(val)
+      if len(missing_args) > 0:
+        msg += ", ".join(missing_args)
+        raise ValueError(msg)
+
+    else:
       index = kwargs["index"]
       if return_items:
         result.append(self.simulator.items)
-      result.append(self.simulator.administered_items[index])
+      if return_administered_items:
+        result.append(self.simulator.administered_items[index])
       if return_response_vector:
         result.append(self.simulator.response_vectors[index])
       if return_est_theta:
         result.append(self.simulator.latest_estimations[index])
-    else:
-      if return_items:
-        result.append(kwargs["items"])
-      result.append(kwargs["administered_items"])
-      if return_response_vector:
-        result.append(kwargs["response_vector"])
-      if return_est_theta:
-        result.append(kwargs["est_theta"])
+      if return_rng:
+        result.append(self.simulator.rng)
+
     return tuple(result)
 
 
@@ -109,11 +118,11 @@ class Initializer(Simulable, ABC):
     super().__init__()
 
   @abstractmethod
-  def initialize(self, index: int) -> float:
+  def initialize(self, **kwargs: dict[str, Any]) -> float:
     r"""Select an examinee's initial :math:`\theta` value.
 
-    :param index: the index of the current examinee
-    :returns: examinee's initial :math:`\theta` value
+    :param kwargs: arguments used by the Initializer.
+    :returns: examinee's initial :math:`\theta` value.
     """
 
 
@@ -175,10 +184,21 @@ class Selector(Simulable, ABC):
     return list(numpy.abs(items[:, 1] - est_theta).argsort())
 
   @abstractmethod
-  def select(self, index: int | None = None) -> int | None:
+  def select(
+    self,
+    index: int | None = None,
+    items: numpy.ndarray | None = None,
+    administered_items: list[int] | None = None,
+    est_theta: float | None = None,
+    kwargs: dict[str, Any] | None = None,
+  ) -> int | None:
     """Returns the index of the next item to be administered.
 
     :param index: the index of the current examinee in the simulator.
+    :param items: a matrix containing item parameters in the format that `catsim` understands
+                  (see: :py:func:`catsim.cat.generate_item_bank`)
+    :param administered_items: a list containing the indexes of items that were already administered
+    :param est_theta: a float containing the current estimated ability
     :returns: index of the next item to be applied or `None` if there are no more items to be presented.
     """
 
@@ -230,10 +250,25 @@ class Estimator(Simulable, ABC):
     self._verbose = verbose
 
   @abstractmethod
-  def estimate(self, index: int) -> float:
+  def estimate(
+    self,
+    index: int | None = None,
+    items: numpy.ndarray | None = None,
+    administered_items: list[int] | None = None,
+    response_vector: list[bool] | None = None,
+    est_theta: float | None = None,
+  ) -> float:
     r"""Compute the theta value that maximizes the log-likelihood function for the given examinee in a test.
 
+    When this method is used inside a simulator, its arguments are automatically filled. Outside of a simulation, the
+    user can also specify the arguments to use the Estimator as a standalone object.
+
     :param index: index of the current examinee in the simulator
+    :param items: a matrix containing item parameters in the format that `catsim` understands
+                  (see: :py:func:`catsim.cat.generate_item_bank`)
+    :param administered_items: a list containing the indexes of items that were already administered
+    :param response_vector: a boolean list containing the examinee's answers to the administered items
+    :param est_theta: a float containing the current estimated ability
     :returns: the current :math:`\hat\theta`
     """
 
@@ -298,6 +333,7 @@ class Simulator:
     selector: Selector = None,
     estimator: Estimator = None,
     stopper: Stopper = None,
+    seed: int = 0,
   ) -> None:
     """Initialize a Simulator object.
 
@@ -313,6 +349,8 @@ class Simulator:
     :type estimator: Estimator, optional
     :param stopper: Stopper to use during the simulation, defaults to None.
     :type stopper: Stopper, optional
+    :param seed: Seed used by the numpy random number generator during the simulation procedure, defaults to None.
+    :type seed: int, optional
     """
     irt.validate_item_bank(items)
 
@@ -333,7 +371,7 @@ class Simulator:
     self._estimator = estimator
     self._stopper = stopper
 
-    self.__rng = numpy.random.default_rng()
+    self.__rng = numpy.random.default_rng(seed=seed)
 
     # `examinees` is passed to its special setter
     self._examinees = self._to_distribution(examinees)
@@ -448,6 +486,11 @@ class Simulator:
     r""":py:type:numpy.ndarray containing examinees true ability values (:math:`\theta`)."""
     return self._examinees
 
+  @property
+  def rng(self) -> numpy.random.Generator:
+    """Get the random number generator used by the simulator."""
+    return self.__rng
+
   @examinees.setter
   def examinees(self, x: int | list[float] | numpy.ndarray) -> None:
     self._examinees = self._to_distribution(x)
@@ -537,11 +580,11 @@ class Simulator:
       if verbose:
         pbar.update()
 
-      est_theta = self._initializer.initialize(current_examinee)
+      est_theta = self._initializer.initialize(index=current_examinee)
       self._estimations[current_examinee].append(est_theta)
 
-      while not self._stopper.stop(current_examinee):
-        selected_item = self._selector.select(current_examinee)
+      while not self._stopper.stop(index=current_examinee):
+        selected_item = self._selector.select(index=current_examinee)
 
         # if the selector returns None, it means the selector and not the stopper, is asking the test to stop
         # this happens e.g. if the item bank or or the available strata end before the minimum error is achieved
@@ -567,7 +610,7 @@ class Simulator:
         self._administered_items[current_examinee].append(selected_item)
 
         # estimate the new theta using the given estimator
-        est_theta = self._estimator.estimate(current_examinee)
+        est_theta = self._estimator.estimate(index=current_examinee)
 
         # count occurrences of this item in all tests
         item_occurrences = numpy.sum([
