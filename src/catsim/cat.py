@@ -132,7 +132,9 @@ def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
   return (bank_size / test_size) * var_r + (test_size / bank_size)
 
 
-def generate_item_bank(n: int, itemtype: irt.NumParams = irt.NumParams.PL4, corr: float = 0) -> numpy.ndarray:
+def generate_item_bank(
+  n: int, itemtype: irt.NumParams = irt.NumParams.PL4, corr: float = 0, rng: Generator | None = None
+) -> numpy.ndarray:
   """Generate a synthetic item bank whose parameters approximately follow real-world parameters.
 
   As proposed by [Bar10]_, item parameters are extracted from the following probability distributions:
@@ -150,6 +152,7 @@ def generate_item_bank(n: int, itemtype: irt.NumParams = irt.NumParams.PL4, corr
                    three- or four-parameter logistic model
   :param corr: the correlation between item discrimination and difficulty. If
                ``itemtype == '1PL'``, it is ignored.
+  :param rng: Optional random number generator to generate the item bank. If not passed, one will be created.
   :return: an ``n x 4`` numerical matrix containing item parameters
   :rtype: numpy.ndarray
 
@@ -170,7 +173,7 @@ def generate_item_bank(n: int, itemtype: irt.NumParams = irt.NumParams.PL4, corr
     [stds[0] * stds[1] * corr, stds[1] ** 2],
   ]
 
-  rng = numpy.random.default_rng()
+  rng = rng or numpy.random.default_rng()
 
   b, a = rng.multivariate_normal(means, covs, n).T
 
