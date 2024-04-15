@@ -4,6 +4,7 @@ import operator
 import random
 
 import numpy
+from numpy.random import Generator
 
 from catsim import irt
 
@@ -189,7 +190,7 @@ def generate_item_bank(
   c = rng.normal(0.25, 0.02, n).clip(min=0) if itemtype in {"3PL", "4PL"} else numpy.zeros(n)
   d = rng.uniform(0.94, 1, n) if itemtype == "4PL" else numpy.ones(n)
 
-  return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
+  return irt.normalize_item_bank(numpy.array([a, b, c, d, numpy.zeros(n)]).T)
 
 
 def random_response_vector(size: int) -> list:
