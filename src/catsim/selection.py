@@ -1,3 +1,4 @@
+import operator
 from abc import abstractmethod
 from typing import Any
 
@@ -411,7 +412,7 @@ class ClusterSelector(Selector):
           cluster
           for (inf_value, cluster) in sorted(
             zip(cluster_infos, set(self._clusters), strict=False),
-            key=lambda pair: pair[0],
+            key=operator.itemgetter(0),
             reverse=True,
           )
         ],
