@@ -37,7 +37,7 @@ class MaxInfoSelector(Selector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     est_theta: float | None = None,
     **kwargs: dict[str, Any],
@@ -100,7 +100,7 @@ class UrrySelector(Selector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     est_theta: float | None = None,
     **kwargs: dict[str, Any],
@@ -205,7 +205,7 @@ class RandomSelector(Selector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     **kwargs: dict[str, Any],
   ) -> int | None:
@@ -328,7 +328,7 @@ class ClusterSelector(Selector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     est_theta: float | None = None,
     **kwargs: dict[str, Any],
@@ -613,7 +613,7 @@ class StratifiedSelector(FiniteSelector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     **kwargs: dict[str, Any],
   ) -> int | None:
@@ -928,7 +928,7 @@ class The54321Selector(FiniteSelector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     est_theta: float | None = None,
     **kwargs: dict[str, Any],
@@ -998,7 +998,7 @@ class RandomesqueSelector(Selector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     est_theta: float | None = None,
     **kwargs: dict[str, Any],
@@ -1066,7 +1066,7 @@ class IntervalInfoSelector(Selector):
   def select(
     self,
     index: int | None = None,
-    items: numpy.ndarray = None,
+    items: numpy.ndarray | None = None,
     administered_items: list[int] | None = None,
     est_theta: float | None = None,
     **kwargs: dict[str, Any],
