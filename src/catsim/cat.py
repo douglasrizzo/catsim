@@ -134,7 +134,11 @@ def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
 
 
 def generate_item_bank(
-  n: int, itemtype: irt.NumParams = irt.NumParams.PL4, corr: float = 0, rng: Generator | None = None
+  n: int,
+  itemtype: irt.NumParams = irt.NumParams.PL4,
+  corr: float = 0,
+  rng: Generator | None = None,
+  seed: int = 0,
 ) -> numpy.ndarray:
   """Generate a synthetic item bank whose parameters approximately follow real-world parameters.
 
@@ -154,6 +158,7 @@ def generate_item_bank(
   :param corr: the correlation between item discrimination and difficulty. If
                ``itemtype == '1PL'``, it is ignored.
   :param rng: Optional random number generator to generate the item bank. If not passed, one will be created.
+  :param seed: Seed used to create a random number generator, if one is not provided. Defaults to 0.
   :return: an ``n x 4`` numerical matrix containing item parameters
   :rtype: numpy.ndarray
 
@@ -174,7 +179,7 @@ def generate_item_bank(
     [stds[0] * stds[1] * corr, stds[1] ** 2],
   ]
 
-  rng = rng or numpy.random.default_rng()
+  rng = rng or numpy.random.default_rng(seed)
 
   b, a = rng.multivariate_normal(means, covs, n).T
 
