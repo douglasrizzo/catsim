@@ -47,6 +47,9 @@ class RandomInitializer(Initializer):
     """Generates a value using the chosen distribution and parameters.
 
     :param index: the index of the current examinee. This parameter is not used by this method.
+    :Keyword Arguments:
+        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object, guarantees
+          reproducibility of outputs.
     :returns: a ability value generated from the chosen distribution using the passed parameters
     """
     (rng,) = self._prepare_args(return_rng=True, index=index, **kwargs)

@@ -32,14 +32,18 @@ def item_curve(
   """Plot 'Item Response Theory'-related item plots.
 
   .. plot::
+      :caption: Item characteristic and information functions for a given item. Last plot contains both curves together.
 
       import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
       from catsim.plot import item_curve, PlotType
       item = generate_item_bank(1)[0]
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC); plt.show()
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC); plt.show()
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH); plt.show()
+      fig, axes = plt.subplots(3, 1, figsize=(7, 15))
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC, ax=axes[0])
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, ax=axes[1])
+      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH, ax=axes[2])
+      plt.tight_layout()
+      plt.show()
 
   When both curves are plotted in the same figure, the figure has no grid, since each curve has a different scale.
 
@@ -169,6 +173,7 @@ def item_exposure(
   test progress.
 
   .. plot::
+      :caption: Item exposure rates for a given item bank, after a simulation has been performed.
 
       import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
@@ -179,10 +184,14 @@ def item_exposure(
       from catsim.stopping import MaxItemStopper
       from catsim.simulation import Simulator
 
+      fig, axes = plt.subplots(2, 1, figsize=(7, 12))
+
       s = Simulator(generate_item_bank(100), 10)
       s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))
-      plot.item_exposure(title='Exposures', simulator=s, hist=True); plt.show()
-      plot.item_exposure(title='Exposures', simulator=s, par='b'); plt.show()
+      plot.item_exposure(title='Exposures', simulator=s, hist=True, ax=axes[0])
+      plot.item_exposure(title='Exposures', simulator=s, par='b', ax=axes[1])
+      plt.tight_layout()
+      plt.show()
 
   :param title: the plot title.
   :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees'
@@ -283,10 +292,13 @@ def test_progress(
       from catsim.stopping import MaxItemStopper
       from catsim.simulation import Simulator
 
+      fig, axes = plt.subplots(2, 1, figsize=(7, 12))
       s = Simulator(generate_item_bank(100), 10)
       s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))
-      plot.test_progress(simulator=s, index=0); plt.show()
-      plot.test_progress(simulator=s, index=0, info=True, var=True, see=True); plt.show()
+      plot.test_progress(simulator=s, index=0, ax=axes[0])
+      plot.test_progress(simulator=s, index=0, info=True, var=True, see=True, ax=axes[1])
+      plt.tight_layout()
+      plt.show()
 
   :param ax: axis to use. If none is passed, a figure with the necessary axis will be created.
   :param title: the plot title.

@@ -40,6 +40,7 @@ The information this item gives is computed as ([Ayala2009]_, [Magis13]_)
 Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee's ability.
 
 .. plot::
+    :caption: Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.
 
     import matplotlib.pyplot as plt
     from catsim.cat import generate_item_bank

@@ -219,6 +219,9 @@ class RandomSelector(Selector):
     :param items: a matrix containing item parameters in the format that `catsim` understands
                   (see: :py:func:`catsim.cat.generate_item_bank`)
     :param administered_items: a list containing the indexes of items that were already administered
+    :Keyword Arguments:
+        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object, guarantees
+          reproducibility of outputs.
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
     items, administered_items, rng = self._prepare_args(
@@ -947,6 +950,9 @@ class The54321Selector(FiniteSelector):
                   (see: :py:func:`catsim.cat.generate_item_bank`)
     :param administered_items: a list containing the indexes of items that were already administered
     :param est_theta: a float containing the current estimated ability
+    :Keyword Arguments:
+        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object, guarantees
+          reproducibility of outputs.
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
     items, administered_items, est_theta, rng = self._prepare_args(
@@ -1018,6 +1024,9 @@ class RandomesqueSelector(Selector):
                   (see: :py:func:`catsim.cat.generate_item_bank`)
     :param administered_items: a list containing the indexes of items that were already administered
     :param est_theta: a float containing the current estimated ability
+    :Keyword Arguments:
+        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object, guarantees
+          reproducibility of outputs.
     :returns: index of the next item to be applied or `None` if there are no more items in the item bank.
     """
     items, administered_items, est_theta, rng = self._prepare_args(

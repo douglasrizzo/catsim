@@ -226,13 +226,17 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
   A few results can be seen in the plots below:
 
   .. plot::
+      :caption: Item information curves for two distinct items. The point of maximum information denoted by a dot.
 
       import matplotlib.pyplot as plt
       from catsim.cat import generate_item_bank
       from catsim.plot import item_curve, PlotType
-      items = generate_item_bank(2)
-      for item in items:
-          item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True); plt.show()
+      n_items = 2
+      items = generate_item_bank(n_items)
+      fig, axes = plt.subplots(n_items, 1)
+      for idx, item in enumerate(items):
+        item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])
+      plt.show()
 
   :param a: item discrimination parameter
   :param b: item difficulty parameter

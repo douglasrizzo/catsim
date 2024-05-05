@@ -35,6 +35,7 @@ Comparison between estimators
 The chart below displays the execution times of the same simulation (100 examinees, an item bank of 300 questions and 20 items per test) using different :math:`\hat{\theta}` estimation methods.
 
 .. plot::
+    :caption: Execution times of the same simulation (100 examinees, an item bank of 300 questions and 20 items per test) using different :math:`\hat{\theta}` estimation methods.
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -62,10 +63,11 @@ The chart below displays the execution times of the same simulation (100 examine
     plt.show()
 
 
-The charts below show the :math:`\hat{\theta}` found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function . The main difference among them is in the number of calls to :py:func:`catsim.irt.log_likelihood`. Methods that require less calls to maximize the function are usually more time efficient.
+The charts below show the :math:`\hat{\theta}` found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function. The main difference among them is in the number of calls to :py:func:`catsim.irt.log_likelihood`. Methods that require less calls to maximize the function are usually more time efficient.
 
 
 .. plot::
+    :caption: :math:`\hat{\theta}` found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function.
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -81,21 +83,23 @@ The charts below show the :math:`\hat{\theta}` found by the different estimation
     response_vectors = [r0, r1, r2]
     thetas = np.arange(-6.,6.,.1)
 
-    for estimator in [
-            NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.available_methods()
-        ]:
-        plt.figure()
+    fig, axes = plt.subplots(len(NumericalSearchEstimator.available_methods()), 1, figsize=(8,35))
 
+    for idx, estimator in enumerate([
+            NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.available_methods()
+        ]):
+        ax = axes[idx]
         for response_vector in response_vectors:
             ll_line = [irt.log_likelihood(theta, response_vector, items) for theta in thetas]
             max_LL = estimator.estimate(items=items, administered_items=range(20),
                                         response_vector=response_vector, est_theta=0)
             best_theta = irt.log_likelihood(max_LL, response_vector, items)
-            plt.plot(thetas, ll_line)
-            plt.plot(max_LL, best_theta, 'o', label = str(sum(response_vector)) + ' correct, '+r'$\hat{\theta} \approx $' + format(round(max_LL, 5)))
-            plt.xlabel(r'$\theta$', size=16)
-            plt.ylabel(r'$\log L(\theta)$', size=16)
-            plt.title(f"{estimator.method} ({round(estimator.avg_evaluations)} avg. evals)")
-            plt.legend(loc='best')
+            ax.plot(thetas, ll_line)
+            ax.plot(max_LL, best_theta, 'o', label = str(sum(response_vector)) + ' correct, '+r'$\hat{\theta} \approx $' + format(round(max_LL, 5)))
+            ax.set_xlabel(r'$\theta$', size=16)
+            ax.set_ylabel(r'$\log L(\theta)$', size=16)
+            ax.set_title(f"{estimator.method} ({round(estimator.avg_evaluations)} avg. evals)")
+            ax.legend(loc='best')
 
-        plt.show()
+    plt.tight_layout()
+    plt.show()
