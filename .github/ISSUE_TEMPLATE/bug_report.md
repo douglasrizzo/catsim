@@ -1,11 +1,12 @@
----
+______________________________________________________________________
+
 name: Bug report
 about: Create a report to help improve catsim!
 title: ''
 labels: ''
 assignees: ''
 
----
+______________________________________________________________________
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -20,8 +21,9 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Software versions:**
- - Python: [e.g. 3.10.1]
- - catsim: [e.g. 0.17.3]
+
+- Python: [e.g. 3.10.1]
+- catsim: [e.g. 0.17.3]
 
 **Additional context**
 Add any other context about the problem here.
