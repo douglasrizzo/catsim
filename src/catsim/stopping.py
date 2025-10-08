@@ -1,15 +1,20 @@
 from typing import Any
 
-import numpy
-
 from . import irt
+from .item_bank import ItemBank
 from .simulation import Stopper
 
 
 class MaxItemStopper(Stopper):
-  """Stopping criterion for maximum number of items in a test.
+  """Stopping criterion based on maximum number of items in a test.
 
-  :param max_itens: the maximum number of items in the test
+  The test stops when the specified maximum number of items has been administered.
+  This is the most common stopping criterion in fixed-length CATs.
+
+  Parameters
+  ----------
+  max_itens : int
+      The maximum number of items to be administered in the test.
   """
 
   def __str__(self) -> str:
@@ -19,8 +24,10 @@ class MaxItemStopper(Stopper):
   def __init__(self, max_itens: int) -> None:
     """Initialize a MaxItemStopper.
 
-    :param max_itens: Maximum number of items to be administered.
-    :type max_itens: int
+    Parameters
+    ----------
+    max_itens : int
+        Maximum number of items to be administered. Must be positive.
     """
     super().__init__()
     self._max_itens = max_itens
@@ -28,22 +35,40 @@ class MaxItemStopper(Stopper):
   def stop(
     self,
     index: int | None = None,
-    administered_items: numpy.ndarray = None,
-    **kwargs: dict[str, Any],  # noqa: ARG002
+    _item_bank: ItemBank | None = None,
+    administered_items: list[int] | None = None,
+    **kwargs: Any,  # noqa: ARG002
   ) -> bool:
     """Check whether the test reached its stopping criterion for the given user.
 
-    :param index: the index of the current examinee
-    :param administered_items: a matrix containing the parameters of items that were already administered
-    :returns: `True` if the test met its stopping criterion, else `False`
+    Parameters
+    ----------
+    index : int or None, optional
+        The index of the current examinee. Default is None.
+    administered_items : numpy.ndarray or None, optional
+        A matrix containing the parameters of items that were already administered.
+        Default is None.
+    **kwargs : dict
+        Additional keyword arguments. Not used by this method.
+
+    Returns
+    -------
+    bool
+        True if the test met its stopping criterion (maximum items reached), False otherwise.
+
+    Raises
+    ------
+    ValueError
+        If more items than permitted were administered, or if required parameters
+        are missing.
     """
     if (index is None or self.simulator is None) and administered_items is None:
       raise ValueError
 
     if administered_items is None:
-      administered_items = self.simulator.items[self.simulator.administered_items[index]]
+      administered_items = self.simulator.item_bank.get_items(self.simulator.administered_items[index])
 
-    n_itens = administered_items.shape[0]
+    n_itens = len(administered_items)
     if n_itens > self._max_itens:
       msg = f"More items than permitted were administered: {n_itens} > {self._max_itens}."
       raise ValueError(msg)
@@ -54,16 +79,26 @@ class MaxItemStopper(Stopper):
   def max_itens(self) -> int:
     """Get the maximum number of items the Stopper is configured to administer.
 
-    :return: int
+    Returns
+    -------
+    int
         The maximum number of items the Stopper is configured to administer.
     """
     return self._max_itens
 
 
 class MinErrorStopper(Stopper):
-  """Stopping criterion for minimum standard error of estimation (see :py:func:`catsim.irt.see`).
+  """Stopping criterion based on minimum standard error of estimation.
 
-  :param min_error: the minimum standard error of estimation the test must achieve before stopping
+  The test stops when the standard error of estimation (see :py:func:`catsim.irt.see`)
+  falls below the specified threshold. This is commonly used in variable-length CATs
+  to achieve a desired level of measurement precision.
+
+  Parameters
+  ----------
+  min_error : float
+      The minimum standard error of estimation the test must achieve before stopping.
+      Must be positive. Smaller values require more items for higher precision.
   """
 
   def __str__(self) -> str:
@@ -73,8 +108,11 @@ class MinErrorStopper(Stopper):
   def __init__(self, min_error: float) -> None:
     """Initialize a MinErrorStopper.
 
-    :param min_error: Error tolerance in estimated examinee ability to stop the test.
-    :type min_error: float
+    Parameters
+    ----------
+    min_error : float
+        Error tolerance in estimated examinee ability to stop the test.
+        The test stops when the standard error of estimation falls below this value.
     """
     super().__init__()
     self._min_error = min_error
@@ -82,23 +120,42 @@ class MinErrorStopper(Stopper):
   def stop(
     self,
     index: int | None = None,
-    administered_items: numpy.ndarray = None,
+    _item_bank: ItemBank | None = None,
+    administered_items: list[int] | None = None,
     theta: float | None = None,
-    **kwargs: dict[str, Any],  # noqa: ARG002
+    **kwargs: Any,  # noqa: ARG002
   ) -> bool:
     """Check whether the test reached its stopping criterion.
 
-    :param index: the index of the current examinee
-    :param administered_items: a matrix containing the parameters of items that were already administered
-    :param theta: a float containing the a ability value to which the error will be computed
-    :returns: `True` if the test met its stopping criterion, else `False`
+    Parameters
+    ----------
+    index : int or None, optional
+        The index of the current examinee. Default is None.
+    administered_items : numpy.ndarray or None, optional
+        A matrix containing the parameters of items that were already administered.
+        Default is None.
+    theta : float or None, optional
+        An ability value to which the error will be computed. Default is None.
+    **kwargs : dict
+        Additional keyword arguments. Not used by this method.
+
+    Returns
+    -------
+    bool
+        True if the test met its stopping criterion (standard error below minimum),
+        False otherwise.
+
+    Raises
+    ------
+    ValueError
+        If required parameters are missing.
     """
     if (index is None or self.simulator is None) and (administered_items is None or theta is None):
       raise ValueError
 
     if administered_items is None and theta is None:
       theta = self.simulator.latest_estimations[index]
-      administered_items = self.simulator.items[self.simulator.administered_items[index]]
+      administered_items = self.simulator.item_bank.get_items(self.simulator.administered_items[index])
 
     if theta is None:
       return False

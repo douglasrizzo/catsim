@@ -4,14 +4,26 @@ from enum import Enum, auto
 
 import matplotlib.pyplot as plt
 import numpy
+from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from . import irt
+from .item_bank import ItemBank
 from .simulation import Simulator
 
 
 class PlotType(Enum):
-  """Enum with the available item plots."""
+  """Enum with the available item plot types.
+
+  Attributes
+  ----------
+  ICC : auto
+      Item Characteristic Curve - plots probability of correct response vs ability.
+  IIC : auto
+      Item Information Curve - plots item information vs ability.
+  BOTH : auto
+      Both ICC and IIC plotted together.
+  """
 
   ICC = auto()
   IIC = auto()
@@ -23,21 +35,22 @@ def item_curve(
   b: float = 0,
   c: float = 0,
   d: float = 1,
-  ax: plt.Axes | None = None,
+  ax: Axes | None = None,
   title: str | None = None,
   ptype: PlotType = PlotType.ICC,
   max_info: bool = True,
   figsize: tuple | None = None,
-) -> None:
-  """Plot 'Item Response Theory'-related item plots.
+) -> Axes:
+  """Plot Item Response Theory-related item plots.
 
   .. plot::
       :caption: Item characteristic and information functions for a given item. Last plot contains both curves together.
 
       import matplotlib.pyplot as plt
-      from catsim.cat import generate_item_bank
+      from catsim.item_bank import ItemBank
       from catsim.plot import item_curve, PlotType
-      item = generate_item_bank(1)[0]
+      item_bank = ItemBank.generate_item_bank(1)
+      item = item_bank.items[0]
       fig, axes = plt.subplots(3, 1, figsize=(7, 15))
       item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC, ax=axes[0])
       item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, ax=axes[1])
@@ -45,17 +58,35 @@ def item_curve(
       plt.tight_layout()
       plt.show()
 
-  When both curves are plotted in the same figure, the figure has no grid, since each curve has a different scale.
+  When both curves are plotted in the same figure, the figure has no grid, since each
+  curve has a different scale.
 
-  :param a: item discrimination parameter
-  :param b: item difficulty parameter
-  :param c: item pseudo-guessing parameter
-  :param d: item upper asymptote
-  :param title: plot title
-  :param ptype: PlotType.ICC for the item characteristic curve, PlotType.IIC for the item information curve.
-  :param max_info: whether the point of maximum information should be shown in the plot
-  :param filepath: saves the plot in the given path
-  :param show: whether the generated plot is to be shown
+  Parameters
+  ----------
+  a : float, optional
+      Item discrimination parameter. Default is 1.
+  b : float, optional
+      Item difficulty parameter. Default is 0.
+  c : float, optional
+      Item pseudo-guessing parameter. Default is 0.
+  d : float, optional
+      Item upper asymptote. Default is 1.
+  ax : matplotlib.axes.Axes or None, optional
+      Matplotlib axes object to plot on. If None, a new figure is created. Default is None.
+  title : str or None, optional
+      Plot title. Default is None.
+  ptype : PlotType, optional
+      Type of plot: PlotType.ICC for item characteristic curve, PlotType.IIC for item
+      information curve, PlotType.BOTH for both curves. Default is PlotType.ICC.
+  max_info : bool, optional
+      Whether the point of maximum information should be shown in the plot. Default is True.
+  figsize : tuple or None, optional
+      Figure size (width, height) in inches. Default is None.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The matplotlib axes object containing the plot.
   """
   if ax is None:
     _, ax = plt.subplots(figsize=figsize)
@@ -123,31 +154,47 @@ def item_curve(
 
 
 def gen3d_dataset_scatter(
-  items: numpy.ndarray,
+  item_bank: ItemBank | numpy.ndarray,
   title: str | None = None,
   figsize: tuple | None = None,
-) -> plt.Axes:
-  """Generate the item matrix tridimensional dataset scatter plot.
+) -> Axes:
+  """Generate a 3D scatter plot of item parameters.
+
+  Creates a three-dimensional visualization of item parameters (a, b, c) to help
+  understand the distribution of item characteristics in the item bank.
 
   .. plot::
 
       import matplotlib.pyplot as plt
-      from catsim.cat import generate_item_bank
       from catsim import plot
-      items = generate_item_bank(100)
-      plot.gen3d_dataset_scatter(items); plt.show()
+      from catsim.item_bank import ItemBank
+      item_bank = ItemBank.generate_item_bank(100)
+      plot.gen3d_dataset_scatter(item_bank); plt.show()
 
-  :param items: the item matrix
-  :param title: the scatter plot title
-  :param filepath: the path to save the scatter plot
-  :param show: whether the generated plot is to be shown
+  Parameters
+  ----------
+  item_bank : ItemBank or numpy.ndarray
+      An ItemBank or item matrix containing item parameters.
+      If a numpy array is provided, it will be converted to an ItemBank.
+  title : str or None, optional
+      The scatter plot title. Default is None.
+  figsize : tuple or None, optional
+      Figure size (width, height) in inches. Default is None.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The matplotlib 3D axes object containing the plot.
   """
   assert Axes3D
-  irt.validate_item_bank(items)
+  if isinstance(item_bank, numpy.ndarray):
+    item_bank = ItemBank(item_bank)
 
   fig = plt.figure(figsize=figsize)
   ax = fig.add_subplot(111, projection="3d")
-  ax.scatter(list(items[:, 0]), list(items[:, 1]), list(items[:, 2]), s=10, c="b")
+  ax.scatter(
+    list(item_bank.discrimination), list(item_bank.difficulty), zs=list(item_bank.pseudo_guessing), s=10, c="b"
+  )
 
   if title is not None:
     ax.set_title(title, size=18)
@@ -160,23 +207,23 @@ def gen3d_dataset_scatter(
 
 
 def item_exposure(
-  ax: plt.Axes | None = None,
+  ax: Axes | None = None,
   title: str | None = None,
   simulator: Simulator | None = None,
-  items: numpy.ndarray | None = None,
+  item_bank: ItemBank | numpy.ndarray | None = None,
   par: str | None = None,
   hist: bool = False,
-) -> plt.Axes:
-  """Generate a bar chart for the item bank exposure rate.
+) -> Axes:
+  """Generate a plot showing item bank exposure rates.
 
-  The `x` axis represents one of the item parameters, while the `y` axis represents their exposure rates. an examinee's
-  test progress.
+  The plot visualizes how frequently each item was administered during a simulation,
+  which is important for assessing item security and test balance.
 
   .. plot::
       :caption: Item exposure rates for a given item bank, after a simulation has been performed.
 
       import matplotlib.pyplot as plt
-      from catsim.cat import generate_item_bank
+      from catsim.item_bank import ItemBank
       from catsim import plot
       from catsim.initialization import RandomInitializer
       from catsim.selection import MaxInfoSelector
@@ -186,26 +233,47 @@ def item_exposure(
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
 
-      s = Simulator(generate_item_bank(100), 10)
+      s = Simulator(ItemBank.generate_item_bank(100), 10)
       s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))
       plot.item_exposure(title='Exposures', simulator=s, hist=True, ax=axes[0])
       plot.item_exposure(title='Exposures', simulator=s, par='b', ax=axes[1])
       plt.tight_layout()
       plt.show()
 
-  :param title: the plot title.
-  :param simulator: a simulator which has already simulated a series of CATs, containing estimations to the examinees'
-                    abilities and a list of administered items for each examinee.
-  :param items: an item matrix containing item parameters and their exposure rate in the last column.
-  :param par: a string representing one of the item parameters to order the items by and use on the x axis, or `None`
-              to use the default order of the item bank. Please note that, if `hist=True`, no sorting will be done.
-  :param hist: if True, plots a histogram of item exposures. Otherwise, plots a dotted line chart of the exposures,
-               sorted in the x-axis by the parameter chosen in `par`.
-  :param filepath: the path to save the plot.
-  :param show: whether the generated plot is to be shown.
+  Parameters
+  ----------
+  ax : matplotlib.axes.Axes or None, optional
+      Matplotlib axes object to plot on. If None, a new figure is created. Default is None.
+  title : str or None, optional
+      The plot title. Default is None.
+  simulator : Simulator or None, optional
+      A simulator which has already simulated a series of CATs, containing estimations
+      to the examinees' abilities and a list of administered items for each examinee.
+      Default is None.
+  item_bank : ItemBank or numpy.ndarray or None, optional
+      An ItemBank or item matrix containing item parameters and their exposure rate in the last column.
+      If a numpy array is provided, it will be converted to an ItemBank.
+      Default is None.
+  par : str or None, optional
+      A string representing one of the item parameters ('a', 'b', 'c', 'd') to order
+      the items by and use on the x axis, or None to use the default order of the item
+      bank. If `hist=True`, no sorting will be done. Default is None.
+  hist : bool, optional
+      If True, plots a histogram of item exposures. Otherwise, plots a line chart of
+      the exposures, sorted in the x-axis by the parameter chosen in `par`. Default is False.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The matplotlib axes object containing the plot.
+
+  Raises
+  ------
+  ValueError
+      If neither simulator nor item_bank is provided, or if par is not one of 'a', 'b', 'c', 'd', or None.
   """
-  if simulator is None and items is None:
-    msg = "Not a single plottable object was passed. Either 'simulator' or 'items' must be passed."
+  if simulator is None and item_bank is None:
+    msg = "Not a single plottable object was passed. Either 'simulator' or 'item_bank' must be passed."
     raise ValueError(msg)
 
   if ax is None:
@@ -215,13 +283,11 @@ def item_exposure(
     ax.set_title(title, size=18)
 
   if simulator is not None:
-    items = simulator.items
+    item_bank = simulator.item_bank
+  elif isinstance(item_bank, numpy.ndarray):
+    item_bank = ItemBank(item_bank)
 
-  assert items is not None
-
-  if items.shape[1] != 5:  # noqa: PLR2004
-    msg = "The item matrix is supposed to have 5 columns, the last one representing item exposure rates."
-    raise ValueError(msg)
+  assert item_bank is not None
 
   supported_parameters = {"a", "b", "c", "d"}
   if par is not None and par not in supported_parameters:
@@ -229,28 +295,28 @@ def item_exposure(
     raise ValueError(msg)
 
   if par == "a":
-    parameter = items[:, 0]
+    parameter = item_bank.discrimination
     xlabel = "Item discrimination"
   elif par == "b":
-    parameter = items[:, 1]
+    parameter = item_bank.difficulty
     xlabel = "Item difficulty"
   elif par == "c":
-    parameter = items[:, 2]
+    parameter = item_bank.pseudo_guessing
     xlabel = "Item Guessing"
   elif par == "d":
-    parameter = items[:, 3]
+    parameter = item_bank.upper_asymptote
     xlabel = "Item upper asymptote"
   else:
-    parameter = numpy.array(range(items.shape[0]))
+    parameter = numpy.array(range(item_bank.n_items))
     xlabel = "Items"
 
   if hist:
-    ax.hist(items[:, 4], max(int(items.shape[0] / 10), 3))
+    ax.hist(item_bank.exposure_rates, max(int(item_bank.n_items / 10), 3))
     ax.set_xlabel("Item exposure")
     ax.set_ylabel("Items")
   else:
     indexes = parameter.argsort()
-    ax.plot(items[:, 4][indexes], marker="o")
+    ax.plot(item_bank.exposure_rates[indexes], marker="o")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Item exposure")
 
@@ -260,12 +326,12 @@ def item_exposure(
 
 
 def test_progress(
-  ax: plt.Axes | None = None,
+  ax: Axes | None = None,
   title: str | None = None,
-  simulator: Simulator = None,
+  simulator: Simulator | None = None,
   index: int | None = None,
   thetas: list[float] | None = None,
-  administered_items: numpy.ndarray = None,
+  administered_items: numpy.ndarray | None = None,
   true_theta: float | None = None,
   info: bool = False,
   var: bool = False,
@@ -273,18 +339,22 @@ def test_progress(
   reliability: bool = False,
   marker: str | int | None = None,
   figsize: tuple | None = None,
-) -> plt.Axes:
-  """Generates a plot representing an examinee's test progress.
+) -> Axes:
+  """Generate a plot representing an examinee's test progress over time.
 
-  Note that, while some functions increase or decrease monotonically, like test information and standard error of
-  estimation, the plot calculates these values using the examinee's ability estimated at that given time of the test.
-  This means that a test that was tought to be informative at a given point may not be as informative after new
-  estimates are done.
+  The plot shows how the ability estimate, item difficulties, and measurement quality
+  metrics evolve as items are administered during the test.
+
+  Note that, while some functions increase or decrease monotonically (like test
+  information and standard error of estimation), the plot calculates these values using
+  the examinee's ability estimated at that given time of the test. This means that a test
+  that was thought to be informative at a given point may not be as informative after new
+  estimates are made.
 
   .. plot::
 
       import matplotlib.pyplot as plt
-      from catsim.cat import generate_item_bank
+      from catsim.item_bank import ItemBank
       from catsim import plot
       from catsim.initialization import RandomInitializer
       from catsim.selection import MaxInfoSelector
@@ -293,36 +363,61 @@ def test_progress(
       from catsim.simulation import Simulator
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
-      s = Simulator(generate_item_bank(100), 10)
+      s = Simulator(ItemBank.generate_item_bank(100), 10)
       s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MaxItemStopper(20))
       plot.test_progress(simulator=s, index=0, ax=axes[0])
       plot.test_progress(simulator=s, index=0, info=True, var=True, see=True, ax=axes[1])
       plt.tight_layout()
       plt.show()
 
-  :param ax: axis to use. If none is passed, a figure with the necessary axis will be created.
-  :param title: the plot title.
-  :param simulator: a simulator which has already simulated a series of CATs,
-                    containing estimations to the examinees' abilities and
-                    a list of administered items for each examinee.
-  :param index: the index of the examinee in the simulator whose plot is to be done.
-  :param thetas: if a :py:class:`Simulator` is not passed, then a list of ability
-                 estimations can be manually passed to the function.
-  :param administered_items: if a :py:class:`Simulator` is not passed, then a
-                             matrix of administered items, represented by their
-                             parameters, can be manually passed to the function.
-  :param true_theta: the value of the examinee's true ability. If it is passed,
-                     it will be shown on the plot, otherwise not.
-  :param info: plot test information. It only works if both abilities and
-               administered items are passed.
-  :param var: plot the estimation variance during the test. It only
-              works if both abilities and administered items are passed.
-  :param see: plot the standard error of estimation during the test. It only
-             works if both abilities and administered items are passed.
-  :param reliability: plot the test reliability. It only works if both abilities
-                      and administered items are passed.
-  :param marker:
-  :param figsize: size of the figure to be created, in case no axis is passed.
+  Parameters
+  ----------
+  ax : matplotlib.axes.Axes or None, optional
+      Axis to use. If None, a figure with the necessary axis will be created. Default is None.
+  title : str or None, optional
+      The plot title. Default is None.
+  simulator : Simulator or None, optional
+      A simulator which has already simulated a series of CATs, containing estimations
+      to the examinees' abilities and a list of administered items for each examinee.
+      Default is None.
+  index : int or None, optional
+      The index of the examinee in the simulator whose plot is to be done. Default is None.
+  thetas : list[float] or None, optional
+      If a Simulator is not passed, then a list of ability estimations can be manually
+      passed to the function. Default is None.
+  administered_items : numpy.ndarray or None, optional
+      If a Simulator is not passed, then a matrix of administered items, represented
+      by their parameters, can be manually passed to the function. Default is None.
+  true_theta : float or None, optional
+      The value of the examinee's true ability. If it is passed, it will be shown on
+      the plot, otherwise not. Default is None.
+  info : bool, optional
+      Plot test information. It only works if both abilities and administered items are
+      passed. Default is False.
+  var : bool, optional
+      Plot the estimation variance during the test. It only works if both abilities
+      and administered items are passed. Default is False.
+  see : bool, optional
+      Plot the standard error of estimation during the test. It only works if both
+      abilities and administered items are passed. Default is False.
+  reliability : bool, optional
+      Plot the test reliability. It only works if both abilities and administered items
+      are passed. Default is False.
+  marker : str or int or None, optional
+      Matplotlib marker style for the plots. Default is None.
+  figsize : tuple or None, optional
+      Size of the figure to be created, in case no axis is passed. Default is None.
+
+  Returns
+  -------
+  matplotlib.axes.Axes
+      The matplotlib axes object containing the plot.
+
+  Raises
+  ------
+  ValueError
+      If neither simulator nor the required manual parameters are provided, or if thetas
+      and administered_items have mismatched lengths.
   """
   if simulator is None and thetas is None and administered_items is None:
     msg = "Not a single plottable object was passed. One of: simulator, thetas, administered_items must be passed."

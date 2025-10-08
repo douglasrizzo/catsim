@@ -100,7 +100,13 @@ unfixable = []
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.ruff.lint.pydocstyle]
-convention = "google"
+convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+  "PLR6301",  # Test methods don't need to use self
+  "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
+]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
