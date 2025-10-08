@@ -27,9 +27,10 @@ jobs:
 
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
-    # Only run tests for PRs to dev/main or on releases
+    # Only run tests for PRs to dev/master, pushes to dev, or releases
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'master')) ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release'
     needs: [pre-commit]
     runs-on: ${{ matrix.os }}
@@ -64,9 +65,10 @@ jobs:
 
   build:
     name: Build package
-    # Only run build for PRs to dev/main or on releases
+    # Only run build for PRs to dev/master, pushes to dev, releases, or manual trigger
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'master')) ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch'
     needs: [test]
@@ -119,7 +121,10 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi'
+    # Publish to TestPyPI on pushes to dev or manual workflow dispatch
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
     needs: [build]
     runs-on: ubuntu-latest
     environment:
