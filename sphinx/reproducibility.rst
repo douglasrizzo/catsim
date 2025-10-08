@@ -10,18 +10,19 @@ In the snippet below, all selectors that have random behavior produce the same o
 .. code-block:: python
     :caption: Generating reproducible outputs from :py:class:`catsim.simulation.Simulable` objects.
 
-    from catsim.cat import generate_item_bank
+    from catsim import ItemBank
     from catsim.selection import RandomesqueSelector, RandomSelector, The54321Selector
     from numpy.random import default_rng
 
     for _ in range(5):
+        item_bank = ItemBank.generate_item_bank(5000, seed=42)
         print(
-            RandomSelector().select(items=generate_item_bank(5000, seed=42), administered_items=[], rng=default_rng(42)),
+            RandomSelector().select(item_bank=item_bank, administered_items=[], rng=default_rng(42)),
             The54321Selector(test_size=10).select(
-            items=generate_item_bank(5000, seed=42), administered_items=[], rng=default_rng(42), est_theta=0
+                item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
             ),
             RandomesqueSelector(bin_size=10).select(
-            items=generate_item_bank(5000, seed=42), administered_items=[], rng=default_rng(42), est_theta=0
+                item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
             ),
         )
 
@@ -32,7 +33,7 @@ Simulations can also be entirely reproduced by passing a seed to a :py:class:`ca
     :caption: Generating a reproducible CAT simulation using seeds.
 
     import matplotlib.pyplot as plt
-    from catsim.cat import generate_item_bank
+    from catsim import ItemBank
     from catsim.estimation import NumericalSearchEstimator
     from catsim.initialization import RandomInitializer
     from catsim.plot import test_progress
@@ -43,7 +44,7 @@ Simulations can also be entirely reproduced by passing a seed to a :py:class:`ca
     figure, axes = plt.subplots(2, 1, figsize=(10, 12))
 
     for ax in axes:
-        item_bank = generate_item_bank(5000, seed=42)
+        item_bank = ItemBank.generate_item_bank(5000, seed=42)
         s = Simulator(item_bank, examinees=1, seed=42)
         s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MinErrorStopper(0.2))
         test_progress(ax=ax, simulator=s, index=0, see=True, marker="|")
