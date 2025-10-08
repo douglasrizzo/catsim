@@ -1,25 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Computerized Adaptive Test-related Functions – catsim.cat &mdash; catsim 0.17.3 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-    <link rel="shortcut icon" href="_static/logo.svg"/>
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Computerized Adaptive Test-related Functions – catsim.cat &mdash; catsim 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=3bc55ee7"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -39,9 +39,6 @@
             
               <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                0.17.3
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -61,13 +58,14 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.cat.bias"><code class="docutils literal notranslate"><span class="pre">bias()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.cat.dodd"><code class="docutils literal notranslate"><span class="pre">dodd()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#catsim.cat.generate_item_bank"><code class="docutils literal notranslate"><span class="pre">generate_item_bank()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.cat.mse"><code class="docutils literal notranslate"><span class="pre">mse()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.cat.overlap_rate"><code class="docutils literal notranslate"><span class="pre">overlap_rate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.cat.random_response_vector"><code class="docutils literal notranslate"><span class="pre">random_response_vector()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.cat.rmse"><code class="docutils literal notranslate"><span class="pre">rmse()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -101,154 +99,204 @@
 <p>Functions used specifically during the application/simulation of computerized adaptive tests.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.cat.bias">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.bias" title="Link to this definition"></a></dt>
-<dd><p>Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies <a class="reference internal" href="references.html#chang2001" id="id1"><span>[Chang2001]</span></a>.
-The value is computed as:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.bias" title="Link to this definition"></a></dt>
+<dd><p>Compute the test bias, an evaluation criterion for computerized adaptive test methodologies <a class="reference internal" href="references.html#chang2001" id="id1"><span>[Chang2001]</span></a>.</p>
+<p>The value is computed as:</p>
 <div class="math notranslate nohighlight">
 \[Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
-<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
+<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability. A positive bias indicates
+systematic overestimation, while a negative bias indicates systematic underestimation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true ability values</p></li>
-<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated ability values</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>actual</strong><span class="classifier">list[float] or numpy.ndarray</span></dt><dd><p>A list or 1-D numpy array containing the true ability values.</p>
+</dd>
+<dt><strong>predicted</strong><span class="classifier">list[float] or numpy.ndarray</span></dt><dd><p>A list or 1-D numpy array containing the estimated ability values.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the bias between the predicted values and actual values.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The bias between the predicted values and actual values.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If actual and predicted vectors are not the same size.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.cat.dodd">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">dodd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#dodd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.dodd" title="Link to this definition"></a></dt>
-<dd><p>Method proposed by <a class="reference internal" href="references.html#dod90" id="id2"><span>[Dod90]</span></a> for the estimation of <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>
-when the response vector is composed entirely of 1s or 0s.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">dodd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#dodd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.dodd" title="Link to this definition"></a></dt>
+<dd><p>Estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> when the response vector is composed entirely of 1s or 0s.</p>
+<p>Method proposed by <a class="reference internal" href="references.html#dod90" id="id2"><span>[Dod90]</span></a>. This heuristic prevents the maximum likelihood
+estimator from returning infinity when all responses are correct or negative
+infinity when all responses are incorrect.</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\hat{\theta}_{t+1} = \left\lbrace \begin{array}{ll}
 \hat{\theta}_t+\frac{b_{max}-\hat{\theta_t}}{2} &amp; \text{if } X_t = 1 \\
-\hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} &amp; \text{if }  X_t = 0
+  \hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} &amp; \text{if }  X_t = 0
 \end{array} \right\rbrace\end{split}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the initial ability level</p></li>
-<li><p><strong>items</strong> – a numpy array containing the parameters of the items in the
-database. This is necessary to capture the maximum and minimum
-difficulty levels necessary for the method.</p></li>
-<li><p><strong>correct</strong> – a boolean value informing if the examinee has answered only correctly
-(<cite>True</cite>) or incorrectly (<cite>False</cite>) up until now</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The initial ability level estimate.</p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a new estimation for <span class="math notranslate nohighlight">\(\theta\)</span></p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing all items in the bank.
+This is necessary to capture the maximum and minimum difficulty levels
+required by the method.</p>
+</dd>
+<dt><strong>correct</strong><span class="classifier">bool</span></dt><dd><p>Boolean value indicating if the examinee has answered only correctly
+(True) or only incorrectly (False) up until now.</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="catsim.cat.generate_item_bank">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">generate_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'4PL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#generate_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.generate_item_bank" title="Link to this definition"></a></dt>
-<dd><p>Generate a synthetic item bank whose parameters approximately follow
-real-world parameters, as proposed by <a class="reference internal" href="references.html#bar10" id="id3"><span>[Bar10]</span></a>.</p>
-<p>Item parameters are extracted from the following probability distributions:</p>
-<ul class="simple">
-<li><p>discrimination: <span class="math notranslate nohighlight">\(N(1.2, 0.25)\)</span></p></li>
-<li><p>difficulty: <span class="math notranslate nohighlight">\(N(0,  1)\)</span></p></li>
-<li><p>pseudo-guessing: <span class="math notranslate nohighlight">\(N(0.25, 0.02)\)</span></p></li>
-<li><p>upper asymptote: <span class="math notranslate nohighlight">\(U(0.94, 1)\)</span></p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> – how many items are to be generated</p></li>
-<li><p><strong>itemtype</strong> – either <code class="docutils literal notranslate"><span class="pre">1PL</span></code>, <code class="docutils literal notranslate"><span class="pre">2PL</span></code>, <code class="docutils literal notranslate"><span class="pre">3PL</span></code> or <code class="docutils literal notranslate"><span class="pre">4PL</span></code> for the one-, two-,
-three- or four-parameter logistic model</p></li>
-<li><p><strong>corr</strong> – the correlation between item discrimination and difficulty. If
-<code class="docutils literal notranslate"><span class="pre">itemtype</span> <span class="pre">==</span> <span class="pre">'1PL'</span></code>, it is ignored.</p></li>
-</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">x</span> <span class="pre">4</span></code> numerical matrix containing item parameters</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)">numpy.ndarray</a></p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>A new estimation for <span class="math notranslate nohighlight">\(\theta\)</span> that avoids infinite values.</p>
 </dd>
 </dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;2PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;4PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;4PL&#39;</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</pre></div>
-</div>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.cat.mse">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#mse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.mse" title="Link to this definition"></a></dt>
-<dd><p>Mean squared error, a value used when measuring the precision
-with which a computerized adaptive test estimates examinees abilities <a class="reference internal" href="references.html#chang2001" id="id4"><span>[Chang2001]</span></a>.
-The value is computed as:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#mse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.mse" title="Link to this definition"></a></dt>
+<dd><p>Compute the mean squared error (MSE) between two lists or 1-D numpy arrays.</p>
+<p>The MSE is used when measuring the precision with which a computerized adaptive
+test estimates examinees abilities <a class="reference internal" href="references.html#chang2001" id="id3"><span>[Chang2001]</span></a>. Lower MSE values indicate better
+estimation accuracy.</p>
+<p>The value is computed as:</p>
 <div class="math notranslate nohighlight">
 \[MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
-<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
+<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true ability values</p></li>
-<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated ability values</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>actual</strong><span class="classifier">list[float] or numpy.ndarray</span></dt><dd><p>A list or 1-D numpy array containing the true ability values.</p>
+</dd>
+<dt><strong>predicted</strong><span class="classifier">list[float] or numpy.ndarray</span></dt><dd><p>A list or 1-D numpy array containing the estimated ability values.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the mean squared error between the predicted values and actual values.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The mean squared error between the predicted values and actual values.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If actual and predicted vectors are not the same size.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.cat.overlap_rate">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usages</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Link to this definition"></a></dt>
-<dd><p>Test overlap rate, an average measure of how much of the test two examinees take is equal <a class="reference internal" href="references.html#bar10" id="id5"><span>[Bar10]</span></a>. It is given by:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Link to this definition"></a></dt>
+<dd><p>Compute the test overlap rate.</p>
+<p>An average measure of how much of the test two examinees take is equal <a class="reference internal" href="references.html#bar10" id="id4"><span>[Bar10]</span></a>.
+The overlap rate provides insight into test security: higher values indicate that
+examinees see more similar items, potentially compromising test security.</p>
+<p>The overlap rate is given by:</p>
 <div class="math notranslate nohighlight">
 \[T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}\]</div>
-<p>If, for example <span class="math notranslate nohighlight">\(T = 0.5\)</span>, it means that the tests of two random examinees have 50% of equal items.</p>
+<p>where <span class="math notranslate nohighlight">\(N\)</span> is the bank size, <span class="math notranslate nohighlight">\(Q\)</span> is the test size, and <span class="math notranslate nohighlight">\(S_{r}^2\)</span>
+is the variance of exposure rates.</p>
+<p>If, for example <span class="math notranslate nohighlight">\(T = 0.5\)</span>, it means that the tests of two random examinees
+have 50% of equal items.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>usages</strong> – a list or numpy.ndarray containing the number of
-times each item was used in the tests.</p></li>
-<li><p><strong>test_size</strong> – an integer informing the number of items in a test.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A numpy array containing the exposure rate (proportion) of each item, where
+each value is between 0 and 1, representing the proportion of examinees who
+received that item.</p>
+</dd>
+<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>The number of items in a test.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>test overlap rate.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Test overlap rate between 0 and 1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If exposure rates are not between 0 and 1, if test size is not positive,
+or if test size is larger than bank size.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.cat.random_response_vector">
+<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">random_response_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/cat.html#random_response_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.random_response_vector" title="Link to this definition"></a></dt>
+<dd><p>Generate a list of random boolean values of the given size.</p>
+<p>This function is useful for testing and simulation purposes when you need
+a random response pattern.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>size</strong><span class="classifier">int</span></dt><dd><p>The size of the list to be generated. Must be non-negative.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>list[bool]</dt><dd><p>A list of random boolean values with equal probability of True and False.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.cat.rmse">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.rmse" title="Link to this definition"></a></dt>
-<dd><p>Root mean squared error, a common value used when measuring the precision
-with which a computerized adaptive test estimates examinees abilities <a class="reference internal" href="references.html#bar10" id="id6"><span>[Bar10]</span></a>.
-The value is computed as:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/cat.html#rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.rmse" title="Link to this definition"></a></dt>
+<dd><p>Compute the root mean squared error (RMSE) between two lists or 1-D numpy arrays.</p>
+<p>A common value used when measuring the precision with which a computerized adaptive
+test estimates examinees abilities <a class="reference internal" href="references.html#bar10" id="id5"><span>[Bar10]</span></a>. RMSE is in the same units as the ability
+scale, making it easier to interpret than MSE.</p>
+<p>The value is computed as:</p>
 <div class="math notranslate nohighlight">
 \[RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
-<span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
+<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>actual</strong> – a list or 1-D numpy array containing the true ability values</p></li>
-<li><p><strong>predicted</strong> – a list or 1-D numpy array containing the estimated ability values</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>actual</strong><span class="classifier">list[float] or numpy.ndarray</span></dt><dd><p>A list or 1-D numpy array containing the true ability values.</p>
+</dd>
+<dt><strong>predicted</strong><span class="classifier">list[float] or numpy.ndarray</span></dt><dd><p>A list or 1-D numpy array containing the estimated ability values.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the root mean squared error between the predicted values and actual values.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The root mean squared error between the predicted values and actual values.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If actual and predicted vectors are not the same size.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -266,7 +314,7 @@ The value is computed as:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

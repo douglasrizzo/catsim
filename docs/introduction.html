@@ -1,25 +1,25 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Introduction &mdash; catsim 0.17.3 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
-    <link rel="shortcut icon" href="_static/logo.svg"/>
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <title>Introduction &mdash; catsim 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
   
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=3bc55ee7"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -39,9 +39,6 @@
             
               <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                0.17.3
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -52,6 +49,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-are-latent-traits">What are Latent Traits?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-problem-with-linear-tests">The Problem with Linear Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-is-computerized-adaptive-testing">What is Computerized Adaptive Testing?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#about-catsim">About catsim</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#item-response-theory-models">Item Response Theory Models</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-item-matrix">The Item Matrix</a></li>
 </ul>
@@ -77,6 +78,7 @@
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -107,16 +109,44 @@
              
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
-<p>Assessment instruments are widely used to measure individuals <em>latent traits</em>, that is, internal characteristics that cannot be directly measured. An example of such assessment instruments are educational and psychological tests. Each test is composed of a series of items and an examinee’s answers to these items allow for the measurement of one or more of his or hers latent traits. When a latent trait is expressed in numerical form, it is called an <em>ability</em> or <em>ability</em>.</p>
-<p>Ordinary tests, hereon called linear tests, are applied using the orthodox paper and pencil strategy, in which tests are printed and all examinees are presented with the same items in the same order. One of the drawbacks of this methodology is that both individuals with high and low abilities must answer all items in order to have their ability estimated. An individual with high ability might get bored of answering the whole test if it only contains items that he or she considers easy; on the other hand, an individual of low ability might get frustrated if he is confronted by items considered and hard and might give up on the test or answer the items without paying attention.</p>
-<p>With these concerns in mind, a new paradigm in assessment emerged in the 70s. Initially named <em>tailored testing</em> in <a class="reference internal" href="references.html#lord77" id="id1"><span>[Lord77]</span></a>, these were tests in which items were chosen to be presented to the examinee in real time, based on the examinee’s responses to previous items. The name was changed to computerized adaptive testing (CAT) due to the advances in technology that facilitated the application of such a testing methodology using electronic devices, like computers and tablets.</p>
-<p>In a CAT, the examinee’s ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee’s real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.</p>
-<p>Finally, the advent of CAT allowed for researchers to create their own variant ways of starting a test, choosing items, estimating abilities and stopping the test. Fortunately, the mathematical formalization provided by Item Response Theory (IRT) allows for tests to be computationally simulated and the different methodologies of applying a CAT to be compared under different constraints. Packages with these functionalities already exist in the R language (<a class="reference internal" href="references.html#magis12" id="id2"><span>[Magis12]</span></a>) but not yet in Python. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was created to fill this gap, using the facilities of established scientific packages such as <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v1.25)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/index.html#module-scipy" title="(in SciPy v1.11.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, as well as the object-oriented programming paradigm supported by Python to create a simple, comprehensive and user-extendable CAT simulation package.</p>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> is a Python package for simulating computerized adaptive tests (CAT), a modern approach to assessment that adapts to each examinee’s ability level in real time.</p>
+<section id="what-are-latent-traits">
+<h2>What are Latent Traits?<a class="headerlink" href="#what-are-latent-traits" title="Link to this heading"></a></h2>
+<p>Assessment instruments measure <em>latent traits</em> - internal characteristics that cannot be directly observed, such as knowledge or personality traits. Educational and psychological tests are common examples. When a latent trait is expressed numerically, it is called an <em>ability</em> or <em>proficiency</em>.</p>
+</section>
+<section id="the-problem-with-linear-tests">
+<h2>The Problem with Linear Tests<a class="headerlink" href="#the-problem-with-linear-tests" title="Link to this heading"></a></h2>
+<p>Traditional <em>linear tests</em> use a paper-and-pencil approach where all examinees answer the same items in the same order. This creates several problems:</p>
+<ul class="simple">
+<li><p>High-ability examinees waste time on easy questions</p></li>
+<li><p>Low-ability examinees become frustrated with overly difficult questions</p></li>
+<li><p>Test length cannot be optimized for individual examinees</p></li>
+</ul>
+</section>
+<section id="what-is-computerized-adaptive-testing">
+<h2>What is Computerized Adaptive Testing?<a class="headerlink" href="#what-is-computerized-adaptive-testing" title="Link to this heading"></a></h2>
+<p>Computerized adaptive testing (CAT) emerged in the 1970s as <em>tailored testing</em> <a class="reference internal" href="references.html#lord77" id="id1"><span>[Lord77]</span></a>. Unlike linear tests, CAT adapts in real time:</p>
+<ol class="arabic simple">
+<li><p>After each item, the examinee’s ability is re-estimated</p></li>
+<li><p>The next item is selected based on the updated ability estimate</p></li>
+<li><p>Each examinee receives items matched to their ability level</p></li>
+</ol>
+<p>This approach is more efficient and engaging, reducing test length while maintaining accuracy.</p>
+</section>
+<section id="about-catsim">
+<h2>About catsim<a class="headerlink" href="#about-catsim" title="Link to this heading"></a></h2>
+<p>CAT simulations rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT simulation packages exist for R <a class="reference internal" href="references.html#magis12" id="id2"><span>[Magis12]</span></a>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> brings these capabilities to Python. Built on <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/index.html#module-scipy" title="(in SciPy v1.16.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, it provides:</p>
+<ul class="simple">
+<li><p>Multiple initialization, selection, estimation, and stopping methods</p></li>
+<li><p>Object-oriented architecture for easy customization</p></li>
+<li><p>Tools for comparing different CAT methodologies</p></li>
+</ul>
+</section>
 <section id="item-response-theory-models">
 <h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading"></a></h2>
 <p>As a CAT simulator, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory (<a class="reference internal" href="references.html#lord68" id="id3"><span>[Lord68]</span></a> and <a class="reference internal" href="references.html#rasch66" id="id4"><span>[Rasch66]</span></a>), a series of models created in the second part of the 20th century with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models’ parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals’ abilities by allocating them in ability scales, inspiring as well as justifying its use in adaptive testing.</p>
 <p>The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of <em>items</em> in which examinees manifest their latent traits when answering them.</p>
-<p>In unidimensional IRT models, an examinee’s ability is represented as <span class="math notranslate nohighlight">\(\theta\)</span>. Usually <span class="math notranslate nohighlight">\(-\inf &lt; \theta &lt; \inf\)</span>, but since the scale of <span class="math notranslate nohighlight">\(\theta\)</span> is up to the individuals creating the instrument, it is common for the values to be around the normal distribution <span class="math notranslate nohighlight">\(N(0; 1)\)</span>, such that <span class="math notranslate nohighlight">\(-4 &lt; \theta &lt; 4\)</span>.Additionally, <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is the estimate of <span class="math notranslate nohighlight">\(\theta\)</span>. Since a latent trait can’t be measured directly, estimates need to be made, which tend to get closer to the theorically real <span class="math notranslate nohighlight">\(\theta\)</span> as the test progresses in length.</p>
+<p>In unidimensional IRT models, an examinee’s ability is represented as <span class="math notranslate nohighlight">\(\theta\)</span>. Usually <span class="math notranslate nohighlight">\(-\infty &lt; \theta &lt; \infty\)</span>, but since the scale of <span class="math notranslate nohighlight">\(\theta\)</span> is up to the individuals creating the instrument, it is common for the values to follow the normal distribution <span class="math notranslate nohighlight">\(N(0, 1)\)</span>, such that <span class="math notranslate nohighlight">\(-4 &lt; \theta &lt; 4\)</span>. Additionally, <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is the estimate of <span class="math notranslate nohighlight">\(\theta\)</span>. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true <span class="math notranslate nohighlight">\(\theta\)</span> as the test progresses in length.</p>
 <p>Under the logistic models of IRT, an item is represented by the following parameters:</p>
 <blockquote>
 <div><ul class="simple">
@@ -135,8 +165,11 @@
 \[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.\]</div>
 <p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s ability.</p>
 <p>(<a class="reference download internal" download="" href="_downloads/fc302e54d1b5c2c307879bce9e7083d7/introduction-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/781a59a947c69b7063efea886330e00d/introduction-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/b5915b0c191b5fd1df7aebeb021f1e3d/introduction-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/ab6fb6078e4968b4441d1709d6692cd0/introduction-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default">
+<figure class="align-default" id="id13">
 <img alt="_images/introduction-1.png" class="plot-directive" src="_images/introduction-1.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.</span><a class="headerlink" href="#id13" title="Link to this image"></a></p>
+</figcaption>
 </figure>
 <p>The sum of the information of all items in a test is called <em>test information</em> <a class="reference internal" href="references.html#ayala2009" id="id10"><span>[Ayala2009]</span></a>:</p>
 <div class="math notranslate nohighlight">
@@ -148,7 +181,7 @@
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> provides these functions in the <a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt()</span></code></a> module.</p>
 <section id="the-item-matrix">
 <h3>The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Link to this heading"></a></h3>
-<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, a collection of items is represented as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the <em>item matrix</em>. The most important features of the items are situated in the first three columns of the matrix, which represent the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span>, respectively. Item matrices can be generated via the <a class="reference internal" href="cat.html#catsim.cat.generate_item_bank" title="catsim.cat.generate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code></a> function as follows:</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, a collection of items is represented as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the <em>item matrix</em>. The most important features of the items are situated in the first three columns of the matrix, which represent the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span>, respectively. Item matrices can be generated via the <code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code> function as follows:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;2PL&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">)</span>
@@ -164,11 +197,11 @@
 </section>
 <section id="computerized-adaptive-tests">
 <h2>Computerized adaptive tests<a class="headerlink" href="#computerized-adaptive-tests" title="Link to this heading"></a></h2>
-<p>Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinees’ ability is updated after the response of each item. The updated knowledge of an examinee’s ability at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduce the standard error of estimation of their ability at a faster rate. This behavior</p>
+<p>Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee’s ability is updated after the response of each item. The updated knowledge of an examinee’s ability at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.</p>
 <section id="the-cat-lifecycle">
 <h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Link to this heading"></a></h3>
 <p>In general, a computerized adaptive test has a very well-defined lifecycle:</p>
-<div class="graphviz"><img src="_images/graphviz-9e87416897233367d784b773084646a57761b919.png" alt="digraph cat_simple {
+<div class="graphviz"><img src="_images/graphviz-80632ff27b6da190db7811b7f3f4779f8ffed487.png" alt="digraph cat_simple {
     bgcolor=&quot;transparent&quot;;
     rankdir=TB;
     a[label=&lt;START&gt;, shape=box];
@@ -216,7 +249,7 @@
 </section>
 <section id="stopping-criterion">
 <h4>Stopping Criterion<a class="headerlink" href="#stopping-criterion" title="Link to this heading"></a></h4>
-<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold etc. Both of these stopping criteria are implemented as <a class="reference internal" href="stopping.html#catsim.stopping.MaxItemStopper" title="catsim.stopping.MaxItemStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxItemStopper</span></code></a> and <a class="reference internal" href="stopping.html#catsim.stopping.MaxItemStopper" title="catsim.stopping.MaxItemStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxItemStopper</span></code></a>, respectively.</p>
+<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold. These stopping criteria are implemented as <a class="reference internal" href="stopping.html#catsim.stopping.MaxItemStopper" title="catsim.stopping.MaxItemStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxItemStopper</span></code></a> and <a class="reference internal" href="stopping.html#catsim.stopping.MinErrorStopper" title="catsim.stopping.MinErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MinErrorStopper</span></code></a>, respectively.</p>
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, test stopping criteria can be found in the <a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> module.</p>
 </section>
 </section>
@@ -260,7 +293,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

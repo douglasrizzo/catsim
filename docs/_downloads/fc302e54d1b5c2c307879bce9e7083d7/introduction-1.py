@@ -1,5 +1,8 @@
-from catsim import plot
-from catsim.cat import generate_item_bank
+import matplotlib.pyplot as plt
+from catsim import ItemBank
+from catsim.plot import item_curve, PlotType
 
-item = generate_item_bank(1)[0]
-plot.item_curve(item[0], item[1], item[2], item[3], ptype="both")
+item_bank = ItemBank.generate_item_bank(1)
+item = item_bank[0]
+item_curve(a=item[0], b=item[1], c=item[2], d=item[3], ptype=PlotType.BOTH)
+plt.show()
