@@ -78,8 +78,8 @@ The charts below show the :math:`\hat{\theta}` found by the different estimation
 
     import numpy as np
     import matplotlib.pyplot as plt
-    from catsim.estimation import *
-    from catsim import ItemBank
+    from catsim import ItemBank, irt
+    from catsim.estimation import NumericalSearchEstimator
 
     test_size = 20
     item_bank = ItemBank.generate_item_bank(20)
@@ -102,11 +102,12 @@ The charts below show the :math:`\hat{\theta}` found by the different estimation
         ax = axes[idx]
         for response_vector in response_vectors:
             ll_line = [irt.log_likelihood(theta, response_vector, sorted_bank.items) for theta in thetas]
-            max_LL = estimator.estimate(item_bank=sorted_bank, administered_items=list(range(20)),
+            max_ll = estimator.estimate(item_bank=sorted_bank, administered_items=list(range(20)),
                                         response_vector=response_vector, est_theta=0)
-            best_theta = irt.log_likelihood(max_LL, response_vector, sorted_bank.items)
+            best_theta = irt.log_likelihood(max_ll, response_vector, sorted_bank.items)
             ax.plot(thetas, ll_line)
-            ax.plot(max_LL, best_theta, 'o', label = str(sum(response_vector)) + ' correct, '+r'$\hat{\theta} \approx $' + format(round(max_LL, 5)))
+            label_text = f"{sum(response_vector)} correct, " + r"$\hat{\theta} \approx $" + f"{round(max_ll, 5)}"
+            ax.plot(max_ll, best_theta, 'o', label=label_text)
             ax.set_xlabel(r'$\theta$', size=16)
             ax.set_ylabel(r'$\log L(\theta)$', size=16)
             ax.set_title(f"{estimator.method} ({round(estimator.avg_evaluations)} avg. evals)")

@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+
 from catsim.item_bank import ItemBank
-from catsim.plot import item_curve, PlotType
+from catsim.plot import PlotType, item_curve
+
 n_items = 2
 item_bank = ItemBank.generate_item_bank(n_items)
 fig, axes = plt.subplots(n_items, 1)

@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
-from catsim.item_bank import ItemBank
+
 from catsim import plot
-from catsim.initialization import RandomInitializer
-from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
-from catsim.stopping import MaxItemStopper
+from catsim.initialization import RandomInitializer
+from catsim.item_bank import ItemBank
+from catsim.selection import MaxInfoSelector
 from catsim.simulation import Simulator
+from catsim.stopping import MaxItemStopper
 
 fig, axes = plt.subplots(2, 1, figsize=(7, 12))
 s = Simulator(ItemBank.generate_item_bank(100), 10)
