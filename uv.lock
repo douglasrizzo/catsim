@@ -44,6 +44,7 @@ dependencies = [
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scipy", version = "1.16.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "tqdm" },
+    { name = "typing-extensions" },
 ]
 
 [package.dev-dependencies]
@@ -77,6 +78,7 @@ requires-dist = [
     { name = "scikit-learn" },
     { name = "scipy" },
     { name = "tqdm" },
+    { name = "typing-extensions" },
 ]
 
 [package.metadata.requires-dev]

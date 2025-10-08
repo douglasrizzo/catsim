@@ -4,10 +4,11 @@ This module provides the ItemBank class for managing item parameters,
 precomputing derived values, and tracking item usage during simulations.
 """
 
-from typing import Any, Literal, Self
+from typing import Any, Literal
 
 import numpy
 from numpy.random import Generator
+from typing_extensions import Self
 
 from . import irt
 

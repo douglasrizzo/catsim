@@ -30,6 +30,7 @@ dependencies = [
     "json_tricks",
     "tqdm",
     "numpy",
+    "typing_extensions",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
