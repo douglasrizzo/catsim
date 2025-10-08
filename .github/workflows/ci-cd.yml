@@ -84,6 +84,19 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Add dev version suffix for dev builds
+        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+        run: |
+          # Get current version from pyproject.toml
+          CURRENT_VERSION=$(grep -E '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          # Get short SHA
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          # Create new version with local identifier
+          NEW_VERSION="${CURRENT_VERSION}+dev.${SHORT_SHA}"
+          # Update pyproject.toml
+          sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" pyproject.toml
+          echo "Updated version to ${NEW_VERSION}"
+
       - name: Build package
         run: uv build
 
