@@ -1,27 +1,76 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
+  # 1. Fast fail checks first
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: check-ast
-      - id: trailing-whitespace
+      - id: check-docstring-first
+      - id: check-toml
+      - id: check-yaml
+      - id: check-json
+      - id: check-xml
+      - id: debug-statements
+
+  # 2. Code structure modifications (before formatting)
+  - repo: https://github.com/JelleZijlstra/autotyping
+    rev: 24.9.0
+    hooks:
+      - id: autotyping
+        stages: [pre-commit]
+        types: [python]
+        args: [--safe]
+
+  # 3. File fixers
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
       - id: end-of-file-fixer
       - id: mixed-line-ending
-      - id: check-docstring-first
-      - id: requirements-txt-fixer
-      - id: check-yaml
-      - id: check-toml
-      - id: check-xml
-      - id: check-json
-      - id: pretty-format-json
-        args:
-          - "--autofix"
+      - id: trailing-whitespace
+
+  # 4. Linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.3
+    rev: v0.14.0
     hooks:
       - id: ruff
         args: [--fix]
-        exclude: sphinx/
       - id: ruff-format
+
+  # 5. Other formatters
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: pretty-format-json
+        args:
+          - "--autofix"
+      - id: requirements-txt-fixer
+
+  - repo: https://github.com/hukkin/mdformat
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-toc
+
+  # 6. Validation checks last
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.24.1
+    hooks:
+      - id: validate-pyproject
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.9.0
+    hooks:
+      - id: uv-lock
+        name: Check uv.lock is up to date
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.34.0
+    hooks:
+      - id: check-github-workflows
+        args: ["--verbose"]
+      - id: check-dependabot
