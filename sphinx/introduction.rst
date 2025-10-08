@@ -1,15 +1,41 @@
 Introduction
 ************
 
-Assessment instruments are widely used to measure individuals *latent traits*, that is, internal characteristics that cannot be directly measured. An example of such assessment instruments are educational and psychological tests. Each test is composed of a series of items and an examinee's answers to these items allow for the measurement of one or more of his or hers latent traits. When a latent trait is expressed in numerical form, it is called an *ability* or *ability*.
+:py:mod:`catsim` is a Python package for simulating computerized adaptive tests (CAT), a modern approach to assessment that adapts to each examinee's ability level in real time.
 
-Ordinary tests, hereon called linear tests, are applied using the orthodox paper and pencil strategy, in which tests are printed and all examinees are presented with the same items in the same order. One of the drawbacks of this methodology is that both individuals with high and low abilities must answer all items in order to have their ability estimated. An individual with high ability might get bored of answering the whole test if it only contains items that he or she considers easy; on the other hand, an individual of low ability might get frustrated if he is confronted by items considered and hard and might give up on the test or answer the items without paying attention.
+What are Latent Traits?
+========================
 
-With these concerns in mind, a new paradigm in assessment emerged in the 70s. Initially named *tailored testing* in [Lord77]_, these were tests in which items were chosen to be presented to the examinee in real time, based on the examinee's responses to previous items. The name was changed to computerized adaptive testing (CAT) due to the advances in technology that facilitated the application of such a testing methodology using electronic devices, like computers and tablets.
+Assessment instruments measure *latent traits* - internal characteristics that cannot be directly observed, such as knowledge or personality traits. Educational and psychological tests are common examples. When a latent trait is expressed numerically, it is called an *ability* or *proficiency*.
 
-In a CAT, the examinee's ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee's real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.
+The Problem with Linear Tests
+==============================
 
-Finally, the advent of CAT allowed for researchers to create their own variant ways of starting a test, choosing items, estimating abilities and stopping the test. Fortunately, the mathematical formalization provided by Item Response Theory (IRT) allows for tests to be computationally simulated and the different methodologies of applying a CAT to be compared under different constraints. Packages with these functionalities already exist in the R language ([Magis12]_) but not yet in Python. :py:mod:`catsim` was created to fill this gap, using the facilities of established scientific packages such as :py:mod:`numpy` and :py:mod:`scipy`, as well as the object-oriented programming paradigm supported by Python to create a simple, comprehensive and user-extendable CAT simulation package.
+Traditional *linear tests* use a paper-and-pencil approach where all examinees answer the same items in the same order. This creates several problems:
+
+* High-ability examinees waste time on easy questions
+* Low-ability examinees become frustrated with overly difficult questions
+* Test length cannot be optimized for individual examinees
+
+What is Computerized Adaptive Testing?
+=======================================
+
+Computerized adaptive testing (CAT) emerged in the 1970s as *tailored testing* [Lord77]_. Unlike linear tests, CAT adapts in real time:
+
+1. After each item, the examinee's ability is re-estimated
+2. The next item is selected based on the updated ability estimate
+3. Each examinee receives items matched to their ability level
+
+This approach is more efficient and engaging, reducing test length while maintaining accuracy.
+
+About catsim
+============
+
+CAT simulations rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT simulation packages exist for R [Magis12]_, :py:mod:`catsim` brings these capabilities to Python. Built on :py:mod:`numpy` and :py:mod:`scipy`, it provides:
+
+* Multiple initialization, selection, estimation, and stopping methods
+* Object-oriented architecture for easy customization
+* Tools for comparing different CAT methodologies
 
 Item Response Theory Models
 ===========================
@@ -18,7 +44,7 @@ As a CAT simulator, :py:mod:`catsim` borrows many concepts from Item Response Th
 
 The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of *items* in which examinees manifest their latent traits when answering them.
 
-In unidimensional IRT models, an examinee's ability is represented as :math:`\theta`. Usually :math:`-\inf < \theta < \inf`, but since the scale of :math:`\theta` is up to the individuals creating the instrument, it is common for the values to be around the normal distribution :math:`N(0; 1)`, such that :math:`-4 < \theta < 4`.Additionally, :math:`\hat{\theta}` is the estimate of :math:`\theta`. Since a latent trait can't be measured directly, estimates need to be made, which tend to get closer to the theorically real :math:`\theta` as the test progresses in length.
+In unidimensional IRT models, an examinee's ability is represented as :math:`\theta`. Usually :math:`-\infty < \theta < \infty`, but since the scale of :math:`\theta` is up to the individuals creating the instrument, it is common for the values to follow the normal distribution :math:`N(0, 1)`, such that :math:`-4 < \theta < 4`. Additionally, :math:`\hat{\theta}` is the estimate of :math:`\theta`. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true :math:`\theta` as the test progresses in length.
 
 Under the logistic models of IRT, an item is represented by the following parameters:
 
@@ -43,11 +69,13 @@ Both of these functions are graphically represented in the following figure. It 
     :caption: Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.
 
     import matplotlib.pyplot as plt
-    from catsim.cat import generate_item_bank
+    from catsim import ItemBank
     from catsim.plot import item_curve, PlotType
 
-    item = generate_item_bank(1)[0]
-    item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH); plt.show()
+    item_bank = ItemBank.generate_item_bank(1)
+    item = item_bank[0]
+    item_curve(a=item[0], b=item[1], c=item[2], d=item[3], ptype=PlotType.BOTH)
+    plt.show()
 
 The sum of the information of all items in a test is called *test information* [Ayala2009]_:
 
@@ -82,7 +110,7 @@ Where :math:`q_i` represents the number of tests item :math:`i` has been used on
 Computerized adaptive tests
 ===========================
 
-Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinees' ability is updated after the response of each item. The updated knowledge of an examinee's ability at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduce the standard error of estimation of their ability at a faster rate. This behavior
+Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee's ability is updated after the response of each item. The updated knowledge of an examinee's ability at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.
 
 The CAT Lifecycle
 -----------------
@@ -150,7 +178,7 @@ In :py:mod:`catsim`, ability estimation procedures can be found in the :py:mod:`
 Stopping Criterion
 ^^^^^^^^^^^^^^^^^^
 
-Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (:py:func:`catsim.irt.see`) reaches a lower threshold etc. Both of these stopping criteria are implemented as :py:class:`catsim.stopping.MaxItemStopper` and :py:class:`catsim.stopping.MaxItemStopper`, respectively.
+Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (:py:func:`catsim.irt.see`) reaches a lower threshold. These stopping criteria are implemented as :py:class:`catsim.stopping.MaxItemStopper` and :py:class:`catsim.stopping.MinErrorStopper`, respectively.
 
 In :py:mod:`catsim`, test stopping criteria can be found in the :py:mod:`catsim.stopping` module.
 

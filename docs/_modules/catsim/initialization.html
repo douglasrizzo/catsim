@@ -1,43 +1,40 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>catsim.initialization &mdash; catsim 0.17.3 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <title>catsim.initialization &mdash; catsim 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+
     <link rel="shortcut icon" href="../../_static/logo.svg"/>
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=3bc55ee7"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../../index.html">
-            
+
               <img src="../../_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                0.17.3
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -56,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -83,80 +81,197 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <h1>Source code for catsim.initialization</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span>
 
-<span class="kn">from</span> <span class="nn">.simulation</span> <span class="kn">import</span> <span class="n">Initializer</span>
+  <h1>Source code for catsim.initialization</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Initializer</span>
+
+
+<div class="viewcode-block" id="InitializationDistribution">
+<a class="viewcode-back" href="../../initialization.html#catsim.initialization.InitializationDistribution">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">InitializationDistribution</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Distribution to use for ability estimate initialization.</span>
+
+<span class="sd">  Attributes</span>
+<span class="sd">  ----------</span>
+<span class="sd">  UNIFORM : str</span>
+<span class="sd">      Uniform distribution for initialization.</span>
+<span class="sd">  NORMAL : str</span>
+<span class="sd">      Normal (Gaussian) distribution for initialization.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">UNIFORM</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span>
+  <span class="n">NORMAL</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span></div>
+
 
 
 <div class="viewcode-block" id="RandomInitializer">
 <a class="viewcode-back" href="../../initialization.html#catsim.initialization.RandomInitializer">[docs]</a>
-<span class="k">class</span> <span class="nc">RandomInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly initializes the first estimate of an examinee&#39;s ability</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RandomInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Randomly initialize the first estimate of an examinee&#39;s ability from a statistical distribution.</span>
 
-<span class="sd">    :param dist_type: either `uniform` or `normal`</span>
-<span class="sd">    :param dist_params: a tuple containing minimum and maximum values for the</span>
-<span class="sd">                        uniform distribution (in no particular order) or the average</span>
-<span class="sd">                        and standard deviation values for the normal distribution</span>
-<span class="sd">                        (in this particular order).&quot;&quot;&quot;</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  dist_type : InitializationDistribution, optional</span>
+<span class="sd">      Distribution type to use for initialization (uniform or normal).</span>
+<span class="sd">      Default is UNIFORM.</span>
+<span class="sd">  dist_params : tuple, optional</span>
+<span class="sd">      Distribution parameters:</span>
+<span class="sd">      - For uniform: tuple of (min, max) values (order doesn&#39;t matter)</span>
+<span class="sd">      - For normal: tuple of (mean, std) values (in this exact order)</span>
+<span class="sd">      Default is (-5, 5).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Random Initializer&quot;</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Initializer.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Random Initializer&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dist_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="n">dist_params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">RandomInitializer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">dist_type</span><span class="p">:</span> <span class="n">InitializationDistribution</span> <span class="o">=</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">,</span> <span class="n">dist_params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a RandomInitializer object.</span>
 
-        <span class="n">available_distributions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;uniform&quot;</span><span class="p">,</span> <span class="s2">&quot;normal&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">dist_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_distributions</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dist_type</span><span class="si">}</span><span class="s2"> not in available distributions </span><span class="si">{</span><span class="n">available_distributions</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dist_type : InitializationDistribution, optional</span>
+<span class="sd">        Distribution to use for ability estimate initialization. Default is UNIFORM.</span>
+<span class="sd">    dist_params : tuple, optional</span>
+<span class="sd">        Parameters for the chosen distribution. Default is (-5, 5).</span>
+<span class="sd">        - For uniform: (min, max) values (order doesn&#39;t matter)</span>
+<span class="sd">        - For normal: (mean, std) values (in this exact order)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">=</span> <span class="n">dist_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span> <span class="o">=</span> <span class="n">dist_params</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If dist_type is not an InitializationDistribution enum value.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If dist_params are invalid for the chosen distribution type (e.g., wrong</span>
+<span class="sd">        length, equal min/max for uniform, non-positive std for normal).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">InitializationDistribution</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;dist_type must be of type InitializationDistribution&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># Validate distribution parameters</span>
+    <span class="n">expected_param_count</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_params</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_param_count</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;dist_params must be a tuple of exactly 2 values&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">:</span>
+      <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">min_val</span> <span class="o">==</span> <span class="n">max_val</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Uniform distribution parameters must have different min and max values, got </span><span class="si">{</span><span class="n">dist_params</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
+      <span class="n">_</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">dist_params</span>  <span class="c1"># mean is not used in validation</span>
+      <span class="k">if</span> <span class="n">std</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Normal distribution standard deviation must be positive, got </span><span class="si">{</span><span class="n">std</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">=</span> <span class="n">dist_type</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span> <span class="o">=</span> <span class="n">dist_params</span>
 
 <div class="viewcode-block" id="RandomInitializer.initialize">
 <a class="viewcode-back" href="../../initialization.html#catsim.initialization.RandomInitializer.initialize">[docs]</a>
-    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates a value using the chosen distribution and parameters</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate an initial ability value using the chosen distribution and parameters.</span>
 
-<span class="sd">        :param index: the index of the current examinee. This parameter is not used by this method.</span>
-<span class="sd">        :returns: a ability value generated from the chosen distribution using the passed parameters</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="s2">&quot;uniform&quot;</span><span class="p">:</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="s2">&quot;normal&quot;</span><span class="p">:</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. This parameter is not used by this method.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments.</span>
 
-        <span class="k">return</span> <span class="n">theta</span></div>
+<span class="sd">        - rng (numpy.random.Generator): Random number generator used by the object,</span>
+<span class="sd">          guarantees reproducibility of outputs.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        An ability value generated from the chosen distribution using the specified</span>
+<span class="sd">        parameters.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        If an invalid distribution type is encountered (should not happen after</span>
+<span class="sd">        validation in __init__).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">rng</span><span class="p">,)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span><span class="n">return_rng</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">:</span>
+      <span class="n">theta</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
+      <span class="n">theta</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Invalid distribution type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span><span class="si">}</span><span class="s2">. This should not happen after validation.&quot;</span>
+      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">theta</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="FixedPointInitializer">
 <a class="viewcode-back" href="../../initialization.html#catsim.initialization.FixedPointInitializer">[docs]</a>
-<span class="k">class</span> <span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes every ability at the same point.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">Initializer</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Initialize every examinee&#39;s ability at the same fixed point.</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Fixed Point Initializer&quot;</span>
+<span class="sd">  This initializer is useful for controlled experiments where you want all</span>
+<span class="sd">  examinees to start with the same initial ability estimate.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param start: the starting point for every examinee</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">FixedPointInitializer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  start : float</span>
+<span class="sd">      The starting ability value for every examinee.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Initializer.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Fixed Point Initializer&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a FixedPointInitializer object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : float</span>
+<span class="sd">        The starting ability value for every examinee.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If start is not a numeric value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
 
 <div class="viewcode-block" id="FixedPointInitializer.initialize">
 <a class="viewcode-back" href="../../initialization.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>
-    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the same ability value that was passed to the constructor of the initializer</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the same ability value that was passed to the constructor.</span>
 
-<span class="sd">        :param index: the index of the current examinee. This parameter is not used by this method.</span>
-<span class="sd">        :returns: the same ability value that was passed to the constructor of the initializer&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span></div>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. This parameter is not used by this method.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments. Not used by this method.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The fixed ability value that was passed to the constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span></div>
 </div>
 
 </pre></div>
@@ -168,13 +283,13 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -185,7 +300,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

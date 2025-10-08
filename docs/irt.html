@@ -1,47 +1,44 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Item Response Theory Functions – catsim.irt &mdash; catsim 0.17.3 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <title>Item Response Theory Functions – catsim.irt &mdash; catsim 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+
     <link rel="shortcut icon" href="_static/logo.svg"/>
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=3bc55ee7"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Computerized Adaptive Test-related Functions – catsim.cat" href="cat.html" />
-    <link rel="prev" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" /> 
+    <link rel="prev" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="index.html">
-            
+
               <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                0.17.3
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -58,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.NumParams"><code class="docutils literal notranslate"><span class="pre">NumParams</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.detect_model"><code class="docutils literal notranslate"><span class="pre">detect_model()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.icc"><code class="docutils literal notranslate"><span class="pre">icc()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.icc_hpc"><code class="docutils literal notranslate"><span class="pre">icc_hpc()</span></code></a></li>
@@ -77,6 +75,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
 </ul>
@@ -104,373 +103,528 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="item-response-theory-functions-catsim-irt">
 <h1>Item Response Theory Functions – <a class="reference internal" href="#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><a class="headerlink" href="#item-response-theory-functions-catsim-irt" title="Link to this heading"></a></h1>
-<p>Item Response Theory is a group of statistical tools created with the purpose of measuring latent traits, like personality traits or knowledge in specific areas. IRT allows for the creation of a measuring instrument (the test), under which every examinee may be positioned and compared with others. The measuring instrument is created by items, which can be most commonly represented as tasks in a test.</p>
-<p>On the mathematical domain, IRT allows us to calculate the probability with which an examinee might answer an item correctly. For that both items and examinees are modelled using numerical parameters. This allows for the estimation and analysis of examinees abilities on the same scale as items difficulties. It also allows for the quality of items to be judged by the values of their parameters.</p>
-<p>This module contains functions pertaining to the Item Response Theory logistic models.</p>
-<span class="target" id="module-catsim.irt"></span><dl class="py function">
+<p>This module contains functions pertaining to the Item Response Theory logistic models, including probability calculations, information functions, likelihood estimation, and other IRT-related utilities.</p>
+<span class="target" id="module-catsim.irt"></span><dl class="py class">
+<dt class="sig sig-object py" id="catsim.irt.NumParams">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">NumParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#NumParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.NumParams" title="Link to this definition"></a></dt>
+<dd><p>Enumerator that informs how many parameters each logistic model of IRT has.</p>
+<p>Created to avoid accessing magic numbers in the code. Each value corresponds
+to the number of parameters in the respective IRT model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>PL1</strong><span class="classifier">int</span></dt><dd><p>One-parameter logistic model (Rasch model).</p>
+</dd>
+<dt><strong>PL2</strong><span class="classifier">int</span></dt><dd><p>Two-parameter logistic model.</p>
+</dd>
+<dt><strong>PL3</strong><span class="classifier">int</span></dt><dd><p>Three-parameter logistic model.</p>
+</dd>
+<dt><strong>PL4</strong><span class="classifier">int</span></dt><dd><p>Four-parameter logistic model.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.detect_model">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">detect_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#detect_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.detect_model" title="Link to this definition"></a></dt>
-<dd><p>Detects which logistic model an item matrix fits into.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">detect_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#detect_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.detect_model" title="Link to this definition"></a></dt>
+<dd><p>Detect which logistic model an item matrix fits into.</p>
+<p>Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,
+or 4PL model based on which parameters vary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>items</strong> – an item matrix</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>An item matrix with at least four columns.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an int between 1 and 4 denoting the logistic model of the given item matrix</p>
+<dd class="field-even"><dl class="simple">
+<dt>int</dt><dd><p>An integer between 1 and 4 denoting the logistic model:
+- 1: Rasch/1PL (all discrimination equal, no guessing, no upper asymptote)
+- 2: 2PL (varying discrimination, no guessing, no upper asymptote)
+- 3: 3PL (varying discrimination, guessing present, no upper asymptote variation)
+- 4: 4PL (all parameters vary)</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.icc">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#icc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc" title="Link to this definition"></a></dt>
-<dd><p>Item Response Theory four-parameter logistic function <a class="reference internal" href="references.html#ayala2009" id="id1"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id2"><span>[Magis13]</span></a>:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#icc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc" title="Link to this definition"></a></dt>
+<dd><p>Compute the Item Response Theory four-parameter logistic function <a class="reference internal" href="references.html#magis13" id="id1"><span>[Magis13]</span></a>.</p>
+<p>The item characteristic curve (ICC) represents the probability that an examinee
+with ability <span class="math notranslate nohighlight">\(\theta\)</span> will correctly answer an item with the given parameters.</p>
 <div class="math notranslate nohighlight">
 \[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s ability value. This parameter value has
-no boundary, but if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was
-used to estimate the parameters, then <span class="math notranslate nohighlight">\(-4 \leq \theta \leq
-4\)</span>.</p></li>
-<li><p><strong>a</strong> – the discrimination parameter of the item, usually a positive
-value in which <span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>.</p></li>
-<li><p><strong>b</strong> – the item difficulty parameter. This parameter value has no
-boundaries, but it is necessary that it be in the same value space
-as <cite>theta</cite> (usually <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>).</p></li>
-<li><p><strong>c</strong> – the item pseudo-guessing parameter. Being a probability,
-<span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate nohighlight">\(c \leq 0.2\)</span>.</p></li>
-<li><p><strong>d</strong> – the item upper asymptote. Being a probability,
-<span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate nohighlight">\(d \approx 1\)</span>.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value. This parameter value has no boundary, but
+if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the
+parameters, then typically <span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</p>
+</dd>
+<dt><strong>a</strong><span class="classifier">float</span></dt><dd><p>The discrimination parameter of the item, usually a positive value in which
+<span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>. Higher values indicate better discrimination
+between ability levels.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float</span></dt><dd><p>The item difficulty parameter. This parameter value has no boundaries, but
+it must be in the same value space as <cite>theta</cite> (usually <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>).
+Higher values indicate more difficult items.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>The item pseudo-guessing parameter. Being a probability, <span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>,
+but items considered good usually have <span class="math notranslate nohighlight">\(c \leq 0.2\)</span>. Represents the
+lower asymptote (probability of guessing correctly). Default is 0.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float, optional</span></dt><dd><p>The item upper asymptote. Being a probability, <span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but
+items considered good usually have <span class="math notranslate nohighlight">\(d \approx 1\)</span>. Represents the maximum
+probability of correct response. Default is 1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The probability <span class="math notranslate nohighlight">\(P(X_i = 1| \theta)\)</span> of a correct response, a value
+between c and d.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.icc_hpc">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#icc_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc_hpc" title="Link to this definition"></a></dt>
-<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v1.25)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the characteristic
-function for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#icc_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc_hpc" title="Link to this definition"></a></dt>
+<dd><p>Compute item characteristic functions for all items in a numpy array at once.</p>
+<p>This is a high-performance computing (HPC) version that uses vectorized operations
+with numpy and numexpr for efficient batch processing of multiple items.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s ability value.</p></li>
-<li><p><strong>items</strong> – array containing the four item parameters.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing item parameters with at least four columns
+[a, b, c, d, …].</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an array of all item characteristic functions, given the current <code class="docutils literal notranslate"><span class="pre">theta</span></code></p>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>An array of probabilities, one for each item, representing the probability
+of a correct response given the current theta.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.inf">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#inf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf" title="Link to this definition"></a></dt>
-<dd><p>Calculates the information value of an item using the Item Response Theory
-four-parameter logistic model function <a class="reference internal" href="references.html#ayala2009" id="id3"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id4"><span>[Magis13]</span></a>:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#inf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf" title="Link to this definition"></a></dt>
+<dd><p>Compute the information value of an item using the Item Response Theory four-parameter logistic model.</p>
+<p>Item information quantifies how precisely an item can estimate ability at a given
+<span class="math notranslate nohighlight">\(\theta\)</span> level. Higher information indicates better precision. References
+are given in <a class="reference internal" href="references.html#ayala2009" id="id2"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id3"><span>[Magis13]</span></a>.</p>
 <div class="math notranslate nohighlight">
 \[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s ability value. This parameter value has
-no boundary, but if a distribution of the form
-<span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the parameters, then
-<span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</p></li>
-<li><p><strong>a</strong> – the discrimination parameter of the item, usually a positive
-value in which <span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>.</p></li>
-<li><p><strong>b</strong> – the item difficulty parameter. This parameter value has no
-boundary, but if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was
-used to estimate the parameters, then <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>.</p></li>
-<li><p><strong>c</strong> – the item pseudo-guessing parameter. Being a probability,
-<span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate nohighlight">\(c \leq 0.2\)</span>.</p></li>
-<li><p><strong>d</strong> – the item upper asymptote. Being a probability,
-<span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but items considered good usually have
-<span class="math notranslate nohighlight">\(d \approx 1\)</span>.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value. This parameter value has no boundary, but
+if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the
+parameters, then typically <span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</p>
+</dd>
+<dt><strong>a</strong><span class="classifier">float</span></dt><dd><p>The discrimination parameter of the item, usually a positive value in which
+<span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float</span></dt><dd><p>The item difficulty parameter. This parameter value has no boundary, but
+if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the
+parameters, then typically <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>The item pseudo-guessing parameter. Being a probability, <span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>,
+but items considered good usually have <span class="math notranslate nohighlight">\(c \leq 0.2\)</span>. Default is 0.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float, optional</span></dt><dd><p>The item upper asymptote. Being a probability, <span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but
+items considered good usually have <span class="math notranslate nohighlight">\(d \approx 1\)</span>. Default is 1.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the information value of the item at the designated <cite>theta</cite> point.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The information value of the item at the designated <cite>theta</cite> point.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.inf_hpc">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#inf_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf_hpc" title="Link to this definition"></a></dt>
-<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.inf" title="catsim.irt.inf"><code class="xref py py-func docutils literal notranslate"><span class="pre">inf()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v1.25)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the information
-values for all items in a <cite>numpy.ndarray</cite> are computed at once.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#inf_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf_hpc" title="Link to this definition"></a></dt>
+<dd><p>Compute the information values for all items in a numpy array using numpy and numexpr.</p>
+<p>This is a high-performance computing (HPC) version that uses vectorized operations
+for efficient batch processing of item information values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – the individual’s ability value.</p></li>
-<li><p><strong>items</strong> – array containing the four item parameters.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing item parameters with at least four columns [a, b, c, d, …].</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an array of all item information values, given the current <code class="docutils literal notranslate"><span class="pre">theta</span></code></p>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Array containing the information values for each item at the given theta.
+Information quantifies how much an item contributes to ability estimation
+precision at the specified ability level.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.log_likelihood">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.log_likelihood" title="Link to this definition"></a></dt>
-<dd><p>Calculates the log-likelihood of an estimated ability, given a
-response vector and the parameters of the answered items <a class="reference internal" href="references.html#ayala2009" id="id5"><span>[Ayala2009]</span></a>.</p>
-<p>The likelihood function of a given <span class="math notranslate nohighlight">\(\theta\)</span> value given the answers to <span class="math notranslate nohighlight">\(I\)</span> items is given by:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.</p>
+<p>The likelihood function of a given <span class="math notranslate nohighlight">\(\theta\)</span> value given the answers to <span class="math notranslate nohighlight">\(I\)</span>
+items is given by <a class="reference internal" href="references.html#ayala2009" id="id4"><span>[Ayala2009]</span></a>:</p>
 <div class="math notranslate nohighlight">
 \[L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}\]</div>
 <p>Finding the maximum of <span class="math notranslate nohighlight">\(L(X_{Ij})\)</span> includes using the product rule of derivations.
 Since <span class="math notranslate nohighlight">\(L(X_{Ij})\)</span> has <span class="math notranslate nohighlight">\(j\)</span> parts, it can be quite complicated to do so. Also,
 for computational reasons, the product of probabilities can quickly tend to 0, so it is
 common to use the log-likelihood in maximization/minimization problems, transforming the
-product of probabilities in a sum of probabilities:</p>
+product of probabilities into a sum of log probabilities:</p>
 <blockquote>
 <div><div class="math notranslate nohighlight">
-\[\log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I
-\left\lbrace x_{ij} \log P_{ij}(\theta)+ (1 - x_{ij}) \log
-Q_{ij}(\theta) \right\rbrace\]</div>
+\[\log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I \left\lbrace x_{ij} \log P_{ij}(\theta)+
+    (1 - x_{ij}) \log Q_{ij}(\theta) \right\rbrace\]</div>
 </div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(Q_{ij}(\theta) = 1 - P_{ij}(\theta)\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>est_theta</strong> – estimated ability value.</p></li>
-<li><p><strong>response_vector</strong> – a Boolean list containing the response vector.</p></li>
-<li><p><strong>administered_items</strong> – a numpy array containing the parameters of the answered items.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Estimated ability value.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>A boolean list containing the response vector, where True indicates a correct
+response and False indicates an incorrect response.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A numpy array containing the parameters of the answered items.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>log-likelihood of a given ability value, given the responses to the administered items.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Log-likelihood of the given ability value, given the responses to the
+administered items. Higher values indicate better fit.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If response vector and administered items have different lengths or if the
+response vector contains non-Boolean elements.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.max_info">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">max_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#max_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.max_info" title="Link to this definition"></a></dt>
-<dd><p>Returns the <span class="math notranslate nohighlight">\(\theta\)</span> value to which the item with the given parameters
-gives maximum information. For the 1-parameter and 2-parameter
-logistic models, this <span class="math notranslate nohighlight">\(\theta\)</span> corresponds to where <span class="math notranslate nohighlight">\(b = 0.5\)</span>.
-In the 3-parameter and 4-parameter logistic models, however, this value is given
-by (<a class="reference internal" href="references.html#magis13" id="id6"><span>[Magis13]</span></a>)</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">max_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#max_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.max_info" title="Link to this definition"></a></dt>
+<dd><p>Return the <span class="math notranslate nohighlight">\(\theta\)</span> value at which an item provides maximum information.</p>
+<p>For the 1-parameter and 2-parameter logistic models, this <span class="math notranslate nohighlight">\(\theta\)</span> equals <span class="math notranslate nohighlight">\(b\)</span>.
+In the 3-parameter and 4-parameter logistic models, however, this value is given by
+(<a class="reference internal" href="references.html#magis13" id="id5"><span>[Magis13]</span></a>)</p>
 <div class="math notranslate nohighlight">
 \[argmax_{\theta}I(\theta) = b + \frac{1}{a} log \left(\frac{x^* - c}{d - x^*}\right)\]</div>
 <p>where</p>
 <div class="math notranslate nohighlight">
-\[x^* = 2 \sqrt{\frac{-u}{3}} cos\left\{\frac{1}{3}acos\left(-\frac{v}{2}\sqrt{\frac{27}{-u^3}}\right)+\frac{4 \pi}{3}\right\} + 0.5\]</div>
+\[x^* = 2 \sqrt{\frac{-u}{3}} cos\left\{\frac{1}{3}acos\left(-\frac{v}{2}\sqrt{\frac{27}{-u^3}}\right)+
+\frac{4 \pi}{3}\right\} + 0.5\]</div>
 <div class="math notranslate nohighlight">
 \[u = -\frac{3}{4} + \frac{c + d - 2cd}{2}\]</div>
 <div class="math notranslate nohighlight">
-\[v = -\frac{c + d - 1}{4}\]</div>
+\[v = \frac{c + d - 1}{4}\]</div>
 <p>A few results can be seen in the plots below:</p>
-<p>(<a class="reference download internal" download="" href="_downloads/bf0381cfd28f6b0498f25da4119a4b90/irt-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
-<figure class="align-default" id="id11">
-<img alt="_images/irt-1_00.png" class="plot-directive" src="_images/irt-1_00.png" />
+<p>(<a class="reference download internal" download="" href="_downloads/bf0381cfd28f6b0498f25da4119a4b90/irt-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/05f73949c920aef1bfbceadb79918847/irt-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/09bcad6ca8b01d86526f19aa10e300af/irt-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/b9123468f4076cebfcc0f18596b0b2a5/irt-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default" id="id9">
+<img alt="_images/irt-1.png" class="plot-directive" src="_images/irt-1.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 8 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/188aafa9f7c0d3b83c3f7ca94028be9f/irt-1_00.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/5e14e2e3a6bd3fe3087fcbfc9882941b/irt-1_00.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/fd0e0bb3b48584bda8dcee2f0b6f0164/irt-1_00.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id11" title="Link to this image"></a></p>
-</figcaption>
-</figure>
-<figure class="align-default" id="id12">
-<img alt="_images/irt-1_01.png" class="plot-directive" src="_images/irt-1_01.png" />
-<figcaption>
-<p><span class="caption-number">Fig. 9 </span><span class="caption-text">(<a class="reference download internal" download="" href="_downloads/b682fb80682a50d6e93e50a6486defc5/irt-1_01.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/e92f000309bdf19657e945d65b11d9d7/irt-1_01.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/757da5c5d1fa31ece92820aa664617db/irt-1_01.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</span><a class="headerlink" href="#id12" title="Link to this image"></a></p>
+<p><span class="caption-number">Fig. 7 </span><span class="caption-text">Item information curves for two distinct items. The point of maximum information denoted by a dot.</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>a</strong> – item discrimination parameter</p></li>
-<li><p><strong>b</strong> – item difficulty parameter</p></li>
-<li><p><strong>c</strong> – item pseudo-guessing parameter</p></li>
-<li><p><strong>d</strong> – item upper asymptote</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a</strong><span class="classifier">float, optional</span></dt><dd><p>Item discrimination parameter. Default is 1.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float, optional</span></dt><dd><p>Item difficulty parameter. Default is 0.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>Item pseudo-guessing parameter. Default is 0.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float, optional</span></dt><dd><p>Item upper asymptote. Default is 1.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the <span class="math notranslate nohighlight">\(\theta\)</span> value to which the item with the given parameters
-gives maximum information</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The <span class="math notranslate nohighlight">\(\theta\)</span> value at which the item with the given parameters
+provides maximum information.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.max_info_hpc">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">max_info_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#max_info_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.max_info_hpc" title="Link to this definition"></a></dt>
-<dd><p>Implementation of <a class="reference internal" href="#catsim.irt.max_info" title="catsim.irt.max_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">max_info()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v1.25)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code> in which the theta
-value that maximizes the information function for all items is returned in a <cite>numpy.ndarray</cite>.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">max_info_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#max_info_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.max_info_hpc" title="Link to this definition"></a></dt>
+<dd><p>Parallelized version of <a class="reference internal" href="#catsim.irt.max_info" title="catsim.irt.max_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">max_info()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code>.</p>
+<p>This high-performance computing version efficiently computes the theta values of
+maximum information for multiple items simultaneously using vectorized operations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>items</strong> – array containing the four item parameters.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing item parameters with at least four columns [a, b, c, d, …].</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an array of all theta values that maximize the information function of each item.</p>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>An array of theta values, one for each item, indicating where each item’s
+information function reaches its maximum.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.negative_log_likelihood">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">negative_log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#negative_log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.negative_log_likelihood" title="Link to this definition"></a></dt>
-<dd><p>Function used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.11.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to minimize
-values, instead of maximizing them. Calculates the negative log-likelihood of a ability
-value, given a response vector and the parameters of the administered items. The value of
-<a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a> is simply the value of <span class="math notranslate nohighlight">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a>.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">negative_log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#negative_log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.negative_log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.</p>
+<p>This function is used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.16.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to
+minimize values, instead of maximizing them. Since we want to maximize the log-likelihood,
+we minimize the negative log-likelihood. The value of <a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a>
+is simply <span class="math notranslate nohighlight">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>est_theta</strong> – estimated ability value</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Estimated ability value.</p>
 </dd>
-</dl>
-<p>args:</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>list</strong> (<em>response_vector</em>) – a Boolean list containing the response vector</p></li>
-<li><p><strong>numpy.ndarray</strong> (<em>administered_items</em>) – a numpy array containing the parameters of the answered items</p></li>
+<dt><strong>*args</strong><span class="classifier">tuple</span></dt><dd><p>Variable length argument list. Expected to contain:</p>
+<ul class="simple">
+<li><p>args[0]: response_vector (list[bool]) - A Boolean list containing the response vector</p></li>
+<li><p>args[1]: administered_items (numpy.ndarray) - A numpy array containing the parameters
+of the answered items</p></li>
 </ul>
 </dd>
+</dl>
+</dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>negative log-likelihood of a given ability value, given the responses to the administered items</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Negative log-likelihood of a given ability value, given the responses to the
+administered items. Lower values indicate better fit.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.normalize_item_bank">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">normalize_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#normalize_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.normalize_item_bank" title="Link to this definition"></a></dt>
-<dd><p>Normalize an item matrix so that it conforms to the standard used by catsim.
-The item matrix must have dimension <span class="math notranslate nohighlight">\(n \times 4\)</span>, in which column 1 represents item
-discrimination, column 2 represents item difficulty, column 3 represents the pseudo-guessing
-parameter and column 4 represents the item upper asymptote.</p>
-<p>If the matrix has one column, it is assumed to be the difficulty column and the other
-three columns are added such that items simulate the 1-parameter logistic model.</p>
-<p>If the matrix has two columns, they are assumed to be the discrimination and difficulty
-columns, respectively. The pseudo-guessing and upper asymptote columns are added such that
-items simulate the 2-parameter logistic model.</p>
-<p>If the matrix has three columns, they are assumed to be the discrimination, difficulty
-and pseudo-guessing columns, respectively. The upper asymptote column is added such that
-items simulate the 3-parameter logistic model.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">normalize_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#normalize_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.normalize_item_bank" title="Link to this definition"></a></dt>
+<dd><p>Normalize an item matrix so that it conforms to the standard used by catsim.</p>
+<p>The item matrix must have dimension <span class="math notranslate nohighlight">\(n \times 4\)</span>, in which column 0 represents item
+discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
+parameter and column 3 represents the item upper asymptote.</p>
+<p>This function automatically expands item matrices with fewer than 4 columns:</p>
+<ul class="simple">
+<li><p>1 column (1PL): Assumed to be difficulty. Discrimination=1, c=0, d=1 are added.</p></li>
+<li><p>2 columns (2PL): Assumed to be [discrimination, difficulty]. c=0, d=1 are added.</p></li>
+<li><p>3 columns (3PL): Assumed to be [discrimination, difficulty, pseudo-guessing]. d=1 is added.</p></li>
+<li><p>4 columns (4PL): Already complete, returned as-is.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>items</strong> – the item matrix.</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The item matrix with 1, 2, 3, or 4 columns.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>an <span class="math notranslate nohighlight">\(n \times 4\)</span> item matrix conforming to the 4 parameter logistic model.</p>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>An <span class="math notranslate nohighlight">\(n \times 4\)</span> item matrix conforming to the 4-parameter logistic model,
+with columns [a, b, c, d].</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.reliability">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">reliability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#reliability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.reliability" title="Link to this definition"></a></dt>
-<dd><p>Computes test reliability <a class="reference internal" href="references.html#thissen00" id="id7"><span>[Thissen00]</span></a>, given by:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">reliability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#reliability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.reliability" title="Link to this definition"></a></dt>
+<dd><p>Compute test reliability <a class="reference internal" href="references.html#thissen00" id="id6"><span>[Thissen00]</span></a>.</p>
+<p>Test reliability is a measure of internal consistency for the test, similar to
+Cronbach’s <span class="math notranslate nohighlight">\(\alpha\)</span> in Classical Test Theory. Its value is always lower than 1,
+with values close to 1 indicating good reliability. If <span class="math notranslate nohighlight">\(I(\theta) &lt; 1\)</span>,
+<span class="math notranslate nohighlight">\(Rel &lt; 0\)</span> and in these cases it does not make sense, but usually the
+application of additional items solves this problem.</p>
 <div class="math notranslate nohighlight">
 \[Rel = 1 - \frac{1}{I(\theta)}\]</div>
-<p>Test reliability is a measure of internal consistency for the test, similar
-to Cronbach’s <span class="math notranslate nohighlight">\(\alpha\)</span> in Classical Test Theory. Its value is always
-lower than 1, with values close to 1 indicating good reliability. If
-<span class="math notranslate nohighlight">\(I(\theta) &lt; 1\)</span>, <span class="math notranslate nohighlight">\(Rel &lt; 0\)</span> and in these cases it does not make
-sense, but usually the application of additional items solves this problem.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a ability value.</p></li>
-<li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>An ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A matrix containing item parameters.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the test reliability at <cite>theta</cite> for a test represented by <cite>items</cite>.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The test reliability at <cite>theta</cite> for a test represented by <cite>items</cite>. Values
+range from negative infinity to just below 1, with values closer to 1
+indicating higher reliability.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.see">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">see</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#see"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.see" title="Link to this definition"></a></dt>
-<dd><p>Computes the standard error of estimation (<span class="math notranslate nohighlight">\(SEE\)</span>) of a test at a
-specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id8"><span>[Ayala2009]</span></a>:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">see</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#see"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.see" title="Link to this definition"></a></dt>
+<dd><p>Compute the standard error of estimation (<span class="math notranslate nohighlight">\(SEE\)</span>) of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id7"><span>[Ayala2009]</span></a>.</p>
+<p>The standard error of estimation is the square root of variance and represents
+the typical error in ability estimation. It is in the same units as the ability
+scale, making it more interpretable than variance.</p>
 <div class="math notranslate nohighlight">
 \[SEE = \sqrt{\frac{1}{I(\theta)}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a ability value.</p></li>
-<li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>An ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A matrix containing item parameters.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the standard error of estimation at <cite>theta</cite> for a test represented by <cite>items</cite>.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The standard error of estimation at <cite>theta</cite> for a test represented by <cite>items</cite>.
+Returns infinity if test information is 0.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.test_info">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">test_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#test_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.test_info" title="Link to this definition"></a></dt>
-<dd><p>Computes the test information of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id9"><span>[Ayala2009]</span></a>:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">test_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#test_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.test_info" title="Link to this definition"></a></dt>
+<dd><p>Compute the test information of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id8"><span>[Ayala2009]</span></a>.</p>
+<p>Test information is the sum of individual item information values and indicates
+the precision of ability estimation at a given ability level.</p>
 <div class="math notranslate nohighlight">
 \[I(\theta) = \sum_{j \in J} I_j(\theta)\]</div>
-<p>where <span class="math notranslate nohighlight">\(J\)</span> is the set of items in the test and <span class="math notranslate nohighlight">\(I_j(\theta)\)</span> is the
-item information of <span class="math notranslate nohighlight">\(j\)</span> at aspecific <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a ability value.</p></li>
-<li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>An ability value at which to compute test information.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A matrix containing item parameters with at least four columns [a, b, c, d, …].</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the test information at <cite>theta</cite> for a test represented by <cite>items</cite>.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The test information at <cite>theta</cite> for a test represented by <cite>items</cite>.
+Higher values indicate more precise ability estimation.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.validate_item_bank">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">validate_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_err</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#validate_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.validate_item_bank" title="Link to this definition"></a></dt>
-<dd><p>Validates the shape and parameters in the item matrix so that it conforms to the standard
-used by catsim. The item matrix must have dimension nx4, in which column 1 represents item
-discrimination, column 2 represents item difficulty, column 3 represents the
-pseudo-guessing parameter and column 4 represents the item upper asymptote.</p>
-<p>The item matrix must have at least one line, representing an item, and exactly four columns, representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters (<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>), respectively. The item matrix is considered valid if, for all items in the matrix,
-<span class="math notranslate nohighlight">\(a &gt; 0 \wedge 0 &lt; c &lt; 1 \wedge 0 &lt; d &lt; 1\)</span>.</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">validate_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_err</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#validate_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.validate_item_bank" title="Link to this definition"></a></dt>
+<dd><p>Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</p>
+<p>The item matrix must have dimension <span class="math notranslate nohighlight">\(n \times 4\)</span>, in which column 0 represents item
+discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
+parameter and column 3 represents the item upper asymptote.</p>
+<p>The item matrix must have at least one line (representing an item) and exactly four columns,
+representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
+(<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>), respectively. The item matrix is considered
+valid if, for all items in the matrix, <span class="math notranslate nohighlight">\(a &gt; 0 \wedge 0 \leq c \leq 1 \wedge 0 \leq d \leq 1\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> – the item matrix.</p></li>
-<li><p><strong>raise_err</strong> – whether to raise an error in case the validation fails or
-just print the error message to standard output.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The item matrix to validate.</p>
+</dd>
+<dt><strong>raise_err</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to raise an error in case the validation fails (True) or just print
+the error message to standard output (False). Default is False.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If items is not a numpy.ndarray.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If raise_err is True and the item matrix does not meet validation criteria.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.var">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25)"><span class="pre">ndarray</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.var" title="Link to this definition"></a></dt>
-<dd><p>Computes the variance (<span class="math notranslate nohighlight">\(Var\)</span>) of the ability estimate of a test at a
-specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id10"><span>[Ayala2009]</span></a>:</p>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.var" title="Link to this definition"></a></dt>
+<dd><p>Compute the variance (<span class="math notranslate nohighlight">\(Var\)</span>) of the ability estimate of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
+<p>Variance quantifies the uncertainty in the ability estimate. Lower variance
+indicates more precise estimation.</p>
 <div class="math notranslate nohighlight">
 \[Var = \frac{1}{I(\theta)}\]</div>
 <p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>theta</strong> – a ability value.</p></li>
-<li><p><strong>items</strong> – a matrix containing item parameters.</p></li>
-</ul>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>An ability value (required if <cite>test_inf</cite> is not provided). Default is None.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>A matrix containing item parameters (required if <cite>test_inf</cite> is not provided).
+Default is None.</p>
+</dd>
+<dt><strong>test_inf</strong><span class="classifier">float or None, optional</span></dt><dd><p>The test information value. If provided, <cite>theta</cite> and <cite>items</cite> are not required.
+Default is None.</p>
+</dd>
+</dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>the variance of ability estimation at <cite>theta</cite> for a test represented by <cite>items</cite>.</p>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The variance of ability estimation. Returns negative infinity if test
+information is 0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If neither <cite>test_inf</cite> nor both <cite>theta</cite> and <cite>items</cite> are provided.</p>
+</dd>
+</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -488,13 +642,13 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -505,7 +659,7 @@ specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a c
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

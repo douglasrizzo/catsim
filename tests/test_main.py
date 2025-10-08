@@ -2,10 +2,13 @@ import random
 
 import numpy as np
 import pytest
+from matplotlib.pyplot import close
+from sklearn.cluster import KMeans
+
 from catsim import cat, irt, plot
-from catsim.cat import generate_item_bank
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
+from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
@@ -21,8 +24,6 @@ from catsim.selection import (
 )
 from catsim.simulation import Estimator, Initializer, Selector, Simulator, Stopper
 from catsim.stopping import MaxItemStopper, MinErrorStopper
-from matplotlib.pyplot import close
-from sklearn.cluster import KMeans
 
 
 def one_simulation(
@@ -32,11 +33,28 @@ def one_simulation(
   selector: Selector,
   estimator: Estimator,
   stopper: Stopper,
-) -> None:
-  """Test a single simulation."""
-  Simulator(items, examinees).simulate(initializer, selector, estimator, stopper, verbose=True)
+) -> Simulator:
+  """Test a single simulation.
+
+  Returns
+  -------
+  Simulator
+      The simulator instance after running the simulation.
+  """
+  simulator = Simulator(items, examinees)
+  simulator.simulate(initializer, selector, estimator, stopper, verbose=True)
+
+  # Verify simulation ran successfully
+  assert simulator.latest_estimations is not None, "Simulation did not produce estimations"
+  assert len(simulator.latest_estimations) == examinees, "Incorrect number of examinees"
+  assert simulator.administered_items is not None, "No items were administered"
+
+  return simulator
 
 
+@pytest.mark.slow
+@pytest.mark.integration
+@pytest.mark.parallel
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("bank_size", [500])
 @pytest.mark.parametrize("initializer", [RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))])
@@ -50,14 +68,17 @@ def test_cism(
   stopper: Stopper,
 ) -> None:
   """Test the cluster-based item selection method."""
-  items = generate_item_bank(bank_size)
-  clusters = list(KMeans(n_clusters=8, n_init="auto").fit_predict(items))
-  ClusterSelector.weighted_cluster_infos(0, items, clusters)
-  ClusterSelector.avg_cluster_params(items, clusters)
+  item_bank = ItemBank.generate_item_bank(bank_size)
+  clusters = list(KMeans(n_clusters=8, n_init="auto").fit_predict(item_bank.items))
+  ClusterSelector.weighted_cluster_infos(0, item_bank, clusters)
+  ClusterSelector.avg_cluster_params(item_bank, clusters)
   selector = ClusterSelector(clusters=clusters, r_max=0.2)
-  one_simulation(items, examinees, initializer, selector, estimator, stopper)
+  one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
 
 
+@pytest.mark.slow
+@pytest.mark.integration
+@pytest.mark.parallel
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("test_size", [30])
 @pytest.mark.parametrize("bank_size", [500])
@@ -95,22 +116,25 @@ def test_finite_selectors(
 
   for selector in finite_selectors:
     rng = np.random.default_rng(1337)
-    items = generate_item_bank(bank_size, itemtype=logistic_model)
+    item_bank = ItemBank.generate_item_bank(bank_size, itemtype=logistic_model)
     responses = cat.random_response_vector(random.randint(1, test_size - 1))
     administered_items = list(rng.choice(bank_size, len(responses), replace=False))
     est_theta = initializer.initialize(rng=rng)
-    selector.select(items=items, administered_items=administered_items, est_theta=est_theta, rng=rng)
+    selector.select(item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, rng=rng)
     estimator.estimate(
-      items=items,
+      item_bank=item_bank,
       administered_items=administered_items,
       response_vector=responses,
       est_theta=est_theta,
     )
-    stopper.stop(administered_items=items[administered_items], theta=est_theta, rng=rng)
+    stopper.stop(administered_items=item_bank.get_items(administered_items), theta=est_theta, rng=rng)
 
-    one_simulation(items, examinees, initializer, selector, estimator, stopper)
+    one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
 
 
+@pytest.mark.slow
+@pytest.mark.integration
+@pytest.mark.parallel
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("bank_size", [5000])
 @pytest.mark.parametrize("logistic_model", [irt.NumParams.PL4])
@@ -150,28 +174,28 @@ def test_infinite_selectors(
 ) -> None:
   """Test infinite selectors."""
   rng = np.random.default_rng()
-  items = generate_item_bank(bank_size, itemtype=logistic_model)
-  max_administered_items = stopper.max_itens if type(stopper) == MaxItemStopper else bank_size
+  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=logistic_model)
+  max_administered_items = stopper.max_itens if isinstance(stopper, MaxItemStopper) else bank_size
   responses = cat.random_response_vector(random.randint(1, max_administered_items))
   administered_items = rng.choice(bank_size, len(responses), replace=False)
   est_theta = initializer.initialize(rng=rng)
   selector.select(
-    items=items,
+    item_bank=item_bank,
     administered_items=administered_items,
     est_theta=est_theta,
     rng=rng,
   )
   estimator.estimate(
-    items=items,
+    item_bank=item_bank,
     administered_items=administered_items,
     response_vector=responses,
     est_theta=est_theta,
   )
   stopper.stop(
-    administered_items=items[administered_items],
+    administered_items=item_bank.get_items(administered_items),
     theta=est_theta,
   )
-  one_simulation(items, examinees, initializer, selector, estimator, stopper)
+  one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
 
 
 @pytest.mark.parametrize(
@@ -189,20 +213,27 @@ def test_infinite_selectors(
 )
 def test_item_bank_generation(logistic_model: irt.NumParams, correlation: float) -> None:
   """Test item bank generation function."""
-  items = generate_item_bank(5, logistic_model, corr=correlation)
-  irt.validate_item_bank(items, raise_err=True)
-  items = irt.normalize_item_bank(items)
-  irt.validate_item_bank(items, raise_err=True)
+  item_bank = ItemBank.generate_item_bank(5, logistic_model, corr=correlation)
+  irt.validate_item_bank(item_bank.items, raise_err=True)
+
+  # Verify basic properties of generated items
+  assert len(item_bank) == 5, "Incorrect number of items generated"
+  assert item_bank.items.shape[1] >= 4, "Items should have at least 4 parameters"
 
 
+@pytest.mark.slow
 def test_plots() -> None:
   """Test plot functionalities."""
   initializer = RandomInitializer()
   selector = MaxInfoSelector()
   estimator = NumericalSearchEstimator()
   stopper = MaxItemStopper(20)
-  s = Simulator(generate_item_bank(100), 10)
+  s = Simulator(ItemBank.generate_item_bank(100), 10)
   s.simulate(initializer, selector, estimator, stopper, verbose=True)
+
+  # Verify simulation produced results before plotting
+  assert s.items is not None, "Simulation did not produce items"
+  assert len(s.items) > 0, "No items in simulation"
 
   for item in s.items[0:10]:
     plot.item_curve(item[0], item[1], item[2], item[3], "Test plot", "icc", False, None, False)
@@ -210,7 +241,7 @@ def test_plots() -> None:
     plot.item_curve(item[0], item[1], item[2], item[3], "Test plot", "both", True, None, False)
     close("all")
 
-  plot.gen3d_dataset_scatter(items=s.items)
+  plot.gen3d_dataset_scatter(s.item_bank)
   plot.test_progress(
     title="Test progress",
     simulator=s,

@@ -4,22 +4,23 @@ clean:
 install:
 	pip install .
 tests:
-	pip install .[testing]
-	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-	pytest
+	uv sync --group testing
+	ruff check .
+	@echo "Running parallel tests with pytest-xdist..."
+	uv run pytest -m parallel -n auto
+	@echo "Running sequential tests..."
+	uv run pytest -m "not parallel"
 upload-test: dist
-	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	uv publish --publish-url https://test.pypi.org/legacy/
 upload: dist
-	twine upload dist/*
+	uv publish
 format:
-	autoflake .
-	isort .
-	black .
-	yapf -i -r .
+	uv run ruff format .
+lint:
+	uv run ruff check .
 dist:
-	python -m build
+	uv build
 docs:
-	pip install .[docs]
-	sphinx-build sphinx docs -b html
+	uv sync --group docs
+	uv run sphinx-build sphinx docs -b html
 	touch docs/.nojekyll
