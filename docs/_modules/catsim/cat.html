@@ -85,10 +85,10 @@
   <h1>Source code for catsim.cat</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Functions used specifically during the application/simulation of computerized adaptive tests.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
@@ -135,8 +135,8 @@
 <div class="viewcode-block" id="bias">
 <a class="viewcode-back" href="../../cat.html#catsim.cat.bias">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span>
-  <span class="n">actual</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-  <span class="n">predicted</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+  <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+  <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the test bias, an evaluation criterion for computerized adaptive test methodologies [Chang2001]_.</span>
 
@@ -150,10 +150,10 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : list[float] or numpy.ndarray</span>
-<span class="sd">      A list or 1-D numpy array containing the true ability values.</span>
-<span class="sd">  predicted : list[float] or numpy.ndarray</span>
-<span class="sd">      A list or 1-D numpy array containing the estimated ability values.</span>
+<span class="sd">  actual : npt.ArrayLike</span>
+<span class="sd">      Array-like (list, tuple, or numpy array) containing the true ability values (float type).</span>
+<span class="sd">  predicted : npt.ArrayLike</span>
+<span class="sd">      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -165,20 +165,23 @@
 <span class="sd">  ValueError</span>
 <span class="sd">      If actual and predicted vectors are not the same size.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">actual</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+  <span class="n">predicted</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predicted</span><span class="p">)</span>
+
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;actual and predicted vectors need to be the same size&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span><span class="p">))))</span></div>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="mse">
 <a class="viewcode-back" href="../../cat.html#catsim.cat.mse">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span>
-  <span class="n">actual</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-  <span class="n">predicted</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+  <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+  <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the mean squared error (MSE) between two lists or 1-D numpy arrays.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the mean squared error (MSE) between two array-like objects.</span>
 
 <span class="sd">  The MSE is used when measuring the precision with which a computerized adaptive</span>
 <span class="sd">  test estimates examinees abilities [Chang2001]_. Lower MSE values indicate better</span>
@@ -193,10 +196,10 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : list[float] or numpy.ndarray</span>
-<span class="sd">      A list or 1-D numpy array containing the true ability values.</span>
-<span class="sd">  predicted : list[float] or numpy.ndarray</span>
-<span class="sd">      A list or 1-D numpy array containing the estimated ability values.</span>
+<span class="sd">  actual : npt.ArrayLike</span>
+<span class="sd">      Array-like (list, tuple, or numpy array) containing the true ability values (float type).</span>
+<span class="sd">  predicted : npt.ArrayLike</span>
+<span class="sd">      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -208,20 +211,24 @@
 <span class="sd">  ValueError</span>
 <span class="sd">      If actual and predicted vectors are not the same size.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">actual</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
+  <span class="n">predicted</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predicted</span><span class="p">)</span>
+
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Actual and predicted vectors need to be the same size&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">,</span> <span class="n">predicted</span><span class="p">,</span> <span class="n">actual</span><span class="p">))]))</span></div>
+  <span class="n">diff</span> <span class="o">=</span> <span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="rmse">
 <a class="viewcode-back" href="../../cat.html#catsim.cat.rmse">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span>
-  <span class="n">actual</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-  <span class="n">predicted</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+  <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+  <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the root mean squared error (RMSE) between two lists or 1-D numpy arrays.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the root mean squared error (RMSE) between two array-like objects.</span>
 
 <span class="sd">  A common value used when measuring the precision with which a computerized adaptive</span>
 <span class="sd">  test estimates examinees abilities [Bar10]_. RMSE is in the same units as the ability</span>
@@ -236,10 +243,10 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : list[float] or numpy.ndarray</span>
-<span class="sd">      A list or 1-D numpy array containing the true ability values.</span>
-<span class="sd">  predicted : list[float] or numpy.ndarray</span>
-<span class="sd">      A list or 1-D numpy array containing the estimated ability values.</span>
+<span class="sd">  actual : npt.ArrayLike</span>
+<span class="sd">      Array-like (list, tuple, or numpy array) containing the true ability values (float type).</span>
+<span class="sd">  predicted : npt.ArrayLike</span>
+<span class="sd">      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -251,16 +258,13 @@
 <span class="sd">  ValueError</span>
 <span class="sd">      If actual and predicted vectors are not the same size.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;actual and predicted vectors need to be the same size&quot;</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="overlap_rate">
 <a class="viewcode-back" href="../../cat.html#catsim.cat.overlap_rate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the test overlap rate.</span>
 
 <span class="sd">  An average measure of how much of the test two examinees take is equal [Bar10]_.</span>

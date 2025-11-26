@@ -93,6 +93,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span><span class="p">,</span> <span class="n">irt</span>
@@ -414,7 +415,7 @@
 <span class="sd">        Number of items to be administered in the test.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">test_size</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
   <span class="nd">@property</span>
@@ -429,13 +430,13 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the overlap rate of the test, if it is of finite length.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    float</span>
-<span class="sd">        Overlap rate of the test.</span>
+<span class="sd">    float or None</span>
+<span class="sd">        Overlap rate of the test, or None if not yet computed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span></div>
 
@@ -559,13 +560,21 @@
 <div class="viewcode-block" id="Stopper.stop">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Stopper.stop">[docs]</a>
   <span class="nd">@abstractmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the test reached its stopping criterion for the given user.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int</span>
-<span class="sd">        The index of the current examinee.</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. When used within a</span>
+<span class="sd">        simulation, this parameter is provided automatically. When used standalone,</span>
+<span class="sd">        other parameters may be provided via **kwargs. Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments that specific Stopper implementations may require.</span>
+<span class="sd">        Common arguments include:</span>
+<span class="sd">        - administered_items: Item parameters or indices that were administered</span>
+<span class="sd">        - theta: Current ability estimate</span>
+<span class="sd">        - item_bank: ItemBank for accessing item parameters</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -590,10 +599,10 @@
 <span class="sd">  item_bank : ItemBank or numpy.ndarray</span>
 <span class="sd">      An ItemBank object containing item parameters. If a numpy.ndarray is provided,</span>
 <span class="sd">      it will be automatically converted to an ItemBank.</span>
-<span class="sd">  examinees : int or list[float] or numpy.ndarray</span>
+<span class="sd">  examinees : int or npt.ArrayLike</span>
 <span class="sd">      Either an integer with the number of examinees (whose real :math:`\theta` values</span>
-<span class="sd">      will be sampled from a normal distribution), or a list/array containing the</span>
-<span class="sd">      examinees&#39; true :math:`\theta` values.</span>
+<span class="sd">      will be sampled from a normal distribution), or an array-like (list, tuple, or</span>
+<span class="sd">      numpy array) containing the examinees&#39; true :math:`\theta` values (float type).</span>
 <span class="sd">  initializer : Initializer or None, optional</span>
 <span class="sd">      Initializer to use during the simulation. Default is None.</span>
 <span class="sd">  selector : Selector or None, optional</span>
@@ -609,8 +618,8 @@
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">examinees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">examinees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
     <span class="n">initializer</span><span class="p">:</span> <span class="n">Initializer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">selector</span><span class="p">:</span> <span class="n">Selector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">estimator</span><span class="p">:</span> <span class="n">Estimator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -624,8 +633,9 @@
 <span class="sd">    item_bank : ItemBank or numpy.ndarray</span>
 <span class="sd">        ItemBank object or item parameter matrix. If a numpy array is provided,</span>
 <span class="sd">        it will be converted to an ItemBank automatically.</span>
-<span class="sd">    examinees : int or list[float] or numpy.ndarray</span>
-<span class="sd">        Either an integer with number of examinees or list/array of examinee abilities.</span>
+<span class="sd">    examinees : int or npt.ArrayLike</span>
+<span class="sd">        Either an integer with number of examinees or array-like (list, tuple, or</span>
+<span class="sd">        numpy array) of examinee abilities (float type).</span>
 <span class="sd">    initializer : Initializer or None, optional</span>
 <span class="sd">        Initializer to use during the simulation. Default is None.</span>
 <span class="sd">    selector : Selector or None, optional</span>
@@ -681,12 +691,12 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Item matrix used by the simulator (for backward compatibility).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
+<span class="sd">    npt.NDArray[numpy.floating[Any]]</span>
 <span class="sd">        The underlying item parameter matrix from the ItemBank.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">items</span>
@@ -801,7 +811,7 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:type:numpy.ndarray containing examinees true ability values (:math:`\theta`).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span>
 
@@ -811,17 +821,17 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span>
 
   <span class="nd">@examinees</span><span class="o">.</span><span class="n">setter</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_to_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate examinees from a distribution, if the Simulator was initialized with an int.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    x : int or list[float] or numpy.ndarray</span>
+<span class="sd">    x : int or npt.ArrayLike</span>
 <span class="sd">        Variable representing the number of examinees (int) or the actual ability values</span>
-<span class="sd">        (list or array).</span>
+<span class="sd">        (array-like: list, tuple, or numpy array of float type).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -845,19 +855,16 @@
         <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">stddev</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;List of examinees cannot be empty&quot;</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-      <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Convert array-like to numpy array</span>
+      <span class="n">x_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">x_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Examinees array must be one-dimensional&quot;</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">x_array</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Array of examinees cannot be empty&quot;</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-      <span class="n">dist</span> <span class="o">=</span> <span class="n">x</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Examinees must be an int, list of floats or one-dimensional numpy array&quot;</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="n">dist</span> <span class="o">=</span> <span class="n">x_array</span>
 
     <span class="k">return</span> <span class="n">dist</span>
 

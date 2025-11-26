@@ -1,14 +1,18 @@
+<!-- DO NOT EDIT README.md, edit sphinx/readme_head.md and sphinx/readme_body.md -->
+
 <p align="center">
   <img src="sphinx/logo_text.svg?sanitize=true" alt="Logo" />
 </p>
+<center>
 
 [![CI/CD](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk)](https://codecov.io/github/douglasrizzo/catsim)
 [![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
 
-**catsim** is a Python package for computerized adaptive testing (CAT)
-simulations. It provides multiple methods for:
+</center>
+
+A Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:
 
 - [test initialization](https://douglasrizzo.com.br/catsim/initialization.html) (selecting the initial ability of the examinees)
 - [item selection](https://douglasrizzo.com.br/catsim/selection.html)
@@ -17,19 +21,13 @@ simulations. It provides multiple methods for:
 
 These methods can either be used in a standalone fashion [[1]](https://douglasrizzo.com.br/catsim/introduction.html#autonomous-usage) to power other software or be used with _catsim_ to simulate the application of computerized adaptive tests [[2]](https://douglasrizzo.com.br/catsim/introduction.html#running-simulations), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
 
-## What's a CAT
-
-Computerized adaptive tests are educational evaluations, usually taken by examinees in a computer or some other digital means, in which the examinee's ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee's real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method or even linear tests applied electronically, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.
-
-More information is available [in the docs](https://douglasrizzo.com.br/catsim/introduction.html) and over at [Wikipedia](https://en.wikipedia.org/wiki/Computerized_adaptive_testing).
-
 ## Installation
 
 Install it using `pip install catsim`.
 
 ## Basic Usage
 
-There is [a Colab Notebook](https://colab.research.google.com/drive/14zEWoDudBCXF0NO-qgzoQpWUGBcJ2lPH?usp=sharing) teaching the basics of catsim!
+There is [a Colab Notebook](https://colab.research.google.com/drive/1iJQE9VFrDD2Pqrsa7K3EvD1pSTBPw0Ur?usp=sharing) teaching the basics of catsim!
 
 1. Have an [item matrix](https://douglasrizzo.com.br/catsim/item_matrix.html);
 1. Have a sample of examinee proficiencies, or a number of examinees to be generated;
@@ -94,6 +92,12 @@ You can cite the package using the following bibtex entry:
   primaryclass = {stat}
 }
 ```
+
+## What's a CAT
+
+Computerized adaptive tests are educational evaluations, usually taken by examinees in a computer or some other digital means, in which the examinee's ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee's real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method or even linear tests applied electronically, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.
+
+More information is available [in the docs](https://douglasrizzo.com.br/catsim/introduction.html) and over at [Wikipedia](https://en.wikipedia.org/wiki/Computerized_adaptive_testing).
 
 ## If you are looking for IRT item parameter estimation
 

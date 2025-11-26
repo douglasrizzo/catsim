@@ -85,6 +85,9 @@
   <h1>Source code for catsim.stopping</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stopper</span>
@@ -125,7 +128,7 @@
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the test reached its stopping criterion for the given user.</span>
@@ -134,7 +137,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee. Default is None.</span>
-<span class="sd">    administered_items : numpy.ndarray or None, optional</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
 <span class="sd">        A matrix containing the parameters of items that were already administered.</span>
 <span class="sd">        Default is None.</span>
 <span class="sd">    **kwargs : dict</span>
@@ -148,14 +151,13 @@
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If more items than permitted were administered, or if required parameters</span>
-<span class="sd">        are missing.</span>
+<span class="sd">        If more items than permitted were administered, or if required parameters are missing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span>
-
-    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">administered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Required parameters are missing. Either index and simulator or administered_items must be provided.&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">n_itens</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">n_itens</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_itens</span><span class="p">:</span>
@@ -216,7 +218,7 @@
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -226,7 +228,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee. Default is None.</span>
-<span class="sd">    administered_items : numpy.ndarray or None, optional</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
 <span class="sd">        A matrix containing the parameters of items that were already administered.</span>
 <span class="sd">        Default is None.</span>
 <span class="sd">    theta : float or None, optional</span>
@@ -245,17 +247,19 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        If required parameters are missing.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span>
-
-    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+      <span class="n">see</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">administered_items_array</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-      <span class="n">administered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">return</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_error</span></div>
+      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+      <span class="n">see</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">administered_items_array</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Required parameters are missing. Either administered_items and theta or index and simulator must be provided.&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">see</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_error</span></div>
 </div>
 
 </pre></div>
