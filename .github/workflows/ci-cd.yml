@@ -23,13 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
       - uses: pre-commit/action@v3.0.1
 
   test:
-    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
-    # Only run tests for PRs to dev/master, pushes to dev, or releases
+    name: Run tests
+    # Only run tests for PRs to dev/main, pushes to dev, or releases
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'master')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release'
     needs: [pre-commit]
@@ -65,9 +67,9 @@ jobs:
 
   build:
     name: Build package
-    # Only run build for PRs to dev/master, pushes to dev, releases, or manual trigger
+    # Only run build for PRs to dev/main, pushes to dev, releases, or manual trigger
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'master')) ||
+      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch'
