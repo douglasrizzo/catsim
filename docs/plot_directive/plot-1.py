@@ -1,4 +1,8 @@
-from catsim.cat import generate_item_bank
+import matplotlib.pyplot as plt
+
 from catsim import plot
-items = generate_item_bank(100)
-plot.gen3d_dataset_scatter(items)
+from catsim.item_bank import ItemBank
+
+item_bank = ItemBank.generate_item_bank(100)
+plot.gen3d_dataset_scatter(item_bank)
+plt.show()

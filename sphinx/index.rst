@@ -15,5 +15,6 @@
     irt.rst
     cat.rst
     plot.rst
+    reproducibility.rst
     contributing.rst
     references.rst

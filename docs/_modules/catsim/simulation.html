@@ -1,43 +1,40 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>catsim.simulation &mdash; catsim 0.17.3 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/plot_directive.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <title>catsim.simulation &mdash; catsim 0.18.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+
     <link rel="shortcut icon" href="../../_static/logo.svg"/>
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=3bc55ee7"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=ba2e7b09"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" /> 
+    <link rel="search" title="Search" href="../../search.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../../index.html">
-            
+
               <img src="../../_static/logo_text.svg" class="logo" alt="Logo"/>
           </a>
-              <div class="version">
-                0.17.3
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -56,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reproducibility.html">Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
 </ul>
@@ -83,561 +81,959 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <h1>Source code for catsim.simulation</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Module containing functions relevant to the process of simulating the</span>
-<span class="sd">application of adaptive tests. Most of this module is based on the work of</span>
-<span class="sd">[Bar10]_.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Module containing functions relevant to the process of simulating the application of adaptive tests.</span>
 
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="sd">Most of this module is based on the work of [Bar10]_.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">cat</span><span class="p">,</span> <span class="n">irt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span><span class="p">,</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
 
 <div class="viewcode-block" id="Simulable">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Simulable">[docs]</a>
-<span class="k">class</span> <span class="nc">Simulable</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class representing one of the Simulator components that will receive a reference back to it.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Simulable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>  <span class="c1"># noqa: B024</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Base class representing one of the Simulator components that will receive a reference back to it.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Simulable</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="sd">  This class provides the infrastructure for components (Initializers, Selectors,</span>
+<span class="sd">  Estimators, and Stoppers) to access the Simulator instance they belong to.</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span><span class="p">,</span> <span class="n">Simulator</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;simulator has to be of type catsim.simulation.Simulator&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  This class inherits from ABC to indicate it&#39;s meant to be subclassed, though it doesn&#39;t</span>
+<span class="sd">  define abstract methods itself. Concrete abstract methods are defined in its subclasses</span>
+<span class="sd">  (Initializer, Selector, Estimator, Stopper).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
-    <span class="nd">@simulator</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;Simulator&quot;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Simulator</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;simulator has to be of type catsim.simulation.Simulator&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">()</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a Simulable object.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Simulator&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set or get the simulator object.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Simulator</span>
+<span class="sd">        The :py:class:`Simulator` instance tied to this Simulable.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If the simulator is not of type catsim.simulation.Simulator or is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;simulator has not been set&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span><span class="p">,</span> <span class="n">Simulator</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;simulator has to be of type catsim.simulation.Simulator&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span>
+
+  <span class="nd">@simulator</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">simulator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;Simulator&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Simulator</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;simulator has to be of type catsim.simulation.Simulator&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preprocess</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Simulable.preprocess">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Simulable.preprocess">[docs]</a>
-    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override this method to initialize any static values the `Simulable` might use for the duration of the</span>
-<span class="sd">        simulation. `preprocess` is called after a value is set for the `simulator` property. If a new value if</span>
-<span class="sd">        attributed to `simulator`, this method is called again, guaranteeing that internal properties of the</span>
-<span class="sd">        `Simulable` are re-initialized as necessary.&quot;&quot;&quot;</span></div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: B027</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Override this method to perform any initialization the `Simulable` might need for the simulation.</span>
+
+<span class="sd">    `preprocess` is called after a value is set for the `simulator` property. If a new</span>
+<span class="sd">    value is attributed to `simulator`, this method is called again, guaranteeing that</span>
+<span class="sd">    internal properties of the `Simulable` are re-initialized as necessary.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The default implementation does nothing. Subclasses should override this method</span>
+<span class="sd">    if they need to perform setup operations that require access to the simulator.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_prepare_args</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">return_items</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">):</span>
-        <span class="n">using_simulator_props</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">using_simulator_props</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;items&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="ow">or</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;administered_items&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="ow">or</span> <span class="p">(</span><span class="n">return_est_theta</span> <span class="ow">and</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;est_theta&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Either pass an index for the simulator or all of the other &quot;</span>
-                <span class="s2">&quot;optional parameters to use this component independently.&quot;</span>
-            <span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_args</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">return_item_bank</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">return_administered_items</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">return_response_vector</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">return_est_theta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">return_rng</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare input arguments for all Simulable objects.</span>
 
-        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">using_simulator_props</span><span class="p">:</span>
-            <span class="n">index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">return_items</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">return_response_vector</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">response_vectors</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">return_est_theta</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">return_items</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">])</span>
-            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;administered_items&quot;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">return_response_vector</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;response_vector&quot;</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">return_est_theta</span><span class="p">:</span>
-                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;est_theta&quot;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+<span class="sd">    This helper method extracts required arguments either from the simulator (if running</span>
+<span class="sd">    within a simulation) or from the provided kwargs (if used standalone).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    return_item_bank : bool, optional</span>
+<span class="sd">        Whether to return the ItemBank. Default is False.</span>
+<span class="sd">    return_administered_items : bool, optional</span>
+<span class="sd">        Whether to return the list of administered item indices. Default is False.</span>
+<span class="sd">    return_response_vector : bool, optional</span>
+<span class="sd">        Whether to return the response vector. Default is False.</span>
+<span class="sd">    return_est_theta : bool, optional</span>
+<span class="sd">        Whether to return the estimated theta value. Default is False.</span>
+<span class="sd">    return_rng : bool, optional</span>
+<span class="sd">        Whether to return the random number generator. Default is False.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments that may contain the required values when not</span>
+<span class="sd">        using a simulator.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        A tuple containing the specified results based on the conditions.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If required arguments are missing when not using a simulator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">using_simulator_props</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;index&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">using_simulator_props</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;No simulator in use, but optional arguments missing: &quot;</span>
+      <span class="n">missing_args</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">for</span> <span class="n">ret</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">return_item_bank</span><span class="p">,</span> <span class="s2">&quot;item_bank&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">return_administered_items</span><span class="p">,</span> <span class="s2">&quot;administered_items&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">return_response_vector</span><span class="p">,</span> <span class="s2">&quot;response_vector&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">return_est_theta</span><span class="p">,</span> <span class="s2">&quot;est_theta&quot;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">return_rng</span><span class="p">,</span> <span class="s2">&quot;rng&quot;</span><span class="p">),</span>
+      <span class="p">):</span>
+        <span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">val</span><span class="p">])</span>
+          <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">missing_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">missing_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_args</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;index&quot;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">return_item_bank</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">return_administered_items</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">return_response_vector</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">response_vectors</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">return_est_theta</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">return_rng</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="Initializer">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Initializer">[docs]</a>
-<span class="k">class</span> <span class="nc">Initializer</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for CAT initializers&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Initializer</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Base class for CAT initializers.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="sd">  Initializers are responsible for selecting examinees&#39; initial ability estimates</span>
+<span class="sd">  before any items are administered.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an Initializer object.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Initializer.initialize">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Initializer.initialize">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Selects an examinee&#39;s initial :math:`\\theta` value</span>
+  <span class="nd">@abstractmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Select an examinee&#39;s initial :math:`\theta` value.</span>
 
-<span class="sd">        :param index: the index of the current examinee</span>
-<span class="sd">        :returns: examinee&#39;s initial :math:`\\theta` value</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Arguments used by the Initializer implementation.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Examinee&#39;s initial :math:`\theta` value.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="Selector">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Selector">[docs]</a>
-<span class="k">class</span> <span class="nc">Selector</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class representing a CAT item selector.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Selector</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Base class representing a CAT item selector.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="sd">  Selectors are responsible for choosing which item to administer next to an</span>
+<span class="sd">  examinee based on their current estimated ability and test progress.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_get_non_administered</span><span class="p">(</span>
-        <span class="n">item_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">administered_item_indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets a list of items that were not administered from a list of indices</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a Selector object.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-<span class="sd">        :param item_indices: a list of integers, corresponding to item indices</span>
-<span class="sd">        :type item_indices: List[int]</span>
-<span class="sd">        :param administered_item_indices: a list of integers, corresponding to the indices of items that were alredy administered to a given examinee</span>
-<span class="sd">        :type administered_item_indices: List[int]</span>
-<span class="sd">        :return: a list of items, corresponding to the indices that are in `item_indices` but not in `administered_item_indices`, in the same order they were passed in `item_indices`</span>
-<span class="sd">        :rtype: List[int]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item_indices</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">administered_item_indices</span><span class="p">]</span>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_get_non_administered</span><span class="p">(</span><span class="n">item_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">administered_item_indices</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a list of items that were not administered from a list of indices.</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_sort_by_info</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort items by their information value, given a ability value</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_indices : list[int]</span>
+<span class="sd">        A list of integers corresponding to item indices.</span>
+<span class="sd">    administered_item_indices : list[int]</span>
+<span class="sd">        A list of integers corresponding to the indices of items that were already</span>
+<span class="sd">        administered to a given examinee.</span>
 
-<span class="sd">        :param items: an item parameter matrix</span>
-<span class="sd">        :type items: numpy.ndarray</span>
-<span class="sd">        :param est_theta: an examinee&#39;s ability</span>
-<span class="sd">        :type est_theta: float</span>
-<span class="sd">        :return: List[int] containing the indices of items, sorted in descending order by their information values (much like the return of `numpy.argsort`)</span>
-<span class="sd">        :rtype: List[int]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">irt</span><span class="o">.</span><span class="n">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="c1"># when the logistic model has the number of parameters &lt;= 2,</span>
-            <span class="c1"># all items have highest information where theta = b</span>
-            <span class="n">ordered_items</span> <span class="o">=</span> <span class="n">Selector</span><span class="o">.</span><span class="n">_sort_by_b</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># else, sort item indexes by their information value descending and remove indexes of administered items</span>
-            <span class="n">ordered_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items</span><span class="p">))</span><span class="o">.</span><span class="n">argsort</span><span class="p">()]</span>
-        <span class="k">return</span> <span class="n">ordered_items</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[int]</span>
+<span class="sd">        A list of items corresponding to the indices that are in `item_indices` but</span>
+<span class="sd">        not in `administered_item_indices`, in the same order they were passed in</span>
+<span class="sd">        `item_indices`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item_indices</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">administered_item_indices</span><span class="p">]</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_sort_by_b</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort items by how close their difficulty parameter is in relaiton to an examinee&#39;s ability</span>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort items by their information value for a given ability value.</span>
 
-<span class="sd">        :param items: an item parameter matrix</span>
-<span class="sd">        :type items: numpy.ndarray</span>
-<span class="sd">        :param est_theta: an examinee&#39;s ability</span>
-<span class="sd">        :type est_theta: float</span>
-<span class="sd">        :return: list containing the indices of items, sorted by how close their difficulty parameter is in relaiton to :param:`est_theta` (much like the return of `numpy.argsort`)</span>
-<span class="sd">        :rtype: List[int]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">())</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        An examinee&#39;s ability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[int]</span>
+<span class="sd">        List containing the indices of items, sorted in descending order by their</span>
+<span class="sd">        information values at the given ability level (much like the return of</span>
+<span class="sd">        `numpy.argsort`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">model</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># when the logistic model has the number of parameters &lt;= 2,</span>
+      <span class="c1"># all items have highest information where theta = b</span>
+      <span class="n">ordered_items</span> <span class="o">=</span> <span class="n">Selector</span><span class="o">.</span><span class="n">_sort_by_b</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># else, sort item indexes by their information value descending and remove indexes of administered items</span>
+      <span class="n">ordered_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="o">-</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">))</span><span class="o">.</span><span class="n">argsort</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">ordered_items</span>
+
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_sort_by_b</span><span class="p">(</span><span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort items by how close their difficulty parameter is to an examinee&#39;s ability.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        An examinee&#39;s ability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[int]</span>
+<span class="sd">        List containing the indices of items, sorted by how close their difficulty</span>
+<span class="sd">        parameter is in relation to `est_theta` (much like the return of `numpy.argsort`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">())</span>
 
 <div class="viewcode-block" id="Selector.select">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Selector.select">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the index of the next item to be administered.</span>
+  <span class="nd">@abstractmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
 
-<span class="sd">        :param index: the index of the current examinee in the simulator.</span>
-<span class="sd">        :returns: index of the next item to be applied or `None` if there are no more items to be presented.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    item_bank : ItemBank or None, optional</span>
+<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied, or None if there are no more items</span>
+<span class="sd">        to be presented.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="FiniteSelector">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.FiniteSelector">[docs]</a>
-<span class="k">class</span> <span class="nc">FiniteSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class representing a CAT item selector.&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FiniteSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Base class representing a CAT item selector for fixed-length tests.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">test_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      Number of items to be administered in the test.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">test_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a FiniteSelector object.</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span></div>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    test_size : int</span>
+<span class="sd">        Number of items to be administered in the test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">test_size</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">test_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the number of items to be administered in the test.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of items to be administered in the test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the overlap rate of the test, if it is of finite length.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Overlap rate of the test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span></div>
 
 
 
 <div class="viewcode-block" id="Estimator">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Estimator">[docs]</a>
-<span class="k">class</span> <span class="nc">Estimator</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for ability estimators&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Estimator</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Base class for ability estimators.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+<span class="sd">  Estimators are responsible for computing ability estimates based on examinees&#39;</span>
+<span class="sd">  responses to administered items.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  verbose : bool, optional</span>
+<span class="sd">      Whether to be verbose during execution. Default is False.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an Estimator object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to be verbose during execution. Default is False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span> <span class="o">=</span> <span class="n">verbose</span>
 
 <div class="viewcode-block" id="Estimator.estimate">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Estimator.estimate">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the theta value that minimizes the negative log-likelihood function, given the current state of the</span>
-<span class="sd">         test for the given examinee.</span>
+  <span class="nd">@abstractmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the theta value that maximizes the log-likelihood function for the given examinee.</span>
 
-<span class="sd">        :param index: index of the current examinee in the simulator</span>
-<span class="sd">        :returns: the current :math:`\\hat\\theta`</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">    When this method is used inside a simulator, its arguments are automatically filled.</span>
+<span class="sd">    Outside of a simulation, the user can also specify the arguments to use the</span>
+<span class="sd">    Estimator as a standalone object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        Index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    item_bank : ItemBank or None, optional</span>
+<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    response_vector : list[bool] or None, optional</span>
+<span class="sd">        A boolean list containing the examinee&#39;s answers to the administered items.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The current estimated ability :math:`\hat\theta`.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">calls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;How many times the estimator has been called to maximize/minimize the log-likelihood function</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">calls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get how many times the estimator has been called to maximize/minimize the log-likelihood function.</span>
 
-<span class="sd">        :returns: number of times the estimator has been called to maximize/minimize the log-likelihood function</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of times the estimator has been called to maximize/minimize the</span>
+<span class="sd">        log-likelihood function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total number of times the estimator has evaluated the log-likelihood function during its existence</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the total number of times the estimator has evaluated the log-likelihood function during its existence.</span>
 
-<span class="sd">        :returns: number of function evaluations&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        Number of function evaluations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">avg_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Average number of function evaluations for all tests the estimator has been used</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">avg_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the average number of function evaluations for all tests the estimator has been used.</span>
 
-<span class="sd">        :returns: average number of function evaluations&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span></div>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Average number of function evaluations per test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span></div>
 
 
 
 <div class="viewcode-block" id="Stopper">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Stopper">[docs]</a>
-<span class="k">class</span> <span class="nc">Stopper</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for CAT stop criterion&quot;&quot;&quot;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stopper</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Base class for CAT stopping criteria.</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<span class="sd">  Stoppers determine when a test should end based on specific criteria such as</span>
+<span class="sd">  test length, measurement precision, or other conditions.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a Stopper object.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Stopper.stop">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Stopper.stop">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks whether the test reached its stopping criterion for the given user</span>
+  <span class="nd">@abstractmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the test reached its stopping criterion for the given user.</span>
 
-<span class="sd">        :param index: the index of the current examinee</span>
-<span class="sd">        :returns: `True` if the test met its stopping criterion, else `False`&quot;&quot;&quot;</span></div>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int</span>
+<span class="sd">        The index of the current examinee.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if the test met its stopping criterion, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
 </div>
 
 
 
 <div class="viewcode-block" id="Simulator">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Simulator">[docs]</a>
-<span class="k">class</span> <span class="nc">Simulator</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing the simulator. It gathers several objects that describe the full</span>
-<span class="sd">    simulation process and simulates one or more computerized adaptive tests</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Simulator</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Class representing the CAT simulator.</span>
 
-<span class="sd">    :param items: a matrix containing item parameters</span>
-<span class="sd">    :param examinees: an integer with the number of examinees, whose real :math:`\\theta` values will be</span>
-<span class="sd">                      sampled from a normal distribution; or a :py:type:list containing said</span>
-<span class="sd">                      :math:`\\theta_0` values</span>
+<span class="sd">  The Simulator gathers several objects that describe the full simulation process</span>
+<span class="sd">  (initializer, selector, estimator, stopper) and simulates one or more computerized</span>
+<span class="sd">  adaptive tests.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  item_bank : ItemBank or numpy.ndarray</span>
+<span class="sd">      An ItemBank object containing item parameters. If a numpy.ndarray is provided,</span>
+<span class="sd">      it will be automatically converted to an ItemBank.</span>
+<span class="sd">  examinees : int or list[float] or numpy.ndarray</span>
+<span class="sd">      Either an integer with the number of examinees (whose real :math:`\theta` values</span>
+<span class="sd">      will be sampled from a normal distribution), or a list/array containing the</span>
+<span class="sd">      examinees&#39; true :math:`\theta` values.</span>
+<span class="sd">  initializer : Initializer or None, optional</span>
+<span class="sd">      Initializer to use during the simulation. Default is None.</span>
+<span class="sd">  selector : Selector or None, optional</span>
+<span class="sd">      Selector to use during the simulation. Default is None.</span>
+<span class="sd">  estimator : Estimator or None, optional</span>
+<span class="sd">      Estimator to use during the simulation. Default is None.</span>
+<span class="sd">  stopper : Stopper or None, optional</span>
+<span class="sd">      Stopper to use during the simulation. Default is None.</span>
+<span class="sd">  seed : int, optional</span>
+<span class="sd">      Seed used by the numpy random number generator during the simulation procedure.</span>
+<span class="sd">      Default is 0.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">examinees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">initializer</span><span class="p">:</span> <span class="n">Initializer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">selector</span><span class="p">:</span> <span class="n">Selector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="n">Estimator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">stopper</span><span class="p">:</span> <span class="n">Stopper</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a Simulator object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank or numpy.ndarray</span>
+<span class="sd">        ItemBank object or item parameter matrix. If a numpy array is provided,</span>
+<span class="sd">        it will be converted to an ItemBank automatically.</span>
+<span class="sd">    examinees : int or list[float] or numpy.ndarray</span>
+<span class="sd">        Either an integer with number of examinees or list/array of examinee abilities.</span>
+<span class="sd">    initializer : Initializer or None, optional</span>
+<span class="sd">        Initializer to use during the simulation. Default is None.</span>
+<span class="sd">    selector : Selector or None, optional</span>
+<span class="sd">        Selector to use during the simulation. Default is None.</span>
+<span class="sd">    estimator : Estimator or None, optional</span>
+<span class="sd">        Estimator to use during the simulation. Default is None.</span>
+<span class="sd">    stopper : Stopper or None, optional</span>
+<span class="sd">        Stopper to use during the simulation. Default is None.</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Seed used by the numpy random number generator during the simulation procedure.</span>
+<span class="sd">        Default is 0.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert numpy array to ItemBank if necessary</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+      <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;item_bank must be an ItemBank or numpy.ndarray&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">items</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">examinees</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-        <span class="n">initializer</span><span class="p">:</span> <span class="n">Initializer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">selector</span><span class="p">:</span> <span class="n">Selector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">estimator</span><span class="p">:</span> <span class="n">Estimator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">stopper</span><span class="p">:</span> <span class="n">Stopper</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="n">irt</span><span class="o">.</span><span class="n">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span> <span class="o">=</span> <span class="n">item_bank</span>
+    <span class="c1"># Track item usage counts for efficient exposure rate updates</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_item_usage_counts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
-        <span class="c1"># adds a column for each item&#39;s exposure rate</span>
-        <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
-            <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_mse</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="n">items</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="o">=</span> <span class="n">stopper</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_mse</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="o">=</span> <span class="n">stopper</span>
+    <span class="c1"># `examinees` is passed to its special setter</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">examinees</span><span class="p">)</span>
 
-        <span class="c1"># `examinees` is passed to its special setter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">examinees</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>  <span class="c1"># type: List[List[int]]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="p">]</span>  <span class="c1"># type: List[List[int]]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="p">]</span>  <span class="c1"># type: List[List[bool]]</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">item_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemBank</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ItemBank used by the simulator.</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Item matrix used by the simulator. If the simulation already</span>
-<span class="sd">        occurred, a column containing item exposure rates will be added to the</span>
-<span class="sd">        matrix.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ItemBank</span>
+<span class="sd">        The ItemBank containing all item parameters and exposure rates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">administered_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of lists containing the indexes of items administered to each</span>
-<span class="sd">        examinee during the simulation.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Item matrix used by the simulator (for backward compatibility).</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of lists containing all estimated :math:`\\hat\\theta` values</span>
-<span class="sd">        for all examinees during each step of the test.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The underlying item parameter matrix from the ItemBank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">items</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of boolean lists containing the examinees answers to all items.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">administered_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A list of lists with the indexes of items administered to each examinee during the simulation.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">latest_estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Final estimated :math:`\\hat\\theta` values for all examinees.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">ests</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ests</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">ests</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">]</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;A list of lists with all estimated :math:`\hat\theta` values for all examinees during each step of the test.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Duration of the simulation, in seconds.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List of boolean lists containing the examinees answers to all items.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overlap rate of the test, if it is of finite length.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">latest_estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Final estimated :math:`\hat\theta` values for all examinees.&quot;&quot;&quot;</span>
+    <span class="c1"># Filter out any None values - all examinees should have at least one estimation</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ests</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ests</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ests</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Fallback: if no estimations, use 0.0 (should not happen in normal operation)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">initializer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Initializer</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Duration of the simulation, in seconds.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Selector</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Overlap rate of the test, if it is of finite length.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Estimator</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initializer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Initializer</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the initializer used during the simulation.</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">stopper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Stopper</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Initializer or None</span>
+<span class="sd">        The initializer used during the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bias between the estimated and true abilities. This property is only</span>
-<span class="sd">        available after :py:func:`simulate` has been successfully called. For more</span>
-<span class="sd">        information on estimation bias, see :py:func:`catsim.cat.bias`&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">selector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Selector</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the selector used during the simulation.</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mean-squared error between the estimated and true abilities. This</span>
-<span class="sd">        property is only available after :py:func:`simulate` has been successfully</span>
-<span class="sd">        called. For more information on the mean-squared error of estimation, see</span>
-<span class="sd">        :py:func:`catsim.cat.mse`&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mse</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Selector or None</span>
+<span class="sd">        The selector used during the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Root mean-squared error between the estimated and true abilities. This</span>
-<span class="sd">        property is only available after :py:func:`simulate` has been successfully</span>
-<span class="sd">        called. For more information on the root mean-squared error of estimation, see</span>
-<span class="sd">        :py:func:`catsim.cat.rmse`&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">estimator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimator</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the estimator used during the simulation.</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;:py:type:numpy.ndarray containing examinees true ability values (:math:`\\theta`).&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Estimator or None</span>
+<span class="sd">        The estimator used during the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span>
 
-    <span class="nd">@examinees</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stopper</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Stopper</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the stopper used during the simulation.</span>
 
-    <span class="k">def</span> <span class="nf">_to_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="c1"># generate examinees from a normal distribution</span>
-        <span class="c1"># if an int was passed</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">stddev</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">stddev</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">dist</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Examinees must be an int, list of floats or one-dimensional numpy array&quot;</span>
-            <span class="p">)</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Stopper or None</span>
+<span class="sd">        The stopper used during the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span>
 
-        <span class="k">return</span> <span class="n">dist</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bias between the estimated and true abilities.</span>
+
+<span class="sd">    This property is only available after :py:func:`simulate` has been successfully called. For more information on</span>
+<span class="sd">    estimation bias, see :py:func:`catsim.cat.bias`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the mean-squared error between the estimated and true abilities.</span>
+
+<span class="sd">    This property is only available after :py:func:`simulate` has been successfully called. For more information on the</span>
+<span class="sd">    mean-squared error of estimation, see :py:func:`catsim.cat.mse`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mse</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the root mean-squared error between the estimated and true abilities.</span>
+
+<span class="sd">    This property is only available after :py:func:`simulate` has been successfully called. For more information on the</span>
+<span class="sd">    root mean-squared error of estimation, see :py:func:`catsim.cat.rmse`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:py:type:numpy.ndarray containing examinees true ability values (:math:`\theta`).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the random number generator used by the simulator.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span>
+
+  <span class="nd">@examinees</span><span class="o">.</span><span class="n">setter</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_examinees</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate examinees from a distribution, if the Simulator was initialized with an int.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : int or list[float] or numpy.ndarray</span>
+<span class="sd">        Variable representing the number of examinees (int) or the actual ability values</span>
+<span class="sd">        (list or array).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Examinees as a numpy array.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If the examinees are not an int, list of floats, or one-dimensional numpy array.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the number of examinees is invalid (non-positive int or empty list/array).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Number of examinees must be positive, got </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">)</span>
+        <span class="n">stddev</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">)</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">stddev</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;List of examinees cannot be empty&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Array of examinees cannot be empty&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="n">dist</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Examinees must be an int, list of floats or one-dimensional numpy array&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dist</span>
 
 <div class="viewcode-block" id="Simulator.simulate">
 <a class="viewcode-back" href="../../simulation.html#catsim.simulation.Simulator.simulate">[docs]</a>
-    <span class="k">def</span> <span class="nf">simulate</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">initializer</span><span class="p">:</span> <span class="n">Initializer</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">selector</span><span class="p">:</span> <span class="n">Selector</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">estimator</span><span class="p">:</span> <span class="n">Estimator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">stopper</span><span class="p">:</span> <span class="n">Stopper</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Simulates a computerized adaptive testing application to one or more examinees</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">initializer</span><span class="p">:</span> <span class="n">Initializer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">selector</span><span class="p">:</span> <span class="n">Selector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">estimator</span><span class="p">:</span> <span class="n">Estimator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">stopper</span><span class="p">:</span> <span class="n">Stopper</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Simulate a computerized adaptive testing application to one or more examinees.</span>
 
-<span class="sd">        :param initializer: an initializer that selects examinees :math:`\\theta_0`</span>
-<span class="sd">        :param selector: a selector that selects new items to be presented to examinees</span>
-<span class="sd">        :param estimator: an estimator that reestimates examinees abilities after each item is applied</span>
-<span class="sd">        :param stopper: an object with a stopping criteria for the test</span>
-<span class="sd">        :param verbose: whether to periodically print a message regarding the progress of the simulation.</span>
-<span class="sd">                        Good for longer simulations.</span>
+<span class="sd">    The simulation process iterates through each examinee, initializing their ability,</span>
+<span class="sd">    selecting items, recording responses, estimating abilities, and stopping when the</span>
+<span class="sd">    criterion is met.</span>
 
-<span class="sd">        &gt;&gt;&gt; from catsim.initialization import RandomInitializer</span>
-<span class="sd">        &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
-<span class="sd">        &gt;&gt;&gt; from catsim.estimation import NumericalSearchEstimator</span>
-<span class="sd">        &gt;&gt;&gt; from catsim.stopping import MaxItemStopper</span>
-<span class="sd">        &gt;&gt;&gt; from catsim.simulation import Simulator</span>
-<span class="sd">        &gt;&gt;&gt; from catsim.cat import generate_item_bank</span>
-<span class="sd">        &gt;&gt;&gt; initializer = RandomInitializer()</span>
-<span class="sd">        &gt;&gt;&gt; selector = MaxInfoSelector()</span>
-<span class="sd">        &gt;&gt;&gt; estimator = NumericalSearchEstimator()</span>
-<span class="sd">        &gt;&gt;&gt; stopper = MaxItemStopper(20)</span>
-<span class="sd">        &gt;&gt;&gt; Simulator(generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    initializer : Initializer or None, optional</span>
+<span class="sd">        An initializer that selects examinees&#39; initial :math:`\theta_0`. Default is None.</span>
+<span class="sd">    selector : Selector or None, optional</span>
+<span class="sd">        A selector that selects new items to be presented to examinees. Default is None.</span>
+<span class="sd">    estimator : Estimator or None, optional</span>
+<span class="sd">        An estimator that reestimates examinees abilities after each item is applied.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    stopper : Stopper or None, optional</span>
+<span class="sd">        An object with a stopping criterion for the test. Default is None.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        Whether to periodically print a message regarding the progress of the simulation.</span>
+<span class="sd">        Good for longer simulations. Default is False.</span>
 
-        <span class="k">if</span> <span class="n">initializer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
-        <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>
-        <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
-        <span class="k">if</span> <span class="n">stopper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="o">=</span> <span class="n">stopper</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If any of initializer, selector, estimator, or stopper is None (either passed</span>
+<span class="sd">        or from constructor).</span>
 
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.initialization import RandomInitializer</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.estimation import NumericalSearchEstimator</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.stopping import MaxItemStopper</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.simulation import Simulator</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.item_bank import ItemBank</span>
+<span class="sd">    &gt;&gt;&gt; initializer = RandomInitializer()</span>
+<span class="sd">    &gt;&gt;&gt; selector = MaxInfoSelector()</span>
+<span class="sd">    &gt;&gt;&gt; estimator = NumericalSearchEstimator()</span>
+<span class="sd">    &gt;&gt;&gt; stopper = MaxItemStopper(20)</span>
+<span class="sd">    &gt;&gt;&gt; Simulator(ItemBank.generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">initializer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="o">=</span> <span class="n">initializer</span>
+    <span class="k">if</span> <span class="n">selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>
+    <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+    <span class="k">if</span> <span class="n">stopper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="o">=</span> <span class="n">stopper</span>
 
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="p">]:</span>
-            <span class="n">s</span><span class="o">.</span><span class="n">simulator</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Initializer is required for simulation&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Selector is required for simulation&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Estimator is required for simulation&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Stopper is required for simulation&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Starting simulation: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> items&quot;</span>
-            <span class="p">)</span>
-            <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="p">]:</span>
+      <span class="n">s</span><span class="o">.</span><span class="n">simulator</span> <span class="o">=</span> <span class="bp">self</span>
 
-        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1"># Reset the item bank to clear any previous simulation data</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">current_examinee</span><span class="p">,</span> <span class="n">true_theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+    <span class="n">pbar</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+      <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Starting simulation: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="si">}</span><span class="s2"> &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> items&quot;</span>
+      <span class="p">)</span>
+      <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">))</span>
 
-            <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">current_examinee</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
-            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">current_examinee</span><span class="p">):</span>
-                <span class="n">selected_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">current_examinee</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">current_examinee</span><span class="p">,</span> <span class="n">true_theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
-                <span class="c1"># if the selector returns None, it means the selector and not the stopper, is asking the test to stop</span>
-                <span class="c1"># this happens e.g. if the item bank or or the available strata end before the minimum error is achieved</span>
-                <span class="k">if</span> <span class="n">selected_item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">break</span>
+      <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">current_examinee</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)</span>
 
-                <span class="c1"># simulates the examinee&#39;s response via the four-parameter</span>
-                <span class="c1"># logistic function</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span>
-                        <span class="n">true_theta</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">selected_item</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">selected_item</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">selected_item</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">selected_item</span><span class="p">][</span><span class="mi">3</span><span class="p">],</span>
-                    <span class="p">)</span>
-                    <span class="o">&gt;=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
-                <span class="p">)</span>
+      <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">current_examinee</span><span class="p">):</span>
+        <span class="n">selected_item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">current_examinee</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="c1"># if the selector returns None, it means the selector and not the stopper, is asking the test to stop</span>
+        <span class="c1"># this happens e.g. if the item bank or the available strata end before the minimum error is achieved</span>
+        <span class="k">if</span> <span class="n">selected_item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="k">break</span>
 
-                <span class="c1"># adds the item selected by the selector to the pool of administered items</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">selected_item</span><span class="p">)</span>
+        <span class="c1"># validate selected item index</span>
+        <span class="n">is_valid_type</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selected_item</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">integer</span><span class="p">))</span>
+        <span class="n">is_valid_range</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">selected_item</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">is_valid_type</span> <span class="ow">and</span> <span class="n">is_valid_range</span><span class="p">):</span>
+          <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid item index </span><span class="si">{</span><span class="n">selected_item</span><span class="si">}</span><span class="s2"> returned by selector. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Must be between 0 and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+          <span class="p">)</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-                <span class="c1"># estimate the new theta using the given estimator</span>
-                <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">current_examinee</span><span class="p">)</span>
+        <span class="c1"># simulates the examinee&#39;s response via the four-parameter</span>
+        <span class="c1"># logistic function</span>
+        <span class="n">item_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">selected_item</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span>
+            <span class="n">true_theta</span><span class="p">,</span>
+            <span class="n">item_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># a</span>
+            <span class="n">item_params</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># b</span>
+            <span class="n">item_params</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># c</span>
+            <span class="n">item_params</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="c1"># d</span>
+          <span class="p">)</span>
+          <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
+        <span class="p">)</span>
 
-                <span class="c1"># count occurrences of this item in all tests</span>
-                <span class="n">item_occurrences</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">selected_item</span> <span class="ow">in</span> <span class="n">administered_list</span>
-                        <span class="k">for</span> <span class="n">administered_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span>
-                    <span class="p">]</span>
-                <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_response_vectors</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
-                <span class="c1"># update the exposure value for this item</span>
-                <span class="c1"># r = number of tests item has been used on / total number of tests</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">selected_item</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_occurrences</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">)</span>
+        <span class="c1"># adds the item selected by the selector to the pool of administered items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">selected_item</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)</span>
+        <span class="c1"># estimate the new theta using the given estimator</span>
+        <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">estimate</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">current_examinee</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="c1"># update item usage count and exposure rate efficiently</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item_usage_counts</span><span class="p">[</span><span class="n">selected_item</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">update_exposure_rate</span><span class="p">(</span>
+          <span class="n">selected_item</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_usage_counts</span><span class="p">[</span><span class="n">selected_item</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">)</span>
+        <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulation took </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_duration</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimations</span><span class="p">[</span><span class="n">current_examinee</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_mse</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
 
-        <span class="c1"># overlap is computed only if all examinees answered the same amount of items</span>
-        <span class="c1"># maybe there is a way to calculate it with tests of different lengths,</span>
-        <span class="c1"># but I did not find it in the literature</span>
-        <span class="n">test_size</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">len_first</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">FiniteSelector</span><span class="p">):</span>
-            <span class="n">test_size</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">test_size</span>
-        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">len_first</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">):</span>
-            <span class="n">test_size</span> <span class="o">=</span> <span class="n">len_first</span>
-        <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">],</span> <span class="n">test_size</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+      <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simulation took </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_duration</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bias</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_mse</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_rmse</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
+
+    <span class="c1"># overlap is computed only if all examinees answered the same amount of items</span>
+    <span class="c1"># maybe there is a way to calculate it with tests of different lengths,</span>
+    <span class="c1"># but I did not find it in the literature</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">len_first</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="n">FiniteSelector</span><span class="p">):</span>
+      <span class="n">test_size</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">test_size</span>
+    <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">len_first</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_administered_items</span><span class="p">):</span>
+      <span class="n">test_size</span> <span class="o">=</span> <span class="n">len_first</span>
+    <span class="k">if</span> <span class="n">test_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_overlap_rate</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span></div>
 </div>
 
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">doctest</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">doctest</span>
 
-    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
+  <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">()</span>
 </pre></div>
 
            </div>
@@ -647,13 +1043,13 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2023, Douglas De Rizzo Meneghetti.</p>
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -664,7 +1060,7 @@
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

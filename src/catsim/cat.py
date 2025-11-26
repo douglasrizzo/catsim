@@ -1,196 +1,249 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
-import operator
 import random
-from typing import List, Union
 
 import numpy
+import numpy.typing as npt
 
-from catsim import irt
+from catsim.item_bank import ItemBank
 
 
-def dodd(theta: float, items: numpy.ndarray, correct: bool) -> float:
-    """Method proposed by [Dod90]_ for the estimation of :math:`\\hat{\\theta}`
-    when the response vector is composed entirely of 1s or 0s.
+def dodd(theta: float, item_bank: ItemBank, correct: bool) -> float:
+  r"""Estimate :math:`\hat{\theta}` when the response vector is composed entirely of 1s or 0s.
 
-    .. math::
+  Method proposed by [Dod90]_. This heuristic prevents the maximum likelihood
+  estimator from returning infinity when all responses are correct or negative
+  infinity when all responses are incorrect.
 
-        \\hat{\\theta}_{t+1} = \\left\\lbrace \\begin{array}{ll}
-        \\hat{\\theta}_t+\\frac{b_{max}-\\hat{\\theta_t}}{2} & \\text{if } X_t = 1 \\\\
-        \\hat{\\theta}_t-\\frac{\\hat{\\theta}_t-b_{min}}{2} & \\text{if }  X_t = 0
-        \\end{array} \\right\\rbrace
+  .. math::
 
-    :param theta: the initial ability level
-    :param items: a numpy array containing the parameters of the items in the
-                  database. This is necessary to capture the maximum and minimum
-                  difficulty levels necessary for the method.
-    :param correct: a boolean value informing if the examinee has answered only correctly
-                    (`True`) or incorrectly (`False`) up until now
-    :returns: a new estimation for :math:`\\theta`
-    """
-    b = items[:, 1]
+      \hat{\theta}_{t+1} = \left\lbrace \begin{array}{ll}
+      \hat{\theta}_t+\frac{b_{max}-\hat{\theta_t}}{2} & \text{if } X_t = 1 \\
+        \hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} & \text{if }  X_t = 0
+      \end{array} \right\rbrace
 
-    return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
+  Parameters
+  ----------
+  theta : float
+      The initial ability level estimate.
+  item_bank : ItemBank
+      An ItemBank containing all items in the bank.
+      This is necessary to capture the maximum and minimum difficulty levels
+      required by the method.
+  correct : bool
+      Boolean value indicating if the examinee has answered only correctly
+      (True) or only incorrectly (False) up until now.
+
+  Returns
+  -------
+  float
+      A new estimation for :math:`\theta` that avoids infinite values.
+  """
+  b = item_bank.difficulty
+
+  return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
 def bias(
-    actual: Union[List[float], numpy.ndarray],
-    predicted: Union[List[float], numpy.ndarray],
+  actual: npt.ArrayLike,
+  predicted: npt.ArrayLike,
 ) -> float:
-    """Calculates the test bias, an evaluation criterion for computerized adaptive test methodolgies [Chang2001]_.
-    The value is computed as:
+  r"""Compute the test bias, an evaluation criterion for computerized adaptive test methodologies [Chang2001]_.
 
-    .. math:: Bias = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})}{N}
+  The value is computed as:
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and
-    :math:`\\theta_i` is examinee :math:`i` actual ability.
+  .. math:: Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}
 
-    :param actual: a list or 1-D numpy array containing the true ability values
-    :param predicted: a list or 1-D numpy array containing the estimated ability values
-    :returns: the bias between the predicted values and actual values.
-    """
-    if len(actual) != len(predicted):
-        raise ValueError("actual and predicted vectors need to be the same size")
-    return float(numpy.mean(list(map(operator.sub, predicted, actual))))
+  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and
+  :math:`\theta_i` is examinee :math:`i` actual ability. A positive bias indicates
+  systematic overestimation, while a negative bias indicates systematic underestimation.
+
+  Parameters
+  ----------
+  actual : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
+  predicted : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
+
+  Returns
+  -------
+  float
+      The bias between the predicted values and actual values.
+
+  Raises
+  ------
+  ValueError
+      If actual and predicted vectors are not the same size.
+  """
+  actual = numpy.asarray(actual)
+  predicted = numpy.asarray(predicted)
+
+  if len(actual) != len(predicted):
+    msg = "actual and predicted vectors need to be the same size"
+    raise ValueError(msg)
+  return float(numpy.mean(predicted - actual))
 
 
 def mse(
-    actual: Union[List[float], numpy.ndarray],
-    predicted: Union[List[float], numpy.ndarray],
+  actual: npt.ArrayLike,
+  predicted: npt.ArrayLike,
 ) -> float:
-    """Mean squared error, a value used when measuring the precision
-    with which a computerized adaptive test estimates examinees abilities [Chang2001]_.
-    The value is computed as:
+  r"""Compute the mean squared error (MSE) between two array-like objects.
 
-    .. math:: MSE = \\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}
+  The MSE is used when measuring the precision with which a computerized adaptive
+  test estimates examinees abilities [Chang2001]_. Lower MSE values indicate better
+  estimation accuracy.
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and
-    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual ability.
+  The value is computed as:
 
-    :param actual: a list or 1-D numpy array containing the true ability values
-    :param predicted: a list or 1-D numpy array containing the estimated ability values
-    :returns: the mean squared error between the predicted values and actual values.
-    """
-    if len(actual) != len(predicted):
-        raise ValueError("actual and predicted vectors need to be the same size")
-    return float(numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))]))
+  .. math:: MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}
+
+  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and
+  :math:`\theta_i` is examinee :math:`i` actual ability.
+
+  Parameters
+  ----------
+  actual : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
+  predicted : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
+
+  Returns
+  -------
+  float
+      The mean squared error between the predicted values and actual values.
+
+  Raises
+  ------
+  ValueError
+      If actual and predicted vectors are not the same size.
+  """
+  actual = numpy.asarray(actual)
+  predicted = numpy.asarray(predicted)
+
+  if len(actual) != len(predicted):
+    msg = "Actual and predicted vectors need to be the same size"
+    raise ValueError(msg)
+  diff = predicted - actual
+  return float(numpy.mean(diff * diff))
 
 
 def rmse(
-    actual: Union[List[float], numpy.ndarray],
-    predicted: Union[List[float], numpy.ndarray],
+  actual: npt.ArrayLike,
+  predicted: npt.ArrayLike,
 ) -> float:
-    """Root mean squared error, a common value used when measuring the precision
-    with which a computerized adaptive test estimates examinees abilities [Bar10]_.
-    The value is computed as:
+  r"""Compute the root mean squared error (RMSE) between two array-like objects.
 
-    .. math:: RMSE = \\sqrt{\\frac{\\sum_{i=1}^{N} (\\hat{\\theta}_i - \\theta_{i})^2}{N}}
+  A common value used when measuring the precision with which a computerized adaptive
+  test estimates examinees abilities [Bar10]_. RMSE is in the same units as the ability
+  scale, making it easier to interpret than MSE.
 
-    where :math:`\\hat{\\theta}_i` is examinee :math:`i` estimated ability and
-    :math:`\\hat{\\theta}_i` is examinee :math:`i` actual ability.
+  The value is computed as:
 
-    :param actual: a list or 1-D numpy array containing the true ability values
-    :param predicted: a list or 1-D numpy array containing the estimated ability values
-    :returns: the root mean squared error between the predicted values and actual values.
-    """
-    if len(actual) != len(predicted):
-        raise ValueError("actual and predicted vectors need to be the same size")
-    return numpy.sqrt(mse(actual, predicted))
+  .. math:: RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}
 
+  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and
+  :math:`\theta_i` is examinee :math:`i` actual ability.
 
-def overlap_rate(usages: numpy.ndarray, test_size: int) -> float:
-    """Test overlap rate, an average measure of how much of the test two examinees take is equal [Bar10]_. It is given by:
+  Parameters
+  ----------
+  actual : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
+  predicted : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
 
-    .. math:: T=\\frac{N}{Q}S_{r}^2 + \\frac{Q}{N}
+  Returns
+  -------
+  float
+      The root mean squared error between the predicted values and actual values.
 
-    If, for example :math:`T = 0.5`, it means that the tests of two random examinees have 50% of equal items.
-
-    :param usages: a list or numpy.ndarray containing the number of
-                  times each item was used in the tests.
-    :param test_size: an integer informing the number of items in a test.
-    :returns: test overlap rate.
-    """
-    if any(usages > test_size):
-        raise ValueError("There are items that have been used more times than there were tests")
-
-    bank_size = usages.shape[0]
-    var_r = numpy.var(usages)
-
-    t = (bank_size / test_size) * var_r + (test_size / bank_size)
-
-    return t
+  Raises
+  ------
+  ValueError
+      If actual and predicted vectors are not the same size.
+  """
+  return numpy.sqrt(mse(actual, predicted))
 
 
-def generate_item_bank(n: int, itemtype: str = "4PL", corr: float = 0) -> numpy.ndarray:
-    """Generate a synthetic item bank whose parameters approximately follow
-    real-world parameters, as proposed by [Bar10]_.
+def overlap_rate(exposure_rates: npt.NDArray[numpy.floating], test_size: int) -> float:
+  r"""Compute the test overlap rate.
 
-    Item parameters are extracted from the following probability distributions:
+  An average measure of how much of the test two examinees take is equal [Bar10]_.
+  The overlap rate provides insight into test security: higher values indicate that
+  examinees see more similar items, potentially compromising test security.
 
-    * discrimination: :math:`N(1.2, 0.25)`
+  The overlap rate is given by:
 
-    * difficulty: :math:`N(0,  1)`
+  .. math:: T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}
 
-    * pseudo-guessing: :math:`N(0.25, 0.02)`
+  where :math:`N` is the bank size, :math:`Q` is the test size, and :math:`S_{r}^2`
+  is the variance of exposure rates.
 
-    * upper asymptote: :math:`U(0.94, 1)`
+  If, for example :math:`T = 0.5`, it means that the tests of two random examinees
+  have 50% of equal items.
 
-    :param n: how many items are to be generated
-    :param itemtype: either ``1PL``, ``2PL``, ``3PL`` or ``4PL`` for the one-, two-,
-                     three- or four-parameter logistic model
-    :param corr: the correlation between item discrimination and difficulty. If
-                 ``itemtype == '1PL'``, it is ignored.
-    :return: an ``n x 4`` numerical matrix containing item parameters
-    :rtype: numpy.ndarray
+  Parameters
+  ----------
+  exposure_rates : numpy.ndarray
+      A numpy array containing the exposure rate (proportion) of each item, where
+      each value is between 0 and 1, representing the proportion of examinees who
+      received that item.
+  test_size : int
+      The number of items in a test.
 
-    >>> generate_item_bank(5, '1PL')
-    >>> generate_item_bank(5, '2PL')
-    >>> generate_item_bank(5, '3PL')
-    >>> generate_item_bank(5, '4PL')
-    >>> generate_item_bank(5, '4PL', corr=0)
-    """
+  Returns
+  -------
+  float
+      Test overlap rate between 0 and 1.
 
-    valid_itemtypes = ["1PL", "2PL", "3PL", "4PL"]
+  Raises
+  ------
+  ValueError
+      If exposure rates are not between 0 and 1, if test size is not positive,
+      or if test size is larger than bank size.
+  """
+  # Validate that exposure_rates contains proportions
+  if numpy.any(exposure_rates < 0) or numpy.any(exposure_rates > 1):
+    msg = "Exposure rates must be between 0 and 1"
+    raise ValueError(msg)
 
-    if itemtype not in valid_itemtypes:
-        raise ValueError("Item type not in " + str(valid_itemtypes))
+  if test_size <= 0:
+    msg = "Test size must be positive"
+    raise ValueError(msg)
 
-    means = [0, 1.2]
-    stds = [1, 0.25]
-    covs = [
-        [stds[0] ** 2, stds[0] * stds[1] * corr],
-        [stds[0] * stds[1] * corr, stds[1] ** 2],
-    ]
+  bank_size = exposure_rates.shape[0]
 
-    b, a = numpy.random.multivariate_normal(means, covs, n).T
+  if test_size > bank_size:
+    msg = f"Test size ({test_size}) cannot be larger than bank size ({bank_size})"
+    raise ValueError(msg)
 
-    # if by chance there is some discrimination value below zero
-    # this makes the problem go away
-    if any(disc < 0 for disc in a):
-        min_disc = min(a)
-        a = [disc + abs(min_disc) for disc in a]
+  # Compute variance of exposure rates
+  var_r = numpy.var(exposure_rates)
 
-    if itemtype not in ["2PL", "3PL", "4PL"]:
-        a = numpy.ones(n)
-
-    if itemtype in ["3PL", "4PL"]:
-        c = numpy.random.normal(0.25, 0.02, n).clip(min=0)
-    else:
-        c = numpy.zeros(n)
-
-    if itemtype == "4PL":
-        d = numpy.random.uniform(0.94, 1, n)
-    else:
-        d = numpy.ones(n)
-
-    return irt.normalize_item_bank(numpy.array([a, b, c, d]).T)
+  # Apply Barrada et al. (2010) formula
+  return (bank_size / test_size) * var_r + (test_size / bank_size)
 
 
-def random_response_vector(size: int) -> list:
-    return [bool(random.getrandbits(1)) for _ in range(size)]
+def random_response_vector(size: int) -> list[bool]:
+  """Generate a list of random boolean values of the given size.
+
+  This function is useful for testing and simulation purposes when you need
+  a random response pattern.
+
+  Parameters
+  ----------
+  size : int
+      The size of the list to be generated. Must be non-negative.
+
+  Returns
+  -------
+  list[bool]
+      A list of random boolean values with equal probability of True and False.
+  """
+  return [bool(random.getrandbits(1)) for _ in range(size)]
 
 
 if __name__ == "__main__":
-    import doctest
+  import doctest
 
-    doctest.testmod()
+  doctest.testmod()
