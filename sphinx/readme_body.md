@@ -1,11 +1,9 @@
-<center>
+<!-- DO NOT EDIT README.md, edit sphinx/readme_head.md and sphinx/readme_body.md -->
 
 [![CI/CD](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk)](https://codecov.io/github/douglasrizzo/catsim)
 [![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
-
-</center>
 
 A Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:
 
