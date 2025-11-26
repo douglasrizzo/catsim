@@ -165,7 +165,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>
@@ -256,7 +256,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>
@@ -438,7 +438,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>
@@ -609,7 +609,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>
@@ -759,7 +759,7 @@
 <div class="viewcode-block" id="ClusterSelector.sum_cluster_infos">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.sum_cluster_infos">[docs]</a>
   <span class="nd">@staticmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">sum_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">sum_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the sum of item information values, separated by cluster.</span>
 
 <span class="sd">    Parameters</span>
@@ -790,7 +790,7 @@
 <div class="viewcode-block" id="ClusterSelector.weighted_cluster_infos">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.weighted_cluster_infos">[docs]</a>
   <span class="nd">@staticmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">weighted_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">weighted_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the weighted sum of item information values, separated by cluster.</span>
 
 <span class="sd">    The weight is the number of items in each cluster, providing an average information</span>
@@ -925,7 +925,7 @@
 <div class="viewcode-block" id="StratifiedSelector.presort_items">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.StratifiedSelector.presort_items">[docs]</a>
   <span class="nd">@abstractmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix according to the strategy employed by this selector.</span>
 
 <span class="sd">    Parameters</span>
@@ -947,7 +947,7 @@
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">using_simulator_props</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort the item matrix before selecting each new item.</span>
 
 <span class="sd">    This default implementation simply returns the presorted items, or sorts them using</span>
@@ -1052,7 +1052,7 @@
     <span class="k">return</span> <span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span></div>
 
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_get_stratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_get_stratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
     <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
     <span class="n">pointer</span> <span class="o">=</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span><span class="p">]</span>
     <span class="n">max_pointer</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="k">if</span> <span class="n">stratum_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
@@ -1101,12 +1101,12 @@
 
 <div class="viewcode-block" id="AStratSelector.presort_items">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.AStratSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix in ascending order according to the discrimination of each item.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    items : numpy.ndarray</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
 <span class="sd">        An item matrix.</span>
 
 <span class="sd">    Returns</span>
@@ -1157,7 +1157,7 @@
 
 <div class="viewcode-block" id="AStratBBlockSelector.presort_items">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.AStratBBlockSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort items in ascending order of discrimination each item, then each strata according to item difficulty.</span>
 
 <span class="sd">    Parameters</span>
@@ -1231,12 +1231,12 @@
 
 <div class="viewcode-block" id="MaxInfoStratSelector.presort_items">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># noqa: PLR6301</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort items in ascending order of maximum information.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    items : numpy.ndarray</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
 <span class="sd">        An item matrix.</span>
 
 <span class="sd">    Returns</span>
@@ -1254,12 +1254,14 @@
 
 <div class="viewcode-block" id="MaxInfoStratSelector.postsort_items">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratSelector.postsort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">using_simulator_props</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">using_simulator_props</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Divide the item bank into strata and sort each one in descending order of information for the current theta.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    items : numpy.ndarray</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
 <span class="sd">        The item matrix.</span>
 <span class="sd">    using_simulator_props : bool</span>
 <span class="sd">        Whether the selector is being executed inside a Simulator.</span>
@@ -1280,11 +1282,11 @@
       <span class="c1"># grab stratum pointers</span>
       <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
       <span class="n">item_indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>  <span class="c1"># item indices for the current stratum</span>
-      <span class="n">items_current_stratum</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span>
+      <span class="n">items_current_stratum</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span>
         <span class="n">item_indices_current_stratum</span>
       <span class="p">)</span>  <span class="c1"># item params for the current stratum</span>
       <span class="c1"># their information for this theta</span>
-      <span class="n">info_items_current_stratum_current_theta</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items_current_stratum</span><span class="p">)</span>
+      <span class="n">info_items_current_stratum_current_theta</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items_current_stratum</span><span class="p">)</span>
       <span class="n">item_indices_current_stratum_sorted_by_info</span> <span class="o">=</span> <span class="n">item_indices_current_stratum</span><span class="p">[</span>
         <span class="p">(</span><span class="o">-</span><span class="n">info_items_current_stratum_current_theta</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
       <span class="p">]</span>
@@ -1328,12 +1330,12 @@
 
 <div class="viewcode-block" id="MaxInfoBBlockSelector.presort_items">
 <a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoBBlockSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix according to the information of each item at their maximum.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    items : numpy.ndarray</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
 <span class="sd">        An item matrix.</span>
 
 <span class="sd">    Returns</span>
@@ -1408,7 +1410,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>
@@ -1502,7 +1504,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>
@@ -1595,7 +1597,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    index : int or None, optional</span>
 <span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    items : numpy.ndarray or None, optional</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
 <span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
 <span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
 <span class="sd">    administered_items : list[int] or None, optional</span>

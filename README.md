@@ -1,14 +1,12 @@
 <p align="center">
   <img src="sphinx/logo_text.svg?sanitize=true" alt="Logo" />
 </p>
-
 [![CI/CD](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk)](https://codecov.io/github/douglasrizzo/catsim)
 [![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
 
-**catsim** is a Python package for computerized adaptive testing (CAT)
-simulations. It provides multiple methods for:
+**catsim** is a Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:
 
 - [test initialization](https://douglasrizzo.com.br/catsim/initialization.html) (selecting the initial ability of the examinees)
 - [item selection](https://douglasrizzo.com.br/catsim/selection.html)
