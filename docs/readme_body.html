@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>What’s a CAT &mdash; catsim 0.18.0 documentation</title>
+  <title>Installation &mdash; catsim 0.18.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="_static/plot_directive.css?v=7f9a90b1" />
@@ -73,7 +73,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">What’s a CAT</li>
+      <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/readme_body.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -83,15 +83,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
 
-  <a class="reference external image-reference" href="https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml"><img alt="CI/CD" src="https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main" />
-</a>
-<a class="reference external image-reference" href="https://codecov.io/github/douglasrizzo/catsim"><img alt="codecov" src="https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk" />
-</a>
-<a class="reference external image-reference" href="https://badge.fury.io/py/catsim"><img alt="Latest Version" src="https://badge.fury.io/py/catsim.svg" />
-</a>
-<a class="reference external image-reference" href="http://dx.doi.org/10.5281/zenodo.46420"><img alt="Digital Object Identifier" src="https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg" />
-</a>
-<p><strong>catsim</strong> is a Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:</p>
+  <center>
+
+[![CI/CD](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml)
+[![codecov](https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk)](https://codecov.io/github/douglasrizzo/catsim)
+[![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
+[![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
+
+</center><p>A Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">item selection</a></p></li>
@@ -99,18 +98,13 @@
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">test stopping</a></p></li>
 </ul>
 <p>These methods can either be used in a standalone fashion <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#autonomous-usage">[1]</a> to power other software or be used with <em>catsim</em> to simulate the application of computerized adaptive tests <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#running-simulations">[2]</a>, given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory model</a>.</p>
-<section id="what-s-a-cat">
-<h1>What’s a CAT<a class="headerlink" href="#what-s-a-cat" title="Link to this heading"></a></h1>
-<p>Computerized adaptive tests are educational evaluations, usually taken by examinees in a computer or some other digital means, in which the examinee’s ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee’s real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method or even linear tests applied electronically, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.</p>
-<p>More information is available <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html">in the docs</a> and over at <a class="reference external" href="https://en.wikipedia.org/wiki/Computerized_adaptive_testing">Wikipedia</a>.</p>
-</section>
 <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <p>Install it using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim</span></code>.</p>
 </section>
 <section id="basic-usage">
 <h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h1>
-<p>There is <a class="reference external" href="https://colab.research.google.com/drive/14zEWoDudBCXF0NO-qgzoQpWUGBcJ2lPH?usp=sharing">a Colab Notebook</a> teaching the basics of catsim!</p>
+<p>There is <a class="reference external" href="https://colab.research.google.com/drive/1iJQE9VFrDD2Pqrsa7K3EvD1pSTBPw0Ur?usp=sharing">a Colab Notebook</a> teaching the basics of catsim!</p>
 <ol class="arabic simple">
 <li><p>Have an <a class="reference external" href="https://douglasrizzo.com.br/catsim/item_matrix.html">item matrix</a>;</p></li>
 <li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
@@ -173,6 +167,11 @@ and start the simulation.</p></li>
 <span class="p">}</span>
 </pre></div>
 </div>
+</section>
+<section id="what-s-a-cat">
+<h1>What’s a CAT<a class="headerlink" href="#what-s-a-cat" title="Link to this heading"></a></h1>
+<p>Computerized adaptive tests are educational evaluations, usually taken by examinees in a computer or some other digital means, in which the examinee’s ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee’s real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method or even linear tests applied electronically, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.</p>
+<p>More information is available <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html">in the docs</a> and over at <a class="reference external" href="https://en.wikipedia.org/wiki/Computerized_adaptive_testing">Wikipedia</a>.</p>
 </section>
 <section id="if-you-are-looking-for-irt-item-parameter-estimation">
 <h1>If you are looking for IRT item parameter estimation<a class="headerlink" href="#if-you-are-looking-for-irt-item-parameter-estimation" title="Link to this heading"></a></h1>
