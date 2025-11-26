@@ -126,7 +126,6 @@ line-ending = "auto"
 dev = [
     "ipykernel>=7.1.0",
     "pre-commit>=4.3.0",
-    "pytest>=8.4.2",
     "ruff>=0.13.3",
 ]
 docs = [
