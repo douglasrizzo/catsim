@@ -60,10 +60,15 @@ jobs:
         run: uv sync --group testing
 
       - name: Run parallel tests
-        run: uv run pytest -m parallel -n auto --verbose
+        run: uv run pytest -m parallel -n auto --verbose --cov-branch --cov-report=xml --cov=catsim
 
       - name: Run sequential tests
-        run: uv run pytest -m "not parallel" --verbose
+        run: uv run pytest -m "not parallel" --verbose --cov-branch --cov-report=xml --cov=catsim
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: Build package
