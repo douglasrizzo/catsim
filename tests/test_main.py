@@ -27,7 +27,7 @@ from catsim.stopping import MaxItemStopper, MinErrorStopper
 
 
 def one_simulation(
-  items: np.ndarray,
+  items: ItemBank,
   examinees: int,
   initializer: Initializer,
   selector: Selector,
@@ -41,8 +41,8 @@ def one_simulation(
   Simulator
       The simulator instance after running the simulation.
   """
-  simulator = Simulator(items, examinees)
-  simulator.simulate(initializer, selector, estimator, stopper, verbose=True)
+  simulator = Simulator(items, examinees, initializer, selector, estimator, stopper)
+  simulator.simulate(verbose=True)
 
   # Verify simulation ran successfully
   assert simulator.latest_estimations is not None, "Simulation did not produce estimations"
@@ -177,7 +177,7 @@ def test_infinite_selectors(
   item_bank = ItemBank.generate_item_bank(bank_size, itemtype=logistic_model)
   max_administered_items = stopper.max_itens if isinstance(stopper, MaxItemStopper) else bank_size
   responses = cat.random_response_vector(random.randint(1, max_administered_items))
-  administered_items = rng.choice(bank_size, len(responses), replace=False)
+  administered_items = list(rng.choice(bank_size, len(responses), replace=False))
   est_theta = initializer.initialize(rng=rng)
   selector.select(
     item_bank=item_bank,
@@ -236,9 +236,9 @@ def test_plots() -> None:
   assert len(s.items) > 0, "No items in simulation"
 
   for item in s.items[0:10]:
-    plot.item_curve(item[0], item[1], item[2], item[3], "Test plot", "icc", False, None, False)
-    plot.item_curve(item[0], item[1], item[2], item[3], "Test plot", "iic", True, None, False)
-    plot.item_curve(item[0], item[1], item[2], item[3], "Test plot", "both", True, None, False)
+    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=plot.PlotType.ICC, max_info=False)
+    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=plot.PlotType.IIC, max_info=True)
+    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=plot.PlotType.BOTH, max_info=True)
     close("all")
 
   plot.gen3d_dataset_scatter(s.item_bank)
