@@ -76,7 +76,7 @@ class MaxInfoSelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
@@ -161,7 +161,7 @@ class UrrySelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
@@ -331,7 +331,7 @@ class RandomSelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
@@ -496,7 +496,7 @@ class ClusterSelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
@@ -643,7 +643,7 @@ class ClusterSelector(Selector):
     return selected_item
 
   @staticmethod
-  def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> numpy.ndarray:
+  def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> NDArray[numpy.floating]:
     r"""Return the sum of item information values, separated by cluster.
 
     Parameters
@@ -671,7 +671,7 @@ class ClusterSelector(Selector):
     return cluster_infos
 
   @staticmethod
-  def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> numpy.ndarray:
+  def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> NDArray[numpy.floating]:
     r"""Return the weighted sum of item information values, separated by cluster.
 
     The weight is the number of items in each cluster, providing an average information
@@ -794,7 +794,7 @@ class StratifiedSelector(FiniteSelector):
     self._presorted_items = None
 
   @abstractmethod
-  def presort_items(self, item_bank: ItemBank) -> numpy.ndarray:
+  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
     """Presort the item matrix according to the strategy employed by this selector.
 
     Parameters
@@ -813,7 +813,7 @@ class StratifiedSelector(FiniteSelector):
     item_bank: ItemBank,
     using_simulator_props: bool,
     **kwargs: Any,  # noqa: ARG002
-  ) -> numpy.ndarray:
+  ) -> NDArray[numpy.floating]:
     """Sort the item matrix before selecting each new item.
 
     This default implementation simply returns the presorted items, or sorts them using
@@ -911,7 +911,7 @@ class StratifiedSelector(FiniteSelector):
 
     return sorted_items[pointer]
 
-  def _get_stratum(self, item_bank: ItemBank, stratum_index: int) -> numpy.ndarray:
+  def _get_stratum(self, item_bank: ItemBank, stratum_index: int) -> NDArray[numpy.floating]:
     slices = numpy.linspace(0, item_bank.n_items, self._test_size, endpoint=False, dtype="i")
     pointer = slices[stratum_index]
     max_pointer = item_bank.n_items if stratum_index == self._test_size - 1 else slices[stratum_index + 1]
@@ -955,12 +955,12 @@ class AStratSelector(StratifiedSelector):
     """
     super().__init__(test_size, True)
 
-  def presort_items(self, item_bank: ItemBank) -> numpy.ndarray:  # noqa: PLR6301
+  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
     """Presort the item matrix in ascending order according to the discrimination of each item.
 
     Parameters
     ----------
-    items : numpy.ndarray
+    items : NDArray[numpy.floating]
         An item matrix.
 
     Returns
@@ -1005,7 +1005,7 @@ class AStratBBlockSelector(StratifiedSelector):
     """
     super().__init__(test_size, True)
 
-  def presort_items(self, item_bank: ItemBank) -> numpy.ndarray:
+  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
     """Presort items in ascending order of discrimination each item, then each strata according to item difficulty.
 
     Parameters
@@ -1073,12 +1073,12 @@ class MaxInfoStratSelector(StratifiedSelector):
     """
     super().__init__(test_size, False)
 
-  def presort_items(self, item_bank: ItemBank) -> numpy.ndarray:  # noqa: PLR6301
+  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
     """Presort items in ascending order of maximum information.
 
     Parameters
     ----------
-    items : numpy.ndarray
+    items : NDArray[numpy.floating]
         An item matrix.
 
     Returns
@@ -1093,12 +1093,14 @@ class MaxInfoStratSelector(StratifiedSelector):
     # globally sort item bank by item max information
     return item_maxinfo.argsort()
 
-  def postsort_items(self, item_bank: ItemBank, using_simulator_props: bool, est_theta: float) -> numpy.ndarray:
+  def postsort_items(
+    self, item_bank: ItemBank, using_simulator_props: bool, est_theta: float
+  ) -> NDArray[numpy.floating]:
     """Divide the item bank into strata and sort each one in descending order of information for the current theta.
 
     Parameters
     ----------
-    items : numpy.ndarray
+    items : NDArray[numpy.floating]
         The item matrix.
     using_simulator_props : bool
         Whether the selector is being executed inside a Simulator.
@@ -1119,11 +1121,11 @@ class MaxInfoStratSelector(StratifiedSelector):
       # grab stratum pointers
       _slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
       item_indices_current_stratum = presorted_items[pointer:max_pointer]  # item indices for the current stratum
-      items_current_stratum: numpy.ndarray = item_bank.get_items(
+      items_current_stratum: NDArray[numpy.floating] = item_bank.get_items(
         item_indices_current_stratum
       )  # item params for the current stratum
       # their information for this theta
-      info_items_current_stratum_current_theta: numpy.ndarray = irt.inf_hpc(est_theta, items_current_stratum)
+      info_items_current_stratum_current_theta: NDArray[numpy.floating] = irt.inf_hpc(est_theta, items_current_stratum)
       item_indices_current_stratum_sorted_by_info = item_indices_current_stratum[
         (-info_items_current_stratum_current_theta).argsort()
       ]
@@ -1161,12 +1163,12 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
     """Return the name of the selector."""
     return "Maximum Information Stratification with b-Blocking Selector"
 
-  def presort_items(self, item_bank: ItemBank) -> numpy.ndarray:
+  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
     """Presort the item matrix according to the information of each item at their maximum.
 
     Parameters
     ----------
-    items : numpy.ndarray
+    items : NDArray[numpy.floating]
         An item matrix.
 
     Returns
@@ -1235,7 +1237,7 @@ class The54321Selector(FiniteSelector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
@@ -1323,7 +1325,7 @@ class RandomesqueSelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
@@ -1410,7 +1412,7 @@ class IntervalInfoSelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : numpy.ndarray or None, optional
+    items : NDArray[numpy.floating] or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional

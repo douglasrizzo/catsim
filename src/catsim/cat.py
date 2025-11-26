@@ -1,9 +1,9 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
-import operator
 import random
 
 import numpy
+import numpy.typing as npt
 
 from catsim.item_bank import ItemBank
 
@@ -45,8 +45,8 @@ def dodd(theta: float, item_bank: ItemBank, correct: bool) -> float:
 
 
 def bias(
-  actual: list[float] | numpy.ndarray,
-  predicted: list[float] | numpy.ndarray,
+  actual: npt.ArrayLike,
+  predicted: npt.ArrayLike,
 ) -> float:
   r"""Compute the test bias, an evaluation criterion for computerized adaptive test methodologies [Chang2001]_.
 
@@ -60,10 +60,10 @@ def bias(
 
   Parameters
   ----------
-  actual : list[float] or numpy.ndarray
-      A list or 1-D numpy array containing the true ability values.
-  predicted : list[float] or numpy.ndarray
-      A list or 1-D numpy array containing the estimated ability values.
+  actual : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
+  predicted : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
 
   Returns
   -------
@@ -75,17 +75,20 @@ def bias(
   ValueError
       If actual and predicted vectors are not the same size.
   """
+  actual = numpy.asarray(actual)
+  predicted = numpy.asarray(predicted)
+
   if len(actual) != len(predicted):
     msg = "actual and predicted vectors need to be the same size"
     raise ValueError(msg)
-  return float(numpy.mean(list(map(operator.sub, predicted, actual))))
+  return float(numpy.mean(predicted - actual))
 
 
 def mse(
-  actual: list[float] | numpy.ndarray,
-  predicted: list[float] | numpy.ndarray,
+  actual: npt.ArrayLike,
+  predicted: npt.ArrayLike,
 ) -> float:
-  r"""Compute the mean squared error (MSE) between two lists or 1-D numpy arrays.
+  r"""Compute the mean squared error (MSE) between two array-like objects.
 
   The MSE is used when measuring the precision with which a computerized adaptive
   test estimates examinees abilities [Chang2001]_. Lower MSE values indicate better
@@ -100,10 +103,10 @@ def mse(
 
   Parameters
   ----------
-  actual : list[float] or numpy.ndarray
-      A list or 1-D numpy array containing the true ability values.
-  predicted : list[float] or numpy.ndarray
-      A list or 1-D numpy array containing the estimated ability values.
+  actual : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
+  predicted : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
 
   Returns
   -------
@@ -115,17 +118,21 @@ def mse(
   ValueError
       If actual and predicted vectors are not the same size.
   """
+  actual = numpy.asarray(actual)
+  predicted = numpy.asarray(predicted)
+
   if len(actual) != len(predicted):
     msg = "Actual and predicted vectors need to be the same size"
     raise ValueError(msg)
-  return float(numpy.mean([x * x for x in list(map(operator.sub, predicted, actual))]))
+  diff = predicted - actual
+  return float(numpy.mean(diff * diff))
 
 
 def rmse(
-  actual: list[float] | numpy.ndarray,
-  predicted: list[float] | numpy.ndarray,
+  actual: npt.ArrayLike,
+  predicted: npt.ArrayLike,
 ) -> float:
-  r"""Compute the root mean squared error (RMSE) between two lists or 1-D numpy arrays.
+  r"""Compute the root mean squared error (RMSE) between two array-like objects.
 
   A common value used when measuring the precision with which a computerized adaptive
   test estimates examinees abilities [Bar10]_. RMSE is in the same units as the ability
@@ -140,10 +147,10 @@ def rmse(
 
   Parameters
   ----------
-  actual : list[float] or numpy.ndarray
-      A list or 1-D numpy array containing the true ability values.
-  predicted : list[float] or numpy.ndarray
-      A list or 1-D numpy array containing the estimated ability values.
+  actual : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
+  predicted : npt.ArrayLike
+      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
 
   Returns
   -------
@@ -155,13 +162,10 @@ def rmse(
   ValueError
       If actual and predicted vectors are not the same size.
   """
-  if len(actual) != len(predicted):
-    msg = "actual and predicted vectors need to be the same size"
-    raise ValueError(msg)
   return numpy.sqrt(mse(actual, predicted))
 
 
-def overlap_rate(exposure_rates: numpy.ndarray, test_size: int) -> float:
+def overlap_rate(exposure_rates: npt.NDArray[numpy.floating], test_size: int) -> float:
   r"""Compute the test overlap rate.
 
   An average measure of how much of the test two examinees take is equal [Bar10]_.

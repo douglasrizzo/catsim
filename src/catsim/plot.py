@@ -4,6 +4,7 @@ from enum import Enum, auto
 
 import matplotlib.pyplot as plt
 import numpy
+import numpy.typing as npt
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -154,7 +155,7 @@ def item_curve(
 
 
 def gen3d_dataset_scatter(
-  item_bank: ItemBank | numpy.ndarray,
+  item_bank: ItemBank | npt.NDArray[numpy.floating],
   title: str | None = None,
   figsize: tuple | None = None,
 ) -> Axes:
@@ -211,7 +212,7 @@ def item_exposure(
   ax: Axes | None = None,
   title: str | None = None,
   simulator: Simulator | None = None,
-  item_bank: ItemBank | numpy.ndarray | None = None,
+  item_bank: ItemBank | npt.NDArray[numpy.floating] | None = None,
   par: str | None = None,
   hist: bool = False,
 ) -> Axes:
@@ -332,7 +333,7 @@ def test_progress(
   simulator: Simulator | None = None,
   index: int | None = None,
   thetas: list[float] | None = None,
-  administered_items: numpy.ndarray | None = None,
+  administered_items: npt.NDArray[numpy.floating] | None = None,
   true_theta: float | None = None,
   info: bool = False,
   var: bool = False,

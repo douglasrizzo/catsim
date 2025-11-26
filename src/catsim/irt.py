@@ -4,6 +4,7 @@ from typing import Any
 
 import numexpr
 import numpy
+import numpy.typing as npt
 
 
 class NumParams(Enum):
@@ -70,7 +71,9 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
 
 
-def _split_params(items: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+def _split_params(
+  items: npt.NDArray[numpy.floating[Any]],
+) -> tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
   """Split the item matrix parameters into columns.
 
   This is a helper function to extract item parameters for vectorized operations.
@@ -92,7 +95,7 @@ def _split_params(items: numpy.ndarray) -> tuple[numpy.ndarray, numpy.ndarray, n
   return items[:, 0], items[:, 1], items[:, 2], items[:, 3]
 
 
-def detect_model(items: numpy.ndarray) -> int:
+def detect_model(items: npt.NDArray[numpy.floating[Any]]) -> int:
   """Detect which logistic model an item matrix fits into.
 
   Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,
@@ -123,7 +126,7 @@ def detect_model(items: numpy.ndarray) -> int:
   return 1
 
 
-def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
+def icc_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
   """Compute item characteristic functions for all items in a numpy array at once.
 
   This is a high-performance computing (HPC) version that uses vectorized operations
@@ -150,7 +153,7 @@ def icc_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
   )
 
 
-def inf_hpc(theta: float, items: numpy.ndarray) -> numpy.ndarray:
+def inf_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
   """Compute the information values for all items in a numpy array using numpy and numexpr.
 
   This is a high-performance computing (HPC) version that uses vectorized operations
@@ -218,7 +221,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   return (a**2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))
 
 
-def test_info(theta: float, items: numpy.ndarray) -> float:
+def test_info(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
   r"""Compute the test information of a test at a specific :math:`\theta` value [Ayala2009]_.
 
   Test information is the sum of individual item information values and indicates
@@ -242,7 +245,11 @@ def test_info(theta: float, items: numpy.ndarray) -> float:
   return float(numpy.sum(inf_hpc(theta, items)))
 
 
-def var(theta: float | None = None, items: numpy.ndarray | None = None, test_inf: float | None = None) -> float:
+def var(
+  theta: float | None = None,
+  items: npt.NDArray[numpy.floating[Any]] | None = None,
+  test_inf: float | None = None,
+) -> float:
   r"""Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.
 
   Variance quantifies the uncertainty in the ability estimate. Lower variance
@@ -284,7 +291,7 @@ def var(theta: float | None = None, items: numpy.ndarray | None = None, test_inf
   return 1 / test_inf
 
 
-def see(theta: float, items: numpy.ndarray) -> float:
+def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
   r"""Compute the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\theta` value [Ayala2009]_.
 
   The standard error of estimation is the square root of variance and represents
@@ -299,7 +306,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
   ----------
   theta : float
       An ability value.
-  items : numpy.ndarray
+  items : npt.NDArray[numpy.floating[Any]]
       A matrix containing item parameters.
 
   Returns
@@ -314,7 +321,7 @@ def see(theta: float, items: numpy.ndarray) -> float:
     return float("inf")
 
 
-def reliability(theta: float, items: numpy.ndarray) -> float:
+def reliability(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
   r"""Compute test reliability [Thissen00]_.
 
   Test reliability is a measure of internal consistency for the test, similar to
@@ -412,7 +419,7 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
   return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
-def max_info_hpc(items: numpy.ndarray) -> numpy.ndarray:
+def max_info_hpc(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
   """Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.
 
   This high-performance computing version efficiently computes the theta values of
@@ -449,7 +456,11 @@ def max_info_hpc(items: numpy.ndarray) -> numpy.ndarray:
   )
 
 
-def log_likelihood(est_theta: float, response_vector: list[bool], administered_items: numpy.ndarray) -> float:
+def log_likelihood(
+  est_theta: float,
+  response_vector: list[bool],
+  administered_items: npt.NDArray[numpy.floating[Any]],
+) -> float:
   r"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.
 
   The likelihood function of a given :math:`\theta` value given the answers to :math:`I`
@@ -532,7 +543,7 @@ def negative_log_likelihood(est_theta: float, *args: Any) -> float:
   return -log_likelihood(est_theta, args[0], args[1])
 
 
-def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
+def normalize_item_bank(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
   r"""Normalize an item matrix so that it conforms to the standard used by catsim.
 
   The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item
@@ -569,7 +580,7 @@ def normalize_item_bank(items: numpy.ndarray) -> numpy.ndarray:
   return items
 
 
-def validate_item_bank(items: numpy.ndarray, raise_err: bool = False) -> None:
+def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool = False) -> None:
   r"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.
 
   The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item

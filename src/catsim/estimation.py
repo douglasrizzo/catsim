@@ -1,4 +1,5 @@
 import numpy
+import numpy.typing as npt
 from scipy.optimize import minimize_scalar
 
 from catsim import cat, irt
@@ -218,7 +219,7 @@ class NumericalSearchEstimator(Estimator):
     b: float,
     a: float,
     response_vector: list[bool],
-    item_params: numpy.ndarray,
+    item_params: npt.NDArray[numpy.floating],
   ) -> float:
     """Find the most likely ability using ternary or dichotomous search methods.
 
@@ -282,7 +283,7 @@ class NumericalSearchEstimator(Estimator):
     b: float,
     a: float,
     response_vector: list[bool],
-    item_params: numpy.ndarray,
+    item_params: npt.NDArray[numpy.floating],
   ) -> float:
     """Find the most likely ability using the Fibonacci search method.
 
@@ -348,7 +349,7 @@ class NumericalSearchEstimator(Estimator):
     b: float,
     a: float,
     response_vector: list[bool],
-    item_params: numpy.ndarray,
+    item_params: npt.NDArray[numpy.floating],
   ) -> float:
     """Find the most likely ability using the golden-section search method.
 

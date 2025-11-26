@@ -7,6 +7,7 @@ precomputing derived values, and tracking item usage during simulations.
 from typing import Any, Literal
 
 import numpy
+import numpy.typing as npt
 from numpy.random import Generator
 from typing_extensions import Self
 
@@ -63,7 +64,7 @@ class ItemBank:
   100
   """
 
-  def __init__(self, items: numpy.ndarray, validate: bool = True) -> None:
+  def __init__(self, items: npt.NDArray[numpy.floating[Any]], validate: bool = True) -> None:
     """Initialize an ItemBank with the given item parameters.
 
     Parameters
@@ -89,8 +90,8 @@ class ItemBank:
       irt.validate_item_bank(self._items[:, :4], raise_err=True)
 
     # Cache expensive computations
-    self._max_info_thetas: numpy.ndarray | None = None
-    self._max_info_values: numpy.ndarray | None = None
+    self._max_info_thetas: npt.NDArray[numpy.floating[Any]] | None = None
+    self._max_info_values: npt.NDArray[numpy.floating[Any]] | None = None
     self._model: int | None = None
 
     # Precompute derived values
@@ -108,12 +109,12 @@ class ItemBank:
     self._model = irt.detect_model(self._items[:, :4])
 
   @property
-  def items(self) -> numpy.ndarray:
+  def items(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get the item parameter matrix.
 
     Returns
     -------
-    numpy.ndarray
+    npt.NDArray[numpy.floating[Any]]
         The item matrix with shape (n_items, 5) containing
         [a, b, c, d, exposure_rate] for each item.
     """
@@ -131,7 +132,7 @@ class ItemBank:
     return self._items.shape[0]
 
   @property
-  def max_info_thetas(self) -> numpy.ndarray:
+  def max_info_thetas(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get the cached theta values where items have maximum information.
 
     Returns
@@ -142,7 +143,7 @@ class ItemBank:
     return self._max_info_thetas
 
   @property
-  def max_info_values(self) -> numpy.ndarray:
+  def max_info_values(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get the cached maximum information values for each item.
 
     Returns
@@ -165,7 +166,7 @@ class ItemBank:
     return self._model
 
   @property
-  def discrimination(self) -> numpy.ndarray:
+  def discrimination(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get item discrimination parameters (a).
 
     Returns
@@ -176,7 +177,7 @@ class ItemBank:
     return self._items[:, 0]
 
   @property
-  def difficulty(self) -> numpy.ndarray:
+  def difficulty(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get item difficulty parameters (b).
 
     Returns
@@ -187,7 +188,7 @@ class ItemBank:
     return self._items[:, 1]
 
   @property
-  def pseudo_guessing(self) -> numpy.ndarray:
+  def pseudo_guessing(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get item pseudo-guessing parameters (c).
 
     Returns
@@ -198,7 +199,7 @@ class ItemBank:
     return self._items[:, 2]
 
   @property
-  def upper_asymptote(self) -> numpy.ndarray:
+  def upper_asymptote(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get item upper asymptote parameters (d).
 
     Returns
@@ -209,7 +210,7 @@ class ItemBank:
     return self._items[:, 3]
 
   @property
-  def exposure_rates(self) -> numpy.ndarray:
+  def exposure_rates(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get item exposure rates.
 
     Returns
@@ -251,7 +252,7 @@ class ItemBank:
     if hasattr(self, "_selector_cache"):
       self._selector_cache.clear()
 
-  def get_item(self, index: int) -> numpy.ndarray:
+  def get_item(self, index: int) -> npt.NDArray[numpy.floating[Any]]:
     """Get parameters for a specific item.
 
     Parameters
@@ -274,20 +275,20 @@ class ItemBank:
       raise IndexError(msg)
     return self._items[index]
 
-  def get_items(self, indices: list[int] | numpy.ndarray) -> numpy.ndarray:
+  def get_items(self, indices: npt.ArrayLike) -> npt.NDArray[numpy.floating[Any]]:
     """Get parameters for multiple items.
 
     Parameters
     ----------
-    indices : list[int] or numpy.ndarray
-        Array or list of item indices.
+    indices : npt.ArrayLike
+        Array-like (list, tuple, or numpy array) of item indices (int type).
 
     Returns
     -------
     numpy.ndarray
         Array of item parameters with shape (len(indices), 5).
     """
-    return self._items[indices]
+    return self._items[numpy.asarray(indices, dtype=int)]
 
   def update_exposure_rate(self, item_index: int, new_rate: float) -> None:
     """Update the exposure rate for a specific item.
@@ -314,7 +315,7 @@ class ItemBank:
       raise ValueError(msg)
     self._items[item_index, 4] = new_rate
 
-  def icc(self, theta: float | numpy.ndarray) -> numpy.ndarray:
+  def icc(self, theta: float | npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
     """Compute item characteristic curves for all items.
 
     Parameters
@@ -338,7 +339,7 @@ class ItemBank:
       result[i, :] = irt.icc_hpc(t, self._items[:, :4])
     return result
 
-  def information(self, theta: float | numpy.ndarray) -> numpy.ndarray:
+  def information(self, theta: float | npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
     """Compute item information values for all items.
 
     Parameters
@@ -362,22 +363,25 @@ class ItemBank:
       result[i, :] = irt.inf_hpc(t, self._items[:, :4])
     return result
 
-  def test_information(self, theta: float, item_indices: list[int] | numpy.ndarray | None = None) -> float:
+  def test_information(self, theta: float, item_indices: npt.ArrayLike | None = None) -> float:
     """Compute test information at a given theta.
 
     Parameters
     ----------
     theta : float
         Ability value.
-    item_indices : list[int] or numpy.ndarray or None, optional
-        Indices of items to include. If None, uses all items. Default is None.
+    item_indices : npt.ArrayLike or None, optional
+        Array-like (list, tuple, or numpy array) of item indices (int type) to include.
+        If None, uses all items. Default is None.
 
     Returns
     -------
     float
         Test information (sum of item information values).
     """
-    items_to_use = self._items[:, :4] if item_indices is None else self._items[item_indices, :4]
+    items_to_use = (
+      self._items[:, :4] if item_indices is None else self._items[numpy.asarray(item_indices, dtype=int), :4]
+    )
     return irt.test_info(theta, items_to_use)
 
   @classmethod
@@ -495,7 +499,9 @@ class ItemBank:
     """Get number of items (allows len(bank))."""
     return self.n_items
 
-  def __getitem__(self, index: int | slice | list | numpy.ndarray) -> numpy.ndarray:
+  def __getitem__(
+    self, index: int | slice | list | npt.NDArray[numpy.integer[Any]]
+  ) -> npt.NDArray[numpy.floating[Any]]:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]
 

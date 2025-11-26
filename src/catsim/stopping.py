@@ -1,5 +1,8 @@
 from typing import Any
 
+import numpy
+import numpy.typing as npt
+
 from . import irt
 from .item_bank import ItemBank
 from .simulation import Stopper
@@ -36,7 +39,7 @@ class MaxItemStopper(Stopper):
     self,
     index: int | None = None,
     _item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    administered_items: npt.NDArray[numpy.floating[Any]] | None = None,
     **kwargs: Any,  # noqa: ARG002
   ) -> bool:
     """Check whether the test reached its stopping criterion for the given user.
@@ -45,7 +48,7 @@ class MaxItemStopper(Stopper):
     ----------
     index : int or None, optional
         The index of the current examinee. Default is None.
-    administered_items : numpy.ndarray or None, optional
+    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional
         A matrix containing the parameters of items that were already administered.
         Default is None.
     **kwargs : dict
@@ -59,14 +62,13 @@ class MaxItemStopper(Stopper):
     Raises
     ------
     ValueError
-        If more items than permitted were administered, or if required parameters
-        are missing.
+        If more items than permitted were administered, or if required parameters are missing.
     """
-    if (index is None or self.simulator is None) and administered_items is None:
-      raise ValueError
-
-    if administered_items is None:
+    if administered_items is None and index is not None and self.simulator is not None:
       administered_items = self.simulator.item_bank.get_items(self.simulator.administered_items[index])
+    elif administered_items is None:
+      msg = "Required parameters are missing. Either index and simulator or administered_items must be provided."
+      raise ValueError(msg)
 
     n_itens = len(administered_items)
     if n_itens > self._max_itens:
@@ -121,7 +123,7 @@ class MinErrorStopper(Stopper):
     self,
     index: int | None = None,
     _item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    administered_items: npt.NDArray[numpy.floating[Any]] | None = None,
     theta: float | None = None,
     **kwargs: Any,  # noqa: ARG002
   ) -> bool:
@@ -131,7 +133,7 @@ class MinErrorStopper(Stopper):
     ----------
     index : int or None, optional
         The index of the current examinee. Default is None.
-    administered_items : numpy.ndarray or None, optional
+    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional
         A matrix containing the parameters of items that were already administered.
         Default is None.
     theta : float or None, optional
@@ -150,14 +152,16 @@ class MinErrorStopper(Stopper):
     ValueError
         If required parameters are missing.
     """
-    if (index is None or self.simulator is None) and (administered_items is None or theta is None):
-      raise ValueError
-
-    if administered_items is None and theta is None:
+    if administered_items is not None and theta is not None:
+      administered_items_array = numpy.asarray(administered_items)
+      see = irt.see(theta, administered_items_array)
+    elif index is not None and self.simulator is not None:
       theta = self.simulator.latest_estimations[index]
-      administered_items = self.simulator.item_bank.get_items(self.simulator.administered_items[index])
-
-    if theta is None:
-      return False
-
-    return irt.see(theta, administered_items) < self._min_error
+      administered_items_array = self.simulator.item_bank.get_items(self.simulator.administered_items[index])
+      see = irt.see(theta, administered_items_array)
+    else:
+      msg = (
+        "Required parameters are missing. Either administered_items and theta or index and simulator must be provided."
+      )
+      raise ValueError(msg)
+    return see < self._min_error

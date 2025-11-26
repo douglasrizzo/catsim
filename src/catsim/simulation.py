@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import numpy
+import numpy.typing as npt
 from tqdm import tqdm
 
 from . import cat, irt
@@ -309,7 +310,7 @@ class FiniteSelector(Selector, ABC):
         Number of items to be administered in the test.
     """
     self._test_size = test_size
-    self._overlap_rate = None
+    self._overlap_rate: float | None = None
     super().__init__()
 
   @property
@@ -324,13 +325,13 @@ class FiniteSelector(Selector, ABC):
     return self._test_size
 
   @property
-  def overlap_rate(self) -> float:
+  def overlap_rate(self) -> float | None:
     """Get the overlap rate of the test, if it is of finite length.
 
     Returns
     -------
-    float
-        Overlap rate of the test.
+    float or None
+        Overlap rate of the test, or None if not yet computed.
     """
     return self._overlap_rate
 
@@ -443,13 +444,21 @@ class Stopper(Simulable, ABC):
     super().__init__()
 
   @abstractmethod
-  def stop(self, index: int) -> bool:
+  def stop(self, index: int | None = None, **kwargs: Any) -> bool:
     """Check whether the test reached its stopping criterion for the given user.
 
     Parameters
     ----------
-    index : int
-        The index of the current examinee.
+    index : int or None, optional
+        The index of the current examinee in the simulator. When used within a
+        simulation, this parameter is provided automatically. When used standalone,
+        other parameters may be provided via **kwargs. Default is None.
+    **kwargs : dict
+        Additional keyword arguments that specific Stopper implementations may require.
+        Common arguments include:
+        - administered_items: Item parameters or indices that were administered
+        - theta: Current ability estimate
+        - item_bank: ItemBank for accessing item parameters
 
     Returns
     -------
@@ -470,10 +479,10 @@ class Simulator:
   item_bank : ItemBank or numpy.ndarray
       An ItemBank object containing item parameters. If a numpy.ndarray is provided,
       it will be automatically converted to an ItemBank.
-  examinees : int or list[float] or numpy.ndarray
+  examinees : int or npt.ArrayLike
       Either an integer with the number of examinees (whose real :math:`\theta` values
-      will be sampled from a normal distribution), or a list/array containing the
-      examinees' true :math:`\theta` values.
+      will be sampled from a normal distribution), or an array-like (list, tuple, or
+      numpy array) containing the examinees' true :math:`\theta` values (float type).
   initializer : Initializer or None, optional
       Initializer to use during the simulation. Default is None.
   selector : Selector or None, optional
@@ -489,8 +498,8 @@ class Simulator:
 
   def __init__(
     self,
-    item_bank: ItemBank | numpy.ndarray,
-    examinees: int | list[float] | numpy.ndarray,
+    item_bank: ItemBank | npt.NDArray[numpy.floating[Any]],
+    examinees: int | npt.ArrayLike,
     initializer: Initializer | None = None,
     selector: Selector | None = None,
     estimator: Estimator | None = None,
@@ -504,8 +513,9 @@ class Simulator:
     item_bank : ItemBank or numpy.ndarray
         ItemBank object or item parameter matrix. If a numpy array is provided,
         it will be converted to an ItemBank automatically.
-    examinees : int or list[float] or numpy.ndarray
-        Either an integer with number of examinees or list/array of examinee abilities.
+    examinees : int or npt.ArrayLike
+        Either an integer with number of examinees or array-like (list, tuple, or
+        numpy array) of examinee abilities (float type).
     initializer : Initializer or None, optional
         Initializer to use during the simulation. Default is None.
     selector : Selector or None, optional
@@ -561,12 +571,12 @@ class Simulator:
     return self._item_bank
 
   @property
-  def items(self) -> numpy.ndarray:
+  def items(self) -> npt.NDArray[numpy.floating[Any]]:
     """Item matrix used by the simulator (for backward compatibility).
 
     Returns
     -------
-    numpy.ndarray
+    npt.NDArray[numpy.floating[Any]]
         The underlying item parameter matrix from the ItemBank.
     """
     return self._item_bank.items
@@ -681,7 +691,7 @@ class Simulator:
     return self._rmse
 
   @property
-  def examinees(self) -> numpy.ndarray:
+  def examinees(self) -> npt.NDArray[numpy.floating[Any]]:
     r""":py:type:numpy.ndarray containing examinees true ability values (:math:`\theta`)."""
     return self._examinees
 
@@ -691,17 +701,17 @@ class Simulator:
     return self.__rng
 
   @examinees.setter
-  def examinees(self, x: int | list[float] | numpy.ndarray) -> None:
+  def examinees(self, x: int | npt.ArrayLike) -> None:
     self._examinees = self._to_distribution(x)
 
-  def _to_distribution(self, x: int | list[float] | numpy.ndarray) -> numpy.ndarray:
+  def _to_distribution(self, x: int | npt.ArrayLike) -> npt.NDArray[numpy.floating[Any]]:
     """Generate examinees from a distribution, if the Simulator was initialized with an int.
 
     Parameters
     ----------
-    x : int or list[float] or numpy.ndarray
+    x : int or npt.ArrayLike
         Variable representing the number of examinees (int) or the actual ability values
-        (list or array).
+        (array-like: list, tuple, or numpy array of float type).
 
     Returns
     -------
@@ -725,19 +735,16 @@ class Simulator:
         dist = self.__rng.normal(mean, stddev, x)
       else:
         dist = self.__rng.normal(0, 1, x)
-    elif isinstance(x, list):
-      if len(x) == 0:
-        msg = "List of examinees cannot be empty"
-        raise ValueError(msg)
-      dist = numpy.array(x)
-    elif isinstance(x, numpy.ndarray) and x.ndim == 1:
-      if x.size == 0:
+    else:
+      # Convert array-like to numpy array
+      x_array = numpy.asarray(x)
+      if x_array.ndim != 1:
+        msg = "Examinees array must be one-dimensional"
+        raise TypeError(msg)
+      if x_array.size == 0:
         msg = "Array of examinees cannot be empty"
         raise ValueError(msg)
-      dist = x
-    else:
-      msg = "Examinees must be an int, list of floats or one-dimensional numpy array"
-      raise TypeError(msg)
+      dist = x_array
 
     return dist
 
