@@ -131,7 +131,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: python-package-distributions
           path: dist/
@@ -155,7 +155,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: python-package-distributions
           path: dist/
@@ -176,7 +176,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: python-package-distributions
           path: dist/
