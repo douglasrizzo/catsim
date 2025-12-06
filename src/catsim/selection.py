@@ -7,6 +7,7 @@ from numpy.typing import NDArray
 from scipy.integrate import quad
 
 from . import irt
+from .exceptions import NoItemsAvailableError
 from .item_bank import ItemBank
 from .simulation import FiniteSelector, Selector
 
@@ -119,7 +120,7 @@ class MaxInfoSelector(Selector):
 
     if len(valid_indexes) == 0:
       msg = "There are no more items to apply."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     # gets the indexes and information values from the items with r < rmax
     valid_indexes_low_r = valid_indexes
@@ -202,7 +203,7 @@ class UrrySelector(Selector):
 
     if len(valid_indexes) == 0:
       msg = "There are no more items to apply."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     return valid_indexes[0]
 
@@ -285,7 +286,7 @@ class LinearSelector(FiniteSelector):
         f"Items to be administered:\t{sorted(self._indexes)} (size: {len(self._indexes)})\n"
         f"Administered items:\t\t{sorted(administered_items)} (size: {len(administered_items)})"
       )
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
     return valid_indexes[0]
 
 
@@ -362,7 +363,7 @@ class RandomSelector(Selector):
 
     if len(administered_items) >= item_bank.n_items and not self._replace:
       msg = "There are no more items to apply."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     if self._replace:
       return rng.choice(item_bank.n_items)
@@ -604,7 +605,7 @@ class ClusterSelector(Selector):
     # if the test size gets larger than the item bank size, end the test
     if selected_cluster is None:
       msg = "There are no more items to be applied."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     # in this part, an item is chosen from the cluster that was
     # selected above
@@ -907,7 +908,7 @@ class StratifiedSelector(FiniteSelector):
       pointer += 1
       if pointer == max_pointer:
         msg = f"There are no more items to be selected from stratum {slices[len(administered_items)]}"
-        raise RuntimeError(msg)
+        raise NoItemsAvailableError(msg)
 
     return sorted_items[pointer]
 
@@ -1277,7 +1278,7 @@ class The54321Selector(FiniteSelector):
 
     if len(organized_items) == 0:
       msg = "There are no more items to apply."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     bin_size = self._test_size - len(administered_items)
     return rng.choice(organized_items[0:bin_size])
@@ -1365,7 +1366,7 @@ class RandomesqueSelector(Selector):
 
     if len(organized_items) == 0:
       msg = "There are no more items to apply."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     return rng.choice(list(organized_items)[: self._bin_size])
 
@@ -1459,6 +1460,6 @@ class IntervalInfoSelector(Selector):
 
     if len(organized_items) == 0:
       msg = "There are no more items to apply."
-      raise RuntimeError(msg)
+      raise NoItemsAvailableError(msg)
 
     return organized_items[0]
