@@ -23,7 +23,7 @@ from catsim.selection import (
   UrrySelector,
 )
 from catsim.simulation import Estimator, Initializer, Selector, Simulator, Stopper
-from catsim.stopping import MaxItemStopper, MinErrorStopper
+from catsim.stopping import MaxItemMinErrorStopper, MaxItemStopper, MinErrorStopper
 
 
 def one_simulation(
@@ -59,7 +59,7 @@ def one_simulation(
 @pytest.mark.parametrize("bank_size", [500])
 @pytest.mark.parametrize("initializer", [RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))])
 @pytest.mark.parametrize("estimator", [NumericalSearchEstimator()])
-@pytest.mark.parametrize("stopper", [MaxItemStopper(30), MinErrorStopper(0.4)])
+@pytest.mark.parametrize("stopper", [MaxItemStopper(30), MinErrorStopper(0.4), MaxItemMinErrorStopper(30, 0.4)])
 def test_cism(
   examinees: int,
   bank_size: int,
@@ -161,6 +161,7 @@ def test_finite_selectors(
   [
     MaxItemStopper(30),
     MinErrorStopper(0.4),
+    MaxItemMinErrorStopper(30, 0.4),
   ],
 )
 def test_infinite_selectors(
