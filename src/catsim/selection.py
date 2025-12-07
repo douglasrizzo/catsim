@@ -889,6 +889,7 @@ class StratifiedSelector(FiniteSelector):
       index=index,
       item_bank=item_bank,
       administered_items=administered_items,
+      est_theta=est_theta,
       **kwargs,
     )
 
