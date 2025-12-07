@@ -16,6 +16,10 @@ on:
           - testpypi
           - pypi
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'release' }}
+
 jobs:
   pre-commit:
     name: Pre-commit checks
@@ -106,7 +110,7 @@ jobs:
           # Get short SHA
           SHORT_SHA=$(git rev-parse --short HEAD)
           # Create new version with local identifier
-          NEW_VERSION="${CURRENT_VERSION}+dev.${SHORT_SHA}"
+          NEW_VERSION="${CURRENT_VERSION}.dev${SHORT_SHA}"
           # Update pyproject.toml
           sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" pyproject.toml
           echo "Updated version to ${NEW_VERSION}"
