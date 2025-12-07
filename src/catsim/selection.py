@@ -257,15 +257,26 @@ class LinearSelector(FiniteSelector):
     """The index of the current item."""
     return self._current
 
-  def select(self, index: int | None = None, administered_items: list[int] | None = None, **kwargs: Any) -> int | None:
+  def select(
+    self,
+    index: int | None = None,
+    item_bank: ItemBank | None = None,  # noqa: ARG002
+    administered_items: list[int] | None = None,
+    est_theta: float | None = None,  # noqa: ARG002
+    **kwargs: Any,
+  ) -> int | None:
     """Return the index of the next item to be administered.
 
     Parameters
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
+    item_bank : ItemBank or None, optional
+        A matrix containing item parameters (not used by this selector). Default is None.
     administered_items : list[int] or None, optional
         A list containing the indexes of items that were already administered. Default is None.
+    est_theta : float or None, optional
+        A float containing the current estimated ability (not used by this selector). Default is None.
     **kwargs
         Additional keyword arguments.
 
@@ -323,6 +334,7 @@ class RandomSelector(Selector):
     index: int | None = None,
     item_bank: ItemBank | None = None,
     administered_items: list[int] | None = None,
+    est_theta: float | None = None,  # noqa: ARG002
     **kwargs: Any,
   ) -> int | None:
     """Return the index of the next item to be administered.
@@ -331,11 +343,13 @@ class RandomSelector(Selector):
     ----------
     index : int or None, optional
         The index of the current examinee in the simulator. Default is None.
-    items : NDArray[numpy.floating] or None, optional
+    item_bank : ItemBank or None, optional
         A matrix containing item parameters in the format that `catsim` understands
         (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.
     administered_items : list[int] or None, optional
         A list containing the indexes of items that were already administered. Default is None.
+    est_theta : float or None, optional
+        A float containing the current estimated ability (not used by this selector). Default is None.
     **kwargs
         Additional keyword arguments. Notably:
 
@@ -845,6 +859,7 @@ class StratifiedSelector(FiniteSelector):
     index: int | None = None,
     item_bank: ItemBank | None = None,
     administered_items: list[int] | None = None,
+    est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
     """Return the index of the next item to be administered.
@@ -857,6 +872,8 @@ class StratifiedSelector(FiniteSelector):
         An ItemBank containing item parameters. Default is None.
     administered_items : list[int] or None, optional
         A list containing the indexes of items that were already administered. Default is None.
+    est_theta : float or None, optional
+        A float containing the current estimated ability (not used by this selector). Default is None.
     **kwargs
         Additional keyword arguments.
 
@@ -872,6 +889,7 @@ class StratifiedSelector(FiniteSelector):
       index=index,
       item_bank=item_bank,
       administered_items=administered_items,
+      est_theta=est_theta,
       **kwargs,
     )
 
