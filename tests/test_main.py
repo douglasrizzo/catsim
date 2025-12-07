@@ -224,6 +224,7 @@ def test_infinite_selectors(
     est_theta=est_theta,
   )
   stopper.stop(
+    _item_bank=item_bank,
     administered_items=item_bank.get_items(administered_items),
     theta=est_theta,
   )
