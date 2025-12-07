@@ -1,7 +1,0 @@
-<map id="inheritance76f349e9d6" name="inheritance76f349e9d6">
-<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,29,77,55"/>
-<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="123,5,300,31"/>
-<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stopping criteria." alt="" coords="346,29,512,55"/>
-<area shape="rect" id="node4" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion based on maximum number of items in a test." alt="" coords="558,5,763,31"/>
-<area shape="rect" id="node5" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion based on minimum standard error of estimation." alt="" coords="559,54,762,79"/>
-</map>
