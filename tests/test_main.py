@@ -128,7 +128,7 @@ def test_finite_selectors(
     The54321Selector(test_size),
     RandomesqueSelector(test_size // 6),
   ]
-  stopper = MaxItemStopper(test_size)
+  stopper = CombinationStopper([MaxItemStopper(test_size), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
 
   for selector in finite_selectors:
     rng = np.random.default_rng(1337)
