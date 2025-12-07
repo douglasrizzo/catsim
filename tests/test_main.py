@@ -23,7 +23,14 @@ from catsim.selection import (
   UrrySelector,
 )
 from catsim.simulation import Estimator, Initializer, Selector, Simulator, Stopper
-from catsim.stopping import MaxItemMinErrorStopper, MaxItemStopper, MinErrorStopper
+from catsim.stopping import (
+  CombinationStopper,
+  CombinationStrategy,
+  ConfidenceIntervalStopper,
+  ItemBankLengthStopper,
+  MaxItemStopper,
+  MinErrorStopper,
+)
 
 
 def one_simulation(
@@ -59,7 +66,16 @@ def one_simulation(
 @pytest.mark.parametrize("bank_size", [500])
 @pytest.mark.parametrize("initializer", [RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))])
 @pytest.mark.parametrize("estimator", [NumericalSearchEstimator()])
-@pytest.mark.parametrize("stopper", [MaxItemStopper(30), MinErrorStopper(0.4), MaxItemMinErrorStopper(30, 0.4)])
+@pytest.mark.parametrize(
+  "stopper",
+  [
+    CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
+    CombinationStopper([MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
+    CombinationStopper(
+      [MaxItemStopper(30), MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR
+    ),
+  ],
+)
 def test_cism(
   examinees: int,
   bank_size: int,
@@ -159,9 +175,15 @@ def test_finite_selectors(
 @pytest.mark.parametrize(
   "stopper",
   [
-    MaxItemStopper(30),
-    MinErrorStopper(0.4),
-    MaxItemMinErrorStopper(30, 0.4),
+    CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
+    CombinationStopper([MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
+    CombinationStopper(
+      [MaxItemStopper(30), MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR
+    ),
+    CombinationStopper(
+      [ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.80), ItemBankLengthStopper()],
+      strategy=CombinationStrategy.OR,
+    ),
   ],
 )
 def test_infinite_selectors(
@@ -176,7 +198,16 @@ def test_infinite_selectors(
   """Test infinite selectors."""
   rng = np.random.default_rng()
   item_bank = ItemBank.generate_item_bank(bank_size, itemtype=logistic_model)
-  max_administered_items = stopper.max_itens if isinstance(stopper, MaxItemStopper) else bank_size
+
+  # Extract max items from stopper (check if it's a CombinationStopper with MaxItemStopper inside)
+  max_administered_items = bank_size
+  if isinstance(stopper, CombinationStopper):
+    for sub_stopper in stopper.stoppers:
+      if isinstance(sub_stopper, MaxItemStopper):
+        max_administered_items = min(max_administered_items, sub_stopper.max_itens)
+  elif isinstance(stopper, MaxItemStopper):
+    max_administered_items = stopper.max_itens
+
   responses = cat.random_response_vector(random.randint(1, max_administered_items))
   administered_items = list(rng.choice(bank_size, len(responses), replace=False))
   est_theta = initializer.initialize(rng=rng)
@@ -228,7 +259,7 @@ def test_plots() -> None:
   initializer = RandomInitializer()
   selector = MaxInfoSelector()
   estimator = NumericalSearchEstimator()
-  stopper = MaxItemStopper(20)
+  stopper = CombinationStopper([MaxItemStopper(20), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
   s = Simulator(ItemBank.generate_item_bank(100), 10)
   s.simulate(initializer, selector, estimator, stopper, verbose=True)
 

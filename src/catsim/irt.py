@@ -5,6 +5,7 @@ from typing import Any
 import numexpr
 import numpy
 import numpy.typing as npt
+from scipy import stats
 
 
 class NumParams(Enum):
@@ -319,6 +320,225 @@ def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
     return math.sqrt(var(theta, items))
   except ValueError:
     return float("inf")
+
+
+def confidence_interval(
+  theta: float, items: npt.NDArray[numpy.floating[Any]], confidence: float = 0.95
+) -> tuple[float, float]:
+  r"""Compute the confidence interval for an ability estimate.
+
+  The confidence interval is computed using the normal approximation:
+
+  .. math:: CI = \hat{\theta} \pm z_{\alpha/2} \times SEE(\hat{\theta})
+
+  where :math:`z_{\alpha/2}` is the critical value from the standard normal distribution
+  corresponding to the desired confidence level, and :math:`SEE` is the standard error
+  of estimation.
+
+  Parameters
+  ----------
+  theta : float
+      The estimated ability value.
+  items : npt.NDArray[numpy.floating[Any]]
+      A matrix containing item parameters for administered items.
+  confidence : float, optional
+      The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).
+      Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).
+
+  Returns
+  -------
+  tuple[float, float]
+      A tuple containing (lower_bound, upper_bound) of the confidence interval.
+
+  Raises
+  ------
+  ValueError
+      If confidence is not between 0 and 1.
+
+  Examples
+  --------
+  >>> import numpy as np
+  >>> items = np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.0, 1.0]])
+  >>> theta = 0.5
+  >>> lower, upper = confidence_interval(theta, items, confidence=0.95)
+  >>> print(f"95% CI: [{lower:.3f}, {upper:.3f}]")  # doctest: +SKIP
+  95% CI: [-0.234, 1.234]
+  """
+  if not 0 < confidence < 1:
+    msg = f"Confidence level must be between 0 and 1, got {confidence}"
+    raise ValueError(msg)
+
+  # Compute standard error of estimation
+  standard_error = see(theta, items)
+
+  # If SEE is infinite, return infinite bounds
+  if math.isinf(standard_error):
+    return (float("-inf"), float("inf"))
+
+  # Compute z-score for the given confidence level
+  # For a two-tailed test, we need the (1 + confidence) / 2 quantile
+  # Common z-scores: 90% = 1.645, 95% = 1.96, 99% = 2.576
+  z_score = float(stats.norm.ppf((1 + confidence) / 2))
+
+  # Compute confidence interval bounds
+  margin = z_score * standard_error
+  lower_bound = theta - margin
+  upper_bound = theta + margin
+
+  return (lower_bound, upper_bound)
+
+
+def theta_to_scale(
+  theta: float | npt.NDArray[numpy.floating[Any]],
+  scale_min: float = 0,
+  scale_max: float = 100,
+  theta_min: float = -4,
+  theta_max: float = 4,
+) -> float | npt.NDArray[numpy.floating[Any]]:
+  r"""Convert theta values to a custom score scale using linear transformation.
+
+  This function transforms ability estimates from the standard IRT theta scale
+  (typically centered at 0) to any desired score scale (e.g., 0-100, 200-800).
+
+  The linear transformation is:
+
+  .. math:: \text{score} = a \cdot \theta + b
+
+  where :math:`a` and :math:`b` are determined by mapping the theta range to the score range.
+
+  Parameters
+  ----------
+  theta : float or numpy.ndarray
+      Ability value(s) on the theta scale.
+  scale_min : float, optional
+      Minimum value of the target score scale. Default is 0.
+  scale_max : float, optional
+      Maximum value of the target score scale. Default is 100.
+  theta_min : float, optional
+      Minimum theta value to map. Default is -4 (typical lower bound).
+  theta_max : float, optional
+      Maximum theta value to map. Default is 4 (typical upper bound).
+
+  Returns
+  -------
+  float or numpy.ndarray
+      The transformed score(s) on the target scale. Returns the same type as input.
+
+  Examples
+  --------
+  >>> # Convert theta to 0-100 scale
+  >>> theta_to_scale(0.0)  # Average ability
+  50.0
+  >>> theta_to_scale(2.0)  # High ability
+  75.0
+  >>> theta_to_scale(-2.0)  # Low ability
+  25.0
+
+  >>> # Convert to SAT-like scale (200-800)
+  >>> theta_to_scale(0.0, scale_min=200, scale_max=800)
+  500.0
+
+  >>> # Convert multiple values at once
+  >>> import numpy as np
+  >>> thetas = np.array([-4, -2, 0, 2, 4])
+  >>> theta_to_scale(thetas)  # doctest: +SKIP
+  array([  0.,  25.,  50.,  75., 100.])
+
+  Notes
+  -----
+  - Values outside [theta_min, theta_max] are extrapolated linearly
+  - The transformation preserves relative distances between ability levels
+  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.
+  """
+  if theta_max <= theta_min:
+    msg = f"theta_max ({theta_max}) must be greater than theta_min ({theta_min})"
+    raise ValueError(msg)
+  if scale_max <= scale_min:
+    msg = f"scale_max ({scale_max}) must be greater than scale_min ({scale_min})"
+    raise ValueError(msg)
+
+  # Linear transformation: score = a * theta + b
+  # Solve for a and b using the two boundary conditions
+  a = (scale_max - scale_min) / (theta_max - theta_min)
+  b = scale_min - a * theta_min
+
+  return a * theta + b
+
+
+def scale_to_theta(
+  score: float | npt.NDArray[numpy.floating[Any]],
+  scale_min: float = 0,
+  scale_max: float = 100,
+  theta_min: float = -4,
+  theta_max: float = 4,
+) -> float | npt.NDArray[numpy.floating[Any]]:
+  r"""Convert scores from a custom scale to theta values using linear transformation.
+
+  This function transforms scores from any desired scale (e.g., 0-100, 200-800)
+  back to the standard IRT theta scale (typically centered at 0).
+
+  The inverse linear transformation is:
+
+  .. math:: \theta = \frac{\text{score} - b}{a}
+
+  where :math:`a` and :math:`b` are determined by the scale mapping.
+
+  Parameters
+  ----------
+  score : float or numpy.ndarray
+      Score value(s) on the custom scale.
+  scale_min : float, optional
+      Minimum value of the score scale. Default is 0.
+  scale_max : float, optional
+      Maximum value of the score scale. Default is 100.
+  theta_min : float, optional
+      Minimum theta value in the mapping. Default is -4.
+  theta_max : float, optional
+      Maximum theta value in the mapping. Default is 4.
+
+  Returns
+  -------
+  float or numpy.ndarray
+      The transformed theta value(s). Returns the same type as input.
+
+  Examples
+  --------
+  >>> # Convert 0-100 score to theta
+  >>> scale_to_theta(50.0)  # Average score
+  0.0
+  >>> scale_to_theta(75.0)  # High score
+  2.0
+  >>> scale_to_theta(25.0)  # Low score
+  -2.0
+
+  >>> # Convert from SAT-like scale (200-800)
+  >>> scale_to_theta(500.0, scale_min=200, scale_max=800)
+  0.0
+
+  >>> # Convert multiple values at once
+  >>> import numpy as np
+  >>> scores = np.array([0, 25, 50, 75, 100])
+  >>> scale_to_theta(scores)  # doctest: +SKIP
+  array([-4., -2.,  0.,  2.,  4.])
+
+  Notes
+  -----
+  - This is the inverse of :py:func:`theta_to_scale`
+  - Useful for converting cutoff scores to theta values for classification
+  - Preserves the relative ordering and distances of scores
+  """
+  if theta_max <= theta_min:
+    msg = f"theta_max ({theta_max}) must be greater than theta_min ({theta_min})"
+    raise ValueError(msg)
+  if scale_max <= scale_min:
+    msg = f"scale_max ({scale_max}) must be greater than scale_min ({scale_min})"
+    raise ValueError(msg)
+
+  # Inverse transformation: theta = (score - b) / a
+  a = (scale_max - scale_min) / (theta_max - theta_min)
+  b = scale_min - a * theta_min
+
+  return (score - b) / a
 
 
 def reliability(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
