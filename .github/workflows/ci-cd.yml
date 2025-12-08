@@ -248,6 +248,21 @@ jobs:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-checkout
+
+      - name: Clean old dev files
+        run: |
+          cd gh-pages-checkout
+          # Remove everything in dev/ subdirectory if it exists
+          if [ -d "dev" ]; then
+            rm -rf dev/*
+          fi
+          cd ..
+
       - name: Deploy to GitHub Pages (dev subdirectory)
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -255,6 +270,7 @@ jobs:
           publish_dir: ./docs/build/html
           destination_dir: dev # Deploy to /dev subdirectory
           commit_message: "Deploy dev documentation from ${{ github.sha }}"
+          keep_files: true # Preserve production docs at root
 
       - name: Comment deployment URL
         run: |
@@ -266,7 +282,7 @@ jobs:
     name: Deploy documentation (production)
     # Deploy production docs on pushes to main (after PR validation)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build-docs]  # Only need docs, not tests (already validated in PR)
+    needs: [build-docs] # Only need docs, not tests (already validated in PR)
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -278,14 +294,28 @@ jobs:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-checkout
+
+      - name: Clean old root files (preserve subdirectories)
+        run: |
+          cd gh-pages-checkout
+          # Remove all files and directories at root level EXCEPT dev/
+          find . -maxdepth 1 -type f ! -name '.nojekyll' ! -name 'CNAME' ! -name '.gitignore' -delete
+          find . -maxdepth 1 -type d ! -name '.' ! -name '.git' ! -name 'dev' -exec rm -rf {} +
+          cd ..
+
       - name: Deploy to GitHub Pages (root)
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
           commit_message: "Deploy production documentation from ${{ github.ref_name }}"
-          # Don't use destination_dir - deploy to root
-          # Keep dev subdirectory by not using force_orphan
+          keep_files: true
+          destination_dir: .
 
       - name: Comment deployment URL
         run: |
