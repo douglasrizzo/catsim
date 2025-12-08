@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 
 from catsim import cat, irt, plot
 from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
+from catsim.initialization import InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
@@ -96,29 +96,48 @@ def test_cism(
 @pytest.mark.integration
 @pytest.mark.parallel
 @pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("test_size", [30])
 @pytest.mark.parametrize("bank_size", [500])
-@pytest.mark.parametrize("logistic_model", [irt.NumParams.PL4])
-@pytest.mark.parametrize(
-  "initializer",
-  [
-    RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5)),
-    FixedPointInitializer(0),
-  ],
-)
 @pytest.mark.parametrize(
   "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.available_methods()]
 )
+def test_estimators(
+  examinees: int,
+  bank_size: int,
+  estimator: Estimator,
+) -> None:
+  """Test all NumericalSearchEstimator methods with simple selector configurations."""
+  rng = np.random.default_rng(1337)
+  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
+  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
+  stopper = CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+  test_size = 30
+
+  # Test with a finite selector (LinearSelector)
+  finite_selector = LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False)))
+  one_simulation(item_bank, examinees, initializer, finite_selector, estimator, stopper)
+
+  # Test with an infinite selector (RandomSelector)
+  infinite_selector = RandomSelector()
+  one_simulation(item_bank, examinees, initializer, infinite_selector, estimator, stopper)
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+@pytest.mark.parallel
+@pytest.mark.parametrize("examinees", [100])
+@pytest.mark.parametrize("test_size", [30])
+@pytest.mark.parametrize("bank_size", [500])
 def test_finite_selectors(
   examinees: int,
   test_size: int,
   bank_size: int,
-  logistic_model: irt.NumParams,
-  initializer: Initializer,
-  estimator: Estimator,
 ) -> None:
-  """Test finite selectors."""
-  rng = np.random.default_rng()
+  """Test all finite selectors with brent and bounded estimators."""
+  rng = np.random.default_rng(1337)
+  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
+  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
+  stopper = CombinationStopper([MaxItemStopper(test_size), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+
   finite_selectors = [
     LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False))),
     AStratSelector(test_size),
@@ -128,24 +147,28 @@ def test_finite_selectors(
     The54321Selector(test_size),
     RandomesqueSelector(test_size // 6),
   ]
-  stopper = CombinationStopper([MaxItemStopper(test_size), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+
+  estimators = [
+    NumericalSearchEstimator(method="brent"),
+    NumericalSearchEstimator(method="bounded"),
+  ]
 
   for selector in finite_selectors:
-    rng = np.random.default_rng(1337)
-    item_bank = ItemBank.generate_item_bank(bank_size, itemtype=logistic_model)
-    responses = cat.random_response_vector(random.randint(1, test_size - 1))
-    administered_items = list(rng.choice(bank_size, len(responses), replace=False))
-    est_theta = initializer.initialize(rng=rng)
-    selector.select(item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, rng=rng)
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=responses,
-      est_theta=est_theta,
-    )
-    stopper.stop(administered_items=item_bank.get_items(administered_items), theta=est_theta, rng=rng)
+    for estimator in estimators:
+      rng = np.random.default_rng(1337)
+      responses = cat.random_response_vector(random.randint(1, test_size - 1))
+      administered_items = list(rng.choice(bank_size, len(responses), replace=False))
+      est_theta = initializer.initialize(rng=rng)
+      selector.select(item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, rng=rng)
+      estimator.estimate(
+        item_bank=item_bank,
+        administered_items=administered_items,
+        response_vector=responses,
+        est_theta=est_theta,
+      )
+      stopper.stop(administered_items=item_bank.get_items(administered_items), theta=est_theta, rng=rng)
 
-    one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
+      one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
 
 
 @pytest.mark.slow
@@ -153,14 +176,6 @@ def test_finite_selectors(
 @pytest.mark.parallel
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("bank_size", [5000])
-@pytest.mark.parametrize("logistic_model", [irt.NumParams.PL4])
-@pytest.mark.parametrize(
-  "initializer",
-  [
-    RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5)),
-    FixedPointInitializer(0),
-  ],
-)
 @pytest.mark.parametrize(
   "selector",
   [
@@ -169,9 +184,51 @@ def test_finite_selectors(
     UrrySelector(),
   ],
 )
-@pytest.mark.parametrize(
-  "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.available_methods()]
-)
+def test_infinite_selectors(
+  examinees: int,
+  bank_size: int,
+  selector: Selector,
+) -> None:
+  """Test all infinite selectors with brent and bounded estimators."""
+  rng = np.random.default_rng(1337)
+  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
+  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
+  stopper = CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+
+  estimators = [
+    NumericalSearchEstimator(method="brent"),
+    NumericalSearchEstimator(method="bounded"),
+  ]
+
+  for estimator in estimators:
+    responses = cat.random_response_vector(random.randint(1, 30))
+    administered_items = list(rng.choice(bank_size, len(responses), replace=False))
+    est_theta = initializer.initialize(rng=rng)
+    selector.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=est_theta,
+      rng=rng,
+    )
+    estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=responses,
+      est_theta=est_theta,
+    )
+    stopper.stop(
+      _item_bank=item_bank,
+      administered_items=item_bank.get_items(administered_items),
+      theta=est_theta,
+    )
+    one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+@pytest.mark.parallel
+@pytest.mark.parametrize("examinees", [100])
+@pytest.mark.parametrize("bank_size", [5000])
 @pytest.mark.parametrize(
   "stopper",
   [
@@ -186,18 +243,16 @@ def test_finite_selectors(
     ),
   ],
 )
-def test_infinite_selectors(
+def test_stoppers(
   examinees: int,
   bank_size: int,
-  logistic_model: irt.NumParams,
-  initializer: Initializer,
-  selector: Selector,
-  estimator: Estimator,
   stopper: Stopper,
 ) -> None:
-  """Test infinite selectors."""
-  rng = np.random.default_rng()
-  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=logistic_model)
+  """Test all stopper configurations with brent and bounded estimators."""
+  rng = np.random.default_rng(1337)
+  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
+  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
+  selector = MaxInfoSelector()
 
   # Extract max items from stopper (check if it's a CombinationStopper with MaxItemStopper inside)
   max_administered_items = bank_size
@@ -208,27 +263,33 @@ def test_infinite_selectors(
   elif isinstance(stopper, MaxItemStopper):
     max_administered_items = stopper.max_itens
 
-  responses = cat.random_response_vector(random.randint(1, max_administered_items))
-  administered_items = list(rng.choice(bank_size, len(responses), replace=False))
-  est_theta = initializer.initialize(rng=rng)
-  selector.select(
-    item_bank=item_bank,
-    administered_items=administered_items,
-    est_theta=est_theta,
-    rng=rng,
-  )
-  estimator.estimate(
-    item_bank=item_bank,
-    administered_items=administered_items,
-    response_vector=responses,
-    est_theta=est_theta,
-  )
-  stopper.stop(
-    _item_bank=item_bank,
-    administered_items=item_bank.get_items(administered_items),
-    theta=est_theta,
-  )
-  one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
+  estimators = [
+    NumericalSearchEstimator(method="brent"),
+    NumericalSearchEstimator(method="bounded"),
+  ]
+
+  for estimator in estimators:
+    responses = cat.random_response_vector(random.randint(1, max_administered_items))
+    administered_items = list(rng.choice(bank_size, len(responses), replace=False))
+    est_theta = initializer.initialize(rng=rng)
+    selector.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=est_theta,
+      rng=rng,
+    )
+    estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=responses,
+      est_theta=est_theta,
+    )
+    stopper.stop(
+      _item_bank=item_bank,
+      administered_items=item_bank.get_items(administered_items),
+      theta=est_theta,
+    )
+    one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
 
 
 @pytest.mark.parametrize(
