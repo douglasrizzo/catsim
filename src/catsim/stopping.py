@@ -518,19 +518,19 @@ class ConfidenceIntervalStopper(Stopper):
 
       # Add arrows and labels for CI bounds
       ax.annotate(
-          f'CI Lower\\n{ci_lower:.2f}', xy=(ci_lower, 0.35), xytext=(ci_lower-0.4, 0.45),
+          f'CI Lower\n{ci_lower:.2f}', xy=(ci_lower, 0.35), xytext=(ci_lower-0.4, 0.45),
           fontsize=10, ha='center', color='blue',
           arrowprops=dict(arrowstyle='->', color='blue', lw=1.5)
       )
       ax.annotate(
-          f'CI Upper\\n{ci_upper:.2f}', xy=(ci_upper, 0.35), xytext=(ci_upper+0.4, 0.45),
+          f'CI Upper\n{ci_upper:.2f}', xy=(ci_upper, 0.35), xytext=(ci_upper+0.4, 0.45),
           fontsize=10, ha='center', color='blue',
           arrowprops=dict(arrowstyle='->', color='blue', lw=1.5)
       )
 
       # Add decision box
       ax.text(
-          1.0, 0.72, 'CI entirely in Grade B\\n→ STOP TEST',
+          1.0, 0.72, 'CI entirely in Grade B\n→ STOP TEST',
           ha='center', va='center', fontsize=12, fontweight='bold',
           bbox=dict(
               boxstyle='round,pad=0.8',
