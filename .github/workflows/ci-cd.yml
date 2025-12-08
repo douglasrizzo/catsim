@@ -38,7 +38,6 @@ jobs:
       (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release'
-    needs: [pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -89,7 +88,6 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch'
-    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -131,7 +129,7 @@ jobs:
   publish-to-pypi:
     name: Publish to PyPI
     if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
-    needs: [build]
+    needs: [pre-commit, test, build, build-docs] # Wait for quality gates + package build
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -156,7 +154,7 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
-    needs: [build]
+    needs: [pre-commit, test, build, build-docs] # Wait for quality gates + package build
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -238,7 +236,7 @@ jobs:
     name: Deploy documentation (dev preview)
     # Deploy preview docs on pushes to dev branch
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    needs: [build-docs]
+    needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -268,7 +266,7 @@ jobs:
     name: Deploy documentation (production)
     # Deploy production docs only on releases
     if: github.event_name == 'release'
-    needs: [build-docs, publish-to-pypi]
+    needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
     runs-on: ubuntu-latest
     permissions:
       contents: write
