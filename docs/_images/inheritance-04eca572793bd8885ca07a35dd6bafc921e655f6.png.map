@@ -1,9 +1,0 @@
-<map id="inheritance51267be144" name="inheritance51267be144">
-<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="11,66,72,88"/>
-<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers." alt="" coords="376,66,522,88"/>
-<area shape="rect" id="node7" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="153,87,302,108"/>
-<area shape="rect" id="node2" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initialize every examinee&#39;s ability at the same fixed point." alt="" coords="561,45,764,67"/>
-<area shape="rect" id="node6" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initialize the first estimate of an examinee&#39;s ability from a statistical distribution." alt="" coords="566,87,758,108"/>
-<area shape="rect" id="node4" href="#catsim.initialization.InitializationDistribution" target="_top" title="Distribution to use for ability estimate initialization." alt="" coords="117,4,337,26"/>
-<area shape="rect" id="node5" href="https://docs.python.org/3/library/enum.html#enum.Enum" target="_top" title="Create a collection of name/value pairs." alt="" coords="4,4,78,26"/>
-</map>

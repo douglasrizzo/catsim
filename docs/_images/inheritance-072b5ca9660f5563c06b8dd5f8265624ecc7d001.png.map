@@ -1,6 +1,0 @@
-<map id="inheritanceb6f22deed1" name="inheritanceb6f22deed1">
-<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,5,69,28"/>
-<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Estimator" target="_top" title="Base class for ability estimators." alt="" coords="314,5,474,28"/>
-<area shape="rect" id="node4" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="111,27,272,50"/>
-<area shape="rect" id="node2" href="#catsim.estimation.NumericalSearchEstimator" target="_top" title="Implement search algorithms in unimodal functions to find the maximum of the log&#45;likelihood function." alt="" coords="515,5,763,28"/>
-</map>

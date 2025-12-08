@@ -176,6 +176,123 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
 
+  build-docs:
+    name: Build documentation
+    # Build docs for PRs to dev/main, pushes to dev, and releases
+    if: |
+      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Build Sphinx documentation
+        run: |
+          cd sphinx
+          uv run sphinx-build -b html -W --keep-going . ../docs/build/html
+          # -W treats warnings as errors
+          # --keep-going shows all warnings/errors at once
+
+      - name: Check for broken links
+        run: |
+          cd sphinx
+          uv run sphinx-build -b linkcheck . ../docs/build/linkcheck
+        continue-on-error: true # Don't fail the build on external link issues
+
+      - name: Upload documentation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-docs-${{ github.sha }}
+          path: docs/build/html/
+          retention-days: 30
+
+      - name: Add build info
+        run: |
+          echo "📚 Documentation built successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the built documentation from the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+
+  deploy-docs-dev:
+    name: Deploy documentation (dev preview)
+    # Deploy preview docs on pushes to dev branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: [build-docs]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download documentation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: html-docs-${{ github.sha }}
+          path: docs/build/html/
+
+      - name: Deploy to GitHub Pages (dev subdirectory)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          destination_dir: dev # Deploy to /dev subdirectory
+          commit_message: "Deploy dev documentation from ${{ github.sha }}"
+
+      - name: Comment deployment URL
+        run: |
+          echo "🚀 **Dev documentation deployed!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Preview at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/dev/" >> $GITHUB_STEP_SUMMARY
+
+  deploy-docs-production:
+    name: Deploy documentation (production)
+    # Deploy production docs only on releases
+    if: github.event_name == 'release'
+    needs: [build-docs, publish-to-pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download documentation artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: html-docs-${{ github.sha }}
+          path: docs/build/html/
+
+      - name: Deploy to GitHub Pages (root)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build/html
+          commit_message: "Deploy production documentation from ${{ github.ref_name }}"
+          # Don't use destination_dir - deploy to root
+          # Keep dev subdirectory by not using force_orphan
+
+      - name: Comment deployment URL
+        run: |
+          echo "🎉 **Production documentation deployed!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Live at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+
   github-release:
     name: Sign and upload to GitHub Release
     needs: [publish-to-pypi]
