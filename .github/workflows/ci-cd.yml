@@ -3,7 +3,7 @@ name: CI/CD
 on:
   pull_request:
   push:
-    branches: [dev]
+    branches: [dev, main]
   release:
     types: [published]
   workflow_dispatch:
@@ -176,10 +176,10 @@ jobs:
 
   build-docs:
     name: Build documentation
-    # Build docs for PRs to dev/main, pushes to dev, and releases
+    # Build docs for PRs to dev/main, pushes to dev/main, and releases
     if: |
       (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
@@ -264,9 +264,9 @@ jobs:
 
   deploy-docs-production:
     name: Deploy documentation (production)
-    # Deploy production docs only on releases
-    if: github.event_name == 'release'
-    needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
+    # Deploy production docs on pushes to main (after PR validation)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build-docs]  # Only need docs, not tests (already validated in PR)
     runs-on: ubuntu-latest
     permissions:
       contents: write
