@@ -452,10 +452,11 @@ class Stopper(Simulable, ABC):
     index : int or None, optional
         The index of the current examinee in the simulator. When used within a
         simulation, this parameter is provided automatically. When used standalone,
-        other parameters may be provided via **kwargs. Default is None.
+        other parameters may be provided via kwargs. Default is None.
     **kwargs : dict
         Additional keyword arguments that specific Stopper implementations may require.
         Common arguments include:
+
         - administered_items: Item parameters or indices that were administered
         - theta: Current ability estimate
         - item_bank: ItemBank for accessing item parameters

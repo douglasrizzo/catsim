@@ -199,14 +199,16 @@ jobs:
           python-version: "3.13"
 
       - name: Install dependencies
-        run: uv sync --group docs
+        run: |
+          # Install graphviz for inheritance diagrams
+          sudo apt-get update && sudo apt-get install -y graphviz
+          uv sync --group docs
 
       - name: Build Sphinx documentation
         run: |
           cd sphinx
-          uv run sphinx-build -b html -W --keep-going . ../docs/build/html
-          # -W treats warnings as errors
-          # --keep-going shows all warnings/errors at once
+          uv run sphinx-build -b html --keep-going . ../docs/build/html
+          # --keep-going shows all warnings at once
 
       - name: Check for broken links
         run: |

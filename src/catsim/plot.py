@@ -322,7 +322,10 @@ def item_exposure(
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Item exposure")
 
-  plt.legend(loc="best")
+  # Only show legend if there are labeled artists
+  handles, _ = ax.get_legend_handles_labels()
+  if handles:
+    plt.legend(loc="best")
 
   return ax
 
