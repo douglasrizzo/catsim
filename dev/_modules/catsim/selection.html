@@ -1,0 +1,1682 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>catsim.selection &mdash; catsim 0.19.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+    <link rel="shortcut icon" href="../../_static/logo.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=cbfb3150"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo_text.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reproducibility.html">Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">catsim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">catsim.selection</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for catsim.selection</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiniteSelector</span><span class="p">,</span> <span class="n">Selector</span>
+
+<span class="c1"># Constants</span>
+<span class="n">MIN_ITEM_BANK_COLUMNS</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># Minimum number of columns required in item bank (includes exposure rate column)</span>
+
+
+<div class="viewcode-block" id="MaxInfoSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Selector that returns the first non-administered item with maximum information for the current theta estimate.</span>
+
+<span class="sd">  This is one of the most common item selection methods in CAT, choosing the item</span>
+<span class="sd">  that provides the most information at the examinee&#39;s current estimated ability level.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  r_max : float, optional</span>
+<span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not</span>
+<span class="sd">      be selected unless no other items are available. Default is 1 (no restriction).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a MaxInfoSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    r_max : float, optional</span>
+<span class="sd">        Maximum exposure rate for items. Default is 1.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If r_max is not between 0 and 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">r_max</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;r_max must be between 0 and 1, got </span><span class="si">{</span><span class="n">r_max</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Maximum Information Selector&quot;</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">r_max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the maximum exposure rate for items the selector accepts.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        Maximum exposure rate for items the selector accepts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span>
+
+<div class="viewcode-block" id="MaxInfoSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;item_bank parameter cannot be None&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;administered_items parameter cannot be None&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;est_theta parameter cannot be None&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># sort items by their information value</span>
+    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+    <span class="c1"># remove administered ones</span>
+    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to apply.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># gets the indexes and information values from the items with r &lt; rmax</span>
+    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="n">valid_indexes</span>
+
+    <span class="c1"># ItemBank always validates and has 5 columns, so no need to check</span>
+
+    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">valid_indexes</span> <span class="k">if</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">]</span>
+    <span class="c1"># return the item with maximum information from the ones available</span>
+    <span class="k">return</span> <span class="n">valid_indexes_low_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="UrrySelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.UrrySelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UrrySelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s ability.</span>
+
+<span class="sd">  This method, known as Urry&#39;s method, selects items based on the proximity of their</span>
+<span class="sd">  difficulty (b parameter) to the current ability estimate, which is particularly</span>
+<span class="sd">  effective for 1PL and 2PL models where information is maximized when b = theta.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a UrrySelector object.&quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Urry Selector&quot;</span>
+
+<div class="viewcode-block" id="UrrySelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.UrrySelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;est_theta parameter cannot be None&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;administered_items parameter cannot be None&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;item_bank parameter cannot be None&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_b</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to apply.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LinearSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.LinearSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LinearSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Selector that returns item indexes in a linear order, simulating a standard (non-adaptive) test.</span>
+
+<span class="sd">  This selector is useful for baseline comparisons or for administering a fixed set</span>
+<span class="sd">  of items in a predetermined order.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  indexes : list[int]</span>
+<span class="sd">      The indexes of the items that will be returned in order.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Linear Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indexes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a LinearSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    indexes : list[int]</span>
+<span class="sd">        List of item indices to be administered in order.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If indexes list is empty or contains invalid (negative) values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;indexes list cannot be empty&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;All indexes must be non-negative integers&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span> <span class="o">=</span> <span class="n">indexes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The indexes of the items that will be returned in order.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">current</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The index of the current item.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current</span>
+
+<div class="viewcode-block" id="LinearSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.LinearSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">administered_items</span><span class="p">,)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;A new index was asked for, but there are no more item indexes to present.</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Current item:</span><span class="se">\t\t\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_current</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Items to be administered:</span><span class="se">\t</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">)</span><span class="si">}</span><span class="s2"> (size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">)</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Administered items:</span><span class="se">\t\t</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> (size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RandomSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.RandomSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RandomSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Selector that randomly selects items for application.</span>
+
+<span class="sd">  This selector is useful for baseline comparisons or for studying the impact of</span>
+<span class="sd">  item selection strategies.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  replace : bool, optional</span>
+<span class="sd">      Whether to select an item that has already been selected before for this examinee.</span>
+<span class="sd">      Default is False.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Random Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a RandomSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    replace : bool, optional</span>
+<span class="sd">        Whether to select an item that has already been selected before for this examinee.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span> <span class="o">=</span> <span class="n">replace</span>
+
+<div class="viewcode-block" id="RandomSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.RandomSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments. Notably:</span>
+
+<span class="sd">        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object,</span>
+<span class="sd">          guarantees reproducibility of outputs.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_rng</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to apply.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)),</span> <span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ClusterSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ClusterSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Cluster-based Item Selection Method.</span>
+
+<span class="sd">  This method groups items into clusters and selects items from clusters based on</span>
+<span class="sd">  their information characteristics, helping to balance item exposure across the</span>
+<span class="sd">  item bank [Men15]_.</span>
+
+<span class="sd">  .. [Men15] Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes</span>
+<span class="sd">     adaptativos informatizados baseada em agrupamento por similaridade (Mestrado).</span>
+<span class="sd">     Centro Universitário da FEI. Retrieved from</span>
+<span class="sd">     https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  clusters : list[int]</span>
+<span class="sd">      A list containing item cluster memberships (integers representing cluster IDs).</span>
+<span class="sd">  method : str, optional</span>
+<span class="sd">      One of the available methods for cluster selection. Given the estimated theta</span>
+<span class="sd">      value at each step:</span>
+
+<span class="sd">      - &#39;item_info&#39;: selects the cluster which has the item with maximum information</span>
+<span class="sd">      - &#39;cluster_info&#39;: selects the cluster whose items&#39; sum of information is maximum</span>
+<span class="sd">      - &#39;weighted_info&#39;: selects the cluster whose weighted sum of information is</span>
+<span class="sd">        maximum (weighted by the number of items in the cluster)</span>
+
+<span class="sd">      Default is &#39;item_info&#39;.</span>
+<span class="sd">  r_max : float, optional</span>
+<span class="sd">      Maximum exposure rate for items. Default is 1.</span>
+<span class="sd">  r_control : str, optional</span>
+<span class="sd">      Item exposure control method. If &#39;passive&#39; and all items in the selected</span>
+<span class="sd">      cluster have exposure rates &gt; r_max, applies the item with maximum information.</span>
+<span class="sd">      If &#39;aggressive&#39;, applies the item with smallest exposure rate. Default is &#39;passive&#39;.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Cluster Selector&quot;</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">r_max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the maximum exposure rate for items the selector accepts.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the clusters each item belongs to.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the method used for cluster selection.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">r_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the item exposure control method.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;item_info&quot;</span><span class="p">,</span>
+    <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">r_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;passive&quot;</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a ClusterSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    clusters : list[int]</span>
+<span class="sd">        List of integers defining item cluster associations.</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        Cluster selection method, one of [&#39;item_info&#39;, &#39;cluster_info&#39;, &#39;weighted_info&#39;].</span>
+<span class="sd">        Default is &#39;item_info&#39;.</span>
+<span class="sd">    r_max : float, optional</span>
+<span class="sd">        Maximum item exposure rate. Default is 1.</span>
+<span class="sd">    r_control : str, optional</span>
+<span class="sd">        Item exposure control method, one of [&#39;passive&#39;, &#39;aggressive&#39;]. Default is &#39;passive&#39;.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If parameters are invalid (empty clusters list, negative cluster values, invalid</span>
+<span class="sd">        method or r_control, or r_max not between 0 and 1).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;clusters list cannot be empty&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;All cluster values must be non-negative integers&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">available_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;item_info&quot;</span><span class="p">,</span> <span class="s2">&quot;cluster_info&quot;</span><span class="p">,</span> <span class="s2">&quot;weighted_info&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_methods</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> is not a valid cluster selection method; choose one from </span><span class="si">{</span><span class="n">available_methods</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">r_max</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;r_max must be between 0 and 1, got </span><span class="si">{</span><span class="n">r_max</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">available_rcontrol</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;passive&quot;</span><span class="p">,</span> <span class="s2">&quot;aggressive&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">r_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_rcontrol</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">r_control</span><span class="si">}</span><span class="s2"> is not a valid item exposure control method; choose one from </span><span class="si">{</span><span class="n">available_rcontrol</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span> <span class="o">=</span> <span class="n">clusters</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">method</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="o">=</span> <span class="n">r_control</span>
+
+<div class="viewcode-block" id="ClusterSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="n">selected_cluster</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">existent_clusters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">)</span>
+
+    <span class="c1"># this part of the code selects the cluster from which the item at</span>
+    <span class="c1"># the current point of the test will be chosen</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">==</span> <span class="s2">&quot;item_info&quot;</span><span class="p">:</span>
+      <span class="c1"># get the item indexes sorted by their information value</span>
+      <span class="n">infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+
+      <span class="n">evaluated_clusters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+      <span class="c1"># iterate over every item in order of information value</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">):</span>
+        <span class="c1"># get the current non-examined item</span>
+        <span class="n">max_info_item</span> <span class="o">=</span> <span class="n">infos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># if the cluster of the current item has already been fully examined, go to the next item</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">max_info_item</span><span class="p">]</span> <span class="ow">in</span> <span class="n">evaluated_clusters</span><span class="p">:</span>
+          <span class="k">continue</span>
+
+        <span class="c1"># get the indexes of all items in the same cluster as the current item</span>
+        <span class="n">items_in_cluster</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">([</span><span class="n">x</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">max_info_item</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># if all the items in the current cluster have already been administered (it happens, theoretically),</span>
+        <span class="c1"># add this cluster to the list of fully evaluated clusters</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">items_in_cluster</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">administered_items</span><span class="p">):</span>
+          <span class="n">evaluated_clusters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">max_info_item</span><span class="p">])</span>
+
+          <span class="c1"># if all clusters have been evaluated, the loop ends and the method returns None somewhere below</span>
+          <span class="k">if</span> <span class="n">evaluated_clusters</span> <span class="o">==</span> <span class="n">existent_clusters</span><span class="p">:</span>
+            <span class="k">break</span>
+
+          <span class="c1"># else, if there are still items and clusters to be explored, keep going</span>
+          <span class="k">continue</span>
+
+        <span class="c1"># if the algorithm gets here, it means this cluster can be used</span>
+        <span class="n">selected_cluster</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">max_info_item</span><span class="p">]</span>
+        <span class="k">break</span>
+
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;cluster_info&quot;</span><span class="p">,</span> <span class="s2">&quot;weighted_info&quot;</span><span class="p">}:</span>
+      <span class="c1"># calculates the cluster information, depending on the method</span>
+      <span class="c1"># selected</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">==</span> <span class="s2">&quot;cluster_info&quot;</span><span class="p">:</span>
+        <span class="n">cluster_infos</span> <span class="o">=</span> <span class="n">ClusterSelector</span><span class="o">.</span><span class="n">sum_cluster_infos</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">cluster_infos</span> <span class="o">=</span> <span class="n">ClusterSelector</span><span class="o">.</span><span class="n">weighted_cluster_infos</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">)</span>
+
+      <span class="c1"># sorts clusters descending by their information values</span>
+      <span class="c1"># this type of sorting was seem on</span>
+      <span class="c1"># http://stackoverflow.com/a/6618543</span>
+      <span class="n">sorted_clusters</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+          <span class="n">cluster</span>
+          <span class="k">for</span> <span class="p">(</span><span class="n">inf_value</span><span class="p">,</span> <span class="n">cluster</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="n">cluster_infos</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">),</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+          <span class="p">)</span>
+        <span class="p">],</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+      <span class="p">)</span>
+
+      <span class="c1"># walks through the sorted clusters in order</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sorted_clusters</span><span class="p">)):</span>
+        <span class="n">valid_indexes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">([</span><span class="n">r</span> <span class="o">==</span> <span class="n">sorted_clusters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># checks if at least one item from this cluster has not</span>
+        <span class="c1"># been administered to this examinee yet</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">):</span>
+          <span class="n">selected_cluster</span> <span class="o">=</span> <span class="n">sorted_clusters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+          <span class="k">break</span>
+          <span class="c1"># the for loop ends with the cluster that has a) the maximum</span>
+          <span class="c1"># information possible and b) at least one item that has not</span>
+          <span class="c1"># yet been administered</span>
+
+    <span class="c1"># if the test size gets larger than the item bank size, end the test</span>
+    <span class="k">if</span> <span class="n">selected_cluster</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to be applied.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># in this part, an item is chosen from the cluster that was</span>
+    <span class="c1"># selected above</span>
+
+    <span class="c1"># gets the indexes and information values from the items in the</span>
+    <span class="c1"># selected cluster that have not been administered</span>
+    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span>
+      <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">([</span><span class="n">cluster</span> <span class="o">==</span> <span class="n">selected_cluster</span> <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">])[</span><span class="mi">0</span><span class="p">],</span>
+      <span class="n">administered_items</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># gets the indexes and information values from the items in the</span>
+    <span class="c1"># selected cluster with r &lt; rmax that have not been administered</span>
+    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="n">valid_indexes</span>
+    <span class="c1"># ItemBank always validates and has 5 columns, so no need to check</span>
+
+    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">index</span>
+      <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">valid_indexes</span>
+      <span class="k">if</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">administered_items</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="c1"># return the item with maximum information from the ones available</span>
+      <span class="n">inf_values</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">))</span>
+      <span class="n">selected_item</span> <span class="o">=</span> <span class="n">valid_indexes_low_r</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">inf_values</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">inf_values</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="c1"># if all items in the selected cluster have exceed their r values,</span>
+    <span class="c1"># select the one with smallest r, regardless of information</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="o">==</span> <span class="s2">&quot;passive&quot;</span><span class="p">:</span>
+      <span class="n">inf_values</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">))</span>
+      <span class="n">selected_item</span> <span class="o">=</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">inf_values</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">inf_values</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">selected_item</span> <span class="o">=</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">))]</span>
+
+    <span class="k">return</span> <span class="n">selected_item</span></div>
+
+
+<div class="viewcode-block" id="ClusterSelector.sum_cluster_infos">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.sum_cluster_infos">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">sum_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the sum of item information values, separated by cluster.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        An examinee&#39;s :math:`\theta` value.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    clusters : list[int]</span>
+<span class="sd">        A list containing item cluster memberships, represented by integers.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Array containing the sum of item information values for each cluster.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cluster_infos</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">clusters</span><span class="p">)))</span>
+
+    <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">clusters</span><span class="p">):</span>
+      <span class="n">cluster_indexes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">([</span><span class="n">c</span> <span class="o">==</span> <span class="n">cluster</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">cluster_indexes</span><span class="p">):</span>
+        <span class="n">cluster_infos</span><span class="p">[</span><span class="n">cluster</span><span class="p">]</span> <span class="o">+=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="o">*</span><span class="n">item</span><span class="p">[:</span><span class="mi">4</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">cluster_infos</span></div>
+
+
+<div class="viewcode-block" id="ClusterSelector.weighted_cluster_infos">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.weighted_cluster_infos">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">weighted_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the weighted sum of item information values, separated by cluster.</span>
+
+<span class="sd">    The weight is the number of items in each cluster, providing an average information</span>
+<span class="sd">    value per cluster that accounts for cluster size.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        An examinee&#39;s :math:`\theta` value.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    clusters : list[int]</span>
+<span class="sd">        A list containing item cluster memberships, represented by integers.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Array containing the average information values for each cluster (sum of</span>
+<span class="sd">        item information divided by the number of items in each cluster).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cluster_infos</span> <span class="o">=</span> <span class="n">ClusterSelector</span><span class="o">.</span><span class="n">sum_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster_infos</span><span class="p">)):</span>
+      <span class="n">cluster_infos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/=</span> <span class="n">count</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">cluster_infos</span></div>
+
+
+<div class="viewcode-block" id="ClusterSelector.sum_cluster_params">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.sum_cluster_params">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">sum_cluster_params</span><span class="p">(</span><span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the sum of item parameter values for each cluster.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    c : list[int]</span>
+<span class="sd">        A list containing clustering memberships (cluster IDs for each item).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A matrix containing the sum of each parameter by cluster. Rows are clusters,</span>
+<span class="sd">        columns are parameters (a, b, c, d).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">averages</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">c</span><span class="p">)):</span>
+      <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">continue</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">discrimination</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">pseudo_guessing</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">3</span><span class="p">]</span> <span class="o">+=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">upper_asymptote</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">averages</span></div>
+
+
+<div class="viewcode-block" id="ClusterSelector.avg_cluster_params">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.ClusterSelector.avg_cluster_params">[docs]</a>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">avg_cluster_params</span><span class="p">(</span><span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the average values of item parameters by cluster.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    c : list[int]</span>
+<span class="sd">        A list containing clustering memberships (cluster IDs for each item).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A matrix containing the average values of each parameter by cluster. Rows are</span>
+<span class="sd">        clusters, columns are parameters (a, b, c, d).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">averages</span> <span class="o">=</span> <span class="n">ClusterSelector</span><span class="o">.</span><span class="n">sum_cluster_params</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+
+    <span class="n">c_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">occurrences</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">c_array</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">c_array</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">counter</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">occurrences</span><span class="p">):</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">counter</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/=</span> <span class="n">i</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">counter</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/=</span> <span class="n">i</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">counter</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/=</span> <span class="n">i</span>
+      <span class="n">averages</span><span class="p">[</span><span class="n">counter</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">/=</span> <span class="n">i</span>
+
+    <span class="k">return</span> <span class="n">averages</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="StratifiedSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.StratifiedSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StratifiedSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Abstract class for stratified finite item selection strategies.</span>
+
+<span class="sd">  Stratified selectors divide the item bank into strata and select items from different</span>
+<span class="sd">  strata as the test progresses, helping to balance item exposure and test characteristics.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      Number of items in the test.</span>
+<span class="sd">  sort_once : bool</span>
+<span class="sd">      Whether the strategy allows for the item matrix to be presorted once at the</span>
+<span class="sd">      beginning of the simulation (True) or requires resorting during the test (False).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;General Stratified Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sort_once</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a StratifiedSelector.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    test_size : int</span>
+<span class="sd">        Number of items in the test.</span>
+<span class="sd">    sort_once : bool</span>
+<span class="sd">        Whether the strategy allows for the item matrix to be presorted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_sort_once</span> <span class="o">=</span> <span class="n">sort_once</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="StratifiedSelector.presort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.StratifiedSelector.presort_items">[docs]</a>
+  <span class="nd">@abstractmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix according to the strategy employed by this selector.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Array of item indices sorted according to the strategy.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="StratifiedSelector.postsort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.StratifiedSelector.postsort_items">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">using_simulator_props</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort the item matrix before selecting each new item.</span>
+
+<span class="sd">    This default implementation simply returns the presorted items, or sorts them using</span>
+<span class="sd">    the :py:func:`presort_items` method and returns them.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    using_simulator_props : bool</span>
+<span class="sd">        Whether the selector is being executed inside a Simulator.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Array of item indices sorted according to the strategy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">using_simulator_props</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">presort_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StratifiedSelector.preprocess">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.StratifiedSelector.preprocess">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">preprocess</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: D102</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="StratifiedSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.StratifiedSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    item_bank : ItemBank or None, optional</span>
+<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more strata to get items from.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="c1"># divide the item matrix into strata and get the stratum in which the examinee is</span>
+    <span class="n">stratum_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">ierr</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">: test size is larger than was informed to the selector</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Length of administered items:</span><span class="se">\t</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Total length of the test:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;Number of slices:</span><span class="se">\t</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">ierr</span>
+
+    <span class="n">using_simulator_props</span> <span class="o">=</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">using_simulator_props</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_once</span><span class="p">:</span>
+      <span class="c1"># if running through a simulator and the selector allows presorting, get the presorted item matrix</span>
+      <span class="n">sorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># allow the selector to resort the item matrix at this point in the test</span>
+      <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;using_simulator_props&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">using_simulator_props</span>
+      <span class="n">sorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">postsort_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">using_simulator_props</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
+
+    <span class="c1"># if the selected item has already been administered, select the next one</span>
+    <span class="k">while</span> <span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span> <span class="ow">in</span> <span class="n">administered_items</span><span class="p">:</span>
+      <span class="n">pointer</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="k">if</span> <span class="n">pointer</span> <span class="o">==</span> <span class="n">max_pointer</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">slices</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span></div>
+
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_get_stratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+    <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
+    <span class="n">pointer</span> <span class="o">=</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span><span class="p">]</span>
+    <span class="n">max_pointer</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="k">if</span> <span class="n">stratum_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span></div>
+
+
+
+<div class="viewcode-block" id="AStratSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.AStratSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implementation of the :math:`\alpha`-stratified selector proposed by [Chang99]_.</span>
+
+<span class="sd">  In this selector, the item bank is sorted in ascending order according to the items&#39;</span>
+<span class="sd">  discrimination parameter and then separated into :math:`K` strata (:math:`K` being the</span>
+<span class="sd">  test size), each stratum containing gradually higher average discrimination. The</span>
+<span class="sd">  :math:`\alpha`-stratified selector then selects the first non-administered item from</span>
+<span class="sd">  stratum :math:`k`, where :math:`k` represents the position in the test of the current</span>
+<span class="sd">  item the examinee is being presented.</span>
+
+<span class="sd">  This method helps control item exposure by ensuring items with different discrimination</span>
+<span class="sd">  levels are distributed throughout the test.</span>
+
+<span class="sd">  .. image:: ../sphinx/alpha-strat.*</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      The number of items the test contains. The selector uses this parameter to create</span>
+<span class="sd">      the correct number of strata.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;a-Stratified Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an AStratSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    test_size : int</span>
+<span class="sd">        Number of items the test contains.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AStratSelector.presort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.AStratSelector.presort_items">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix in ascending order according to the discrimination of each item.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
+<span class="sd">        An item matrix.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Array of item indices sorted in ascending order by discrimination (a parameter).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">discrimination</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AStratBBlockSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.AStratBBlockSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AStratBBlockSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implementation of the :math:`\\alpha`-stratified selector with :math:`b` blocking proposed by [Chang2001]_.</span>
+
+<span class="sd">  In this selector, the item bank is sorted in ascending order according to the items difficulty parameter and then</span>
+<span class="sd">  separated into :math:`M` strata, each stratum containing gradually higher average difficulty.</span>
+
+<span class="sd">  Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size),</span>
+<span class="sd">  according to their discrimination. The final item bank is then ordered such that the first sub-strata of each strata</span>
+<span class="sd">  forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution of both</span>
+<span class="sd">  parameters between all strata, after perceiving that they are correlated.</span>
+
+<span class="sd">  .. image:: ../sphinx/b-blocking.*</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      The number of items the test contains. The selector uses this parameter to</span>
+<span class="sd">      create the correct number of strata.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;a-Stratified b-Blocking Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a AStratBBlockSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    test_size : int</span>
+<span class="sd">        Number of items the test contains.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AStratBBlockSelector.presort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.AStratBBlockSelector.presort_items">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort items in ascending order of discrimination each item, then each strata according to item difficulty.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The sorted item matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># sort items by their b values, in ascending order</span>
+    <span class="n">presorted_items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+
+    <span class="n">final_indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">stratum_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">):</span>
+      <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
+      <span class="n">indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>
+      <span class="n">items_current_stratum</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">indices_current_stratum</span><span class="p">)</span>
+      <span class="n">sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">items_current_stratum</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+      <span class="c1"># sort the items in the current stratum by their discrimination values, in ascending order</span>
+      <span class="n">global_sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">indices_current_stratum</span><span class="p">[</span><span class="n">sorted_indices_current_stratum</span><span class="p">]</span>
+      <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">global_sorted_indices_current_stratum</span><span class="p">)</span>
+
+    <span class="c1"># sort the item bank first by the items maximum information, ascending</span>
+    <span class="c1"># then by their information to the examinee&#39;s cuirrent theta, descending</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MaxInfoStratSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Implementation of the maximum information stratification (MIS) selector proposed by [Bar06]_.</span>
+
+<span class="sd">  In this selector, the item bank is sorted in ascending order according to the items&#39;</span>
+<span class="sd">  maximum information and then separated into :math:`K` strata (:math:`K` being the test</span>
+<span class="sd">  size), each stratum containing items with gradually higher maximum information. The MIS</span>
+<span class="sd">  selector then selects the first non-administered item from stratum :math:`k`, where</span>
+<span class="sd">  :math:`k` represents the position in the test of the current item the examinee is being</span>
+<span class="sd">  presented.</span>
+
+<span class="sd">  .. image:: ../sphinx/mis.*</span>
+
+<span class="sd">  This method claims to work better than the :math:`a`-stratified method by [Chang99]_ for</span>
+<span class="sd">  the three-parameter logistic model of IRT, since item difficulty and maximum information</span>
+<span class="sd">  are not positioned in the same place in the ability scale in 3PL.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      The number of items the test contains. The selector uses this parameter to create</span>
+<span class="sd">      the correct number of strata.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Maximum Information Stratification Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a MaxInfoStratSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    test_size : int</span>
+<span class="sd">        Number of items the test contains.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MaxInfoStratSelector.presort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratSelector.presort_items">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort items in ascending order of maximum information.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
+<span class="sd">        An item matrix.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The sorted item matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Use cached max info values from ItemBank - this is a key optimization!</span>
+    <span class="c1"># get the theta values in which items are maximally informative</span>
+    <span class="c1"># get the information values for all items at their maximum points</span>
+    <span class="n">item_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_values</span>  <span class="c1"># Using cached values!</span>
+    <span class="c1"># globally sort item bank by item max information</span>
+    <span class="k">return</span> <span class="n">item_maxinfo</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MaxInfoStratSelector.postsort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoStratSelector.postsort_items">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">using_simulator_props</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Divide the item bank into strata and sort each one in descending order of information for the current theta.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
+<span class="sd">        The item matrix.</span>
+<span class="sd">    using_simulator_props : bool</span>
+<span class="sd">        Whether the selector is being executed inside a Simulator.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        The current estimate of the examinee&#39;s ability.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The sorted item matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># recover items presorted by the first rule</span>
+    <span class="n">presorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span> <span class="k">if</span> <span class="n">using_simulator_props</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">presort_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
+    <span class="c1"># run through each stratum and sort items in descending order according to</span>
+    <span class="c1"># their information for the current theta value</span>
+    <span class="n">final_indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">stratum_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">):</span>
+      <span class="c1"># grab stratum pointers</span>
+      <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
+      <span class="n">item_indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>  <span class="c1"># item indices for the current stratum</span>
+      <span class="n">items_current_stratum</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span>
+        <span class="n">item_indices_current_stratum</span>
+      <span class="p">)</span>  <span class="c1"># item params for the current stratum</span>
+      <span class="c1"># their information for this theta</span>
+      <span class="n">info_items_current_stratum_current_theta</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items_current_stratum</span><span class="p">)</span>
+      <span class="n">item_indices_current_stratum_sorted_by_info</span> <span class="o">=</span> <span class="n">item_indices_current_stratum</span><span class="p">[</span>
+        <span class="p">(</span><span class="o">-</span><span class="n">info_items_current_stratum_current_theta</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+      <span class="p">]</span>
+      <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item_indices_current_stratum_sorted_by_info</span><span class="p">)</span>
+
+    <span class="c1"># sort the item bank first by the items maximum information, ascending</span>
+    <span class="c1"># then by their information to the examinee&#39;s cuirrent theta, descending</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MaxInfoBBlockSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoBBlockSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoBBlockSelector</span><span class="p">(</span><span class="n">MaxInfoStratSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector [Bar06]_.</span>
+
+<span class="sd">  In this selector, the item bank is sorted in ascending order according to the items difficulty parameter and then</span>
+<span class="sd">  separated into :math:`M` strata, each stratum containing gradually higher average difficulty.</span>
+
+<span class="sd">  Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size),</span>
+<span class="sd">  according to the items maximum information. The final item bank is then ordered such that the first sub-strata of each</span>
+<span class="sd">  strata forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution</span>
+<span class="sd">  of both parameters between all strata and works better than the :math:`a`-stratified with :math:`b` blocking method by</span>
+<span class="sd">  [Chang2001]_ for the three-parameter logistic model of IRT, since item difficulty and maximum information are not</span>
+<span class="sd">  positioned in the same place in the ability scale in 3PL. This may also apply, although not mentioned by the authors,</span>
+<span class="sd">  for the 4PL.</span>
+
+<span class="sd">  .. image:: ../sphinx/mis-b.*</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      The number of items the test contains. The selector uses this parameter to</span>
+<span class="sd">      create the correct number of strata.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Maximum Information Stratification with b-Blocking Selector&quot;</span>
+
+<div class="viewcode-block" id="MaxInfoBBlockSelector.presort_items">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.MaxInfoBBlockSelector.presort_items">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix according to the information of each item at their maximum.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : NDArray[numpy.floating]</span>
+<span class="sd">        An item matrix.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        The sorted item matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Use cached max info values from ItemBank - key optimization!</span>
+    <span class="c1"># get the theta values in which items are maximally informative</span>
+    <span class="n">theta_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span>  <span class="c1"># Using cached values!</span>
+    <span class="c1"># sort items by theta</span>
+    <span class="n">presorted_items</span> <span class="o">=</span> <span class="n">theta_maxinfo</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+    <span class="c1"># get the information values for all items at their maximum points</span>
+    <span class="n">item_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_values</span>  <span class="c1"># Using cached values!</span>
+
+    <span class="n">final_indices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">stratum_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">):</span>
+      <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
+      <span class="n">indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>
+      <span class="c1"># sort items in the current stratum by maximum information, in ascending order</span>
+      <span class="n">sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">item_maxinfo</span><span class="p">[</span><span class="n">indices_current_stratum</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+      <span class="n">global_sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">indices_current_stratum</span><span class="p">[</span><span class="n">sorted_indices_current_stratum</span><span class="p">]</span>
+      <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">global_sorted_indices_current_stratum</span><span class="p">)</span>
+
+    <span class="c1"># sanity check to make sure all indices are present and unique</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">final_indices</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="The54321Selector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.The54321Selector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">The54321Selector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implementation of the 5-4-3-2-1 selector proposed by [McBride83]_.</span>
+
+<span class="sd">  In this selector, at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin containing the</span>
+<span class="sd">  :math:`K-k` most informative items in the bank, given the current :math:`\\hat\\theta`. As the test progresses, the</span>
+<span class="sd">  bin gets smaller and more informative items have a higher probability of being chosen by the end of the test, when the</span>
+<span class="sd">  estimation of &#39;:math:`\\hat\\theta` is more precise. The 5-4-3-2-1 selector can be viewed as a specialization of the</span>
+<span class="sd">  :py:class:`catsim.selection.RandomesqueSelector`, in which the bin size of most informative items gets smaller as the</span>
+<span class="sd">  test progresses.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;5-4-3-2-1 Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a The54321Selector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    test_size : int</span>
+<span class="sd">        The number of items the test contains. The selector uses this parameter to set the bin size.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
+
+<div class="viewcode-block" id="The54321Selector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.The54321Selector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments. Notably:</span>
+
+<span class="sd">        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object,</span>
+<span class="sd">          guarantees reproducibility of outputs.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_rng</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="c1"># sort item indexes by their information value descending and remove indexes of administered items</span>
+    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+    <span class="n">organized_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to apply.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">organized_items</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">bin_size</span><span class="p">])</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RandomesqueSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.RandomesqueSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RandomesqueSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Implementation of the randomesque selector proposed by [Kingsbury89]_.</span>
+
+<span class="sd">  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in</span>
+<span class="sd">  the item bank, :math:`n` being a predefined value (originally 5, but user-defined in this implementation).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Randomesque Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a RandomesqueSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    bin_size : int</span>
+<span class="sd">        The number of most informative items to be taken into consideration when</span>
+<span class="sd">        randomly selecting one of them.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span> <span class="o">=</span> <span class="n">bin_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">bin_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bin size.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span>
+
+<div class="viewcode-block" id="RandomesqueSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.RandomesqueSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments. Notably:</span>
+
+<span class="sd">        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object,</span>
+<span class="sd">          guarantees reproducibility of outputs.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">,</span> <span class="n">rng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_rng</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="c1"># sort item indexes by their information value descending and remove indexes of administered items</span>
+    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
+    <span class="n">organized_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to apply.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">])</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="IntervalInfoSelector">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.IntervalInfoSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntervalInfoSelector</span><span class="p">(</span><span class="n">Selector</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Selects the item that maximizes the integral of the information function at a predetermined ``interval``.</span>
+
+<span class="sd">  The interval is defined by a parameter :math:`\\delta` above and below the current :math:`\\hat\\theta`, like so:</span>
+<span class="sd">  .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta + \\delta}I_i(\\hat\\theta)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Interval Information Selector&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize an IntervalInfoSelector object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    interval : float or None, optional</span>
+<span class="sd">        The interval of the integral. If no interval is passed, the integral is computed from</span>
+<span class="sd">        :math:`[-\\infty, \\infty]`. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="o">=</span> <span class="n">interval</span> <span class="k">if</span> <span class="n">interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the size of the interval under which the integral of the information function will be computed.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
+
+<div class="viewcode-block" id="IntervalInfoSelector.select">
+<a class="viewcode-back" href="../../selection.html#catsim.selection.IntervalInfoSelector.select">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
+<span class="sd">    items : NDArray[numpy.floating] or None, optional</span>
+<span class="sd">        A matrix containing item parameters in the format that `catsim` understands</span>
+<span class="sd">        (see: :py:meth:`ItemBank.generate_item_bank`). Default is None.</span>
+<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
+<span class="sd">    est_theta : float or None, optional</span>
+<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    **kwargs</span>
+<span class="sd">        Additional keyword arguments.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int or None</span>
+<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
+      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
+      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
+      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
+      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="c1"># compute the integral of the information function around an examinee&#39;s ability</span>
+    <span class="n">information_integral</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+      <span class="n">quad</span><span class="p">(</span>
+        <span class="n">irt</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
+        <span class="n">est_theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span>
+        <span class="n">est_theta</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+      <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span>
+    <span class="p">])</span>
+    <span class="c1"># sort by that integral in descending order</span>
+    <span class="n">ordered_items</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">information_integral</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
+    <span class="c1"># remove administered items</span>
+    <span class="n">organized_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;There are no more items to apply.&quot;</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">organized_items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
