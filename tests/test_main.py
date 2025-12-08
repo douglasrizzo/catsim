@@ -166,7 +166,9 @@ def test_finite_selectors(
         response_vector=responses,
         est_theta=est_theta,
       )
-      stopper.stop(administered_items=item_bank.get_items(administered_items), theta=est_theta, rng=rng)
+      stopper.stop(
+        _item_bank=item_bank, administered_items=item_bank.get_items(administered_items), theta=est_theta, rng=rng
+      )
 
       one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
 
