@@ -1,0 +1,838 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Item Response Theory Functions – catsim.irt &mdash; catsim 0.19.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+    <link rel="shortcut icon" href="_static/logo.svg"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=cbfb3150"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Computerized Adaptive Test-related Functions – catsim.cat" href="cat.html" />
+    <link rel="prev" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.NumParams"><code class="docutils literal notranslate"><span class="pre">NumParams</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.confidence_interval"><code class="docutils literal notranslate"><span class="pre">confidence_interval()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.detect_model"><code class="docutils literal notranslate"><span class="pre">detect_model()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.icc"><code class="docutils literal notranslate"><span class="pre">icc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.icc_hpc"><code class="docutils literal notranslate"><span class="pre">icc_hpc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.inf"><code class="docutils literal notranslate"><span class="pre">inf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.inf_hpc"><code class="docutils literal notranslate"><span class="pre">inf_hpc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.log_likelihood"><code class="docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.max_info"><code class="docutils literal notranslate"><span class="pre">max_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.max_info_hpc"><code class="docutils literal notranslate"><span class="pre">max_info_hpc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.negative_log_likelihood"><code class="docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.normalize_item_bank"><code class="docutils literal notranslate"><span class="pre">normalize_item_bank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.reliability"><code class="docutils literal notranslate"><span class="pre">reliability()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.scale_to_theta"><code class="docutils literal notranslate"><span class="pre">scale_to_theta()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.see"><code class="docutils literal notranslate"><span class="pre">see()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.test_info"><code class="docutils literal notranslate"><span class="pre">test_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.theta_to_scale"><code class="docutils literal notranslate"><span class="pre">theta_to_scale()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.validate_item_bank"><code class="docutils literal notranslate"><span class="pre">validate_item_bank()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.var"><code class="docutils literal notranslate"><span class="pre">var()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">catsim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/irt.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="item-response-theory-functions-catsim-irt">
+<h1>Item Response Theory Functions – <a class="reference internal" href="#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><a class="headerlink" href="#item-response-theory-functions-catsim-irt" title="Link to this heading"></a></h1>
+<p>This module contains functions pertaining to the Item Response Theory logistic models, including probability calculations, information functions, likelihood estimation, and other IRT-related utilities.</p>
+<span class="target" id="module-catsim.irt"></span><dl class="py class">
+<dt class="sig sig-object py" id="catsim.irt.NumParams">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">NumParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#NumParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.NumParams" title="Link to this definition"></a></dt>
+<dd><p>Enumerator that informs how many parameters each logistic model of IRT has.</p>
+<p>Created to avoid accessing magic numbers in the code. Each value corresponds
+to the number of parameters in the respective IRT model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>PL1</strong><span class="classifier">int</span></dt><dd><p>One-parameter logistic model (Rasch model).</p>
+</dd>
+<dt><strong>PL2</strong><span class="classifier">int</span></dt><dd><p>Two-parameter logistic model.</p>
+</dd>
+<dt><strong>PL3</strong><span class="classifier">int</span></dt><dd><p>Three-parameter logistic model.</p>
+</dd>
+<dt><strong>PL4</strong><span class="classifier">int</span></dt><dd><p>Four-parameter logistic model.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.confidence_interval">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">confidence_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#confidence_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.confidence_interval" title="Link to this definition"></a></dt>
+<dd><p>Compute the confidence interval for an ability estimate.</p>
+<p>The confidence interval is computed using the normal approximation:</p>
+<div class="math notranslate nohighlight">
+\[CI = \hat{\theta} \pm z_{\alpha/2} \times SEE(\hat{\theta})\]</div>
+<p>where <span class="math notranslate nohighlight">\(z_{\alpha/2}\)</span> is the critical value from the standard normal distribution
+corresponding to the desired confidence level, and <span class="math notranslate nohighlight">\(SEE\)</span> is the standard error
+of estimation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The estimated ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">npt.NDArray[numpy.floating[Any]]</span></dt><dd><p>A matrix containing item parameters for administered items.</p>
+</dd>
+<dt><strong>confidence</strong><span class="classifier">float, optional</span></dt><dd><p>The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).
+Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>tuple[float, float]</dt><dd><p>A tuple containing (lower_bound, upper_bound) of the confidence interval.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If confidence is not between 0 and 1.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">confidence_interval</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;95% CI: [</span><span class="si">{</span><span class="n">lower</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">upper</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span>
+<span class="go">95% CI: [-0.234, 1.234]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.detect_model">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">detect_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#detect_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.detect_model" title="Link to this definition"></a></dt>
+<dd><p>Detect which logistic model an item matrix fits into.</p>
+<p>Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,
+or 4PL model based on which parameters vary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>An item matrix with at least four columns.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>int</dt><dd><p>An integer between 1 and 4 denoting the logistic model:
+- 1: Rasch/1PL (all discrimination equal, no guessing, no upper asymptote)
+- 2: 2PL (varying discrimination, no guessing, no upper asymptote)
+- 3: 3PL (varying discrimination, guessing present, no upper asymptote variation)
+- 4: 4PL (all parameters vary)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.icc">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#icc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc" title="Link to this definition"></a></dt>
+<dd><p>Compute the Item Response Theory four-parameter logistic function <a class="reference internal" href="references.html#magis13" id="id1"><span>[Magis13]</span></a>.</p>
+<p>The item characteristic curve (ICC) represents the probability that an examinee
+with ability <span class="math notranslate nohighlight">\(\theta\)</span> will correctly answer an item with the given parameters.</p>
+<div class="math notranslate nohighlight">
+\[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value. This parameter value has no boundary, but
+if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the
+parameters, then typically <span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</p>
+</dd>
+<dt><strong>a</strong><span class="classifier">float</span></dt><dd><p>The discrimination parameter of the item, usually a positive value in which
+<span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>. Higher values indicate better discrimination
+between ability levels.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float</span></dt><dd><p>The item difficulty parameter. This parameter value has no boundaries, but
+it must be in the same value space as <cite>theta</cite> (usually <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>).
+Higher values indicate more difficult items.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>The item pseudo-guessing parameter. Being a probability, <span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>,
+but items considered good usually have <span class="math notranslate nohighlight">\(c \leq 0.2\)</span>. Represents the
+lower asymptote (probability of guessing correctly). Default is 0.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float, optional</span></dt><dd><p>The item upper asymptote. Being a probability, <span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but
+items considered good usually have <span class="math notranslate nohighlight">\(d \approx 1\)</span>. Represents the maximum
+probability of correct response. Default is 1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The probability <span class="math notranslate nohighlight">\(P(X_i = 1| \theta)\)</span> of a correct response, a value
+between c and d.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.icc_hpc">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">icc_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#icc_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.icc_hpc" title="Link to this definition"></a></dt>
+<dd><p>Compute item characteristic functions for all items in a numpy array at once.</p>
+<p>This is a high-performance computing (HPC) version that uses vectorized operations
+with numpy and numexpr for efficient batch processing of multiple items.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing item parameters with at least four columns
+[a, b, c, d, …].</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>An array of probabilities, one for each item, representing the probability
+of a correct response given the current theta.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.inf">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#inf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf" title="Link to this definition"></a></dt>
+<dd><p>Compute the information value of an item using the Item Response Theory four-parameter logistic model.</p>
+<p>Item information quantifies how precisely an item can estimate ability at a given
+<span class="math notranslate nohighlight">\(\theta\)</span> level. Higher information indicates better precision. References
+are given in <a class="reference internal" href="references.html#ayala2009" id="id2"><span>[Ayala2009]</span></a>, <a class="reference internal" href="references.html#magis13" id="id3"><span>[Magis13]</span></a>.</p>
+<div class="math notranslate nohighlight">
+\[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value. This parameter value has no boundary, but
+if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the
+parameters, then typically <span class="math notranslate nohighlight">\(-4 \leq \theta \leq 4\)</span>.</p>
+</dd>
+<dt><strong>a</strong><span class="classifier">float</span></dt><dd><p>The discrimination parameter of the item, usually a positive value in which
+<span class="math notranslate nohighlight">\(0.8 \leq a \leq 2.5\)</span>.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float</span></dt><dd><p>The item difficulty parameter. This parameter value has no boundary, but
+if a distribution of the form <span class="math notranslate nohighlight">\(N(0, 1)\)</span> was used to estimate the
+parameters, then typically <span class="math notranslate nohighlight">\(-4 \leq b \leq 4\)</span>.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>The item pseudo-guessing parameter. Being a probability, <span class="math notranslate nohighlight">\(0\leq c \leq 1\)</span>,
+but items considered good usually have <span class="math notranslate nohighlight">\(c \leq 0.2\)</span>. Default is 0.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float, optional</span></dt><dd><p>The item upper asymptote. Being a probability, <span class="math notranslate nohighlight">\(0\leq d \leq 1\)</span>, but
+items considered good usually have <span class="math notranslate nohighlight">\(d \approx 1\)</span>. Default is 1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The information value of the item at the designated <cite>theta</cite> point.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.inf_hpc">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">inf_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#inf_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.inf_hpc" title="Link to this definition"></a></dt>
+<dd><p>Compute the information values for all items in a numpy array using numpy and numexpr.</p>
+<p>This is a high-performance computing (HPC) version that uses vectorized operations
+for efficient batch processing of item information values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The individual’s ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing item parameters with at least four columns [a, b, c, d, …].</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Array containing the information values for each item at the given theta.
+Information quantifies how much an item contributes to ability estimation
+precision at the specified ability level.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.log_likelihood">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.</p>
+<p>The likelihood function of a given <span class="math notranslate nohighlight">\(\theta\)</span> value given the answers to <span class="math notranslate nohighlight">\(I\)</span>
+items is given by <a class="reference internal" href="references.html#ayala2009" id="id4"><span>[Ayala2009]</span></a>:</p>
+<div class="math notranslate nohighlight">
+\[L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}\]</div>
+<p>Finding the maximum of <span class="math notranslate nohighlight">\(L(X_{Ij})\)</span> includes using the product rule of derivations.
+Since <span class="math notranslate nohighlight">\(L(X_{Ij})\)</span> has <span class="math notranslate nohighlight">\(j\)</span> parts, it can be quite complicated to do so. Also,
+for computational reasons, the product of probabilities can quickly tend to 0, so it is
+common to use the log-likelihood in maximization/minimization problems, transforming the
+product of probabilities into a sum of log probabilities:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I \left\lbrace x_{ij} \log P_{ij}(\theta)+
+    (1 - x_{ij}) \log Q_{ij}(\theta) \right\rbrace\]</div>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(Q_{ij}(\theta) = 1 - P_{ij}(\theta)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Estimated ability value.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>A boolean list containing the response vector, where True indicates a correct
+response and False indicates an incorrect response.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A numpy array containing the parameters of the answered items.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Log-likelihood of the given ability value, given the responses to the
+administered items. Higher values indicate better fit.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If response vector and administered items have different lengths or if the
+response vector contains non-Boolean elements.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.max_info">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">max_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#max_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.max_info" title="Link to this definition"></a></dt>
+<dd><p>Return the <span class="math notranslate nohighlight">\(\theta\)</span> value at which an item provides maximum information.</p>
+<p>For the 1-parameter and 2-parameter logistic models, this <span class="math notranslate nohighlight">\(\theta\)</span> equals <span class="math notranslate nohighlight">\(b\)</span>.
+In the 3-parameter and 4-parameter logistic models, however, this value is given by
+(<a class="reference internal" href="references.html#magis13" id="id5"><span>[Magis13]</span></a>)</p>
+<div class="math notranslate nohighlight">
+\[argmax_{\theta}I(\theta) = b + \frac{1}{a} log \left(\frac{x^* - c}{d - x^*}\right)\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[x^* = 2 \sqrt{\frac{-u}{3}} cos\left\{\frac{1}{3}acos\left(-\frac{v}{2}\sqrt{\frac{27}{-u^3}}\right)+
+\frac{4 \pi}{3}\right\} + 0.5\]</div>
+<div class="math notranslate nohighlight">
+\[u = -\frac{3}{4} + \frac{c + d - 2cd}{2}\]</div>
+<div class="math notranslate nohighlight">
+\[v = \frac{c + d - 1}{4}\]</div>
+<p>A few results can be seen in the plots below:</p>
+<p>(<a class="reference download internal" download="" href="_downloads/56b7d3c5a7b8582918b2e5042c3fd470/irt-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/4b50962e732e8c4d5f15897400fb6766/irt-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/4713699f9c1418a2d4e71657cc6435d8/irt-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/4e13e2c0751851e21b5fbc7444907342/irt-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default" id="id9">
+<img alt="_images/irt-1.png" class="plot-directive" src="_images/irt-1.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 9 </span><span class="caption-text">Item information curves for two distinct items. The point of maximum information denoted by a dot.</span><a class="headerlink" href="#id9" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>a</strong><span class="classifier">float, optional</span></dt><dd><p>Item discrimination parameter. Default is 1.</p>
+</dd>
+<dt><strong>b</strong><span class="classifier">float, optional</span></dt><dd><p>Item difficulty parameter. Default is 0.</p>
+</dd>
+<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>Item pseudo-guessing parameter. Default is 0.</p>
+</dd>
+<dt><strong>d</strong><span class="classifier">float, optional</span></dt><dd><p>Item upper asymptote. Default is 1.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The <span class="math notranslate nohighlight">\(\theta\)</span> value at which the item with the given parameters
+provides maximum information.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.max_info_hpc">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">max_info_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#max_info_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.max_info_hpc" title="Link to this definition"></a></dt>
+<dd><p>Parallelized version of <a class="reference internal" href="#catsim.irt.max_info" title="catsim.irt.max_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">max_info()</span></code></a> using <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">numexpr</span></code>.</p>
+<p>This high-performance computing version efficiently computes the theta values of
+maximum information for multiple items simultaneously using vectorized operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Array containing item parameters with at least four columns [a, b, c, d, …].</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>An array of theta values, one for each item, indicating where each item’s
+information function reaches its maximum.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.negative_log_likelihood">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">negative_log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#negative_log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.negative_log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.</p>
+<p>This function is used by <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html#module-scipy.optimize" title="(in SciPy v1.16.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy.optimize</span></code></a> optimization functions that tend to
+minimize values, instead of maximizing them. Since we want to maximize the log-likelihood,
+we minimize the negative log-likelihood. The value of <a class="reference internal" href="#catsim.irt.negative_log_likelihood" title="catsim.irt.negative_log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a>
+is simply <span class="math notranslate nohighlight">\(-\)</span> <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Estimated ability value.</p>
+</dd>
+<dt><strong>*args</strong><span class="classifier">tuple</span></dt><dd><p>Variable length argument list. Expected to contain:</p>
+<ul class="simple">
+<li><p>args[0]: response_vector (list[bool]) - A Boolean list containing the response vector</p></li>
+<li><p>args[1]: administered_items (numpy.ndarray) - A numpy array containing the parameters
+of the answered items</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Negative log-likelihood of a given ability value, given the responses to the
+administered items. Lower values indicate better fit.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.normalize_item_bank">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">normalize_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#normalize_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.normalize_item_bank" title="Link to this definition"></a></dt>
+<dd><p>Normalize an item matrix so that it conforms to the standard used by catsim.</p>
+<p>The item matrix must have dimension <span class="math notranslate nohighlight">\(n \times 4\)</span>, in which column 0 represents item
+discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
+parameter and column 3 represents the item upper asymptote.</p>
+<p>This function automatically expands item matrices with fewer than 4 columns:</p>
+<ul class="simple">
+<li><p>1 column (1PL): Assumed to be difficulty. Discrimination=1, c=0, d=1 are added.</p></li>
+<li><p>2 columns (2PL): Assumed to be [discrimination, difficulty]. c=0, d=1 are added.</p></li>
+<li><p>3 columns (3PL): Assumed to be [discrimination, difficulty, pseudo-guessing]. d=1 is added.</p></li>
+<li><p>4 columns (4PL): Already complete, returned as-is.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The item matrix with 1, 2, 3, or 4 columns.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>An <span class="math notranslate nohighlight">\(n \times 4\)</span> item matrix conforming to the 4-parameter logistic model,
+with columns [a, b, c, d].</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.reliability">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">reliability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#reliability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.reliability" title="Link to this definition"></a></dt>
+<dd><p>Compute test reliability <a class="reference internal" href="references.html#thissen00" id="id6"><span>[Thissen00]</span></a>.</p>
+<p>Test reliability is a measure of internal consistency for the test, similar to
+Cronbach’s <span class="math notranslate nohighlight">\(\alpha\)</span> in Classical Test Theory. Its value is always lower than 1,
+with values close to 1 indicating good reliability. If <span class="math notranslate nohighlight">\(I(\theta) &lt; 1\)</span>,
+<span class="math notranslate nohighlight">\(Rel &lt; 0\)</span> and in these cases it does not make sense, but usually the
+application of additional items solves this problem.</p>
+<div class="math notranslate nohighlight">
+\[Rel = 1 - \frac{1}{I(\theta)}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>An ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A matrix containing item parameters.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The test reliability at <cite>theta</cite> for a test represented by <cite>items</cite>. Values
+range from negative infinity to just below 1, with values closer to 1
+indicating higher reliability.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.scale_to_theta">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">scale_to_theta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#scale_to_theta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.scale_to_theta" title="Link to this definition"></a></dt>
+<dd><p>Convert scores from a custom scale to theta values using linear transformation.</p>
+<p>This function transforms scores from any desired scale (e.g., 0-100, 200-800)
+back to the standard IRT theta scale (typically centered at 0).</p>
+<p>The inverse linear transformation is:</p>
+<div class="math notranslate nohighlight">
+\[\theta = \frac{\text{score} - b}{a}\]</div>
+<p>where <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> are determined by the scale mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>score</strong><span class="classifier">float or numpy.ndarray</span></dt><dd><p>Score value(s) on the custom scale.</p>
+</dd>
+<dt><strong>scale_min</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value of the score scale. Default is 0.</p>
+</dd>
+<dt><strong>scale_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value of the score scale. Default is 100.</p>
+</dd>
+<dt><strong>theta_min</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum theta value in the mapping. Default is -4.</p>
+</dd>
+<dt><strong>theta_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum theta value in the mapping. Default is 4.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float or numpy.ndarray</dt><dd><p>The transformed theta value(s). Returns the same type as input.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>This is the inverse of <a class="reference internal" href="#catsim.irt.theta_to_scale" title="catsim.irt.theta_to_scale"><code class="xref py py-func docutils literal notranslate"><span class="pre">theta_to_scale()</span></code></a></p></li>
+<li><p>Useful for converting cutoff scores to theta values for classification</p></li>
+<li><p>Preserves the relative ordering and distances of scores</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert 0-100 score to theta</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scale_to_theta</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span>  <span class="c1"># Average score</span>
+<span class="go">0.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scale_to_theta</span><span class="p">(</span><span class="mf">75.0</span><span class="p">)</span>  <span class="c1"># High score</span>
+<span class="go">2.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scale_to_theta</span><span class="p">(</span><span class="mf">25.0</span><span class="p">)</span>  <span class="c1"># Low score</span>
+<span class="go">-2.0</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert from SAT-like scale (200-800)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scale_to_theta</span><span class="p">(</span><span class="mf">500.0</span><span class="p">,</span> <span class="n">scale_min</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">scale_max</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span class="go">0.0</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert multiple values at once</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">scale_to_theta</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+<span class="go">array([-4., -2.,  0.,  2.,  4.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.see">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">see</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#see"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.see" title="Link to this definition"></a></dt>
+<dd><p>Compute the standard error of estimation (<span class="math notranslate nohighlight">\(SEE\)</span>) of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id7"><span>[Ayala2009]</span></a>.</p>
+<p>The standard error of estimation is the square root of variance and represents
+the typical error in ability estimation. It is in the same units as the ability
+scale, making it more interpretable than variance.</p>
+<div class="math notranslate nohighlight">
+\[SEE = \sqrt{\frac{1}{I(\theta)}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>An ability value.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">npt.NDArray[numpy.floating[Any]]</span></dt><dd><p>A matrix containing item parameters.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The standard error of estimation at <cite>theta</cite> for a test represented by <cite>items</cite>.
+Returns infinity if test information is 0.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.test_info">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">test_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#test_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.test_info" title="Link to this definition"></a></dt>
+<dd><p>Compute the test information of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value <a class="reference internal" href="references.html#ayala2009" id="id8"><span>[Ayala2009]</span></a>.</p>
+<p>Test information is the sum of individual item information values and indicates
+the precision of ability estimation at a given ability level.</p>
+<div class="math notranslate nohighlight">
+\[I(\theta) = \sum_{j \in J} I_j(\theta)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>An ability value at which to compute test information.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A matrix containing item parameters with at least four columns [a, b, c, d, …].</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The test information at <cite>theta</cite> for a test represented by <cite>items</cite>.
+Higher values indicate more precise ability estimation.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.theta_to_scale">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">theta_to_scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/irt.html#theta_to_scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.theta_to_scale" title="Link to this definition"></a></dt>
+<dd><p>Convert theta values to a custom score scale using linear transformation.</p>
+<p>This function transforms ability estimates from the standard IRT theta scale
+(typically centered at 0) to any desired score scale (e.g., 0-100, 200-800).</p>
+<p>The linear transformation is:</p>
+<div class="math notranslate nohighlight">
+\[\text{score} = a \cdot \theta + b\]</div>
+<p>where <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> are determined by mapping the theta range to the score range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float or numpy.ndarray</span></dt><dd><p>Ability value(s) on the theta scale.</p>
+</dd>
+<dt><strong>scale_min</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum value of the target score scale. Default is 0.</p>
+</dd>
+<dt><strong>scale_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum value of the target score scale. Default is 100.</p>
+</dd>
+<dt><strong>theta_min</strong><span class="classifier">float, optional</span></dt><dd><p>Minimum theta value to map. Default is -4 (typical lower bound).</p>
+</dd>
+<dt><strong>theta_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum theta value to map. Default is 4 (typical upper bound).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float or numpy.ndarray</dt><dd><p>The transformed score(s) on the target scale. Returns the same type as input.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Values outside [theta_min, theta_max] are extrapolated linearly</p></li>
+<li><p>The transformation preserves relative distances between ability levels</p></li>
+<li><p>Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert theta to 0-100 scale</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta_to_scale</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>  <span class="c1"># Average ability</span>
+<span class="go">50.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta_to_scale</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># High ability</span>
+<span class="go">75.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta_to_scale</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="p">)</span>  <span class="c1"># Low ability</span>
+<span class="go">25.0</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert to SAT-like scale (200-800)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta_to_scale</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scale_min</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">scale_max</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+<span class="go">500.0</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert multiple values at once</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta_to_scale</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+<span class="go">array([  0.,  25.,  50.,  75., 100.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.validate_item_bank">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">validate_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_err</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#validate_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.validate_item_bank" title="Link to this definition"></a></dt>
+<dd><p>Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</p>
+<p>The item matrix must have dimension <span class="math notranslate nohighlight">\(n \times 4\)</span>, in which column 0 represents item
+discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
+parameter and column 3 represents the item upper asymptote.</p>
+<p>The item matrix must have at least one line (representing an item) and exactly four columns,
+representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
+(<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>), respectively. The item matrix is considered
+valid if, for all items in the matrix, <span class="math notranslate nohighlight">\(a &gt; 0 \wedge 0 \leq c \leq 1 \wedge 0 \leq d \leq 1\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The item matrix to validate.</p>
+</dd>
+<dt><strong>raise_err</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to raise an error in case the validation fails (True) or just print
+the error message to standard output (False). Default is False.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If items is not a numpy.ndarray.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If raise_err is True and the item matrix does not meet validation criteria.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.var">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.3)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.3)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/irt.html#var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.var" title="Link to this definition"></a></dt>
+<dd><p>Compute the variance (<span class="math notranslate nohighlight">\(Var\)</span>) of the ability estimate of a test at a specific <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
+<p>Variance quantifies the uncertainty in the ability estimate. Lower variance
+indicates more precise estimation.</p>
+<div class="math notranslate nohighlight">
+\[Var = \frac{1}{I(\theta)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is the test information (see <a class="reference internal" href="#catsim.irt.test_info" title="catsim.irt.test_info"><code class="xref py py-func docutils literal notranslate"><span class="pre">test_info()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>An ability value (required if <cite>test_inf</cite> is not provided). Default is None.</p>
+</dd>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>A matrix containing item parameters (required if <cite>test_inf</cite> is not provided).
+Default is None.</p>
+</dd>
+<dt><strong>test_inf</strong><span class="classifier">float or None, optional</span></dt><dd><p>The test information value. If provided, <cite>theta</cite> and <cite>items</cite> are not required.
+Default is None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The variance of ability estimation. Returns negative infinity if test
+information is 0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If neither <cite>test_inf</cite> nor both <cite>theta</cite> and <cite>items</cite> are provided.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="simulation.html" class="btn btn-neutral float-left" title="Computerized Adaptive Testing Simulation – catsim.simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cat.html" class="btn btn-neutral float-right" title="Computerized Adaptive Test-related Functions – catsim.cat" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

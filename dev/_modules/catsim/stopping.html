@@ -1,0 +1,849 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>catsim.stopping &mdash; catsim 0.19.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+    <link rel="shortcut icon" href="../../_static/logo.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=cbfb3150"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo_text.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reproducibility.html">Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">catsim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">catsim.stopping</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for catsim.stopping</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stopper</span>
+
+
+<div class="viewcode-block" id="CombinationStrategy">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.CombinationStrategy">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CombinationStrategy</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Strategy for combining multiple stopping criteria.</span>
+
+<span class="sd">  Attributes</span>
+<span class="sd">  ----------</span>
+<span class="sd">  OR : str</span>
+<span class="sd">      Test stops when ANY of the stoppers indicates stopping (logical OR).</span>
+<span class="sd">      This is useful when you want the test to end as soon as any condition is met.</span>
+<span class="sd">  AND : str</span>
+<span class="sd">      Test stops when ALL of the stoppers indicate stopping (logical AND).</span>
+<span class="sd">      This is useful when you want the test to continue until all conditions are met.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">OR</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span>
+  <span class="n">AND</span> <span class="o">=</span> <span class="s2">&quot;and&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MaxItemStopper">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.MaxItemStopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MaxItemStopper</span><span class="p">(</span><span class="n">Stopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Stopping criterion based on maximum number of items in a test.</span>
+
+<span class="sd">  The test stops when the specified maximum number of items has been administered.</span>
+<span class="sd">  This is the most common stopping criterion in fixed-length CATs.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  max_itens : int</span>
+<span class="sd">      The maximum number of items to be administered in the test.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Stopper.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Maximum Item Number Initializer&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_itens</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a MaxItemStopper.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    max_itens : int</span>
+<span class="sd">        Maximum number of items to be administered. Must be positive.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_max_itens</span> <span class="o">=</span> <span class="n">max_itens</span>
+
+<div class="viewcode-block" id="MaxItemStopper.stop">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.MaxItemStopper.stop">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the test reached its stopping criterion for the given user.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. Default is None.</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
+<span class="sd">        A matrix containing the parameters of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments. Not used by this method.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if the test met its stopping criterion (maximum items reached), False otherwise.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If more items than permitted were administered, or if required parameters are missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">administered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Required parameters are missing. Either index and simulator or administered_items must be provided.&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">n_itens</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_itens</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_itens</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;More items than permitted were administered: </span><span class="si">{</span><span class="n">n_itens</span><span class="si">}</span><span class="s2"> &gt; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_itens</span><span class="si">}</span><span class="s2">.&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">n_itens</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_itens</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">max_itens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the maximum number of items the Stopper is configured to administer.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        The maximum number of items the Stopper is configured to administer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_itens</span></div>
+
+
+
+<div class="viewcode-block" id="MinErrorStopper">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.MinErrorStopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MinErrorStopper</span><span class="p">(</span><span class="n">Stopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Stopping criterion based on minimum standard error of estimation.</span>
+
+<span class="sd">  The test stops when the standard error of estimation (see :py:func:`catsim.irt.see`)</span>
+<span class="sd">  falls below the specified threshold. This is commonly used in variable-length CATs</span>
+<span class="sd">  to achieve a desired level of measurement precision.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  min_error : float</span>
+<span class="sd">      The minimum standard error of estimation the test must achieve before stopping.</span>
+<span class="sd">      Must be positive. Smaller values require more items for higher precision.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Stopper.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Minimum Error Initializer&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_error</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a MinErrorStopper.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_error : float</span>
+<span class="sd">        Error tolerance in estimated examinee ability to stop the test.</span>
+<span class="sd">        The test stops when the standard error of estimation falls below this value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_min_error</span> <span class="o">=</span> <span class="n">min_error</span>
+
+<div class="viewcode-block" id="MinErrorStopper.stop">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.MinErrorStopper.stop">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the test reached its stopping criterion.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. Default is None.</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
+<span class="sd">        A matrix containing the parameters of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    theta : float or None, optional</span>
+<span class="sd">        An ability value to which the error will be computed. Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments. Not used by this method.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if the test met its stopping criterion (standard error below minimum),</span>
+<span class="sd">        False otherwise.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If required parameters are missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Required parameters are missing. Either administered_items and theta or index and simulator must be provided.&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">see</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">administered_items_array</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">see</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_error</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ItemBankLengthStopper">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.ItemBankLengthStopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ItemBankLengthStopper</span><span class="p">(</span><span class="n">Stopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Stopping criterion based on exhausting the entire item bank.</span>
+
+<span class="sd">  The test stops when all items in the item bank have been administered to the</span>
+<span class="sd">  examinee. This is useful for ensuring that an examinee never runs out of items,</span>
+<span class="sd">  or for creating tests that must use all available items.</span>
+
+<span class="sd">  This stopper is typically used in combination with other stoppers (via</span>
+<span class="sd">  CombinationStopper with OR strategy) to prevent item exhaustion errors.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # Stop when item bank is exhausted (safety mechanism)</span>
+<span class="sd">  &gt;&gt;&gt; stopper = ItemBankLengthStopper()</span>
+
+<span class="sd">  &gt;&gt;&gt; # Combine with other criteria: stop at 30 items OR when bank exhausted</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.stopping import CombinationStopper, CombinationStrategy</span>
+<span class="sd">  &gt;&gt;&gt; stopper = CombinationStopper(</span>
+<span class="sd">  ...     [MaxItemStopper(30), ItemBankLengthStopper()],</span>
+<span class="sd">  ...     strategy=CombinationStrategy.OR</span>
+<span class="sd">  ... )</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Stopper.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Item Bank Length Stopper&quot;</span>
+
+<div class="viewcode-block" id="ItemBankLengthStopper.stop">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.ItemBankLengthStopper.stop">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether all items in the item bank have been administered.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. Default is None.</span>
+<span class="sd">    _item_bank : ItemBank or None, optional</span>
+<span class="sd">        The item bank being used. Default is None.</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
+<span class="sd">        A matrix containing the parameters of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments. Not used by this method.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if all items in the item bank have been administered, False otherwise.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If required parameters are missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get the item bank and administered items</span>
+    <span class="k">if</span> <span class="n">_item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">bank_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_item_bank</span><span class="p">)</span>
+      <span class="n">n_administered</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">bank_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="p">)</span>
+      <span class="n">n_administered</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Required parameters are missing. Either _item_bank and administered_items or index and simulator must be &quot;</span>
+        <span class="s2">&quot;provided.&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># Stop if all items have been administered</span>
+    <span class="k">return</span> <span class="n">n_administered</span> <span class="o">&gt;=</span> <span class="n">bank_size</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CombinationStopper">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.CombinationStopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CombinationStopper</span><span class="p">(</span><span class="n">Stopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Stopping criterion that combines multiple stoppers using AND or OR logic.</span>
+
+<span class="sd">  This stopper allows you to combine multiple stopping criteria in a flexible way.</span>
+<span class="sd">  With OR logic (default), the test stops when ANY of the stoppers indicates stopping.</span>
+<span class="sd">  With AND logic, the test stops only when ALL stoppers indicate stopping.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  stoppers : list[Stopper]</span>
+<span class="sd">      A list of Stopper instances to combine. Must contain at least one stopper.</span>
+<span class="sd">  strategy : CombinationStrategy, optional</span>
+<span class="sd">      The combination strategy to use. Default is CombinationStrategy.OR.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # Stop when either 30 items OR error &lt; 0.4 (whichever comes first)</span>
+<span class="sd">  &gt;&gt;&gt; stopper = CombinationStopper(</span>
+<span class="sd">  ...     [MaxItemStopper(30), MinErrorStopper(0.4)],</span>
+<span class="sd">  ...     strategy=CombinationStrategy.OR</span>
+<span class="sd">  ... )</span>
+
+<span class="sd">  &gt;&gt;&gt; # Stop only when BOTH 20 items AND error &lt; 0.3 are achieved</span>
+<span class="sd">  &gt;&gt;&gt; stopper = CombinationStopper(</span>
+<span class="sd">  ...     [MaxItemStopper(20), MinErrorStopper(0.3)],</span>
+<span class="sd">  ...     strategy=CombinationStrategy.AND</span>
+<span class="sd">  ... )</span>
+
+<span class="sd">  &gt;&gt;&gt; # Combine three stoppers: stop when any condition is met</span>
+<span class="sd">  &gt;&gt;&gt; stopper = CombinationStopper(</span>
+<span class="sd">  ...     [</span>
+<span class="sd">  ...         MaxItemStopper(50),</span>
+<span class="sd">  ...         MinErrorStopper(0.3),</span>
+<span class="sd">  ...         ConfidenceIntervalStopper([-1.0, 0.0, 1.0], confidence=0.90)</span>
+<span class="sd">  ...     ],</span>
+<span class="sd">  ...     strategy=CombinationStrategy.OR</span>
+<span class="sd">  ... )</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Stopper.&quot;&quot;&quot;</span>
+    <span class="n">strategy_name</span> <span class="o">=</span> <span class="s2">&quot;OR&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="n">CombinationStrategy</span><span class="o">.</span><span class="n">OR</span> <span class="k">else</span> <span class="s2">&quot;AND&quot;</span>
+    <span class="n">stopper_names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoppers</span><span class="p">]</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Combination Stopper (</span><span class="si">{</span><span class="n">strategy_name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stopper_names</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stoppers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Stopper</span><span class="p">],</span> <span class="n">strategy</span><span class="p">:</span> <span class="n">CombinationStrategy</span> <span class="o">=</span> <span class="n">CombinationStrategy</span><span class="o">.</span><span class="n">OR</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a CombinationStopper.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    stoppers : list[Stopper]</span>
+<span class="sd">        List of Stopper instances to combine. Must contain at least one stopper.</span>
+<span class="sd">    strategy : CombinationStrategy, optional</span>
+<span class="sd">        The combination strategy (OR or AND). Default is CombinationStrategy.OR.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If stoppers list is empty or contains non-Stopper objects.</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If strategy is not a CombinationStrategy enum value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stoppers</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;stoppers list must contain at least one Stopper&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Stopper</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stoppers</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;All elements in stoppers list must be Stopper instances&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">strategy</span><span class="p">,</span> <span class="n">CombinationStrategy</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;strategy must be a CombinationStrategy enum value, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">strategy</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_stoppers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">stoppers</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">=</span> <span class="n">strategy</span>
+
+<div class="viewcode-block" id="CombinationStopper.stop">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.CombinationStopper.stop">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the combined stopping criterion is met.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. Default is None.</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
+<span class="sd">        A matrix containing the parameters of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    theta : float or None, optional</span>
+<span class="sd">        An ability value. Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments passed to individual stoppers.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        - If strategy is OR: True if ANY stopper indicates stopping</span>
+<span class="sd">        - If strategy is AND: True if ALL stoppers indicate stopping</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The CombinationStopper extracts data from the simulator (if needed) and calls</span>
+<span class="sd">    all child stoppers in standalone mode with explicit parameters, so the child</span>
+<span class="sd">    stoppers don&#39;t need to depend on having a simulator reference.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># If administered_items or theta not provided, get them from simulator</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">administered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+      <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+      <span class="c1"># Also get item_bank if not provided</span>
+      <span class="k">if</span> <span class="n">_item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_item_bank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span>
+    <span class="k">elif</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Required parameters are missing. Either index and simulator or administered_items and theta must be provided.&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># Call all stoppers with explicit parameters (standalone mode)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">stopper</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoppers</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span>
+        <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">_item_bank</span><span class="o">=</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+      <span class="p">)</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># Combine results based on strategy</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span> <span class="o">==</span> <span class="n">CombinationStrategy</span><span class="o">.</span><span class="n">OR</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="c1"># CombinationStrategy.AND</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">results</span><span class="p">)</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stoppers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Stopper</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the list of stoppers being combined.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[Stopper]</span>
+<span class="sd">        The list of Stopper instances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stoppers</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CombinationStrategy</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the combination strategy.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    CombinationStrategy</span>
+<span class="sd">        The combination strategy (OR or AND).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strategy</span></div>
+
+
+
+<div class="viewcode-block" id="ConfidenceIntervalStopper">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.ConfidenceIntervalStopper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfidenceIntervalStopper</span><span class="p">(</span><span class="n">Stopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Stopping criterion based on confidence interval falling within discrete ability intervals.</span>
+
+<span class="sd">  This stopper is designed for tests with discrete performance levels (e.g., letter grades</span>
+<span class="sd">  A, B, C, D, F) defined by intervals on the ability scale. The test stops when the</span>
+<span class="sd">  confidence interval for the examinee&#39;s ability estimate falls entirely within one of</span>
+<span class="sd">  these discrete intervals, indicating sufficient precision to classify the examinee.</span>
+
+<span class="sd">  The figure below illustrates the concept with an example where an examinee&#39;s ability</span>
+<span class="sd">  is estimated at θ = 1.0 with a confidence interval that falls entirely within the</span>
+<span class="sd">  grade B interval [0.5, 1.5), causing the test to stop.</span>
+
+<span class="sd">  .. plot::</span>
+<span class="sd">      :caption: Confidence interval-based stopping. The shaded area shows the 90% confidence</span>
+<span class="sd">                interval around the estimated ability (θ = 1.0). Since the entire confidence</span>
+<span class="sd">                interval falls within the grade B boundaries, the test stops.</span>
+
+<span class="sd">      import matplotlib.pyplot as plt</span>
+<span class="sd">      import numpy as np</span>
+<span class="sd">      from scipy import stats</span>
+
+<span class="sd">      # Setup</span>
+<span class="sd">      fig, ax = plt.subplots(figsize=(12, 6))</span>
+
+<span class="sd">      # Define grade boundaries</span>
+<span class="sd">      boundaries = [-1.5, -0.5, 0.5, 1.5]</span>
+<span class="sd">      grade_names = [&#39;F&#39;, &#39;D&#39;, &#39;C&#39;, &#39;B&#39;, &#39;A&#39;]</span>
+<span class="sd">      grade_colors = [&#39;#ff6b6b&#39;, &#39;#ffa07a&#39;, &#39;#ffd93d&#39;, &#39;#95e1d3&#39;, &#39;#6bcf7f&#39;]</span>
+
+<span class="sd">      # Define the ability scale range</span>
+<span class="sd">      theta_range = np.linspace(-3, 3, 1000)</span>
+
+<span class="sd">      # Draw grade regions with shading</span>
+<span class="sd">      regions = [</span>
+<span class="sd">        (-3, boundaries[0])</span>
+<span class="sd">      ] + [</span>
+<span class="sd">        (boundaries[i], boundaries[i+1]) for i in range(len(boundaries)-1)</span>
+<span class="sd">      ] + [</span>
+<span class="sd">        (boundaries[-1], 3)</span>
+<span class="sd">      ]</span>
+
+<span class="sd">      for i, (start, end) in enumerate(regions):</span>
+<span class="sd">          ax.axvspan(start, end, alpha=0.15, color=grade_colors[i], label=f&#39;Grade {grade_names[i]}&#39;)</span>
+<span class="sd">          # Add grade label in the middle of each region</span>
+<span class="sd">          mid = (start + end) / 2</span>
+<span class="sd">          ax.text(</span>
+<span class="sd">              mid, 0.85, grade_names[i], ha=&#39;center&#39;, va=&#39;center&#39;,</span>
+<span class="sd">              fontsize=16, fontweight=&#39;bold&#39;, color=grade_colors[i],</span>
+<span class="sd">              bbox=dict(</span>
+<span class="sd">                  boxstyle=&#39;round,pad=0.5&#39;,</span>
+<span class="sd">                  facecolor=&#39;white&#39;,</span>
+<span class="sd">                  edgecolor=grade_colors[i],</span>
+<span class="sd">                  linewidth=2</span>
+<span class="sd">              )</span>
+<span class="sd">          )</span>
+
+<span class="sd">      # Draw boundary lines</span>
+<span class="sd">      for boundary in boundaries:</span>
+<span class="sd">          ax.axvline(boundary, color=&#39;black&#39;, linestyle=&#39;--&#39;, linewidth=2, alpha=0.5)</span>
+
+<span class="sd">      # Example: examinee with theta = 1.0 and SEE = 0.2</span>
+<span class="sd">      # This gives a CI that falls entirely within grade B [0.5, 1.5)</span>
+<span class="sd">      estimated_theta = 1.0</span>
+<span class="sd">      see = 0.2</span>
+<span class="sd">      confidence = 0.90</span>
+
+<span class="sd">      # Calculate confidence interval</span>
+<span class="sd">      z_score = stats.norm.ppf((1 + confidence) / 2)</span>
+<span class="sd">      ci_lower = estimated_theta - z_score * see</span>
+<span class="sd">      ci_upper = estimated_theta + z_score * see</span>
+
+<span class="sd">      # Draw normal distribution curve</span>
+<span class="sd">      normal_curve = stats.norm.pdf(theta_range, estimated_theta, see)</span>
+<span class="sd">      # Scale it for visibility</span>
+<span class="sd">      normal_curve_scaled = normal_curve * 0.6 / np.max(normal_curve)</span>
+
+<span class="sd">      ax.plot(theta_range, normal_curve_scaled, &#39;b-&#39;, linewidth=2.5, label=&#39;Ability distribution&#39;)</span>
+
+<span class="sd">      # Shade the confidence interval</span>
+<span class="sd">      mask = (theta_range &gt;= ci_lower) &amp; (theta_range &lt;= ci_upper)</span>
+<span class="sd">      ax.fill_between(</span>
+<span class="sd">          theta_range[mask], 0, normal_curve_scaled[mask],</span>
+<span class="sd">          alpha=0.4, color=&#39;blue&#39;, label=f&#39;{int(confidence*100)}% Confidence Interval&#39;</span>
+<span class="sd">      )</span>
+
+<span class="sd">      # Mark the estimated theta</span>
+<span class="sd">      ax.plot(estimated_theta, 0, &#39;ro&#39;, markersize=15, label=f&#39;Estimated θ = {estimated_theta}&#39;, zorder=5)</span>
+<span class="sd">      ax.axvline(estimated_theta, color=&#39;red&#39;, linestyle=&#39;-&#39;, linewidth=2, alpha=0.7, ymax=0.65)</span>
+
+<span class="sd">      # Mark confidence interval bounds</span>
+<span class="sd">      ax.axvline(ci_lower, color=&#39;blue&#39;, linestyle=&#39;:&#39;, linewidth=2, alpha=0.8)</span>
+<span class="sd">      ax.axvline(ci_upper, color=&#39;blue&#39;, linestyle=&#39;:&#39;, linewidth=2, alpha=0.8)</span>
+
+<span class="sd">      # Add arrows and labels for CI bounds</span>
+<span class="sd">      ax.annotate(</span>
+<span class="sd">          f&#39;CI Lower\n{ci_lower:.2f}&#39;, xy=(ci_lower, 0.35), xytext=(ci_lower-0.4, 0.45),</span>
+<span class="sd">          fontsize=10, ha=&#39;center&#39;, color=&#39;blue&#39;,</span>
+<span class="sd">          arrowprops=dict(arrowstyle=&#39;-&gt;&#39;, color=&#39;blue&#39;, lw=1.5)</span>
+<span class="sd">      )</span>
+<span class="sd">      ax.annotate(</span>
+<span class="sd">          f&#39;CI Upper\n{ci_upper:.2f}&#39;, xy=(ci_upper, 0.35), xytext=(ci_upper+0.4, 0.45),</span>
+<span class="sd">          fontsize=10, ha=&#39;center&#39;, color=&#39;blue&#39;,</span>
+<span class="sd">          arrowprops=dict(arrowstyle=&#39;-&gt;&#39;, color=&#39;blue&#39;, lw=1.5)</span>
+<span class="sd">      )</span>
+
+<span class="sd">      # Add decision box</span>
+<span class="sd">      ax.text(</span>
+<span class="sd">          1.0, 0.72, &#39;CI entirely in Grade B\n→ STOP TEST&#39;,</span>
+<span class="sd">          ha=&#39;center&#39;, va=&#39;center&#39;, fontsize=12, fontweight=&#39;bold&#39;,</span>
+<span class="sd">          bbox=dict(</span>
+<span class="sd">              boxstyle=&#39;round,pad=0.8&#39;,</span>
+<span class="sd">              facecolor=&#39;lightgreen&#39;,</span>
+<span class="sd">              edgecolor=&#39;darkgreen&#39;,</span>
+<span class="sd">              linewidth=3</span>
+<span class="sd">          )</span>
+<span class="sd">      )</span>
+
+<span class="sd">      # Formatting</span>
+<span class="sd">      ax.set_xlabel(&#39;Ability (θ)&#39;, fontsize=14, fontweight=&#39;bold&#39;)</span>
+<span class="sd">      ax.set_ylabel(&#39;Probability Density&#39;, fontsize=14, fontweight=&#39;bold&#39;)</span>
+<span class="sd">      ax.set_title(&#39;Confidence Interval-Based Stopping Criterion&#39;, fontsize=16, fontweight=&#39;bold&#39;, pad=20)</span>
+<span class="sd">      ax.set_xlim(-3, 3)</span>
+<span class="sd">      ax.set_ylim(0, 0.95)</span>
+<span class="sd">      ax.grid(True, alpha=0.3, linestyle=&#39;:&#39;, linewidth=0.5)</span>
+<span class="sd">      ax.legend(loc=&#39;upper left&#39;, fontsize=10, framealpha=0.9)</span>
+
+<span class="sd">      plt.tight_layout()</span>
+<span class="sd">      plt.show()</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  interval_bounds : list[float]</span>
+<span class="sd">      Sorted list of boundary points defining the discrete intervals on the ability scale.</span>
+<span class="sd">      For example, [-2.0, -0.5, 0.5, 2.0] defines 5 intervals:</span>
+<span class="sd">      (-inf, -2.0), [-2.0, -0.5), [-0.5, 0.5), [0.5, 2.0), [2.0, inf)</span>
+<span class="sd">  confidence : float, optional</span>
+<span class="sd">      The confidence level for computing the confidence interval, must be between 0 and 1.</span>
+<span class="sd">      Default is 0.95 (95% confidence).</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # Define grade boundaries: F (&lt;-1), D [-1, 0), C [0, 1), B [1, 2), A (&gt;=2)</span>
+<span class="sd">  &gt;&gt;&gt; stopper = ConfidenceIntervalStopper([-1.0, 0.0, 1.0, 2.0], confidence=0.95)</span>
+<span class="sd">  &gt;&gt;&gt; # Test stops when 95% CI is entirely within one grade interval</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Stopper.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;Confidence Interval Stopper&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_bounds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a ConfidenceIntervalStopper.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    interval_bounds : list[float]</span>
+<span class="sd">        Sorted list of boundary points on the ability scale. Must contain at least one value.</span>
+<span class="sd">    confidence : float, optional</span>
+<span class="sd">        Confidence level for the interval computation (between 0 and 1). Default is 0.95.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If interval_bounds is empty, not sorted, or confidence is not between 0 and 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">interval_bounds</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;interval_bounds must contain at least one value&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># Verify bounds are sorted</span>
+    <span class="n">sorted_bounds</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">interval_bounds</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sorted_bounds</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="n">interval_bounds</span><span class="p">):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;interval_bounds must be sorted in ascending order&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;confidence must be between 0 and 1, got </span><span class="si">{</span><span class="n">confidence</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">interval_bounds</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span> <span class="o">=</span> <span class="n">confidence</span>
+
+<div class="viewcode-block" id="ConfidenceIntervalStopper.stop">
+<a class="viewcode-back" href="../../stopping.html#catsim.stopping.ConfidenceIntervalStopper.stop">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check whether the confidence interval falls entirely within a discrete interval.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    index : int or None, optional</span>
+<span class="sd">        The index of the current examinee. Default is None.</span>
+<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
+<span class="sd">        A matrix containing the parameters of items that were already administered.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    theta : float or None, optional</span>
+<span class="sd">        An ability value to which the confidence interval will be computed. Default is None.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Additional keyword arguments. Not used by this method.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if the confidence interval for the ability estimate falls entirely within</span>
+<span class="sd">        one of the discrete intervals, False otherwise.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If required parameters are missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get administered items and theta</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;Required parameters are missing. Either administered_items and theta or index and simulator must be provided.&quot;</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># Need at least one item to compute confidence interval</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items_array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Compute confidence interval</span>
+    <span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">administered_items_array</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span><span class="p">)</span>
+
+    <span class="c1"># Check if the entire confidence interval falls within one of the discrete intervals</span>
+    <span class="c1"># The discrete intervals are:</span>
+    <span class="c1"># (-inf, bounds[0]), [bounds[0], bounds[1]), ..., [bounds[n-1], inf)</span>
+
+    <span class="c1"># Check if CI is in the leftmost interval (-inf, bounds[0])</span>
+    <span class="k">if</span> <span class="n">upper_bound</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Check if CI is in the rightmost interval [bounds[-1], inf)</span>
+    <span class="k">if</span> <span class="n">lower_bound</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Check if CI falls within any middle interval [bounds[i], bounds[i+1])</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">lower_bound</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">upper_bound</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">interval_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the interval boundary points.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[float]</span>
+<span class="sd">        The boundary points defining the discrete intervals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval_bounds</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">confidence</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the confidence level.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The confidence level used for computing confidence intervals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

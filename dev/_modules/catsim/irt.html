@@ -1,0 +1,1037 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>catsim.irt &mdash; catsim 0.19.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+    <link rel="shortcut icon" href="../../_static/logo.svg"/>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=cbfb3150"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html">
+            
+              <img src="../../_static/logo_text.svg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reproducibility.html">Reproducibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">Bibliography</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">catsim</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">catsim.irt</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for catsim.irt</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numexpr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+
+
+<div class="viewcode-block" id="NumParams">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.NumParams">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NumParams</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Enumerator that informs how many parameters each logistic model of IRT has.</span>
+
+<span class="sd">  Created to avoid accessing magic numbers in the code. Each value corresponds</span>
+<span class="sd">  to the number of parameters in the respective IRT model.</span>
+
+<span class="sd">  Attributes</span>
+<span class="sd">  ----------</span>
+<span class="sd">  PL1 : int</span>
+<span class="sd">      One-parameter logistic model (Rasch model).</span>
+<span class="sd">  PL2 : int</span>
+<span class="sd">      Two-parameter logistic model.</span>
+<span class="sd">  PL3 : int</span>
+<span class="sd">      Three-parameter logistic model.</span>
+<span class="sd">  PL4 : int</span>
+<span class="sd">      Four-parameter logistic model.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">PL1</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="n">PL2</span> <span class="o">=</span> <span class="mi">2</span>
+  <span class="n">PL3</span> <span class="o">=</span> <span class="mi">3</span>
+  <span class="n">PL4</span> <span class="o">=</span> <span class="mi">4</span></div>
+
+
+
+<div class="viewcode-block" id="icc">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.icc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">icc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the Item Response Theory four-parameter logistic function [Magis13]_.</span>
+
+<span class="sd">  The item characteristic curve (ICC) represents the probability that an examinee</span>
+<span class="sd">  with ability :math:`\theta` will correctly answer an item with the given parameters.</span>
+
+<span class="sd">  .. math:: P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      The individual&#39;s ability value. This parameter value has no boundary, but</span>
+<span class="sd">      if a distribution of the form :math:`N(0, 1)` was used to estimate the</span>
+<span class="sd">      parameters, then typically :math:`-4 \leq \theta \leq 4`.</span>
+<span class="sd">  a : float</span>
+<span class="sd">      The discrimination parameter of the item, usually a positive value in which</span>
+<span class="sd">      :math:`0.8 \leq a \leq 2.5`. Higher values indicate better discrimination</span>
+<span class="sd">      between ability levels.</span>
+<span class="sd">  b : float</span>
+<span class="sd">      The item difficulty parameter. This parameter value has no boundaries, but</span>
+<span class="sd">      it must be in the same value space as `theta` (usually :math:`-4 \leq b \leq 4`).</span>
+<span class="sd">      Higher values indicate more difficult items.</span>
+<span class="sd">  c : float, optional</span>
+<span class="sd">      The item pseudo-guessing parameter. Being a probability, :math:`0\leq c \leq 1`,</span>
+<span class="sd">      but items considered good usually have :math:`c \leq 0.2`. Represents the</span>
+<span class="sd">      lower asymptote (probability of guessing correctly). Default is 0.</span>
+<span class="sd">  d : float, optional</span>
+<span class="sd">      The item upper asymptote. Being a probability, :math:`0\leq d \leq 1`, but</span>
+<span class="sd">      items considered good usually have :math:`d \approx 1`. Represents the maximum</span>
+<span class="sd">      probability of correct response. Default is 1.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The probability :math:`P(X_i = 1| \theta)` of a correct response, a value</span>
+<span class="sd">      between c and d.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">c</span> <span class="o">+</span> <span class="p">((</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">e</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">b</span><span class="p">))))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_split_params</span><span class="p">(</span>
+  <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Split the item matrix parameters into columns.</span>
+
+<span class="sd">  This is a helper function to extract item parameters for vectorized operations.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      An item matrix with at least four columns representing the four IRT parameters.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  tuple of numpy.ndarray</span>
+<span class="sd">      A 4-tuple containing (a, b, c, d) where:</span>
+<span class="sd">      - a: discrimination parameters</span>
+<span class="sd">      - b: difficulty parameters</span>
+<span class="sd">      - c: pseudo-guessing parameters</span>
+<span class="sd">      - d: upper asymptote parameters</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="detect_model">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.detect_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Detect which logistic model an item matrix fits into.</span>
+
+<span class="sd">  Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,</span>
+<span class="sd">  or 4PL model based on which parameters vary.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      An item matrix with at least four columns.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  int</span>
+<span class="sd">      An integer between 1 and 4 denoting the logistic model:</span>
+<span class="sd">      - 1: Rasch/1PL (all discrimination equal, no guessing, no upper asymptote)</span>
+<span class="sd">      - 2: 2PL (varying discrimination, no guessing, no upper asymptote)</span>
+<span class="sd">      - 3: 3PL (varying discrimination, guessing present, no upper asymptote variation)</span>
+<span class="sd">      - 4: 4PL (all parameters vary)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">4</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">c</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">3</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">return</span> <span class="mi">2</span>
+  <span class="k">return</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="icc_hpc">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.icc_hpc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">icc_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compute item characteristic functions for all items in a numpy array at once.</span>
+
+<span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
+<span class="sd">  with numpy and numexpr for efficient batch processing of multiple items.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      The individual&#39;s ability value.</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      Array containing item parameters with at least four columns</span>
+<span class="sd">      [a, b, c, d, ...].</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      An array of probabilities, one for each item, representing the probability</span>
+<span class="sd">      of a correct response given the current theta.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="s2">&quot;c + ((d - c) / (1 + exp((-a * (theta - b)))))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">theta</span><span class="p">},</span>
+  <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="inf_hpc">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.inf_hpc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compute the information values for all items in a numpy array using numpy and numexpr.</span>
+
+<span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
+<span class="sd">  for efficient batch processing of item information values.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      The individual&#39;s ability value.</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      Array containing item parameters with at least four columns [a, b, c, d, ...].</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      Array containing the information values for each item at the given theta.</span>
+<span class="sd">      Information quantifies how much an item contributes to ability estimation</span>
+<span class="sd">      precision at the specified ability level.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">a</span><span class="p">,</span> <span class="n">_b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+  <span class="n">p</span> <span class="o">=</span> <span class="n">icc_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="s2">&quot;(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">},</span>
+  <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="inf">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.inf">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inf</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the information value of an item using the Item Response Theory four-parameter logistic model.</span>
+
+<span class="sd">  Item information quantifies how precisely an item can estimate ability at a given</span>
+<span class="sd">  :math:`\theta` level. Higher information indicates better precision. References</span>
+<span class="sd">  are given in [Ayala2009]_, [Magis13]_.</span>
+
+<span class="sd">  .. math:: I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      The individual&#39;s ability value. This parameter value has no boundary, but</span>
+<span class="sd">      if a distribution of the form :math:`N(0, 1)` was used to estimate the</span>
+<span class="sd">      parameters, then typically :math:`-4 \leq \theta \leq 4`.</span>
+<span class="sd">  a : float</span>
+<span class="sd">      The discrimination parameter of the item, usually a positive value in which</span>
+<span class="sd">      :math:`0.8 \leq a \leq 2.5`.</span>
+<span class="sd">  b : float</span>
+<span class="sd">      The item difficulty parameter. This parameter value has no boundary, but</span>
+<span class="sd">      if a distribution of the form :math:`N(0, 1)` was used to estimate the</span>
+<span class="sd">      parameters, then typically :math:`-4 \leq b \leq 4`.</span>
+<span class="sd">  c : float, optional</span>
+<span class="sd">      The item pseudo-guessing parameter. Being a probability, :math:`0\leq c \leq 1`,</span>
+<span class="sd">      but items considered good usually have :math:`c \leq 0.2`. Default is 0.</span>
+<span class="sd">  d : float, optional</span>
+<span class="sd">      The item upper asymptote. Being a probability, :math:`0\leq d \leq 1`, but</span>
+<span class="sd">      items considered good usually have :math:`d \approx 1`. Default is 1.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The information value of the item at the designated `theta` point.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">p</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="test_info">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.test_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the test information of a test at a specific :math:`\theta` value [Ayala2009]_.</span>
+
+<span class="sd">  Test information is the sum of individual item information values and indicates</span>
+<span class="sd">  the precision of ability estimation at a given ability level.</span>
+
+<span class="sd">  .. math:: I(\theta) = \sum_{j \in J} I_j(\theta)</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      An ability value at which to compute test information.</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      A matrix containing item parameters with at least four columns [a, b, c, d, ...].</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The test information at `theta` for a test represented by `items`.</span>
+<span class="sd">      Higher values indicate more precise ability estimation.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)))</span></div>
+
+
+
+<div class="viewcode-block" id="var">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.var">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span>
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">test_inf</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.</span>
+
+<span class="sd">  Variance quantifies the uncertainty in the ability estimate. Lower variance</span>
+<span class="sd">  indicates more precise estimation.</span>
+
+<span class="sd">  .. math:: Var = \frac{1}{I(\theta)}</span>
+
+<span class="sd">  where :math:`I(\theta)` is the test information (see :py:func:`test_info`).</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float or None, optional</span>
+<span class="sd">      An ability value (required if `test_inf` is not provided). Default is None.</span>
+<span class="sd">  items : numpy.ndarray or None, optional</span>
+<span class="sd">      A matrix containing item parameters (required if `test_inf` is not provided).</span>
+<span class="sd">      Default is None.</span>
+<span class="sd">  test_inf : float or None, optional</span>
+<span class="sd">      The test information value. If provided, `theta` and `items` are not required.</span>
+<span class="sd">      Default is None.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The variance of ability estimation. Returns negative infinity if test</span>
+<span class="sd">      information is 0.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If neither `test_inf` nor both `theta` and `items` are provided.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">test_inf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Either theta and items or test_inf must be passed&quot;</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">test_inf</span> <span class="o">=</span> <span class="n">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">test_inf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+  <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">test_inf</span></div>
+
+
+
+<div class="viewcode-block" id="see">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.see">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">see</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\theta` value [Ayala2009]_.</span>
+
+<span class="sd">  The standard error of estimation is the square root of variance and represents</span>
+<span class="sd">  the typical error in ability estimation. It is in the same units as the ability</span>
+<span class="sd">  scale, making it more interpretable than variance.</span>
+
+<span class="sd">  .. math:: SEE = \sqrt{\frac{1}{I(\theta)}}</span>
+
+<span class="sd">  where :math:`I(\theta)` is the test information (see :py:func:`test_info`).</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      An ability value.</span>
+<span class="sd">  items : npt.NDArray[numpy.floating[Any]]</span>
+<span class="sd">      A matrix containing item parameters.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The standard error of estimation at `theta` for a test represented by `items`.</span>
+<span class="sd">      Returns infinity if test information is 0.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">))</span>
+  <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="confidence_interval">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.confidence_interval">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">confidence_interval</span><span class="p">(</span>
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the confidence interval for an ability estimate.</span>
+
+<span class="sd">  The confidence interval is computed using the normal approximation:</span>
+
+<span class="sd">  .. math:: CI = \hat{\theta} \pm z_{\alpha/2} \times SEE(\hat{\theta})</span>
+
+<span class="sd">  where :math:`z_{\alpha/2}` is the critical value from the standard normal distribution</span>
+<span class="sd">  corresponding to the desired confidence level, and :math:`SEE` is the standard error</span>
+<span class="sd">  of estimation.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      The estimated ability value.</span>
+<span class="sd">  items : npt.NDArray[numpy.floating[Any]]</span>
+<span class="sd">      A matrix containing item parameters for administered items.</span>
+<span class="sd">  confidence : float, optional</span>
+<span class="sd">      The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).</span>
+<span class="sd">      Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  tuple[float, float]</span>
+<span class="sd">      A tuple containing (lower_bound, upper_bound) of the confidence interval.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If confidence is not between 0 and 1.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">  &gt;&gt;&gt; items = np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.0, 1.0]])</span>
+<span class="sd">  &gt;&gt;&gt; theta = 0.5</span>
+<span class="sd">  &gt;&gt;&gt; lower, upper = confidence_interval(theta, items, confidence=0.95)</span>
+<span class="sd">  &gt;&gt;&gt; print(f&quot;95% CI: [{lower:.3f}, {upper:.3f}]&quot;)  # doctest: +SKIP</span>
+<span class="sd">  95% CI: [-0.234, 1.234]</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Confidence level must be between 0 and 1, got </span><span class="si">{</span><span class="n">confidence</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="c1"># Compute standard error of estimation</span>
+  <span class="n">standard_error</span> <span class="o">=</span> <span class="n">see</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+
+  <span class="c1"># If SEE is infinite, return infinite bounds</span>
+  <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">standard_error</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
+
+  <span class="c1"># Compute z-score for the given confidence level</span>
+  <span class="c1"># For a two-tailed test, we need the (1 + confidence) / 2 quantile</span>
+  <span class="c1"># Common z-scores: 90% = 1.645, 95% = 1.96, 99% = 2.576</span>
+  <span class="n">z_score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">confidence</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+
+  <span class="c1"># Compute confidence interval bounds</span>
+  <span class="n">margin</span> <span class="o">=</span> <span class="n">z_score</span> <span class="o">*</span> <span class="n">standard_error</span>
+  <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="n">margin</span>
+  <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">margin</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="theta_to_scale">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.theta_to_scale">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">theta_to_scale</span><span class="p">(</span>
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+  <span class="n">scale_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="n">scale_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+  <span class="n">theta_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
+  <span class="n">theta_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert theta values to a custom score scale using linear transformation.</span>
+
+<span class="sd">  This function transforms ability estimates from the standard IRT theta scale</span>
+<span class="sd">  (typically centered at 0) to any desired score scale (e.g., 0-100, 200-800).</span>
+
+<span class="sd">  The linear transformation is:</span>
+
+<span class="sd">  .. math:: \text{score} = a \cdot \theta + b</span>
+
+<span class="sd">  where :math:`a` and :math:`b` are determined by mapping the theta range to the score range.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float or numpy.ndarray</span>
+<span class="sd">      Ability value(s) on the theta scale.</span>
+<span class="sd">  scale_min : float, optional</span>
+<span class="sd">      Minimum value of the target score scale. Default is 0.</span>
+<span class="sd">  scale_max : float, optional</span>
+<span class="sd">      Maximum value of the target score scale. Default is 100.</span>
+<span class="sd">  theta_min : float, optional</span>
+<span class="sd">      Minimum theta value to map. Default is -4 (typical lower bound).</span>
+<span class="sd">  theta_max : float, optional</span>
+<span class="sd">      Maximum theta value to map. Default is 4 (typical upper bound).</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float or numpy.ndarray</span>
+<span class="sd">      The transformed score(s) on the target scale. Returns the same type as input.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # Convert theta to 0-100 scale</span>
+<span class="sd">  &gt;&gt;&gt; theta_to_scale(0.0)  # Average ability</span>
+<span class="sd">  50.0</span>
+<span class="sd">  &gt;&gt;&gt; theta_to_scale(2.0)  # High ability</span>
+<span class="sd">  75.0</span>
+<span class="sd">  &gt;&gt;&gt; theta_to_scale(-2.0)  # Low ability</span>
+<span class="sd">  25.0</span>
+
+<span class="sd">  &gt;&gt;&gt; # Convert to SAT-like scale (200-800)</span>
+<span class="sd">  &gt;&gt;&gt; theta_to_scale(0.0, scale_min=200, scale_max=800)</span>
+<span class="sd">  500.0</span>
+
+<span class="sd">  &gt;&gt;&gt; # Convert multiple values at once</span>
+<span class="sd">  &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">  &gt;&gt;&gt; thetas = np.array([-4, -2, 0, 2, 4])</span>
+<span class="sd">  &gt;&gt;&gt; theta_to_scale(thetas)  # doctest: +SKIP</span>
+<span class="sd">  array([  0.,  25.,  50.,  75., 100.])</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  - Values outside [theta_min, theta_max] are extrapolated linearly</span>
+<span class="sd">  - The transformation preserves relative distances between ability levels</span>
+<span class="sd">  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">theta_max</span> <span class="o">&lt;=</span> <span class="n">theta_min</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">scale_max</span> <span class="o">&lt;=</span> <span class="n">scale_min</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;scale_max (</span><span class="si">{</span><span class="n">scale_max</span><span class="si">}</span><span class="s2">) must be greater than scale_min (</span><span class="si">{</span><span class="n">scale_min</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="c1"># Linear transformation: score = a * theta + b</span>
+  <span class="c1"># Solve for a and b using the two boundary conditions</span>
+  <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">scale_max</span> <span class="o">-</span> <span class="n">scale_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta_max</span> <span class="o">-</span> <span class="n">theta_min</span><span class="p">)</span>
+  <span class="n">b</span> <span class="o">=</span> <span class="n">scale_min</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">theta_min</span>
+
+  <span class="k">return</span> <span class="n">a</span> <span class="o">*</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">b</span></div>
+
+
+
+<div class="viewcode-block" id="scale_to_theta">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.scale_to_theta">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">scale_to_theta</span><span class="p">(</span>
+  <span class="n">score</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+  <span class="n">scale_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="n">scale_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+  <span class="n">theta_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
+  <span class="n">theta_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert scores from a custom scale to theta values using linear transformation.</span>
+
+<span class="sd">  This function transforms scores from any desired scale (e.g., 0-100, 200-800)</span>
+<span class="sd">  back to the standard IRT theta scale (typically centered at 0).</span>
+
+<span class="sd">  The inverse linear transformation is:</span>
+
+<span class="sd">  .. math:: \theta = \frac{\text{score} - b}{a}</span>
+
+<span class="sd">  where :math:`a` and :math:`b` are determined by the scale mapping.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  score : float or numpy.ndarray</span>
+<span class="sd">      Score value(s) on the custom scale.</span>
+<span class="sd">  scale_min : float, optional</span>
+<span class="sd">      Minimum value of the score scale. Default is 0.</span>
+<span class="sd">  scale_max : float, optional</span>
+<span class="sd">      Maximum value of the score scale. Default is 100.</span>
+<span class="sd">  theta_min : float, optional</span>
+<span class="sd">      Minimum theta value in the mapping. Default is -4.</span>
+<span class="sd">  theta_max : float, optional</span>
+<span class="sd">      Maximum theta value in the mapping. Default is 4.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float or numpy.ndarray</span>
+<span class="sd">      The transformed theta value(s). Returns the same type as input.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; # Convert 0-100 score to theta</span>
+<span class="sd">  &gt;&gt;&gt; scale_to_theta(50.0)  # Average score</span>
+<span class="sd">  0.0</span>
+<span class="sd">  &gt;&gt;&gt; scale_to_theta(75.0)  # High score</span>
+<span class="sd">  2.0</span>
+<span class="sd">  &gt;&gt;&gt; scale_to_theta(25.0)  # Low score</span>
+<span class="sd">  -2.0</span>
+
+<span class="sd">  &gt;&gt;&gt; # Convert from SAT-like scale (200-800)</span>
+<span class="sd">  &gt;&gt;&gt; scale_to_theta(500.0, scale_min=200, scale_max=800)</span>
+<span class="sd">  0.0</span>
+
+<span class="sd">  &gt;&gt;&gt; # Convert multiple values at once</span>
+<span class="sd">  &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">  &gt;&gt;&gt; scores = np.array([0, 25, 50, 75, 100])</span>
+<span class="sd">  &gt;&gt;&gt; scale_to_theta(scores)  # doctest: +SKIP</span>
+<span class="sd">  array([-4., -2.,  0.,  2.,  4.])</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  - This is the inverse of :py:func:`theta_to_scale`</span>
+<span class="sd">  - Useful for converting cutoff scores to theta values for classification</span>
+<span class="sd">  - Preserves the relative ordering and distances of scores</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">theta_max</span> <span class="o">&lt;=</span> <span class="n">theta_min</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">scale_max</span> <span class="o">&lt;=</span> <span class="n">scale_min</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;scale_max (</span><span class="si">{</span><span class="n">scale_max</span><span class="si">}</span><span class="s2">) must be greater than scale_min (</span><span class="si">{</span><span class="n">scale_min</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="c1"># Inverse transformation: theta = (score - b) / a</span>
+  <span class="n">a</span> <span class="o">=</span> <span class="p">(</span><span class="n">scale_max</span> <span class="o">-</span> <span class="n">scale_min</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta_max</span> <span class="o">-</span> <span class="n">theta_min</span><span class="p">)</span>
+  <span class="n">b</span> <span class="o">=</span> <span class="n">scale_min</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">theta_min</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="n">score</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">a</span></div>
+
+
+
+<div class="viewcode-block" id="reliability">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.reliability">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reliability</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute test reliability [Thissen00]_.</span>
+
+<span class="sd">  Test reliability is a measure of internal consistency for the test, similar to</span>
+<span class="sd">  Cronbach&#39;s :math:`\alpha` in Classical Test Theory. Its value is always lower than 1,</span>
+<span class="sd">  with values close to 1 indicating good reliability. If :math:`I(\theta) &lt; 1`,</span>
+<span class="sd">  :math:`Rel &lt; 0` and in these cases it does not make sense, but usually the</span>
+<span class="sd">  application of additional items solves this problem.</span>
+
+<span class="sd">  .. math:: Rel = 1 - \frac{1}{I(\theta)}</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float</span>
+<span class="sd">      An ability value.</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      A matrix containing item parameters.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The test reliability at `theta` for a test represented by `items`. Values</span>
+<span class="sd">      range from negative infinity to just below 1, with values closer to 1</span>
+<span class="sd">      indicating higher reliability.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">var</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="max_info">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.max_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">max_info</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the :math:`\theta` value at which an item provides maximum information.</span>
+
+<span class="sd">  For the 1-parameter and 2-parameter logistic models, this :math:`\theta` equals :math:`b`.</span>
+<span class="sd">  In the 3-parameter and 4-parameter logistic models, however, this value is given by</span>
+<span class="sd">  ([Magis13]_)</span>
+
+<span class="sd">  .. math:: argmax_{\theta}I(\theta) = b + \frac{1}{a} log \left(\frac{x^* - c}{d - x^*}\right)</span>
+
+<span class="sd">  where</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">    x^* = 2 \sqrt{\frac{-u}{3}} cos\left\{\frac{1}{3}acos\left(-\frac{v}{2}\sqrt{\frac{27}{-u^3}}\right)+</span>
+<span class="sd">    \frac{4 \pi}{3}\right\} + 0.5</span>
+
+<span class="sd">  .. math:: u = -\frac{3}{4} + \frac{c + d - 2cd}{2}</span>
+
+<span class="sd">  .. math:: v = \frac{c + d - 1}{4}</span>
+
+<span class="sd">  A few results can be seen in the plots below:</span>
+
+<span class="sd">  .. plot::</span>
+<span class="sd">      :caption: Item information curves for two distinct items. The point of maximum information denoted by a dot.</span>
+
+<span class="sd">      import matplotlib.pyplot as plt</span>
+<span class="sd">      from catsim.item_bank import ItemBank</span>
+<span class="sd">      from catsim.plot import item_curve, PlotType</span>
+<span class="sd">      n_items = 2</span>
+<span class="sd">      item_bank = ItemBank.generate_item_bank(n_items)</span>
+<span class="sd">      fig, axes = plt.subplots(n_items, 1)</span>
+<span class="sd">      for idx, item in enumerate(item_bank.items):</span>
+<span class="sd">        item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])</span>
+<span class="sd">      plt.show()</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  a : float, optional</span>
+<span class="sd">      Item discrimination parameter. Default is 1.</span>
+<span class="sd">  b : float, optional</span>
+<span class="sd">      Item difficulty parameter. Default is 0.</span>
+<span class="sd">  c : float, optional</span>
+<span class="sd">      Item pseudo-guessing parameter. Default is 0.</span>
+<span class="sd">  d : float, optional</span>
+<span class="sd">      Item upper asymptote. Default is 1.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      The :math:`\theta` value at which the item with the given parameters</span>
+<span class="sd">      provides maximum information.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># for explanations on finding the following values, see referenced work in function description</span>
+  <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">c</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+  <span class="n">u</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">3</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">c</span> <span class="o">+</span> <span class="n">d</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">c</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+  <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">c</span> <span class="o">+</span> <span class="n">d</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">4</span>
+  <span class="n">x_star</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="mi">2</span>
+    <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="o">-</span><span class="n">u</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">v</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">27</span> <span class="o">/</span> <span class="p">(</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="mi">3</span><span class="p">))))</span> <span class="o">+</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="o">+</span> <span class="mf">0.5</span>
+  <span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">x_star</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">x_star</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="max_info_hpc">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.max_info_hpc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">max_info_hpc</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.</span>
+
+<span class="sd">  This high-performance computing version efficiently computes the theta values of</span>
+<span class="sd">  maximum information for multiple items simultaneously using vectorized operations.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      Array containing item parameters with at least four columns [a, b, c, d, ...].</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      An array of theta values, one for each item, indicating where each item&#39;s</span>
+<span class="sd">      information function reaches its maximum.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)&quot;</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">})</span>
+
+  <span class="n">u</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;-(3 / 4) + ((c + d - 2 * c * d) / 2)&quot;</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
+  <span class="n">v</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;(c + d - 1) / 4&quot;</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
+  <span class="n">x_star</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="s2">&quot;2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="n">u</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">&quot;pi&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">},</span>
+  <span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="s2">&quot;b + (1 / a) * log((x_star - c) / (d - x_star))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;x_star&quot;</span><span class="p">:</span> <span class="n">x_star</span><span class="p">},</span>
+  <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="log_likelihood">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.log_likelihood">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_likelihood</span><span class="p">(</span>
+  <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+  <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+  <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.</span>
+
+<span class="sd">  The likelihood function of a given :math:`\theta` value given the answers to :math:`I`</span>
+<span class="sd">  items is given by [Ayala2009]_:</span>
+
+<span class="sd">  .. math:: L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}</span>
+
+<span class="sd">  Finding the maximum of :math:`L(X_{Ij})` includes using the product rule of derivations.</span>
+<span class="sd">  Since :math:`L(X_{Ij})` has :math:`j` parts, it can be quite complicated to do so. Also,</span>
+<span class="sd">  for computational reasons, the product of probabilities can quickly tend to 0, so it is</span>
+<span class="sd">  common to use the log-likelihood in maximization/minimization problems, transforming the</span>
+<span class="sd">  product of probabilities into a sum of log probabilities:</span>
+
+<span class="sd">   .. math::</span>
+<span class="sd">      \log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I \left\lbrace x_{ij} \log P_{ij}(\theta)+</span>
+<span class="sd">          (1 - x_{ij}) \log Q_{ij}(\theta) \right\rbrace</span>
+
+<span class="sd">  where :math:`Q_{ij}(\theta) = 1 - P_{ij}(\theta)`.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  est_theta : float</span>
+<span class="sd">      Estimated ability value.</span>
+<span class="sd">  response_vector : list[bool]</span>
+<span class="sd">      A boolean list containing the response vector, where True indicates a correct</span>
+<span class="sd">      response and False indicates an incorrect response.</span>
+<span class="sd">  administered_items : numpy.ndarray</span>
+<span class="sd">      A numpy array containing the parameters of the answered items.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      Log-likelihood of the given ability value, given the responses to the</span>
+<span class="sd">      administered items. Higher values indicate better fit.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If response vector and administered items have different lengths or if the</span>
+<span class="sd">      response vector contains non-Boolean elements.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span> <span class="o">!=</span> <span class="n">administered_items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Response vector and administered items must have the same number of items&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">})</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Response vector must contain only Boolean elements&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="n">ps</span> <span class="o">=</span> <span class="n">icc_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+    <span class="s2">&quot;sum(where(response_vector, log(ps), log(1 - ps)))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;response_vector&quot;</span><span class="p">:</span> <span class="n">response_vector</span><span class="p">,</span> <span class="s2">&quot;ps&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="p">},</span>
+  <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="negative_log_likelihood">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.negative_log_likelihood">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.</span>
+
+<span class="sd">  This function is used by :py:mod:`scipy.optimize` optimization functions that tend to</span>
+<span class="sd">  minimize values, instead of maximizing them. Since we want to maximize the log-likelihood,</span>
+<span class="sd">  we minimize the negative log-likelihood. The value of :py:func:`negative_log_likelihood`</span>
+<span class="sd">  is simply :math:`-` :py:func:`log_likelihood`.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  est_theta : float</span>
+<span class="sd">      Estimated ability value.</span>
+<span class="sd">  *args : tuple</span>
+<span class="sd">      Variable length argument list. Expected to contain:</span>
+
+<span class="sd">      - args[0]: response_vector (list[bool]) - A Boolean list containing the response vector</span>
+<span class="sd">      - args[1]: administered_items (numpy.ndarray) - A numpy array containing the parameters</span>
+<span class="sd">        of the answered items</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      Negative log-likelihood of a given ability value, given the responses to the</span>
+<span class="sd">      administered items. Lower values indicate better fit.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="o">-</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="normalize_item_bank">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.normalize_item_bank">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Normalize an item matrix so that it conforms to the standard used by catsim.</span>
+
+<span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>
+<span class="sd">  discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing</span>
+<span class="sd">  parameter and column 3 represents the item upper asymptote.</span>
+
+<span class="sd">  This function automatically expands item matrices with fewer than 4 columns:</span>
+
+<span class="sd">  - 1 column (1PL): Assumed to be difficulty. Discrimination=1, c=0, d=1 are added.</span>
+<span class="sd">  - 2 columns (2PL): Assumed to be [discrimination, difficulty]. c=0, d=1 are added.</span>
+<span class="sd">  - 3 columns (3PL): Assumed to be [discrimination, difficulty, pseudo-guessing]. d=1 is added.</span>
+<span class="sd">  - 4 columns (4PL): Already complete, returned as-is.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      The item matrix with 1, 2, 3, or 4 columns.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      An :math:`n \times 4` item matrix conforming to the 4-parameter logistic model,</span>
+<span class="sd">      with columns [a, b, c, d].</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL1</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">items</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL2</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL3</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">items</span></div>
+
+
+
+<div class="viewcode-block" id="validate_item_bank">
+<a class="viewcode-back" href="../../irt.html#catsim.irt.validate_item_bank">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">raise_err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</span>
+
+<span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>
+<span class="sd">  discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing</span>
+<span class="sd">  parameter and column 3 represents the item upper asymptote.</span>
+
+<span class="sd">  The item matrix must have at least one line (representing an item) and exactly four columns,</span>
+<span class="sd">  representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters</span>
+<span class="sd">  (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered</span>
+<span class="sd">  valid if, for all items in the matrix, :math:`a &gt; 0 \wedge 0 \leq c \leq 1 \wedge 0 \leq d \leq 1`.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      The item matrix to validate.</span>
+<span class="sd">  raise_err : bool, optional</span>
+<span class="sd">      Whether to raise an error in case the validation fails (True) or just print</span>
+<span class="sd">      the error message to standard output (False). Default is False.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If items is not a numpy.ndarray.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If raise_err is True and the item matrix does not meet validation criteria.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Item matrix is not of type numpy.ndarray&quot;</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;Item matrix has only one dimension.&quot;</span>
+  <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span>
+      <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has more than 4 columns. catsim tends to add </span><span class="se">\</span>
+<span class="s2">            columns to the matrix during the simulation, so it&#39;s not a good idea to keep them.&quot;</span>
+    <span class="p">)</span>
+  <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL1</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns&quot;</span>
+    <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL2</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has no pseudo-guessing or upper asymptote parameter columns&quot;</span>
+    <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL3</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has no upper asymptote parameter column&quot;</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with discrimination &lt; 0&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &lt; 0&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &gt; 1&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &gt; 1&quot;</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &lt; 0&quot;</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">raise_err</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+
+  <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

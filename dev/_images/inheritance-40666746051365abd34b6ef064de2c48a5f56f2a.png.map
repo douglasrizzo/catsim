@@ -1,0 +1,12 @@
+<map id="inheritance76f349e9d6" name="inheritance76f349e9d6">
+<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="13,78,70,98"/>
+<area shape="rect" id="node2" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="138,59,295,78"/>
+<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Stopper" target="_top" title="Base class for CAT stopping criteria." alt="" coords="354,78,500,98"/>
+<area shape="rect" id="node4" href="#catsim.stopping.CombinationStopper" target="_top" title="Stopping criterion that combines multiple stoppers using AND or OR logic." alt="" coords="551,4,749,23"/>
+<area shape="rect" id="node7" href="#catsim.stopping.ConfidenceIntervalStopper" target="_top" title="Stopping criterion based on confidence interval falling within discrete ability intervals." alt="" coords="536,41,764,60"/>
+<area shape="rect" id="node8" href="#catsim.stopping.ItemBankLengthStopper" target="_top" title="Stopping criterion based on exhausting the entire item bank." alt="" coords="542,78,758,98"/>
+<area shape="rect" id="node9" href="#catsim.stopping.MaxItemStopper" target="_top" title="Stopping criterion based on maximum number of items in a test." alt="" coords="560,116,740,135"/>
+<area shape="rect" id="node10" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stopping criterion based on minimum standard error of estimation." alt="" coords="561,153,738,172"/>
+<area shape="rect" id="node5" href="#catsim.stopping.CombinationStrategy" target="_top" title="Strategy for combining multiple stopping criteria." alt="" coords="116,22,318,41"/>
+<area shape="rect" id="node6" href="https://docs.python.org/3/library/enum.html#enum.Enum" target="_top" title="Create a collection of name/value pairs." alt="" coords="4,22,79,41"/>
+</map>
