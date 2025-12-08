@@ -102,18 +102,17 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Add dev version suffix for dev builds
-        if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+      - name: Add pre-release suffix for TestPyPI
+        if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev'
         run: |
           # Get current version from pyproject.toml
           CURRENT_VERSION=$(grep -E '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
-          # Get short SHA
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          # Create new version with local identifier
-          NEW_VERSION="${CURRENT_VERSION}.dev${SHORT_SHA}"
+          # Create release candidate version with PR number and run number
+          NEW_VERSION="${CURRENT_VERSION}rc${{ github.run_number }}"
           # Update pyproject.toml
           sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" pyproject.toml
-          echo "Updated version to ${NEW_VERSION}"
+          echo "Updated version to ${NEW_VERSION} for TestPyPI"
+          echo "Original version: ${CURRENT_VERSION}"
 
       - name: Build package
         run: uv build
@@ -152,9 +151,10 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    # Publish to TestPyPI on pushes to dev or manual workflow dispatch
+    # Publish to TestPyPI on PRs from dev to main (final checkpoint before release)
+    # or manual workflow dispatch for testing
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
     needs: [build]
     runs-on: ubuntu-latest
