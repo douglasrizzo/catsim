@@ -1,3 +1,10 @@
+"""Item Response Theory (IRT) functions and utilities for computerized adaptive testing.
+
+This module provides core IRT functions including item characteristic curves (ICC),
+item information functions, and various utility functions for parameter estimation
+and scale transformations.
+"""
+
 import math
 from enum import Enum
 from typing import Any
@@ -6,6 +13,38 @@ import numexpr
 import numpy
 import numpy.typing as npt
 from scipy import stats
+
+THETA_MIN_TYPICAL = -4.0
+"""Typical lower bound for ability (theta) estimation.
+
+This value covers approximately 99.99% of the population (±4 standard deviations)
+assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
+for scale transformations and reporting."""
+
+THETA_MAX_TYPICAL = 4.0
+"""Typical upper bound for ability (theta) estimation.
+
+This value covers approximately 99.99% of the population (±4 standard deviations)
+assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
+for scale transformations and reporting."""
+
+THETA_MIN_EXTENDED = -6.0
+"""Extended lower bound for ability (theta) estimation.
+
+This value covers >99.9999% of the population (±6 standard deviations) assuming
+abilities are normally distributed N(0, 1). Recommended for numerical search
+algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
+than the item bank difficulty range prevents artificial restrictions on ability
+estimates."""
+
+THETA_MAX_EXTENDED = 6.0
+"""Extended upper bound for ability (theta) estimation.
+
+This value covers >99.9999% of the population (±6 standard deviations) assuming
+abilities are normally distributed N(0, 1). Recommended for numerical search
+algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
+than the item bank difficulty range prevents artificial restrictions on ability
+estimates."""
 
 
 class NumParams(Enum):
