@@ -88,6 +88,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize_scalar</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span><span class="p">,</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimator</span>
 
@@ -266,34 +267,23 @@
 
       <span class="k">return</span> <span class="n">candidate_theta</span>
 
-    <span class="c1"># select lower and upper bounds for an interval in which the estimator will look for the most probable new theta</span>
-
-    <span class="c1"># these bounds are computed as a the minimum and maximum item difficulties in the bank...</span>
-    <span class="n">lower_bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">)</span>
-    <span class="n">upper_bound</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">)</span>
-
-    <span class="c1"># ... plus an arbitrary error margin</span>
-    <span class="n">margin</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper_bound</span> <span class="o">-</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
-    <span class="n">upper_bound</span> <span class="o">+=</span> <span class="n">margin</span>
-    <span class="n">lower_bound</span> <span class="o">-=</span> <span class="n">margin</span>
-
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;ternary&quot;</span><span class="p">,</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">}:</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_ternary_dichotomous</span><span class="p">(</span>
-        <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+        <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
       <span class="p">)</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;fibonacci&quot;</span><span class="p">:</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_fibonacci</span><span class="p">(</span>
-        <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+        <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
       <span class="p">)</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;golden2&quot;</span><span class="p">:</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_golden_section</span><span class="p">(</span>
-        <span class="n">upper_bound</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+        <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
       <span class="p">)</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;brent&quot;</span><span class="p">,</span> <span class="s2">&quot;bounded&quot;</span><span class="p">,</span> <span class="s2">&quot;golden&quot;</span><span class="p">}:</span>
       <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
         <span class="n">irt</span><span class="o">.</span><span class="n">negative_log_likelihood</span><span class="p">,</span>
-        <span class="n">bracket</span><span class="o">=</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">),</span>
-        <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">lower_bound</span><span class="p">,</span> <span class="n">upper_bound</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;bounded&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bracket</span><span class="o">=</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;bounded&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span><span class="p">,</span>
         <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)),</span>
         <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">!=</span> <span class="s2">&quot;bounded&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>

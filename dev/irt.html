@@ -56,6 +56,10 @@
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.NumParams"><code class="docutils literal notranslate"><span class="pre">NumParams</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.THETA_MAX_EXTENDED"><code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.THETA_MAX_TYPICAL"><code class="docutils literal notranslate"><span class="pre">THETA_MAX_TYPICAL</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.THETA_MIN_EXTENDED"><code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catsim.irt.THETA_MIN_TYPICAL"><code class="docutils literal notranslate"><span class="pre">THETA_MIN_TYPICAL</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.confidence_interval"><code class="docutils literal notranslate"><span class="pre">confidence_interval()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.detect_model"><code class="docutils literal notranslate"><span class="pre">detect_model()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#catsim.irt.icc"><code class="docutils literal notranslate"><span class="pre">icc()</span></code></a></li>
@@ -110,7 +114,11 @@
   <section id="item-response-theory-functions-catsim-irt">
 <h1>Item Response Theory Functions – <a class="reference internal" href="#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a><a class="headerlink" href="#item-response-theory-functions-catsim-irt" title="Link to this heading"></a></h1>
 <p>This module contains functions pertaining to the Item Response Theory logistic models, including probability calculations, information functions, likelihood estimation, and other IRT-related utilities.</p>
-<span class="target" id="module-catsim.irt"></span><dl class="py class">
+<p id="module-catsim.irt">Item Response Theory (IRT) functions and utilities for computerized adaptive testing.</p>
+<p>This module provides core IRT functions including item characteristic curves (ICC),
+item information functions, and various utility functions for parameter estimation
+and scale transformations.</p>
+<dl class="py class">
 <dt class="sig sig-object py" id="catsim.irt.NumParams">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">NumParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#NumParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.NumParams" title="Link to this definition"></a></dt>
 <dd><p>Enumerator that informs how many parameters each logistic model of IRT has.</p>
@@ -130,6 +138,46 @@ to the number of parameters in the respective IRT model.</p>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="catsim.irt.THETA_MAX_EXTENDED">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_EXTENDED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MAX_EXTENDED" title="Link to this definition"></a></dt>
+<dd><p>Extended upper bound for ability (theta) estimation.</p>
+<p>This value covers &gt;99.9999% of the population (±6 standard deviations) assuming
+abilities are normally distributed N(0, 1). Recommended for numerical search
+algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
+than the item bank difficulty range prevents artificial restrictions on ability
+estimates.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="catsim.irt.THETA_MAX_TYPICAL">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_TYPICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MAX_TYPICAL" title="Link to this definition"></a></dt>
+<dd><p>Typical upper bound for ability (theta) estimation.</p>
+<p>This value covers approximately 99.99% of the population (±4 standard deviations)
+assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
+for scale transformations and reporting.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="catsim.irt.THETA_MIN_EXTENDED">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MIN_EXTENDED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-6.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MIN_EXTENDED" title="Link to this definition"></a></dt>
+<dd><p>Extended lower bound for ability (theta) estimation.</p>
+<p>This value covers &gt;99.9999% of the population (±6 standard deviations) assuming
+abilities are normally distributed N(0, 1). Recommended for numerical search
+algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
+than the item bank difficulty range prevents artificial restrictions on ability
+estimates.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="catsim.irt.THETA_MIN_TYPICAL">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MIN_TYPICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-4.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MIN_TYPICAL" title="Link to this definition"></a></dt>
+<dd><p>Typical lower bound for ability (theta) estimation.</p>
+<p>This value covers approximately 99.99% of the population (±4 standard deviations)
+assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
+for scale transformations and reporting.</p>
 </dd></dl>
 
 <dl class="py function">

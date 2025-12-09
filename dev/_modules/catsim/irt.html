@@ -83,7 +83,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for catsim.irt</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span></span><span class="sd">&quot;&quot;&quot;Item Response Theory (IRT) functions and utilities for computerized adaptive testing.</span>
+
+<span class="sd">This module provides core IRT functions including item characteristic curves (ICC),</span>
+<span class="sd">item information functions, and various utility functions for parameter estimation</span>
+<span class="sd">and scale transformations.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
@@ -91,6 +98,38 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
+
+<span class="n">THETA_MIN_TYPICAL</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.0</span>
+<span class="sd">&quot;&quot;&quot;Typical lower bound for ability (theta) estimation.</span>
+
+<span class="sd">This value covers approximately 99.99% of the population (±4 standard deviations)</span>
+<span class="sd">assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature</span>
+<span class="sd">for scale transformations and reporting.&quot;&quot;&quot;</span>
+
+<span class="n">THETA_MAX_TYPICAL</span> <span class="o">=</span> <span class="mf">4.0</span>
+<span class="sd">&quot;&quot;&quot;Typical upper bound for ability (theta) estimation.</span>
+
+<span class="sd">This value covers approximately 99.99% of the population (±4 standard deviations)</span>
+<span class="sd">assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature</span>
+<span class="sd">for scale transformations and reporting.&quot;&quot;&quot;</span>
+
+<span class="n">THETA_MIN_EXTENDED</span> <span class="o">=</span> <span class="o">-</span><span class="mf">6.0</span>
+<span class="sd">&quot;&quot;&quot;Extended lower bound for ability (theta) estimation.</span>
+
+<span class="sd">This value covers &gt;99.9999% of the population (±6 standard deviations) assuming</span>
+<span class="sd">abilities are normally distributed N(0, 1). Recommended for numerical search</span>
+<span class="sd">algorithms to avoid ceiling/floor effects during estimation. Using bounds wider</span>
+<span class="sd">than the item bank difficulty range prevents artificial restrictions on ability</span>
+<span class="sd">estimates.&quot;&quot;&quot;</span>
+
+<span class="n">THETA_MAX_EXTENDED</span> <span class="o">=</span> <span class="mf">6.0</span>
+<span class="sd">&quot;&quot;&quot;Extended upper bound for ability (theta) estimation.</span>
+
+<span class="sd">This value covers &gt;99.9999% of the population (±6 standard deviations) assuming</span>
+<span class="sd">abilities are normally distributed N(0, 1). Recommended for numerical search</span>
+<span class="sd">algorithms to avoid ceiling/floor effects during estimation. Using bounds wider</span>
+<span class="sd">than the item bank difficulty range prevents artificial restrictions on ability</span>
+<span class="sd">estimates.&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="NumParams">
