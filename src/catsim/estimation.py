@@ -3,6 +3,7 @@ import numpy.typing as npt
 from scipy.optimize import minimize_scalar
 
 from catsim import cat, irt
+from catsim.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from catsim.item_bank import ItemBank
 from catsim.simulation import Estimator
 
@@ -174,34 +175,23 @@ class NumericalSearchEstimator(Estimator):
 
       return candidate_theta
 
-    # select lower and upper bounds for an interval in which the estimator will look for the most probable new theta
-
-    # these bounds are computed as a the minimum and maximum item difficulties in the bank...
-    lower_bound = min(item_bank.difficulty)
-    upper_bound = max(item_bank.difficulty)
-
-    # ... plus an arbitrary error margin
-    margin = (upper_bound - lower_bound) / 3
-    upper_bound += margin
-    lower_bound -= margin
-
     if self.__search_method in {"ternary", "dichotomous"}:
       candidate_theta = self._solve_ternary_dichotomous(
-        upper_bound, lower_bound, response_vector, item_bank.get_items(administered_items)
+        THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
       )
     elif self.__search_method == "fibonacci":
       candidate_theta = self._solve_fibonacci(
-        upper_bound, lower_bound, response_vector, item_bank.get_items(administered_items)
+        THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
       )
     elif self.__search_method == "golden2":
       candidate_theta = self._solve_golden_section(
-        upper_bound, lower_bound, response_vector, item_bank.get_items(administered_items)
+        THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
       )
     elif self.__search_method in {"brent", "bounded", "golden"}:
       res = minimize_scalar(
         irt.negative_log_likelihood,
-        bracket=(lower_bound, upper_bound),
-        bounds=(lower_bound, upper_bound) if self.__search_method == "bounded" else None,
+        bracket=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
+        bounds=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED) if self.__search_method == "bounded" else None,
         method=self.__search_method,
         args=(response_vector, item_bank.get_items(administered_items)),
         tol=self._tol if self.__search_method != "bounded" else None,

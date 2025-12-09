@@ -7,7 +7,6 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: check-ast
-      - id: check-docstring-first
       - id: check-toml
       - id: check-yaml
       - id: check-json
