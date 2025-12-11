@@ -63,7 +63,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/93/a1/925a019c76dd0f6d7
 
 [[package]]
 name = "catsim"
-version = "0.19.0"
+version = "0.20.0"
 source = { editable = "." }
 dependencies = [
     { name = "json-tricks" },

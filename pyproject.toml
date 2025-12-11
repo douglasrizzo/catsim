@@ -20,7 +20,7 @@ classifiers = [
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
 ]
 name = "catsim"
-version = "0.19.0"
+version = "0.20.0"
 description = "Computerized Adaptive Testing Simulator"
 dependencies = [
     "scipy",
