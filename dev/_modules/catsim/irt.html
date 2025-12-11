@@ -495,7 +495,9 @@
 
 <div class="viewcode-block" id="icc_hpc">
 <a class="viewcode-back" href="../../irt.html#catsim.irt.icc_hpc">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">icc_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">icc_hpc</span><span class="p">(</span>
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">  </span><span class="sd">"""Compute item characteristic functions for all items in a numpy array at once.</span>
 
 <span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
@@ -503,8 +505,9 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  theta : float</span>
-<span class="sd">      The individual's ability value.</span>
+<span class="sd">  theta : float or numpy.ndarray</span>
+<span class="sd">      The individual's ability value(s). Can be a scalar or an array for element-wise</span>
+<span class="sd">      computation with items (via numpy broadcasting).</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      Array containing item parameters with at least four columns</span>
 <span class="sd">      [a, b, c, d, ...].</span>
@@ -525,7 +528,9 @@
 
 <div class="viewcode-block" id="inf_hpc">
 <a class="viewcode-back" href="../../irt.html#catsim.irt.inf_hpc">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">inf_hpc</span><span class="p">(</span>
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
 <span class="w">  </span><span class="sd">"""Compute the information values for all items in a numpy array using numpy and numexpr.</span>
 
 <span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
@@ -533,8 +538,9 @@
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  theta : float</span>
-<span class="sd">      The individual's ability value.</span>
+<span class="sd">  theta : float or numpy.ndarray</span>
+<span class="sd">      The individual's ability value(s). Can be a scalar or an array for element-wise</span>
+<span class="sd">      computation with items (via numpy broadcasting).</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      Array containing item parameters with at least four columns [a, b, c, d, ...].</span>
 
@@ -1133,10 +1139,11 @@
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Response vector must contain only Boolean elements"</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="n">ps</span> <span class="o">=</span> <span class="n">icc_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
     <span class="s2">"sum(where(response_vector, log(ps), log(1 - ps)))"</span><span class="p">,</span>
     <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"response_vector"</span><span class="p">:</span> <span class="n">response_vector</span><span class="p">,</span> <span class="s2">"ps"</span><span class="p">:</span> <span class="n">ps</span><span class="p">},</span>
-  <span class="p">)</span></div>
+  <span class="p">)</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
 
 
