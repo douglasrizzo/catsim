@@ -24,3 +24,6 @@ docs:
 	uv sync --group docs
 	uv run sphinx-build sphinx docs -b html
 	touch docs/.nojekyll
+linkcheck:
+	uv sync --group docs
+	uv run sphinx-build sphinx docs/_linkcheck -b linkcheck

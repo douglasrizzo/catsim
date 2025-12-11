@@ -12,7 +12,7 @@ A Python package for computerized adaptive testing (CAT) simulations. It provide
 - [ability estimation](https://douglasrizzo.com.br/catsim/estimation.html)
 - [test stopping](https://douglasrizzo.com.br/catsim/stopping.html)
 
-These methods can either be used in a standalone fashion [[1]](https://douglasrizzo.com.br/catsim/introduction.html#autonomous-usage) to power other software or be used with _catsim_ to simulate the application of computerized adaptive tests [[2]](https://douglasrizzo.com.br/catsim/introduction.html#running-simulations), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
+These methods can either be used in a standalone fashion to power other software or be used with _catsim_ to simulate the application of [computerized adaptive tests](https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
 
 ## Installation
 
@@ -22,7 +22,7 @@ Install it using `pip install catsim`.
 
 There is [a Colab Notebook](https://colab.research.google.com/drive/1iJQE9VFrDD2Pqrsa7K3EvD1pSTBPw0Ur?usp=sharing) teaching the basics of catsim!
 
-1. Have an [item matrix](https://douglasrizzo.com.br/catsim/item_matrix.html);
+1. Have an [item matrix](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
 1. Have a sample of examinee proficiencies, or a number of examinees to be generated;
 1. Create an [initializer](https://douglasrizzo.com.br/catsim/initialization.html),
    an item [selector](https://douglasrizzo.com.br/catsim/selection.html), a
