@@ -1,120 +1,469 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
-<head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Initialization Methods – catsim.initialization &mdash; catsim 0.19.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
 
   
-    <link rel="shortcut icon" href="_static/logo.svg"/>
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=cbfb3150"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/js/theme.js"></script>
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>Initialization Methods – catsim.initialization &#8212; catsim 0.19.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/material.css?v=79c92029" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=cbfb3150"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="_static/logo.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Item Selection Methods – catsim.selection" href="selection.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" /> 
-</head>
+    <link rel="prev" title="Introduction" href="introduction.html" />
+  
+   
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue data-md-color-accent=light-blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#initialization" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="index.html" title="catsim 0.19.0 documentation"
+           class="md-header-nav__button md-logo">
           
+            &nbsp;
           
-          <a href="index.html">
-            
-              <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#catsim.initialization.FixedPointInitializer"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#catsim.initialization.FixedPointInitializer.initialize"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer.initialize()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#catsim.initialization.InitializationDistribution"><code class="docutils literal notranslate"><span class="pre">InitializationDistribution</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#catsim.initialization.RandomInitializer"><code class="docutils literal notranslate"><span class="pre">RandomInitializer</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#catsim.initialization.RandomInitializer.initialize"><code class="docutils literal notranslate"><span class="pre">RandomInitializer.initialize()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
-</ul>
-
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">catsim</span>
+          <span class="md-header-nav__topic"> Initialization Methods – catsim.initialization </span>
         </div>
       </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">catsim</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/initialization.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = ""versions.json"",
+        target_loc = "../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="index.html" class="md-tabs__link">catsim 0.19.0 documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="index.html" title="catsim 0.19.0 documentation" class="md-nav__button md-logo">
+      
+        <img src="_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="index.html"
+       title="catsim 0.19.0 documentation">catsim</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+    </div>
+  
+  
+
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+    
+      <a href="introduction.html" class="md-nav__link">Introduction</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    <label class="md-nav__link md-nav__link--active" for="__toc"> Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code> </label>
+    
+      <a href="#" class="md-nav__link md-nav__link--active">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
+      
+        
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#initialization--page-root" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.BaseInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.BaseInitializer.initialize" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseInitializer.initialize()</span></code></a>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.FixedPointInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.FixedPointInitializer.initialize" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer.initialize()</span></code></a>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.InitializationDistribution" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">InitializationDistribution</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.Initializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">Initializer</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.RandomInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">RandomInitializer</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.RandomInitializer.initialize" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">RandomInitializer.initialize()</span></code></a>
+        </li></ul>
+            </nav>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/initialization.rst.txt">Show Source</a> </li>
+
+  </ul>
+</nav>
+      <ul class="md-nav__list"> 
+    <li class="md-nav__item">
+    
+    
+      <a href="#catsim.initialization.BaseInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#catsim.initialization.FixedPointInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#catsim.initialization.InitializationDistribution" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">InitializationDistribution</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#catsim.initialization.Initializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">Initializer</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#catsim.initialization.RandomInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">RandomInitializer</span></code></a>
+      
+    
+    </li></ul>
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="contributing.html" class="md-nav__link">Contributing</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="references.html" class="md-nav__link">Bibliography</a>
+      
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#initialization--page-root" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.BaseInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.BaseInitializer.initialize" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseInitializer.initialize()</span></code></a>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.FixedPointInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.FixedPointInitializer.initialize" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer.initialize()</span></code></a>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.InitializationDistribution" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">InitializationDistribution</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.Initializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">Initializer</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.initialization.RandomInitializer" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">RandomInitializer</span></code></a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#catsim.initialization.RandomInitializer.initialize" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">RandomInitializer.initialize()</span></code></a>
+        </li></ul>
+            </nav>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/initialization.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
   <section id="initialization-methods-catsim-initialization">
-<h1>Initialization Methods – <a class="reference internal" href="#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><a class="headerlink" href="#initialization-methods-catsim-initialization" title="Link to this heading"></a></h1>
+<h1 id="initialization--page-root">Initialization Methods – <a class="reference internal" href="#initialization--page-root" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><a class="headerlink" href="#initialization--page-root" title="Link to this heading">¶</a></h1>
 <p>All implemented classes in this module inherit from a base abstract class
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom initializer be
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom initializer be
 used during the simulation, as long as it also inherits from
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code>.</p>
-<div class="graphviz"><img src="_images/inheritance-04eca572793bd8885ca07a35dd6bafc921e655f6.png" alt="Inheritance diagram of catsim.initialization" usemap="#inheritance51267be144" class="inheritance graphviz" /></div>
-<map id="inheritance51267be144" name="inheritance51267be144">
-<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="13,59,68,78"/>
-<area shape="rect" id="node3" href="simulation.html#catsim.simulation.Initializer" target="_top" title="Base class for CAT initializers." alt="" coords="374,59,523,78"/>
-<area shape="rect" id="node7" href="simulation.html#catsim.simulation.Simulable" target="_top" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="150,78,301,96"/>
-<area shape="rect" id="node2" href="#catsim.initialization.FixedPointInitializer" target="_top" title="Initialize every examinee&#39;s ability at the same fixed point." alt="" coords="558,41,764,59"/>
-<area shape="rect" id="node6" href="#catsim.initialization.RandomInitializer" target="_top" title="Randomly initialize the first estimate of an examinee&#39;s ability from a statistical distribution." alt="" coords="562,77,760,95"/>
-<area shape="rect" id="node4" href="#catsim.initialization.InitializationDistribution" target="_top" title="Distribution to use for ability estimate initialization." alt="" coords="112,4,339,22"/>
-<area shape="rect" id="node5" href="https://docs.python.org/3/library/enum.html#enum.Enum" target="_top" title="Create a collection of name/value pairs." alt="" coords="4,4,77,22"/>
-</map><span class="target" id="module-catsim.initialization"></span><dl class="py class">
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code>.</p>
+<div class="graphviz"><img alt="Inheritance diagram of catsim.initialization.BaseInitializer, catsim.initialization.RandomInitializer, catsim.initialization.FixedPointInitializer" class="inheritance graphviz" src="_images/inheritance-dc9ca89d9926618990084174aea95f8eda72e65a.png" usemap="#inheritance1ec1f24ad0"/></div>
+<map id="inheritance1ec1f24ad0" name="inheritance1ec1f24ad0">
+<area alt="" coords="13,5,85,31" href="https://docs.python.org/3/library/abc.html#abc.ABC" id="node1" shape="rect" target="_top" title="Helper class that provides a standard way to create an ABC using"/>
+<area alt="" coords="140,31,255,56" href="#catsim.initialization.BaseInitializer" id="node2" shape="rect" target="_top" title="Base class for CAT initializers."/>
+<area alt="" coords="303,5,453,31" href="#catsim.initialization.FixedPointInitializer" id="node4" shape="rect" target="_top" title="Initialize every examinee's ability at the same fixed point."/>
+<area alt="" coords="309,55,447,80" href="#catsim.initialization.RandomInitializer" id="node5" shape="rect" target="_top" title="Randomly initialize the first estimate of an examinee's ability from a statistical distribution."/>
+</map><p id="module-catsim.initialization">Initialization components for CAT.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.initialization.BaseInitializer">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">BaseInitializer</span></span><a class="reference internal" href="_modules/catsim/initialization/base.html#BaseInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.BaseInitializer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulable</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Base class for CAT initializers.</p>
+<p>Initializers are responsible for selecting examinees’ initial ability estimates
+before any items are administered.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.initialization.BaseInitializer.initialize">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/base.html#BaseInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.BaseInitializer.initialize" title="Link to this definition">¶</a></dt>
+<dd><p>Select an examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Arguments used by the BaseInitializer implementation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>Examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<dl class="py class">
 <dt class="sig sig-object py" id="catsim.initialization.FixedPointInitializer">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">FixedPointInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code></a></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">FixedPointInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#FixedPointInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catsim.initialization.BaseInitializer" title="catsim.initialization.base.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a></p>
 <p>Initialize every examinee’s ability at the same fixed point.</p>
 <p>This initializer is useful for controlled experiments where you want all
 examinees to start with the same initial ability estimate.</p>
@@ -128,7 +477,7 @@ examinees to start with the same initial ability estimate.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.initialization.FixedPointInitializer.initialize">
-<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Link to this definition">¶</a></dt>
 <dd><p>Return the same ability value that was passed to the constructor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -148,12 +497,10 @@ Default is None.</p>
 </dd>
 </dl>
 </dd></dl>
-
 </dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.initialization.InitializationDistribution">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">InitializationDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#InitializationDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.InitializationDistribution" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">InitializationDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#InitializationDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.InitializationDistribution" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Distribution to use for ability estimate initialization.</p>
 <dl class="field-list simple">
@@ -167,11 +514,15 @@ Default is None.</p>
 </dd>
 </dl>
 </dd></dl>
-
+<dl class="py attribute">
+<dt class="sig sig-object py" id="catsim.initialization.Initializer">
+<span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">Initializer</span></span><a class="headerlink" href="#catsim.initialization.Initializer" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#catsim.initialization.BaseInitializer" title="catsim.initialization.base.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a></p>
+</dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.initialization.RandomInitializer">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">RandomInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.initialization.InitializationDistribution" title="catsim.initialization.InitializationDistribution"><span class="pre">InitializationDistribution</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">InitializationDistribution.UNIFORM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-5,</span> <span class="pre">5)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="simulation.html#catsim.simulation.Initializer" title="catsim.simulation.Initializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Initializer</span></code></a></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">RandomInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.initialization.InitializationDistribution" title="catsim.initialization.initialization.InitializationDistribution"><span class="pre">InitializationDistribution</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">InitializationDistribution.UNIFORM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-5,</span> <span class="pre">5)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#RandomInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catsim.initialization.BaseInitializer" title="catsim.initialization.base.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></a></p>
 <p>Randomly initialize the first estimate of an examinee’s ability from a statistical distribution.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -189,7 +540,7 @@ Default is (-5, 5).</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.initialization.RandomInitializer.initialize">
-<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization.html#RandomInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#RandomInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Link to this definition">¶</a></dt>
 <dd><p>Generate an initial ability value using the chosen distribution and parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -221,40 +572,65 @@ validation in __init__).</p>
 </dd>
 </dl>
 </dd></dl>
-
 </dd></dl>
-
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="selection.html" class="btn btn-neutral float-right" title="Item Selection Methods – catsim.selection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+          </article>
         </div>
       </div>
-    </section>
+    </main>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="introduction.html" title="Introduction"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> "Previous" </span> Introduction </span>
+              </div>
+            </a>
+          
+          
+            <a href="selection.html" title="Item Selection Methods – catsim.selection"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code> </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
 </html>

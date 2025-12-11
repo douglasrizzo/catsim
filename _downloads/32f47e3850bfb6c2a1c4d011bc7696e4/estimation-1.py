@@ -5,7 +5,7 @@ from catsim.simulation import Simulator
 from catsim.initialization import FixedPointInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
-from catsim.stopping import MaxItemStopper
+from catsim.stopping import MinErrorStopper
 from catsim import ItemBank
 
 items = ItemBank.generate_item_bank(300)
@@ -20,7 +20,7 @@ for m in NumericalSearchEstimator.available_methods():
         FixedPointInitializer(0),
         MaxInfoSelector(),
         NumericalSearchEstimator(method=m),
-        MaxItemStopper(test_size),
+        MinErrorStopper(0.4, max_items=test_size),
         verbose=True
     )
     sim_times[m] = simulator.duration

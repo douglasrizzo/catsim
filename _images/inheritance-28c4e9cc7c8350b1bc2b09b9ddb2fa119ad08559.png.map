@@ -1,0 +1,19 @@
+<map id="inheritance4e31b40ab8" name="inheritance4e31b40ab8">
+<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="9,127,60,145"/>
+<area shape="rect" id="node5" href="#catsim.selection.BaseSelector" target="_top" title="Base class representing a CAT item selector." alt="" coords="99,162,175,179"/>
+<area shape="rect" id="node8" href="#catsim.selection.FiniteSelector" target="_top" title="Base class representing a CAT item selector for fixed&#45;length tests." alt="" coords="229,74,307,92"/>
+<area shape="rect" id="node2" href="#catsim.selection.AStratBBlockSelector" target="_top" title="Implementation of the :math:`\alpha`&#45;stratified selector with :math:`b` blocking proposed by [Chang2001]_." alt="" coords="494,4,607,22"/>
+<area shape="rect" id="node3" href="#catsim.selection.StratifiedSelector" target="_top" title="Abstract class for stratified finite item selection strategies." alt="" coords="363,39,459,57"/>
+<area shape="rect" id="node4" href="#catsim.selection.AStratSelector" target="_top" title="Implementation of the :math:`alpha`&#45;stratified selector proposed by [Chang99]_." alt="" coords="510,39,591,57"/>
+<area shape="rect" id="node12" href="#catsim.selection.MaxInfoStratSelector" target="_top" title="Implementation of the maximum information stratification (MIS) selector proposed by [Bar06]_." alt="" coords="495,74,607,92"/>
+<area shape="rect" id="node7" href="#catsim.selection.ClusterSelector" target="_top" title="Cluster&#45;based Item Selection Method." alt="" coords="225,109,311,127"/>
+<area shape="rect" id="node9" href="#catsim.selection.IntervalInfoSelector" target="_top" title="Selects the item that maximizes the integral of the information function at a predetermined ``interval``." alt="" coords="215,144,322,162"/>
+<area shape="rect" id="node13" href="#catsim.selection.MaxInfoSelector" target="_top" title="Selector that returns the first non&#45;administered item with maximum information for the current theta estimate." alt="" coords="223,179,314,196"/>
+<area shape="rect" id="node14" href="#catsim.selection.RandomSelector" target="_top" title="Selector that randomly selects items for application." alt="" coords="222,213,314,231"/>
+<area shape="rect" id="node15" href="#catsim.selection.RandomesqueSelector" target="_top" title="Implementation of the randomesque selector proposed by [Kingsbury89]_." alt="" coords="209,248,328,266"/>
+<area shape="rect" id="node17" href="#catsim.selection.UrrySelector" target="_top" title="Selector that returns the item whose difficulty parameter is closest to the examinee&#39;s ability." alt="" coords="232,283,305,301"/>
+<area shape="rect" id="node6" title="Base class representing one of the Simulator components that will receive a reference back to it." alt="" coords="4,162,65,179"/>
+<area shape="rect" id="node10" href="#catsim.selection.LinearSelector" target="_top" title="Selector that returns item indexes in a linear order, simulating a standard (non&#45;adaptive) test." alt="" coords="370,74,452,92"/>
+<area shape="rect" id="node16" href="#catsim.selection.The54321Selector" target="_top" title="Implementation of the 5&#45;4&#45;3&#45;2&#45;1 selector proposed by [McBride83]_." alt="" coords="362,109,460,127"/>
+<area shape="rect" id="node11" href="#catsim.selection.MaxInfoBBlockSelector" target="_top" title="Implementation of the maximum information stratification with :math:`b` blocking (MIS&#45;B) selector [Bar06]_." alt="" coords="641,74,764,92"/>
+</map>

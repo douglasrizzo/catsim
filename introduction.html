@@ -1,121 +1,468 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
-<head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Introduction &mdash; catsim 0.19.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
 
   
-    <link rel="shortcut icon" href="_static/logo.svg"/>
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=cbfb3150"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="_static/js/theme.js"></script>
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>Introduction &#8212; catsim 0.19.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/material.css?v=79c92029" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <script src="_static/documentation_options.js?v=cbfb3150"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="icon" href="_static/logo.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Initialization Methods – catsim.initialization" href="initialization.html" />
-    <link rel="prev" title="catsim - Computerized Adaptive Testing Simulator" href="index.html" /> 
-</head>
+    <link rel="prev" title="catsim - Computerized Adaptive Testing Simulator" href="index.html" />
+  
+   
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue data-md-color-accent=light-blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#introduction" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="index.html" title="catsim 0.19.0 documentation"
+           class="md-header-nav__button md-logo">
           
+            &nbsp;
           
-          <a href="index.html">
-            
-              <img src="_static/logo_text.svg" class="logo" alt="Logo"/>
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#what-are-latent-traits">What are Latent Traits?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#the-problem-with-linear-tests">The Problem with Linear Tests</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-is-computerized-adaptive-testing">What is Computerized Adaptive Testing?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#about-catsim">About catsim</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#item-response-theory-models">Item Response Theory Models</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-item-matrix">The Item Matrix</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#computerized-adaptive-tests">Computerized adaptive tests</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-cat-lifecycle">The CAT Lifecycle</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#initialization">Initialization</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#item-selection">Item Selection</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#proficiency-estimation">Proficiency Estimation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#stopping-criterion">Stopping Criterion</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#package-architecture">Package architecture</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="initialization.html">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="selection.html">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="estimation.html">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="stopping.html">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="reproducibility.html">Reproducibility</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="references.html">Bibliography</a></li>
-</ul>
-
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">catsim</span>
+          <span class="md-header-nav__topic"> Introduction </span>
         </div>
       </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">catsim</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Introduction</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = ""versions.json"",
+        target_loc = "../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="index.html" class="md-tabs__link">catsim 0.19.0 documentation</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="index.html" title="catsim 0.19.0 documentation" class="md-nav__button md-logo">
+      
+        <img src="_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="index.html"
+       title="catsim 0.19.0 documentation">catsim</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+    </div>
+  
+  
+
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    <label class="md-nav__link md-nav__link--active" for="__toc"> Introduction </label>
+    
+      <a href="#" class="md-nav__link md-nav__link--active">Introduction</a>
+      
+        
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#introduction--page-root" class="md-nav__link">Introduction</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#what-are-latent-traits" class="md-nav__link">What are Latent Traits?</a>
+        </li>
+        <li class="md-nav__item"><a href="#the-problem-with-linear-tests" class="md-nav__link">The Problem with Linear Tests</a>
+        </li>
+        <li class="md-nav__item"><a href="#what-is-computerized-adaptive-testing" class="md-nav__link">What is Computerized Adaptive Testing?</a>
+        </li>
+        <li class="md-nav__item"><a href="#about-catsim" class="md-nav__link">About catsim</a>
+        </li>
+        <li class="md-nav__item"><a href="#item-response-theory-models" class="md-nav__link">Item Response Theory Models</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#the-item-matrix" class="md-nav__link">The Item Matrix</a>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#computerized-adaptive-tests" class="md-nav__link">Computerized adaptive tests</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#the-cat-lifecycle" class="md-nav__link">The CAT Lifecycle</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#initialization" class="md-nav__link">Initialization</a>
+        </li>
+        <li class="md-nav__item"><a href="#item-selection" class="md-nav__link">Item Selection</a>
+        </li>
+        <li class="md-nav__item"><a href="#proficiency-estimation" class="md-nav__link">Proficiency Estimation</a>
+        </li>
+        <li class="md-nav__item"><a href="#stopping-criterion" class="md-nav__link">Stopping Criterion</a>
+        </li></ul>
+            </nav>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#package-architecture" class="md-nav__link">Package architecture</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/introduction.rst.txt">Show Source</a> </li>
+
+  </ul>
+</nav>
+      <ul class="md-nav__list"> 
+    <li class="md-nav__item">
+    
+    
+      <a href="#what-are-latent-traits" class="md-nav__link">What are Latent Traits?</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#the-problem-with-linear-tests" class="md-nav__link">The Problem with Linear Tests</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#what-is-computerized-adaptive-testing" class="md-nav__link">What is Computerized Adaptive Testing?</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#about-catsim" class="md-nav__link">About catsim</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#item-response-theory-models" class="md-nav__link">Item Response Theory Models</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#computerized-adaptive-tests" class="md-nav__link">Computerized adaptive tests</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#package-architecture" class="md-nav__link">Package architecture</a>
+      
+    
+    </li></ul>
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="contributing.html" class="md-nav__link">Contributing</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="references.html" class="md-nav__link">Bibliography</a>
+      
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#introduction--page-root" class="md-nav__link">Introduction</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#what-are-latent-traits" class="md-nav__link">What are Latent Traits?</a>
+        </li>
+        <li class="md-nav__item"><a href="#the-problem-with-linear-tests" class="md-nav__link">The Problem with Linear Tests</a>
+        </li>
+        <li class="md-nav__item"><a href="#what-is-computerized-adaptive-testing" class="md-nav__link">What is Computerized Adaptive Testing?</a>
+        </li>
+        <li class="md-nav__item"><a href="#about-catsim" class="md-nav__link">About catsim</a>
+        </li>
+        <li class="md-nav__item"><a href="#item-response-theory-models" class="md-nav__link">Item Response Theory Models</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#the-item-matrix" class="md-nav__link">The Item Matrix</a>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#computerized-adaptive-tests" class="md-nav__link">Computerized adaptive tests</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#the-cat-lifecycle" class="md-nav__link">The CAT Lifecycle</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#initialization" class="md-nav__link">Initialization</a>
+        </li>
+        <li class="md-nav__item"><a href="#item-selection" class="md-nav__link">Item Selection</a>
+        </li>
+        <li class="md-nav__item"><a href="#proficiency-estimation" class="md-nav__link">Proficiency Estimation</a>
+        </li>
+        <li class="md-nav__item"><a href="#stopping-criterion" class="md-nav__link">Stopping Criterion</a>
+        </li></ul>
+            </nav>
+        </li></ul>
+            </nav>
+        </li>
+        <li class="md-nav__item"><a href="#package-architecture" class="md-nav__link">Package architecture</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="_sources/introduction.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
   <section id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<h1 id="introduction--page-root">Introduction<a class="headerlink" href="#introduction--page-root" title="Link to this heading">¶</a></h1>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> is a Python package for simulating computerized adaptive tests (CAT), a modern approach to assessment that adapts to each examinee’s ability level in real time.</p>
 <section id="what-are-latent-traits">
-<h2>What are Latent Traits?<a class="headerlink" href="#what-are-latent-traits" title="Link to this heading"></a></h2>
+<h2 id="what-are-latent-traits">What are Latent Traits?<a class="headerlink" href="#what-are-latent-traits" title="Link to this heading">¶</a></h2>
 <p>Assessment instruments measure <em>latent traits</em> - internal characteristics that cannot be directly observed, such as knowledge or personality traits. Educational and psychological tests are common examples. When a latent trait is expressed numerically, it is called an <em>ability</em> or <em>proficiency</em>.</p>
 </section>
 <section id="the-problem-with-linear-tests">
-<h2>The Problem with Linear Tests<a class="headerlink" href="#the-problem-with-linear-tests" title="Link to this heading"></a></h2>
+<h2 id="the-problem-with-linear-tests">The Problem with Linear Tests<a class="headerlink" href="#the-problem-with-linear-tests" title="Link to this heading">¶</a></h2>
 <p>Traditional <em>linear tests</em> use a paper-and-pencil approach where all examinees answer the same items in the same order. This creates several problems:</p>
 <ul class="simple">
 <li><p>High-ability examinees waste time on easy questions</p></li>
@@ -124,7 +471,7 @@
 </ul>
 </section>
 <section id="what-is-computerized-adaptive-testing">
-<h2>What is Computerized Adaptive Testing?<a class="headerlink" href="#what-is-computerized-adaptive-testing" title="Link to this heading"></a></h2>
+<h2 id="what-is-computerized-adaptive-testing">What is Computerized Adaptive Testing?<a class="headerlink" href="#what-is-computerized-adaptive-testing" title="Link to this heading">¶</a></h2>
 <p>Computerized adaptive testing (CAT) emerged in the 1970s as <em>tailored testing</em> <a class="reference internal" href="references.html#lord77" id="id1"><span>[Lord77]</span></a>. Unlike linear tests, CAT adapts in real time:</p>
 <ol class="arabic simple">
 <li><p>After each item, the examinee’s ability is re-estimated</p></li>
@@ -134,7 +481,7 @@
 <p>This approach is more efficient and engaging, reducing test length while maintaining accuracy.</p>
 </section>
 <section id="about-catsim">
-<h2>About catsim<a class="headerlink" href="#about-catsim" title="Link to this heading"></a></h2>
+<h2 id="about-catsim">About catsim<a class="headerlink" href="#about-catsim" title="Link to this heading">¶</a></h2>
 <p>CAT simulations rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT simulation packages exist for R <a class="reference internal" href="references.html#magis12" id="id2"><span>[Magis12]</span></a>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> brings these capabilities to Python. Built on <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.3)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/index.html#module-scipy" title="(in SciPy v1.16.2)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, it provides:</p>
 <ul class="simple">
 <li><p>Multiple initialization, selection, estimation, and stopping methods</p></li>
@@ -143,7 +490,7 @@
 </ul>
 </section>
 <section id="item-response-theory-models">
-<h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading"></a></h2>
+<h2 id="item-response-theory-models">Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading">¶</a></h2>
 <p>As a CAT simulator, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory (<a class="reference internal" href="references.html#lord68" id="id3"><span>[Lord68]</span></a> and <a class="reference internal" href="references.html#rasch66" id="id4"><span>[Rasch66]</span></a>), a series of models created in the second part of the 20th century with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models’ parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals’ abilities by allocating them in ability scales, inspiring as well as justifying its use in adaptive testing.</p>
 <p>The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of <em>items</em> in which examinees manifest their latent traits when answering them.</p>
 <p>In unidimensional IRT models, an examinee’s ability is represented as <span class="math notranslate nohighlight">\(\theta\)</span>. Usually <span class="math notranslate nohighlight">\(-\infty &lt; \theta &lt; \infty\)</span>, but since the scale of <span class="math notranslate nohighlight">\(\theta\)</span> is up to the individuals creating the instrument, it is common for the values to follow the normal distribution <span class="math notranslate nohighlight">\(N(0, 1)\)</span>, such that <span class="math notranslate nohighlight">\(-4 &lt; \theta &lt; 4\)</span>. Additionally, <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is the estimate of <span class="math notranslate nohighlight">\(\theta\)</span>. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true <span class="math notranslate nohighlight">\(\theta\)</span> as the test progresses in length.</p>
@@ -166,9 +513,9 @@
 <p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s ability.</p>
 <p>(<a class="reference download internal" download="" href="_downloads/c92da68e0ffc591995d50cbbf510eb6a/introduction-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/0a1207a8ac1e87d24500801374fce6a1/introduction-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/b2bd4d80461301421c2c287e755cf756/introduction-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/5838449c3087695278482880cdf411bc/introduction-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default" id="id13">
-<img alt="_images/introduction-1.png" class="plot-directive" src="_images/introduction-1.png" />
+<img alt="_images/introduction-1.png" class="plot-directive" src="_images/introduction-1.png"/>
 <figcaption>
-<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.</span><a class="headerlink" href="#id13" title="Link to this image"></a></p>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.</span><a class="headerlink" href="#id13" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>The sum of the information of all items in a test is called <em>test information</em> <a class="reference internal" href="references.html#ayala2009" id="id10"><span>[Ayala2009]</span></a>:</p>
@@ -180,12 +527,12 @@
 <p>Since the denominator in the calculation of the <span class="math notranslate nohighlight">\(SEE\)</span> is <span class="math notranslate nohighlight">\(I(\theta)\)</span>, it is clear to see that the more items an examinee answers, the smaller SEE gets.</p>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> provides these functions in the <a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt()</span></code></a> module.</p>
 <section id="the-item-matrix">
-<h3>The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Link to this heading"></a></h3>
+<h3 id="the-item-matrix">The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Link to this heading">¶</a></h3>
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, a collection of items is represented as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the <em>item matrix</em>. The most important features of the items are situated in the first three columns of the matrix, which represent the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span>, respectively. Item matrices can be generated via the <code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code> function as follows:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;1PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;2PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;3PL&#39;</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'1PL'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'2PL'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'3PL'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">'3PL'</span><span class="p">,</span> <span class="n">corr</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>These examples depict the generation of an array of five items according to the different logistic models. In the last example, parameters <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> have a correlation of <span class="math notranslate nohighlight">\(0.5\)</span>, an adjustment that may be useful in case simulations require it <a class="reference internal" href="references.html#chang2001" id="id12"><span>[Chang2001]</span></a>.</p>
@@ -196,13 +543,13 @@
 </section>
 </section>
 <section id="computerized-adaptive-tests">
-<h2>Computerized adaptive tests<a class="headerlink" href="#computerized-adaptive-tests" title="Link to this heading"></a></h2>
+<h2 id="computerized-adaptive-tests">Computerized adaptive tests<a class="headerlink" href="#computerized-adaptive-tests" title="Link to this heading">¶</a></h2>
 <p>Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee’s ability is updated after the response of each item. The updated knowledge of an examinee’s ability at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.</p>
 <section id="the-cat-lifecycle">
-<h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Link to this heading"></a></h3>
+<h3 id="the-cat-lifecycle">The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Link to this heading">¶</a></h3>
 <p>In general, a computerized adaptive test has a very well-defined lifecycle:</p>
-<div class="graphviz"><img src="_images/graphviz-80632ff27b6da190db7811b7f3f4779f8ffed487.png" alt="digraph cat_simple {
-    bgcolor=&quot;transparent&quot;;
+<div class="graphviz"><img alt='digraph cat_simple {
+    bgcolor="transparent";
     rankdir=TB;
     a[label=&lt;START&gt;, shape=box];
     b[label=&lt;Initial ability&lt;br/&gt;estimation&gt;];
@@ -215,7 +562,7 @@
     a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; f;
     f -&gt; g[label=&lt;YES&gt;];
     f -&gt; c[label=&lt;NO&gt;];
-}" class="graphviz" /></div>
+}' class="graphviz" src="_images/graphviz-80632ff27b6da190db7811b7f3f4779f8ffed487.png"/></div>
 <ol class="arabic simple">
 <li><p>The examinee’s initial ability is estimated;</p></li>
 <li><p>An item is selected based on the current ability estimation;</p></li>
@@ -224,12 +571,12 @@
 </ol>
 <p>There is a considerable amount of literature covering these four phases proposed by many authors. In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, each phase is separated in its own module, which makes it easy to create simulations combining different methods for each phase. Each module will be explained separately, along with its API.</p>
 <section id="initialization">
-<h4>Initialization<a class="headerlink" href="#initialization" title="Link to this heading"></a></h4>
-<p>The initialization procedure is done only once during each examinee’s test. In it, the initial value of an examinee’s ability <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (<code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedInitializer</span></code>); it can be chosen randomly from a probability distribution (<a class="reference internal" href="initialization.html#catsim.initialization.RandomInitializer" title="catsim.initialization.RandomInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.RandomInitializer</span></code></a>); the place in the item bank with items of more information can be chosen to initialize <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> etc.</p>
+<h4 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h4>
+<p>The initialization procedure is done only once during each examinee’s test. In it, the initial value of an examinee’s ability <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (<a class="reference internal" href="initialization.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>); it can be chosen randomly from a probability distribution (<a class="reference internal" href="initialization.html#catsim.initialization.RandomInitializer" title="catsim.initialization.RandomInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.RandomInitializer</span></code></a>); the place in the item bank with items of more information can be chosen to initialize <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> etc.</p>
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, initialization procedures can be found in the <a class="reference internal" href="initialization.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a> module.</p>
 </section>
 <section id="item-selection">
-<h4>Item Selection<a class="headerlink" href="#item-selection" title="Link to this heading"></a></h4>
+<h4 id="item-selection">Item Selection<a class="headerlink" href="#item-selection" title="Link to this heading">¶</a></h4>
 <p>With a set value for <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>.</p>
 <p>Item selection methods are diverse. The most famous method is to choose the item that maximizes the <em>gain of information</em>, represented by <a class="reference internal" href="selection.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.</p>
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, an examinee’s response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of <span class="math notranslate nohighlight">\(p\)</span> is given by the IRT logistic model characteristic function (<a class="reference internal" href="irt.html#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.icc()</span></code></a>), given by:</p>
@@ -238,7 +585,7 @@
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, item selection procedures can be found in the <a class="reference internal" href="selection.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> module.</p>
 </section>
 <section id="proficiency-estimation">
-<h4>Proficiency Estimation<a class="headerlink" href="#proficiency-estimation" title="Link to this heading"></a></h4>
+<h4 id="proficiency-estimation">Proficiency Estimation<a class="headerlink" href="#proficiency-estimation" title="Link to this heading">¶</a></h4>
 <p>Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee’s <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>. This value reflects the examinee’s ability, given his or hers answers up until that point of the test.</p>
 <p>In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">response_vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
@@ -248,17 +595,17 @@
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, ability estimation procedures can be found in the <a class="reference internal" href="estimation.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a> module.</p>
 </section>
 <section id="stopping-criterion">
-<h4>Stopping Criterion<a class="headerlink" href="#stopping-criterion" title="Link to this heading"></a></h4>
-<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold. These stopping criteria are implemented as <a class="reference internal" href="stopping.html#catsim.stopping.MaxItemStopper" title="catsim.stopping.MaxItemStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxItemStopper</span></code></a> and <a class="reference internal" href="stopping.html#catsim.stopping.MinErrorStopper" title="catsim.stopping.MinErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MinErrorStopper</span></code></a>, respectively.</p>
+<h4 id="stopping-criterion">Stopping Criterion<a class="headerlink" href="#stopping-criterion" title="Link to this heading">¶</a></h4>
+<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold. These stopping criteria are implemented in <a class="reference internal" href="stopping.html#catsim.stopping.MinErrorStopper" title="catsim.stopping.MinErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MinErrorStopper</span></code></a> and <a class="reference internal" href="stopping.html#catsim.stopping.ConfidenceIntervalStopper" title="catsim.stopping.ConfidenceIntervalStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.ConfidenceIntervalStopper</span></code></a>, both supporting optional minimum and maximum item constraints and automatic item bank exhaustion detection.</p>
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, test stopping criteria can be found in the <a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> module.</p>
 </section>
 </section>
 </section>
 <section id="package-architecture">
-<h2>Package architecture<a class="headerlink" href="#package-architecture" title="Link to this heading"></a></h2>
+<h2 id="package-architecture">Package architecture<a class="headerlink" href="#package-architecture" title="Link to this heading">¶</a></h2>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> was built using an object-oriented architecture,which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module’s respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on <a class="reference internal" href="#modules-classes"><span class="std std-numref">Table 1</span></a>.</p>
-<table class="docutils align-default" id="modules-classes">
-<caption><span class="caption-number">Table 1 </span><span class="caption-text">Modules and their corresponding abstract classes</span><a class="headerlink" href="#modules-classes" title="Link to this table"></a></caption>
+<table id="modules-classes">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Modules and their corresponding abstract classes</span><a class="headerlink" href="#modules-classes" title="Link to this table">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>Module</p></th>
 <th class="head"><p>Abstract class</p></th>
@@ -266,16 +613,16 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="initialization.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></p></td>
-<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.Initializer</span></code></p></td>
+<td><p><a class="reference internal" href="initialization.html#catsim.initialization.BaseInitializer" title="catsim.initialization.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.BaseInitializer</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="selection.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></p></td>
-<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.Selector</span></code></p></td>
+<td><p><a class="reference internal" href="selection.html#catsim.selection.BaseSelector" title="catsim.selection.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.BaseSelector</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="estimation.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></p></td>
-<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.Estimator</span></code></p></td>
+<td><p><a class="reference internal" href="estimation.html#catsim.estimation.BaseEstimator" title="catsim.estimation.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.BaseEstimator</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></p></td>
-<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.Stopper</span></code></p></td>
+<td><p><a class="reference internal" href="stopping.html#catsim.stopping.BaseStopper" title="catsim.stopping.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.BaseStopper</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -283,34 +630,61 @@
 </section>
 
 
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="catsim - Computerized Adaptive Testing Simulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="initialization.html" class="btn btn-neutral float-right" title="Initialization Methods – catsim.initialization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
+          </article>
         </div>
       </div>
-    </section>
+    </main>
   </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="index.html" title="catsim - Computerized Adaptive Testing Simulator"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> "Previous" </span> <cite>catsim</cite> - Computerized Adaptive Testing Simulator </span>
+              </div>
+            </a>
+          
+          
+            <a href="initialization.html" title="Initialization Methods – catsim.initialization"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code> </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
 </html>
