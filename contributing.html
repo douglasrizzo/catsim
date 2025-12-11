@@ -296,6 +296,8 @@
         <li class="md-nav__item"><a href="#unit-testing" class="md-nav__link">Unit testing</a>
         </li>
         <li class="md-nav__item"><a href="#how-to-contribute" class="md-nav__link">How to contribute</a>
+        </li>
+        <li class="md-nav__item"><a href="#references" class="md-nav__link">References</a>
         </li></ul>
             </nav>
         </li>
@@ -323,6 +325,13 @@
     
     
       <a href="#how-to-contribute" class="md-nav__link">How to contribute</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="#references" class="md-nav__link">References</a>
       
     
     </li></ul>
@@ -356,6 +365,8 @@
         <li class="md-nav__item"><a href="#unit-testing" class="md-nav__link">Unit testing</a>
         </li>
         <li class="md-nav__item"><a href="#how-to-contribute" class="md-nav__link">How to contribute</a>
+        </li>
+        <li class="md-nav__item"><a href="#references" class="md-nav__link">References</a>
         </li></ul>
             </nav>
         </li>
@@ -375,17 +386,17 @@
             
   <section id="contributing">
 <h1 id="contributing--page-root">Contributing<a class="headerlink" href="#contributing--page-root" title="Link to this heading">¶</a></h1>
-<p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="catsim.initialization.html">initializers</a>, <a class="reference external" href="catsim.selection.html">selectors</a>, <a class="reference external" href="catsim.reestimation.html">estimators</a> or <a class="reference external" href="catsim.stopping.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. You can also write new <a class="reference external" href="catsim.irt.html">IRT-related functions</a> ot <a class="reference external" href="catsim.cat.html">CAT-related functions</a>, as long as you have the right academic papers to prove they are relevant.</p>
-<p>If you think the simulator could be doing something it is currently not doing, feel free to sudy it and <a class="reference external" href="catsim.simulation.html">make a contribution</a></p>
-<p>If you know a better way to present all the data collected during simulation, fell free to contribute with <a class="reference external" href="catsim.plot.html">your own plots</a>.</p>
+<p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">initializers</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">selectors</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">estimators</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. You can also write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/irt.html">IRT-related functions</a>, as long as you have the right academic papers to prove they are relevant.</p>
+<p>If you think the <a class="reference external" href="https://douglasrizzo.com.br/catsim/simulation.html">simulator</a> could be doing something it is currently not doing, feel free to study it and make a contribution.</p>
+<p>If you know a better way to present all the data collected during simulation, feel free to contribute with your own <a class="reference external" href="https://douglasrizzo.com.br/catsim/plot.html">plots</a>.</p>
 <section id="psychometrics">
 <h2 id="psychometrics">Psychometrics<a class="headerlink" href="#psychometrics" title="Link to this heading">¶</a></h2>
 <p><strong>catsim</strong> still has a way to go before it can be considered a mature package. Here is a list of features that may be of interest:</p>
 <ul class="simple">
-<li><p>Bayesian ability estimators (maybe using <a class="reference external" href="https://pymc-devs.github.io/pymc/">PyMC</a>);</p></li>
+<li><p>Bayesian ability estimators (maybe using <a class="reference external" href="https://www.pymc.io/">PyMC</a>);</p></li>
 <li><p>Other test evaluation methods;</p></li>
-<li><p>Comparisons between simulation results (for example <a class="reference internal" href="#barr2010" id="id1"><span>[Barr2010]</span></a>);</p></li>
-<li><p>Other information functions, selection methods based on intervals or areas of information etc. (see <a class="reference internal" href="#lind2010" id="id2"><span>[Lind2010]</span></a>).</p></li>
+<li><p>Comparisons between simulation results (for example <a class="footnote-reference brackets" href="#fn-barr2010" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>);</p></li>
+<li><p>Other information functions, selection methods based on intervals or areas of information etc. (see <a class="footnote-reference brackets" href="#fn-lind2010" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>).</p></li>
 </ul>
 </section>
 <section id="unit-testing">
@@ -394,19 +405,22 @@
 </section>
 <section id="how-to-contribute">
 <h2 id="how-to-contribute">How to contribute<a class="headerlink" href="#how-to-contribute" title="Link to this heading">¶</a></h2>
-<p><strong>Contributing code:</strong> create a fork on GitHub, make your changes on your own repo and then send a pull request to out <strong>testing</strong> branch so that we can check your contributions. Make sure your version passes on the unit tests.</p>
+<p><strong>Contributing code:</strong> create a fork on GitHub, make your changes on your own repo and then send a pull request to our <strong>testing</strong> branch so that we can check your contributions. Make sure your version passes on the unit tests.</p>
 <p><strong>Contributing ideas:</strong> file an <a class="reference external" href="https://github.com/douglasrizzo/catsim/issues">issue on GitHub</a>, label it as an <strong>enhancement</strong> and describe as thoroughly as possible what could be done.</p>
 <p><strong>Blaming me:</strong> file an <a class="reference external" href="https://github.com/douglasrizzo/catsim/issues">issue on GitHub</a> describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.</p>
-<div class="citation-list" role="list">
-<div class="citation" id="lind2010" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a href="#id2" role="doc-backlink">Lind2010</a><span class="fn-bracket">]</span></span>
-<p>Linden, W. J. V. D., &amp; Pashley, J. P. Item Selection and Ability Estimation in Adaptive Testing. _In_ Linden, W. J. V. D., &amp; Glas, C. A. W. (2010). Elements of Adaptive Testing. New York, NY, USA: Springer New York.</p>
-</div>
-<div class="citation" id="barr2010" role="doc-biblioentry">
-<span class="label"><span class="fn-bracket">[</span><a href="#id1" role="doc-backlink">Barr2010</a><span class="fn-bracket">]</span></span>
+</section>
+<section id="references">
+<h2 id="references">References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-barr2010" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a href="#id1" role="doc-backlink">1</a><span class="fn-bracket">]</span></span>
 <p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2010). A Method for the Comparison of Item Selection Rules in Computerized Adaptive Testing. Applied Psychological Measurement, 34(6), 438–452. <a class="reference external" href="http://doi.org/10.1177/0146621610370152">http://doi.org/10.1177/0146621610370152</a></p>
-</div>
-</div>
+</aside>
+<aside class="footnote brackets" id="fn-lind2010" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a href="#id2" role="doc-backlink">2</a><span class="fn-bracket">]</span></span>
+<p>Linden, W. J. V. D., &amp; Pashley, J. P. Item Selection and Ability Estimation in Adaptive Testing. <em>In</em> Linden, W. J. V. D., &amp; Glas, C. A. W. (2010). Elements of Adaptive Testing. New York, NY, USA: Springer New York.</p>
+</aside>
+</aside>
 </section>
 </section>
 
