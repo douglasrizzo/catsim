@@ -89,24 +89,10 @@ class ItemBank:
     if validate:
       irt.validate_item_bank(self._items[:, :4], raise_err=True)
 
-    # Cache expensive computations
+    # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: npt.NDArray[numpy.floating[Any]] | None = None
     self._max_info_values: npt.NDArray[numpy.floating[Any]] | None = None
     self._model: int | None = None
-
-    # Precompute derived values
-    self._precompute()
-
-  def _precompute(self) -> None:
-    """Precompute and cache values that depend only on item parameters."""
-    # Cache maximum information theta values (expensive: sqrt, trig, log operations)
-    self._max_info_thetas = irt.max_info_hpc(self._items[:, :4])
-
-    # Cache maximum information values
-    self._max_info_values = irt.inf_hpc(self._max_info_thetas, self._items[:, :4])
-
-    # Cache the detected model type
-    self._model = irt.detect_model(self._items[:, :4])
 
   @property
   def items(self) -> npt.NDArray[numpy.floating[Any]]:
@@ -140,6 +126,8 @@ class ItemBank:
     numpy.ndarray
         Array of theta values, one per item.
     """
+    if self._max_info_thetas is None:
+      self._max_info_thetas = irt.max_info_hpc(self._items[:, :4])
     return self._max_info_thetas
 
   @property
@@ -151,11 +139,14 @@ class ItemBank:
     numpy.ndarray
         Array of maximum information values, one per item.
     """
+    if self._max_info_values is None:
+      # Ensure max_info_thetas is computed first
+      self._max_info_values = irt.inf_hpc(self.max_info_thetas, self._items[:, :4])
     return self._max_info_values
 
   @property
   def model(self) -> int:
-    """Get the detected IRT model type.
+    """Get the detected IRT model type (lazy-loaded).
 
     Returns
     -------
@@ -163,6 +154,8 @@ class ItemBank:
         Integer between 1 and 4 denoting the logistic model:
         1 for 1PL (Rasch), 2 for 2PL, 3 for 3PL, 4 for 4PL.
     """
+    if self._model is None:
+      self._model = irt.detect_model(self._items[:, :4])
     return self._model
 
   @property
