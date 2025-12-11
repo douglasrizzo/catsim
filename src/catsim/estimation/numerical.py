@@ -1,17 +1,19 @@
+"""Numerical estimation methods for ability estimation."""
+
 import numpy
 import numpy.typing as npt
 from scipy.optimize import minimize_scalar
 
-from catsim import cat, irt
-from catsim.irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from catsim.item_bank import ItemBank
-from catsim.simulation import Estimator
+from .. import cat, irt
+from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from ..item_bank import ItemBank
+from .base import BaseEstimator
 
 # Mathematical constants
 GOLDEN_RATIO = (1 + 5**0.5) / 2
 
 
-class NumericalSearchEstimator(Estimator):
+class NumericalSearchEstimator(BaseEstimator):
   """Implement search algorithms in unimodal functions to find the maximum of the log-likelihood function.
 
   This class provides multiple numerical search methods for ability estimation in IRT,

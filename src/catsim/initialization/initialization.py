@@ -1,7 +1,9 @@
+"""Concrete initialization implementations."""
+
 from enum import Enum
 from typing import Any
 
-from .simulation import Initializer
+from .base import BaseInitializer
 
 
 class InitializationDistribution(Enum):
@@ -19,7 +21,7 @@ class InitializationDistribution(Enum):
   NORMAL = "normal"
 
 
-class RandomInitializer(Initializer):
+class RandomInitializer(BaseInitializer):
   """Randomly initialize the first estimate of an examinee's ability from a statistical distribution.
 
   Parameters
@@ -125,7 +127,7 @@ class RandomInitializer(Initializer):
     return theta
 
 
-class FixedPointInitializer(Initializer):
+class FixedPointInitializer(BaseInitializer):
   """Initialize every examinee's ability at the same fixed point.
 
   This initializer is useful for controlled experiments where you want all

@@ -7,11 +7,12 @@ from sklearn.cluster import KMeans
 
 from catsim import cat, irt, plot
 from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import InitializationDistribution, RandomInitializer
+from catsim.initialization import BaseInitializer, InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
+  BaseSelector,
   ClusterSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
@@ -22,13 +23,10 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
-from catsim.simulation import Estimator, Initializer, Selector, Simulator, Stopper
+from catsim.simulation import Simulator
 from catsim.stopping import (
-  CombinationStopper,
-  CombinationStrategy,
+  BaseStopper,
   ConfidenceIntervalStopper,
-  ItemBankLengthStopper,
-  MaxItemStopper,
   MinErrorStopper,
 )
 
@@ -36,10 +34,10 @@ from catsim.stopping import (
 def one_simulation(
   items: ItemBank,
   examinees: int,
-  initializer: Initializer,
-  selector: Selector,
-  estimator: Estimator,
-  stopper: Stopper,
+  initializer: BaseInitializer,
+  selector: BaseSelector,
+  estimator: NumericalSearchEstimator,
+  stopper: BaseStopper,
 ) -> Simulator:
   """Test a single simulation.
 
@@ -69,19 +67,16 @@ def one_simulation(
 @pytest.mark.parametrize(
   "stopper",
   [
-    CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
-    CombinationStopper([MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
-    CombinationStopper(
-      [MaxItemStopper(30), MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR
-    ),
+    MinErrorStopper(0.4, max_items=30),
+    MinErrorStopper(0.4, min_items=10, max_items=30),
   ],
 )
 def test_cism(
   examinees: int,
   bank_size: int,
-  initializer: Initializer,
-  estimator: Estimator,
-  stopper: Stopper,
+  initializer: BaseInitializer,
+  estimator: NumericalSearchEstimator,
+  stopper: BaseStopper,
 ) -> None:
   """Test the cluster-based item selection method."""
   item_bank = ItemBank.generate_item_bank(bank_size)
@@ -103,13 +98,13 @@ def test_cism(
 def test_estimators(
   examinees: int,
   bank_size: int,
-  estimator: Estimator,
+  estimator: NumericalSearchEstimator,
 ) -> None:
   """Test all NumericalSearchEstimator methods with simple selector configurations."""
   rng = np.random.default_rng(1337)
   item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
   initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
-  stopper = CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+  stopper = MinErrorStopper(0.4, max_items=30)
   test_size = 30
 
   # Test with a finite selector (LinearSelector)
@@ -136,7 +131,7 @@ def test_finite_selectors(
   rng = np.random.default_rng(1337)
   item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
   initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
-  stopper = CombinationStopper([MaxItemStopper(test_size), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+  stopper = MinErrorStopper(0.4, max_items=test_size)
 
   finite_selectors = [
     LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False))),
@@ -189,13 +184,13 @@ def test_finite_selectors(
 def test_infinite_selectors(
   examinees: int,
   bank_size: int,
-  selector: Selector,
+  selector: BaseSelector,
 ) -> None:
   """Test all infinite selectors with brent and bounded estimators."""
   rng = np.random.default_rng(1337)
   item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
   initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
-  stopper = CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+  stopper = MinErrorStopper(0.4, max_items=30)
 
   estimators = [
     NumericalSearchEstimator(method="brent"),
@@ -234,21 +229,16 @@ def test_infinite_selectors(
 @pytest.mark.parametrize(
   "stopper",
   [
-    CombinationStopper([MaxItemStopper(30), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
-    CombinationStopper([MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR),
-    CombinationStopper(
-      [MaxItemStopper(30), MinErrorStopper(0.4), ItemBankLengthStopper()], strategy=CombinationStrategy.OR
-    ),
-    CombinationStopper(
-      [ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.80), ItemBankLengthStopper()],
-      strategy=CombinationStrategy.OR,
-    ),
+    MinErrorStopper(0.4, max_items=30),
+    MinErrorStopper(0.4, min_items=10, max_items=30),
+    ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.80, max_items=50),
+    ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.80, min_items=10, max_items=50),
   ],
 )
 def test_stoppers(
   examinees: int,
   bank_size: int,
-  stopper: Stopper,
+  stopper: BaseStopper,
 ) -> None:
   """Test all stopper configurations with brent and bounded estimators."""
   rng = np.random.default_rng(1337)
@@ -256,14 +246,8 @@ def test_stoppers(
   initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
   selector = MaxInfoSelector()
 
-  # Extract max items from stopper (check if it's a CombinationStopper with MaxItemStopper inside)
-  max_administered_items = bank_size
-  if isinstance(stopper, CombinationStopper):
-    for sub_stopper in stopper.stoppers:
-      if isinstance(sub_stopper, MaxItemStopper):
-        max_administered_items = min(max_administered_items, sub_stopper.max_itens)
-  elif isinstance(stopper, MaxItemStopper):
-    max_administered_items = stopper.max_itens
+  # Extract max items from stopper
+  max_administered_items = stopper.max_items if stopper.max_items is not None else bank_size
 
   estimators = [
     NumericalSearchEstimator(method="brent"),
@@ -323,7 +307,7 @@ def test_plots() -> None:
   initializer = RandomInitializer()
   selector = MaxInfoSelector()
   estimator = NumericalSearchEstimator()
-  stopper = CombinationStopper([MaxItemStopper(20), ItemBankLengthStopper()], strategy=CombinationStrategy.OR)
+  stopper = MinErrorStopper(0.5, max_items=20)
   s = Simulator(ItemBank.generate_item_bank(100), 10)
   s.simulate(initializer, selector, estimator, stopper, verbose=True)
 

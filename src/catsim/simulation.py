@@ -4,7 +4,6 @@ Most of this module is based on the work of [Bar10]_.
 """
 
 import time
-from abc import ABC, abstractmethod
 from typing import Any
 
 import numpy
@@ -12,460 +11,15 @@ import numpy.typing as npt
 from tqdm import tqdm
 
 from . import cat, irt
+from .estimation import BaseEstimator
+from .initialization import BaseInitializer
 from .item_bank import ItemBank
-
-
-class Simulable(ABC):  # noqa: B024
-  """Base class representing one of the Simulator components that will receive a reference back to it.
-
-  This class provides the infrastructure for components (Initializers, Selectors,
-  Estimators, and Stoppers) to access the Simulator instance they belong to.
-
-  Notes
-  -----
-  This class inherits from ABC to indicate it's meant to be subclassed, though it doesn't
-  define abstract methods itself. Concrete abstract methods are defined in its subclasses
-  (Initializer, Selector, Estimator, Stopper).
-  """
-
-  def __init__(self) -> None:
-    """Initialize a Simulable object."""
-    super().__init__()
-    self._simulator: Simulator | None = None
-
-  @property
-  def simulator(self) -> "Simulator":
-    """Set or get the simulator object.
-
-    Returns
-    -------
-    Simulator
-        The :py:class:`Simulator` instance tied to this Simulable.
-
-    Raises
-    ------
-    TypeError
-        If the simulator is not of type catsim.simulation.Simulator or is None.
-    """
-    if self._simulator is None:
-      msg = "simulator has not been set"
-      raise TypeError(msg)
-    if not isinstance(self._simulator, Simulator):
-      msg = "simulator has to be of type catsim.simulation.Simulator"
-      raise TypeError(msg)
-    return self._simulator
-
-  @simulator.setter
-  def simulator(self, x: "Simulator") -> None:
-    if not isinstance(x, Simulator):
-      msg = "simulator has to be of type catsim.simulation.Simulator"
-      raise TypeError(msg)
-    self._simulator = x
-    self.preprocess()
-
-  def preprocess(self) -> None:  # noqa: B027
-    """Override this method to perform any initialization the `Simulable` might need for the simulation.
-
-    `preprocess` is called after a value is set for the `simulator` property. If a new
-    value is attributed to `simulator`, this method is called again, guaranteeing that
-    internal properties of the `Simulable` are re-initialized as necessary.
-
-    Notes
-    -----
-    The default implementation does nothing. Subclasses should override this method
-    if they need to perform setup operations that require access to the simulator.
-    """
-
-  def _prepare_args(
-    self,
-    return_item_bank: bool = False,
-    return_administered_items: bool = False,
-    return_response_vector: bool = False,
-    return_est_theta: bool = False,
-    return_rng: bool = False,
-    **kwargs: Any,
-  ) -> tuple:
-    """Prepare input arguments for all Simulable objects.
-
-    This helper method extracts required arguments either from the simulator (if running
-    within a simulation) or from the provided kwargs (if used standalone).
-
-    Parameters
-    ----------
-    return_item_bank : bool, optional
-        Whether to return the ItemBank. Default is False.
-    return_administered_items : bool, optional
-        Whether to return the list of administered item indices. Default is False.
-    return_response_vector : bool, optional
-        Whether to return the response vector. Default is False.
-    return_est_theta : bool, optional
-        Whether to return the estimated theta value. Default is False.
-    return_rng : bool, optional
-        Whether to return the random number generator. Default is False.
-    **kwargs : dict
-        Additional keyword arguments that may contain the required values when not
-        using a simulator.
-
-    Returns
-    -------
-    tuple
-        A tuple containing the specified results based on the conditions.
-
-    Raises
-    ------
-    ValueError
-        If required arguments are missing when not using a simulator.
-    """
-    using_simulator_props = kwargs.get("index") is not None and self.simulator is not None
-    result = []
-    if not using_simulator_props:
-      msg = "No simulator in use, but optional arguments missing: "
-      missing_args = []
-
-      for ret, val in (
-        (return_item_bank, "item_bank"),
-        (return_administered_items, "administered_items"),
-        (return_response_vector, "response_vector"),
-        (return_est_theta, "est_theta"),
-        (return_rng, "rng"),
-      ):
-        if ret:
-          try:
-            result.append(kwargs[val])
-          except KeyError:
-            missing_args.append(val)
-      if len(missing_args) > 0:
-        msg += ", ".join(missing_args)
-        raise ValueError(msg)
-
-    else:
-      index = kwargs["index"]
-      if return_item_bank:
-        result.append(self.simulator.item_bank)
-      if return_administered_items:
-        result.append(self.simulator.administered_items[index])
-      if return_response_vector:
-        result.append(self.simulator.response_vectors[index])
-      if return_est_theta:
-        result.append(self.simulator.latest_estimations[index])
-      if return_rng:
-        result.append(self.simulator.rng)
-
-    return tuple(result)
-
-
-class Initializer(Simulable, ABC):
-  """Base class for CAT initializers.
-
-  Initializers are responsible for selecting examinees' initial ability estimates
-  before any items are administered.
-  """
-
-  def __init__(self) -> None:
-    """Initialize an Initializer object."""
-    super().__init__()
-
-  @abstractmethod
-  def initialize(self, **kwargs: Any) -> float:
-    r"""Select an examinee's initial :math:`\theta` value.
-
-    Parameters
-    ----------
-    **kwargs : dict
-        Arguments used by the Initializer implementation.
-
-    Returns
-    -------
-    float
-        Examinee's initial :math:`\theta` value.
-    """
-
-
-class Selector(Simulable, ABC):
-  """Base class representing a CAT item selector.
-
-  Selectors are responsible for choosing which item to administer next to an
-  examinee based on their current estimated ability and test progress.
-  """
-
-  def __init__(self) -> None:
-    """Initialize a Selector object."""
-    super().__init__()
-
-  @staticmethod
-  def _get_non_administered(item_indices: list[int], administered_item_indices: list[int]) -> list[int]:
-    """Get a list of items that were not administered from a list of indices.
-
-    Parameters
-    ----------
-    item_indices : list[int]
-        A list of integers corresponding to item indices.
-    administered_item_indices : list[int]
-        A list of integers corresponding to the indices of items that were already
-        administered to a given examinee.
-
-    Returns
-    -------
-    list[int]
-        A list of items corresponding to the indices that are in `item_indices` but
-        not in `administered_item_indices`, in the same order they were passed in
-        `item_indices`.
-    """
-    return [x for x in item_indices if x not in administered_item_indices]
-
-  @staticmethod
-  def _sort_by_info(item_bank: ItemBank, est_theta: float) -> list[int]:
-    """Sort items by their information value for a given ability value.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    est_theta : float
-        An examinee's ability.
-
-    Returns
-    -------
-    list[int]
-        List containing the indices of items, sorted in descending order by their
-        information values at the given ability level (much like the return of
-        `numpy.argsort`).
-    """
-    if item_bank.model == 1:
-      # when the logistic model has the number of parameters <= 2,
-      # all items have highest information where theta = b
-      ordered_items = Selector._sort_by_b(item_bank, est_theta)
-    else:
-      # else, sort item indexes by their information value descending and remove indexes of administered items
-      ordered_items = list((-item_bank.information(est_theta)).argsort())
-    return ordered_items
-
-  @staticmethod
-  def _sort_by_b(item_bank: ItemBank, est_theta: float) -> list[int]:
-    """Sort items by how close their difficulty parameter is to an examinee's ability.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    est_theta : float
-        An examinee's ability.
-
-    Returns
-    -------
-    list[int]
-        List containing the indices of items, sorted by how close their difficulty
-        parameter is in relation to `est_theta` (much like the return of `numpy.argsort`).
-    """
-    return list(numpy.abs(item_bank.difficulty - est_theta).argsort())
-
-  @abstractmethod
-  def select(
-    self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
-    est_theta: float | None = None,
-    **kwargs: Any,
-  ) -> int | None:
-    """Return the index of the next item to be administered.
-
-    Parameters
-    ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered.
-        Default is None.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs : dict
-        Additional keyword arguments.
-
-    Returns
-    -------
-    int or None
-        Index of the next item to be applied, or None if there are no more items
-        to be presented.
-    """
-
-
-class FiniteSelector(Selector, ABC):
-  """Base class representing a CAT item selector for fixed-length tests.
-
-  Parameters
-  ----------
-  test_size : int
-      Number of items to be administered in the test.
-  """
-
-  def __init__(self, test_size: int) -> None:
-    """Initialize a FiniteSelector object.
-
-    Parameters
-    ----------
-    test_size : int
-        Number of items to be administered in the test.
-    """
-    self._test_size = test_size
-    self._overlap_rate: float | None = None
-    super().__init__()
-
-  @property
-  def test_size(self) -> int:
-    """Get the number of items to be administered in the test.
-
-    Returns
-    -------
-    int
-        Number of items to be administered in the test.
-    """
-    return self._test_size
-
-  @property
-  def overlap_rate(self) -> float | None:
-    """Get the overlap rate of the test, if it is of finite length.
-
-    Returns
-    -------
-    float or None
-        Overlap rate of the test, or None if not yet computed.
-    """
-    return self._overlap_rate
-
-
-class Estimator(Simulable, ABC):
-  """Base class for ability estimators.
-
-  Estimators are responsible for computing ability estimates based on examinees'
-  responses to administered items.
-
-  Parameters
-  ----------
-  verbose : bool, optional
-      Whether to be verbose during execution. Default is False.
-  """
-
-  def __init__(self, verbose: bool = False) -> None:
-    """Initialize an Estimator object.
-
-    Parameters
-    ----------
-    verbose : bool, optional
-        Whether to be verbose during execution. Default is False.
-    """
-    super().__init__()
-    self._calls = 0
-    self._evaluations = 0
-    self._verbose = verbose
-
-  @abstractmethod
-  def estimate(
-    self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
-    response_vector: list[bool] | None = None,
-    est_theta: float | None = None,
-  ) -> float:
-    r"""Compute the theta value that maximizes the log-likelihood function for the given examinee.
-
-    When this method is used inside a simulator, its arguments are automatically filled.
-    Outside of a simulation, the user can also specify the arguments to use the
-    Estimator as a standalone object.
-
-    Parameters
-    ----------
-    index : int or None, optional
-        Index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered.
-        Default is None.
-    response_vector : list[bool] or None, optional
-        A boolean list containing the examinee's answers to the administered items.
-        Default is None.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-
-    Returns
-    -------
-    float
-        The current estimated ability :math:`\hat\theta`.
-    """
-
-  @property
-  def calls(self) -> int:
-    """Get how many times the estimator has been called to maximize/minimize the log-likelihood function.
-
-    Returns
-    -------
-    int
-        Number of times the estimator has been called to maximize/minimize the
-        log-likelihood function.
-    """
-    return self._calls
-
-  @property
-  def evaluations(self) -> int:
-    """Get the total number of times the estimator has evaluated the log-likelihood function during its existence.
-
-    Returns
-    -------
-    int
-        Number of function evaluations.
-    """
-    return self._evaluations
-
-  @property
-  def avg_evaluations(self) -> float:
-    """Get the average number of function evaluations for all tests the estimator has been used.
-
-    Returns
-    -------
-    float
-        Average number of function evaluations per test.
-    """
-    return self._evaluations / self._calls
-
-
-class Stopper(Simulable, ABC):
-  """Base class for CAT stopping criteria.
-
-  Stoppers determine when a test should end based on specific criteria such as
-  test length, measurement precision, or other conditions.
-  """
-
-  def __init__(self) -> None:
-    """Initialize a Stopper object."""
-    super().__init__()
-
-  @abstractmethod
-  def stop(self, index: int | None = None, **kwargs: Any) -> bool:
-    """Check whether the test reached its stopping criterion for the given user.
-
-    Parameters
-    ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. When used within a
-        simulation, this parameter is provided automatically. When used standalone,
-        other parameters may be provided via kwargs. Default is None.
-    **kwargs : dict
-        Additional keyword arguments that specific Stopper implementations may require.
-        Common arguments include:
-
-        - administered_items: Item parameters or indices that were administered
-        - theta: Current ability estimate
-        - item_bank: ItemBank for accessing item parameters
-
-    Returns
-    -------
-    bool
-        True if the test met its stopping criterion, False otherwise.
-    """
+from .selection import BaseSelector, FiniteSelector
+from .stopping import BaseStopper
+
+# Re-export component base classes for backward compatibility
+Estimator = BaseEstimator
+Selector = BaseSelector
 
 
 class Simulator:
@@ -484,8 +38,8 @@ class Simulator:
       Either an integer with the number of examinees (whose real :math:`\theta` values
       will be sampled from a normal distribution), or an array-like (list, tuple, or
       numpy array) containing the examinees' true :math:`\theta` values (float type).
-  initializer : Initializer or None, optional
-      Initializer to use during the simulation. Default is None.
+  initializer : BaseInitializer or None, optional
+      BaseInitializer to use during the simulation. Default is None.
   selector : Selector or None, optional
       Selector to use during the simulation. Default is None.
   estimator : Estimator or None, optional
@@ -501,10 +55,10 @@ class Simulator:
     self,
     item_bank: ItemBank | npt.NDArray[numpy.floating[Any]],
     examinees: int | npt.ArrayLike,
-    initializer: Initializer | None = None,
-    selector: Selector | None = None,
-    estimator: Estimator | None = None,
-    stopper: Stopper | None = None,
+    initializer: BaseInitializer | None = None,
+    selector: BaseSelector | None = None,
+    estimator: BaseEstimator | None = None,
+    stopper: BaseStopper | None = None,
     seed: int = 0,
   ) -> None:
     """Initialize a Simulator object.
@@ -621,18 +175,18 @@ class Simulator:
     return self._overlap_rate
 
   @property
-  def initializer(self) -> Initializer | None:
+  def initializer(self) -> BaseInitializer | None:
     """Get the initializer used during the simulation.
 
     Returns
     -------
-    Initializer or None
+    BaseInitializer or None
         The initializer used during the simulation.
     """
     return self._initializer
 
   @property
-  def selector(self) -> Selector | None:
+  def selector(self) -> BaseSelector | None:
     """Get the selector used during the simulation.
 
     Returns
@@ -643,7 +197,7 @@ class Simulator:
     return self._selector
 
   @property
-  def estimator(self) -> Estimator | None:
+  def estimator(self) -> BaseEstimator | None:
     """Get the estimator used during the simulation.
 
     Returns
@@ -654,7 +208,7 @@ class Simulator:
     return self._estimator
 
   @property
-  def stopper(self) -> Stopper | None:
+  def stopper(self) -> BaseStopper | None:
     """Get the stopper used during the simulation.
 
     Returns
@@ -751,10 +305,10 @@ class Simulator:
 
   def simulate(
     self,
-    initializer: Initializer | None = None,
-    selector: Selector | None = None,
-    estimator: Estimator | None = None,
-    stopper: Stopper | None = None,
+    initializer: BaseInitializer | None = None,
+    selector: BaseSelector | None = None,
+    estimator: BaseEstimator | None = None,
+    stopper: BaseStopper | None = None,
     verbose: bool = False,
   ) -> None:
     r"""Simulate a computerized adaptive testing application to one or more examinees.
@@ -789,13 +343,13 @@ class Simulator:
     >>> from catsim.initialization import RandomInitializer
     >>> from catsim.selection import MaxInfoSelector
     >>> from catsim.estimation import NumericalSearchEstimator
-    >>> from catsim.stopping import MaxItemStopper
+    >>> from catsim.stopping import MinErrorStopper
     >>> from catsim.simulation import Simulator
     >>> from catsim.item_bank import ItemBank
     >>> initializer = RandomInitializer()
     >>> selector = MaxInfoSelector()
     >>> estimator = NumericalSearchEstimator()
-    >>> stopper = MaxItemStopper(20)
+    >>> stopper = MinErrorStopper(0.4, max_items=20)
     >>> Simulator(ItemBank.generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
     """
     if initializer is not None:

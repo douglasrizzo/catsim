@@ -37,13 +37,13 @@ There is [a Colab Notebook](https://colab.research.google.com/drive/1iJQE9VFrDD2
 from catsim.initialization import RandomInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
-from catsim.stopping import MaxItemStopper
+from catsim.stopping import MinErrorStopper
 from catsim.simulation import Simulator
 from catsim import ItemBank
 initializer = RandomInitializer()
 selector = MaxInfoSelector()
 estimator = NumericalSearchEstimator()
-stopper = MaxItemStopper(20)
+stopper = MinErrorStopper(0.4, max_items=20)
 Simulator(ItemBank.generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
 ```
 

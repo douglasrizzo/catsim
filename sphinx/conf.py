@@ -45,7 +45,6 @@ extensions = [
   "sphinx.ext.mathjax",
   "sphinx.ext.viewcode",
   "numpydoc",
-  "sphinx_rtd_theme",
   "m2r2",
 ]
 
@@ -133,12 +132,24 @@ numfig_secnum_depth = 0
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "sphinx_rtd_theme"
+html_theme = "sphinx_material"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {"logo_only": True}
+html_theme_options = {
+  "nav_title": "catsim",
+  "color_primary": "blue",
+  "color_accent": "light-blue",
+  "repo_url": "https://github.com/douglasrizzo/catsim",
+  "repo_name": "catsim",
+  "globaltoc_depth": 2,
+  "globaltoc_collapse": True,
+  "globaltoc_includehidden": True,
+}
+
+# Sidebar configuration for sphinx-material
+html_sidebars = {"**": ["globaltoc.html", "localtoc.html", "searchbox.html"]}
 
 # The name of the Pygments (syntax highlighting) style to use.
 # pygments_style = 'fruity'

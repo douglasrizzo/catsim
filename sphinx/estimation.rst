@@ -17,11 +17,13 @@ used to refine assumptions about the parameter distributions, improving
 future estimations.
 
 All implemented classes in this module inherit from a base abstract class
-:py:class:`Estimator`. :py:class:`Simulator` allows that a custom estimator be
+:py:class:`BaseEstimator`. :py:class:`Simulator` allows that a custom estimator be
 used during the simulation, as long as it also inherits from
-:py:class:`Estimator`.
+:py:class:`BaseEstimator`.
 
 .. inheritance-diagram:: catsim.estimation
+   :parts: 1
+   :top-classes: catsim._base.Simulable
 
 :mod:`catsim` implements a few types of maximum-likelihood estimators.
 
@@ -44,7 +46,7 @@ The chart below displays the execution times of the same simulation (100 examine
     from catsim.initialization import FixedPointInitializer
     from catsim.selection import MaxInfoSelector
     from catsim.estimation import NumericalSearchEstimator
-    from catsim.stopping import MaxItemStopper
+    from catsim.stopping import MinErrorStopper
     from catsim import ItemBank
 
     items = ItemBank.generate_item_bank(300)
@@ -59,7 +61,7 @@ The chart below displays the execution times of the same simulation (100 examine
             FixedPointInitializer(0),
             MaxInfoSelector(),
             NumericalSearchEstimator(method=m),
-            MaxItemStopper(test_size),
+            MinErrorStopper(0.4, max_items=test_size),
             verbose=True
         )
         sim_times[m] = simulator.duration

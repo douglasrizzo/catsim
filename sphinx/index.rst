@@ -5,6 +5,7 @@
 
 .. toctree::
     :maxdepth: 2
+    :hidden:
 
     introduction.rst
     initialization.rst
