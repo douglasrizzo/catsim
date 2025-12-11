@@ -17,7 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Education :: Testing",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "License :: OSI Approved :: BSD License",
 ]
 name = "catsim"
 version = "0.20.0"
@@ -34,7 +34,7 @@ dependencies = [
 ]
 requires-python = ">=3.10"
 readme = "README.md"
-license.file = "COPYING.LESSER"
+license = "BSD-3-Clause"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
