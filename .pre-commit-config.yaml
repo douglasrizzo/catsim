@@ -54,6 +54,7 @@ repos:
         additional_dependencies:
           - mdformat-gfm
           - mdformat-toc
+          - mdformat-footnote
 
   # 6. Validation checks last
   - repo: https://github.com/abravalheri/validate-pyproject
