@@ -166,7 +166,9 @@ def detect_model(items: npt.NDArray[numpy.floating[Any]]) -> int:
   return 1
 
 
-def icc_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
+def icc_hpc(
+  theta: float | npt.NDArray[numpy.floating[Any]], items: npt.NDArray[numpy.floating[Any]]
+) -> npt.NDArray[numpy.floating[Any]]:
   """Compute item characteristic functions for all items in a numpy array at once.
 
   This is a high-performance computing (HPC) version that uses vectorized operations
@@ -174,8 +176,9 @@ def icc_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArra
 
   Parameters
   ----------
-  theta : float
-      The individual's ability value.
+  theta : float or numpy.ndarray
+      The individual's ability value(s). Can be a scalar or an array for element-wise
+      computation with items (via numpy broadcasting).
   items : numpy.ndarray
       Array containing item parameters with at least four columns
       [a, b, c, d, ...].
@@ -193,7 +196,9 @@ def icc_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArra
   )
 
 
-def inf_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
+def inf_hpc(
+  theta: float | npt.NDArray[numpy.floating[Any]], items: npt.NDArray[numpy.floating[Any]]
+) -> npt.NDArray[numpy.floating[Any]]:
   """Compute the information values for all items in a numpy array using numpy and numexpr.
 
   This is a high-performance computing (HPC) version that uses vectorized operations
@@ -201,8 +206,9 @@ def inf_hpc(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArra
 
   Parameters
   ----------
-  theta : float
-      The individual's ability value.
+  theta : float or numpy.ndarray
+      The individual's ability value(s). Can be a scalar or an array for element-wise
+      computation with items (via numpy broadcasting).
   items : numpy.ndarray
       Array containing item parameters with at least four columns [a, b, c, d, ...].
 
@@ -768,10 +774,11 @@ def log_likelihood(
     msg = "Response vector must contain only Boolean elements"
     raise ValueError(msg)
   ps = icc_hpc(est_theta, administered_items)
-  return numexpr.evaluate(
+  result = numexpr.evaluate(
     "sum(where(response_vector, log(ps), log(1 - ps)))",
     local_dict={"response_vector": response_vector, "ps": ps},
   )
+  return float(result)
 
 
 def negative_log_likelihood(est_theta: float, *args: Any) -> float:

@@ -94,6 +94,9 @@ class ItemBank:
     self._max_info_values: npt.NDArray[numpy.floating[Any]] | None = None
     self._model: int | None = None
 
+    # Cache for selector-specific data (may be populated by selectors during simulation)
+    self._selector_cache: dict[str, Any] = {}
+
   @property
   def items(self) -> npt.NDArray[numpy.floating[Any]]:
     """Get the item parameter matrix.
@@ -242,8 +245,7 @@ class ItemBank:
 
     # Clear any dynamic caches that selectors might have added
     # (while preserving built-in cached properties like max_info_thetas)
-    if hasattr(self, "_selector_cache"):
-      self._selector_cache.clear()
+    self._selector_cache.clear()
 
   def get_item(self, index: int) -> npt.NDArray[numpy.floating[Any]]:
     """Get parameters for a specific item.
