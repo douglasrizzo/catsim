@@ -121,7 +121,7 @@ jobs:
           uv run twine check dist/*
 
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: python-package-distributions
           path: dist/
@@ -215,7 +215,7 @@ jobs:
         continue-on-error: true # Don't fail the build on external link issues
 
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
