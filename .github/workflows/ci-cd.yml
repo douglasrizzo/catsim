@@ -139,7 +139,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -164,7 +164,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -243,7 +243,7 @@ jobs:
 
     steps:
       - name: Download documentation artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
@@ -289,7 +289,7 @@ jobs:
 
     steps:
       - name: Download documentation artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
@@ -334,7 +334,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
