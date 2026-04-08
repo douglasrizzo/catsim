@@ -143,7 +143,7 @@ jobs:
   publish-to-pypi:
     name: Publish to PyPI
     if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
-    needs: [pre-commit, test, build] # Wait for quality gates + package build
+    needs: [pre-commit, test, build, deploy-docs-production] # Wait for quality gates, package build, and live docs
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -168,7 +168,7 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
-    needs: [pre-commit, test, build] # Wait for quality gates + package build
+    needs: [pre-commit, test, build, deploy-docs-dev] # Wait for quality gates, package build, and live docs
     runs-on: ubuntu-latest
     environment:
       name: testpypi
