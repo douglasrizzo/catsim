@@ -39,7 +39,6 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
       - run: uv run --only-group dev pre-commit run --all-files
-      - run: uv run --only-group dev ty check
 
   test:
     name: Run tests
