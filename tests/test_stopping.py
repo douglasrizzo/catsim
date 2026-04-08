@@ -119,14 +119,14 @@ class TestMinErrorStopperInit:
   def test_init_with_min_error(self) -> None:
     """Test initialization with min_error."""
     stopper = MinErrorStopper(0.3)
-    assert stopper.min_error == 0.3
+    assert stopper.min_error == pytest.approx(0.3)
     assert stopper.min_items is None
     assert stopper.max_items is None
 
   def test_init_with_all_params(self) -> None:
     """Test initialization with all parameters."""
     stopper = MinErrorStopper(0.3, min_items=5, max_items=30)
-    assert stopper.min_error == 0.3
+    assert stopper.min_error == pytest.approx(0.3)
     assert stopper.min_items == 5
     assert stopper.max_items == 30
 

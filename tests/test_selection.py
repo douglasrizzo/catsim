@@ -29,13 +29,13 @@ class TestMaxInfoSelector:
   def test_init_default(self) -> None:
     """Test default initialization."""
     selector = MaxInfoSelector()
-    assert selector.r_max == 1.0
+    assert selector.r_max == pytest.approx(1.0)
     assert str(selector) == "Maximum Information Selector"
 
   def test_init_with_r_max(self) -> None:
     """Test initialization with r_max."""
     selector = MaxInfoSelector(r_max=0.5)
-    assert selector.r_max == 0.5
+    assert selector.r_max == pytest.approx(0.5)
 
   def test_init_invalid_r_max_raises(self) -> None:
     """Test that invalid r_max raises ValueError."""
@@ -340,7 +340,7 @@ class TestIntervalInfoSelector:
   def test_init_with_interval(self) -> None:
     """Test initialization with interval."""
     selector = IntervalInfoSelector(interval=2.0)
-    assert selector.interval == 2.0
+    assert selector.interval == pytest.approx(2.0)
     assert str(selector) == "Interval Information Selector"
 
   def test_init_default(self) -> None:

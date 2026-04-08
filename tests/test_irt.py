@@ -281,24 +281,24 @@ class TestNormalizeItemBank:
     normalized = irt.normalize_item_bank(items)
     assert normalized.shape == (2, 4)
     # Check a=1, b=original, c=0, d=1
-    assert np.all(normalized[:, 0] == 1.0)  # a
-    assert np.all(normalized[:, 2] == 0.0)  # c
-    assert np.all(normalized[:, 3] == 1.0)  # d
+    assert np.allclose(normalized[:, 0], 1.0)  # a
+    assert np.allclose(normalized[:, 2], 0.0)  # c
+    assert np.allclose(normalized[:, 3], 1.0)  # d
 
   def test_normalize_2pl(self) -> None:
     """Test normalization of 2PL (a, b)."""
     items = np.array([[1.5, 0.0], [1.0, 1.0]])
     normalized = irt.normalize_item_bank(items)
     assert normalized.shape == (2, 4)
-    assert np.all(normalized[:, 2] == 0.0)  # c
-    assert np.all(normalized[:, 3] == 1.0)  # d
+    assert np.allclose(normalized[:, 2], 0.0)  # c
+    assert np.allclose(normalized[:, 3], 1.0)  # d
 
   def test_normalize_3pl(self) -> None:
     """Test normalization of 3PL (a, b, c)."""
     items = np.array([[1.5, 0.0, 0.2], [1.0, 1.0, 0.1]])
     normalized = irt.normalize_item_bank(items)
     assert normalized.shape == (2, 4)
-    assert np.all(normalized[:, 3] == 1.0)  # d
+    assert np.allclose(normalized[:, 3], 1.0)  # d
 
   def test_normalize_4pl_unchanged(self) -> None:
     """Test that 4PL items are returned unchanged."""

@@ -23,9 +23,7 @@ sys.path.insert(0, pathlib.Path("..").resolve())
 
 filenames = ["readme_head.md", "readme_body.md"]
 with pathlib.Path("../README.md").open("w", encoding="utf-8") as outfile:
-  for fname in filenames:
-    with pathlib.Path(fname).open(encoding="utf-8") as infile:
-      outfile.write(infile.read())
+  outfile.writelines(pathlib.Path(fname).read_text(encoding="utf-8") for fname in filenames)
 
 # -- General configuration ------------------------------------------------
 

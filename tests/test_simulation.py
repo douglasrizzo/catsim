@@ -134,15 +134,15 @@ class TestSimulatorProperties:
     """Test that duration is zero before simulation."""
     item_bank = ItemBank.generate_item_bank(50)
     simulator = Simulator(item_bank, examinees=5)
-    assert simulator.duration == 0.0
+    assert simulator.duration == pytest.approx(0.0)
 
   def test_bias_mse_rmse_initially_zero(self) -> None:
     """Test that evaluation metrics are zero initially."""
     item_bank = ItemBank.generate_item_bank(50)
     simulator = Simulator(item_bank, examinees=5)
-    assert simulator.bias == 0.0
-    assert simulator.mse == 0.0
-    assert simulator.rmse == 0.0
+    assert simulator.bias == pytest.approx(0.0)
+    assert simulator.mse == pytest.approx(0.0)
+    assert simulator.rmse == pytest.approx(0.0)
 
   def test_rng_property(self) -> None:
     """Test that rng property returns numpy Generator."""
