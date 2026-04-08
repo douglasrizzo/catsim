@@ -134,7 +134,9 @@ line-ending = "auto"
 [dependency-groups]
 dev = [
     "ipykernel>=7.1.0",
+    "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
+    "pytest>=8.4.2",
     "ruff>=0.15.9",
     "ty>=0.0.28",
 ]

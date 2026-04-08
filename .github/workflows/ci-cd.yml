@@ -80,13 +80,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --group testing
+        run: uv sync --group dev --group testing
 
       - name: Run parallel tests
         run: uv run pytest -m parallel -n auto --verbose --cov-branch --cov-report=xml --cov=catsim
 
       - name: Run sequential tests
         run: uv run pytest -m "not parallel" --verbose --cov-branch --cov-report=xml --cov=catsim
+
+      - name: Run tutorial notebooks
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        run: uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'

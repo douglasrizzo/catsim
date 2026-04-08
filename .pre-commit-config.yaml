@@ -42,16 +42,37 @@ repos:
     hooks:
       - id: ruff-check
         args: [--fix]
+        types_or: [python, pyi]
       - id: ruff-format
+        types_or: [python, pyi]
 
   - repo: local
     hooks:
+      - id: ruff-check-notebooks
+        name: ruff check notebooks
+        entry: uv run --only-group dev ruff check --fix
+        language: system
+        files: \.ipynb$
+        types: [file]
+      - id: ruff-format-notebooks
+        name: ruff format notebooks
+        entry: uv run --only-group dev ruff format
+        language: system
+        files: \.ipynb$
+        types: [file]
       - id: ty-check
         name: ty check
         entry: uv run --only-group dev ty check
         language: system
         pass_filenames: false
         types_or: [python, pyi]
+      - id: pytest-nbmake
+        name: pytest nbmake
+        entry: uv run --only-group dev pytest --nbmake --nbmake-timeout=300 -q
+        language: system
+        files: \.ipynb$
+        types: [file]
+        require_serial: true
 
   # 5. Other formatters
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -60,6 +81,7 @@ repos:
       - id: pretty-format-json
         args:
           - "--autofix"
+        exclude: \.ipynb$
       - id: requirements-txt-fixer
 
   - repo: https://github.com/hukkin/mdformat

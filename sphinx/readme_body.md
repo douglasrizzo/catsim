@@ -20,7 +20,13 @@ Install it using `pip install catsim`.
 
 ## Basic Usage
 
-There is [a Colab Notebook](https://colab.research.google.com/drive/1iJQE9VFrDD2Pqrsa7K3EvD1pSTBPw0Ur?usp=sharing) teaching the basics of catsim!
+Tutorial notebooks are available in the repository under [`notebooks/`](https://github.com/douglasrizzo/catsim/tree/main/notebooks):
+
+- [Introduction](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/01_introduction_to_catsim.ipynb)
+- [Manual CAT sessions](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/02_manual_cat_sessions.ipynb)
+- [Simulation studies](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_simulation_studies.ipynb)
+- [Item selection and stopping](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_item_selection_and_stopping.ipynb)
+- [Visualization and analysis](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/05_visualization_and_analysis.ipynb)
 
 1. Have an [item matrix](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
 1. Have a sample of examinee proficiencies, or a number of examinees to be generated;
