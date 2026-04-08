@@ -52,9 +52,9 @@
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
     <script src="_static/documentation_options.js?v=c4f92b34"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <link rel="icon" href="_static/logo.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -603,7 +603,7 @@ item information functions, and various utility functions for parameter estimati
 and scale transformations.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.irt.NumParams">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">NumParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#NumParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.NumParams" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">NumParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/irt.html#NumParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.NumParams" title="Link to this definition">¶</a></dt>
 <dd><p>Enumerator that informs how many parameters each logistic model of IRT has.</p>
 <p>Created to avoid accessing magic numbers in the code. Each value corresponds
 to the number of parameters in the respective IRT model.</p>
@@ -624,7 +624,7 @@ to the number of parameters in the respective IRT model.</p>
 </dd></dl>
 <dl class="py data">
 <dt class="sig sig-object py" id="catsim.irt.THETA_MAX_EXTENDED">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_EXTENDED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MAX_EXTENDED" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_EXTENDED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6.0</span></span><a class="headerlink" href="#catsim.irt.THETA_MAX_EXTENDED" title="Link to this definition">¶</a></dt>
 <dd><p>Extended upper bound for ability (theta) estimation.</p>
 <p>This value covers &gt;99.9999% of the population (±6 standard deviations) assuming
 abilities are normally distributed N(0, 1). Recommended for numerical search
@@ -634,7 +634,7 @@ estimates.</p>
 </dd></dl>
 <dl class="py data">
 <dt class="sig sig-object py" id="catsim.irt.THETA_MAX_TYPICAL">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_TYPICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MAX_TYPICAL" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_TYPICAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4.0</span></span><a class="headerlink" href="#catsim.irt.THETA_MAX_TYPICAL" title="Link to this definition">¶</a></dt>
 <dd><p>Typical upper bound for ability (theta) estimation.</p>
 <p>This value covers approximately 99.99% of the population (±4 standard deviations)
 assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
@@ -642,7 +642,7 @@ for scale transformations and reporting.</p>
 </dd></dl>
 <dl class="py data">
 <dt class="sig sig-object py" id="catsim.irt.THETA_MIN_EXTENDED">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MIN_EXTENDED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-6.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MIN_EXTENDED" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MIN_EXTENDED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-6.0</span></span><a class="headerlink" href="#catsim.irt.THETA_MIN_EXTENDED" title="Link to this definition">¶</a></dt>
 <dd><p>Extended lower bound for ability (theta) estimation.</p>
 <p>This value covers &gt;99.9999% of the population (±6 standard deviations) assuming
 abilities are normally distributed N(0, 1). Recommended for numerical search
@@ -652,7 +652,7 @@ estimates.</p>
 </dd></dl>
 <dl class="py data">
 <dt class="sig sig-object py" id="catsim.irt.THETA_MIN_TYPICAL">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MIN_TYPICAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-4.0</span></em><a class="headerlink" href="#catsim.irt.THETA_MIN_TYPICAL" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MIN_TYPICAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-4.0</span></span><a class="headerlink" href="#catsim.irt.THETA_MIN_TYPICAL" title="Link to this definition">¶</a></dt>
 <dd><p>Typical lower bound for ability (theta) estimation.</p>
 <p>This value covers approximately 99.99% of the population (±4 standard deviations)
 assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
@@ -1361,7 +1361,7 @@ information is 0.</p>
               
           </div>
             Created using
-            <a href="http://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
              and
             <a href="https://github.com/bashtage/sphinx-material/">Material for
               Sphinx</a>
