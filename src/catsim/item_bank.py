@@ -4,12 +4,11 @@ This module provides the ItemBank class for managing calibrated item parameters
 and precomputing derived values that depend only on static item content.
 """
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
 import numpy
 import numpy.typing as npt
 from numpy.random import Generator
-from typing_extensions import Self
 
 from . import irt
 

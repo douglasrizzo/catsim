@@ -57,13 +57,13 @@ jobs:
       matrix:
         # Test on primary OS with all Python versions
         os: [ubuntu-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
         include:
           # Add cross-platform testing on latest Python only
           - os: macos-latest
-            python-version: "3.13"
+            python-version: "3.14"
           - os: windows-latest
-            python-version: "3.13"
+            python-version: "3.14"
 
     steps:
       - uses: actions/checkout@v6
@@ -89,11 +89,11 @@ jobs:
         run: uv run pytest -m "not parallel" --verbose --cov-branch --cov-report=xml --cov=catsim
 
       - name: Run tutorial notebooks
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         run: uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb
 
       - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 import numpy
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
   from .item_bank import ItemBank
 
 
-class SessionStatus(Enum):
+class SessionStatus(StrEnum):
   """Lifecycle state for a CAT session."""
 
   NOT_STARTED = "not_started"

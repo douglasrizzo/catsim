@@ -1,6 +1,6 @@
 """Concrete initialization implementations."""
 
-from enum import Enum
+from enum import StrEnum
 
 import numpy
 
@@ -8,7 +8,7 @@ from ..item_bank import ItemBank
 from .base import BaseInitializer
 
 
-class InitializationDistribution(Enum):
+class InitializationDistribution(StrEnum):
   """Distribution to use for ability estimate initialization.
 
   Attributes

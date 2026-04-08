@@ -12,10 +12,10 @@ classifiers = [
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Education :: Testing",
 ]
 name = "catsim"
@@ -25,13 +25,10 @@ dependencies = [
     "scipy",
     "numexpr",
     "matplotlib",
-    "scikit-learn",
-    "json_tricks",
     "tqdm",
     "numpy",
-    "typing_extensions",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 readme = "README.md"
 license = "BSD-3-Clause"
 
@@ -43,7 +40,7 @@ line-length = 120
 indent-width = 2
 preview = true
 
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
