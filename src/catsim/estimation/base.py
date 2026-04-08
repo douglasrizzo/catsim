@@ -100,4 +100,6 @@ class BaseEstimator(Simulable, ABC):
     float
         Average number of function evaluations per test.
     """
+    if self._calls == 0:
+      return 0.0
     return self._evaluations / self._calls

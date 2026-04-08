@@ -33,7 +33,7 @@ class TestItemBankCreation:
     assert bank.n_items == 2
     assert bank.items.shape == (2, 5)
     # d should be added as 1.0
-    assert np.all(bank.upper_asymptote == 1.0)
+    assert np.allclose(bank.upper_asymptote, 1.0)
 
   def test_create_from_2pl_params(self) -> None:
     """Test creating ItemBank from 2PL parameters."""
@@ -46,8 +46,8 @@ class TestItemBankCreation:
     assert bank.n_items == 2
     assert bank.model == 2  # 2PL
     # c should be 0, d should be 1
-    assert np.all(bank.pseudo_guessing == 0.0)
-    assert np.all(bank.upper_asymptote == 1.0)
+    assert np.allclose(bank.pseudo_guessing, 0.0)
+    assert np.allclose(bank.upper_asymptote, 1.0)
 
   def test_create_from_1pl_params(self) -> None:
     """Test creating ItemBank from 1PL (difficulty only) parameters."""
@@ -57,16 +57,16 @@ class TestItemBankCreation:
     assert bank.n_items == 3
     assert bank.model == 1  # 1PL (Rasch)
     # a should be 1, c should be 0, d should be 1
-    assert np.all(bank.discrimination == 1.0)
-    assert np.all(bank.pseudo_guessing == 0.0)
-    assert np.all(bank.upper_asymptote == 1.0)
+    assert np.allclose(bank.discrimination, 1.0)
+    assert np.allclose(bank.pseudo_guessing, 0.0)
+    assert np.allclose(bank.upper_asymptote, 1.0)
 
   def test_exposure_rates_initialized_to_zero(self) -> None:
     """Test that exposure rates are initialized to zero."""
     items = np.array([[1.0, 0.0, 0.0, 1.0]])
     bank = ItemBank(items)
 
-    assert np.all(bank.exposure_rates == 0.0)
+    assert np.allclose(bank.exposure_rates, 0.0)
 
   def test_validation_enabled_by_default(self) -> None:
     """Test that validation is enabled by default and catches invalid params."""
@@ -106,7 +106,7 @@ class TestItemBankGenerate:
 
     assert bank.n_items == 30
     assert bank.model == 3
-    assert np.all(bank.upper_asymptote == 1.0)
+    assert np.allclose(bank.upper_asymptote, 1.0)
     assert np.any(bank.pseudo_guessing > 0)
 
   def test_generate_2pl(self) -> None:
@@ -115,8 +115,8 @@ class TestItemBankGenerate:
 
     assert bank.n_items == 20
     assert bank.model == 2
-    assert np.all(bank.pseudo_guessing == 0.0)
-    assert np.all(bank.upper_asymptote == 1.0)
+    assert np.allclose(bank.pseudo_guessing, 0.0)
+    assert np.allclose(bank.upper_asymptote, 1.0)
 
   def test_generate_1pl(self) -> None:
     """Test generating 1PL (Rasch) item bank."""
@@ -124,9 +124,9 @@ class TestItemBankGenerate:
 
     assert bank.n_items == 15
     assert bank.model == 1
-    assert np.all(bank.discrimination == 1.0)
-    assert np.all(bank.pseudo_guessing == 0.0)
-    assert np.all(bank.upper_asymptote == 1.0)
+    assert np.allclose(bank.discrimination, 1.0)
+    assert np.allclose(bank.pseudo_guessing, 0.0)
+    assert np.allclose(bank.upper_asymptote, 1.0)
 
   def test_generate_with_correlation(self) -> None:
     """Test generating items with correlated a and b parameters."""
@@ -192,7 +192,7 @@ class TestItemBankProperties:
     bank = ItemBank(items)
     bank.items[0, 4] = 0.5
 
-    assert bank.exposure_rates[0] == 0.5
+    assert bank.exposure_rates[0] == pytest.approx(0.5)
 
   def test_model_property(self) -> None:
     """Test model property returns correct IRT model."""
@@ -256,8 +256,8 @@ class TestItemBankMethods:
 
     item = bank.get_item(1)
     assert len(item) == 5
-    assert item[0] == 1.5  # discrimination
-    assert item[1] == 1.0  # difficulty
+    assert item[0] == pytest.approx(1.5)  # discrimination
+    assert item[1] == pytest.approx(1.0)  # difficulty
 
   def test_get_item_out_of_bounds_raises(self) -> None:
     """Test that out of bounds index raises IndexError."""
@@ -281,8 +281,8 @@ class TestItemBankMethods:
 
     selected = bank.get_items([0, 2])
     assert selected.shape == (2, 5)
-    assert selected[0, 0] == 1.0
-    assert selected[1, 0] == 0.8
+    assert selected[0, 0] == pytest.approx(1.0)
+    assert selected[1, 0] == pytest.approx(0.8)
 
   def test_update_exposure_rate(self) -> None:
     """Test updating exposure rate for a specific item."""
@@ -290,7 +290,7 @@ class TestItemBankMethods:
     bank = ItemBank(items)
 
     bank.update_exposure_rate(0, 0.75)
-    assert bank.exposure_rates[0] == 0.75
+    assert bank.exposure_rates[0] == pytest.approx(0.75)
 
   def test_update_exposure_rate_invalid_index_raises(self) -> None:
     """Test that invalid index raises IndexError."""
@@ -322,7 +322,7 @@ class TestItemBankMethods:
 
     # Reset
     bank.reset_exposure_rates()
-    assert np.all(bank.exposure_rates == 0.0)
+    assert np.allclose(bank.exposure_rates, 0.0)
 
   def test_icc_scalar_theta(self) -> None:
     """Test computing ICC for a scalar theta."""
@@ -397,11 +397,11 @@ class TestItemBankReset:
 
     # Set some exposure rates
     bank.update_exposure_rate(0, 0.5)
-    assert bank.exposure_rates[0] == 0.5
+    assert bank.exposure_rates[0] == pytest.approx(0.5)
 
     # Reset
     bank.reset_exposure_rates()
-    assert bank.exposure_rates[0] == 0.0
+    assert bank.exposure_rates[0] == pytest.approx(0.0)
 
   def test_reset_clears_exposure_rates(self) -> None:
     """Test that reset() clears all exposure rates."""
@@ -465,7 +465,7 @@ class TestItemBankReset:
       bank.reset()
 
       # Verify reset worked
-      assert np.all(bank.exposure_rates == 0)
+      assert np.allclose(bank.exposure_rates, 0.0)
 
 
 class TestItemBankDunderMethods:
@@ -494,7 +494,7 @@ class TestItemBankDunderMethods:
     bank = ItemBank(items)
 
     item = bank[1]
-    assert item[0] == 1.5
+    assert item[0] == pytest.approx(1.5)
 
   def test_getitem_slice(self) -> None:
     """Test __getitem__ with slice."""
@@ -511,5 +511,5 @@ class TestItemBankDunderMethods:
 
     subset = bank[[0, 2]]
     assert subset.shape == (2, 5)
-    assert subset[0, 0] == 1.0
-    assert subset[1, 0] == 0.8
+    assert subset[0, 0] == pytest.approx(1.0)
+    assert subset[1, 0] == pytest.approx(0.8)

@@ -32,11 +32,20 @@ repos:
 
   # 4. Linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.6
+    rev: v0.15.9
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty check
+        entry: uv run --only-group dev ty check
+        language: system
+        pass_filenames: false
+        types_or: [python, pyi]
 
   # 5. Other formatters
   - repo: https://github.com/pre-commit/pre-commit-hooks

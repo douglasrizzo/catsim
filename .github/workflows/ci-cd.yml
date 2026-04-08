@@ -25,11 +25,20 @@ jobs:
     name: Pre-commit checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
-      - uses: pre-commit/action@v3.0.1
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - run: uv run --only-group dev pre-commit run --all-files
 
   test:
     name: Run tests
@@ -39,6 +48,9 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release'
     runs-on: ${{ matrix.os }}
+    env:
+      # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
+      MPLBACKEND: Agg
     strategy:
       fail-fast: false
       matrix:
@@ -53,16 +65,16 @@ jobs:
             python-version: "3.13"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -90,13 +102,13 @@ jobs:
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -121,7 +133,7 @@ jobs:
           uv run twine check dist/*
 
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-package-distributions
           path: dist/
@@ -139,7 +151,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -164,7 +176,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
@@ -184,15 +196,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -215,7 +227,7 @@ jobs:
         continue-on-error: true # Don't fail the build on external link issues
 
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
@@ -243,13 +255,13 @@ jobs:
 
     steps:
       - name: Download documentation artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
       - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: gh-pages
           path: gh-pages-checkout
@@ -289,13 +301,13 @@ jobs:
 
     steps:
       - name: Download documentation artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
       - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: gh-pages
           path: gh-pages-checkout
@@ -334,7 +346,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/

@@ -1,11 +1,16 @@
+"""Integration tests for catsim simulation pipeline.
+
+These tests run full CAT simulations with various configurations to verify
+that all components work correctly together.
+"""
+
 import random
 
 import numpy as np
 import pytest
-from matplotlib.pyplot import close
 from sklearn.cluster import KMeans
 
-from catsim import cat, irt, plot
+from catsim import cat, irt
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import BaseInitializer, InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
@@ -93,7 +98,7 @@ def test_cism(
 @pytest.mark.parametrize("examinees", [100])
 @pytest.mark.parametrize("bank_size", [500])
 @pytest.mark.parametrize(
-  "estimator", [NumericalSearchEstimator(method=m) for m in NumericalSearchEstimator.available_methods()]
+  "estimator", [NumericalSearchEstimator(method=m) for m in sorted(NumericalSearchEstimator.available_methods())]
 )
 def test_estimators(
   examinees: int,
@@ -276,66 +281,3 @@ def test_stoppers(
       theta=est_theta,
     )
     one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
-
-
-@pytest.mark.parametrize(
-  "logistic_model",
-  [
-    irt.NumParams.PL1,
-    irt.NumParams.PL2,
-    irt.NumParams.PL3,
-    irt.NumParams.PL4,
-  ],
-)
-@pytest.mark.parametrize(
-  "correlation",
-  [0, 0.3],
-)
-def test_item_bank_generation(logistic_model: irt.NumParams, correlation: float) -> None:
-  """Test item bank generation function."""
-  item_bank = ItemBank.generate_item_bank(5, logistic_model, corr=correlation)
-  irt.validate_item_bank(item_bank.items, raise_err=True)
-
-  # Verify basic properties of generated items
-  assert len(item_bank) == 5, "Incorrect number of items generated"
-  assert item_bank.items.shape[1] >= 4, "Items should have at least 4 parameters"
-
-
-@pytest.mark.slow
-def test_plots() -> None:
-  """Test plot functionalities."""
-  initializer = RandomInitializer()
-  selector = MaxInfoSelector()
-  estimator = NumericalSearchEstimator()
-  stopper = MinErrorStopper(0.5, max_items=20)
-  s = Simulator(ItemBank.generate_item_bank(100), 10)
-  s.simulate(initializer, selector, estimator, stopper, verbose=True)
-
-  # Verify simulation produced results before plotting
-  assert s.items is not None, "Simulation did not produce items"
-  assert len(s.items) > 0, "No items in simulation"
-
-  for item in s.items[0:10]:
-    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=plot.PlotType.ICC, max_info=False)
-    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=plot.PlotType.IIC, max_info=True)
-    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=plot.PlotType.BOTH, max_info=True)
-    close("all")
-
-  plot.gen3d_dataset_scatter(s.item_bank)
-  plot.test_progress(
-    title="Test progress",
-    simulator=s,
-    index=0,
-    info=True,
-    see=True,
-    reliability=True,
-  )
-  plot.item_exposure(simulator=s)
-  plot.item_exposure(simulator=s, par="a")
-  plot.item_exposure(simulator=s, par="b")
-  plot.item_exposure(simulator=s, par="c")
-  plot.item_exposure(simulator=s, par="d")
-  plot.item_exposure(simulator=s, hist=True)
-
-  # close all plots after testing
-  close("all")

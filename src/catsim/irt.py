@@ -469,6 +469,12 @@ def theta_to_scale(
   float or numpy.ndarray
       The transformed score(s) on the target scale. Returns the same type as input.
 
+  Notes
+  -----
+  - Values outside [theta_min, theta_max] are extrapolated linearly
+  - The transformation preserves relative distances between ability levels
+  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.
+
   Examples
   --------
   >>> # Convert theta to 0-100 scale
@@ -488,12 +494,6 @@ def theta_to_scale(
   >>> thetas = np.array([-4, -2, 0, 2, 4])
   >>> theta_to_scale(thetas)  # doctest: +SKIP
   array([  0.,  25.,  50.,  75., 100.])
-
-  Notes
-  -----
-  - Values outside [theta_min, theta_max] are extrapolated linearly
-  - The transformation preserves relative distances between ability levels
-  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.
   """
   if theta_max <= theta_min:
     msg = f"theta_max ({theta_max}) must be greater than theta_min ({theta_min})"
@@ -546,6 +546,12 @@ def scale_to_theta(
   float or numpy.ndarray
       The transformed theta value(s). Returns the same type as input.
 
+  Notes
+  -----
+  - This is the inverse of :py:func:`theta_to_scale`
+  - Useful for converting cutoff scores to theta values for classification
+  - Preserves the relative ordering and distances of scores
+
   Examples
   --------
   >>> # Convert 0-100 score to theta
@@ -565,12 +571,6 @@ def scale_to_theta(
   >>> scores = np.array([0, 25, 50, 75, 100])
   >>> scale_to_theta(scores)  # doctest: +SKIP
   array([-4., -2.,  0.,  2.,  4.])
-
-  Notes
-  -----
-  - This is the inverse of :py:func:`theta_to_scale`
-  - Useful for converting cutoff scores to theta values for classification
-  - Preserves the relative ordering and distances of scores
   """
   if theta_max <= theta_min:
     msg = f"theta_max ({theta_max}) must be greater than theta_min ({theta_min})"
