@@ -819,6 +819,12 @@
 <span class="sd">  float or numpy.ndarray</span>
 <span class="sd">      The transformed score(s) on the target scale. Returns the same type as input.</span>
 
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  - Values outside [theta_min, theta_max] are extrapolated linearly</span>
+<span class="sd">  - The transformation preserves relative distances between ability levels</span>
+<span class="sd">  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.</span>
+
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; # Convert theta to 0-100 scale</span>
@@ -838,12 +844,6 @@
 <span class="sd">  &gt;&gt;&gt; thetas = np.array([-4, -2, 0, 2, 4])</span>
 <span class="sd">  &gt;&gt;&gt; theta_to_scale(thetas)  # doctest: +SKIP</span>
 <span class="sd">  array([  0.,  25.,  50.,  75., 100.])</span>
-
-<span class="sd">  Notes</span>
-<span class="sd">  -----</span>
-<span class="sd">  - Values outside [theta_min, theta_max] are extrapolated linearly</span>
-<span class="sd">  - The transformation preserves relative distances between ability levels</span>
-<span class="sd">  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.</span>
 <span class="sd">  """</span>
   <span class="k">if</span> <span class="n">theta_max</span> <span class="o">&lt;=</span> <span class="n">theta_min</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)"</span>
@@ -899,6 +899,12 @@
 <span class="sd">  float or numpy.ndarray</span>
 <span class="sd">      The transformed theta value(s). Returns the same type as input.</span>
 
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  - This is the inverse of :py:func:`theta_to_scale`</span>
+<span class="sd">  - Useful for converting cutoff scores to theta values for classification</span>
+<span class="sd">  - Preserves the relative ordering and distances of scores</span>
+
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
 <span class="sd">  &gt;&gt;&gt; # Convert 0-100 score to theta</span>
@@ -918,12 +924,6 @@
 <span class="sd">  &gt;&gt;&gt; scores = np.array([0, 25, 50, 75, 100])</span>
 <span class="sd">  &gt;&gt;&gt; scale_to_theta(scores)  # doctest: +SKIP</span>
 <span class="sd">  array([-4., -2.,  0.,  2.,  4.])</span>
-
-<span class="sd">  Notes</span>
-<span class="sd">  -----</span>
-<span class="sd">  - This is the inverse of :py:func:`theta_to_scale`</span>
-<span class="sd">  - Useful for converting cutoff scores to theta values for classification</span>
-<span class="sd">  - Preserves the relative ordering and distances of scores</span>
 <span class="sd">  """</span>
   <span class="k">if</span> <span class="n">theta_max</span> <span class="o">&lt;=</span> <span class="n">theta_min</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)"</span>

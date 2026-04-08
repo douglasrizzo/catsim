@@ -423,6 +423,8 @@
 <span class="sd">    float</span>
 <span class="sd">        Average number of function evaluations per test.</span>
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="mf">0.0</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span></div>
 
 </pre></div>
