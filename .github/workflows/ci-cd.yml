@@ -48,6 +48,9 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       github.event_name == 'release'
     runs-on: ${{ matrix.os }}
+    env:
+      # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
+      MPLBACKEND: Agg
     strategy:
       fail-fast: false
       matrix:
