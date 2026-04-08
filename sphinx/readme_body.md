@@ -5,14 +5,14 @@
 [![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
 [![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
 
-A Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:
+A Python package for computerized adaptive testing (CAT). It provides a reusable CAT engine, simulation tools, and multiple methods for:
 
 - [test initialization](https://douglasrizzo.com.br/catsim/initialization.html) (selecting the initial ability of the examinees)
 - [item selection](https://douglasrizzo.com.br/catsim/selection.html)
 - [ability estimation](https://douglasrizzo.com.br/catsim/estimation.html)
 - [test stopping](https://douglasrizzo.com.br/catsim/stopping.html)
 
-These methods can either be used in a standalone fashion to power other software or be used with _catsim_ to simulate the application of [computerized adaptive tests](https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
+These methods can either be used in a standalone fashion to power other software or be used with _catsim_ to run and simulate [computerized adaptive tests](https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
 
 ## Installation
 

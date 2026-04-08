@@ -1,4 +1,4 @@
-"""catsim: Computerized Adaptive Testing Simulator."""
+"""catsim: Computerized Adaptive Testing engine and simulation toolkit."""
 
 from .engine import CatEngine, RunContext, SimulatedResponseProvider
 from .exceptions import NoItemsAvailableError

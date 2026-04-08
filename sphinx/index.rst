@@ -1,5 +1,5 @@
-`catsim` - Computerized Adaptive Testing Simulator
-##################################################
+`catsim` - Computerized Adaptive Testing Toolkit
+################################################
 
 .. mdinclude:: readme_body.md
 
