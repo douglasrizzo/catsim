@@ -38,6 +38,15 @@ repos:
         args: [--fix]
       - id: ruff-format
 
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty check
+        entry: uv run --only-group dev ty check
+        language: system
+        pass_filenames: false
+        types_or: [python, pyi]
+
   # 5. Other formatters
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
