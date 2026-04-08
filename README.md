@@ -33,9 +33,9 @@ There is [a Colab Notebook](https://colab.research.google.com/drive/1iJQE9VFrDD2
    an item [selector](https://douglasrizzo.com.br/catsim/selection.html), a
    ability [estimator](https://douglasrizzo.com.br/catsim/estimation.html)
    and a [stopping criterion](https://douglasrizzo.com.br/catsim/stopping.html);
-1. Pass them to a [simulator](https://douglasrizzo.com.br/catsim/simulation.html)
-   and start the simulation.
-1. Access the simulator's properties to get specifics of the results;
+1. Create a [simulation runner](https://douglasrizzo.com.br/catsim/simulation.html)
+   with those components.
+1. Run the simulation and inspect the returned result object;
 1. [Plot](https://douglasrizzo.com.br/catsim/plot.html) your results.
 
 ```python
@@ -43,13 +43,15 @@ from catsim.initialization import RandomInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
 from catsim.stopping import MinErrorStopper
-from catsim.simulation import Simulator
+from catsim.simulation import SimulationRunner
 from catsim import ItemBank
 initializer = RandomInitializer()
 selector = MaxInfoSelector()
 estimator = NumericalSearchEstimator()
 stopper = MinErrorStopper(0.4, max_items=20)
-Simulator(ItemBank.generate_item_bank(100), 10).simulate(initializer, selector, estimator, stopper)
+runner = SimulationRunner(ItemBank.generate_item_bank(100), initializer, selector, estimator, stopper)
+result = runner.run(10)
+print(result.rmse)
 ```
 
 ## Dependencies

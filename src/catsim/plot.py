@@ -10,7 +10,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from . import irt
 from .item_bank import ItemBank
-from .simulation import Simulator
+from .state import CatSessionState, SimulationResult
 
 
 class PlotType(Enum):
@@ -211,8 +211,9 @@ def gen3d_dataset_scatter(
 def item_exposure(
   ax: Axes | None = None,
   title: str | None = None,
-  simulator: Simulator | None = None,
+  simulation: SimulationResult | None = None,
   item_bank: ItemBank | npt.NDArray[numpy.floating] | None = None,
+  exposure_rates: npt.NDArray[numpy.floating] | None = None,
   par: str | None = None,
   hist: bool = False,
 ) -> Axes:
@@ -231,14 +232,20 @@ def item_exposure(
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MinErrorStopper
-      from catsim.simulation import Simulator
+      from catsim.simulation import SimulationRunner
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
 
-      s = Simulator(ItemBank.generate_item_bank(100), 10)
-      s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MinErrorStopper(0.4, max_items=20))
-      plot.item_exposure(title='Exposures', simulator=s, hist=True, ax=axes[0])
-      plot.item_exposure(title='Exposures', simulator=s, par='b', ax=axes[1])
+      runner = SimulationRunner(
+          ItemBank.generate_item_bank(100),
+          RandomInitializer(),
+          MaxInfoSelector(),
+          NumericalSearchEstimator(),
+          MinErrorStopper(0.4, max_items=20),
+      )
+      result = runner.run(10)
+      plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])
+      plot.item_exposure(title='Exposures', simulation=result, par='b', ax=axes[1])
       plt.tight_layout()
       plt.show()
 
@@ -248,10 +255,8 @@ def item_exposure(
       Matplotlib axes object to plot on. If None, a new figure is created. Default is None.
   title : str or None, optional
       The plot title. Default is None.
-  simulator : Simulator or None, optional
-      A simulator which has already simulated a series of CATs, containing estimations
-      to the examinees' abilities and a list of administered items for each examinee.
-      Default is None.
+  simulation : SimulationResult or None, optional
+      Simulation result containing exposure data. Default is None.
   item_bank : ItemBank or numpy.ndarray or None, optional
       An ItemBank or item matrix containing item parameters and their exposure rate in the last column.
       If a numpy array is provided, it will be converted to an ItemBank.
@@ -272,10 +277,11 @@ def item_exposure(
   Raises
   ------
   ValueError
-      If neither simulator nor item_bank is provided, or if par is not one of 'a', 'b', 'c', 'd', or None.
+      If neither simulation, item_bank, nor exposure_rates is provided, or if
+      par is not one of 'a', 'b', 'c', 'd', or None.
   """
-  if simulator is None and item_bank is None:
-    msg = "Not a single plottable object was passed. Either 'simulator' or 'item_bank' must be passed."
+  if simulation is None and item_bank is None and exposure_rates is None:
+    msg = "One of: simulation, item_bank, exposure_rates must be passed."
     raise ValueError(msg)
 
   if ax is None:
@@ -284,12 +290,17 @@ def item_exposure(
   if title is not None:
     ax.set_title(title, size=18)
 
-  if simulator is not None:
-    item_bank = simulator.item_bank
+  if simulation is not None:
+    item_bank = simulation.item_bank
+    exposure_rates = simulation.exposure_rates
   elif isinstance(item_bank, numpy.ndarray):
     item_bank = ItemBank(item_bank)
 
-  assert item_bank is not None
+  if item_bank is None:
+    msg = "item_bank must be provided when simulation is not passed"
+    raise ValueError(msg)
+  if exposure_rates is None:
+    exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
 
   supported_parameters = {"a", "b", "c", "d"}
   if par is not None and par not in supported_parameters:
@@ -313,12 +324,12 @@ def item_exposure(
     xlabel = "Items"
 
   if hist:
-    ax.hist(item_bank.exposure_rates, max(int(item_bank.n_items / 10), 3))
+    ax.hist(exposure_rates, max(int(item_bank.n_items / 10), 3))
     ax.set_xlabel("Item exposure")
     ax.set_ylabel("Items")
   else:
     indexes = parameter.argsort()
-    ax.plot(item_bank.exposure_rates[indexes], marker="o")
+    ax.plot(exposure_rates[indexes], marker="o")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Item exposure")
 
@@ -333,8 +344,9 @@ def item_exposure(
 def test_progress(
   ax: Axes | None = None,
   title: str | None = None,
-  simulator: Simulator | None = None,
+  simulation: SimulationResult | None = None,
   index: int | None = None,
+  session: CatSessionState | None = None,
   thetas: list[float] | None = None,
   administered_items: npt.NDArray[numpy.floating] | None = None,
   true_theta: float | None = None,
@@ -365,13 +377,19 @@ def test_progress(
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MinErrorStopper
-      from catsim.simulation import Simulator
+      from catsim.simulation import SimulationRunner
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
-      s = Simulator(ItemBank.generate_item_bank(100), 10)
-      s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MinErrorStopper(0.4, max_items=20))
-      plot.test_progress(simulator=s, index=0, ax=axes[0])
-      plot.test_progress(simulator=s, index=0, info=True, var=True, see=True, ax=axes[1])
+      runner = SimulationRunner(
+          ItemBank.generate_item_bank(100),
+          RandomInitializer(),
+          MaxInfoSelector(),
+          NumericalSearchEstimator(),
+          MinErrorStopper(0.4, max_items=20),
+      )
+      result = runner.run(10)
+      plot.test_progress(simulation=result, index=0, ax=axes[0])
+      plot.test_progress(simulation=result, index=0, info=True, var=True, see=True, ax=axes[1])
       plt.tight_layout()
       plt.show()
 
@@ -381,17 +399,15 @@ def test_progress(
       Axis to use. If None, a figure with the necessary axis will be created. Default is None.
   title : str or None, optional
       The plot title. Default is None.
-  simulator : Simulator or None, optional
-      A simulator which has already simulated a series of CATs, containing estimations
-      to the examinees' abilities and a list of administered items for each examinee.
-      Default is None.
+  simulation : SimulationResult or None, optional
+      Simulation result containing session traces. Default is None.
   index : int or None, optional
-      The index of the examinee in the simulator whose plot is to be done. Default is None.
+      The index of the session to be plotted when ``simulation`` is provided.
   thetas : list[float] or None, optional
-      If a Simulator is not passed, then a list of ability estimations can be manually
+      If a simulation result is not passed, then a list of ability estimations can be manually
       passed to the function. Default is None.
   administered_items : numpy.ndarray or None, optional
-      If a Simulator is not passed, then a matrix of administered items, represented
+      If a simulation result is not passed, then a matrix of administered items, represented
       by their parameters, can be manually passed to the function. Default is None.
   true_theta : float or None, optional
       The value of the examinee's true ability. If it is passed, it will be shown on
@@ -421,11 +437,11 @@ def test_progress(
   Raises
   ------
   ValueError
-      If neither simulator nor the required manual parameters are provided, or if thetas
+      If neither simulation nor the required manual parameters are provided, or if thetas
       and administered_items have mismatched lengths.
   """
-  if simulator is None and thetas is None and administered_items is None:
-    msg = "Not a single plottable object was passed. One of: simulator, thetas, administered_items must be passed."
+  if simulation is None and session is None and thetas is None and administered_items is None:
+    msg = "One of: simulation, session, thetas, administered_items must be passed."
     raise ValueError(msg)
 
   if ax is None:
@@ -434,16 +450,27 @@ def test_progress(
   if title is not None:
     ax.set_title(title, size=18)
 
-  if simulator is not None and index is not None:
-    thetas = simulator.estimations[index]
-    administered_items = simulator.items[simulator.administered_items[index]]
-    true_theta = simulator.examinees[index]
+  if simulation is not None:
+    if index is None:
+      msg = "index must be provided when simulation is passed"
+      raise ValueError(msg)
+    session = simulation.sessions[index]
+    thetas = session.theta_history
+    administered_items = simulation.item_bank.get_items(session.administered_item_ids)
+    true_theta = session.true_theta
 
-  assert thetas is not None
-  assert administered_items is not None
-  assert true_theta is not None
+  if session is not None and simulation is None:
+    msg = "session plotting currently requires the parent simulation result"
+    raise ValueError(msg)
 
-  if thetas is not None and administered_items is not None and len(thetas) - 1 != len(administered_items[:, 1]):
+  if thetas is None:
+    msg = "thetas must be provided"
+    raise ValueError(msg)
+  if administered_items is None:
+    msg = "administered_items must be provided"
+    raise ValueError(msg)
+
+  if len(thetas) - 1 != len(administered_items[:, 1]):
     msg = "Number of estimated thetas and administered items is not the same."
     raise ValueError(msg)
 

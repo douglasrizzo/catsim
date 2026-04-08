@@ -92,32 +92,23 @@ class NumericalSearchEstimator(BaseEstimator):
 
   def estimate(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
-    response_vector: list[bool] | None = None,
-    est_theta: float | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,
   ) -> float:
     r"""Compute the theta value that maximizes the log-likelihood function for the given examinee.
 
-    When this method is used inside a simulator, its arguments are automatically filled.
-    Outside of a simulation, the user can also specify the arguments to use the Estimator
-    as a standalone object.
-
     Parameters
     ----------
-    index : int or None, optional
-        Index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
         A list containing the indexes of items that were already administered.
-        Default is None.
-    response_vector : list[bool] or None, optional
+    response_vector : list[bool]
         A boolean list containing the examinee's answers to the administered items.
-        Default is None.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
@@ -127,20 +118,8 @@ class NumericalSearchEstimator(BaseEstimator):
     Raises
     ------
     ValueError
-        If required parameters are None when not using a simulator.
+        If required parameters are missing.
     """
-    item_bank, administered_items, response_vector, est_theta = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_response_vector=True,
-      return_est_theta=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=est_theta,
-    )
-
     if item_bank is None:
       msg = "item_bank parameter cannot be None"
       raise ValueError(msg)
@@ -150,12 +129,9 @@ class NumericalSearchEstimator(BaseEstimator):
     if response_vector is None:
       msg = "response_vector parameter cannot be None"
       raise ValueError(msg)
-    if est_theta is None:
-      msg = "est_theta parameter cannot be None"
-      raise ValueError(msg)
 
     self._calls += 1
-    self._evaluations = 0
+    self._last_evaluations = 0
 
     summarized_answers = set(response_vector)
 
@@ -198,11 +174,13 @@ class NumericalSearchEstimator(BaseEstimator):
         args=(response_vector, item_bank.get_items(administered_items)),
         tol=self._tol if self.__search_method != "bounded" else None,
       )
-      self._evaluations = res.nfev
+      self._last_evaluations = res.nfev
       candidate_theta = res.x
 
+    self._total_evaluations += self._last_evaluations
+
     if self._verbose:
-      print(f"{self._evaluations} evaluations")
+      print(f"{self._last_evaluations} evaluations")
 
     return candidate_theta
 
@@ -238,7 +216,7 @@ class NumericalSearchEstimator(BaseEstimator):
     """
     error = float("inf")
     while error >= self._tol:
-      self._evaluations += 2
+      self._last_evaluations += 2
 
       if self.__search_method == "ternary":
         c = (b + 2 * a) / 3
@@ -308,10 +286,10 @@ class NumericalSearchEstimator(BaseEstimator):
 
     left_side_ll = irt.log_likelihood(c, response_vector, item_params)
     right_side_ll = irt.log_likelihood(d, response_vector, item_params)
-    self._evaluations += 2
+    self._last_evaluations += 2
 
     while n != 2:  # noqa: PLR2004
-      self._evaluations += 1
+      self._last_evaluations += 1
 
       n -= 1
 
@@ -371,9 +349,10 @@ class NumericalSearchEstimator(BaseEstimator):
 
     left_side_ll = irt.log_likelihood(c, response_vector, item_params)
     right_side_ll = irt.log_likelihood(d, response_vector, item_params)
+    self._last_evaluations += 2
 
     while abs(b - a) > self._tol:
-      self._evaluations += 1
+      self._last_evaluations += 1
 
       if left_side_ll >= right_side_ll:
         b = d

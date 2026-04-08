@@ -1,13 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
-
-from .._base import Simulable
-
-if TYPE_CHECKING:
-  from ..item_bank import ItemBank
+from ..item_bank import ItemBank
 
 
-class BaseEstimator(Simulable, ABC):
+class BaseEstimator(ABC):
   """Base class for ability estimators.
 
   Estimators are responsible for computing ability estimates based on examinees'
@@ -27,40 +22,31 @@ class BaseEstimator(Simulable, ABC):
     verbose : bool, optional
         Whether to be verbose during execution. Default is False.
     """
-    super().__init__()
     self._calls = 0
-    self._evaluations = 0
+    self._last_evaluations = 0
+    self._total_evaluations = 0
     self._verbose = verbose
 
   @abstractmethod
   def estimate(
     self,
-    index: int | None = None,
-    item_bank: "ItemBank | None" = None,
-    administered_items: list[int] | None = None,
-    response_vector: list[bool] | None = None,
-    est_theta: float | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,
   ) -> float:
     r"""Compute the theta value that maximizes the log-likelihood function for the given examinee.
 
-    When this method is used inside a simulator, its arguments are automatically filled.
-    Outside of a simulation, the user can also specify the arguments to use the
-    Estimator as a standalone object.
-
     Parameters
     ----------
-    index : int or None, optional
-        Index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
         A list containing the indexes of items that were already administered.
-        Default is None.
-    response_vector : list[bool] or None, optional
+    response_vector : list[bool]
         A boolean list containing the examinee's answers to the administered items.
-        Default is None.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
@@ -87,9 +73,14 @@ class BaseEstimator(Simulable, ABC):
     Returns
     -------
     int
-        Number of function evaluations.
+        Number of function evaluations in the most recent estimate call.
     """
-    return self._evaluations
+    return self._last_evaluations
+
+  @property
+  def total_evaluations(self) -> int:
+    """Get the total number of evaluations across the estimator lifetime."""
+    return self._total_evaluations
 
   @property
   def avg_evaluations(self) -> float:
@@ -98,8 +89,8 @@ class BaseEstimator(Simulable, ABC):
     Returns
     -------
     float
-        Average number of function evaluations per test.
+        Average number of function evaluations per estimate call.
     """
     if self._calls == 0:
       return 0.0
-    return self._evaluations / self._calls
+    return self._total_evaluations / self._calls

@@ -38,21 +38,18 @@ class RandomSelector(BaseSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     **kwargs: Any,
   ) -> int | None:
     """Return the index of the next item to be administered.
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     **kwargs
         Additional keyword arguments. Notably:
 
@@ -64,27 +61,21 @@ class RandomSelector(BaseSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank, administered_items, rng = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_rng=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      **kwargs,
-    )
-
-    assert item_bank is not None
-    assert administered_items is not None
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    rng = kwargs.get("rng")
+    if rng is None:
+      msg = "rng parameter cannot be None"
+      raise ValueError(msg)
 
     if len(administered_items) >= item_bank.n_items and not self._replace:
       msg = "There are no more items to apply."
       raise NoItemsAvailableError(msg)
 
     if self._replace:
-      return rng.choice(item_bank.n_items)
+      return int(rng.choice(item_bank.n_items))
     valid_indexes = self._get_non_administered(list(range(item_bank.n_items)), administered_items)
-    return rng.choice(valid_indexes)
+    return int(rng.choice(valid_indexes))
 
 
 class The54321Selector(FiniteSelector):
@@ -114,9 +105,8 @@ class The54321Selector(FiniteSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -124,12 +114,10 @@ class The54321Selector(FiniteSelector):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs
@@ -143,21 +131,13 @@ class The54321Selector(FiniteSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank, administered_items, est_theta, rng = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      return_rng=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      **kwargs,
-    )
-
-    assert est_theta is not None
-    assert administered_items is not None
-    assert item_bank is not None
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
+    rng = kwargs.get("rng")
+    if rng is None:
+      msg = "rng parameter cannot be None"
+      raise ValueError(msg)
 
     # sort item indexes by their information value descending and remove indexes of administered items
     ordered_items = self._sort_by_info(item_bank, est_theta)
@@ -168,7 +148,7 @@ class The54321Selector(FiniteSelector):
       raise NoItemsAvailableError(msg)
 
     bin_size = self._test_size - len(administered_items)
-    return rng.choice(organized_items[0:bin_size])
+    return int(rng.choice(organized_items[0:bin_size]))
 
 
 class RandomesqueSelector(BaseSelector):
@@ -201,9 +181,8 @@ class RandomesqueSelector(BaseSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -211,12 +190,10 @@ class RandomesqueSelector(BaseSelector):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs
@@ -230,21 +207,13 @@ class RandomesqueSelector(BaseSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank, administered_items, est_theta, rng = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      return_rng=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      **kwargs,
-    )
-
-    assert est_theta is not None
-    assert administered_items is not None
-    assert item_bank is not None
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
+    rng = kwargs.get("rng")
+    if rng is None:
+      msg = "rng parameter cannot be None"
+      raise ValueError(msg)
 
     # sort item indexes by their information value descending and remove indexes of administered items
     ordered_items = self._sort_by_info(item_bank, est_theta)
@@ -254,4 +223,4 @@ class RandomesqueSelector(BaseSelector):
       msg = "There are no more items to apply."
       raise NoItemsAvailableError(msg)
 
-    return rng.choice(list(organized_items)[: self._bin_size])
+    return int(rng.choice(list(organized_items)[: self._bin_size]))

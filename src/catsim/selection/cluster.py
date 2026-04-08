@@ -126,9 +126,8 @@ class ClusterSelector(BaseSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -136,12 +135,10 @@ class ClusterSelector(BaseSelector):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs
@@ -152,20 +149,9 @@ class ClusterSelector(BaseSelector):
     int or None
         Index of the next item to be applied.
     """
-    item_bank, administered_items, est_theta = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      **kwargs,
-    )
-
-    assert item_bank is not None
-    assert administered_items is not None
-    assert est_theta is not None
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
 
     selected_cluster = None
     existent_clusters = set(self._clusters)
@@ -214,29 +200,20 @@ class ClusterSelector(BaseSelector):
       else:
         cluster_infos = ClusterSelector.weighted_cluster_infos(est_theta, item_bank, self._clusters)
 
-      # sorts clusters descending by their information values
-      # this type of sorting was seem on
-      # http://stackoverflow.com/a/6618543
-      sorted_clusters = numpy.array(
-        [
-          cluster
-          for (inf_value, cluster) in sorted(
-            zip(cluster_infos, set(self._clusters), strict=False),
-            key=operator.itemgetter(0),
-            reverse=True,
-          )
-        ],
-        dtype=float,
-      )
+      sorted_clusters = [
+        cluster for cluster, _info in sorted(cluster_infos.items(), key=operator.itemgetter(1), reverse=True)
+      ]
 
       # walks through the sorted clusters in order
-      for i in range(len(sorted_clusters)):
-        valid_indexes = numpy.nonzero([r == sorted_clusters[i] for r in item_bank.exposure_rates])[0]
+      for cluster in sorted_clusters:
+        valid_indexes = [
+          idx for idx, item_cluster in enumerate(self._clusters) if item_cluster == cluster and idx not in administered_items
+        ]
 
         # checks if at least one item from this cluster has not
         # been administered to this examinee yet
-        if set(valid_indexes).intersection(administered_items) != set(valid_indexes):
-          selected_cluster = sorted_clusters[i]
+        if valid_indexes:
+          selected_cluster = cluster
           break
           # the for loop ends with the cluster that has a) the maximum
           # information possible and b) at least one item that has not
@@ -259,9 +236,10 @@ class ClusterSelector(BaseSelector):
 
     # gets the indexes and information values from the items in the
     # selected cluster with r < rmax that have not been administered
-    valid_indexes_low_r = [
-      idx for idx in valid_indexes if item_bank.exposure_rates[idx] < self._r_max and idx not in administered_items
-    ]
+    exposure_rates = kwargs.get("exposure_rates")
+    if exposure_rates is None:
+      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
+    valid_indexes_low_r = [idx for idx in valid_indexes if exposure_rates[idx] < self._r_max and idx not in administered_items]
 
     if len(valid_indexes_low_r) > 0:
       # return the item with maximum information from the ones available
@@ -275,14 +253,14 @@ class ClusterSelector(BaseSelector):
       selected_item = valid_indexes[numpy.nonzero(inf_values == max(inf_values))[0][0]]
     else:
       # Find the item with minimum exposure rate
-      exposure_rates = [item_bank.exposure_rates[idx] for idx in valid_indexes]
-      min_rate_idx = exposure_rates.index(min(exposure_rates))
+      cluster_exposure_rates = [exposure_rates[idx] for idx in valid_indexes]
+      min_rate_idx = cluster_exposure_rates.index(min(cluster_exposure_rates))
       selected_item = valid_indexes[min_rate_idx]
 
     return selected_item
 
   @staticmethod
-  def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> NDArray[numpy.floating]:
+  def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:
     r"""Return the sum of item information values, separated by cluster.
 
     Parameters
@@ -299,18 +277,15 @@ class ClusterSelector(BaseSelector):
     numpy.ndarray
         Array containing the sum of item information values for each cluster.
     """
-    cluster_infos = numpy.zeros(len(set(clusters)))
-
-    for cluster in set(clusters):
+    cluster_infos: dict[int, float] = {}
+    for cluster in sorted(set(clusters)):
       cluster_indexes = numpy.nonzero([c == cluster for c in clusters])[0]
-
-      for item in item_bank.get_items(cluster_indexes):
-        cluster_infos[cluster] += irt.inf(theta, *item[:4])
+      cluster_infos[cluster] = float(sum(irt.inf(theta, *item[:4]) for item in item_bank.get_items(cluster_indexes)))
 
     return cluster_infos
 
   @staticmethod
-  def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> NDArray[numpy.floating]:
+  def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:
     r"""Return the weighted sum of item information values, separated by cluster.
 
     The weight is the number of items in each cluster, providing an average information
@@ -334,8 +309,8 @@ class ClusterSelector(BaseSelector):
     cluster_infos = ClusterSelector.sum_cluster_infos(theta, item_bank, clusters)
     count = numpy.bincount(clusters)
 
-    for i in range(len(cluster_infos)):
-      cluster_infos[i] /= count[i]
+    for cluster in list(cluster_infos):
+      cluster_infos[cluster] /= count[cluster]
 
     return cluster_infos
 

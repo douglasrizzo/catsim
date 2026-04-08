@@ -56,15 +56,21 @@ class LinearSelector(FiniteSelector):
     """The index of the current item."""
     return self._current
 
-  def select(self, index: int | None = None, administered_items: list[int] | None = None, **kwargs: Any) -> int | None:
+  def select(
+    self,
+    item_bank: Any,  # noqa: ARG002
+    administered_items: list[int],
+    est_theta: float | None = None,  # noqa: ARG002
+    **kwargs: Any,
+  ) -> int | None:
     """Return the index of the next item to be administered.
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : Any
+        Unused for linear selection.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     **kwargs
         Additional keyword arguments.
 
@@ -73,9 +79,7 @@ class LinearSelector(FiniteSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    (administered_items,) = self._prepare_args(
-      return_administered_items=True, index=index, administered_items=administered_items, **kwargs
-    )
+    administered_items = self._require_administered_items(administered_items)
     valid_indexes = self._get_non_administered(self._indexes, administered_items)
     if len(valid_indexes) == 0:
       msg = (

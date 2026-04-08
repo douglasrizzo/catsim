@@ -62,8 +62,6 @@ class RandomInitializer(BaseInitializer):
         If dist_params are invalid for the chosen distribution type (e.g., wrong
         length, equal min/max for uniform, non-positive std for normal).
     """
-    super().__init__()
-
     if not isinstance(dist_type, InitializationDistribution):
       msg = "dist_type must be of type InitializationDistribution"
       raise TypeError(msg)
@@ -88,19 +86,17 @@ class RandomInitializer(BaseInitializer):
     self._dist_type = dist_type
     self._dist_params = dist_params
 
-  def initialize(self, index: int | None = None, **kwargs: Any) -> float:
+  def initialize(self, item_bank: Any, rng: Any, **kwargs: Any) -> float:  # noqa: ARG002
     """Generate an initial ability value using the chosen distribution and parameters.
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee. This parameter is not used by this method.
-        Default is None.
+    item_bank : Any
+        Unused by this initializer.
+    rng : Any
+        Random number generator used by the object, guaranteeing reproducibility.
     **kwargs : dict
         Additional keyword arguments.
-
-        - rng (numpy.random.Generator): Random number generator used by the object,
-          guarantees reproducibility of outputs.
 
     Returns
     -------
@@ -114,8 +110,6 @@ class RandomInitializer(BaseInitializer):
         If an invalid distribution type is encountered (should not happen after
         validation in __init__).
     """
-    (rng,) = self._prepare_args(return_rng=True, index=index, **kwargs)
-
     if self._dist_type == InitializationDistribution.UNIFORM:
       theta = rng.uniform(min(self._dist_params), max(self._dist_params))
     elif self._dist_type == InitializationDistribution.NORMAL:
@@ -156,17 +150,17 @@ class FixedPointInitializer(BaseInitializer):
     TypeError
         If start is not a numeric value.
     """
-    super().__init__()
     self._start = start
 
-  def initialize(self, index: int | None = None, **kwargs: Any) -> float:  # noqa: ARG002
+  def initialize(self, item_bank: Any, rng: Any, **kwargs: Any) -> float:  # noqa: ARG002
     """Return the same ability value that was passed to the constructor.
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee. This parameter is not used by this method.
-        Default is None.
+    item_bank : Any
+        Unused by this initializer.
+    rng : Any
+        Unused by this initializer.
     **kwargs : dict
         Additional keyword arguments. Not used by this method.
 

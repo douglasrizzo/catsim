@@ -57,8 +57,6 @@ class TestLengthStopper(BaseStopper):
     ValueError
         If min_items or max_items are not positive, or if min_items > max_items.
     """
-    super().__init__()
-
     if min_items is not None and min_items < 1:
       msg = f"min_items must be positive, got {min_items}"
       raise ValueError(msg)
@@ -76,9 +74,8 @@ class TestLengthStopper(BaseStopper):
 
   def stop(
     self,
-    index: int | None = None,
-    _item_bank: ItemBank | None = None,
-    administered_items: npt.NDArray[numpy.floating[Any]] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     theta: float | None = None,
     **kwargs: Any,
   ) -> bool:
@@ -86,13 +83,10 @@ class TestLengthStopper(BaseStopper):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee. Default is None.
-    _item_bank : ItemBank or None, optional
-        The item bank being used. Default is None.
-    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional
-        A matrix containing the parameters of items that were already administered.
-        Default is None.
+    item_bank : ItemBank
+        The item bank being used.
+    administered_items : list[int]
+        Item indices that were already administered.
     theta : float or None, optional
         An ability value. Default is None.
     **kwargs : dict
@@ -108,27 +102,22 @@ class TestLengthStopper(BaseStopper):
     ValueError
         If required parameters are missing.
     """
-    # Extract data from simulator if not provided directly
-    if administered_items is not None:
-      n_items = len(administered_items)
-      administered_items_array = numpy.asarray(administered_items)
-    elif index is not None and self._simulator is not None:
-      n_items = len(self.simulator.administered_items[index])
-      administered_items_array = self.simulator.item_bank.get_items(indices=self.simulator.administered_items[index])
-      if theta is None:
-        theta = self.simulator.estimations[index][-1]
-      if _item_bank is None:
-        _item_bank = self.simulator.item_bank
-    else:
-      msg = "Required parameters are missing. Either administered_items or index and simulator must be provided."
+    if item_bank is None:
+      msg = "item_bank is required"
       raise ValueError(msg)
+    if administered_items is None:
+      msg = "administered_items is required"
+      raise ValueError(msg)
+
+    n_items = len(administered_items)
+    administered_items_array = item_bank.get_items(administered_items) if n_items > 0 else item_bank.items[:0, :4]
 
     # Hard stop: max_items reached
     if self._max_items is not None and n_items >= self._max_items:
       return True
 
     # Hard stop: item bank exhausted
-    if _item_bank is not None and n_items >= len(_item_bank):
+    if n_items >= len(item_bank):
       return True
 
     # Cannot stop yet: min_items not reached

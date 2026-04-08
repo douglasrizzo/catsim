@@ -17,13 +17,14 @@ used to refine assumptions about the parameter distributions, improving
 future estimations.
 
 All implemented classes in this module inherit from a base abstract class
-:py:class:`BaseEstimator`. :py:class:`Simulator` allows that a custom estimator be
-used during the simulation, as long as it also inherits from
+:py:class:`BaseEstimator`. Estimators can be used manually through
+:py:class:`catsim.engine.CatEngine` or through
+:py:class:`catsim.simulation.SimulationRunner`, as long as they also inherit from
 :py:class:`BaseEstimator`.
 
 .. inheritance-diagram:: catsim.estimation
    :parts: 1
-   :top-classes: catsim._base.Simulable
+   :top-classes: catsim.estimation.BaseEstimator
 
 :mod:`catsim` implements a few types of maximum-likelihood estimators.
 
@@ -42,7 +43,7 @@ The chart below displays the execution times of the same simulation (100 examine
     import numpy as np
     import matplotlib.pyplot as plt
 
-    from catsim.simulation import Simulator
+    from catsim.simulation import SimulationRunner
     from catsim.initialization import FixedPointInitializer
     from catsim.selection import MaxInfoSelector
     from catsim.estimation import NumericalSearchEstimator
@@ -56,15 +57,15 @@ The chart below displays the execution times of the same simulation (100 examine
     thetas = rng.normal(0, 1, examinees)
     sim_times = {}
     for m in NumericalSearchEstimator.available_methods():
-        simulator = Simulator(items, thetas)
-        simulator.simulate(
+        runner = SimulationRunner(
+            items,
             FixedPointInitializer(0),
             MaxInfoSelector(),
             NumericalSearchEstimator(method=m),
             MinErrorStopper(0.4, max_items=test_size),
-            verbose=True
         )
-        sim_times[m] = simulator.duration
+        result = runner.run(thetas, verbose=True)
+        sim_times[m] = result.duration
 
     plt.figure(figsize=(10,5))
     plt.bar(range(len(sim_times)), list(sim_times.values()), align='center')

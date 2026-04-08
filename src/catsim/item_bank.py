@@ -1,7 +1,7 @@
 """Item Bank management for Computerized Adaptive Testing.
 
-This module provides the ItemBank class for managing item parameters,
-precomputing derived values, and tracking item usage during simulations.
+This module provides the ItemBank class for managing calibrated item parameters
+and precomputing derived values that depend only on static item content.
 """
 
 from typing import Any, Literal
@@ -17,10 +17,10 @@ from . import irt
 class ItemBank:
   """Container for CAT item parameters with caching of derived values.
 
-  The ItemBank class encapsulates item parameters, validates them, and
+  The ItemBank class encapsulates static item parameters, validates them, and
   precomputes expensive calculations that depend only on item parameters
   (like maximum information theta values). This improves performance by
-  avoiding redundant calculations during simulations.
+  avoiding redundant calculations during CAT execution.
 
   Parameters
   ----------
@@ -35,6 +35,8 @@ class ItemBank:
   items : numpy.ndarray
       The normalized item parameter matrix (n_items x 5) with columns
       [discrimination, difficulty, pseudo-guessing, upper_asymptote, exposure_rate].
+      The exposure-rate column is retained for transition compatibility and is
+      not the primary source of run-time exposure data in the new architecture.
   n_items : int
       Number of items in the bank.
   max_info_thetas : numpy.ndarray
@@ -94,7 +96,7 @@ class ItemBank:
     self._max_info_values: npt.NDArray[numpy.floating[Any]] | None = None
     self._model: int | None = None
 
-    # Cache for selector-specific data (may be populated by selectors during simulation)
+    # Cache for selector-specific data derived from this item bank.
     self._selector_cache: dict[str, Any] = {}
 
   @property
@@ -212,27 +214,30 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array of exposure rates (proportion of examinees who received each item).
+        Array of exposure rates. This column is retained for transition
+        compatibility; new simulation code should prefer explicit run artifacts
+        such as ``SimulationResult.exposure_rates``.
     """
     return self._items[:, 4]
 
   def reset_exposure_rates(self) -> None:
     """Reset all item exposure rates to zero.
 
-    This is useful when running multiple simulations with the same item bank.
+    This method is retained for transition compatibility. New simulation code
+    should track exposure outside of the item bank.
     """
     self._items[:, 4] = 0
 
   def reset(self) -> None:
-    """Reset the ItemBank to its initial state before any simulations.
+    """Reset compatibility state stored on the ItemBank.
 
     This method:
     - Resets all exposure rates to zero
     - Clears any dynamically cached values computed during simulations
     - Preserves precomputed static values (max_info_thetas, max_info_values)
 
-    This is the recommended method to call before starting a new simulation
-    with the same ItemBank instance.
+    New simulation code should not rely on this method for run-time state
+    management.
 
     Examples
     --------
@@ -286,7 +291,7 @@ class ItemBank:
     return self._items[numpy.asarray(indices, dtype=int)]
 
   def update_exposure_rate(self, item_index: int, new_rate: float) -> None:
-    """Update the exposure rate for a specific item.
+    """Update the compatibility exposure-rate column for a specific item.
 
     Parameters
     ----------
@@ -294,6 +299,11 @@ class ItemBank:
         Index of the item to update.
     new_rate : float
         New exposure rate value (should be between 0 and 1).
+
+    Notes
+    -----
+    New simulation code should prefer explicit run-level exposure tracking over
+    mutating ``ItemBank``.
 
     Raises
     ------

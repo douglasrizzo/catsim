@@ -44,6 +44,7 @@ class StratifiedSelector(FiniteSelector):
     super().__init__(test_size)
     self._sort_once = sort_once
     self._presorted_items: NDArray[numpy.floating] | None = None
+    self._presorted_item_bank_id: int | None = None
 
   @abstractmethod
   def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
@@ -60,12 +61,7 @@ class StratifiedSelector(FiniteSelector):
         Array of item indices sorted according to the strategy.
     """
 
-  def postsort_items(
-    self,
-    item_bank: ItemBank,
-    using_simulator_props: bool,
-    **kwargs: Any,  # noqa: ARG002
-  ) -> NDArray[numpy.floating]:
+  def postsort_items(self, item_bank: ItemBank, **kwargs: Any) -> NDArray[numpy.floating]:  # noqa: ARG002
     """Sort the item matrix before selecting each new item.
 
     This default implementation simply returns the presorted items, or sorts them using
@@ -75,8 +71,6 @@ class StratifiedSelector(FiniteSelector):
     ----------
     item_bank : ItemBank
         An ItemBank containing item parameters.
-    using_simulator_props : bool
-        Whether the selector is being executed inside a Simulator.
     **kwargs : dict
         Additional keyword arguments.
 
@@ -85,30 +79,29 @@ class StratifiedSelector(FiniteSelector):
     numpy.ndarray
         Array of item indices sorted according to the strategy.
     """
-    if using_simulator_props:
-      return self._presorted_items
-    return self.presort_items(item_bank)
+    return self._get_presorted_items(item_bank)
 
-  def preprocess(self) -> None:  # noqa: D102
-    self._presorted_items = self.presort_items(self.simulator.item_bank)
+  def _get_presorted_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
+    if self._presorted_items is None or self._presorted_item_bank_id != id(item_bank):
+      self._presorted_items = self.presort_items(item_bank)
+      self._presorted_item_bank_id = id(item_bank)
+    return self._presorted_items
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
     """Return the index of the next item to be administered.
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     **kwargs
         Additional keyword arguments.
 
@@ -117,42 +110,18 @@ class StratifiedSelector(FiniteSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more strata to get items from.
     """
-    item_bank, administered_items, est_theta = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      **kwargs,
-    )
-
-    assert item_bank is not None
-    assert administered_items is not None
-    assert est_theta is not None
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
 
     # divide the item matrix into strata and get the stratum in which the examinee is
     stratum_index = len(administered_items)
-    try:
-      slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
-    except IndexError as ierr:
-      msg = (
-        f"{self}: test size is larger than was informed to the selector\n"
-        f"Length of administered items:\t{len(administered_items)}\n"
-        f"Total length of the test:\t{self._test_size}\n"
-        f"Number of slices:\t{len(slices)}"
-      )
-      raise RuntimeError(msg) from ierr
+    slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
 
-    using_simulator_props = index is not None
-
-    if using_simulator_props and self._sort_once:
-      # if running through a simulator and the selector allows presorting, get the presorted item matrix
-      sorted_items = self._presorted_items
+    if self._sort_once:
+      sorted_items = self._get_presorted_items(item_bank)
     else:
-      # allow the selector to resort the item matrix at this point in the test
-      kwargs["using_simulator_props"] = using_simulator_props
-      sorted_items = self.postsort_items(item_bank, using_simulator_props, est_theta=est_theta)
+      sorted_items = self.postsort_items(item_bank, est_theta=est_theta)
 
     # if the selected item has already been administered, select the next one
     while sorted_items[pointer] in administered_items:
@@ -165,6 +134,14 @@ class StratifiedSelector(FiniteSelector):
 
   def _get_stratum(self, item_bank: ItemBank, stratum_index: int) -> tuple[NDArray[numpy.floating], int, int]:
     slices = numpy.linspace(0, item_bank.n_items, self._test_size, endpoint=False, dtype="i")
+    if stratum_index >= len(slices):
+      msg = (
+        f"{self}: test size is larger than was informed to the selector\n"
+        f"Length of administered items:\t{stratum_index}\n"
+        f"Total length of the test:\t{self._test_size}\n"
+        f"Number of slices:\t{len(slices)}"
+      )
+      raise RuntimeError(msg)
     pointer = slices[stratum_index]
     max_pointer = item_bank.n_items if stratum_index == self._test_size - 1 else slices[stratum_index + 1]
 
@@ -348,7 +325,6 @@ class MaxInfoStratSelector(StratifiedSelector):
   def postsort_items(
     self,
     item_bank: ItemBank,
-    using_simulator_props: bool,
     est_theta: float,
     **kwargs: Any,  # noqa: ARG002
   ) -> NDArray[numpy.floating]:
@@ -358,8 +334,6 @@ class MaxInfoStratSelector(StratifiedSelector):
     ----------
     item_bank : ItemBank
         An ItemBank containing item parameters.
-    using_simulator_props : bool
-        Whether the selector is being executed inside a Simulator.
     est_theta : float
         The current estimate of the examinee's ability.
     **kwargs : dict
@@ -371,7 +345,7 @@ class MaxInfoStratSelector(StratifiedSelector):
         The sorted item matrix.
     """
     # recover items presorted by the first rule
-    presorted_items = self._presorted_items if using_simulator_props else self.presort_items(item_bank)
+    presorted_items = self._get_presorted_items(item_bank)
     # run through each stratum and sort items in descending order according to
     # their information for the current theta value
     final_indices = []
@@ -452,5 +426,7 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
       final_indices.extend(global_sorted_indices_current_stratum)
 
     # sanity check to make sure all indices are present and unique
-    assert len(final_indices) == len(set(final_indices))
+    if len(final_indices) != len(set(final_indices)):
+      msg = "Presorted indices must be unique"
+      raise RuntimeError(msg)
     return numpy.array(final_indices)

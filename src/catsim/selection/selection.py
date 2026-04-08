@@ -61,9 +61,8 @@ class MaxInfoSelector(BaseSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -71,12 +70,10 @@ class MaxInfoSelector(BaseSelector):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs
@@ -87,26 +84,9 @@ class MaxInfoSelector(BaseSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank, administered_items, est_theta = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      **kwargs,
-    )
-
-    if item_bank is None:
-      msg = "item_bank parameter cannot be None"
-      raise ValueError(msg)
-    if administered_items is None:
-      msg = "administered_items parameter cannot be None"
-      raise ValueError(msg)
-    if est_theta is None:
-      msg = "est_theta parameter cannot be None"
-      raise ValueError(msg)
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
 
     # sort items by their information value
     ordered_items = self._sort_by_info(item_bank, est_theta)
@@ -117,8 +97,10 @@ class MaxInfoSelector(BaseSelector):
       msg = "There are no more items to apply."
       raise NoItemsAvailableError(msg)
 
-    # gets the indexes and information values from the items with r < rmax
-    valid_indexes_low_r = [idx for idx in valid_indexes if item_bank.exposure_rates[idx] < self._r_max]
+    exposure_rates = kwargs.get("exposure_rates")
+    if exposure_rates is None:
+      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
+    valid_indexes_low_r = [idx for idx in valid_indexes if exposure_rates[idx] < self._r_max]
     # return the item with maximum information from the ones available
     return valid_indexes_low_r[0] if len(valid_indexes_low_r) > 0 else valid_indexes[0]
 
@@ -141,9 +123,8 @@ class UrrySelector(BaseSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -151,12 +132,10 @@ class UrrySelector(BaseSelector):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs
@@ -167,26 +146,9 @@ class UrrySelector(BaseSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank, administered_items, est_theta = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      **kwargs,
-    )
-
-    if est_theta is None:
-      msg = "est_theta parameter cannot be None"
-      raise ValueError(msg)
-    if administered_items is None:
-      msg = "administered_items parameter cannot be None"
-      raise ValueError(msg)
-    if item_bank is None:
-      msg = "item_bank parameter cannot be None"
-      raise ValueError(msg)
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
 
     ordered_items = self._sort_by_b(item_bank, est_theta)
     valid_indexes = self._get_non_administered(ordered_items, administered_items)
@@ -228,9 +190,8 @@ class IntervalInfoSelector(BaseSelector):
 
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -238,12 +199,10 @@ class IntervalInfoSelector(BaseSelector):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
-        A list containing the indexes of items that were already administered. Default is None.
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs
@@ -254,20 +213,9 @@ class IntervalInfoSelector(BaseSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank, administered_items, est_theta = self._prepare_args(
-      return_item_bank=True,
-      return_administered_items=True,
-      return_est_theta=True,
-      index=index,
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      **kwargs,
-    )
-
-    assert est_theta is not None
-    assert administered_items is not None
-    assert item_bank is not None
+    item_bank = self._require_item_bank(item_bank)
+    administered_items = self._require_administered_items(administered_items)
+    est_theta = self._require_est_theta(est_theta)
 
     # compute the integral of the information function around an examinee's ability
     information_integral = numpy.array([

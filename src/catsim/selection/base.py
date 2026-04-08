@@ -5,20 +5,15 @@ from typing import Any
 
 import numpy
 
-from .._base import Simulable
 from ..item_bank import ItemBank
 
 
-class BaseSelector(Simulable, ABC):
+class BaseSelector(ABC):
   """Base class representing a CAT item selector.
 
   Selectors are responsible for choosing which item to administer next to an
   examinee based on their current estimated ability and test progress.
   """
-
-  def __init__(self) -> None:
-    """Initialize a Selector object."""
-    super().__init__()
 
   @staticmethod
   def _get_non_administered(item_indices: list[int], administered_item_indices: list[int]) -> list[int]:
@@ -87,12 +82,32 @@ class BaseSelector(Simulable, ABC):
     """
     return list(numpy.abs(item_bank.difficulty - est_theta).argsort())
 
+  @staticmethod
+  def _require_item_bank(item_bank: ItemBank | None) -> ItemBank:
+    if item_bank is None:
+      msg = "item_bank parameter cannot be None"
+      raise ValueError(msg)
+    return item_bank
+
+  @staticmethod
+  def _require_administered_items(administered_items: list[int] | None) -> list[int]:
+    if administered_items is None:
+      msg = "administered_items parameter cannot be None"
+      raise ValueError(msg)
+    return administered_items
+
+  @staticmethod
+  def _require_est_theta(est_theta: float | None) -> float:
+    if est_theta is None:
+      msg = "est_theta parameter cannot be None"
+      raise ValueError(msg)
+    return est_theta
+
   @abstractmethod
   def select(
     self,
-    index: int | None = None,
-    item_bank: ItemBank | None = None,
-    administered_items: list[int] | None = None,
+    item_bank: ItemBank,
+    administered_items: list[int],
     est_theta: float | None = None,
     **kwargs: Any,
   ) -> int | None:
@@ -100,17 +115,15 @@ class BaseSelector(Simulable, ABC):
 
     Parameters
     ----------
-    index : int or None, optional
-        The index of the current examinee in the simulator. Default is None.
-    item_bank : ItemBank or None, optional
-        An ItemBank containing item parameters. Default is None.
-    administered_items : list[int] or None, optional
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
         A list containing the indexes of items that were already administered.
-        Default is None.
     est_theta : float or None, optional
         A float containing the current estimated ability. Default is None.
     **kwargs : dict
-        Additional keyword arguments.
+        Additional keyword arguments such as a random number generator or
+        exposure-rate snapshot.
 
     Returns
     -------

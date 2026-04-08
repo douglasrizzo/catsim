@@ -3,28 +3,24 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from .._base import Simulable
+from ..item_bank import ItemBank
 
 
-class BaseInitializer(Simulable, ABC):
+class BaseInitializer(ABC):
   """Base class for CAT initializers.
 
   Initializers are responsible for selecting examinees' initial ability estimates
   before any items are administered.
   """
 
-  def __init__(self) -> None:
-    """Initialize a BaseInitializer object."""
-    super().__init__()
-
   @abstractmethod
-  def initialize(self, **kwargs: Any) -> float:
+  def initialize(self, item_bank: ItemBank, rng: Any, **kwargs: Any) -> float:
     r"""Select an examinee's initial :math:`\theta` value.
 
     Parameters
     ----------
     **kwargs : dict
-        Arguments used by the BaseInitializer implementation.
+        Additional implementation-specific arguments.
 
     Returns
     -------
