@@ -21,10 +21,9 @@ class TestNoItemsAvailableError:
   def test_message_is_preserved(self) -> None:
     """Test that the error message is preserved."""
     message = "Custom error message"
-    try:
+    with pytest.raises(NoItemsAvailableError) as exc_info:
       raise NoItemsAvailableError(message)
-    except NoItemsAvailableError as e:
-      assert str(e) == message
+    assert str(exc_info.value) == message
 
   def test_can_be_caught_as_runtime_error(self) -> None:
     """Test that it can be caught as RuntimeError."""

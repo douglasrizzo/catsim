@@ -57,6 +57,7 @@ select = [
     "ANN",
     "B",
     "A",
+    "BLE",
     "C4",
     "EM",
     "EXE",
@@ -88,9 +89,10 @@ select = [
     "NPY",
     "PERF",
     "FURB",
+    "S",
     "RUF",
 ]
-ignore = ["ANN401", "D100", "E111", "E114"]
+ignore = ["ANN401", "D100", "E111", "E114", "S101"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
@@ -106,6 +108,7 @@ convention = "numpy"
 "tests/*" = [
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
+  "S",        # Security rules are too noisy for intentionally non-production test code
 ]
 
 [tool.ruff.format]
@@ -124,8 +127,9 @@ line-ending = "auto"
 [dependency-groups]
 dev = [
     "ipykernel>=7.1.0",
-    "pre-commit>=4.3.0",
-    "ruff>=0.13.3",
+    "pre-commit>=4.5.1",
+    "ruff>=0.15.9",
+    "ty>=0.0.28",
 ]
 docs = [
     "bibtex-pygments-lexer>=0.0.1",
@@ -140,6 +144,17 @@ testing = [
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "pytest-xdist>=3.6.1",
-    "ruff>=0.13.3",
+    "ruff>=0.15.9",
     "scikit-learn>=1.7.2",
 ]
+
+[tool.ty.src]
+include = ["src/catsim"]
+
+[tool.ty.rules]
+all = "ignore"
+division-by-zero = "error"
+possibly-missing-import = "error"
+redundant-cast = "error"
+unused-ignore-comment = "error"
+unused-type-ignore-comment = "error"

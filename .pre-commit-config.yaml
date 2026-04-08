@@ -32,7 +32,7 @@ repos:
 
   # 4. Linting and formatting
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.6
+    rev: v0.15.9
     hooks:
       - id: ruff-check
         args: [--fix]

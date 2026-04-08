@@ -170,7 +170,7 @@ class TestFixedPointInitializerInitialize:
 
     for _ in range(10):
       theta = initializer.initialize()
-      assert theta == start
+      assert theta == pytest.approx(start)
 
   def test_initialize_ignores_index(self) -> None:
     """Test that initialize ignores the index parameter."""
@@ -178,17 +178,17 @@ class TestFixedPointInitializerInitialize:
 
     for i in range(10):
       theta = initializer.initialize(index=i)
-      assert theta == 0.0
+      assert theta == pytest.approx(0.0)
 
   def test_initialize_zero(self) -> None:
     """Test initialization with zero."""
     initializer = FixedPointInitializer(0.0)
-    assert initializer.initialize() == 0.0
+    assert initializer.initialize() == pytest.approx(0.0)
 
   def test_initialize_negative(self) -> None:
     """Test initialization with negative value."""
     initializer = FixedPointInitializer(-3.0)
-    assert initializer.initialize() == -3.0
+    assert initializer.initialize() == pytest.approx(-3.0)
 
 
 class TestBaseInitializerAbstract:
@@ -216,4 +216,4 @@ class TestBaseInitializerAbstract:
         return 42.0
 
     initializer = ConstantInitializer()
-    assert initializer.initialize() == 42.0
+    assert initializer.initialize() == pytest.approx(42.0)
