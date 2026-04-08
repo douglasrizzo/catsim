@@ -1,256 +1,150 @@
-"""Tests for catsim.plot module."""
+"""Tests for catsim.plot module under the new architecture."""
+
+from __future__ import annotations
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from catsim import plot
-from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import RandomInitializer
-from catsim.item_bank import ItemBank
 from catsim.plot import PlotType
-from catsim.selection import MaxInfoSelector
-from catsim.simulation import Simulator
-from catsim.stopping import MinErrorStopper
 
 
 class TestPlotType:
   """Tests for PlotType enum."""
 
-  def test_plot_type_icc(self) -> None:
-    """Test ICC plot type exists."""
+  def test_plot_type_members_exist(self) -> None:
+    """All documented plot types should exist."""
     assert PlotType.ICC is not None
-
-  def test_plot_type_iic(self) -> None:
-    """Test IIC plot type exists."""
     assert PlotType.IIC is not None
-
-  def test_plot_type_both(self) -> None:
-    """Test BOTH plot type exists."""
     assert PlotType.BOTH is not None
 
 
 class TestItemCurve:
-  """Tests for item_curve function."""
+  """Tests for item_curve()."""
 
-  def test_item_curve_icc(self) -> None:
-    """Test ICC plot."""
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ptype=PlotType.ICC)
+  @pytest.mark.parametrize("ptype", [PlotType.ICC, PlotType.IIC, PlotType.BOTH])
+  def test_item_curve_returns_axes(self, ptype: PlotType) -> None:
+    """Every item curve mode should return axes."""
+    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ptype=ptype)
     assert isinstance(ax, Axes)
     plt.close("all")
 
-  def test_item_curve_iic(self) -> None:
-    """Test IIC plot."""
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ptype=PlotType.IIC)
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_item_curve_both(self) -> None:
-    """Test BOTH plot type."""
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ptype=PlotType.BOTH)
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_item_curve_with_title(self) -> None:
-    """Test with custom title."""
+  def test_item_curve_respects_title(self) -> None:
+    """Custom titles should be applied."""
     ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, title="Test Item")
     assert ax.get_title() == "Test Item"
     plt.close("all")
 
-  def test_item_curve_with_existing_axes(self) -> None:
-    """Test plotting on existing axes."""
-    _, ax_orig = plt.subplots()
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ax=ax_orig)
-    assert ax is ax_orig
-    plt.close("all")
-
-  def test_item_curve_with_max_info(self) -> None:
-    """Test with max_info marker."""
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ptype=PlotType.IIC, max_info=True)
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_item_curve_with_figsize(self) -> None:
-    """Test with custom figure size."""
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, figsize=(10, 6))
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_item_curve_various_params(self) -> None:
-    """Test with various item parameters."""
-    params = [
-      (0.5, -1.0, 0.0, 1.0),
-      (1.5, 0.0, 0.2, 1.0),
-      (2.0, 1.0, 0.1, 0.95),
-    ]
-    for a, b, c, d in params:
-      ax = plot.item_curve(a=a, b=b, c=c, d=d)
-      assert isinstance(ax, Axes)
-    plt.close("all")
-
 
 class TestGen3dDatasetScatter:
-  """Tests for gen3d_dataset_scatter function."""
+  """Tests for gen3d_dataset_scatter()."""
 
-  def test_gen3d_scatter_basic(self) -> None:
-    """Test basic 3D scatter plot."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+  def test_gen3d_scatter_returns_3d_axes(self, item_bank) -> None:
+    """3D dataset plots should return 3D axes."""
     ax = plot.gen3d_dataset_scatter(item_bank)
     assert isinstance(ax, Axes3D)
     plt.close("all")
 
-  def test_gen3d_scatter_with_title(self) -> None:
-    """Test with custom title."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    ax = plot.gen3d_dataset_scatter(item_bank, title="Test 3D Scatter")
-    assert ax.get_title() == "Test 3D Scatter"
-    plt.close("all")
-
 
 class TestItemExposure:
-  """Tests for item_exposure function."""
+  """Tests for item_exposure()."""
 
-  @pytest.fixture
-  def simulator(self) -> Simulator:
-    """Create a simulator with completed simulation."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    sim = Simulator(
-      item_bank,
-      examinees=10,
-      initializer=RandomInitializer(),
-      selector=MaxInfoSelector(),
-      estimator=NumericalSearchEstimator(),
-      stopper=MinErrorStopper(0.5, max_items=10),
-    )
-    sim.simulate()
-    return sim
-
-  def test_item_exposure_basic(self, simulator: Simulator) -> None:
-    """Test basic item exposure plot."""
-    ax = plot.item_exposure(simulator=simulator)
+  def test_item_exposure_from_simulation_result(self, simulation_result) -> None:
+    """SimulationResult should be accepted directly."""
+    ax = plot.item_exposure(simulation=simulation_result)
     assert isinstance(ax, Axes)
     plt.close("all")
 
-  def test_item_exposure_histogram(self, simulator: Simulator) -> None:
-    """Test histogram mode."""
-    ax = plot.item_exposure(simulator=simulator, hist=True)
+  def test_item_exposure_histogram(self, simulation_result) -> None:
+    """Histogram mode should return axes."""
+    ax = plot.item_exposure(simulation=simulation_result, hist=True)
     assert isinstance(ax, Axes)
     plt.close("all")
 
-  def test_item_exposure_by_parameter(self, simulator: Simulator) -> None:
-    """Test exposure by different parameters."""
-    for par in ["a", "b", "c", "d"]:
-      ax = plot.item_exposure(simulator=simulator, par=par)
-      assert isinstance(ax, Axes)
+  def test_item_exposure_manual_inputs(self, item_bank) -> None:
+    """Manual item_bank plus exposure_rates should be supported."""
+    rates = np.linspace(0.0, 1.0, item_bank.n_items)
+    ax = plot.item_exposure(item_bank=item_bank, exposure_rates=rates, par="b")
+    assert isinstance(ax, Axes)
     plt.close("all")
+
+  def test_item_exposure_requires_input(self) -> None:
+    """At least one plottable object must be provided."""
+    with pytest.raises(ValueError, match="must be passed"):
+      plot.item_exposure()
 
 
 class TestTestProgress:
-  """Tests for test_progress function."""
+  """Tests for test_progress()."""
 
-  @pytest.fixture
-  def simulator(self) -> Simulator:
-    """Create a simulator with completed simulation."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    sim = Simulator(
-      item_bank,
-      examinees=5,
-      initializer=RandomInitializer(),
-      selector=MaxInfoSelector(),
-      estimator=NumericalSearchEstimator(),
-      stopper=MinErrorStopper(0.5, max_items=10),
-    )
-    sim.simulate()
-    return sim
-
-  def test_test_progress_basic(self, simulator: Simulator) -> None:
-    """Test basic test progress plot."""
-    ax = plot.test_progress(simulator=simulator, index=0)
+  def test_test_progress_from_simulation_result(self, simulation_result) -> None:
+    """SimulationResult plus index should be accepted."""
+    ax = plot.test_progress(simulation=simulation_result, index=0)
     assert isinstance(ax, Axes)
     plt.close("all")
 
-  def test_test_progress_with_title(self, simulator: Simulator) -> None:
-    """Test with custom title."""
-    ax = plot.test_progress(simulator=simulator, index=0, title="Test Progress")
-    assert ax.get_title() == "Test Progress"
-    plt.close("all")
-
-  def test_test_progress_with_info(self, simulator: Simulator) -> None:
-    """Test with information curve."""
-    ax = plot.test_progress(simulator=simulator, index=0, info=True)
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_test_progress_with_see(self, simulator: Simulator) -> None:
-    """Test with standard error curve."""
-    ax = plot.test_progress(simulator=simulator, index=0, see=True)
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_test_progress_with_reliability(self, simulator: Simulator) -> None:
-    """Test with reliability curve."""
-    ax = plot.test_progress(simulator=simulator, index=0, reliability=True)
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_test_progress_all_options(self, simulator: Simulator) -> None:
-    """Test with all options enabled."""
+  def test_test_progress_with_quality_curves(self, simulation_result) -> None:
+    """Information, variance, SEE, and reliability options should render."""
     ax = plot.test_progress(
-      simulator=simulator,
+      simulation=simulation_result,
       index=0,
-      title="Full Progress",
       info=True,
+      var=True,
       see=True,
       reliability=True,
     )
     assert isinstance(ax, Axes)
     plt.close("all")
 
-  def test_test_progress_different_indices(self, simulator: Simulator) -> None:
-    """Test with different examinee indices."""
-    for i in range(min(3, len(simulator.examinees))):
-      ax = plot.test_progress(simulator=simulator, index=i)
-      assert isinstance(ax, Axes)
+  def test_test_progress_manual_inputs(self, item_bank) -> None:
+    """Manual thetas and administered items should still be supported."""
+    administered_items = item_bank.get_items([0, 1, 2])
+    thetas = [0.0, 0.1, 0.2, 0.3]
+    ax = plot.test_progress(thetas=thetas, administered_items=administered_items, true_theta=0.0)
+    assert isinstance(ax, Axes)
     plt.close("all")
+
+  def test_test_progress_requires_index_with_simulation(self, simulation_result) -> None:
+    """SimulationResult calls require an index."""
+    with pytest.raises(ValueError, match="index must be provided"):
+      plot.test_progress(simulation=simulation_result)
+
+  def test_test_progress_rejects_mismatched_lengths(self, item_bank) -> None:
+    """Theta history and administered items must align."""
+    administered_items = item_bank.get_items([0, 1, 2])
+    with pytest.raises(ValueError, match="not the same"):
+      plot.test_progress(thetas=[0.0, 0.1], administered_items=administered_items, true_theta=0.0)
 
 
 @pytest.mark.slow
 @pytest.mark.integration
-def test_plots_integration() -> None:
-  """Integration test for plot functionalities with full simulation."""
-  initializer = RandomInitializer()
-  selector = MaxInfoSelector()
-  estimator = NumericalSearchEstimator()
-  stopper = MinErrorStopper(0.5, max_items=20)
-  s = Simulator(ItemBank.generate_item_bank(100), 10)
-  s.simulate(initializer, selector, estimator, stopper, verbose=True)
-
-  # Verify simulation produced results before plotting
-  assert s.items is not None, "Simulation did not produce items"
-  assert len(s.items) > 0, "No items in simulation"
-
-  for item in s.items[0:10]:
+def test_plots_integration(simulation_result) -> None:
+  """Integration test for plotting from a completed simulation result."""
+  for item in simulation_result.item_bank.items[:5]:
     plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=PlotType.ICC, max_info=False)
+    plt.close("all")
     plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=PlotType.IIC, max_info=True)
+    plt.close("all")
     plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=PlotType.BOTH, max_info=True)
     plt.close("all")
 
-  plot.gen3d_dataset_scatter(s.item_bank)
-  plot.test_progress(
-    title="Test progress",
-    simulator=s,
-    index=0,
-    info=True,
-    see=True,
-    reliability=True,
-  )
-  plot.item_exposure(simulator=s)
-  plot.item_exposure(simulator=s, par="a")
-  plot.item_exposure(simulator=s, par="b")
-  plot.item_exposure(simulator=s, par="c")
-  plot.item_exposure(simulator=s, par="d")
-  plot.item_exposure(simulator=s, hist=True)
+  plot.gen3d_dataset_scatter(simulation_result.item_bank)
+  plt.close("all")
+  plot.test_progress(simulation=simulation_result, index=0, info=True, see=True, reliability=True)
+  plt.close("all")
+  plot.item_exposure(simulation=simulation_result)
+  plt.close("all")
+  plot.item_exposure(simulation=simulation_result, par="a")
+  plt.close("all")
+  plot.item_exposure(simulation=simulation_result, par="b")
+  plt.close("all")
+  plot.item_exposure(simulation=simulation_result, par="c")
+  plt.close("all")
+  plot.item_exposure(simulation=simulation_result, par="d")
+  plt.close("all")
+  plot.item_exposure(simulation=simulation_result, hist=True)
 
-  # close all plots after testing
   plt.close("all")

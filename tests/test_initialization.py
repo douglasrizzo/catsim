@@ -9,6 +9,7 @@ from catsim.initialization import (
   InitializationDistribution,
   RandomInitializer,
 )
+from catsim.item_bank import ItemBank
 
 
 class TestInitializationDistribution:
@@ -91,36 +92,39 @@ class TestRandomInitializerInitialize:
   def test_initialize_uniform_in_range(self) -> None:
     """Test that uniform initialization produces values in range."""
     rng = np.random.default_rng(42)
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
     initializer = RandomInitializer(
       dist_type=InitializationDistribution.UNIFORM,
       dist_params=(-3, 3),
     )
 
     for _ in range(100):
-      theta = initializer.initialize(rng=rng)
+      theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert -3 <= theta <= 3
 
   def test_initialize_uniform_reversed_params(self) -> None:
     """Test that uniform handles reversed params correctly."""
     rng = np.random.default_rng(42)
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
     initializer = RandomInitializer(
       dist_type=InitializationDistribution.UNIFORM,
       dist_params=(3, -3),  # Reversed order
     )
 
     for _ in range(100):
-      theta = initializer.initialize(rng=rng)
+      theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert -3 <= theta <= 3
 
   def test_initialize_normal_distribution(self) -> None:
     """Test that normal initialization produces reasonable values."""
     rng = np.random.default_rng(42)
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
     initializer = RandomInitializer(
       dist_type=InitializationDistribution.NORMAL,
       dist_params=(0, 1),
     )
 
-    values = [initializer.initialize(rng=rng) for _ in range(1000)]
+    values = [initializer.initialize(item_bank=item_bank, rng=rng) for _ in range(1000)]
 
     # Check mean is close to 0
     assert abs(np.mean(values)) < 0.1
@@ -131,12 +135,13 @@ class TestRandomInitializerInitialize:
   def test_initialize_reproducibility_with_rng(self) -> None:
     """Test that same RNG produces same results."""
     initializer = RandomInitializer()
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
 
     rng1 = np.random.default_rng(42)
-    values1 = [initializer.initialize(rng=rng1) for _ in range(10)]
+    values1 = [initializer.initialize(item_bank=item_bank, rng=rng1) for _ in range(10)]
 
     rng2 = np.random.default_rng(42)
-    values2 = [initializer.initialize(rng=rng2) for _ in range(10)]
+    values2 = [initializer.initialize(item_bank=item_bank, rng=rng2) for _ in range(10)]
 
     assert values1 == values2
 
@@ -166,29 +171,37 @@ class TestFixedPointInitializerInitialize:
   def test_initialize_returns_fixed_value(self) -> None:
     """Test that initialize always returns the fixed value."""
     start = 1.5
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    rng = np.random.default_rng(42)
     initializer = FixedPointInitializer(start)
 
     for _ in range(10):
-      theta = initializer.initialize()
+      theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert theta == pytest.approx(start)
 
-  def test_initialize_ignores_index(self) -> None:
-    """Test that initialize ignores the index parameter."""
+  def test_initialize_ignores_extra_kwargs(self) -> None:
+    """Test that initialize ignores unrelated keyword arguments."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    rng = np.random.default_rng(42)
     initializer = FixedPointInitializer(0.0)
 
     for i in range(10):
-      theta = initializer.initialize(index=i)
+      theta = initializer.initialize(item_bank=item_bank, rng=rng, examinee_index=i)
       assert theta == pytest.approx(0.0)
 
   def test_initialize_zero(self) -> None:
     """Test initialization with zero."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    rng = np.random.default_rng(42)
     initializer = FixedPointInitializer(0.0)
-    assert initializer.initialize() == pytest.approx(0.0)
+    assert initializer.initialize(item_bank=item_bank, rng=rng) == pytest.approx(0.0)
 
   def test_initialize_negative(self) -> None:
     """Test initialization with negative value."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    rng = np.random.default_rng(42)
     initializer = FixedPointInitializer(-3.0)
-    assert initializer.initialize() == pytest.approx(-3.0)
+    assert initializer.initialize(item_bank=item_bank, rng=rng) == pytest.approx(-3.0)
 
 
 class TestBaseInitializerAbstract:
@@ -212,8 +225,10 @@ class TestBaseInitializerAbstract:
     """Test creating a custom initializer."""
 
     class ConstantInitializer(BaseInitializer):
-      def initialize(self, **_kwargs: object) -> float:
+      def initialize(self, item_bank: ItemBank, rng: object, **_kwargs: object) -> float:  # noqa: ARG002
         return 42.0
 
     initializer = ConstantInitializer()
-    assert initializer.initialize() == pytest.approx(42.0)
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    rng = np.random.default_rng(42)
+    assert initializer.initialize(item_bank=item_bank, rng=rng) == pytest.approx(42.0)

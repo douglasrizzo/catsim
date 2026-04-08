@@ -180,7 +180,8 @@ class TestNumericalSearchEstimatorEstimate:
       )
 
     avg = estimator.avg_evaluations
-    assert avg == estimator.evaluations / estimator.calls
+    assert avg == estimator.total_evaluations / estimator.calls
+    assert avg >= 0
 
 
 class TestNumericalSearchEstimatorWithMethods:

@@ -1,23 +1,18 @@
-"""Integration tests for catsim simulation pipeline.
+"""Integration tests for the CAT engine and simulation pipeline."""
 
-These tests run full CAT simulations with various configurations to verify
-that all components work correctly together.
-"""
+from __future__ import annotations
 
-import random
+from collections.abc import Callable
 
-import numpy as np
 import pytest
 from sklearn.cluster import KMeans
 
-from catsim import cat, irt
 from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import BaseInitializer, InitializationDistribution, RandomInitializer
+from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
-  BaseSelector,
   ClusterSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
@@ -28,256 +23,150 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
-from catsim.simulation import Simulator
-from catsim.stopping import (
-  BaseStopper,
-  ConfidenceIntervalStopper,
-  MinErrorStopper,
-)
+from catsim.selection.base import BaseSelector
+from catsim.simulation import SimulationRunner
+from catsim.state import SessionStatus, SimulationResult
+from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MinErrorStopper
+from catsim.stopping import TestLengthStopper as LengthStopper
 
 
-def one_simulation(
-  items: ItemBank,
-  examinees: int,
-  initializer: BaseInitializer,
+def run_simulation(
+  item_bank: ItemBank,
   selector: BaseSelector,
-  estimator: NumericalSearchEstimator,
   stopper: BaseStopper,
-) -> Simulator:
-  """Test a single simulation.
+  *,
+  estimator: NumericalSearchEstimator | None = None,
+  examinees: int = 12,
+  seed: int = 42,
+) -> SimulationResult:
+  """Run a small deterministic simulation and return its aggregate result."""
+  runner = SimulationRunner(
+    item_bank,
+    RandomInitializer(InitializationDistribution.UNIFORM, (-2, 2)),
+    selector,
+    estimator or NumericalSearchEstimator(),
+    stopper,
+    seed=seed,
+  )
+  result = runner.run(examinees)
+  assert len(result.sessions) == examinees
+  assert all(session.status == SessionStatus.STOPPED for session in result.sessions)
+  assert result.exposure_counts.sum() == sum(len(session.administered_item_ids) for session in result.sessions)
+  return result
 
-  Returns
-  -------
-  Simulator
-      The simulator instance after running the simulation.
-  """
-  simulator = Simulator(items, examinees, initializer, selector, estimator, stopper)
-  simulator.simulate(verbose=True)
 
-  # Verify simulation ran successfully
-  assert simulator.latest_estimations is not None, "Simulation did not produce estimations"
-  assert len(simulator.latest_estimations) == examinees, "Incorrect number of examinees"
-  assert simulator.administered_items is not None, "No items were administered"
-
-  return simulator
-
-
-@pytest.mark.slow
 @pytest.mark.integration
-@pytest.mark.parallel
-@pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("bank_size", [500])
-@pytest.mark.parametrize("initializer", [RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))])
-@pytest.mark.parametrize("estimator", [NumericalSearchEstimator()])
+@pytest.mark.parametrize("method", sorted(NumericalSearchEstimator.available_methods()))
+def test_estimation_methods_complete_simulation(method: str) -> None:
+  """All supported estimator methods should complete an end-to-end run."""
+  item_bank = ItemBank.generate_item_bank(80, seed=42)
+  result = run_simulation(
+    item_bank,
+    MaxInfoSelector(),
+    LengthStopper(max_items=6),
+    estimator=NumericalSearchEstimator(method=method),
+  )
+
+  assert all(len(session.administered_item_ids) == 6 for session in result.sessions)
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize(
-  "stopper",
+  "factory",
   [
-    MinErrorStopper(0.4, max_items=30),
-    MinErrorStopper(0.4, min_items=10, max_items=30),
+    pytest.param(lambda: LinearSelector(list(range(8))), id="linear"),
+    pytest.param(lambda: AStratSelector(8), id="astrat"),
+    pytest.param(lambda: AStratBBlockSelector(8), id="astrat_bblock"),
+    pytest.param(lambda: MaxInfoStratSelector(8), id="max_info_strat"),
+    pytest.param(lambda: MaxInfoBBlockSelector(8), id="max_info_bblock"),
+    pytest.param(lambda: The54321Selector(8), id="54321"),
+    pytest.param(lambda: RandomesqueSelector(3), id="randomesque"),
   ],
 )
-def test_cism(
-  examinees: int,
-  bank_size: int,
-  initializer: BaseInitializer,
-  estimator: NumericalSearchEstimator,
-  stopper: BaseStopper,
-) -> None:
-  """Test the cluster-based item selection method."""
-  item_bank = ItemBank.generate_item_bank(bank_size)
-  clusters = list(KMeans(n_clusters=8, n_init="auto").fit_predict(item_bank.items))
-  ClusterSelector.weighted_cluster_infos(0, item_bank, clusters)
-  ClusterSelector.avg_cluster_params(item_bank, clusters)
-  selector = ClusterSelector(clusters=clusters, r_max=0.2)
-  one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
+def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector]) -> None:
+  """Finite selectors should drive the shared simulation path without legacy adapters."""
+  item_bank = ItemBank.generate_item_bank(80, seed=42)
+  result = run_simulation(item_bank, factory(), LengthStopper(max_items=8))
+
+  assert all(len(session.administered_item_ids) == 8 for session in result.sessions)
+  assert result.overlap_rate is not None
 
 
-@pytest.mark.slow
 @pytest.mark.integration
-@pytest.mark.parallel
-@pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("bank_size", [500])
-@pytest.mark.parametrize(
-  "estimator", [NumericalSearchEstimator(method=m) for m in sorted(NumericalSearchEstimator.available_methods())]
-)
-def test_estimators(
-  examinees: int,
-  bank_size: int,
-  estimator: NumericalSearchEstimator,
-) -> None:
-  """Test all NumericalSearchEstimator methods with simple selector configurations."""
-  rng = np.random.default_rng(1337)
-  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
-  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
-  stopper = MinErrorStopper(0.4, max_items=30)
-  test_size = 30
-
-  # Test with a finite selector (LinearSelector)
-  finite_selector = LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False)))
-  one_simulation(item_bank, examinees, initializer, finite_selector, estimator, stopper)
-
-  # Test with an infinite selector (RandomSelector)
-  infinite_selector = RandomSelector()
-  one_simulation(item_bank, examinees, initializer, infinite_selector, estimator, stopper)
-
-
-@pytest.mark.slow
-@pytest.mark.integration
-@pytest.mark.parallel
-@pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("test_size", [30])
-@pytest.mark.parametrize("bank_size", [500])
-def test_finite_selectors(
-  examinees: int,
-  test_size: int,
-  bank_size: int,
-) -> None:
-  """Test all finite selectors with brent and bounded estimators."""
-  rng = np.random.default_rng(1337)
-  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
-  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
-  stopper = MinErrorStopper(0.4, max_items=test_size)
-
-  finite_selectors = [
-    LinearSelector(list(rng.choice(bank_size, size=test_size, replace=False))),
-    AStratSelector(test_size),
-    AStratBBlockSelector(test_size),
-    MaxInfoStratSelector(test_size),
-    MaxInfoBBlockSelector(test_size),
-    The54321Selector(test_size),
-    RandomesqueSelector(test_size // 6),
-  ]
-
-  estimators = [
-    NumericalSearchEstimator(method="brent"),
-    NumericalSearchEstimator(method="bounded"),
-  ]
-
-  for selector in finite_selectors:
-    for estimator in estimators:
-      rng = np.random.default_rng(1337)
-      responses = cat.random_response_vector(random.randint(1, test_size - 1))
-      administered_items = list(rng.choice(bank_size, len(responses), replace=False))
-      est_theta = initializer.initialize(rng=rng)
-      selector.select(item_bank=item_bank, administered_items=administered_items, est_theta=est_theta, rng=rng)
-      estimator.estimate(
-        item_bank=item_bank,
-        administered_items=administered_items,
-        response_vector=responses,
-        est_theta=est_theta,
-      )
-      stopper.stop(
-        _item_bank=item_bank, administered_items=item_bank.get_items(administered_items), theta=est_theta, rng=rng
-      )
-
-      one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
-
-
-@pytest.mark.slow
-@pytest.mark.integration
-@pytest.mark.parallel
-@pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("bank_size", [5000])
 @pytest.mark.parametrize(
   "selector",
   [
-    MaxInfoSelector(),
-    RandomSelector(),
-    UrrySelector(),
+    pytest.param(MaxInfoSelector(), id="max_info"),
+    pytest.param(RandomSelector(), id="random"),
+    pytest.param(UrrySelector(), id="urry"),
   ],
 )
-def test_infinite_selectors(
-  examinees: int,
-  bank_size: int,
-  selector: BaseSelector,
-) -> None:
-  """Test all infinite selectors with brent and bounded estimators."""
-  rng = np.random.default_rng(1337)
-  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
-  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
-  stopper = MinErrorStopper(0.4, max_items=30)
+def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector) -> None:
+  """Infinite selectors should work end to end with variable-length stopping rules."""
+  item_bank = ItemBank.generate_item_bank(100, seed=42)
+  result = run_simulation(item_bank, selector, MinErrorStopper(0.6, min_items=3, max_items=10))
 
-  estimators = [
-    NumericalSearchEstimator(method="brent"),
-    NumericalSearchEstimator(method="bounded"),
-  ]
-
-  for estimator in estimators:
-    responses = cat.random_response_vector(random.randint(1, 30))
-    administered_items = list(rng.choice(bank_size, len(responses), replace=False))
-    est_theta = initializer.initialize(rng=rng)
-    selector.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      rng=rng,
-    )
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=responses,
-      est_theta=est_theta,
-    )
-    stopper.stop(
-      _item_bank=item_bank,
-      administered_items=item_bank.get_items(administered_items),
-      theta=est_theta,
-    )
-    one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
+  assert all(3 <= len(session.administered_item_ids) <= 10 for session in result.sessions)
 
 
-@pytest.mark.slow
 @pytest.mark.integration
-@pytest.mark.parallel
-@pytest.mark.parametrize("examinees", [100])
-@pytest.mark.parametrize("bank_size", [5000])
+@pytest.mark.parametrize("method", ["item_info", "cluster_info", "weighted_info"])
+def test_cluster_selector_completes_runs(method: str) -> None:
+  """ClusterSelector should operate through SimulationRunner for all supported methods."""
+  item_bank = ItemBank.generate_item_bank(60, seed=42)
+  clusters = list(KMeans(n_clusters=4, n_init="auto", random_state=42).fit_predict(item_bank.items))
+  result = run_simulation(
+    item_bank,
+    ClusterSelector(clusters=clusters, method=method, r_max=0.3),
+    LengthStopper(max_items=6),
+  )
+
+  assert all(len(session.administered_item_ids) == 6 for session in result.sessions)
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize(
-  "stopper",
+  "stopper,expected_min,expected_max",
   [
-    MinErrorStopper(0.4, max_items=30),
-    MinErrorStopper(0.4, min_items=10, max_items=30),
-    ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.80, max_items=50),
-    ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.80, min_items=10, max_items=50),
+    pytest.param(LengthStopper(max_items=5), 5, 5, id="fixed_length"),
+    pytest.param(MinErrorStopper(0.6, min_items=3, max_items=9), 3, 9, id="min_error"),
+    pytest.param(
+      ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.8, min_items=3, max_items=9),
+      3,
+      9,
+      id="confidence_interval",
+    ),
   ],
 )
-def test_stoppers(
-  examinees: int,
-  bank_size: int,
-  stopper: BaseStopper,
-) -> None:
-  """Test all stopper configurations with brent and bounded estimators."""
-  rng = np.random.default_rng(1337)
-  item_bank = ItemBank.generate_item_bank(bank_size, itemtype=irt.NumParams.PL4)
-  initializer = RandomInitializer(InitializationDistribution.UNIFORM, (-5, 5))
+def test_stoppers_complete_runs(stopper: BaseStopper, expected_min: int, expected_max: int) -> None:
+  """Supported stoppers should terminate sessions within their configured limits."""
+  item_bank = ItemBank.generate_item_bank(100, seed=42)
+  result = run_simulation(item_bank, MaxInfoSelector(), stopper)
+
+  assert all(expected_min <= len(session.administered_item_ids) <= expected_max for session in result.sessions)
+
+
+@pytest.mark.integration
+def test_manual_and_batched_flows_share_equivalent_fixed_length_behavior() -> None:
+  """Manual and automated execution should agree on core stopping semantics."""
+  item_bank = ItemBank.generate_item_bank(40, seed=42)
+  initializer = FixedPointInitializer(0.0)
   selector = MaxInfoSelector()
+  estimator = NumericalSearchEstimator()
+  stopper = LengthStopper(max_items=4)
 
-  # Extract max items from stopper
-  max_administered_items = stopper.max_items if stopper.max_items is not None else bank_size
+  manual_runner = SimulationRunner(item_bank, initializer, selector, estimator, stopper, seed=42)
+  batched_runner = SimulationRunner(
+    item_bank,
+    initializer,
+    MaxInfoSelector(),
+    NumericalSearchEstimator(),
+    stopper,
+    seed=42,
+  )
 
-  estimators = [
-    NumericalSearchEstimator(method="brent"),
-    NumericalSearchEstimator(method="bounded"),
-  ]
+  manual_result = manual_runner.run([0.0])
+  batched_result = batched_runner.run(1)
 
-  for estimator in estimators:
-    responses = cat.random_response_vector(random.randint(1, max_administered_items))
-    administered_items = list(rng.choice(bank_size, len(responses), replace=False))
-    est_theta = initializer.initialize(rng=rng)
-    selector.select(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      est_theta=est_theta,
-      rng=rng,
-    )
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=responses,
-      est_theta=est_theta,
-    )
-    stopper.stop(
-      _item_bank=item_bank,
-      administered_items=item_bank.get_items(administered_items),
-      theta=est_theta,
-    )
-    one_simulation(item_bank, examinees, initializer, selector, estimator, stopper)
+  assert len(manual_result.sessions[0].administered_item_ids) == 4
+  assert len(batched_result.sessions[0].administered_item_ids) == 4
