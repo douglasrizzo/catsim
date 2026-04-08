@@ -136,13 +136,14 @@ class CatEngine:
     state.current_theta = updated_theta
     state.theta_history.append(updated_theta)
 
+    # After updating the estimate, check whether the completed step satisfied the stop rule.
     stopped = self.should_stop(state, item_bank)
     if stopped:
       state.status = SessionStatus.STOPPED
       state.stop_reason = "stop_rule"
 
     return CatStepResult(
-      session=state,
+      session=state.snapshot(),
       selected_item_id=item_id,
       response=response,
       updated_theta=updated_theta,
@@ -158,22 +159,24 @@ class CatEngine:
     context: RunContext,
   ) -> CatStepResult:
     """Execute one full CAT step."""
+    # Guard against callers stepping a session that already satisfies the stop rule
+    # before item selection begins.
     if self.should_stop(state, item_bank):
       state.status = SessionStatus.STOPPED
       state.stop_reason = "stop_rule"
-      return CatStepResult(state, None, None, state.current_theta, True, state.stop_reason)
+      return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
 
     try:
       item_id = self.select_next(state, item_bank, context)
     except NoItemsAvailableError:
       state.status = SessionStatus.STOPPED
       state.stop_reason = "item_bank_exhausted"
-      return CatStepResult(state, None, None, state.current_theta, True, state.stop_reason)
+      return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
 
     if item_id is None:
       state.status = SessionStatus.STOPPED
       state.stop_reason = "selector_stopped"
-      return CatStepResult(state, None, None, state.current_theta, True, state.stop_reason)
+      return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
 
     response = response_provider.answer(state, item_bank, item_id, context)
     return self.apply_response(state, item_bank, item_id, response, context)
@@ -187,7 +190,5 @@ class CatEngine:
   ) -> CatSessionState:
     """Run a session until a stop condition is reached."""
     while state.status != SessionStatus.STOPPED:
-      result = self.step(state, item_bank, response_provider, context)
-      if result.stopped:
-        break
+      self.step(state, item_bank, response_provider, context)
     return state

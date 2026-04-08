@@ -26,14 +26,14 @@ class FixedResponseProvider:
 class NullSelector:
   """Selector stub that explicitly stops item selection."""
 
-  def select(self, item_bank, administered_items, est_theta=None, **kwargs):  # noqa: ARG002
+  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None):  # noqa: ARG002
     return None
 
 
 class ExhaustedSelector:
   """Selector stub that behaves like an exhausted item bank."""
 
-  def select(self, item_bank, administered_items, est_theta=None, **kwargs):  # noqa: ARG002
+  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None):  # noqa: ARG002
     msg = "No items remain"
     raise NoItemsAvailableError(msg)
 
@@ -80,6 +80,30 @@ def test_apply_response_updates_session_histories(
   assert session.responses == [True]
   assert len(session.theta_history) == 2
   assert session.current_theta == session.theta_history[-1]
+
+
+def test_apply_response_returns_immutable_session_snapshot(
+  item_bank,
+  fixed_initializer,
+  random_selector,
+  estimator,
+  fixed_length_stopper,
+) -> None:
+  """Step results should preserve the session state observed at that step."""
+  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+
+  first = engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
+  session.metadata["phase"] = "mutated"
+  second = engine.apply_response(session, item_bank, item_id=1, response=False, context=context)
+
+  assert first.session.administered_item_ids == [0]
+  assert first.session.responses == [True]
+  assert len(first.session.theta_history) == 2
+  assert first.session.metadata == {}
+  assert second.session.administered_item_ids == [0, 1]
+  assert second.session.responses == [True, False]
 
 
 def test_step_executes_full_transition(

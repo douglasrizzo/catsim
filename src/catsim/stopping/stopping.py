@@ -76,8 +76,7 @@ class TestLengthStopper(BaseStopper):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    theta: float | None = None,
-    **kwargs: Any,
+    theta: float,
   ) -> bool:
     """Check whether the test should stop based on common constraints and specific criterion.
 
@@ -87,10 +86,8 @@ class TestLengthStopper(BaseStopper):
         The item bank being used.
     administered_items : list[int]
         Item indices that were already administered.
-    theta : float or None, optional
-        An ability value. Default is None.
-    **kwargs : dict
-        Additional keyword arguments passed to the specific stopping criterion.
+    theta : float
+        Current ability estimate.
 
     Returns
     -------
@@ -125,13 +122,12 @@ class TestLengthStopper(BaseStopper):
       return False
 
     # Check the specific stopping criterion
-    return self._check_stopping_criterion(administered_items_array, theta, **kwargs)
+    return self._check_stopping_criterion(administered_items_array, theta)
 
   def _check_stopping_criterion(  # noqa: PLR6301
     self,
     administered_items: npt.NDArray[numpy.floating[Any]],  # noqa: ARG002
-    theta: float | None,  # noqa: ARG002
-    **kwargs: Any,  # noqa: ARG002
+    theta: float,  # noqa: ARG002
   ) -> bool:
     """Check the specific stopping criterion implemented by the subclass.
 
@@ -142,10 +138,8 @@ class TestLengthStopper(BaseStopper):
     ----------
     administered_items : npt.NDArray[numpy.floating[Any]]
         Array containing the parameters of administered items.
-    theta : float or None
+    theta : float
         Current ability estimate.
-    **kwargs : dict
-        Additional keyword arguments.
 
     Returns
     -------
@@ -251,8 +245,7 @@ class MinErrorStopper(TestLengthStopper):
   def _check_stopping_criterion(
     self,
     administered_items: npt.NDArray[numpy.floating[Any]],
-    theta: float | None,
-    **kwargs: Any,  # noqa: ARG002
+    theta: float,
   ) -> bool:
     """Check if the standard error is below the threshold.
 
@@ -260,10 +253,8 @@ class MinErrorStopper(TestLengthStopper):
     ----------
     administered_items : npt.NDArray[numpy.floating[Any]]
         Array of administered item parameters.
-    theta : float or None
+    theta : float
         Current ability estimate.
-    **kwargs : dict
-        Additional keyword arguments (unused).
 
     Returns
     -------
@@ -398,8 +389,7 @@ class ConfidenceIntervalStopper(TestLengthStopper):
   def _check_stopping_criterion(
     self,
     administered_items: npt.NDArray[numpy.floating[Any]],
-    theta: float | None,
-    **kwargs: Any,  # noqa: ARG002
+    theta: float,
   ) -> bool:
     """Check if the confidence interval falls entirely within a discrete interval.
 
@@ -407,10 +397,8 @@ class ConfidenceIntervalStopper(TestLengthStopper):
     ----------
     administered_items : npt.NDArray[numpy.floating[Any]]
         Array of administered item parameters.
-    theta : float or None
+    theta : float
         Current ability estimate.
-    **kwargs : dict
-        Additional keyword arguments (unused).
 
     Returns
     -------

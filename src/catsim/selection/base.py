@@ -1,9 +1,10 @@
 """Base class for CAT selectors."""
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 import numpy
+import numpy.typing as npt
+from numpy.random import Generator
 
 from ..item_bank import ItemBank
 
@@ -108,8 +109,9 @@ class BaseSelector(ABC):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **kwargs: Any,
+    est_theta: float,
+    rng: Generator | None = None,
+    exposure_rates: npt.NDArray[numpy.floating] | None = None,
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -119,11 +121,12 @@ class BaseSelector(ABC):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs : dict
-        Additional keyword arguments such as a random number generator or
-        exposure-rate snapshot.
+    est_theta : float
+        The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator for selectors that rely on randomness.
+    exposure_rates : numpy.ndarray or None, optional
+        Explicit run-level exposure-rate snapshot.
 
     Returns
     -------
@@ -151,7 +154,6 @@ class FiniteSelector(BaseSelector, ABC):
         Number of items to be administered in the test.
     """
     self._test_size = test_size
-    self._overlap_rate: float | None = None
     super().__init__()
 
   @property
@@ -164,14 +166,3 @@ class FiniteSelector(BaseSelector, ABC):
         Number of items to be administered in the test.
     """
     return self._test_size
-
-  @property
-  def overlap_rate(self) -> float | None:
-    """Get the overlap rate of the test, if it is of finite length.
-
-    Returns
-    -------
-    float or None
-        Overlap rate of the test, or None if not yet computed.
-    """
-    return self._overlap_rate

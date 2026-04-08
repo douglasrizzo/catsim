@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from numpy.random import Generator
 
 from catsim.initialization import (
   BaseInitializer,
@@ -179,15 +180,14 @@ class TestFixedPointInitializerInitialize:
       theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert theta == pytest.approx(start)
 
-  def test_initialize_ignores_extra_kwargs(self) -> None:
-    """Test that initialize ignores unrelated keyword arguments."""
+  def test_initialize_rejects_unexpected_kwargs(self) -> None:
+    """Initializers should expose an explicit runtime contract."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     rng = np.random.default_rng(42)
     initializer = FixedPointInitializer(0.0)
 
-    for i in range(10):
-      theta = initializer.initialize(item_bank=item_bank, rng=rng, examinee_index=i)
-      assert theta == pytest.approx(0.0)
+    with pytest.raises(TypeError, match="unexpected keyword argument"):
+      initializer.initialize(item_bank=item_bank, rng=rng, examinee_index=1)  # type: ignore[call-arg]
 
   def test_initialize_zero(self) -> None:
     """Test initialization with zero."""
@@ -225,7 +225,7 @@ class TestBaseInitializerAbstract:
     """Test creating a custom initializer."""
 
     class ConstantInitializer(BaseInitializer):
-      def initialize(self, item_bank: ItemBank, rng: object, **_kwargs: object) -> float:  # noqa: ARG002
+      def initialize(self, item_bank: ItemBank, rng: Generator) -> float:  # noqa: ARG002
         return 42.0
 
     initializer = ConstantInitializer()

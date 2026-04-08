@@ -1,8 +1,7 @@
 """Concrete selector implementations."""
 
-from typing import Any
-
 import numpy
+import numpy.typing as npt
 from scipy.integrate import quad
 
 from .. import irt
@@ -63,8 +62,9 @@ class MaxInfoSelector(BaseSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **kwargs: Any,
+    est_theta: float,
+    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    exposure_rates: npt.NDArray[numpy.floating] | None = None,
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -74,20 +74,14 @@ class MaxInfoSelector(BaseSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs
-        Additional keyword arguments.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-
     # sort items by their information value
     ordered_items = self._sort_by_info(item_bank, est_theta)
     # remove administered ones
@@ -97,7 +91,6 @@ class MaxInfoSelector(BaseSelector):
       msg = "There are no more items to apply."
       raise NoItemsAvailableError(msg)
 
-    exposure_rates = kwargs.get("exposure_rates")
     if exposure_rates is None:
       exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
     valid_indexes_low_r = [idx for idx in valid_indexes if exposure_rates[idx] < self._r_max]
@@ -125,8 +118,9 @@ class UrrySelector(BaseSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **_kwargs: Any,
+    est_theta: float,
+    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    exposure_rates: npt.NDArray[numpy.floating] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -136,20 +130,14 @@ class UrrySelector(BaseSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs
-        Additional keyword arguments.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-
     ordered_items = self._sort_by_b(item_bank, est_theta)
     valid_indexes = self._get_non_administered(ordered_items, administered_items)
 
@@ -192,8 +180,9 @@ class IntervalInfoSelector(BaseSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **_kwargs: Any,
+    est_theta: float,
+    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    exposure_rates: npt.NDArray[numpy.floating] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -203,20 +192,14 @@ class IntervalInfoSelector(BaseSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs
-        Additional keyword arguments.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-
     # compute the integral of the information function around an examinee's ability
     information_integral = numpy.array([
       quad(

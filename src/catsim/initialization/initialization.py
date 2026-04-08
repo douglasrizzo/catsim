@@ -1,8 +1,10 @@
 """Concrete initialization implementations."""
 
 from enum import Enum
-from typing import Any
 
+import numpy
+
+from ..item_bank import ItemBank
 from .base import BaseInitializer
 
 
@@ -86,7 +88,7 @@ class RandomInitializer(BaseInitializer):
     self._dist_type = dist_type
     self._dist_params = dist_params
 
-  def initialize(self, item_bank: Any, rng: Any, **kwargs: Any) -> float:  # noqa: ARG002
+  def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     """Generate an initial ability value using the chosen distribution and parameters.
 
     Parameters
@@ -95,8 +97,6 @@ class RandomInitializer(BaseInitializer):
         Unused by this initializer.
     rng : Any
         Random number generator used by the object, guaranteeing reproducibility.
-    **kwargs : dict
-        Additional keyword arguments.
 
     Returns
     -------
@@ -152,7 +152,7 @@ class FixedPointInitializer(BaseInitializer):
     """
     self._start = start
 
-  def initialize(self, item_bank: Any, rng: Any, **kwargs: Any) -> float:  # noqa: ARG002
+  def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     """Return the same ability value that was passed to the constructor.
 
     Parameters
@@ -161,8 +161,6 @@ class FixedPointInitializer(BaseInitializer):
         Unused by this initializer.
     rng : Any
         Unused by this initializer.
-    **kwargs : dict
-        Additional keyword arguments. Not used by this method.
 
     Returns
     -------

@@ -1,8 +1,10 @@
 """Linear selector implementation."""
 
-from typing import Any
+import numpy
+import numpy.typing as npt
 
 from ..exceptions import NoItemsAvailableError
+from ..item_bank import ItemBank
 from .base import FiniteSelector
 
 
@@ -58,28 +60,26 @@ class LinearSelector(FiniteSelector):
 
   def select(
     self,
-    item_bank: Any,  # noqa: ARG002
+    item_bank: ItemBank,  # noqa: ARG002
     administered_items: list[int],
-    est_theta: float | None = None,  # noqa: ARG002
-    **_kwargs: Any,
+    est_theta: float,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    exposure_rates: npt.NDArray[numpy.floating] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
     Parameters
     ----------
-    item_bank : Any
+    item_bank : ItemBank
         Unused for linear selection.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    **kwargs
-        Additional keyword arguments.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    administered_items = self._require_administered_items(administered_items)
     valid_indexes = self._get_non_administered(self._indexes, administered_items)
     if len(valid_indexes) == 0:
       msg = (

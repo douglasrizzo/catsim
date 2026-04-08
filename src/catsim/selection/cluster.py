@@ -1,9 +1,7 @@
-"""Cluster-based selector implementation."""
-
 import operator
-from typing import Any
 
 import numpy
+import numpy.typing as npt
 from numpy.typing import NDArray
 
 from .. import irt
@@ -128,8 +126,9 @@ class ClusterSelector(BaseSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **kwargs: Any,
+    est_theta: float,
+    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    exposure_rates: npt.NDArray[numpy.floating] | None = None,
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -139,20 +138,14 @@ class ClusterSelector(BaseSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs
-        Additional keyword arguments.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
     int or None
         Index of the next item to be applied.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-
     selected_cluster = None
     existent_clusters = set(self._clusters)
 
@@ -238,7 +231,6 @@ class ClusterSelector(BaseSelector):
 
     # gets the indexes and information values from the items in the
     # selected cluster with r < rmax that have not been administered
-    exposure_rates = kwargs.get("exposure_rates")
     if exposure_rates is None:
       exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
     valid_indexes_low_r = [

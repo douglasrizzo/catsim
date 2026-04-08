@@ -1,6 +1,7 @@
 """Random selector implementations."""
 
-from typing import Any
+import numpy.typing as npt
+from numpy.random import Generator
 
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
@@ -40,7 +41,9 @@ class RandomSelector(BaseSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    **kwargs: Any,
+    est_theta: float,  # noqa: ARG002
+    rng: Generator | None = None,
+    exposure_rates: npt.NDArray | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -50,20 +53,16 @@ class RandomSelector(BaseSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    **kwargs
-        Additional keyword arguments. Notably:
-
-        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object,
-          guarantees reproducibility of outputs.
+    est_theta : float
+        Current estimated ability. Unused by this selector.
+    rng : numpy.random.Generator or None, optional
+        Random number generator used by the object.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    rng = kwargs.get("rng")
     if rng is None:
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
@@ -107,8 +106,9 @@ class The54321Selector(FiniteSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **kwargs: Any,
+    est_theta: float,
+    rng: Generator | None = None,
+    exposure_rates: npt.NDArray | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -118,23 +118,16 @@ class The54321Selector(FiniteSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs
-        Additional keyword arguments. Notably:
-
-        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object,
-          guarantees reproducibility of outputs.
+    est_theta : float
+        The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator used by the object.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-    rng = kwargs.get("rng")
     if rng is None:
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
@@ -183,8 +176,9 @@ class RandomesqueSelector(BaseSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **kwargs: Any,
+    est_theta: float,
+    rng: Generator | None = None,
+    exposure_rates: npt.NDArray | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -194,23 +188,16 @@ class RandomesqueSelector(BaseSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    est_theta : float or None, optional
-        A float containing the current estimated ability. Default is None.
-    **kwargs
-        Additional keyword arguments. Notably:
-
-        * **rng** (:py:class:`numpy.random.Generator`) -- Random number generator used by the object,
-          guarantees reproducibility of outputs.
+    est_theta : float
+        The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator used by the object.
 
     Returns
     -------
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-    rng = kwargs.get("rng")
     if rng is None:
       msg = "rng parameter cannot be None"
       raise ValueError(msg)

@@ -91,8 +91,9 @@ class StratifiedSelector(FiniteSelector):
     self,
     item_bank: ItemBank,
     administered_items: list[int],
-    est_theta: float | None = None,
-    **_kwargs: Any,
+    est_theta: float,
+    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    exposure_rates: NDArray[numpy.floating] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -110,10 +111,6 @@ class StratifiedSelector(FiniteSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more strata to get items from.
     """
-    item_bank = self._require_item_bank(item_bank)
-    administered_items = self._require_administered_items(administered_items)
-    est_theta = self._require_est_theta(est_theta)
-
     # divide the item matrix into strata and get the stratum in which the examinee is
     stratum_index = len(administered_items)
     slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)

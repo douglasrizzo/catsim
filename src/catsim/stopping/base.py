@@ -1,7 +1,6 @@
 """Base class for CAT stoppers."""
 
 from abc import ABC, abstractmethod
-from typing import Any
 
 from ..item_bank import ItemBank
 
@@ -14,7 +13,7 @@ class BaseStopper(ABC):
   """
 
   @abstractmethod
-  def stop(self, item_bank: ItemBank, administered_items: list[int], theta: float | None, **kwargs: Any) -> bool:
+  def stop(self, item_bank: ItemBank, administered_items: list[int], theta: float) -> bool:
     """Check whether the test reached its stopping criterion for the given user.
 
     Parameters
@@ -23,10 +22,8 @@ class BaseStopper(ABC):
         Item bank used by the session.
     administered_items : list[int]
         Item indices already administered in the session.
-    theta : float or None
+    theta : float
         Current ability estimate.
-    **kwargs : dict
-        Additional keyword arguments that specific Stopper implementations may require.
 
     Returns
     -------

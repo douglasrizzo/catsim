@@ -52,12 +52,41 @@ class CatSessionState:
     """Return the latest theta estimate."""
     return self.theta_history[-1]
 
+  def snapshot(self) -> CatSessionSnapshot:
+    """Return an immutable snapshot of the current session state."""
+    return CatSessionSnapshot(
+      session_id=self.session_id,
+      current_theta=self.current_theta,
+      true_theta=self.true_theta,
+      administered_item_ids=self.administered_item_ids.copy(),
+      responses=self.responses.copy(),
+      theta_history=self.theta_history.copy(),
+      status=self.status,
+      stop_reason=self.stop_reason,
+      metadata=self.metadata.copy(),
+    )
+
+
+@dataclass(slots=True, frozen=True)
+class CatSessionSnapshot:
+  """Immutable snapshot of a session at a specific point in time."""
+
+  session_id: int
+  current_theta: float
+  true_theta: float | None
+  administered_item_ids: list[int]
+  responses: list[bool]
+  theta_history: list[float]
+  status: SessionStatus
+  stop_reason: str | None
+  metadata: dict[str, Any]
+
 
 @dataclass(slots=True)
 class CatStepResult:
   """Result of applying one CAT step."""
 
-  session: CatSessionState
+  session: CatSessionSnapshot
   selected_item_id: int | None
   response: bool | None
   updated_theta: float
