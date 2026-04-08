@@ -33,6 +33,9 @@ Tutorial notebooks are available in the repository under [`notebooks/`](https://
 - [Item selection and stopping](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_item_selection_and_stopping.ipynb)
 - [Visualization and analysis](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/05_visualization_and_analysis.ipynb)
 
+The main architecture decisions behind the current engine and simulation model are documented as
+[Architecture Decision Records](https://douglasrizzo.com.br/catsim/architecture_decisions.html).
+
 1. Have an [item matrix](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
 1. Have a sample of examinee proficiencies, or a number of examinees to be generated;
 1. Create an [initializer](https://douglasrizzo.com.br/catsim/initialization.html),

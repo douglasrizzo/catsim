@@ -17,5 +17,6 @@
     cat.rst
     plot.rst
     reproducibility.rst
+    architecture_decisions.rst
     contributing.rst
     references.rst
