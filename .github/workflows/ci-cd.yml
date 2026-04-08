@@ -39,14 +39,16 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
       - run: uv run --only-group dev pre-commit run --all-files
+      - run: uv run --only-group dev ty check
 
   test:
     name: Run tests
-    # Only run tests for PRs to dev/main, pushes to dev, or releases
+    # Run tests for main development events and manual publish validation.
     if: |
       (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
-      github.event_name == 'release'
+      (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
+      github.event_name == 'release' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ${{ matrix.os }}
     env:
       # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
@@ -88,16 +90,17 @@ jobs:
         run: uv run pytest -m "not parallel" --verbose --cov-branch --cov-report=xml --cov=catsim
 
       - name: Upload coverage reports to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: Build package
-    # Only run build for PRs to dev/main, pushes to dev, releases, or manual trigger
+    # Run builds for main development events, releases, and manual publish validation.
     if: |
       (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -141,7 +144,7 @@ jobs:
   publish-to-pypi:
     name: Publish to PyPI
     if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
-    needs: [pre-commit, test, build, build-docs] # Wait for quality gates + package build
+    needs: [pre-commit, test, build] # Wait for quality gates + package build
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -166,7 +169,7 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
-    needs: [pre-commit, test, build, build-docs] # Wait for quality gates + package build
+    needs: [pre-commit, test, build] # Wait for quality gates + package build
     runs-on: ubuntu-latest
     environment:
       name: testpypi

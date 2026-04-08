@@ -92,7 +92,7 @@ class StratifiedSelector(FiniteSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float | None = None,
-    **kwargs: Any,
+    **_kwargs: Any,
   ) -> int | None:
     """Return the index of the next item to be administered.
 

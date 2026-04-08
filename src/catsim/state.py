@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy
 import numpy.typing as npt
 
 from . import cat
-from .item_bank import ItemBank
+
+if TYPE_CHECKING:
+  from .item_bank import ItemBank
 
 
 class SessionStatus(Enum):
@@ -36,6 +38,7 @@ class CatSessionState:
   metadata: dict[str, Any] = field(default_factory=dict)
 
   def __post_init__(self) -> None:
+    """Seed theta history with the initial theta when no history is provided."""
     if not self.theta_history:
       self.theta_history.append(self.current_theta)
 
@@ -70,6 +73,7 @@ class ExposureTracker:
   counts: npt.NDArray[numpy.integer[Any]] = field(init=False)
 
   def __post_init__(self) -> None:
+    """Allocate the item exposure counter array."""
     self.counts = numpy.zeros(self.n_items, dtype=int)
 
   def record(self, item_id: int) -> None:

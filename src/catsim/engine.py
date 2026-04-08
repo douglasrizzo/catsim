@@ -3,14 +3,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
-
-import numpy
+from typing import TYPE_CHECKING, Protocol
 
 from .exceptions import NoItemsAvailableError
 from .irt import icc
-from .item_bank import ItemBank
 from .state import CatSessionState, CatStepResult, ExposureTracker, SessionStatus
+
+if TYPE_CHECKING:
+  import numpy
+
+  from .estimation import BaseEstimator
+  from .initialization import BaseInitializer
+  from .item_bank import ItemBank
+  from .selection import BaseSelector
+  from .stopping import BaseStopper
 
 
 @dataclass(slots=True)
@@ -32,7 +38,9 @@ class ResponseProvider(Protocol):
 class SimulatedResponseProvider:
   """Generate responses from an examinee's true theta."""
 
-  def answer(self, state: CatSessionState, item_bank: ItemBank, item_id: int, context: RunContext) -> bool:
+  def answer(  # noqa: PLR6301
+    self, state: CatSessionState, item_bank: ItemBank, item_id: int, context: RunContext
+  ) -> bool:
     """Sample a Bernoulli response using the 4PL model."""
     if state.true_theta is None:
       msg = "true_theta is required to simulate responses"
@@ -46,7 +54,13 @@ class SimulatedResponseProvider:
 class CatEngine:
   """Engine for stepwise CAT execution."""
 
-  def __init__(self, initializer, selector, estimator, stopper) -> None:
+  def __init__(
+    self,
+    initializer: BaseInitializer,
+    selector: BaseSelector,
+    estimator: BaseEstimator,
+    stopper: BaseStopper,
+  ) -> None:
     self._initializer = initializer
     self._selector = selector
     self._estimator = estimator

@@ -207,7 +207,9 @@ class ClusterSelector(BaseSelector):
       # walks through the sorted clusters in order
       for cluster in sorted_clusters:
         valid_indexes = [
-          idx for idx, item_cluster in enumerate(self._clusters) if item_cluster == cluster and idx not in administered_items
+          idx
+          for idx, item_cluster in enumerate(self._clusters)
+          if item_cluster == cluster and idx not in administered_items
         ]
 
         # checks if at least one item from this cluster has not
@@ -239,7 +241,9 @@ class ClusterSelector(BaseSelector):
     exposure_rates = kwargs.get("exposure_rates")
     if exposure_rates is None:
       exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    valid_indexes_low_r = [idx for idx in valid_indexes if exposure_rates[idx] < self._r_max and idx not in administered_items]
+    valid_indexes_low_r = [
+      idx for idx in valid_indexes if exposure_rates[idx] < self._r_max and idx not in administered_items
+    ]
 
     if len(valid_indexes_low_r) > 0:
       # return the item with maximum information from the ones available

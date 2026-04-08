@@ -106,9 +106,16 @@ convention = "numpy"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = [
+  "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
+  "ARG005",   # Mocked call signatures often intentionally ignore parameters
+  "D",        # Test names already communicate intent; per-test docstring churn is low value
+  "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
+  "RUF069",   # Exact float expectations are acceptable in tests
   "S",        # Security rules are too noisy for intentionally non-production test code
+  "TC001",    # Test-only type imports do not justify TYPE_CHECKING indirection
+  "TC003",    # Test-only type imports do not justify TYPE_CHECKING indirection
 ]
 
 [tool.ruff.format]

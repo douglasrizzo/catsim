@@ -3,19 +3,21 @@
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy
 import numpy.typing as npt
 from tqdm import tqdm
 
 from .engine import CatEngine, RunContext, SimulatedResponseProvider
-from .estimation import BaseEstimator
-from .initialization import BaseInitializer
 from .item_bank import ItemBank
-from .selection import BaseSelector
 from .state import ExposureTracker, SimulationResult
-from .stopping import BaseStopper
+
+if TYPE_CHECKING:
+  from .estimation import BaseEstimator
+  from .initialization import BaseInitializer
+  from .selection import BaseSelector
+  from .stopping import BaseStopper
 
 
 class SimulationRunner:

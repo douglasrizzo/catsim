@@ -61,7 +61,7 @@ class LinearSelector(FiniteSelector):
     item_bank: Any,  # noqa: ARG002
     administered_items: list[int],
     est_theta: float | None = None,  # noqa: ARG002
-    **kwargs: Any,
+    **_kwargs: Any,
   ) -> int | None:
     """Return the index of the next item to be administered.
 

@@ -300,17 +300,17 @@ class ItemBank:
     new_rate : float
         New exposure rate value (should be between 0 and 1).
 
-    Notes
-    -----
-    New simulation code should prefer explicit run-level exposure tracking over
-    mutating ``ItemBank``.
-
     Raises
     ------
     IndexError
         If item_index is out of bounds.
     ValueError
         If new_rate is not between 0 and 1.
+
+    Notes
+    -----
+    New simulation code should prefer explicit run-level exposure tracking over
+    mutating ``ItemBank``.
     """
     if item_index < 0 or item_index >= self.n_items:
       msg = f"Item index {item_index} out of bounds for bank with {self.n_items} items"
