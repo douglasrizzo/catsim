@@ -353,6 +353,35 @@ class TestWarmLikelihoodEstimator:
 
     assert isinstance(theta, float)
     assert np.isfinite(theta)
+    assert estimator.calls == 1
+    assert estimator.evaluations > 0
+    assert estimator.total_evaluations == estimator.evaluations
+
+  def test_estimate_accumulates_counters_across_calls(self) -> None:
+    """Test that repeated estimates update the internal call and evaluation counters."""
+    item_bank = ItemBank.generate_item_bank(30, seed=123)
+    estimator = WarmLikelihoodEstimator()
+
+    first_theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2],
+      response_vector=[True, False, True],
+      est_theta=0.0,
+    )
+    first_evaluations = estimator.evaluations
+
+    second_theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2, 3],
+      response_vector=[True, False, True, False],
+      est_theta=0.0,
+    )
+
+    assert estimator.calls == 2
+    assert estimator.evaluations > 0
+    assert estimator.total_evaluations >= first_evaluations
+    assert np.isfinite(first_theta)
+    assert np.isfinite(second_theta)
 
   def test_estimate_records_evaluation_counts_for_mixed_responses(self) -> None:
     """The estimator should track the underlying MLE evaluations on ordinary inputs."""
