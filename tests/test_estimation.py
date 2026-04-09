@@ -1,8 +1,11 @@
 """Tests for catsim.estimation module."""
 
+from itertools import pairwise
+
 import numpy as np
 import pytest
 
+from catsim import irt
 from catsim.estimation import (
   BaseEstimator,
   NumericalSearchEstimator,
@@ -366,3 +369,45 @@ class TestBayesianHelpers:
 
     assert posterior_mean(post, nodes) == pytest.approx(0.0)
     assert posterior_variance(post, nodes) == pytest.approx(0.0)
+
+  def test_posterior_variance_decreases_as_items_accumulate(self) -> None:
+    """Posterior variance must shrink as more items are administered."""
+    rng = np.random.default_rng(0)
+    grid = QuadratureGrid.uniform()
+    log_prior = normal_log_prior()
+
+    items = np.column_stack([
+      rng.uniform(0.8, 2.0, 15),
+      rng.uniform(-2.0, 2.0, 15),
+      np.zeros(15),
+      np.ones(15),
+    ])
+    theta_true = 0.5
+    responses = [bool(rng.random() < irt.icc(theta_true, *items[idx])) for idx in range(15)]
+
+    variances = []
+    for n_items in [1, 3, 5, 10, 15]:
+      post = posterior(responses[:n_items], items[:n_items], grid, log_prior)
+      variances.append(posterior_variance(post, grid.nodes))
+
+    for earlier, later in pairwise(variances):
+      assert later < earlier
+
+  def test_posterior_is_numerically_stable_on_long_response_vector(self) -> None:
+    """The posterior should stay normalized and finite on a 50-item response vector."""
+    rng = np.random.default_rng(1)
+    grid = QuadratureGrid.uniform()
+    items = np.column_stack([
+      rng.uniform(0.8, 2.0, 50),
+      rng.uniform(-2.0, 2.0, 50),
+      np.zeros(50),
+      np.ones(50),
+    ])
+    theta_true = 1.5
+    responses = [bool(rng.random() < irt.icc(theta_true, *items[idx])) for idx in range(50)]
+
+    post = posterior(responses, items, grid, normal_log_prior())
+
+    assert np.isfinite(post).all()
+    assert post.sum() == pytest.approx(1.0)
+    assert (post > 0).any()
