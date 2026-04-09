@@ -359,6 +359,30 @@ class TestEAPEstimator:
     assert np.isclose(estimator.last_posterior.sum(), 1.0)
     assert estimator.last_posterior_variance() > 0
 
+  def test_estimate_uses_custom_prior_mean_with_no_data(self) -> None:
+    """Custom priors should control the posterior mean when there is no data."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator(log_prior=normal_log_prior(mean=1.2, sd=0.5))
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=0.0,
+    )
+
+    assert theta == pytest.approx(1.2, abs=1e-12)
+    assert estimator.last_posterior is not None
+    assert estimator.calls == 1
+    assert estimator.last_posterior_variance() > 0
+
+  def test_last_posterior_variance_is_infinite_before_first_estimate(self) -> None:
+    """The variance accessor should signal that no posterior has been computed yet."""
+    estimator = EAPEstimator()
+
+    assert estimator.last_posterior is None
+    assert estimator.last_posterior_variance() == np.inf
+
   def test_estimate_shifts_positive_after_correct_response(self) -> None:
     """Test that a correct response on a difficult item moves EAP upward."""
     item_bank = ItemBank(np.array([[1.5, 2.0, 0.0, 1.0]], dtype=float))
@@ -372,6 +396,53 @@ class TestEAPEstimator:
     )
 
     assert theta > 0.0
+
+  def test_estimate_uses_custom_grid_and_prior(self) -> None:
+    """Test that custom grid and prior parameters shape the posterior as expected."""
+    grid = QuadratureGrid.uniform(n_nodes=21, low=-3.0, high=3.0)
+    estimator = EAPEstimator(grid=grid, log_prior=normal_log_prior(mean=1.5, sd=0.5))
+    item_bank = ItemBank.generate_item_bank(5, seed=7)
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=0.0,
+    )
+
+    assert theta == pytest.approx(1.5, abs=0.05)
+    assert estimator.grid is grid
+    assert estimator.last_posterior is not None
+    assert estimator.last_posterior.shape == (21,)
+    assert np.isclose(estimator.last_posterior.sum(), 1.0)
+
+  def test_last_posterior_updates_between_calls(self) -> None:
+    """Test that the estimator state tracks the most recent posterior only."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator()
+
+    estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0],
+      response_vector=[True],
+      est_theta=0.0,
+    )
+    first_posterior = estimator.last_posterior
+    assert first_posterior is not None
+
+    estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1],
+      response_vector=[True, False],
+      est_theta=0.0,
+    )
+
+    assert estimator.last_posterior is not None
+    assert estimator.last_posterior is not first_posterior
+    assert np.isclose(estimator.last_posterior.sum(), 1.0)
+    assert estimator.last_posterior_variance() != pytest.approx(
+      posterior_variance(first_posterior, estimator.grid.nodes)
+    )
 
   def test_estimate_converges_toward_mle_on_longer_test(self) -> None:
     """Test that EAP tracks MLE on a longer, information-rich response pattern."""
