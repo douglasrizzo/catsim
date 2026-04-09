@@ -1,5 +1,7 @@
 """Tests for catsim.selection module."""
 
+import importlib
+
 import numpy as np
 import pytest
 
@@ -385,6 +387,59 @@ class TestKLSelector:
     assert selector.c == pytest.approx(3.0)
     assert selector.r_max == pytest.approx(1.0)
     assert str(selector) == "Kullback-Leibler Selector (c=3.0)"
+
+  def test_kl_integrand_is_zero_at_theta_hat(self) -> None:
+    """Test that the KL integrand vanishes when theta equals theta_hat."""
+    kl_module = importlib.import_module("catsim.selection.kl")
+    value = kl_module.__dict__["_kl_integrand"](0.0, 0.0, 1.0, 0.0, 0.0, 1.0)
+    assert value == pytest.approx(0.0, abs=1e-12)
+
+  def test_wider_integration_window_accumulates_more_kl_mass(self) -> None:
+    """Test that a wider integration window yields more KL mass."""
+    item = self._bank().items[1]
+    kl_global = KLSelector.__dict__["_kl_global"].__func__
+    narrow = kl_global(theta_hat=0.0, item=item, half_width=0.25)
+    wide = kl_global(theta_hat=0.0, item=item, half_width=1.0)
+
+    assert narrow >= 0.0
+    assert wide > narrow
+
+  def test_select_uses_half_width_c_over_sqrt_administered(
+    self,
+    monkeypatch: pytest.MonkeyPatch,
+  ) -> None:
+    """Test that select uses c / sqrt(max(1, n_administered)) for the window width.
+
+    This spies on `_kl_global` instead of the local `half_width` variable so the
+    assertion stays tied to the public `select()` contract while remaining stable.
+    """
+    item_bank = self._bank()
+    selector = KLSelector(c=2.0)
+    observed_half_widths: list[float] = []
+
+    def spy(_theta_hat: float, item: np.ndarray, half_width: float) -> float:
+      observed_half_widths.append(half_width)
+      return float(2.0 - abs(float(item[1])))
+
+    monkeypatch.setattr(KLSelector, "_kl_global", staticmethod(spy))
+
+    selector.select(
+      item_bank=item_bank,
+      administered_items=[],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+    )
+    selector.select(
+      item_bank=item_bank,
+      administered_items=[0, 1],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+    )
+
+    assert all(half_width == pytest.approx(2.0) for half_width in observed_half_widths[: item_bank.n_items])
+    assert all(
+      half_width == pytest.approx(2.0 / np.sqrt(2.0)) for half_width in observed_half_widths[item_bank.n_items :]
+    )
 
   def test_select_prefers_central_item(self) -> None:
     """Test that KL selection prefers the item centered on the current theta."""
