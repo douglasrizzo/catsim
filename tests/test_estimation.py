@@ -285,6 +285,20 @@ class TestBayesianHelpers:
     assert uniform_values[1] == pytest.approx(-np.log(2.0))
     assert uniform_values[2] == -np.inf
 
+  def test_normal_log_prior_rejects_non_positive_sd(self) -> None:
+    """Normal priors must have a positive standard deviation."""
+    with pytest.raises(ValueError, match="sd must be positive"):
+      normal_log_prior(sd=0.0)
+    with pytest.raises(ValueError, match="sd must be positive"):
+      normal_log_prior(sd=-1.0)
+
+  def test_uniform_log_prior_rejects_inverted_bounds(self) -> None:
+    """Uniform priors require a strictly increasing interval."""
+    with pytest.raises(ValueError, match="high must be greater than low"):
+      uniform_log_prior(1.0, 1.0)
+    with pytest.raises(ValueError, match="high must be greater than low"):
+      uniform_log_prior(2.0, 1.0)
+
   def test_quadrature_grid_uniform_defaults(self) -> None:
     """Test the default uniform quadrature grid."""
     grid = QuadratureGrid.uniform()
@@ -295,6 +309,15 @@ class TestBayesianHelpers:
     assert grid.nodes[-1] == pytest.approx(6.0)
     assert np.allclose(grid.weights, grid.weights[0])
 
+  def test_quadrature_grid_uniform_rejects_invalid_parameters(self) -> None:
+    """The grid factory should validate its shape and bounds."""
+    with pytest.raises(ValueError, match="at least 2"):
+      QuadratureGrid.uniform(n_nodes=1)
+    with pytest.raises(ValueError, match="high must be greater than low"):
+      QuadratureGrid.uniform(low=1.0, high=1.0)
+    with pytest.raises(ValueError, match="high must be greater than low"):
+      QuadratureGrid.uniform(low=2.0, high=1.0)
+
   def test_posterior_normalizes_to_one(self) -> None:
     """Test that the discrete posterior is normalized."""
     grid = QuadratureGrid.uniform()
@@ -303,6 +326,17 @@ class TestBayesianHelpers:
     post = posterior([True], items, grid, normal_log_prior())
 
     assert np.isclose(post.sum(), 1.0)
+
+  def test_posterior_rejects_impossible_prior(self) -> None:
+    """A prior that assigns zero mass everywhere should be rejected."""
+    grid = QuadratureGrid.uniform()
+    items = np.array([[1.5, 1.5, 0.0, 1.0]], dtype=float)
+
+    def impossible_prior(theta: np.ndarray) -> np.ndarray:
+      return np.full_like(theta, -np.inf, dtype=float)
+
+    with pytest.raises(ValueError, match="posterior is undefined"):
+      posterior([True], items, grid, impossible_prior)
 
   def test_posterior_mean_is_zero_with_empty_response_vector(self) -> None:
     """Test that the prior mean is recovered when there is no data."""
@@ -324,3 +358,11 @@ class TestBayesianHelpers:
     mean = posterior_mean(post, grid.nodes)
 
     assert mean > 0.0
+
+  def test_posterior_variance_is_zero_for_point_mass(self) -> None:
+    """A point-mass posterior should have zero variance."""
+    nodes = np.array([-1.0, 0.0, 1.0], dtype=float)
+    post = np.array([0.0, 1.0, 0.0], dtype=float)
+
+    assert posterior_mean(post, nodes) == pytest.approx(0.0)
+    assert posterior_variance(post, nodes) == pytest.approx(0.0)
