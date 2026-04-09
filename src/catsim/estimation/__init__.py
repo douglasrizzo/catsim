@@ -4,6 +4,7 @@
 from .base import BaseEstimator
 from .bayesian import (
   EAPEstimator,
+  MAPEstimator,
   QuadratureGrid,
   normal_log_prior,
   posterior,
@@ -16,6 +17,7 @@ from .numerical import NumericalSearchEstimator
 __all__ = [
   "BaseEstimator",
   "EAPEstimator",
+  "MAPEstimator",
   "NumericalSearchEstimator",
   "QuadratureGrid",
   "normal_log_prior",
