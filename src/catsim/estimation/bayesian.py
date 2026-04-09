@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy
 import numpy.typing as npt
+from scipy.optimize import minimize_scalar
 
 from .. import irt
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
@@ -28,6 +29,7 @@ __all__ = [
   "EAPEstimator",
   "FloatArray",
   "LogPrior",
+  "MAPEstimator",
   "QuadratureGrid",
   "normal_log_prior",
   "posterior",
@@ -198,3 +200,70 @@ class EAPEstimator(BaseEstimator):
     if self._last_posterior is None:
       return float("inf")
     return posterior_variance(self._last_posterior, self._grid.nodes)
+
+
+class MAPEstimator(BaseEstimator):
+  """Maximum a Posteriori ability estimator.
+
+  For full algorithmic details, see :doc:`/specs/estimation/map-estimator`.
+  """
+
+  def __init__(
+    self,
+    log_prior: LogPrior | None = None,
+    tol: float = 1e-6,
+    bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
+    verbose: bool = False,
+  ) -> None:
+    super().__init__(verbose=verbose)
+    self._log_prior = log_prior if log_prior is not None else normal_log_prior()
+    self._tol = float(tol)
+    self._bounds = bounds
+
+  def __str__(self) -> str:
+    """Return a human-readable estimator name."""
+    return "Maximum a Posteriori Estimator"
+
+  def _negative_log_posterior(self, theta: float, response_vector: list[bool], items: FloatArray) -> float:
+    """Return the negative log-posterior at a candidate theta."""
+    log_lik = irt.log_likelihood(theta, response_vector, items)
+    log_pr = float(self._log_prior(numpy.array([theta], dtype=float))[0])
+    return -(log_lik + log_pr)
+
+  def estimate(
+    self,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,  # noqa: ARG002 - required by the estimator contract
+  ) -> float:
+    """Estimate ability by maximizing the posterior density."""
+    if item_bank is None:
+      msg = "item_bank parameter cannot be None"
+      raise ValueError(msg)
+    if administered_items is None:
+      msg = "administered_items parameter cannot be None"
+      raise ValueError(msg)
+    if response_vector is None:
+      msg = "response_vector parameter cannot be None"
+      raise ValueError(msg)
+
+    self._calls += 1
+    self._last_evaluations = 0
+
+    if not administered_items:
+      grid = numpy.linspace(self._bounds[0], self._bounds[1], 201)
+      idx = int(numpy.argmax(self._log_prior(grid)))
+      return float(grid[idx])
+
+    items = item_bank.items[administered_items, :4]
+    result = minimize_scalar(
+      self._negative_log_posterior,
+      args=(response_vector, items),
+      bounds=self._bounds,
+      method="bounded",
+      options={"xatol": self._tol},
+    )
+    self._last_evaluations = int(result.nfev)
+    self._total_evaluations += self._last_evaluations
+    return float(result.x)
