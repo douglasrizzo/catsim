@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from catsim.estimation import BaseEstimator, NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, NumericalSearchEstimator, WarmLikelihoodEstimator
 from catsim.item_bank import ItemBank
 
 
@@ -255,3 +255,95 @@ class TestBaseEstimatorAbstract:
 
     with pytest.raises(TypeError):
       IncompleteEstimator()  # type: ignore[abstract]
+
+
+class TestWarmLikelihoodEstimator:
+  """Tests for WarmLikelihoodEstimator."""
+
+  def test_init_default(self) -> None:
+    """Test default initialization."""
+    estimator = WarmLikelihoodEstimator()
+    assert estimator.calls == 0
+    assert str(estimator) == "Warm Weighted Likelihood Estimator"
+
+  def test_estimate_empty_response_returns_input_theta(self) -> None:
+    """No administered items should return the input estimate unchanged."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = WarmLikelihoodEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=1.25,
+    )
+
+    assert theta == pytest.approx(1.25)
+    assert estimator.calls == 1
+
+  def test_estimate_all_correct_remains_finite(self) -> None:
+    """Warm correction should remain finite when plain MLE diverges."""
+    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    administered_items = [0, 1, 2, 3, 4]
+    response_vector = [True] * len(administered_items)
+
+    mle = NumericalSearchEstimator(dodd=False)
+    mle_theta = mle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    wle = WarmLikelihoodEstimator()
+    wle_theta = wle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(wle_theta)
+    assert np.isinf(mle_theta)
+
+  def test_estimate_all_incorrect_remains_finite(self) -> None:
+    """Warm correction should remain finite when plain MLE diverges."""
+    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    administered_items = [0, 1, 2, 3, 4]
+    response_vector = [False] * len(administered_items)
+
+    mle = NumericalSearchEstimator(dodd=False)
+    mle_theta = mle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    wle = WarmLikelihoodEstimator()
+    wle_theta = wle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(wle_theta)
+    assert np.isinf(mle_theta)
+
+  def test_estimate_handles_mixed_responses(self) -> None:
+    """WLE should remain finite for ordinary response patterns."""
+    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    administered_items = [0, 1, 2, 3, 4]
+    response_vector = [True, False, True, True, False]
+
+    estimator = WarmLikelihoodEstimator()
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert isinstance(theta, float)
+    assert np.isfinite(theta)
