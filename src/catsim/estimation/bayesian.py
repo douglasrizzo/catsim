@@ -98,9 +98,18 @@ def posterior(
   """Compute a discrete posterior distribution on the provided grid."""
   log_lik = log_likelihood_grid(response_vector, administered_items, grid.nodes)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
-  m = numpy.max(log_post)
-  unnorm = numpy.exp(log_post - m)
-  return unnorm / unnorm.sum()
+  finite = numpy.isfinite(log_post)
+  if not finite.any():
+    msg = "posterior is undefined on the provided grid"
+    raise ValueError(msg)
+
+  max_log_post = float(numpy.max(log_post[finite]))
+  unnorm = numpy.exp(log_post - max_log_post)
+  total = float(unnorm.sum())
+  if total <= 0:
+    msg = "posterior normalization failed"
+    raise ValueError(msg)
+  return unnorm / total
 
 
 def posterior_mean(post: FloatArray, nodes: FloatArray) -> float:
