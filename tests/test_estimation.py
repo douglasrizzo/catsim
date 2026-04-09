@@ -305,6 +305,9 @@ class TestWarmLikelihoodEstimator:
 
     assert np.isfinite(wle_theta)
     assert np.isinf(mle_theta)
+    assert wle.calls == 1
+    assert wle.evaluations > 0
+    assert wle.total_evaluations == wle.evaluations
 
   def test_estimate_all_incorrect_remains_finite(self) -> None:
     """Warm correction should remain finite when plain MLE diverges."""
@@ -330,6 +333,9 @@ class TestWarmLikelihoodEstimator:
 
     assert np.isfinite(wle_theta)
     assert np.isinf(mle_theta)
+    assert wle.calls == 1
+    assert wle.evaluations > 0
+    assert wle.total_evaluations == wle.evaluations
 
   def test_estimate_handles_mixed_responses(self) -> None:
     """WLE should remain finite for ordinary response patterns."""
@@ -347,3 +353,81 @@ class TestWarmLikelihoodEstimator:
 
     assert isinstance(theta, float)
     assert np.isfinite(theta)
+
+  def test_estimate_records_evaluation_counts_for_mixed_responses(self) -> None:
+    """The estimator should track the underlying MLE evaluations on ordinary inputs."""
+    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    administered_items = [0, 1, 2, 3, 4]
+    response_vector = [True, False, True, True, False]
+
+    estimator = WarmLikelihoodEstimator()
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(theta)
+    assert estimator.calls == 1
+    assert estimator.evaluations > 0
+    assert estimator.total_evaluations == estimator.evaluations
+
+  def test_estimate_applies_bias_correction_when_mle_is_finite(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    """WLE should add the Warm correction term on top of a finite MLE."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.0, -1.0, 0.0, 1.0],
+          [1.5, 0.0, 0.0, 1.0],
+          [2.0, 1.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0, 1, 2]
+    response_vector = [True, False, True]
+
+    estimator = WarmLikelihoodEstimator()
+
+    class StubMLE:
+      evaluations = 11
+
+      @staticmethod
+      def estimate(
+        item_bank: ItemBank,
+        administered_items: list[int],
+        response_vector: list[bool],
+        est_theta: float,
+      ) -> float:
+        del item_bank, administered_items, response_vector, est_theta
+        return 0.75
+
+    monkeypatch.setattr(estimator, "_mle", StubMLE(), raising=False)
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    items = item_bank.items[administered_items, :4]
+    a = items[:, 0]
+    b = items[:, 1]
+    c = items[:, 2]
+    d = items[:, 3]
+    z = np.exp(-a * (0.75 - b))
+    one_plus_z = 1.0 + z
+    p = c + (d - c) / one_plus_z
+    p_prime = a * (d - c) * z / (one_plus_z**2)
+    p_double = a * a * (d - c) * z * (z - 1.0) / (one_plus_z**3)
+    denom = np.clip(p * (1.0 - p), np.finfo(float).eps, None)
+    info = float(np.sum((p_prime**2) / denom))
+    j = float(np.sum((p_prime * p_double) / denom))
+    expected = 0.75 if info <= 0 else 0.75 + j / (2.0 * info * info)
+
+    assert theta == pytest.approx(expected)
+    assert estimator.calls == 1
+    assert estimator.evaluations == 11
+    assert estimator.total_evaluations == 11
