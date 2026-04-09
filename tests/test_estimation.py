@@ -3,7 +3,16 @@
 import numpy as np
 import pytest
 
-from catsim.estimation import BaseEstimator, NumericalSearchEstimator
+from catsim.estimation import (
+  BaseEstimator,
+  NumericalSearchEstimator,
+  QuadratureGrid,
+  normal_log_prior,
+  posterior,
+  posterior_mean,
+  posterior_variance,
+  uniform_log_prior,
+)
 from catsim.item_bank import ItemBank
 
 
@@ -255,3 +264,63 @@ class TestBaseEstimatorAbstract:
 
     with pytest.raises(TypeError):
       IncompleteEstimator()  # type: ignore[abstract]
+
+
+class TestBayesianHelpers:
+  """Tests for the shared Bayesian estimation helpers."""
+
+  def test_prior_factories_are_re_exported(self) -> None:
+    """Test that the prior factories are available from the package root."""
+    normal_prior = normal_log_prior()
+    uniform_prior = uniform_log_prior(-1.0, 1.0)
+
+    theta = np.array([-2.0, 0.0, 2.0])
+    normal_values = normal_prior(theta)
+    uniform_values = uniform_prior(theta)
+
+    assert normal_values.shape == theta.shape
+    assert uniform_values.shape == theta.shape
+    assert np.isfinite(normal_values).all()
+    assert uniform_values[0] == -np.inf
+    assert uniform_values[1] == pytest.approx(-np.log(2.0))
+    assert uniform_values[2] == -np.inf
+
+  def test_quadrature_grid_uniform_defaults(self) -> None:
+    """Test the default uniform quadrature grid."""
+    grid = QuadratureGrid.uniform()
+
+    assert len(grid.nodes) == 41
+    assert len(grid.weights) == 41
+    assert grid.nodes[0] == pytest.approx(-6.0)
+    assert grid.nodes[-1] == pytest.approx(6.0)
+    assert np.allclose(grid.weights, grid.weights[0])
+
+  def test_posterior_normalizes_to_one(self) -> None:
+    """Test that the discrete posterior is normalized."""
+    grid = QuadratureGrid.uniform()
+    items = np.array([[1.5, 1.5, 0.0, 1.0]], dtype=float)
+
+    post = posterior([True], items, grid, normal_log_prior())
+
+    assert np.isclose(post.sum(), 1.0)
+
+  def test_posterior_mean_is_zero_with_empty_response_vector(self) -> None:
+    """Test that the prior mean is recovered when there is no data."""
+    grid = QuadratureGrid.uniform()
+    empty_items = np.empty((0, 4), dtype=float)
+
+    post = posterior([], empty_items, grid, normal_log_prior())
+    mean = posterior_mean(post, grid.nodes)
+
+    assert mean == pytest.approx(0.0, abs=1e-12)
+    assert posterior_variance(post, grid.nodes) > 0
+
+  def test_posterior_shifts_positive_after_correct_response(self) -> None:
+    """Test that a correct response on a difficult item moves the posterior upward."""
+    grid = QuadratureGrid.uniform()
+    items = np.array([[1.5, 2.0, 0.0, 1.0]], dtype=float)
+
+    post = posterior([True], items, grid, normal_log_prior())
+    mean = posterior_mean(post, grid.nodes)
+
+    assert mean > 0.0
