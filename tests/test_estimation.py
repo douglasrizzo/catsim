@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from catsim import irt
 from catsim.estimation import (
   BaseEstimator,
   MAPEstimator,
@@ -485,3 +486,94 @@ class TestMAPEstimator:
     assert estimator.calls == 1
     assert estimator.evaluations > 0
     assert estimator.total_evaluations == estimator.evaluations
+
+  def test_estimate_is_pulled_toward_prior_mean_vs_mle(self) -> None:
+    """MAP should move the estimate toward the prior mean relative to the MLE."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.5, 2.0, 0.0, 1.0],
+          [1.2, 2.5, 0.0, 1.0],
+          [1.8, 1.5, 0.0, 1.0],
+          [1.0, 3.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0, 1, 2, 3]
+    response_vector = [True, True, True, False]
+
+    mle = NumericalSearchEstimator(dodd=False)
+    mle_theta = mle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=1.0))
+    map_theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(mle_theta)
+    assert np.isfinite(map_theta)
+    assert mle_theta > 0.0
+    assert map_theta > 0.0
+    assert abs(map_theta) < abs(mle_theta)
+
+  def test_estimate_and_posterior_mean_agree_on_a_long_test(self) -> None:
+    """MAP and posterior mean should agree on an information-rich test."""
+    item_bank = ItemBank.generate_item_bank(30, seed=5)
+    theta_true = 0.3
+    rng = np.random.default_rng(42)
+    administered_items = list(range(20))
+    response_vector = [
+      bool(rng.random() < posterior_prob)
+      for posterior_prob in [irt.icc(theta_true, *item_bank.items[idx, :4]) for idx in administered_items]
+    ]
+    log_prior = normal_log_prior()
+
+    map_estimator = MAPEstimator(log_prior=log_prior)
+    map_theta = map_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+    grid = QuadratureGrid.uniform()
+    posterior_mass = posterior(response_vector, item_bank.items[administered_items, :4], grid, log_prior)
+    eap_theta = posterior_mean(posterior_mass, grid.nodes)
+
+    assert np.isfinite(map_theta)
+    assert np.isfinite(eap_theta)
+    assert abs(map_theta - eap_theta) < 0.15
+
+  def test_estimate_shifted_prior_pulls_post_data_map_estimate(self) -> None:
+    """A shifted prior should move the post-data MAP estimate toward its mean."""
+    item_bank = ItemBank.generate_item_bank(10, seed=9)
+    administered_items = [0, 1, 2, 3]
+    response_vector = [True, False, True, False]
+
+    default_estimator = MAPEstimator()
+    default_theta = default_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    shifted_estimator = MAPEstimator(log_prior=normal_log_prior(mean=2.0, sd=1.0))
+    shifted_theta = shifted_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(default_theta)
+    assert np.isfinite(shifted_theta)
+    assert shifted_theta > default_theta
