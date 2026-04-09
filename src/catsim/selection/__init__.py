@@ -3,6 +3,7 @@
 from .base import BaseSelector, FiniteSelector
 from .cluster import ClusterSelector
 from .linear import LinearSelector
+from .progressive import ProgressiveSelector, ProportionalSelector
 from .random import RandomesqueSelector, RandomSelector, The54321Selector
 from .selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
 from .stratified import (
@@ -24,6 +25,8 @@ __all__ = [
   "MaxInfoBBlockSelector",
   "MaxInfoSelector",
   "MaxInfoStratSelector",
+  "ProgressiveSelector",
+  "ProportionalSelector",
   "RandomSelector",
   "RandomesqueSelector",
   "StratifiedSelector",
