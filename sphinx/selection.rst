@@ -1,6 +1,9 @@
 Item Selection Methods -- :mod:`catsim.selection`
 *************************************************
 
+For algorithmic details, mathematical definitions, and behavioral contracts of each
+selection technique, see :doc:`specs/selection/index`.
+
 All implemented classes in this module inherit from a base abstract class
 :py:class:`BaseSelector`. Selectors can be used manually through
 :py:class:`catsim.engine.CatEngine` or through

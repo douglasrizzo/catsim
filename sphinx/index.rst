@@ -12,6 +12,7 @@
     selection.rst
     estimation.rst
     stopping.rst
+    specs/index
     simulation.rst
     irt.rst
     cat.rst

@@ -11,16 +11,17 @@ from .base import BaseSelector
 
 
 class MaxInfoSelector(BaseSelector):
-  """Selector that returns the first non-administered item with maximum information for the current theta estimate.
-
-  This is one of the most common item selection methods in CAT, choosing the item
-  that provides the most information at the examinee's current estimated ability level.
+  """Select the non-administered item with maximum information at the current theta estimate.
 
   Parameters
   ----------
   r_max : float, optional
       Maximum exposure rate for items. Items with exposure rates >= r_max will not
       be selected unless no other items are available. Default is 1 (no restriction).
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/max-info-selector`.
   """
 
   def __init__(self, r_max: float = 1) -> None:
@@ -99,11 +100,11 @@ class MaxInfoSelector(BaseSelector):
 
 
 class UrrySelector(BaseSelector):
-  """Selector that returns the item whose difficulty parameter is closest to the examinee's ability.
+  """Select the remaining item whose difficulty parameter is closest to the current ability estimate.
 
-  This method, known as Urry's method, selects items based on the proximity of their
-  difficulty (b parameter) to the current ability estimate, which is particularly
-  effective for 1PL and 2PL models where information is maximized when b = theta.
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/urry-selector`.
   """
 
   def __init__(self) -> None:
@@ -153,6 +154,10 @@ class IntervalInfoSelector(BaseSelector):
 
   The interval is defined by a parameter :math:`\\delta` above and below the current :math:`\\hat\\theta`, like so:
   .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta + \\delta}I_i(\\hat\\theta)
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/interval-info-selector`.
   """
 
   def __str__(self) -> str:

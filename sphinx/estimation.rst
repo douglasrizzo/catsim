@@ -1,6 +1,9 @@
 Estimation Methods -- :mod:`catsim.estimation`
 **********************************************
 
+For algorithmic details, mathematical definitions, and behavioral contracts of each
+estimation technique, see :doc:`specs/estimation/index`.
+
 Estimators are the objects responsible for estimating examinees'
 ability values, given a dichotomous (binary) response vector and an array of
 the items answered by the examinee. In the domain of IRT, there are two main
@@ -22,7 +25,7 @@ All implemented classes in this module inherit from a base abstract class
 :py:class:`catsim.simulation.SimulationRunner`, as long as they also inherit from
 :py:class:`BaseEstimator`.
 
-.. inheritance-diagram:: catsim.estimation
+.. inheritance-diagram:: catsim.estimation.BaseEstimator catsim.estimation.NumericalSearchEstimator
    :parts: 1
    :top-classes: catsim.estimation.BaseEstimator
 

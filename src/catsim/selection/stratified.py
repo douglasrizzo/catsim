@@ -13,10 +13,7 @@ from .base import FiniteSelector
 
 
 class StratifiedSelector(FiniteSelector):
-  """Abstract class for stratified finite item selection strategies.
-
-  Stratified selectors divide the item bank into strata and select items from different
-  strata as the test progresses, helping to balance item exposure and test characteristics.
+  """Abstract base class for finite selectors that divide the item bank into stage-aligned strata.
 
   Parameters
   ----------
@@ -25,6 +22,10 @@ class StratifiedSelector(FiniteSelector):
   sort_once : bool
       Whether the strategy allows for the item matrix to be presorted once at the
       beginning of the simulation (True) or requires resorting during the test (False).
+
+  Notes
+  -----
+  For full family-level details, see :doc:`/specs/selection/stratified-selector`.
   """
 
   def __str__(self) -> str:
@@ -146,25 +147,17 @@ class StratifiedSelector(FiniteSelector):
 
 
 class AStratSelector(StratifiedSelector):
-  r"""Implementation of the :math:`\alpha`-stratified selector proposed by [Chang99]_.
-
-  In this selector, the item bank is sorted in ascending order according to the items'
-  discrimination parameter and then separated into :math:`K` strata (:math:`K` being the
-  test size), each stratum containing gradually higher average discrimination. The
-  :math:`\alpha`-stratified selector then selects the first non-administered item from
-  stratum :math:`k`, where :math:`k` represents the position in the test of the current
-  item the examinee is being presented.
-
-  This method helps control item exposure by ensuring items with different discrimination
-  levels are distributed throughout the test.
-
-  .. image:: ../sphinx/alpha-strat.*
+  r"""Implementation of the :math:`\alpha`-stratified selector.
 
   Parameters
   ----------
   test_size : int
       The number of items the test contains. The selector uses this parameter to create
       the correct number of strata.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/a-strat-selector`.
   """
 
   def __str__(self) -> str:
@@ -198,23 +191,17 @@ class AStratSelector(StratifiedSelector):
 
 
 class AStratBBlockSelector(StratifiedSelector):
-  r"""Implementation of the :math:`\\alpha`-stratified selector with :math:`b` blocking proposed by [Chang2001]_.
-
-  In this selector, the item bank is sorted in ascending order according to the items difficulty parameter and then
-  separated into :math:`M` strata, each stratum containing gradually higher average difficulty.
-
-  Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size),
-  according to their discrimination. The final item bank is then ordered such that the first sub-strata of each strata
-  forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution of both
-  parameters between all strata, after perceiving that they are correlated.
-
-  .. image:: ../sphinx/b-blocking.*
+  r"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking.
 
   Parameters
   ----------
   test_size : int
       The number of items the test contains. The selector uses this parameter to
       create the correct number of strata.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/a-strat-b-block-selector`.
   """
 
   def __str__(self) -> str:
@@ -263,26 +250,17 @@ class AStratBBlockSelector(StratifiedSelector):
 
 
 class MaxInfoStratSelector(StratifiedSelector):
-  """Implementation of the maximum information stratification (MIS) selector proposed by [Bar06]_.
-
-  In this selector, the item bank is sorted in ascending order according to the items'
-  maximum information and then separated into :math:`K` strata (:math:`K` being the test
-  size), each stratum containing items with gradually higher maximum information. The MIS
-  selector then selects the first non-administered item from stratum :math:`k`, where
-  :math:`k` represents the position in the test of the current item the examinee is being
-  presented.
-
-  .. image:: ../sphinx/mis.*
-
-  This method claims to work better than the :math:`a`-stratified method by [Chang99]_ for
-  the three-parameter logistic model of IRT, since item difficulty and maximum information
-  are not positioned in the same place in the ability scale in 3PL.
+  """Implementation of the maximum information stratification (MIS) selector.
 
   Parameters
   ----------
   test_size : int
       The number of items the test contains. The selector uses this parameter to create
       the correct number of strata.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/max-info-strat-selector`.
   """
 
   def __str__(self) -> str:
@@ -366,26 +344,17 @@ class MaxInfoStratSelector(StratifiedSelector):
 
 
 class MaxInfoBBlockSelector(MaxInfoStratSelector):
-  """Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector [Bar06]_.
-
-  In this selector, the item bank is sorted in ascending order according to the items difficulty parameter and then
-  separated into :math:`M` strata, each stratum containing gradually higher average difficulty.
-
-  Each of the :math:`M` strata is then again separated into :math:`K` sub-strata (:math:`k` being the test size),
-  according to the items maximum information. The final item bank is then ordered such that the first sub-strata of each
-  strata forms the first strata of the new ordered item bank, and so on. This method tries to balance the distribution
-  of both parameters between all strata and works better than the :math:`a`-stratified with :math:`b` blocking method by
-  [Chang2001]_ for the three-parameter logistic model of IRT, since item difficulty and maximum information are not
-  positioned in the same place in the ability scale in 3PL. This may also apply, although not mentioned by the authors,
-  for the 4PL.
-
-  .. image:: ../sphinx/mis-b.*
+  """Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector.
 
   Parameters
   ----------
   test_size : int
       The number of items the test contains. The selector uses this parameter to
       create the correct number of strata.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/max-info-b-block-selector`.
   """
 
   def __str__(self) -> str:

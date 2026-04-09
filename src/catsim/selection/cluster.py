@@ -13,15 +13,6 @@ from .base import BaseSelector
 class ClusterSelector(BaseSelector):
   """Cluster-based Item Selection Method.
 
-  This method groups items into clusters and selects items from clusters based on
-  their information characteristics, helping to balance item exposure across the
-  item bank [Men15]_.
-
-  .. [Men15] Meneghetti, D. R. (2015). Metolodogia de seleção de itens em testes
-     adaptativos informatizados baseada em agrupamento por similaridade (Mestrado).
-     Centro Universitário da FEI. Retrieved from
-     https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade
-
   Parameters
   ----------
   clusters : list[int]
@@ -42,6 +33,10 @@ class ClusterSelector(BaseSelector):
       Item exposure control method. If 'passive' and all items in the selected
       cluster have exposure rates > r_max, applies the item with maximum information.
       If 'aggressive', applies the item with smallest exposure rate. Default is 'passive'.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/selection/cluster-selector`.
   """
 
   def __str__(self) -> str:

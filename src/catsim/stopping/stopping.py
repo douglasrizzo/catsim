@@ -11,15 +11,7 @@ from .base import BaseStopper
 
 
 class TestLengthStopper(BaseStopper):
-  """Base class for stoppers with common min/max item constraints and bank exhaustion checks.
-
-  This class provides common functionality for stopping criteria including:
-  - Minimum items requirement (test cannot stop before min_items are administered)
-  - Maximum items constraint (test must stop when max_items are reached)
-  - Item bank exhaustion detection (test stops when all items are used)
-
-  Subclasses must implement the `_check_stopping_criterion` method to define
-  their specific stopping logic.
+  """Base class for stoppers with shared minimum/maximum length and bank-exhaustion checks.
 
   Parameters
   ----------
@@ -33,11 +25,7 @@ class TestLengthStopper(BaseStopper):
 
   Notes
   -----
-  The stopping logic follows this priority order:
-  1. Stop if max_items reached (hard stop)
-  2. Stop if item bank exhausted (hard stop)
-  3. Do not stop if min_items not yet reached (regardless of other criteria)
-  4. Check the specific stopping criterion implemented by the subclass
+  For full algorithmic details, see :doc:`/specs/stopping/test-length-stopper`.
   """
 
   def __init__(self, min_items: int | None = None, max_items: int | None = None) -> None:
@@ -172,14 +160,7 @@ class TestLengthStopper(BaseStopper):
 
 
 class MinErrorStopper(TestLengthStopper):
-  """Stopping criterion based on minimum standard error of estimation.
-
-  The test stops when the standard error of estimation (see :py:func:`catsim.irt.see`)
-  falls below the specified threshold. This is commonly used in variable-length CATs
-  to achieve a desired level of measurement precision.
-
-  This stopper also enforces optional minimum/maximum item constraints and stops
-  when the item bank is exhausted (via :py:class:`BaseStopper`).
+  """Stop when the standard error of estimation falls below a configured threshold.
 
   Parameters
   ----------
@@ -192,19 +173,9 @@ class MinErrorStopper(TestLengthStopper):
   max_items : int or None, optional
       Maximum number of items that can be administered. Default is None (no maximum).
 
-  Examples
-  --------
-  >>> # Stop when error < 0.3
-  >>> stopper = MinErrorStopper(0.3)
-
-  >>> # Stop when error < 0.3, but only after at least 10 items
-  >>> stopper = MinErrorStopper(0.3, min_items=10)
-
-  >>> # Stop when error < 0.3, or when 50 items reached
-  >>> stopper = MinErrorStopper(0.3, max_items=50)
-
-  >>> # Stop when error < 0.3, between 10 and 50 items
-  >>> stopper = MinErrorStopper(0.3, min_items=10, max_items=50)
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/stopping/min-error-stopper`.
   """
 
   def __str__(self) -> str:
@@ -289,15 +260,7 @@ class MinErrorStopper(TestLengthStopper):
 
 
 class ConfidenceIntervalStopper(TestLengthStopper):
-  r"""Stopping criterion based on confidence interval falling within discrete ability intervals.
-
-  This stopper is designed for tests with discrete performance levels (e.g., letter grades
-  A, B, C, D, F) defined by intervals on the ability scale. The test stops when the
-  confidence interval for the examinee's ability estimate falls entirely within one of
-  these discrete intervals, indicating sufficient precision to classify the examinee.
-
-  This stopper also enforces optional minimum/maximum item constraints and stops
-  when the item bank is exhausted (via :py:class:`BaseStopper`).
+  r"""Stop when the confidence interval for the current estimate falls within one configured ability band.
 
   Parameters
   ----------
@@ -314,23 +277,9 @@ class ConfidenceIntervalStopper(TestLengthStopper):
   max_items : int or None, optional
       Maximum number of items that can be administered. Default is None (no maximum).
 
-  Examples
-  --------
-  >>> # Define grade boundaries: F (<-1), D [-1, 0), C [0, 1), B [1, 2), A (>=2)
-  >>> stopper = ConfidenceIntervalStopper([-1.0, 0.0, 1.0, 2.0], confidence=0.95)
-  >>> # Test stops when 95% CI is entirely within one grade interval
-
-  >>> # With minimum items constraint
-  >>> stopper = ConfidenceIntervalStopper(
-  ...     [-1.0, 0.0, 1.0, 2.0], confidence=0.90, min_items=10
-  ... )
-  >>> # Test cannot stop before 10 items, even if CI criterion is met
-
-  >>> # With maximum items constraint
-  >>> stopper = ConfidenceIntervalStopper(
-  ...     [-1.0, 0.0, 1.0, 2.0], confidence=0.95, max_items=50
-  ... )
-  >>> # Test stops at 50 items even if CI criterion is not met
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/stopping/confidence-interval-stopper`.
   """
 
   def __str__(self) -> str:

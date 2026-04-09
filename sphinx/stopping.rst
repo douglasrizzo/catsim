@@ -1,6 +1,9 @@
 Stopping Criteria -- :mod:`catsim.stopping`
 *******************************************
 
+For algorithmic details, mathematical definitions, and behavioral contracts of each
+stopping criterion, see :doc:`specs/stopping/index`.
+
 All implemented classes in this module inherit from a base abstract class
 :py:class:`BaseStopper`. Stoppers can be used manually through
 :py:class:`catsim.engine.CatEngine` or through

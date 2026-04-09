@@ -14,12 +14,7 @@ GOLDEN_RATIO = (1 + 5**0.5) / 2
 
 
 class NumericalSearchEstimator(BaseEstimator):
-  """Implement search algorithms in unimodal functions to find the maximum of the log-likelihood function.
-
-  This class provides multiple numerical search methods for ability estimation in IRT,
-  including ternary search, dichotomous search, Fibonacci search, and golden-section
-  search, according to [Veliz20]_. Also check [Brent02]_. It is also possible to use
-  the methods from :py:func:`scipy.optimize.minimize_scalar`.
+  """Estimate ability by numerically maximizing the IRT log-likelihood.
 
   Parameters
   ----------
@@ -34,6 +29,10 @@ class NumericalSearchEstimator(BaseEstimator):
   method : str, optional
       The search method to employ. Must be one of: 'ternary', 'dichotomous', 'fibonacci',
       'golden', 'brent', 'bounded', or 'golden2'. Default is 'bounded'.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/specs/estimation/numerical-search-estimator`.
   """
 
   __methods = frozenset(["ternary", "dichotomous", "fibonacci", "golden", "brent", "bounded", "golden2"])
