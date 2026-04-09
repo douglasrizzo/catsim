@@ -2,6 +2,7 @@
 
 from .base import BaseSelector, FiniteSelector
 from .cluster import ClusterSelector
+from .kl import KLSelector
 from .linear import LinearSelector
 from .random import RandomesqueSelector, RandomSelector, The54321Selector
 from .selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
@@ -20,6 +21,7 @@ __all__ = [
   "ClusterSelector",
   "FiniteSelector",
   "IntervalInfoSelector",
+  "KLSelector",
   "LinearSelector",
   "MaxInfoBBlockSelector",
   "MaxInfoSelector",

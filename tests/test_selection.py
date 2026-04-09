@@ -12,6 +12,7 @@ from catsim.selection import (
   ClusterSelector,
   FiniteSelector,
   IntervalInfoSelector,
+  KLSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
   MaxInfoSelector,
@@ -362,6 +363,73 @@ class TestIntervalInfoSelector:
 
     assert selected is not None
     assert 0 <= selected < 50
+
+
+class TestKLSelector:
+  """Tests for KLSelector."""
+
+  @staticmethod
+  def _bank() -> ItemBank:
+    """Create a small bank with a clear central item."""
+    return ItemBank(
+      np.array([
+        [1.0, -2.0, 0.0, 1.0],
+        [1.0, 0.0, 0.0, 1.0],
+        [1.0, 2.0, 0.0, 1.0],
+      ])
+    )
+
+  def test_init_default(self) -> None:
+    """Test default initialization."""
+    selector = KLSelector()
+    assert selector.c == pytest.approx(3.0)
+    assert selector.r_max == pytest.approx(1.0)
+    assert str(selector) == "Kullback-Leibler Selector (c=3.0)"
+
+  def test_select_prefers_central_item(self) -> None:
+    """Test that KL selection prefers the item centered on the current theta."""
+    item_bank = self._bank()
+    selector = KLSelector(c=0.5)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+    )
+
+    assert selected == 1
+
+  def test_select_excludes_administered_and_honors_exposure_cap(self) -> None:
+    """Test that selection excludes administered items and falls back when cap blocks all candidates."""
+    item_bank = self._bank()
+    selector = KLSelector(c=0.5, r_max=0.0)
+    exposure_rates = np.ones(item_bank.n_items, dtype=float)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[1],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+      exposure_rates=exposure_rates,
+    )
+
+    assert selected is not None
+    assert selected != 1
+    assert selected in {0, 2}
+
+  def test_select_raises_when_exhausted(self) -> None:
+    """Test that select raises NoItemsAvailableError when all items are administered."""
+    item_bank = self._bank()
+    selector = KLSelector()
+
+    with pytest.raises(NoItemsAvailableError, match="no more items"):
+      selector.select(
+        item_bank=item_bank,
+        administered_items=[0, 1, 2],
+        est_theta=0.0,
+        rng=np.random.default_rng(42),
+      )
 
 
 class TestClusterSelector:
