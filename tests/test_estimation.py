@@ -397,6 +397,67 @@ class TestEAPEstimator:
 
     assert theta > 0.0
 
+  def test_last_posterior_variance_decreases_as_items_accumulate(self) -> None:
+    """Each additional item should reduce the posterior variance overall."""
+    rng = np.random.default_rng(7)
+    item_bank = ItemBank.generate_item_bank(20, seed=3)
+    theta_true = 0.8
+    estimator = EAPEstimator()
+
+    administered_items: list[int] = []
+    response_vector: list[bool] = []
+    variances: list[float] = []
+
+    for idx in range(10):
+      administered_items.append(idx)
+      probability = irt.icc(theta_true, *item_bank.items[idx, :4])
+      response_vector.append(bool(rng.random() < probability))
+      estimator.estimate(
+        item_bank=item_bank,
+        administered_items=administered_items,
+        response_vector=response_vector,
+        est_theta=0.0,
+      )
+      variances.append(estimator.last_posterior_variance())
+
+    assert variances[-1] < variances[0]
+    assert variances[4] < variances[0]
+
+  def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self) -> None:
+    """A centered prior should shrink EAP more than a flat prior on all-correct data."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.5, 2.0, 0.0, 1.0],
+          [1.2, 2.5, 0.0, 1.0],
+          [1.8, 1.5, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0, 1, 2]
+    response_vector = [True, True, True]
+
+    normal_estimator = EAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=1.0))
+    normal_theta = normal_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    flat_estimator = EAPEstimator(log_prior=uniform_log_prior())
+    flat_theta = flat_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert normal_theta > 0.0
+    assert normal_theta < 5.0
+    assert abs(normal_theta) < abs(flat_theta)
+
   def test_estimate_uses_custom_grid_and_prior(self) -> None:
     """Test that custom grid and prior parameters shape the posterior as expected."""
     grid = QuadratureGrid.uniform(n_nodes=21, low=-3.0, high=3.0)
