@@ -5,6 +5,7 @@ import pytest
 
 from catsim.estimation import (
   BaseEstimator,
+  MAPEstimator,
   NumericalSearchEstimator,
   QuadratureGrid,
   normal_log_prior,
@@ -324,3 +325,64 @@ class TestBayesianHelpers:
     mean = posterior_mean(post, grid.nodes)
 
     assert mean > 0.0
+
+
+class TestMAPEstimator:
+  """Tests for the Maximum a Posteriori estimator."""
+
+  def test_init_default(self) -> None:
+    """Test default initialization."""
+    estimator = MAPEstimator()
+
+    assert str(estimator) == "Maximum a Posteriori Estimator"
+    assert estimator.calls == 0
+    assert estimator.evaluations == 0
+
+  def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
+    """Test that the prior mode is returned when there is no data."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = MAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=1.7,
+    )
+
+    assert theta == pytest.approx(0.0)
+    assert estimator.calls == 1
+    assert estimator.evaluations == 0
+
+  def test_estimate_all_correct_is_finite(self) -> None:
+    """Test that MAP remains finite for an extreme all-correct response pattern."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.2, 2.0, 0.0, 1.0],
+          [1.4, 2.5, 0.0, 1.0],
+          [1.1, 3.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    estimator = MAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2],
+      response_vector=[True, True, True],
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(theta)
+    assert theta > 0.0
+
+    mle = NumericalSearchEstimator(dodd=False)
+    mle_theta = mle.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2],
+      response_vector=[True, True, True],
+      est_theta=0.0,
+    )
+    assert np.isposinf(mle_theta)
