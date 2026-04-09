@@ -112,6 +112,7 @@ class BaseSelector(ABC):
     est_theta: float,
     rng: Generator | None = None,
     exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    response_vector: list[bool] | None = None,
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -127,6 +128,9 @@ class BaseSelector(ABC):
         Random number generator for selectors that rely on randomness.
     exposure_rates : numpy.ndarray or None, optional
         Explicit run-level exposure-rate snapshot.
+    response_vector : list[bool] or None, optional
+        Responses observed so far in the current session. Selectors that need
+        response history can use this without relying on hidden engine state.
 
     Returns
     -------

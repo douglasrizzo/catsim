@@ -26,16 +26,52 @@ class FixedResponseProvider:
 class NullSelector:
   """Selector stub that explicitly stops item selection."""
 
-  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None):  # noqa: ARG002
-    return None
+  def select(
+    self,
+    item_bank,
+    administered_items,
+    est_theta,
+    rng=None,
+    exposure_rates=None,
+    response_vector=None,
+  ) -> None:
+    del item_bank, administered_items, est_theta, rng, exposure_rates, response_vector
 
 
 class ExhaustedSelector:
   """Selector stub that behaves like an exhausted item bank."""
 
-  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None):  # noqa: ARG002
+  def select(
+    self,
+    item_bank,
+    administered_items,
+    est_theta,
+    rng=None,
+    exposure_rates=None,
+    response_vector=None,
+  ):
+    del item_bank, administered_items, est_theta, rng, exposure_rates, response_vector
     msg = "No items remain"
     raise NoItemsAvailableError(msg)
+
+
+class RecordingSelector:
+  """Selector stub that records forwarded response history."""
+
+  def __init__(self) -> None:
+    self.calls: list[list[bool] | None] = []
+
+  def select(
+    self,
+    item_bank,
+    administered_items,
+    est_theta,
+    rng=None,
+    exposure_rates=None,
+    response_vector=None,
+  ) -> None:
+    del item_bank, administered_items, est_theta, rng, exposure_rates
+    self.calls.append(None if response_vector is None else list(response_vector))
 
 
 def test_start_session_initializes_theta_and_state(
@@ -165,6 +201,26 @@ def test_select_next_passes_exposure_snapshot(
 
   assert selected is not None
   assert 0 <= selected < item_bank.n_items
+
+
+def test_select_next_passes_response_history(
+  item_bank,
+  fixed_initializer,
+  estimator,
+  fixed_length_stopper,
+) -> None:
+  """Selectors should receive the current response history from the engine."""
+  selector = RecordingSelector()
+  engine = CatEngine(fixed_initializer, selector, estimator, fixed_length_stopper)
+  context = RunContext(rng=np.random.default_rng(42), total_sessions=10)
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session.administered_item_ids.extend([0, 1])
+  session.responses.extend([True, False])
+
+  selected = engine.select_next(session, item_bank, context)
+
+  assert selected is None
+  assert selector.calls == [[True, False]]
 
 
 def test_simulated_response_provider_requires_true_theta(item_bank) -> None:

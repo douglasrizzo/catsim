@@ -95,6 +95,7 @@ class StratifiedSelector(FiniteSelector):
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
     exposure_rates: NDArray[numpy.floating] | None = None,  # noqa: ARG002
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 

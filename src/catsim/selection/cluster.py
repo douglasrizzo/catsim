@@ -124,6 +124,7 @@ class ClusterSelector(BaseSelector):
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
     exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
