@@ -13,6 +13,7 @@ from .bayesian import (
   uniform_log_prior,
 )
 from .numerical import NumericalSearchEstimator
+from .wle import WarmLikelihoodEstimator
 
 __all__ = [
   "BaseEstimator",
@@ -20,6 +21,7 @@ __all__ = [
   "MAPEstimator",
   "NumericalSearchEstimator",
   "QuadratureGrid",
+  "WarmLikelihoodEstimator",
   "normal_log_prior",
   "posterior",
   "posterior_mean",
