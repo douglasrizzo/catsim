@@ -4,19 +4,24 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy
 import numpy.typing as npt
 
 from .. import irt
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from .base import BaseEstimator
+
+if TYPE_CHECKING:
+  from ..item_bank import ItemBank
 
 FloatArray = npt.NDArray[numpy.floating[Any]]
 LogPrior = Callable[[FloatArray], FloatArray]
 MIN_QUADRATURE_NODES = 2
 
 __all__ = [
+  "EAPEstimator",
   "FloatArray",
   "LogPrior",
   "QuadratureGrid",
@@ -132,3 +137,53 @@ def posterior_variance(post: FloatArray, nodes: FloatArray) -> float:
   """Return the posterior variance over a discrete grid."""
   mean = posterior_mean(post, nodes)
   return float(numpy.sum(((nodes - mean) ** 2) * post))
+
+
+class EAPEstimator(BaseEstimator):
+  """Expected a Posteriori ability estimator."""
+
+  def __init__(
+    self,
+    grid: QuadratureGrid | None = None,
+    log_prior: LogPrior | None = None,
+    verbose: bool = False,
+  ) -> None:
+    super().__init__(verbose=verbose)
+    self._grid = grid if grid is not None else QuadratureGrid.uniform()
+    self._log_prior = log_prior if log_prior is not None else normal_log_prior()
+    self._last_posterior: FloatArray | None = None
+
+  def __str__(self) -> str:
+    """Return a human-readable name for the estimator."""
+    return "Expected a Posteriori Estimator"
+
+  def estimate(
+    self,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,  # noqa: ARG002
+  ) -> float:
+    """Return the posterior mean for the administered response pattern."""
+    self._calls += 1
+
+    items = item_bank.items[administered_items, :4] if administered_items else numpy.empty((0, 4), dtype=float)
+    post = posterior(response_vector, items, self._grid, self._log_prior)
+    self._last_posterior = post
+    return posterior_mean(post, self._grid.nodes)
+
+  @property
+  def last_posterior(self) -> FloatArray | None:
+    """Return the most recent posterior."""
+    return self._last_posterior
+
+  @property
+  def grid(self) -> QuadratureGrid:
+    """Return the quadrature grid used by the estimator."""
+    return self._grid
+
+  def last_posterior_variance(self) -> float:
+    """Return the variance of the most recent posterior."""
+    if self._last_posterior is None:
+      return float("inf")
+    return posterior_variance(self._last_posterior, self._grid.nodes)

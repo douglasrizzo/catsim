@@ -3,8 +3,10 @@
 import numpy as np
 import pytest
 
+from catsim import irt
 from catsim.estimation import (
   BaseEstimator,
+  EAPEstimator,
   NumericalSearchEstimator,
   QuadratureGrid,
   normal_log_prior,
@@ -58,7 +60,15 @@ class TestNumericalSearchEstimatorMethods:
   def test_available_methods_contains_expected(self) -> None:
     """Test that available methods contains expected methods."""
     methods = NumericalSearchEstimator.available_methods()
-    expected = {"ternary", "dichotomous", "fibonacci", "golden", "brent", "bounded", "golden2"}
+    expected = {
+      "ternary",
+      "dichotomous",
+      "fibonacci",
+      "golden",
+      "brent",
+      "bounded",
+      "golden2",
+    }
     assert methods == expected
 
   def test_all_methods_can_be_instantiated(self) -> None:
@@ -196,7 +206,10 @@ class TestNumericalSearchEstimatorEstimate:
 class TestNumericalSearchEstimatorWithMethods:
   """Test estimation with different methods."""
 
-  @pytest.mark.parametrize("method", sorted(NumericalSearchEstimator.available_methods()))
+  @pytest.mark.parametrize(
+    "method",
+    sorted(NumericalSearchEstimator.available_methods()),
+  )
   def test_estimate_with_all_methods(self, method: str) -> None:
     """Test that all methods produce valid estimates."""
     item_bank = ItemBank.generate_item_bank(50)
@@ -324,3 +337,68 @@ class TestBayesianHelpers:
     mean = posterior_mean(post, grid.nodes)
 
     assert mean > 0.0
+
+
+class TestEAPEstimator:
+  """Tests for the EAP estimator."""
+
+  def test_estimate_returns_prior_mean_with_no_data(self) -> None:
+    """Test that an empty response vector returns the prior mean."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=0.0,
+    )
+
+    assert theta == pytest.approx(0.0, abs=1e-12)
+    assert estimator.last_posterior is not None
+    assert np.isclose(estimator.last_posterior.sum(), 1.0)
+    assert estimator.last_posterior_variance() > 0
+
+  def test_estimate_shifts_positive_after_correct_response(self) -> None:
+    """Test that a correct response on a difficult item moves EAP upward."""
+    item_bank = ItemBank(np.array([[1.5, 2.0, 0.0, 1.0]], dtype=float))
+    estimator = EAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0],
+      response_vector=[True],
+      est_theta=0.0,
+    )
+
+    assert theta > 0.0
+
+  def test_estimate_converges_toward_mle_on_longer_test(self) -> None:
+    """Test that EAP tracks MLE on a longer, information-rich response pattern."""
+    item_bank = ItemBank.generate_item_bank(30, seed=1)
+    theta_true = 0.25
+    administered_items = list(range(30))
+    response_vector = [irt.icc(theta_true, *item_bank.items[i, :4]) >= 0.5 for i in administered_items]
+
+    mle = NumericalSearchEstimator()
+    mle_theta = mle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    estimator = EAPEstimator(
+      grid=QuadratureGrid.uniform(n_nodes=81),
+      log_prior=uniform_log_prior(),
+    )
+    eap_theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(mle_theta)
+    assert np.isfinite(eap_theta)
+    assert abs(eap_theta - mle_theta) < 0.3
