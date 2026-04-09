@@ -450,28 +450,52 @@ class TestProgressiveSelector:
     assert selector.test_size == 10
     assert str(selector) == "Progressive Selector (s=1.0)"
 
-  def test_select_blends_random_and_information(self) -> None:
-    """Test that early positions behave randomly and late positions use information."""
-    item_bank = _progressive_item_bank()
-    selector = ProgressiveSelector(test_size=3, acceleration=1.0)
+  def test_weight_is_zero_at_first_position(self) -> None:
+    """At position 1 the blend weight must be exactly 0."""
+    selector = ProgressiveSelector(test_size=10, acceleration=1.0)
+    assert selector._weight(1) == pytest.approx(0.0)  # noqa: SLF001
 
-    early_rng = _DeterministicRNG([0.1, 0.9, 0.2, 0.3])
-    early_selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=early_rng,
-    )
-    assert early_selected == 1
+  def test_weight_is_one_at_last_position(self) -> None:
+    """At the final position the blend weight must be exactly 1."""
+    selector = ProgressiveSelector(test_size=10, acceleration=1.0)
+    assert selector._weight(10) == pytest.approx(1.0)  # noqa: SLF001
 
-    late_rng = _DeterministicRNG([0.9, 0.1, 0.2, 0.3])
-    late_selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      est_theta=0.0,
-      rng=late_rng,
+  def test_weight_formula_linear_schedule(self) -> None:
+    """Midpoint weight should be 0.5 with s=1 and test_size=9."""
+    selector = ProgressiveSelector(test_size=9, acceleration=1.0)
+    assert selector._weight(5) == pytest.approx(0.5)  # noqa: SLF001
+
+  def test_weight_formula_accelerated_schedule(self) -> None:
+    """s=2 should delay the transition."""
+    selector = ProgressiveSelector(test_size=9, acceleration=2.0)
+    assert selector._weight(5) == pytest.approx(0.25)  # noqa: SLF001
+
+  def test_weight_formula_fast_schedule(self) -> None:
+    """s=0.5 should accelerate the transition."""
+    selector = ProgressiveSelector(test_size=9, acceleration=0.5)
+    assert selector._weight(5) == pytest.approx((4 / 8) ** 0.5)  # noqa: SLF001
+
+  def test_first_item_is_independent_of_information(self) -> None:
+    """At position 1, high-information items should not be selected more often."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [5.0, 0.0, 0.0, 1.0],
+          [0.3, -1.0, 0.0, 1.0],
+          [0.3, 0.0, 0.0, 1.0],
+          [0.3, 1.0, 0.0, 1.0],
+          [0.3, 2.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
     )
-    assert late_selected == 3
+    selector = ProgressiveSelector(test_size=10, acceleration=1.0)
+    rng = np.random.default_rng(99)
+
+    selections = [selector.select(item_bank, [], 0.0, rng=rng) for _ in range(200)]
+    rate = selections.count(0) / len(selections)
+
+    assert 0.10 < rate < 0.40
 
   def test_select_respects_exposure_cap(self) -> None:
     """Test that the exposure cap is applied when possible."""
@@ -499,6 +523,26 @@ class TestProportionalSelector:
     assert selector.test_size == 10
     assert str(selector) == "Proportional Selector (s=1.0, k=6.0)"
 
+  def test_first_position_is_uniform_regardless_of_sharpness(self) -> None:
+    """Test that the first position is uniform for any sharpness."""
+    item_bank = _progressive_item_bank()
+
+    for sharpness in (0.0, 12.0):
+      selector = ProportionalSelector(test_size=3, sharpness=sharpness)
+      rng = _DeterministicRNG([0.9, 0.8, 0.7, 0.6])
+
+      selected = selector.select(
+        item_bank=item_bank,
+        administered_items=[],
+        est_theta=0.0,
+        rng=rng,
+      )
+
+      assert selected == 0
+      _, probs = rng.choice_calls[0]
+      assert probs is not None
+      np.testing.assert_allclose(probs, np.full(4, 0.25))
+
   def test_select_uses_weighted_information(self) -> None:
     """Test that selection probabilities follow the weighted information formula."""
     item_bank = _progressive_item_bank()
@@ -525,23 +569,24 @@ class TestProportionalSelector:
     expected /= expected.sum()
     np.testing.assert_allclose(probs, expected)
 
-  def test_select_can_fall_back_to_uniform(self) -> None:
-    """Test that zero sharpness produces a uniform distribution."""
+  def test_late_position_becomes_near_deterministic_with_high_sharpness(self) -> None:
+    """Test that late positions collapse toward the highest-information item."""
     item_bank = _progressive_item_bank()
-    selector = ProportionalSelector(test_size=3, sharpness=0.0)
-    rng = _DeterministicRNG([0.9, 0.8, 0.7, 0.6])
+    selector = ProportionalSelector(test_size=3, acceleration=1.0, sharpness=12.0)
+    rng = _DeterministicRNG([0.2, 0.1, 0.3, 0.4])
 
     selected = selector.select(
       item_bank=item_bank,
-      administered_items=[],
+      administered_items=[0, 1],
       est_theta=0.0,
       rng=rng,
     )
 
-    assert selected == 0
+    assert selected == 3
     _, probs = rng.choice_calls[0]
     assert probs is not None
-    np.testing.assert_allclose(probs, np.full(4, 0.25))
+    assert probs[1] > 0.999999
+    assert probs[0] < 1e-6
 
 
 class TestBaseSelectorAbstract:
