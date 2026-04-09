@@ -52,7 +52,8 @@ class QueueOrderSelector:
   def __init__(self, order: tuple[int, ...] | list[int]) -> None:
     self._order = tuple(order)
 
-  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None):  # noqa: ARG002
+  def select(self, item_bank, administered_items, est_theta, rng=None, exposure_rates=None, response_vector=None):
+    del est_theta, rng, exposure_rates, response_vector
     administered_set = set(administered_items)
     n = item_bank.n_items
     for idx in self._order:
