@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from catsim import irt
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator, WarmLikelihoodEstimator
 from catsim.item_bank import ItemBank
 
@@ -265,6 +266,89 @@ class TestWarmLikelihoodEstimator:
     estimator = WarmLikelihoodEstimator()
     assert estimator.calls == 0
     assert str(estimator) == "Warm Weighted Likelihood Estimator"
+
+  @pytest.mark.xfail(
+    strict=True,
+    reason="Current Warm WLE branch does not yet show lower short-test bias than MLE on a reproducible simulation.",
+  )
+  def test_estimate_has_lower_bias_than_mle_on_short_tests(self) -> None:
+    """WLE absolute error should be smaller than MLE on average for a 5-item test."""
+    rng = np.random.default_rng(42)
+    item_bank = ItemBank.generate_item_bank(100, seed=0)
+    mle = NumericalSearchEstimator(dodd=True)
+    wle = WarmLikelihoodEstimator()
+
+    theta_true = 1.5
+    administered_items = list(range(5))
+    items = item_bank.items[administered_items, :4]
+
+    mle_errors: list[float] = []
+    wle_errors: list[float] = []
+    for _ in range(500):
+      response_vector = [
+        bool(rng.random() < irt.icc(theta_true, *items[idx])) for idx in range(len(administered_items))
+      ]
+      if all(response_vector) or not any(response_vector):
+        continue
+
+      mle_theta = mle.estimate(
+        item_bank=item_bank,
+        administered_items=administered_items,
+        response_vector=response_vector,
+        est_theta=theta_true,
+      )
+      wle_theta = wle.estimate(
+        item_bank=item_bank,
+        administered_items=administered_items,
+        response_vector=response_vector,
+        est_theta=theta_true,
+      )
+      if np.isfinite(mle_theta) and np.isfinite(wle_theta):
+        mle_errors.append(abs(mle_theta - theta_true))
+        wle_errors.append(abs(wle_theta - theta_true))
+
+    assert mle_errors
+    assert wle_errors
+    assert float(np.mean(wle_errors)) < float(np.mean(mle_errors))
+
+  def test_estimate_pulls_toward_center_relative_to_mle(self) -> None:
+    """Warm correction should reduce the outward bias of a mixed-response MLE."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.5, 1.5, 0.0, 1.0],
+          [1.2, 1.8, 0.0, 1.0],
+          [1.8, 1.2, 0.0, 1.0],
+          [1.0, 2.0, 0.0, 1.0],
+          [2.0, 1.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0, 1, 2, 3, 4]
+    response_vector = [True, True, True, True, False]
+
+    mle = NumericalSearchEstimator(dodd=False)
+    mle_theta = mle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    wle = WarmLikelihoodEstimator()
+    wle_theta = wle.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(mle_theta)
+    assert np.isfinite(wle_theta)
+    assert mle_theta > 0.0
+    assert wle_theta > 0.0
+    assert abs(wle_theta) < abs(mle_theta)
 
   def test_estimate_empty_response_returns_input_theta(self) -> None:
     """No administered items should return the input estimate unchanged."""
