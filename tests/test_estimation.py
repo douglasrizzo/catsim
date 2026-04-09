@@ -386,3 +386,102 @@ class TestMAPEstimator:
       est_theta=0.0,
     )
     assert np.isposinf(mle_theta)
+
+  def test_estimate_uses_custom_prior_mode_when_empty(self) -> None:
+    """Test that a shifted prior changes the no-data MAP estimate."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=1.5, sd=0.5))
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=0.0,
+    )
+
+    assert theta == pytest.approx(1.5, abs=1e-12)
+    assert estimator.calls == 1
+    assert estimator.evaluations == 0
+
+  def test_estimate_tracks_evaluation_counts_across_calls(self) -> None:
+    """Test that the estimator counters reflect repeated posterior maximization calls."""
+    item_bank = ItemBank.generate_item_bank(20, seed=7)
+    estimator = MAPEstimator()
+
+    first_theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2, 3],
+      response_vector=[True, False, True, True],
+      est_theta=0.0,
+    )
+    first_evaluations = estimator.evaluations
+
+    second_theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2, 3, 4],
+      response_vector=[True, False, True, True, False],
+      est_theta=0.0,
+    )
+
+    assert estimator.calls == 2
+    assert estimator.evaluations > 0
+    assert estimator.total_evaluations >= first_evaluations
+    assert np.isfinite(first_theta)
+    assert np.isfinite(second_theta)
+
+  def test_estimate_all_incorrect_is_finite(self) -> None:
+    """Test that MAP remains finite for an extreme all-incorrect response pattern."""
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.2, -2.0, 0.0, 1.0],
+          [1.4, -2.5, 0.0, 1.0],
+          [1.1, -3.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    estimator = MAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2],
+      response_vector=[False, False, False],
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(theta)
+    assert theta < 0.0
+
+  def test_estimate_uses_custom_prior_mode_when_no_items_are_administered(self) -> None:
+    """Custom priors should control the no-data mode."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=1.2, sd=0.5))
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=-3.0,
+    )
+
+    assert theta == pytest.approx(1.2, abs=1e-12)
+    assert estimator.calls == 1
+    assert estimator.evaluations == 0
+
+  def test_estimate_records_evaluation_counts_for_mixed_responses(self) -> None:
+    """Mixed response patterns should update the evaluation counters."""
+    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    estimator = MAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[0, 1, 2, 3, 4],
+      response_vector=[True, False, True, True, False],
+      est_theta=0.0,
+    )
+
+    assert np.isfinite(theta)
+    assert estimator.calls == 1
+    assert estimator.evaluations > 0
+    assert estimator.total_evaluations == estimator.evaluations
