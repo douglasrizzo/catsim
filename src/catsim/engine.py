@@ -103,6 +103,7 @@ class CatEngine:
       est_theta=state.current_theta,
       rng=context.rng,
       exposure_rates=exposure_rates,
+      response_vector=state.responses,
     )
 
   def apply_response(
