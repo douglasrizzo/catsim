@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.progressive.ProportionalSelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.ProportionalSelector`
 **Reference:** Segall (2004); Barrada et al. (2008)
 
 # Proportional Selector
@@ -48,7 +48,7 @@ acceleration parameter used by the progressive selector.
      - Description
    * - ``test_size``
      - required
-     - Planned fixed test length :math:`N`.
+     - Fixed test length :math:`N`.
    * - ``acceleration``
      - ``1.0``
      - Positive schedule exponent :math:`s`.
@@ -77,5 +77,5 @@ Segall, D. O. (2004). Computerized adaptive testing. In K. Kempf-Leonard (Ed.), 
 Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information function for item exposure control. *Methodology*, 4(2), 51-59.
 
 :::{seealso}
-Companion planned spec: {doc}`/api/techniques/selection/progressive-selector`
+Companion spec: {doc}`/api/techniques/selection/progressive-selector`
 :::

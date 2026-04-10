@@ -451,32 +451,56 @@ class TestProgressiveSelector:
     assert str(selector) == "Progressive Selector (s=1.0)"
 
   def test_weight_is_zero_at_first_position(self) -> None:
-    """At position 1 the blend weight must be exactly 0."""
+    """At position 1 the blend weight must be exactly 0.
+
+    This guards the pure-random starting condition; an off-by-one here would
+    silently make the selector exposure-heavy from the first item.
+    """
     selector = ProgressiveSelector(test_size=10, acceleration=1.0)
     assert selector._weight(1) == pytest.approx(0.0)  # noqa: SLF001
 
   def test_weight_is_one_at_last_position(self) -> None:
-    """At the final position the blend weight must be exactly 1."""
+    """At the final position the blend weight must be exactly 1.
+
+    This protects the asymptotic handoff to information-based selection at the
+    end of a fixed-length test.
+    """
     selector = ProgressiveSelector(test_size=10, acceleration=1.0)
     assert selector._weight(10) == pytest.approx(1.0)  # noqa: SLF001
 
   def test_weight_formula_linear_schedule(self) -> None:
-    """Midpoint weight should be 0.5 with s=1 and test_size=9."""
+    """Midpoint weight should be 0.5 with s=1 and test_size=9.
+
+    The direct formula check catches exponent or indexing mistakes that a
+    selection-outcome test could miss.
+    """
     selector = ProgressiveSelector(test_size=9, acceleration=1.0)
     assert selector._weight(5) == pytest.approx(0.5)  # noqa: SLF001
 
   def test_weight_formula_accelerated_schedule(self) -> None:
-    """s=2 should delay the transition."""
+    """s=2 should delay the transition.
+
+    This verifies that larger acceleration values postpone the move toward
+    information-based behavior instead of speeding it up.
+    """
     selector = ProgressiveSelector(test_size=9, acceleration=2.0)
     assert selector._weight(5) == pytest.approx(0.25)  # noqa: SLF001
 
   def test_weight_formula_fast_schedule(self) -> None:
-    """s=0.5 should accelerate the transition."""
+    """s=0.5 should accelerate the transition.
+
+    This checks the opposite regime, where smaller acceleration values should
+    pull the selector toward information earlier in the test.
+    """
     selector = ProgressiveSelector(test_size=9, acceleration=0.5)
     assert selector._weight(5) == pytest.approx((4 / 8) ** 0.5)  # noqa: SLF001
 
   def test_first_item_is_independent_of_information(self) -> None:
-    """At position 1, high-information items should not be selected more often."""
+    """At position 1, high-information items should not be selected more often.
+
+    This catches regressions where the random component stops dominating the
+    first step and high-information items start being overused immediately.
+    """
     item_bank = ItemBank(
       np.array(
         [
@@ -524,7 +548,11 @@ class TestProportionalSelector:
     assert str(selector) == "Proportional Selector (s=1.0, k=6.0)"
 
   def test_first_position_is_uniform_regardless_of_sharpness(self) -> None:
-    """Test that the first position is uniform for any sharpness."""
+    """Test that the first position is uniform for any sharpness.
+
+    Because the exponent is zero at the first step, the sampling distribution
+    must ignore item information even when sharpness is large.
+    """
     item_bank = _progressive_item_bank()
 
     for sharpness in (0.0, 12.0):
@@ -570,7 +598,11 @@ class TestProportionalSelector:
     np.testing.assert_allclose(probs, expected)
 
   def test_late_position_becomes_near_deterministic_with_high_sharpness(self) -> None:
-    """Test that late positions collapse toward the highest-information item."""
+    """Test that late positions collapse toward the highest-information item.
+
+    This validates the upper end of the schedule, where proportional sampling
+    should behave almost deterministically on the best item.
+    """
     item_bank = _progressive_item_bank()
     selector = ProportionalSelector(test_size=3, acceleration=1.0, sharpness=12.0)
     rng = _DeterministicRNG([0.2, 0.1, 0.3, 0.4])
