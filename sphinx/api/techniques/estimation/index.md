@@ -10,6 +10,7 @@ accuracy, bias, and the availability of uncertainty quantification.
 :maxdepth: 1
 
 numerical-search-estimator
+bayesian-infrastructure
 ```
 
 ## Class Hierarchy
@@ -30,7 +31,6 @@ They describe planned additions to {mod}`catsim.estimation`.
 ```{toctree}
 :maxdepth: 1
 
-bayesian-infrastructure
 warm-wle
 eap-estimator
 map-estimator
