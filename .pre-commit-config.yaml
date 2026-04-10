@@ -68,7 +68,7 @@ repos:
         types_or: [python, pyi]
       - id: pytest-nbmake
         name: pytest nbmake
-        entry: uv run --only-group dev pytest --nbmake --nbmake-timeout=300 -q
+        entry: uv run --group dev pytest --nbmake --nbmake-timeout=300 -q
         language: system
         files: \.ipynb$
         types: [file]

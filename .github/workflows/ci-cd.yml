@@ -82,11 +82,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --group dev --group testing
 
-      - name: Run parallel tests
-        run: uv run pytest -m parallel -n auto --verbose --cov-branch --cov-report=xml --cov=catsim
-
-      - name: Run sequential tests
-        run: uv run pytest -m "not parallel" --verbose --cov-branch --cov-report=xml --cov=catsim
+      - name: Run tests
+        run: uv run pytest --verbose --cov-branch --cov-report=xml --cov=catsim
 
       - name: Run tutorial notebooks
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
