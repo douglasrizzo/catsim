@@ -488,7 +488,11 @@ class TestMAPEstimator:
     assert estimator.total_evaluations == estimator.evaluations
 
   def test_estimate_is_pulled_toward_prior_mean_vs_mle(self) -> None:
-    """MAP should move the estimate toward the prior mean relative to the MLE."""
+    """MAP should move the estimate toward the prior mean relative to the MLE.
+
+    This captures MAP's defining short-test behavior; if it matched MLE here,
+    the implementation would be ignoring prior information in the case that matters.
+    """
     item_bank = ItemBank(
       np.array(
         [
@@ -526,7 +530,11 @@ class TestMAPEstimator:
     assert abs(map_theta) < abs(mle_theta)
 
   def test_estimate_and_posterior_mean_agree_on_a_long_test(self) -> None:
-    """MAP and posterior mean should agree on an information-rich test."""
+    """MAP and posterior mean should agree on an information-rich test.
+
+    On a smooth concentrated posterior, the mode and mean should nearly coincide,
+    so this cross-check catches bugs in either posterior scoring or optimization.
+    """
     item_bank = ItemBank.generate_item_bank(30, seed=5)
     theta_true = 0.3
     rng = np.random.default_rng(42)
@@ -553,7 +561,11 @@ class TestMAPEstimator:
     assert abs(map_theta - eap_theta) < 0.15
 
   def test_estimate_shifted_prior_pulls_post_data_map_estimate(self) -> None:
-    """A shifted prior should move the post-data MAP estimate toward its mean."""
+    """A shifted prior should move the post-data MAP estimate toward its mean.
+
+    The prior must still influence the estimate after data arrive; otherwise the
+    no-data default would work while real Bayesian shrinkage silently failed.
+    """
     item_bank = ItemBank.generate_item_bank(10, seed=9)
     administered_items = [0, 1, 2, 3]
     response_vector = [True, False, True, False]

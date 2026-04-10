@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.estimation.bayesian.MAPEstimator` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.estimation.MAPEstimator`
 **Reference:** Samejima (1969); Bock & Aitkin (1981)
 
 # Maximum A Posteriori Estimator
@@ -28,7 +28,7 @@ p(\theta)\,L(\mathbf{u}\mid\theta)
 \left[\log p(\theta)+\log L(\mathbf{u}\mid\theta)\right].
 $$
 
-Equivalently, the planned estimator minimizes the penalized negative log-posterior
+Equivalently, the estimator minimizes the penalized negative log-posterior
 
 $$
 -\log p(\theta) - \log L(\mathbf{u}\mid\theta)
@@ -58,7 +58,7 @@ it only requires a prior function and a scalar optimizer.
      - Search range for the penalized objective.
    * - ``verbose``
      - ``False``
-     - Planned diagnostics flag inherited from the estimator base class.
+     - Diagnostics flag inherited from the estimator base class.
 ```
 
 ## Behavioral Contracts
@@ -78,6 +78,6 @@ Samejima, F. (1969). Estimation of latent ability using a response pattern of gr
 Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters. *Psychometrika*, 46, 443-459.
 
 :::{seealso}
-Related planned specs: {doc}`/api/techniques/estimation/bayesian-infrastructure`,
+Related specs: {doc}`/api/techniques/estimation/bayesian-infrastructure`,
 {doc}`/api/techniques/estimation/eap-estimator`
 :::
