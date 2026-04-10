@@ -371,7 +371,12 @@ class TestBayesianHelpers:
     assert posterior_variance(post, nodes) == pytest.approx(0.0)
 
   def test_posterior_variance_decreases_as_items_accumulate(self) -> None:
-    """Posterior variance must shrink as more items are administered."""
+    """Posterior variance must shrink as more items are administered.
+
+    This verifies the monotone-concentration property expected by downstream
+    Bayesian selectors and stoppers; broken normalization could widen the
+    posterior without any other test noticing.
+    """
     rng = np.random.default_rng(0)
     grid = QuadratureGrid.uniform()
     log_prior = normal_log_prior()
@@ -394,7 +399,11 @@ class TestBayesianHelpers:
       assert later < earlier
 
   def test_posterior_is_numerically_stable_on_long_response_vector(self) -> None:
-    """The posterior should stay normalized and finite on a 50-item response vector."""
+    """The posterior should stay normalized and finite on a 50-item response vector.
+
+    This protects the log-max-subtract stabilization: if that step regressed,
+    long response vectors could underflow to zeros or NaNs before normalization.
+    """
     rng = np.random.default_rng(1)
     grid = QuadratureGrid.uniform()
     items = np.column_stack([

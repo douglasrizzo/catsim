@@ -1,4 +1,8 @@
-"""Shared Bayesian helpers for ability estimation in CAT."""
+"""Shared Bayesian helpers for ability estimation in CAT.
+
+For the full posterior specification and quadrature contract, see
+:doc:`/specs/estimation/bayesian-infrastructure`.
+"""
 
 from __future__ import annotations
 
@@ -61,7 +65,11 @@ def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_E
 
 @dataclass(frozen=True, slots=True)
 class QuadratureGrid:
-  """A fixed quadrature grid for posterior computations."""
+  """A fixed quadrature grid for posterior computations.
+
+  For the full posterior specification and quadrature contract, see
+  :doc:`/specs/estimation/bayesian-infrastructure`.
+  """
 
   nodes: FloatArray
   weights: FloatArray
