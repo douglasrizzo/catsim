@@ -22,6 +22,8 @@ a-strat-selector
 a-strat-b-block-selector
 max-info-strat-selector
 max-info-b-block-selector
+mei-selector
+mlwi-selector
 ```
 
 ## Class Hierarchy
@@ -45,8 +47,6 @@ They describe planned additions to {mod}`catsim.selection`.
 kl-selector
 progressive-selector
 proportional-selector
-mei-selector
-mlwi-selector
 sympson-hetter-exposure
 mpwi-selector
 klp-selector

@@ -442,7 +442,11 @@ class TestMEISelector:
     assert selected != 0
 
   def test_select_diverges_from_max_info_when_one_step_estimates_shift(self) -> None:
-    """MEI should not collapse to MaxInfo when the response history changes theta."""
+    """MEI should not collapse to MaxInfo when the response history changes theta.
+
+    This is the key behavioral check for a one-step-ahead selector: if MEI
+    always agreed with MaxInfo here, it would be ignoring the estimated post-response shift.
+    """
     # Frozen bank parameters captured from a verified divergence scenario.
     item_bank = ItemBank(
       np.array(
@@ -485,7 +489,11 @@ class TestMEISelector:
     assert mei_choice != max_info_choice
 
   def test_select_matches_manual_expected_information(self) -> None:
-    """MEI scores should match the manual P*I_correct + (1-P)*I_incorrect calculation."""
+    """MEI scores should match the manual P*I_correct + (1-P)*I_incorrect calculation.
+
+    The manual score comparison makes sure both response branches are weighted
+    correctly instead of merely exercising the estimator wiring.
+    """
     item_bank = ItemBank(
       np.array(
         [
@@ -621,7 +629,11 @@ class TestMLWISelector:
     assert selected not in {0, 1}
 
   def test_select_with_empty_response_vector_reduces_to_information_integral(self) -> None:
-    """With no responses, MLWI should reduce to the integral of item information."""
+    """With no responses, MLWI should reduce to the integral of item information.
+
+    This verifies the no-data degeneracy case where likelihood weights become
+    uniform; if that fallback changed, MLWI would stop matching its mathematical definition.
+    """
     item_bank = ItemBank.generate_item_bank(8, seed=0)
     n_nodes = 21
     selector = MLWISelector(n_nodes=n_nodes)
@@ -646,7 +658,11 @@ class TestMLWISelector:
     assert selected == int(manual_scores.argmax())
 
   def test_select_converges_to_max_info_on_long_test(self) -> None:
-    """On a long test, MLWI should agree with MaxInfo near the MLE."""
+    """On a long test, MLWI should agree with MaxInfo near the MLE.
+
+    As the likelihood sharpens, MLWI should concentrate on the MLE neighborhood,
+    so disagreement here would signal broken weighting or integration.
+    """
     item_bank = ItemBank.generate_item_bank(30, seed=1)
     theta_true = 0.7
     rng = np.random.default_rng(5)

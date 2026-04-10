@@ -14,7 +14,10 @@ from .base import BaseSelector
 
 
 class MEISelector(BaseSelector):
-  """Maximum Expected Information selector."""
+  """Maximum Expected Information selector.
+
+  For full algorithmic details, see :doc:`/specs/selection/mei-selector`.
+  """
 
   def __init__(self, estimator: BaseEstimator | None = None, r_max: float = 1.0) -> None:
     if not 0 <= r_max <= 1:

@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.expected_info.MEISelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.MEISelector`
 **Reference:** van der Linden (1998)
 
 # Maximum Expected Information Selector
@@ -69,5 +69,5 @@ van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive test
 Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440.
 
 :::{seealso}
-Sister planned spec: {doc}`/api/techniques/selection/mlwi-selector`
+Sister spec: {doc}`/api/techniques/selection/mlwi-selector`
 :::
