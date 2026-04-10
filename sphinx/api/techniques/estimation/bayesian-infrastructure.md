@@ -1,12 +1,12 @@
-**Status:** Planned
-**Module:** `catsim.estimation.bayesian` (planned)
+**Status:** Implemented
+**Module:** {py:mod}`catsim.estimation.bayesian`; {py:class}`catsim.estimation.QuadratureGrid`
 **Reference:** Bock & Mislevy (1982); Bock & Aitkin (1981)
 
 # Bayesian Estimation Infrastructure
 
 ## Motivation
 
-Several planned estimators and selectors need the same Bayesian substrate: a
+Several estimators and selectors need the same Bayesian substrate: a
 prior on $\theta$, a fixed quadrature grid, and a numerically stable way
 to turn responses into a discrete posterior. This page specifies that shared
 subsystem so later features do not duplicate incompatible posterior code.
@@ -51,7 +51,7 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-The default planned configuration is a uniform grid over the extended theta
+The default configuration is a uniform grid over the extended theta
 range with a standard normal prior, matching the conventions already used in the
 feature card.
 
