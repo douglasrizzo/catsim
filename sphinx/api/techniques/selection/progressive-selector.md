@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.progressive.ProgressiveSelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.ProgressiveSelector`
 **Reference:** Revuelta & Ponsoda (1998); Barrada et al. (2008, 2010)
 
 # Progressive Selector
@@ -50,7 +50,7 @@ non-administered item with the largest score.
      - Description
    * - ``test_size``
      - required
-     - Planned total number of administered items :math:`N`; required because the schedule depends on test position.
+     - Total number of administered items :math:`N`; required because the schedule depends on test position.
    * - ``acceleration``
      - ``1.0``
      - Positive exponent :math:`s`. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.
@@ -78,5 +78,5 @@ Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating rando
 Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A method for the comparison of item selection rules in computerized adaptive testing. *Applied Psychological Measurement*, 34(6), 438-452.
 
 :::{seealso}
-Companion planned spec: {doc}`/api/techniques/selection/proportional-selector`
+Companion spec: {doc}`/api/techniques/selection/proportional-selector`
 :::
