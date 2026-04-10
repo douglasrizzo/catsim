@@ -30,7 +30,10 @@ def _available_candidates(
 
 
 class ProgressiveSelector(FiniteSelector):
-  """Progressive selector that blends random and information-based scoring."""
+  """Progressive selector that blends random and information-based scoring.
+
+  For full algorithmic details, see :doc:`/specs/selection/progressive-selector`.
+  """
 
   def __init__(
     self,
@@ -85,7 +88,10 @@ class ProgressiveSelector(FiniteSelector):
 
 
 class ProportionalSelector(FiniteSelector):
-  """Proportional selector that samples items with probability proportional to weighted information."""
+  """Proportional selector that samples items with probability proportional to weighted information.
+
+  For full algorithmic details, see :doc:`/specs/selection/proportional-selector`.
+  """
 
   def __init__(
     self,
