@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.estimation.bayesian.EAPEstimator` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.estimation.EAPEstimator`
 **Reference:** Bock & Mislevy (1982)
 
 # Expected A Posteriori Estimator
@@ -29,7 +29,7 @@ $$
      {\int p(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta}.
 $$
 
-Using the shared quadrature grid from the Bayesian infrastructure, the planned
+Using the shared quadrature grid from the Bayesian infrastructure, the
 implementation approximates this as
 
 $$
@@ -69,7 +69,7 @@ avoids the divergence issues that motivate Dodd-style MLE fallbacks.
      - Prior density on :math:`\theta`; changing it changes both shrinkage and zero-data behavior.
    * - ``verbose``
      - ``False``
-     - Planned diagnostics flag inherited from the estimator base class.
+     - Diagnostics flag inherited from the estimator base class.
 ```
 
 ## Behavioral Contracts
