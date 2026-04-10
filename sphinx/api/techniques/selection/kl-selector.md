@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.kl.KLSelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.KLSelector`
 **Reference:** Chang & Ying (1996)
 
 # Kullback-Leibler Selector
@@ -77,5 +77,5 @@ Any correct implementation must satisfy the following properties:
 Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized adaptive testing. *Applied Psychological Measurement*, 20(3), 213-229. <https://doi.org/10.1177/014662169602000303>
 
 :::{seealso}
-Posterior-weighted variant planned in card 15: KLP selector.
+Posterior-weighted variant: {doc}`/api/techniques/selection/klp-selector`.
 :::

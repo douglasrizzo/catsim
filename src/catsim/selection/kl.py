@@ -32,7 +32,10 @@ def _kl_integrand(
 
 
 class KLSelector(BaseSelector):
-  """Kullback-Leibler global-information item selector."""
+  """Kullback-Leibler global-information item selector.
+
+  For full algorithmic details, see :doc:`/specs/selection/kl-selector`.
+  """
 
   def __init__(self, c: float = 3.0, r_max: float = 1.0) -> None:
     if c <= 0:
