@@ -243,6 +243,13 @@
     <li class="md-nav__item">
     
     
+      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -272,6 +279,13 @@
     
     
       <a href="../../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -318,9 +332,8 @@
   <h1 id="modules-catsim-selection-selection--page-root">Source code for catsim.selection.selection</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Concrete selector implementations."""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
@@ -332,16 +345,17 @@
 <div class="viewcode-block" id="MaxInfoSelector">
 <a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Selector that returns the first non-administered item with maximum information for the current theta estimate.</span>
-
-<span class="sd">  This is one of the most common item selection methods in CAT, choosing the item</span>
-<span class="sd">  that provides the most information at the examinee's current estimated ability level.</span>
+<span class="w">  </span><span class="sd">"""Select the non-administered item with maximum information at the current theta estimate.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  r_max : float, optional</span>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not</span>
 <span class="sd">      be selected unless no other items are available. Default is 1 (no restriction).</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/max-info-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -383,53 +397,28 @@
 <a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoSelector.select">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    item_bank : ItemBank or None, optional</span>
-<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
-<span class="sd">    administered_items : list[int] or None, optional</span>
-<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
-<span class="sd">    est_theta : float or None, optional</span>
-<span class="sd">        A float containing the current estimated ability. Default is None.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Additional keyword arguments.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    administered_items : list[int]</span>
+<span class="sd">        A list containing the indexes of items that were already administered.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        The current estimated ability.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int or None</span>
 <span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">    """</span>
-    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
-      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"administered_items parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"est_theta parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
     <span class="c1"># sort items by their information value</span>
     <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
     <span class="c1"># remove administered ones</span>
@@ -439,8 +428,9 @@
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="c1"># gets the indexes and information values from the items with r &lt; rmax</span>
-    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">valid_indexes</span> <span class="k">if</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">exposure_rates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">valid_indexes</span> <span class="k">if</span> <span class="n">exposure_rates</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">]</span>
     <span class="c1"># return the item with maximum information from the ones available</span>
     <span class="k">return</span> <span class="n">valid_indexes_low_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 </div>
@@ -450,11 +440,11 @@
 <div class="viewcode-block" id="UrrySelector">
 <a class="viewcode-back" href="../../../selection.html#catsim.selection.UrrySelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UrrySelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Selector that returns the item whose difficulty parameter is closest to the examinee's ability.</span>
+<span class="w">  </span><span class="sd">"""Select the remaining item whose difficulty parameter is closest to the current ability estimate.</span>
 
-<span class="sd">  This method, known as Urry's method, selects items based on the proximity of their</span>
-<span class="sd">  difficulty (b parameter) to the current ability estimate, which is particularly</span>
-<span class="sd">  effective for 1PL and 2PL models where information is maximized when b = theta.</span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/urry-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -469,53 +459,28 @@
 <a class="viewcode-back" href="../../../selection.html#catsim.selection.UrrySelector.select">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    item_bank : ItemBank or None, optional</span>
-<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
-<span class="sd">    administered_items : list[int] or None, optional</span>
-<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
-<span class="sd">    est_theta : float or None, optional</span>
-<span class="sd">        A float containing the current estimated ability. Default is None.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Additional keyword arguments.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    administered_items : list[int]</span>
+<span class="sd">        A list containing the indexes of items that were already administered.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        The current estimated ability.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int or None</span>
 <span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">    """</span>
-    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
-      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"est_theta parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"administered_items parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
     <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_b</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
     <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
 
@@ -535,6 +500,10 @@
 
 <span class="sd">  The interval is defined by a parameter :math:`\\delta` above and below the current :math:`\\hat\\theta`, like so:</span>
 <span class="sd">  .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta + \\delta}I_i(\\hat\\theta)</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/interval-info-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -562,47 +531,28 @@
 <a class="viewcode-back" href="../../../selection.html#catsim.selection.IntervalInfoSelector.select">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    item_bank : ItemBank or None, optional</span>
-<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
-<span class="sd">    administered_items : list[int] or None, optional</span>
-<span class="sd">        A list containing the indexes of items that were already administered. Default is None.</span>
-<span class="sd">    est_theta : float or None, optional</span>
-<span class="sd">        A float containing the current estimated ability. Default is None.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Additional keyword arguments.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    administered_items : list[int]</span>
+<span class="sd">        A list containing the indexes of items that were already administered.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        The current estimated ability.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int or None</span>
 <span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">    """</span>
-    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
-      <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">assert</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-
     <span class="c1"># compute the integral of the information function around an examinee's ability</span>
     <span class="n">information_integral</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
       <span class="n">quad</span><span class="p">(</span>

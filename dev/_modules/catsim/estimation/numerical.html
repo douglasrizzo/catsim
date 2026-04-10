@@ -243,6 +243,13 @@
     <li class="md-nav__item">
     
     
+      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -272,6 +279,13 @@
     
     
       <a href="../../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -334,12 +348,7 @@
 <div class="viewcode-block" id="NumericalSearchEstimator">
 <a class="viewcode-back" href="../../../estimation.html#catsim.estimation.NumericalSearchEstimator">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NumericalSearchEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Implement search algorithms in unimodal functions to find the maximum of the log-likelihood function.</span>
-
-<span class="sd">  This class provides multiple numerical search methods for ability estimation in IRT,</span>
-<span class="sd">  including ternary search, dichotomous search, Fibonacci search, and golden-section</span>
-<span class="sd">  search, according to [Veliz20]_. Also check [Brent02]_. It is also possible to use</span>
-<span class="sd">  the methods from :py:func:`scipy.optimize.minimize_scalar`.</span>
+<span class="w">  </span><span class="sd">"""Estimate ability by numerically maximizing the IRT log-likelihood.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -354,6 +363,10 @@
 <span class="sd">  method : str, optional</span>
 <span class="sd">      The search method to employ. Must be one of: 'ternary', 'dichotomous', 'fibonacci',</span>
 <span class="sd">      'golden', 'brent', 'bounded', or 'golden2'. Default is 'bounded'.</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/estimation/numerical-search-estimator`.</span>
 <span class="sd">  """</span>
 
   <span class="n">__methods</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s2">"ternary"</span><span class="p">,</span> <span class="s2">"dichotomous"</span><span class="p">,</span> <span class="s2">"fibonacci"</span><span class="p">,</span> <span class="s2">"golden"</span><span class="p">,</span> <span class="s2">"brent"</span><span class="p">,</span> <span class="s2">"bounded"</span><span class="p">,</span> <span class="s2">"golden2"</span><span class="p">])</span>
@@ -417,32 +430,23 @@
 <a class="viewcode-back" href="../../../estimation.html#catsim.estimation.NumericalSearchEstimator.estimate">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Compute the theta value that maximizes the log-likelihood function for the given examinee.</span>
 
-<span class="sd">    When this method is used inside a simulator, its arguments are automatically filled.</span>
-<span class="sd">    Outside of a simulation, the user can also specify the arguments to use the Estimator</span>
-<span class="sd">    as a standalone object.</span>
-
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        Index of the current examinee in the simulator. Default is None.</span>
-<span class="sd">    item_bank : ItemBank or None, optional</span>
-<span class="sd">        An ItemBank containing item parameters. Default is None.</span>
-<span class="sd">    administered_items : list[int] or None, optional</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        An ItemBank containing item parameters.</span>
+<span class="sd">    administered_items : list[int]</span>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    response_vector : list[bool] or None, optional</span>
+<span class="sd">    response_vector : list[bool]</span>
 <span class="sd">        A boolean list containing the examinee's answers to the administered items.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    est_theta : float or None, optional</span>
-<span class="sd">        A float containing the current estimated ability. Default is None.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        The current estimated ability.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -452,20 +456,8 @@
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If required parameters are None when not using a simulator.</span>
+<span class="sd">        If required parameters are missing.</span>
 <span class="sd">    """</span>
-    <span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span>
-      <span class="n">return_item_bank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_administered_items</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_response_vector</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">return_est_theta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-      <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>
-      <span class="n">administered_items</span><span class="o">=</span><span class="n">administered_items</span><span class="p">,</span>
-      <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
-      <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
-    <span class="p">)</span>
-
     <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -475,12 +467,9 @@
     <span class="k">if</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"response_vector parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">est_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"est_theta parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">summarized_answers</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span>
 
@@ -523,11 +512,13 @@
         <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)),</span>
         <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">!=</span> <span class="s2">"bounded"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
       <span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span>
+
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-      <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span><span class="si">}</span><span class="s2"> evaluations"</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span><span class="si">}</span><span class="s2"> evaluations"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">candidate_theta</span></div>
 
@@ -564,7 +555,7 @@
 <span class="sd">    """</span>
     <span class="n">error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">error</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
 
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"ternary"</span><span class="p">:</span>
         <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
@@ -634,10 +625,10 @@
 
     <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_params</span><span class="p">)</span>
     <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_params</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
 
     <span class="k">while</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># noqa: PLR2004</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
 
       <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
 
@@ -697,9 +688,10 @@
 
     <span class="n">left_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_params</span><span class="p">)</span>
     <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_params</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
 
     <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">+=</span> <span class="mi">1</span>
 
       <span class="k">if</span> <span class="n">left_side_ll</span> <span class="o">&gt;=</span> <span class="n">right_side_ll</span><span class="p">:</span>
         <span class="n">b</span> <span class="o">=</span> <span class="n">d</span>

@@ -1,7 +1,7 @@
 Introduction
 ************
 
-:py:mod:`catsim` is a Python package for simulating computerized adaptive tests (CAT), a modern approach to assessment that adapts to each examinee's ability level in real time.
+:py:mod:`catsim` is a Python package for computerized adaptive testing (CAT), providing both stepwise CAT execution and CAT simulation tools for a modern assessment workflow that adapts to each examinee's ability level in real time.
 
 What are Latent Traits?
 ========================
@@ -31,16 +31,16 @@ This approach is more efficient and engaging, reducing test length while maintai
 About catsim
 ============
 
-CAT simulations rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT simulation packages exist for R [Magis12]_, :py:mod:`catsim` brings these capabilities to Python. Built on :py:mod:`numpy` and :py:mod:`scipy`, it provides:
+CAT systems rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT packages exist for R [Magis12]_, :py:mod:`catsim` brings these capabilities to Python. Built on :py:mod:`numpy` and :py:mod:`scipy`, it provides:
 
 * Multiple initialization, selection, estimation, and stopping methods
-* Object-oriented architecture for easy customization
-* Tools for comparing different CAT methodologies
+* A reusable CAT engine for manual and embedded workflows
+* Simulation tools for comparing different CAT methodologies
 
 Item Response Theory Models
 ===========================
 
-As a CAT simulator, :py:mod:`catsim` borrows many concepts from Item Response Theory ([Lord68]_ and [Rasch66]_), a series of models created in the second part of the 20th century with the goal of *measuring latent traits*. :py:mod:`catsim` makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models' parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals' abilities by allocating them in ability scales, inspiring as well as justifying its use in adaptive testing.
+:py:mod:`catsim` borrows many concepts from Item Response Theory ([Lord68]_ and [Rasch66]_), a series of models created in the second part of the 20th century with the goal of *measuring latent traits*. :py:mod:`catsim` makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models' parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals' abilities by allocating them in ability scales, inspiring as well as justifying its use in adaptive testing.
 
 The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of *items* in which examinees manifest their latent traits when answering them.
 
@@ -101,7 +101,7 @@ In :py:mod:`catsim`, a collection of items is represented as a :py:class:`numpy.
 
 These examples depict the generation of an array of five items according to the different logistic models. In the last example, parameters :math:`a` and :math:`b` have a correlation of :math:`0.5`, an adjustment that may be useful in case simulations require it [Chang2001]_.
 
-After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as :math:`r`. Its value denotes how many times an item has been used and it is computed as follows:
+Historically, catsim stored item exposure rates in an additional item-matrix column. In the current architecture, exposure is better treated as run-level output derived from simulation results. When represented, the exposure rate is commonly denoted as :math:`r` and computed as follows:
 
 .. math:: r_i = \frac{q_i}{N}
 

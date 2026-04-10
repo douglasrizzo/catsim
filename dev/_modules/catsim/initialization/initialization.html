@@ -243,6 +243,13 @@
     <li class="md-nav__item">
     
     
+      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -272,6 +279,13 @@
     
     
       <a href="../../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -318,15 +332,17 @@
   <h1 id="modules-catsim-initialization-initialization--page-root">Source code for catsim.initialization.initialization</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Concrete initialization implementations."""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
 
 
 <div class="viewcode-block" id="InitializationDistribution">
 <a class="viewcode-back" href="../../../initialization.html#catsim.initialization.InitializationDistribution">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">InitializationDistribution</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InitializationDistribution</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Distribution to use for ability estimate initialization.</span>
 
 <span class="sd">  Attributes</span>
@@ -385,8 +401,6 @@
 <span class="sd">        If dist_params are invalid for the chosen distribution type (e.g., wrong</span>
 <span class="sd">        length, equal min/max for uniform, non-positive std for normal).</span>
 <span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">InitializationDistribution</span><span class="p">):</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"dist_type must be of type InitializationDistribution"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -413,19 +427,15 @@
 
 <div class="viewcode-block" id="RandomInitializer.initialize">
 <a class="viewcode-back" href="../../../initialization.html#catsim.initialization.RandomInitializer.initialize">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
 <span class="w">    </span><span class="sd">"""Generate an initial ability value using the chosen distribution and parameters.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee. This parameter is not used by this method.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments.</span>
-
-<span class="sd">        - rng (numpy.random.Generator): Random number generator used by the object,</span>
-<span class="sd">          guarantees reproducibility of outputs.</span>
+<span class="sd">    item_bank : Any</span>
+<span class="sd">        Unused by this initializer.</span>
+<span class="sd">    rng : Any</span>
+<span class="sd">        Random number generator used by the object, guaranteeing reproducibility.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -439,8 +449,6 @@
 <span class="sd">        If an invalid distribution type is encountered (should not happen after</span>
 <span class="sd">        validation in __init__).</span>
 <span class="sd">    """</span>
-    <span class="p">(</span><span class="n">rng</span><span class="p">,)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_args</span><span class="p">(</span><span class="n">return_rng</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">:</span>
       <span class="n">theta</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">))</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
@@ -485,21 +493,19 @@
 <span class="sd">    TypeError</span>
 <span class="sd">        If start is not a numeric value.</span>
 <span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
 
 <div class="viewcode-block" id="FixedPointInitializer.initialize">
 <a class="viewcode-back" href="../../../initialization.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
 <span class="w">    </span><span class="sd">"""Return the same ability value that was passed to the constructor.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee. This parameter is not used by this method.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments. Not used by this method.</span>
+<span class="sd">    item_bank : Any</span>
+<span class="sd">        Unused by this initializer.</span>
+<span class="sd">    rng : Any</span>
+<span class="sd">        Unused by this initializer.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

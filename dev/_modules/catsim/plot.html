@@ -243,6 +243,13 @@
     <li class="md-nav__item">
     
     
+      <a href="../../specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -272,6 +279,13 @@
     
     
       <a href="../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -328,7 +342,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">SimulationResult</span>
 
 
 <div class="viewcode-block" id="PlotType">
@@ -540,8 +554,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">item_exposure</span><span class="p">(</span>
   <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="n">simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">simulation</span><span class="p">:</span> <span class="n">SimulationResult</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">par</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">hist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
@@ -560,14 +575,20 @@
 <span class="sd">      from catsim.selection import MaxInfoSelector</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.stopping import MinErrorStopper</span>
-<span class="sd">      from catsim.simulation import Simulator</span>
+<span class="sd">      from catsim.simulation import SimulationRunner</span>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 
-<span class="sd">      s = Simulator(ItemBank.generate_item_bank(100), 10)</span>
-<span class="sd">      s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MinErrorStopper(0.4, max_items=20))</span>
-<span class="sd">      plot.item_exposure(title='Exposures', simulator=s, hist=True, ax=axes[0])</span>
-<span class="sd">      plot.item_exposure(title='Exposures', simulator=s, par='b', ax=axes[1])</span>
+<span class="sd">      runner = SimulationRunner(</span>
+<span class="sd">          ItemBank.generate_item_bank(100),</span>
+<span class="sd">          RandomInitializer(),</span>
+<span class="sd">          MaxInfoSelector(),</span>
+<span class="sd">          NumericalSearchEstimator(),</span>
+<span class="sd">          MinErrorStopper(0.4, max_items=20),</span>
+<span class="sd">      )</span>
+<span class="sd">      result = runner.run(10)</span>
+<span class="sd">      plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])</span>
+<span class="sd">      plot.item_exposure(title='Exposures', simulation=result, par='b', ax=axes[1])</span>
 <span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
@@ -577,10 +598,8 @@
 <span class="sd">      Matplotlib axes object to plot on. If None, a new figure is created. Default is None.</span>
 <span class="sd">  title : str or None, optional</span>
 <span class="sd">      The plot title. Default is None.</span>
-<span class="sd">  simulator : Simulator or None, optional</span>
-<span class="sd">      A simulator which has already simulated a series of CATs, containing estimations</span>
-<span class="sd">      to the examinees' abilities and a list of administered items for each examinee.</span>
-<span class="sd">      Default is None.</span>
+<span class="sd">  simulation : SimulationResult or None, optional</span>
+<span class="sd">      Simulation result containing exposure data. Default is None.</span>
 <span class="sd">  item_bank : ItemBank or numpy.ndarray or None, optional</span>
 <span class="sd">      An ItemBank or item matrix containing item parameters and their exposure rate in the last column.</span>
 <span class="sd">      If a numpy array is provided, it will be converted to an ItemBank.</span>
@@ -601,10 +620,11 @@
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If neither simulator nor item_bank is provided, or if par is not one of 'a', 'b', 'c', 'd', or None.</span>
+<span class="sd">      If neither simulation, item_bank, nor exposure_rates is provided, or if</span>
+<span class="sd">      par is not one of 'a', 'b', 'c', 'd', or None.</span>
 <span class="sd">  """</span>
-  <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Not a single plottable object was passed. Either 'simulator' or 'item_bank' must be passed."</span>
+  <span class="k">if</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">exposure_rates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"One of: simulation, item_bank, exposure_rates must be passed."</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -613,12 +633,17 @@
   <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">item_bank</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span>
+  <span class="k">if</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">item_bank</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">item_bank</span>
+    <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">exposure_rates</span>
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
 
-  <span class="k">assert</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+  <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank must be provided when simulation is not passed"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">exposure_rates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
   <span class="n">supported_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">}</span>
   <span class="k">if</span> <span class="n">par</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">par</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_parameters</span><span class="p">:</span>
@@ -642,12 +667,12 @@
     <span class="n">xlabel</span> <span class="o">=</span> <span class="s2">"Items"</span>
 
   <span class="k">if</span> <span class="n">hist</span><span class="p">:</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="o">/</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="o">/</span> <span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Item exposure"</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Items"</span><span class="p">)</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">indexes</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">indexes</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">indexes</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Item exposure"</span><span class="p">)</span>
 
@@ -665,8 +690,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">test_progress</span><span class="p">(</span>
   <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="n">simulator</span><span class="p">:</span> <span class="n">Simulator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">simulation</span><span class="p">:</span> <span class="n">SimulationResult</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionState</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">thetas</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -697,13 +723,19 @@
 <span class="sd">      from catsim.selection import MaxInfoSelector</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.stopping import MinErrorStopper</span>
-<span class="sd">      from catsim.simulation import Simulator</span>
+<span class="sd">      from catsim.simulation import SimulationRunner</span>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
-<span class="sd">      s = Simulator(ItemBank.generate_item_bank(100), 10)</span>
-<span class="sd">      s.simulate(RandomInitializer(), MaxInfoSelector(), NumericalSearchEstimator(), MinErrorStopper(0.4, max_items=20))</span>
-<span class="sd">      plot.test_progress(simulator=s, index=0, ax=axes[0])</span>
-<span class="sd">      plot.test_progress(simulator=s, index=0, info=True, var=True, see=True, ax=axes[1])</span>
+<span class="sd">      runner = SimulationRunner(</span>
+<span class="sd">          ItemBank.generate_item_bank(100),</span>
+<span class="sd">          RandomInitializer(),</span>
+<span class="sd">          MaxInfoSelector(),</span>
+<span class="sd">          NumericalSearchEstimator(),</span>
+<span class="sd">          MinErrorStopper(0.4, max_items=20),</span>
+<span class="sd">      )</span>
+<span class="sd">      result = runner.run(10)</span>
+<span class="sd">      plot.test_progress(simulation=result, index=0, ax=axes[0])</span>
+<span class="sd">      plot.test_progress(simulation=result, index=0, info=True, var=True, see=True, ax=axes[1])</span>
 <span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
@@ -713,17 +745,15 @@
 <span class="sd">      Axis to use. If None, a figure with the necessary axis will be created. Default is None.</span>
 <span class="sd">  title : str or None, optional</span>
 <span class="sd">      The plot title. Default is None.</span>
-<span class="sd">  simulator : Simulator or None, optional</span>
-<span class="sd">      A simulator which has already simulated a series of CATs, containing estimations</span>
-<span class="sd">      to the examinees' abilities and a list of administered items for each examinee.</span>
-<span class="sd">      Default is None.</span>
+<span class="sd">  simulation : SimulationResult or None, optional</span>
+<span class="sd">      Simulation result containing session traces. Default is None.</span>
 <span class="sd">  index : int or None, optional</span>
-<span class="sd">      The index of the examinee in the simulator whose plot is to be done. Default is None.</span>
+<span class="sd">      The index of the session to be plotted when ``simulation`` is provided.</span>
 <span class="sd">  thetas : list[float] or None, optional</span>
-<span class="sd">      If a Simulator is not passed, then a list of ability estimations can be manually</span>
+<span class="sd">      If a simulation result is not passed, then a list of ability estimations can be manually</span>
 <span class="sd">      passed to the function. Default is None.</span>
 <span class="sd">  administered_items : numpy.ndarray or None, optional</span>
-<span class="sd">      If a Simulator is not passed, then a matrix of administered items, represented</span>
+<span class="sd">      If a simulation result is not passed, then a matrix of administered items, represented</span>
 <span class="sd">      by their parameters, can be manually passed to the function. Default is None.</span>
 <span class="sd">  true_theta : float or None, optional</span>
 <span class="sd">      The value of the examinee's true ability. If it is passed, it will be shown on</span>
@@ -753,11 +783,11 @@
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If neither simulator nor the required manual parameters are provided, or if thetas</span>
+<span class="sd">      If neither simulation nor the required manual parameters are provided, or if thetas</span>
 <span class="sd">      and administered_items have mismatched lengths.</span>
 <span class="sd">  """</span>
-  <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Not a single plottable object was passed. One of: simulator, thetas, administered_items must be passed."</span>
+  <span class="k">if</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"One of: simulation, session, thetas, administered_items must be passed."</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -766,16 +796,27 @@
   <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">thetas</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">estimations</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
-    <span class="n">administered_items</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
-    <span class="n">true_theta</span> <span class="o">=</span> <span class="n">simulator</span><span class="o">.</span><span class="n">examinees</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+  <span class="k">if</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"index must be provided when simulation is passed"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">theta_history</span>
+    <span class="n">administered_items</span> <span class="o">=</span> <span class="n">simulation</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
+    <span class="n">true_theta</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span>
 
-  <span class="k">assert</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-  <span class="k">assert</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-  <span class="k">assert</span> <span class="n">true_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+  <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"session plotting currently requires the parent simulation result"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]):</span>
+  <span class="k">if</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"thetas must be provided"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"administered_items must be provided"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Number of estimated thetas and administered items is not the same."</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 

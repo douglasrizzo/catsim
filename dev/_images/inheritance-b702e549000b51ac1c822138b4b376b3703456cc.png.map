@@ -1,0 +1,7 @@
+<map id="inheritanceb3465e1daf" name="inheritanceb3465e1daf">
+<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,31,77,56"/>
+<area shape="rect" id="node2" href="#catsim.stopping.BaseStopper" target="_top" title="Base class for CAT stopping criteria." alt="" coords="125,31,229,56"/>
+<area shape="rect" id="node4" href="#catsim.stopping.TestLengthStopper" target="_top" title="Base class for stoppers with shared minimum/maximum length and bank&#45;exhaustion checks." alt="" coords="277,31,420,56"/>
+<area shape="rect" id="node3" href="#catsim.stopping.ConfidenceIntervalStopper" target="_top" title="Stop when the confidence interval for the current estimate falls within one configured ability band." alt="" coords="468,5,663,31"/>
+<area shape="rect" id="node5" href="#catsim.stopping.MinErrorStopper" target="_top" title="Stop when the standard error of estimation falls below a configured threshold." alt="" coords="502,55,629,80"/>
+</map>

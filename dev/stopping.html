@@ -57,7 +57,7 @@
     <link rel="icon" href="_static/logo.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Computerized Adaptive Testing Simulation – catsim.simulation" href="simulation.html" />
+    <link rel="next" title="Technique Specifications" href="specs/index.html" />
     <link rel="prev" title="Estimation Methods – catsim.estimation" href="estimation.html" />
   
    
@@ -320,6 +320,13 @@
     <li class="md-nav__item">
     
     
+      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -349,6 +356,13 @@
     
     
       <a href="reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -430,43 +444,40 @@
             
   <section id="stopping-criteria-catsim-stopping">
 <h1 id="stopping--page-root">Stopping Criteria – <a class="reference internal" href="#stopping--page-root" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a><a class="headerlink" href="#stopping--page-root" title="Link to this heading">¶</a></h1>
+<p>For algorithmic details, mathematical definitions, and behavioral contracts of each
+stopping criterion, see <a class="reference internal" href="specs/stopping/index.html"><span class="doc">Stopping Criteria</span></a>.</p>
 <p>All implemented classes in this module inherit from a base abstract class
-<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom stopping criterion be
-used during the simulation, as long as it also inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code>. Stoppers can be used manually through
+<code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.engine.CatEngine</span></code> or through
+<a class="reference internal" href="simulation.html#catsim.simulation.SimulationRunner" title="catsim.simulation.SimulationRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.SimulationRunner</span></code></a>, as long as they also inherit from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code>.</p>
-<div class="graphviz"><img alt="Inheritance diagram of catsim.stopping.BaseStopper, catsim.stopping.TestLengthStopper, catsim.stopping.MinErrorStopper, catsim.stopping.ConfidenceIntervalStopper" class="inheritance graphviz" src="_images/inheritance-e9a6cca5f1dc53f3e415655caf4417f5bf056d9d.png" usemap="#inheritanceb3465e1daf"/></div>
+<div class="graphviz"><img alt="Inheritance diagram of catsim.stopping.BaseStopper, catsim.stopping.TestLengthStopper, catsim.stopping.MinErrorStopper, catsim.stopping.ConfidenceIntervalStopper" class="inheritance graphviz" src="_images/inheritance-b702e549000b51ac1c822138b4b376b3703456cc.png" usemap="#inheritanceb3465e1daf"/></div>
 <map id="inheritanceb3465e1daf" name="inheritanceb3465e1daf">
-<area alt="" coords="13,5,85,31" href="https://docs.python.org/3/library/abc.html#abc.ABC" id="node1" shape="rect" target="_top" title="Helper class that provides a standard way to create an ABC using"/>
-<area alt="" coords="140,31,244,56" href="#catsim.stopping.BaseStopper" id="node2" shape="rect" target="_top" title="Base class for CAT stopping criteria."/>
-<area alt="" coords="292,31,435,56" href="#catsim.stopping.TestLengthStopper" id="node5" shape="rect" target="_top" title="Base class for stoppers with common min/max item constraints and bank exhaustion checks."/>
-<area alt="" coords="483,5,677,31" href="#catsim.stopping.ConfidenceIntervalStopper" id="node4" shape="rect" target="_top" title="Stopping criterion based on confidence interval falling within discrete ability intervals."/>
-<area alt="" coords="517,55,643,80" href="#catsim.stopping.MinErrorStopper" id="node6" shape="rect" target="_top" title="Stopping criterion based on minimum standard error of estimation."/>
+<area alt="" coords="5,31,77,56" href="https://docs.python.org/3/library/abc.html#abc.ABC" id="node1" shape="rect" target="_top" title="Helper class that provides a standard way to create an ABC using"/>
+<area alt="" coords="125,31,229,56" href="#catsim.stopping.BaseStopper" id="node2" shape="rect" target="_top" title="Base class for CAT stopping criteria."/>
+<area alt="" coords="277,31,420,56" href="#catsim.stopping.TestLengthStopper" id="node4" shape="rect" target="_top" title="Base class for stoppers with shared minimum/maximum length and bank-exhaustion checks."/>
+<area alt="" coords="468,5,663,31" href="#catsim.stopping.ConfidenceIntervalStopper" id="node3" shape="rect" target="_top" title="Stop when the confidence interval for the current estimate falls within one configured ability band."/>
+<area alt="" coords="502,55,629,80" href="#catsim.stopping.MinErrorStopper" id="node5" shape="rect" target="_top" title="Stop when the standard error of estimation falls below a configured threshold."/>
 </map><p id="module-catsim.stopping">Stopping criteria components for CAT.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.stopping.BaseStopper">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.stopping.</span></span><span class="sig-name descname"><span class="pre">BaseStopper</span></span><a class="reference internal" href="_modules/catsim/stopping/base.html#BaseStopper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.BaseStopper" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulable</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Base class for CAT stopping criteria.</p>
 <p>Stoppers determine when a test should end based on specific criteria such as
 test length, measurement precision, or other conditions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.stopping.BaseStopper.stop">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/catsim/stopping/base.html#BaseStopper.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.BaseStopper.stop" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/catsim/stopping/base.html#BaseStopper.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.BaseStopper.stop" title="Link to this definition">¶</a></dt>
 <dd><p>Check whether the test reached its stopping criterion for the given user.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>index</strong><span class="classifier">int or None, optional</span></dt><dd><p>The index of the current examinee in the simulator. When used within a
-simulation, this parameter is provided automatically. When used standalone,
-other parameters may be provided via kwargs. Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Item bank used by the session.</p>
 </dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Additional keyword arguments that specific Stopper implementations may require.
-Common arguments include:</p>
-<ul class="simple">
-<li><p>administered_items: Item parameters or indices that were administered</p></li>
-<li><p>theta: Current ability estimate</p></li>
-<li><p>item_bank: ItemBank for accessing item parameters</p></li>
-</ul>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>Item indices already administered in the session.</p>
+</dd>
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Current ability estimate.</p>
 </dd>
 </dl>
 </dd>
@@ -483,13 +494,7 @@ Common arguments include:</p>
 <dt class="sig sig-object py" id="catsim.stopping.ConfidenceIntervalStopper">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.stopping.</span></span><span class="sig-name descname"><span class="pre">ConfidenceIntervalStopper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval_bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping/stopping.html#ConfidenceIntervalStopper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.ConfidenceIntervalStopper" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.stopping.TestLengthStopper" title="catsim.stopping.stopping.TestLengthStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestLengthStopper</span></code></a></p>
-<p>Stopping criterion based on confidence interval falling within discrete ability intervals.</p>
-<p>This stopper is designed for tests with discrete performance levels (e.g., letter grades
-A, B, C, D, F) defined by intervals on the ability scale. The test stops when the
-confidence interval for the examinee’s ability estimate falls entirely within one of
-these discrete intervals, indicating sufficient precision to classify the examinee.</p>
-<p>This stopper also enforces optional minimum/maximum item constraints and stops
-when the item bank is exhausted (via <a class="reference internal" href="#catsim.stopping.BaseStopper" title="catsim.stopping.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code></a>).</p>
+<p>Stop when the confidence interval for the current estimate falls within one configured ability band.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -508,26 +513,8 @@ Default is None (no minimum).</p>
 </dl>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define grade boundaries: F (&lt;-1), D [-1, 0), C [0, 1), B [1, 2), A (&gt;=2)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">ConfidenceIntervalStopper</span><span class="p">([</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Test stops when 95% CI is entirely within one grade interval</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With minimum items constraint</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">ConfidenceIntervalStopper</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.90</span><span class="p">,</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">10</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Test cannot stop before 10 items, even if CI criterion is met</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With maximum items constraint</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">ConfidenceIntervalStopper</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span> <span class="n">confidence</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">50</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Test stops at 50 items even if CI criterion is not met</span>
-</pre></div>
-</div>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="specs/stopping/confidence-interval-stopper.html"><span class="doc">Confidence Interval Stopper</span></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.stopping.ConfidenceIntervalStopper.confidence">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">confidence</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.stopping.ConfidenceIntervalStopper.confidence" title="Link to this definition">¶</a></dt>
@@ -559,12 +546,7 @@ Default is None (no minimum).</p>
 <dt class="sig sig-object py" id="catsim.stopping.MinErrorStopper">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.stopping.</span></span><span class="sig-name descname"><span class="pre">MinErrorStopper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping/stopping.html#MinErrorStopper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.MinErrorStopper" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.stopping.TestLengthStopper" title="catsim.stopping.stopping.TestLengthStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestLengthStopper</span></code></a></p>
-<p>Stopping criterion based on minimum standard error of estimation.</p>
-<p>The test stops when the standard error of estimation (see <a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>)
-falls below the specified threshold. This is commonly used in variable-length CATs
-to achieve a desired level of measurement precision.</p>
-<p>This stopper also enforces optional minimum/maximum item constraints and stops
-when the item bank is exhausted (via <a class="reference internal" href="#catsim.stopping.BaseStopper" title="catsim.stopping.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code></a>).</p>
+<p>Stop when the standard error of estimation falls below a configured threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -579,23 +561,8 @@ Default is None (no minimum).</p>
 </dl>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Stop when error &lt; 0.3</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="mf">0.3</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Stop when error &lt; 0.3, but only after at least 10 items</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Stop when error &lt; 0.3, or when 50 items reached</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Stop when error &lt; 0.3, between 10 and 50 items</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stopper</span> <span class="o">=</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">min_items</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-</pre></div>
-</div>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="specs/stopping/min-error-stopper.html"><span class="doc">Minimum Error Stopper</span></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.stopping.MinErrorStopper.min_error">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">min_error</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.stopping.MinErrorStopper.min_error" title="Link to this definition">¶</a></dt>
@@ -614,13 +581,7 @@ Default is None (no minimum).</p>
 <dt class="sig sig-object py" id="catsim.stopping.TestLengthStopper">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.stopping.</span></span><span class="sig-name descname"><span class="pre">TestLengthStopper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/stopping/stopping.html#TestLengthStopper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.TestLengthStopper" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.stopping.BaseStopper" title="catsim.stopping.base.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseStopper</span></code></a></p>
-<p>Base class for stoppers with common min/max item constraints and bank exhaustion checks.</p>
-<p>This class provides common functionality for stopping criteria including:
-- Minimum items requirement (test cannot stop before min_items are administered)
-- Maximum items constraint (test must stop when max_items are reached)
-- Item bank exhaustion detection (test stops when all items are used)</p>
-<p>Subclasses must implement the <cite>_check_stopping_criterion</cite> method to define
-their specific stopping logic.</p>
+<p>Base class for stoppers with shared minimum/maximum length and bank-exhaustion checks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -635,11 +596,7 @@ Default is None.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The stopping logic follows this priority order:
-1. Stop if max_items reached (hard stop)
-2. Stop if item bank exhausted (hard stop)
-3. Do not stop if min_items not yet reached (regardless of other criteria)
-4. Check the specific stopping criterion implemented by the subclass</p>
+<p>For full algorithmic details, see <a class="reference internal" href="specs/stopping/test-length-stopper.html"><span class="doc">Test Length Stopper</span></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.stopping.TestLengthStopper.max_items">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">max_items</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.stopping.TestLengthStopper.max_items" title="Link to this definition">¶</a></dt>
@@ -668,21 +625,16 @@ Default is None.</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.stopping.TestLengthStopper.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.4)"><span class="pre">dtype</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.4)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/catsim/stopping/stopping.html#TestLengthStopper.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.TestLengthStopper.stop" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="_modules/catsim/stopping/stopping.html#TestLengthStopper.stop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.stopping.TestLengthStopper.stop" title="Link to this definition">¶</a></dt>
 <dd><p>Check whether the test should stop based on common constraints and specific criterion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>index</strong><span class="classifier">int or None, optional</span></dt><dd><p>The index of the current examinee. Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank being used.</p>
 </dd>
-<dt><strong>_item_bank</strong><span class="classifier">ItemBank or None, optional</span></dt><dd><p>The item bank being used. Default is None.</p>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>Item indices that were already administered.</p>
 </dd>
-<dt><strong>administered_items</strong><span class="classifier">npt.NDArray[numpy.floating[Any]] or None, optional</span></dt><dd><p>A matrix containing the parameters of items that were already administered.
-Default is None.</p>
-</dd>
-<dt><strong>theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>An ability value. Default is None.</p>
-</dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Additional keyword arguments passed to the specific stopping criterion.</p>
+<dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>Current ability estimate.</p>
 </dd>
 </dl>
 </dd>
@@ -727,12 +679,12 @@ Default is None.</p>
             </a>
           
           
-            <a href="simulation.html" title="Computerized Adaptive Testing Simulation – catsim.simulation"
+            <a href="specs/index.html" title="Technique Specifications"
                class="md-flex md-footer-nav__link md-footer-nav__link--next"
                rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
                 class="md-flex__ellipsis"> <span
-                class="md-footer-nav__direction"> "Next" </span> Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code> </span>
+                class="md-footer-nav__direction"> "Next" </span> Technique Specifications </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink"><i
                 class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>

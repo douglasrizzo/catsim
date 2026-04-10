@@ -243,6 +243,13 @@
     <li class="md-nav__item">
     
     
+      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -272,6 +279,13 @@
     
     
       <a href="../../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -331,15 +345,7 @@
 <div class="viewcode-block" id="TestLengthStopper">
 <a class="viewcode-back" href="../../../stopping.html#catsim.stopping.TestLengthStopper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">TestLengthStopper</span><span class="p">(</span><span class="n">BaseStopper</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Base class for stoppers with common min/max item constraints and bank exhaustion checks.</span>
-
-<span class="sd">  This class provides common functionality for stopping criteria including:</span>
-<span class="sd">  - Minimum items requirement (test cannot stop before min_items are administered)</span>
-<span class="sd">  - Maximum items constraint (test must stop when max_items are reached)</span>
-<span class="sd">  - Item bank exhaustion detection (test stops when all items are used)</span>
-
-<span class="sd">  Subclasses must implement the `_check_stopping_criterion` method to define</span>
-<span class="sd">  their specific stopping logic.</span>
+<span class="w">  </span><span class="sd">"""Base class for stoppers with shared minimum/maximum length and bank-exhaustion checks.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -353,11 +359,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  The stopping logic follows this priority order:</span>
-<span class="sd">  1. Stop if max_items reached (hard stop)</span>
-<span class="sd">  2. Stop if item bank exhausted (hard stop)</span>
-<span class="sd">  3. Do not stop if min_items not yet reached (regardless of other criteria)</span>
-<span class="sd">  4. Check the specific stopping criterion implemented by the subclass</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/stopping/test-length-stopper`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -377,8 +379,6 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        If min_items or max_items are not positive, or if min_items &gt; max_items.</span>
 <span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
     <span class="k">if</span> <span class="n">min_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">min_items</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"min_items must be positive, got </span><span class="si">{</span><span class="n">min_items</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -398,27 +398,20 @@
 <a class="viewcode-back" href="../../../stopping.html#catsim.stopping.TestLengthStopper.stop">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check whether the test should stop based on common constraints and specific criterion.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee. Default is None.</span>
-<span class="sd">    _item_bank : ItemBank or None, optional</span>
-<span class="sd">        The item bank being used. Default is None.</span>
-<span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]] or None, optional</span>
-<span class="sd">        A matrix containing the parameters of items that were already administered.</span>
-<span class="sd">        Default is None.</span>
-<span class="sd">    theta : float or None, optional</span>
-<span class="sd">        An ability value. Default is None.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments passed to the specific stopping criterion.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        The item bank being used.</span>
+<span class="sd">    administered_items : list[int]</span>
+<span class="sd">        Item indices that were already administered.</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Current ability estimate.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -430,27 +423,22 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        If required parameters are missing.</span>
 <span class="sd">    """</span>
-    <span class="c1"># Extract data from simulator if not provided directly</span>
-    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
-      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-      <span class="n">administered_items_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">administered_items</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-      <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">estimations</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-      <span class="k">if</span> <span class="n">_item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">_item_bank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulator</span><span class="o">.</span><span class="n">item_bank</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Required parameters are missing. Either administered_items or index and simulator must be provided."</span>
+    <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank is required"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"administered_items is required"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">administered_items_array</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="k">if</span> <span class="n">n_items</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[:</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span>
 
     <span class="c1"># Hard stop: max_items reached</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_items</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_items</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">True</span>
 
     <span class="c1"># Hard stop: item bank exhausted</span>
-    <span class="k">if</span> <span class="n">_item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">n_items</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_item_bank</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n_items</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_bank</span><span class="p">):</span>
       <span class="k">return</span> <span class="kc">True</span>
 
     <span class="c1"># Cannot stop yet: min_items not reached</span>
@@ -458,14 +446,13 @@
       <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Check the specific stopping criterion</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_stopping_criterion</span><span class="p">(</span><span class="n">administered_items_array</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_stopping_criterion</span><span class="p">(</span><span class="n">administered_items_array</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span></div>
 
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_check_stopping_criterion</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check the specific stopping criterion implemented by the subclass.</span>
 
@@ -476,10 +463,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]]</span>
 <span class="sd">        Array containing the parameters of administered items.</span>
-<span class="sd">    theta : float or None</span>
+<span class="sd">    theta : float</span>
 <span class="sd">        Current ability estimate.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -515,14 +500,7 @@
 <div class="viewcode-block" id="MinErrorStopper">
 <a class="viewcode-back" href="../../../stopping.html#catsim.stopping.MinErrorStopper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MinErrorStopper</span><span class="p">(</span><span class="n">TestLengthStopper</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Stopping criterion based on minimum standard error of estimation.</span>
-
-<span class="sd">  The test stops when the standard error of estimation (see :py:func:`catsim.irt.see`)</span>
-<span class="sd">  falls below the specified threshold. This is commonly used in variable-length CATs</span>
-<span class="sd">  to achieve a desired level of measurement precision.</span>
-
-<span class="sd">  This stopper also enforces optional minimum/maximum item constraints and stops</span>
-<span class="sd">  when the item bank is exhausted (via :py:class:`BaseStopper`).</span>
+<span class="w">  </span><span class="sd">"""Stop when the standard error of estimation falls below a configured threshold.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -535,19 +513,9 @@
 <span class="sd">  max_items : int or None, optional</span>
 <span class="sd">      Maximum number of items that can be administered. Default is None (no maximum).</span>
 
-<span class="sd">  Examples</span>
-<span class="sd">  --------</span>
-<span class="sd">  &gt;&gt;&gt; # Stop when error &lt; 0.3</span>
-<span class="sd">  &gt;&gt;&gt; stopper = MinErrorStopper(0.3)</span>
-
-<span class="sd">  &gt;&gt;&gt; # Stop when error &lt; 0.3, but only after at least 10 items</span>
-<span class="sd">  &gt;&gt;&gt; stopper = MinErrorStopper(0.3, min_items=10)</span>
-
-<span class="sd">  &gt;&gt;&gt; # Stop when error &lt; 0.3, or when 50 items reached</span>
-<span class="sd">  &gt;&gt;&gt; stopper = MinErrorStopper(0.3, max_items=50)</span>
-
-<span class="sd">  &gt;&gt;&gt; # Stop when error &lt; 0.3, between 10 and 50 items</span>
-<span class="sd">  &gt;&gt;&gt; stopper = MinErrorStopper(0.3, min_items=10, max_items=50)</span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/stopping/min-error-stopper`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -588,8 +556,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_check_stopping_criterion</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
-    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check if the standard error is below the threshold.</span>
 
@@ -597,10 +564,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]]</span>
 <span class="sd">        Array of administered item parameters.</span>
-<span class="sd">    theta : float or None</span>
+<span class="sd">    theta : float</span>
 <span class="sd">        Current ability estimate.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments (unused).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -638,15 +603,7 @@
 <div class="viewcode-block" id="ConfidenceIntervalStopper">
 <a class="viewcode-back" href="../../../stopping.html#catsim.stopping.ConfidenceIntervalStopper">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ConfidenceIntervalStopper</span><span class="p">(</span><span class="n">TestLengthStopper</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Stopping criterion based on confidence interval falling within discrete ability intervals.</span>
-
-<span class="sd">  This stopper is designed for tests with discrete performance levels (e.g., letter grades</span>
-<span class="sd">  A, B, C, D, F) defined by intervals on the ability scale. The test stops when the</span>
-<span class="sd">  confidence interval for the examinee's ability estimate falls entirely within one of</span>
-<span class="sd">  these discrete intervals, indicating sufficient precision to classify the examinee.</span>
-
-<span class="sd">  This stopper also enforces optional minimum/maximum item constraints and stops</span>
-<span class="sd">  when the item bank is exhausted (via :py:class:`BaseStopper`).</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Stop when the confidence interval for the current estimate falls within one configured ability band.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -663,23 +620,9 @@
 <span class="sd">  max_items : int or None, optional</span>
 <span class="sd">      Maximum number of items that can be administered. Default is None (no maximum).</span>
 
-<span class="sd">  Examples</span>
-<span class="sd">  --------</span>
-<span class="sd">  &gt;&gt;&gt; # Define grade boundaries: F (&lt;-1), D [-1, 0), C [0, 1), B [1, 2), A (&gt;=2)</span>
-<span class="sd">  &gt;&gt;&gt; stopper = ConfidenceIntervalStopper([-1.0, 0.0, 1.0, 2.0], confidence=0.95)</span>
-<span class="sd">  &gt;&gt;&gt; # Test stops when 95% CI is entirely within one grade interval</span>
-
-<span class="sd">  &gt;&gt;&gt; # With minimum items constraint</span>
-<span class="sd">  &gt;&gt;&gt; stopper = ConfidenceIntervalStopper(</span>
-<span class="sd">  ...     [-1.0, 0.0, 1.0, 2.0], confidence=0.90, min_items=10</span>
-<span class="sd">  ... )</span>
-<span class="sd">  &gt;&gt;&gt; # Test cannot stop before 10 items, even if CI criterion is met</span>
-
-<span class="sd">  &gt;&gt;&gt; # With maximum items constraint</span>
-<span class="sd">  &gt;&gt;&gt; stopper = ConfidenceIntervalStopper(</span>
-<span class="sd">  ...     [-1.0, 0.0, 1.0, 2.0], confidence=0.95, max_items=50</span>
-<span class="sd">  ... )</span>
-<span class="sd">  &gt;&gt;&gt; # Test stops at 50 items even if CI criterion is not met</span>
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/specs/stopping/confidence-interval-stopper`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -738,8 +681,7 @@
   <span class="k">def</span><span class="w"> </span><span class="nf">_check_stopping_criterion</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
-    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check if the confidence interval falls entirely within a discrete interval.</span>
 
@@ -747,10 +689,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    administered_items : npt.NDArray[numpy.floating[Any]]</span>
 <span class="sd">        Array of administered item parameters.</span>
-<span class="sd">    theta : float or None</span>
+<span class="sd">    theta : float</span>
 <span class="sd">        Current ability estimate.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments (unused).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

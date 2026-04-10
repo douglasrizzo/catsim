@@ -46,7 +46,7 @@
   
   
   
-    <title>catsim - Computerized Adaptive Testing Simulator &#8212; catsim 0.21.0 documentation</title>
+    <title>catsim - Computerized Adaptive Testing Toolkit &#8212; catsim 0.21.0 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/material.css?v=79c92029" />
     <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
@@ -94,7 +94,7 @@
       <div class="md-flex__cell md-flex__cell--stretch">
         <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
           <span class="md-header-nav__topic">catsim</span>
-          <span class="md-header-nav__topic"> catsim - Computerized Adaptive Testing Simulator </span>
+          <span class="md-header-nav__topic"> catsim - Computerized Adaptive Testing Toolkit </span>
         </div>
       </div>
       <div class="md-flex__cell md-flex__cell--shrink">
@@ -244,6 +244,13 @@
     <li class="md-nav__item">
     
     
+      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -279,6 +286,13 @@
     <li class="md-nav__item">
     
     
+      <a href="architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="contributing.html" class="md-nav__link">Contributing</a>
       
     
@@ -304,7 +318,7 @@
 <nav class="md-nav md-nav--secondary">
     <label class="md-nav__title" for="__toc">"Contents"</label>
   <ul class="md-nav__list" data-md-scrollfix="">
-        <li class="md-nav__item"><a href="#index--page-root" class="md-nav__link"><cite>catsim</cite> - Computerized Adaptive Testing Simulator</a><nav class="md-nav">
+        <li class="md-nav__item"><a href="#index--page-root" class="md-nav__link"><cite>catsim</cite> - Computerized Adaptive Testing Toolkit</a><nav class="md-nav">
               <ul class="md-nav__list">
         <li class="md-nav__item"><a href="#installation" class="md-nav__link">Installation</a>
         </li>
@@ -338,8 +352,8 @@
         <div class="md-content">
           <article class="md-content__inner md-typeset" role="main">
             
-  <section id="catsim-computerized-adaptive-testing-simulator">
-<h1 id="index--page-root"><cite>catsim</cite> - Computerized Adaptive Testing Simulator<a class="headerlink" href="#index--page-root" title="Link to this heading">¶</a></h1>
+  <section id="catsim-computerized-adaptive-testing-toolkit">
+<h1 id="index--page-root"><cite>catsim</cite> - Computerized Adaptive Testing Toolkit<a class="headerlink" href="#index--page-root" title="Link to this heading">¶</a></h1>
 <!-- DO NOT EDIT README.md, edit sphinx/readme_head.md and sphinx/readme_body.md --><a class="reference external image-reference" href="https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml"><img alt="CI/CD" src="https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main"/>
 </a>
 <a class="reference external image-reference" href="https://codecov.io/github/douglasrizzo/catsim"><img alt="codecov" src="https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk"/>
@@ -348,21 +362,30 @@
 </a>
 <a class="reference external image-reference" href="http://dx.doi.org/10.5281/zenodo.46420"><img alt="Digital Object Identifier" src="https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg"/>
 </a>
-<p>A Python package for computerized adaptive testing (CAT) simulations. It provides multiple methods for:</p>
+<p>A Python package for computerized adaptive testing (CAT). It provides a reusable CAT engine, simulation tools, and multiple methods for:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">item selection</a></p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">ability estimation</a></p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">test stopping</a></p></li>
 </ul>
-<p>These methods can either be used in a standalone fashion to power other software or be used with <em>catsim</em> to simulate the application of <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests">computerized adaptive tests</a>, given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory model</a>.</p>
+<p>These methods can either be used in a standalone fashion to power other software or be used with <em>catsim</em> to run and simulate <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests">computerized adaptive tests</a>, given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory model</a>.</p>
 <section id="installation">
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
 <p>Install it using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim</span></code>.</p>
 </section>
 <section id="basic-usage">
 <h2 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h2>
-<p>There is <a class="reference external" href="https://colab.research.google.com/drive/1iJQE9VFrDD2Pqrsa7K3EvD1pSTBPw0Ur?usp=sharing">a Colab Notebook</a> teaching the basics of catsim!</p>
+<p>Tutorial notebooks are available in the repository under <cite>``notebooks/`</cite> &lt;<a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/main/notebooks">https://github.com/douglasrizzo/catsim/tree/main/notebooks</a>&gt;`_:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/01_introduction_to_catsim.ipynb">Introduction</a></p></li>
+<li><p><a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/02_manual_cat_sessions.ipynb">Manual CAT sessions</a></p></li>
+<li><p><a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_simulation_studies.ipynb">Simulation studies</a></p></li>
+<li><p><a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_item_selection_and_stopping.ipynb">Item selection and stopping</a></p></li>
+<li><p><a class="reference external" href="https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/05_visualization_and_analysis.ipynb">Visualization and analysis</a></p></li>
+</ul>
+<p>The main architecture decisions behind the current engine and simulation model are documented as
+<a class="reference external" href="https://douglasrizzo.com.br/catsim/architecture_decisions.html">Architecture Decision Records</a>.</p>
 <ol class="arabic simple">
 <li><p>Have an <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix">item matrix</a>;</p></li>
 <li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
@@ -370,22 +393,24 @@
 an item <a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">selector</a>, a
 ability <a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">estimator</a>
 and a <a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">stopping criterion</a>;</p></li>
-<li><p>Pass them to a <a class="reference external" href="https://douglasrizzo.com.br/catsim/simulation.html">simulator</a>
-and start the simulation.</p></li>
-<li><p>Access the simulator’s properties to get specifics of the results;</p></li>
+<li><p>Create a <a class="reference external" href="https://douglasrizzo.com.br/catsim/simulation.html">simulation runner</a>
+with those components.</p></li>
+<li><p>Run the simulation and inspect the returned result object;</p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/plot.html">Plot</a> your results.</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomInitializer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MinErrorStopper</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationRunner</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
 <span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
 <span class="n">estimator</span> <span class="o">=</span> <span class="n">NumericalSearchEstimator</span><span class="p">()</span>
 <span class="n">stopper</span> <span class="o">=</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="n">Simulator</span><span class="p">(</span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
+<span class="n">runner</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

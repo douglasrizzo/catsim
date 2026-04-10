@@ -243,6 +243,13 @@
     <li class="md-nav__item">
     
     
+      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -272,6 +279,13 @@
     
     
       <a href="../../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -319,43 +333,33 @@
 <span></span><span class="sd">"""Base class for CAT stoppers."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.._base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Simulable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
 
 <div class="viewcode-block" id="BaseStopper">
 <a class="viewcode-back" href="../../../stopping.html#catsim.stopping.BaseStopper">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BaseStopper</span><span class="p">(</span><span class="n">Simulable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseStopper</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Base class for CAT stopping criteria.</span>
 
 <span class="sd">  Stoppers determine when a test should end based on specific criteria such as</span>
 <span class="sd">  test length, measurement precision, or other conditions.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a Stopper object."""</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-
 <div class="viewcode-block" id="BaseStopper.stop">
 <a class="viewcode-back" href="../../../stopping.html#catsim.stopping.BaseStopper.stop">[docs]</a>
   <span class="nd">@abstractmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Check whether the test reached its stopping criterion for the given user.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    index : int or None, optional</span>
-<span class="sd">        The index of the current examinee in the simulator. When used within a</span>
-<span class="sd">        simulation, this parameter is provided automatically. When used standalone,</span>
-<span class="sd">        other parameters may be provided via kwargs. Default is None.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments that specific Stopper implementations may require.</span>
-<span class="sd">        Common arguments include:</span>
-
-<span class="sd">        - administered_items: Item parameters or indices that were administered</span>
-<span class="sd">        - theta: Current ability estimate</span>
-<span class="sd">        - item_bank: ItemBank for accessing item parameters</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        Item bank used by the session.</span>
+<span class="sd">    administered_items : list[int]</span>
+<span class="sd">        Item indices already administered in the session.</span>
+<span class="sd">    theta : float</span>
+<span class="sd">        Current ability estimate.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>

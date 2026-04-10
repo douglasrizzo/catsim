@@ -252,6 +252,8 @@
         <li class="md-nav__item"><a href="#catsim.estimation.BaseEstimator.estimate" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.estimate()</span></code></a>
         </li>
         <li class="md-nav__item"><a href="#catsim.estimation.BaseEstimator.evaluations" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.evaluations</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.estimation.BaseEstimator.total_evaluations" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.total_evaluations</span></code></a>
         </li></ul>
             </nav>
         </li>
@@ -310,6 +312,13 @@
     <li class="md-nav__item">
     
     
+      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -339,6 +348,13 @@
     
     
       <a href="reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -381,6 +397,8 @@
         <li class="md-nav__item"><a href="#catsim.estimation.BaseEstimator.estimate" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.estimate()</span></code></a>
         </li>
         <li class="md-nav__item"><a href="#catsim.estimation.BaseEstimator.evaluations" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.evaluations</span></code></a>
+        </li>
+        <li class="md-nav__item"><a href="#catsim.estimation.BaseEstimator.total_evaluations" class="md-nav__link"><code class="docutils literal notranslate"><span class="pre">BaseEstimator.total_evaluations</span></code></a>
         </li></ul>
             </nav>
         </li>
@@ -416,6 +434,8 @@
             
   <section id="estimation-methods-catsim-estimation">
 <h1 id="estimation--page-root">Estimation Methods – <a class="reference internal" href="#estimation--page-root" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a><a class="headerlink" href="#estimation--page-root" title="Link to this heading">¶</a></h1>
+<p>For algorithmic details, mathematical definitions, and behavioral contracts of each
+estimation technique, see <a class="reference internal" href="specs/estimation/index.html"><span class="doc">Estimation Techniques</span></a>.</p>
 <p>Estimators are the objects responsible for estimating examinees’
 ability values, given a dichotomous (binary) response vector and an array of
 the items answered by the examinee. In the domain of IRT, there are two main
@@ -429,15 +449,21 @@ parameter distributions) to make new estimations. New estimations are then
 used to refine assumptions about the parameter distributions, improving
 future estimations.</p>
 <p>All implemented classes in this module inherit from a base abstract class
-<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom estimator be
-used during the simulation, as long as it also inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>. Estimators can be used manually through
+<code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.engine.CatEngine</span></code> or through
+<a class="reference internal" href="simulation.html#catsim.simulation.SimulationRunner" title="catsim.simulation.SimulationRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.SimulationRunner</span></code></a>, as long as they also inherit from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>.</p>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> implements a few types of maximum-likelihood estimators.</p>
+<div class="graphviz"><img alt="Inheritance diagram of catsim.estimation.BaseEstimator, catsim.estimation.NumericalSearchEstimator" class="inheritance graphviz" src="_images/inheritance-ebbecef971a53064b31b2d73e2ae52ffc9054603.png" usemap="#inheritance9556b9dc56"/></div>
+<map id="inheritance9556b9dc56" name="inheritance9556b9dc56">
+<area alt="" coords="5,5,77,31" href="https://docs.python.org/3/library/abc.html#abc.ABC" id="node1" shape="rect" target="_top" title="Helper class that provides a standard way to create an ABC using"/>
+<area alt="" coords="125,5,243,31" href="#catsim.estimation.BaseEstimator" id="node2" shape="rect" target="_top" title="Base class for ability estimators."/>
+<area alt="" coords="291,5,487,31" href="#catsim.estimation.NumericalSearchEstimator" id="node3" shape="rect" target="_top" title="Estimate ability by numerically maximizing the IRT log-likelihood."/>
+</map><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> implements a few types of maximum-likelihood estimators.</p>
 <p id="module-catsim.estimation">Ability estimation components for CAT.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.estimation.BaseEstimator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">BaseEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation/base.html#BaseEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.BaseEstimator" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulable</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Base class for ability estimators.</p>
 <p>Estimators are responsible for computing ability estimates based on examinees’
 responses to administered items.</p>
@@ -456,7 +482,7 @@ responses to administered items.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>float</dt><dd><p>Average number of function evaluations per test.</p>
+<dt>float</dt><dd><p>Average number of function evaluations per estimate call.</p>
 </dd>
 </dl>
 </dd>
@@ -478,25 +504,18 @@ log-likelihood function.</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.BaseEstimator.estimate">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/estimation/base.html#BaseEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.BaseEstimator.estimate" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/estimation/base.html#BaseEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.BaseEstimator.estimate" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the theta value that maximizes the log-likelihood function for the given examinee.</p>
-<p>When this method is used inside a simulator, its arguments are automatically filled.
-Outside of a simulation, the user can also specify the arguments to use the
-Estimator as a standalone object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>index</strong><span class="classifier">int or None, optional</span></dt><dd><p>Index of the current examinee in the simulator. Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
 </dd>
-<dt><strong>item_bank</strong><span class="classifier">ItemBank or None, optional</span></dt><dd><p>An ItemBank containing item parameters. Default is None.</p>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing the indexes of items that were already administered.</p>
 </dd>
-<dt><strong>administered_items</strong><span class="classifier">list[int] or None, optional</span></dt><dd><p>A list containing the indexes of items that were already administered.
-Default is None.</p>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>A boolean list containing the examinee’s answers to the administered items.</p>
 </dd>
-<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>A boolean list containing the examinee’s answers to the administered items.
-Default is None.</p>
-</dd>
-<dt><strong>est_theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>A float containing the current estimated ability. Default is None.</p>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
 </dl>
 </dd>
@@ -515,28 +534,29 @@ Default is None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>int</dt><dd><p>Number of function evaluations.</p>
+<dt>int</dt><dd><p>Number of function evaluations in the most recent estimate call.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.BaseEstimator.total_evaluations">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">total_evaluations</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.estimation.BaseEstimator.total_evaluations" title="Link to this definition">¶</a></dt>
+<dd><p>Get the total number of evaluations across the estimator lifetime.</p>
 </dd></dl>
 </dd></dl>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">NumericalSearchEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dodd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bounded'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/estimation/numerical.html#NumericalSearchEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#catsim.estimation.BaseEstimator" title="catsim.estimation.base.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a></p>
-<p>Implement search algorithms in unimodal functions to find the maximum of the log-likelihood function.</p>
-<p>This class provides multiple numerical search methods for ability estimation in IRT,
-including ternary search, dichotomous search, Fibonacci search, and golden-section
-search, according to <a class="reference internal" href="references.html#veliz20" id="id1"><span>[Veliz20]</span></a>. Also check <a class="reference internal" href="references.html#brent02" id="id2"><span>[Brent02]</span></a>. It is also possible to use
-the methods from <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar" title="(in SciPy v1.17.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize_scalar()</span></code></a>.</p>
+<p>Estimate ability by numerically maximizing the IRT log-likelihood.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Tolerance for convergence in the optimization algorithm. Default is 1e-6.</p>
 </dd>
-<dt><strong>dodd</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to employ Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id3"><span>[Dod90]</span></a> when the response vector
+<dt><strong>dodd</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to employ Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id1"><span>[Dod90]</span></a> when the response vector
 only has one kind of response (all correct or all incorrect, see
 <a class="reference internal" href="cat.html#catsim.cat.dodd" title="catsim.cat.dodd"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.dodd()</span></code></a>). Default is True.</p>
 </dd>
@@ -548,6 +568,8 @@ only has one kind of response (all correct or all incorrect, see
 </dl>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="specs/estimation/numerical-search-estimator.html"><span class="doc">Numerical Search Estimator (MLE)</span></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator.available_methods">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">available_methods</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#frozenset" title="(in Python v3.14)"><span class="pre">frozenset</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/catsim/estimation/numerical.html#NumericalSearchEstimator.available_methods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.available_methods" title="Link to this definition">¶</a></dt>
@@ -565,7 +587,7 @@ only has one kind of response (all correct or all incorrect, see
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator.dodd">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">dodd</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.dodd" title="Link to this definition">¶</a></dt>
-<dd><p>Whether Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id4"><span>[Dod90]</span></a> will be used by the estimator.</p>
+<dd><p>Whether Dodd’s estimation heuristic <a class="reference internal" href="references.html#dod90" id="id2"><span>[Dod90]</span></a> will be used by the estimator.</p>
 <p>Dodd’s method is used when the response vector is composed solely of correct or
 incorrect answers, to prevent maximum likelihood methods from returning -infinity
 or +infinity.</p>
@@ -587,25 +609,18 @@ or +infinity.</p>
 </dd></dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.NumericalSearchEstimator.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/estimation/numerical.html#NumericalSearchEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.estimate" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/estimation/numerical.html#NumericalSearchEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.NumericalSearchEstimator.estimate" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the theta value that maximizes the log-likelihood function for the given examinee.</p>
-<p>When this method is used inside a simulator, its arguments are automatically filled.
-Outside of a simulation, the user can also specify the arguments to use the Estimator
-as a standalone object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>index</strong><span class="classifier">int or None, optional</span></dt><dd><p>Index of the current examinee in the simulator. Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
 </dd>
-<dt><strong>item_bank</strong><span class="classifier">ItemBank or None, optional</span></dt><dd><p>An ItemBank containing item parameters. Default is None.</p>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing the indexes of items that were already administered.</p>
 </dd>
-<dt><strong>administered_items</strong><span class="classifier">list[int] or None, optional</span></dt><dd><p>A list containing the indexes of items that were already administered.
-Default is None.</p>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>A boolean list containing the examinee’s answers to the administered items.</p>
 </dd>
-<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>A boolean list containing the examinee’s answers to the administered items.
-Default is None.</p>
-</dd>
-<dt><strong>est_theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>A float containing the current estimated ability. Default is None.</p>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
 </dl>
 </dd>
@@ -617,7 +632,7 @@ Default is None.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If required parameters are None when not using a simulator.</p>
+<dt>ValueError</dt><dd><p>If required parameters are missing.</p>
 </dd>
 </dl>
 </dd>
@@ -642,18 +657,18 @@ Default is None.</p>
 <h2 id="comparison-between-estimators">Comparison between estimators<a class="headerlink" href="#comparison-between-estimators" title="Link to this heading">¶</a></h2>
 <p>The chart below displays the execution times of the same simulation (100 examinees, an item bank of 300 questions and 20 items per test) using different <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> estimation methods.</p>
 <p>(<a class="reference download internal" download="" href="_downloads/32f47e3850bfb6c2a1c4d011bc7696e4/estimation-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/a21b70957c1b2ae4bcab7ad6de55f6b3/estimation-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/bf9d6e6926ab1bf2786c9b18cdaefa41/estimation-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/3d18476672713eba1bf1e2a34e7a95ef/estimation-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default" id="id5">
+<figure class="align-default" id="id3">
 <img alt="_images/estimation-1.png" class="plot-directive" src="_images/estimation-1.png"/>
 <figcaption>
-<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Execution times of the same simulation (100 examinees, an item bank of 300 questions and 20 items per test) using different <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> estimation methods.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+<p><span class="caption-number">Fig. 3 </span><span class="caption-text">Execution times of the same simulation (100 examinees, an item bank of 300 questions and 20 items per test) using different <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> estimation methods.</span><a class="headerlink" href="#id3" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 <p>The charts below show the <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function. The main difference among them is in the number of calls to <a class="reference internal" href="irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>. Methods that require less calls to maximize the function are usually more time efficient.</p>
 <p>(<a class="reference download internal" download="" href="_downloads/4a25134a8ae59167f2e88255e7bf0b51/estimation-2.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>, <a class="reference download internal" download="" href="_downloads/3d671c605e8086a3e766b1ae1f5b5462/estimation-2.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="_downloads/342faf071e3d87ce772c903dbebb507e/estimation-2.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="_downloads/d895aab3091f04cfd701d5269b61f8b6/estimation-2.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default" id="id7">
+<figure class="align-default" id="id5">
 <img alt="_images/estimation-2.png" class="plot-directive" src="_images/estimation-2.png"/>
 <figcaption>
-<p><span class="caption-number">Fig. 5 </span><span class="caption-text"><span class="math notranslate nohighlight">\(\hat{\theta}\)</span> found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function.</span><a class="headerlink" href="#id7" title="Link to this image">¶</a></p>
+<p><span class="caption-number">Fig. 5 </span><span class="caption-text"><span class="math notranslate nohighlight">\(\hat{\theta}\)</span> found by the different estimation methods, given three dichotomous response vectors with different numbers of correct answers. All estimators reach comparable results, maximizing the log-likelihood function.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
 </section>

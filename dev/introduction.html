@@ -59,7 +59,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Initialization Methods – catsim.initialization" href="initialization.html" />
-    <link rel="prev" title="catsim - Computerized Adaptive Testing Simulator" href="index.html" />
+    <link rel="prev" title="catsim - Computerized Adaptive Testing Toolkit" href="index.html" />
   
    
 
@@ -344,6 +344,13 @@
     <li class="md-nav__item">
     
     
+      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -373,6 +380,13 @@
     
     
       <a href="reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -456,7 +470,7 @@
             
   <section id="introduction">
 <h1 id="introduction--page-root">Introduction<a class="headerlink" href="#introduction--page-root" title="Link to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> is a Python package for simulating computerized adaptive tests (CAT), a modern approach to assessment that adapts to each examinee’s ability level in real time.</p>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> is a Python package for computerized adaptive testing (CAT), providing both stepwise CAT execution and CAT simulation tools for a modern assessment workflow that adapts to each examinee’s ability level in real time.</p>
 <section id="what-are-latent-traits">
 <h2 id="what-are-latent-traits">What are Latent Traits?<a class="headerlink" href="#what-are-latent-traits" title="Link to this heading">¶</a></h2>
 <p>Assessment instruments measure <em>latent traits</em> - internal characteristics that cannot be directly observed, such as knowledge or personality traits. Educational and psychological tests are common examples. When a latent trait is expressed numerically, it is called an <em>ability</em> or <em>proficiency</em>.</p>
@@ -482,16 +496,16 @@
 </section>
 <section id="about-catsim">
 <h2 id="about-catsim">About catsim<a class="headerlink" href="#about-catsim" title="Link to this heading">¶</a></h2>
-<p>CAT simulations rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT simulation packages exist for R <a class="reference internal" href="references.html#magis12" id="id2"><span>[Magis12]</span></a>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> brings these capabilities to Python. Built on <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.4)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/index.html#module-scipy" title="(in SciPy v1.17.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, it provides:</p>
+<p>CAT systems rely on Item Response Theory (IRT), which provides the mathematical framework for modeling tests, items, and examinees. While CAT packages exist for R <a class="reference internal" href="references.html#magis12" id="id2"><span>[Magis12]</span></a>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> brings these capabilities to Python. Built on <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.4)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/index.html#module-scipy" title="(in SciPy v1.17.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, it provides:</p>
 <ul class="simple">
 <li><p>Multiple initialization, selection, estimation, and stopping methods</p></li>
-<li><p>Object-oriented architecture for easy customization</p></li>
-<li><p>Tools for comparing different CAT methodologies</p></li>
+<li><p>A reusable CAT engine for manual and embedded workflows</p></li>
+<li><p>Simulation tools for comparing different CAT methodologies</p></li>
 </ul>
 </section>
 <section id="item-response-theory-models">
 <h2 id="item-response-theory-models">Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading">¶</a></h2>
-<p>As a CAT simulator, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory (<a class="reference internal" href="references.html#lord68" id="id3"><span>[Lord68]</span></a> and <a class="reference internal" href="references.html#rasch66" id="id4"><span>[Rasch66]</span></a>), a series of models created in the second part of the 20th century with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models’ parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals’ abilities by allocating them in ability scales, inspiring as well as justifying its use in adaptive testing.</p>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory (<a class="reference internal" href="references.html#lord68" id="id3"><span>[Lord68]</span></a> and <a class="reference internal" href="references.html#rasch66" id="id4"><span>[Rasch66]</span></a>), a series of models created in the second part of the 20th century with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item Response Theory one-, two- and three-parameter logistic models, a series of models in which examinees and items are represented by a set of numerical values (the models’ parameters). Item Response Theory itself was created with the goal of measuring latent traits as well as assessing and comparing individuals’ abilities by allocating them in ability scales, inspiring as well as justifying its use in adaptive testing.</p>
 <p>The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of <em>items</em> in which examinees manifest their latent traits when answering them.</p>
 <p>In unidimensional IRT models, an examinee’s ability is represented as <span class="math notranslate nohighlight">\(\theta\)</span>. Usually <span class="math notranslate nohighlight">\(-\infty &lt; \theta &lt; \infty\)</span>, but since the scale of <span class="math notranslate nohighlight">\(\theta\)</span> is up to the individuals creating the instrument, it is common for the values to follow the normal distribution <span class="math notranslate nohighlight">\(N(0, 1)\)</span>, such that <span class="math notranslate nohighlight">\(-4 &lt; \theta &lt; 4\)</span>. Additionally, <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is the estimate of <span class="math notranslate nohighlight">\(\theta\)</span>. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true <span class="math notranslate nohighlight">\(\theta\)</span> as the test progresses in length.</p>
 <p>Under the logistic models of IRT, an item is represented by the following parameters:</p>
@@ -536,7 +550,7 @@
 </pre></div>
 </div>
 <p>These examples depict the generation of an array of five items according to the different logistic models. In the last example, parameters <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> have a correlation of <span class="math notranslate nohighlight">\(0.5\)</span>, an adjustment that may be useful in case simulations require it <a class="reference internal" href="references.html#chang2001" id="id12"><span>[Chang2001]</span></a>.</p>
-<p>After the simulation, catsim adds a fourth column to the item matrix, representing the items exposure rate, commonly denoted as <span class="math notranslate nohighlight">\(r\)</span>. Its value denotes how many times an item has been used and it is computed as follows:</p>
+<p>Historically, catsim stored item exposure rates in an additional item-matrix column. In the current architecture, exposure is better treated as run-level output derived from simulation results. When represented, the exposure rate is commonly denoted as <span class="math notranslate nohighlight">\(r\)</span> and computed as follows:</p>
 <div class="math notranslate nohighlight">
 \[r_i = \frac{q_i}{N}\]</div>
 <p>Where <span class="math notranslate nohighlight">\(q_i\)</span> represents the number of tests item <span class="math notranslate nohighlight">\(i\)</span> has been used on and <span class="math notranslate nohighlight">\(N\)</span> is the total number of tests applied.</p>
@@ -639,7 +653,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
           
-            <a href="index.html" title="catsim - Computerized Adaptive Testing Simulator"
+            <a href="index.html" title="catsim - Computerized Adaptive Testing Toolkit"
                class="md-flex md-footer-nav__link md-footer-nav__link--prev"
                rel="prev">
               <div class="md-flex__cell md-flex__cell--shrink">
@@ -648,7 +662,7 @@
               <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
                 <span class="md-flex__ellipsis">
                   <span
-                      class="md-footer-nav__direction"> "Previous" </span> <cite>catsim</cite> - Computerized Adaptive Testing Simulator </span>
+                      class="md-footer-nav__direction"> "Previous" </span> <cite>catsim</cite> - Computerized Adaptive Testing Toolkit </span>
               </div>
             </a>
           

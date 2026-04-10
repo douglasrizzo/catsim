@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="../../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../../_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="../../_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="../../_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>Generalized Likelihood Ratio Stopper &#8212; catsim 0.21.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/material.css?v=79c92029" />
+    <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../_static/logo.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Stochastic Curtailment Stopper" href="stochastic-curtailment-stopper.html" />
+    <link rel="prev" title="Sequential Probability Ratio Test Stopper" href="sprt-stopper.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue data-md-color-accent=light-blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#specs/stopping/glr-stopper" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../../index.html" title="catsim 0.21.0 documentation"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">catsim</span>
+          <span class="md-header-nav__topic"> Generalized Likelihood Ratio Stopper </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="../../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../../"versions.json"",
+        target_loc = "../../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../../index.html" class="md-tabs__link">catsim 0.21.0 documentation</a></li>
+          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">Technique Specifications</a></li>
+          <li class="md-tabs__item"><a href="index.html" class="md-tabs__link">Stopping Criteria</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../../index.html" title="catsim 0.21.0 documentation" class="md-nav__button md-logo">
+      
+        <img src="../../_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="../../index.html"
+       title="catsim 0.21.0 documentation">catsim</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+    </div>
+  
+  
+
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+    
+      <a href="../../introduction.html" class="md-nav__link">Introduction</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../index.html" class="md-nav__link">Technique Specifications</a>
+      <ul class="md-nav__list"> 
+    <li class="md-nav__item">
+    
+    
+      <a href="../selection/index.html" class="md-nav__link">Selection Techniques</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../estimation/index.html" class="md-nav__link">Estimation Techniques</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="index.html" class="md-nav__link">Stopping Criteria</a>
+      
+    
+    </li></ul>
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../contributing.html" class="md-nav__link">Contributing</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../references.html" class="md-nav__link">Bibliography</a>
+      
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#specs-stopping-glr-stopper--page-root" class="md-nav__link">Generalized Likelihood Ratio Stopper</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#motivation" class="md-nav__link">Motivation</a>
+        </li>
+        <li class="md-nav__item"><a href="#definition" class="md-nav__link">Definition</a>
+        </li>
+        <li class="md-nav__item"><a href="#parameters" class="md-nav__link">Parameters</a>
+        </li>
+        <li class="md-nav__item"><a href="#behavioral-contracts" class="md-nav__link">Behavioral Contracts</a>
+        </li>
+        <li class="md-nav__item"><a href="#references" class="md-nav__link">References</a>
+        </li>
+        <li class="md-nav__item"><a href="#implementation-guidance" class="md-nav__link">Implementation Guidance</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="../../_sources/specs/stopping/glr-stopper.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <section id="generalized-likelihood-ratio-stopper">
+<h1 id="specs-stopping-glr-stopper--page-root">Generalized Likelihood Ratio Stopper<a class="headerlink" href="#specs-stopping-glr-stopper--page-root" title="Link to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Status<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Planned</p>
+</dd>
+<dt class="field-even">Module<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">catsim.stopping.classification.GLRStopper</span></code> (planned)</p>
+</dd>
+<dt class="field-odd">Reference<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bartroff, Finkelman, and Lai (2008); Finkelman (2010)</p>
+</dd>
+</dl>
+<section id="motivation">
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>SPRT compares two fixed boundary points around the cut score. That is simple, but
+it can be conservative because it does not use the full information already
+contained in the current ability estimate.</p>
+<p>The generalized likelihood ratio (GLR) rule plugs in the current MLE and compares
+it with the nearest boundary point in the competing region. In practice this
+often yields shorter classification tests than SPRT at comparable error control.</p>
+</section>
+<section id="definition">
+<h2 id="definition">Definition<a class="headerlink" href="#definition" title="Link to this heading">¶</a></h2>
+<p>Let <span class="math notranslate nohighlight">\(\hat{\theta}_n\)</span> be the current MLE after <span class="math notranslate nohighlight">\(n\)</span> items, with cut
+score <span class="math notranslate nohighlight">\(\theta_c\)</span> and indifference half-width <span class="math notranslate nohighlight">\(\delta\)</span>. Define</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Lambda_n^{\mathrm{GLR}}
+=
+\begin{cases}
+  \ell_n(\hat{\theta}_n) - \ell_n(\theta_c - \delta),
+    &amp; \hat{\theta}_n \ge \theta_c + \delta \\
+  \ell_n(\hat{\theta}_n) - \ell_n(\theta_c + \delta),
+    &amp; \hat{\theta}_n \le \theta_c - \delta \\
+  0, &amp; \text{otherwise}
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\ell_n(\theta) = \log L(\mathbf{u} \mid \theta)\)</span>. A practical first
+threshold is</p>
+<div class="math notranslate nohighlight">
+\[\Lambda_n^{\mathrm{GLR}} \ge \log(1/\alpha),\]</div>
+<p>though the original paper gives refined calibrations.</p>
+</section>
+<section id="parameters">
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<table>
+<colgroup>
+<col style="width: 20.0%"/>
+<col style="width: 15.0%"/>
+<col style="width: 65.0%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cut_score</span></code></p></td>
+<td><p>required</p></td>
+<td><p>Classification cut point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">indifference</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p>Half-width of the indifference region.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Nominal Type I error rate used to derive a default threshold.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Explicit stopping threshold; overrides the alpha-based default if provided.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min_items</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Minimum length before classification can be declared.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_items</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Hard maximum length before fallback classification.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="behavioral-contracts">
+<h2 id="behavioral-contracts">Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">¶</a></h2>
+<p>Any correct implementation must satisfy the following properties:</p>
+<ol class="arabic simple">
+<li><p>If the current estimate lies inside the indifference region, the GLR statistic is zero and the rule does not classify on the statistic alone.</p></li>
+<li><p>When the estimate is above the upper indifference boundary, the decision favored by the GLR statistic is “above cut”; when below the lower boundary, it is “below cut”.</p></li>
+<li><p>The statistic is computed from the current estimate plus boundary-point likelihoods, not from two fixed-point likelihoods as in SPRT.</p></li>
+<li><p>The stopper exposes the last statistic value and the last classification outcome.</p></li>
+<li><p>Like SPRT, the rule requires response-vector access through the stopping API.</p></li>
+</ol>
+</section>
+<section id="references">
+<h2 id="references">References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<p>Bartroff, J., Finkelman, M. D., &amp; Lai, T. L. (2008). Modern sequential analysis and its applications to computerized adaptive testing. <em>Psychometrika</em>, 73(3), 473-486. <a class="reference external" href="https://doi.org/10.1007/s11336-007-9053-9">https://doi.org/10.1007/s11336-007-9053-9</a></p>
+<p>Finkelman, M. D. (2010). Variations on stochastic curtailment in sequential mastery testing. <em>Applied Psychological Measurement</em>, 34(1), 27-45. <a class="reference external" href="https://doi.org/10.1177/0146621609349807">https://doi.org/10.1177/0146621609349807</a></p>
+</section>
+<section id="implementation-guidance">
+<h2 id="implementation-guidance">Implementation Guidance<a class="headerlink" href="#implementation-guidance" title="Link to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section is for contributors and agents implementing this technique.
+It is removed when the spec is promoted to “Implemented” status.</p>
+</div>
+<p><strong>Proposed location:</strong> <code class="docutils literal notranslate"><span class="pre">src/catsim/stopping/classification.py</span></code></p>
+<p><strong>Mock implementation:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># src/catsim/stopping/classification.py  (alongside SPRTStopper)</span>
+<span class="sd">"""Generalized Likelihood Ratio classification stopper (Bartroff, Finkelman &amp; Lai, 2008)."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.classification</span><span class="w"> </span><span class="kn">import</span> <span class="n">Classification</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestLengthStopper</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">GLRStopper</span><span class="p">(</span><span class="n">TestLengthStopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">"""Generalized Likelihood Ratio classification stopper.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  cut_score : float</span>
+<span class="sd">      Ability threshold :math:`\\theta_c`.</span>
+<span class="sd">  indifference : float</span>
+<span class="sd">      Half-width :math:`\\delta` of the indifference region.</span>
+<span class="sd">  alpha : float</span>
+<span class="sd">      Nominal Type I error rate. The stopping threshold is ``log(1/alpha)``</span>
+<span class="sd">      (Bartroff et al. 2008 recommend slight inflation; exposed as ``threshold``).</span>
+<span class="sd">  threshold : float or None</span>
+<span class="sd">      Explicit stopping threshold on the GLR statistic. Overrides ``alpha`` if given.</span>
+<span class="sd">  min_items : int or None</span>
+<span class="sd">      Minimum items before a classification can be declared.</span>
+<span class="sd">  max_items : int or None</span>
+<span class="sd">      Maximum items before forced classification.</span>
+<span class="sd">  """</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">cut_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">indifference</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">indifference</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"indifference must be positive, got </span><span class="si">{</span><span class="n">indifference</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"alpha must be in (0, 1), got </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">min_items</span><span class="o">=</span><span class="n">min_items</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="n">max_items</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_theta_low</span> <span class="o">=</span> <span class="n">cut_score</span> <span class="o">-</span> <span class="n">indifference</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_theta_high</span> <span class="o">=</span> <span class="n">cut_score</span> <span class="o">+</span> <span class="n">indifference</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span> <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_classification</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">UNDECIDED</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_last_statistic</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"GLRStopper(threshold=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)"</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">last_classification</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Classification</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_classification</span>
+
+  <span class="c1"># ---- core kernel ----</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_glr_statistic</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Classification</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return (statistic, proposed_decision)."""</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_low</span> <span class="o">&lt;</span> <span class="n">theta_hat</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_high</span><span class="p">:</span>
+      <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Classification</span><span class="o">.</span><span class="n">UNDECIDED</span>
+
+    <span class="n">ll_hat</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">theta_hat</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_theta_high</span><span class="p">:</span>
+      <span class="n">ll_boundary</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_low</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">ll_hat</span> <span class="o">-</span> <span class="n">ll_boundary</span><span class="p">,</span> <span class="n">Classification</span><span class="o">.</span><span class="n">ABOVE_CUT</span>
+
+    <span class="n">ll_boundary</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_high</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ll_hat</span> <span class="o">-</span> <span class="n">ll_boundary</span><span class="p">,</span> <span class="n">Classification</span><span class="o">.</span><span class="n">BELOW_CUT</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="n">base_decision</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">administered_items</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">base_decision</span>
+
+    <span class="c1"># Requires response_vector through the stopper API (see card 16 for the API change).</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+      <span class="s2">"Wire response_vector through the stopping API before using GLRStopper."</span>
+    <span class="p">)</span>
+
+  <span class="c1"># Final body once the API change from card 16 is in place:</span>
+  <span class="c1">#</span>
+  <span class="c1">#   administered_arr = item_bank.get_items(administered_items)</span>
+  <span class="c1">#   stat, decision = self._glr_statistic(theta, response_vector, administered_arr)</span>
+  <span class="c1">#   self._last_statistic = stat</span>
+  <span class="c1">#   if stat &gt;= self._threshold:</span>
+  <span class="c1">#     self._last_classification = decision</span>
+  <span class="c1">#     return True</span>
+  <span class="c1">#   if base_decision and self._last_classification is Classification.UNDECIDED:</span>
+  <span class="c1">#     self._last_classification = (</span>
+  <span class="c1">#       Classification.ABOVE_CUT if theta &gt; (self._theta_low + self._theta_high) / 2</span>
+  <span class="c1">#       else Classification.BELOW_CUT</span>
+  <span class="c1">#     )</span>
+  <span class="c1">#   return base_decision</span>
+</pre></div>
+</div>
+<p><strong>Implementation notes:</strong></p>
+<ul class="simple">
+<li><p>The main approximation choice is the threshold calibration; the naive <code class="docutils literal notranslate"><span class="pre">log(1/alpha)</span></code> threshold is acceptable for a first pass.</p></li>
+<li><p>This family should be implemented alongside SPRT so the classification enums and API extensions are shared.</p></li>
+<li><p>The statistic reuses the current estimate, so it naturally depends on an estimator that remains stable under the classification regime.</p></li>
+</ul>
+<p><strong>Dependencies:</strong></p>
+<ul class="simple">
+<li><p>Requires the same response-vector stopper API extension as SPRT.</p></li>
+<li><p>Pairs naturally with the existing numerical MLE estimator.</p></li>
+</ul>
+<p><strong>Testing notes:</strong></p>
+<ul class="simple">
+<li><p>Compare average test length against SPRT at matched nominal error settings.</p></li>
+<li><p>Verify behavior inside the indifference region and at both tails.</p></li>
+<li><p>Validate explicit-threshold override behavior.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="sprt-stopper.html" title="Sequential Probability Ratio Test Stopper"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> "Previous" </span> Sequential Probability Ratio Test Stopper </span>
+              </div>
+            </a>
+          
+          
+            <a href="stochastic-curtailment-stopper.html" title="Stochastic Curtailment Stopper"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> Stochastic Curtailment Stopper </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>

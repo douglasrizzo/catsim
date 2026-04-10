@@ -311,6 +311,13 @@
     <li class="md-nav__item">
     
     
+      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
       <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
       
     
@@ -340,6 +347,13 @@
     
     
       <a href="reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
       
     
     </li>
@@ -412,36 +426,31 @@
   <section id="initialization-methods-catsim-initialization">
 <h1 id="initialization--page-root">Initialization Methods – <a class="reference internal" href="#initialization--page-root" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a><a class="headerlink" href="#initialization--page-root" title="Link to this heading">¶</a></h1>
 <p>All implemented classes in this module inherit from a base abstract class
-<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code>. <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulator</span></code> allows that a custom initializer be
-used during the simulation, as long as it also inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code>. Initializers can be used manually through
+<code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.engine.CatEngine</span></code> or through
+<a class="reference internal" href="simulation.html#catsim.simulation.SimulationRunner" title="catsim.simulation.SimulationRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.simulation.SimulationRunner</span></code></a>, as long as they also inherit from
 <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code>.</p>
-<div class="graphviz"><img alt="Inheritance diagram of catsim.initialization.BaseInitializer, catsim.initialization.RandomInitializer, catsim.initialization.FixedPointInitializer" class="inheritance graphviz" src="_images/inheritance-dc9ca89d9926618990084174aea95f8eda72e65a.png" usemap="#inheritance1ec1f24ad0"/></div>
+<div class="graphviz"><img alt="Inheritance diagram of catsim.initialization.BaseInitializer, catsim.initialization.RandomInitializer, catsim.initialization.FixedPointInitializer" class="inheritance graphviz" src="_images/inheritance-e12ad253803d114166bd2fccb597aab9e39a172d.png" usemap="#inheritance1ec1f24ad0"/></div>
 <map id="inheritance1ec1f24ad0" name="inheritance1ec1f24ad0">
-<area alt="" coords="13,5,85,31" href="https://docs.python.org/3/library/abc.html#abc.ABC" id="node1" shape="rect" target="_top" title="Helper class that provides a standard way to create an ABC using"/>
-<area alt="" coords="140,31,255,56" href="#catsim.initialization.BaseInitializer" id="node2" shape="rect" target="_top" title="Base class for CAT initializers."/>
-<area alt="" coords="303,5,453,31" href="#catsim.initialization.FixedPointInitializer" id="node4" shape="rect" target="_top" title="Initialize every examinee's ability at the same fixed point."/>
-<area alt="" coords="309,55,447,80" href="#catsim.initialization.RandomInitializer" id="node5" shape="rect" target="_top" title="Randomly initialize the first estimate of an examinee's ability from a statistical distribution."/>
+<area alt="" coords="5,31,77,56" href="https://docs.python.org/3/library/abc.html#abc.ABC" id="node1" shape="rect" target="_top" title="Helper class that provides a standard way to create an ABC using"/>
+<area alt="" coords="125,31,240,56" href="#catsim.initialization.BaseInitializer" id="node2" shape="rect" target="_top" title="Base class for CAT initializers."/>
+<area alt="" coords="288,5,439,31" href="#catsim.initialization.FixedPointInitializer" id="node3" shape="rect" target="_top" title="Initialize every examinee's ability at the same fixed point."/>
+<area alt="" coords="295,55,432,80" href="#catsim.initialization.RandomInitializer" id="node4" shape="rect" target="_top" title="Randomly initialize the first estimate of an examinee's ability from a statistical distribution."/>
 </map><p id="module-catsim.initialization">Initialization components for CAT.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.initialization.BaseInitializer">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">BaseInitializer</span></span><a class="reference internal" href="_modules/catsim/initialization/base.html#BaseInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.BaseInitializer" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Simulable</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>Base class for CAT initializers.</p>
 <p>Initializers are responsible for selecting examinees’ initial ability estimates
 before any items are administered.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.initialization.BaseInitializer.initialize">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/base.html#BaseInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.BaseInitializer.initialize" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.4)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/base.html#BaseInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.BaseInitializer.initialize" title="Link to this definition">¶</a></dt>
 <dd><p>Select an examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Arguments used by the BaseInitializer implementation.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
 <dt>float</dt><dd><p>Examinee’s initial <span class="math notranslate nohighlight">\(\theta\)</span> value.</p>
 </dd>
 </dl>
@@ -466,15 +475,14 @@ examinees to start with the same initial ability estimate.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.initialization.FixedPointInitializer.initialize">
-<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.4)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#FixedPointInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Link to this definition">¶</a></dt>
 <dd><p>Return the same ability value that was passed to the constructor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>index</strong><span class="classifier">int or None, optional</span></dt><dd><p>The index of the current examinee. This parameter is not used by this method.
-Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">Any</span></dt><dd><p>Unused by this initializer.</p>
 </dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Additional keyword arguments. Not used by this method.</p>
+<dt><strong>rng</strong><span class="classifier">Any</span></dt><dd><p>Unused by this initializer.</p>
 </dd>
 </dl>
 </dd>
@@ -490,7 +498,7 @@ Default is None.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.initialization.InitializationDistribution">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">InitializationDistribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#InitializationDistribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.InitializationDistribution" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code></a></p>
 <p>Distribution to use for ability estimate initialization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Attributes<span class="colon">:</span></dt>
@@ -524,19 +532,14 @@ Default is (-5, 5).</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.initialization.RandomInitializer.initialize">
-<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#RandomInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.4)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></span><a class="reference internal" href="_modules/catsim/initialization/initialization.html#RandomInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer.initialize" title="Link to this definition">¶</a></dt>
 <dd><p>Generate an initial ability value using the chosen distribution and parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>index</strong><span class="classifier">int or None, optional</span></dt><dd><p>The index of the current examinee. This parameter is not used by this method.
-Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">Any</span></dt><dd><p>Unused by this initializer.</p>
 </dd>
-<dt><strong>**kwargs</strong><span class="classifier">dict</span></dt><dd><p>Additional keyword arguments.</p>
-<ul class="simple">
-<li><p>rng (numpy.random.Generator): Random number generator used by the object,
-guarantees reproducibility of outputs.</p></li>
-</ul>
+<dt><strong>rng</strong><span class="classifier">Any</span></dt><dd><p>Random number generator used by the object, guaranteeing reproducibility.</p>
 </dd>
 </dl>
 </dd>
