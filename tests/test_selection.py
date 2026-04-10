@@ -389,13 +389,21 @@ class TestKLSelector:
     assert str(selector) == "Kullback-Leibler Selector (c=3.0)"
 
   def test_kl_integrand_is_zero_at_theta_hat(self) -> None:
-    """Test that the KL integrand vanishes when theta equals theta_hat."""
+    """Test that the KL integrand vanishes when theta equals theta_hat.
+
+    Self-divergence must be zero, so this catches sign flips and argument-order
+    mistakes in the KL formula before they distort the global integral.
+    """
     kl_module = importlib.import_module("catsim.selection.kl")
     value = kl_module.__dict__["_kl_integrand"](0.0, 0.0, 1.0, 0.0, 0.0, 1.0)
     assert value == pytest.approx(0.0, abs=1e-12)
 
   def test_wider_integration_window_accumulates_more_kl_mass(self) -> None:
-    """Test that a wider integration window yields more KL mass."""
+    """Test that a wider integration window yields more KL mass.
+
+    This isolates the integration-window effect, which is the mechanism that
+    makes KL behave globally early and more locally as the test progresses.
+    """
     item = self._bank().items[1]
     kl_global = KLSelector.__dict__["_kl_global"].__func__
     narrow = kl_global(theta_hat=0.0, item=item, half_width=0.25)
@@ -412,6 +420,8 @@ class TestKLSelector:
 
     This spies on `_kl_global` instead of the local `half_width` variable so the
     assertion stays tied to the public `select()` contract while remaining stable.
+    If the sqrt schedule or guard changed, KL could stop converging toward a
+    local-information rule late in the test.
     """
     item_bank = self._bank()
     selector = KLSelector(c=2.0)

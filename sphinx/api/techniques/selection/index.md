@@ -16,6 +16,7 @@ the-54321-selector
 max-info-selector
 urry-selector
 interval-info-selector
+kl-selector
 cluster-selector
 stratified-selector
 a-strat-selector
@@ -42,7 +43,6 @@ They describe planned additions to {mod}`catsim.selection`.
 ```{toctree}
 :maxdepth: 1
 
-kl-selector
 progressive-selector
 proportional-selector
 mei-selector
