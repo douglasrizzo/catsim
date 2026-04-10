@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.estimation.wle.WarmLikelihoodEstimator` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.estimation.WarmLikelihoodEstimator`
 **Reference:** Warm (1989)
 
 # Warm Weighted Likelihood Estimator
@@ -19,7 +19,7 @@ short-test behavior that matters most in adaptive testing.
 
 Warm's estimator maximizes a weighted likelihood proportional to the square root
 of Fisher information times the ordinary likelihood. In the closed-form
-approximation planned here, the estimate is expressed as an MLE plus a bias
+approximation used here, the estimate is expressed as an MLE plus a bias
 correction:
 
 $$
@@ -41,7 +41,7 @@ J(\theta)
      {P_i(\theta)\,[1-P_i(\theta)]}.
 $$
 
-The planned implementation computes $\hat{\theta}_{\mathrm{MLE}}$ with the
+The implementation computes $\hat{\theta}_{\mathrm{MLE}}$ with the
 existing numerical optimizer and then applies the analytic correction term.
 
 ## Parameters
@@ -59,7 +59,7 @@ existing numerical optimizer and then applies the analytic correction term.
      - Tolerance passed to the underlying numerical MLE routine.
    * - ``verbose``
      - ``False``
-     - Planned diagnostics flag inherited from the estimator base class.
+     - Diagnostics flag inherited from the estimator base class.
 ```
 
 ## Behavioral Contracts
