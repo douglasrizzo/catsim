@@ -15,7 +15,10 @@ _MIN_NODES = 5
 
 
 class MLWISelector(BaseSelector):
-  """Maximum Likelihood Weighted Information selector."""
+  """Maximum Likelihood Weighted Information selector.
+
+  For full algorithmic details, see :doc:`/specs/selection/mlwi-selector`.
+  """
 
   def __init__(
     self,

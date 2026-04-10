@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.weighted_info.MLWISelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.MLWISelector`
 **Reference:** Veerkamp & Berger (1997)
 
 # Maximum Likelihood Weighted Information Selector
@@ -25,7 +25,7 @@ $$
 \int I_i(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta.
 $$
 
-The planned implementation approximates the integral on a fixed grid
+The implementation approximates the integral on a fixed grid
 $\{\theta_q\}_{q=1}^{Q}$ with spacing $\Delta_q$:
 
 $$
@@ -73,5 +73,5 @@ Any correct implementation must satisfy the following properties:
 Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>
 
 :::{seealso}
-Sister planned spec: {doc}`/api/techniques/selection/mei-selector`
+Sister spec: {doc}`/api/techniques/selection/mei-selector`
 :::
