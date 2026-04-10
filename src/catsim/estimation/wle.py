@@ -26,6 +26,8 @@ class WarmLikelihoodEstimator(BaseEstimator):
   Warm's first-order bias correction when the MLE is finite. If the numerical
   MLE diverges for an extreme response pattern, the estimator falls back to a
   direct bounded maximization of the weighted likelihood.
+
+  For full algorithmic details, see :doc:`/specs/estimation/warm-wle`.
   """
 
   def __init__(self, tol: float = 1e-6, verbose: bool = False) -> None:

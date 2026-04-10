@@ -272,7 +272,11 @@ class TestWarmLikelihoodEstimator:
     reason="Current Warm WLE branch does not yet show lower short-test bias than MLE on a reproducible simulation.",
   )
   def test_estimate_has_lower_bias_than_mle_on_short_tests(self) -> None:
-    """WLE absolute error should be smaller than MLE on average for a 5-item test."""
+    """WLE absolute error should be smaller than MLE on average for a 5-item test.
+
+    This xfail documents Warm's headline short-test claim, so a plausible-looking
+    correction that moves in the wrong direction cannot hide behind formula-only tests.
+    """
     rng = np.random.default_rng(42)
     item_bank = ItemBank.generate_item_bank(100, seed=0)
     mle = NumericalSearchEstimator(dodd=True)
@@ -312,7 +316,11 @@ class TestWarmLikelihoodEstimator:
     assert float(np.mean(wle_errors)) < float(np.mean(mle_errors))
 
   def test_estimate_pulls_toward_center_relative_to_mle(self) -> None:
-    """Warm correction should reduce the outward bias of a mixed-response MLE."""
+    """Warm correction should reduce the outward bias of a mixed-response MLE.
+
+    This is the direction-of-correction sanity check: the estimate should move
+    back toward the population center rather than farther away.
+    """
     item_bank = ItemBank(
       np.array(
         [
