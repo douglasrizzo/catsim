@@ -36,6 +36,10 @@ class RandomInitializer(BaseInitializer):
       - For uniform: tuple of (min, max) values (order doesn't matter)
       - For normal: tuple of (mean, std) values (in this exact order)
       Default is (-5, 5).
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/techniques/initialization/random-initializer`.
   """
 
   def __str__(self) -> str:
@@ -131,6 +135,10 @@ class FixedPointInitializer(BaseInitializer):
   ----------
   start : float
       The starting ability value for every examinee.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/techniques/initialization/fixed-point-initializer`.
   """
 
   def __str__(self) -> str:

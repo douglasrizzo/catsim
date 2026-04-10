@@ -36,7 +36,7 @@ class ClusterSelector(BaseSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/selection/cluster-selector`.
+  For full algorithmic details, see :doc:`/techniques/selection/cluster-selector`.
   """
 
   def __str__(self) -> str:

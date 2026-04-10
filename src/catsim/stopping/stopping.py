@@ -25,7 +25,7 @@ class TestLengthStopper(BaseStopper):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/stopping/test-length-stopper`.
+  For full algorithmic details, see :doc:`/techniques/stopping/test-length-stopper`.
   """
 
   def __init__(self, min_items: int | None = None, max_items: int | None = None) -> None:
@@ -175,7 +175,7 @@ class MinErrorStopper(TestLengthStopper):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/stopping/min-error-stopper`.
+  For full algorithmic details, see :doc:`/techniques/stopping/min-error-stopper`.
   """
 
   def __str__(self) -> str:
@@ -279,7 +279,7 @@ class ConfidenceIntervalStopper(TestLengthStopper):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/stopping/confidence-interval-stopper`.
+  For full algorithmic details, see :doc:`/techniques/stopping/confidence-interval-stopper`.
   """
 
   def __str__(self) -> str:

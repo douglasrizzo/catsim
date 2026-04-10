@@ -8,16 +8,13 @@
     :hidden:
 
     introduction.rst
-    initialization.rst
-    selection.rst
-    estimation.rst
-    stopping.rst
-    specs/index
+    techniques/index
     simulation.rst
     irt.rst
     cat.rst
     plot.rst
     reproducibility.rst
+    api/index
     architecture_decisions.rst
     contributing.rst
     references.rst

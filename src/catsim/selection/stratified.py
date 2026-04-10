@@ -25,7 +25,7 @@ class StratifiedSelector(FiniteSelector):
 
   Notes
   -----
-  For full family-level details, see :doc:`/specs/selection/stratified-selector`.
+  For full family-level details, see :doc:`/techniques/selection/stratified-selector`.
   """
 
   def __str__(self) -> str:
@@ -157,7 +157,7 @@ class AStratSelector(StratifiedSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/selection/a-strat-selector`.
+  For full algorithmic details, see :doc:`/techniques/selection/a-strat-selector`.
   """
 
   def __str__(self) -> str:
@@ -201,7 +201,7 @@ class AStratBBlockSelector(StratifiedSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/selection/a-strat-b-block-selector`.
+  For full algorithmic details, see :doc:`/techniques/selection/a-strat-b-block-selector`.
   """
 
   def __str__(self) -> str:
@@ -260,7 +260,7 @@ class MaxInfoStratSelector(StratifiedSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/selection/max-info-strat-selector`.
+  For full algorithmic details, see :doc:`/techniques/selection/max-info-strat-selector`.
   """
 
   def __str__(self) -> str:
@@ -354,7 +354,7 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/selection/max-info-b-block-selector`.
+  For full algorithmic details, see :doc:`/techniques/selection/max-info-b-block-selector`.
   """
 
   def __str__(self) -> str:

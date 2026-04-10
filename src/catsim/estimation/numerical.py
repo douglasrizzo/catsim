@@ -32,7 +32,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/specs/estimation/numerical-search-estimator`.
+  For full algorithmic details, see :doc:`/techniques/estimation/numerical-search-estimator`.
   """
 
   __methods = frozenset(["ternary", "dichotomous", "fibonacci", "golden", "brent", "bounded", "golden2"])

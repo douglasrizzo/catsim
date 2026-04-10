@@ -12,10 +12,10 @@
 
 A Python package for computerized adaptive testing (CAT). It provides a reusable CAT engine, simulation tools, and multiple methods for:
 
-- [test initialization](https://douglasrizzo.com.br/catsim/initialization.html) (selecting the initial ability of the examinees)
-- [item selection](https://douglasrizzo.com.br/catsim/selection.html)
-- [ability estimation](https://douglasrizzo.com.br/catsim/estimation.html)
-- [test stopping](https://douglasrizzo.com.br/catsim/stopping.html)
+- [test initialization](https://douglasrizzo.com.br/catsim/techniques/initialization/index.html) (selecting the initial ability of the examinees)
+- [item selection](https://douglasrizzo.com.br/catsim/techniques/selection/index.html)
+- [ability estimation](https://douglasrizzo.com.br/catsim/techniques/estimation/index.html)
+- [test stopping](https://douglasrizzo.com.br/catsim/techniques/stopping/index.html)
 
 These methods can either be used in a standalone fashion to power other software or be used with _catsim_ to run and simulate [computerized adaptive tests](https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
 
@@ -38,10 +38,10 @@ The main architecture decisions behind the current engine and simulation model a
 
 1. Have an [item matrix](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
 1. Have a sample of examinee proficiencies, or a number of examinees to be generated;
-1. Create an [initializer](https://douglasrizzo.com.br/catsim/initialization.html),
-   an item [selector](https://douglasrizzo.com.br/catsim/selection.html), a
-   ability [estimator](https://douglasrizzo.com.br/catsim/estimation.html)
-   and a [stopping criterion](https://douglasrizzo.com.br/catsim/stopping.html);
+1. Create an [initializer](https://douglasrizzo.com.br/catsim/techniques/initialization/index.html),
+   an item [selector](https://douglasrizzo.com.br/catsim/techniques/selection/index.html), a
+   ability [estimator](https://douglasrizzo.com.br/catsim/techniques/estimation/index.html)
+   and a [stopping criterion](https://douglasrizzo.com.br/catsim/techniques/stopping/index.html);
 1. Create a [simulation runner](https://douglasrizzo.com.br/catsim/simulation.html)
    with those components.
 1. Run the simulation and inspect the returned result object;
