@@ -398,7 +398,11 @@ class TestEAPEstimator:
     assert theta > 0.0
 
   def test_last_posterior_variance_decreases_as_items_accumulate(self) -> None:
-    """Each additional item should reduce the posterior variance overall."""
+    """Each additional item should reduce the posterior variance overall.
+
+    This protects the convergence signal exposed to downstream stopping and
+    selection rules; broken posterior normalization could keep variance flat or rising.
+    """
     rng = np.random.default_rng(7)
     item_bank = ItemBank.generate_item_bank(20, seed=3)
     theta_true = 0.8
@@ -424,7 +428,11 @@ class TestEAPEstimator:
     assert variances[4] < variances[0]
 
   def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self) -> None:
-    """A centered prior should shrink EAP more than a flat prior on all-correct data."""
+    """A centered prior should shrink EAP more than a flat prior on all-correct data.
+
+    This checks the core Bayesian behavior on sparse data, where prior shrinkage
+    matters most and a purely likelihood-driven implementation would look too extreme.
+    """
     item_bank = ItemBank(
       np.array(
         [
