@@ -215,63 +215,7 @@
     <li class="md-nav__item">
     
     
-      <a href="../../initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="../../api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -346,7 +290,7 @@
 
 
 <div class="viewcode-block" id="PlotType">
-<a class="viewcode-back" href="../../plot.html#catsim.plot.PlotType">[docs]</a>
+<a class="viewcode-back" href="../../api/plot.html#catsim.plot.PlotType">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PlotType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Enum with the available item plot types.</span>
 
@@ -367,7 +311,7 @@
 
 
 <div class="viewcode-block" id="item_curve">
-<a class="viewcode-back" href="../../plot.html#catsim.plot.item_curve">[docs]</a>
+<a class="viewcode-back" href="../../api/plot.html#catsim.plot.item_curve">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">item_curve</span><span class="p">(</span>
   <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
   <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -493,7 +437,7 @@
 
 
 <div class="viewcode-block" id="gen3d_dataset_scatter">
-<a class="viewcode-back" href="../../plot.html#catsim.plot.gen3d_dataset_scatter">[docs]</a>
+<a class="viewcode-back" href="../../api/plot.html#catsim.plot.gen3d_dataset_scatter">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">gen3d_dataset_scatter</span><span class="p">(</span>
   <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -550,7 +494,7 @@
 
 
 <div class="viewcode-block" id="item_exposure">
-<a class="viewcode-back" href="../../plot.html#catsim.plot.item_exposure">[docs]</a>
+<a class="viewcode-back" href="../../api/plot.html#catsim.plot.item_exposure">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">item_exposure</span><span class="p">(</span>
   <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -686,7 +630,7 @@
 
 
 <div class="viewcode-block" id="test_progress">
-<a class="viewcode-back" href="../../plot.html#catsim.plot.test_progress">[docs]</a>
+<a class="viewcode-back" href="../../api/plot.html#catsim.plot.test_progress">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">test_progress</span><span class="p">(</span>
   <span class="n">ax</span><span class="p">:</span> <span class="n">Axes</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

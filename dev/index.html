@@ -216,63 +216,7 @@
     <li class="md-nav__item">
     
     
-      <a href="initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -364,10 +308,10 @@
 </a>
 <p>A Python package for computerized adaptive testing (CAT). It provides a reusable CAT engine, simulation tools, and multiple methods for:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">item selection</a></p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">ability estimation</a></p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">test stopping</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">test initialization</a> (selecting the initial ability of the examinees)</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">item selection</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">ability estimation</a></p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">test stopping</a></p></li>
 </ul>
 <p>These methods can either be used in a standalone fashion to power other software or be used with <em>catsim</em> to run and simulate <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests">computerized adaptive tests</a>, given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models">logistic Item Response Theory model</a>.</p>
 <section id="installation">
@@ -389,14 +333,14 @@
 <ol class="arabic simple">
 <li><p>Have an <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix">item matrix</a>;</p></li>
 <li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
-<li><p>Create an <a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">initializer</a>,
-an item <a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">selector</a>, a
-ability <a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">estimator</a>
-and a <a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">stopping criterion</a>;</p></li>
-<li><p>Create a <a class="reference external" href="https://douglasrizzo.com.br/catsim/simulation.html">simulation runner</a>
+<li><p>Create an <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">initializer</a>,
+an item <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selector</a>, a
+ability <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">estimator</a>
+and a <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">stopping criterion</a>;</p></li>
+<li><p>Create a <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html">simulation runner</a>
 with those components.</p></li>
 <li><p>Run the simulation and inspect the returned result object;</p></li>
-<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/plot.html">Plot</a> your results.</p></li>
+<li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/plot.html">Plot</a> your results.</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomInitializer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>

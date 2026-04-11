@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="../../../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../../../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../../../_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="../../../_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="#3f51b5">
+  <script src="../../../_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>Stochastic Curtailment Stopper &#8212; catsim 0.21.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/material.css?v=79c92029" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <link rel="icon" href="../../../_static/logo.svg"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Initialization Techniques" href="../initialization/index.html" />
+    <link rel="prev" title="Generalized Likelihood Ratio Stopper" href="glr-stopper.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=blue data-md-color-accent=light-blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#api/techniques/stopping/stochastic-curtailment-stopper" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../../../index.html" title="catsim 0.21.0 documentation"
+           class="md-header-nav__button md-logo">
+          
+            &nbsp;
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">catsim</span>
+          <span class="md-header-nav__topic"> Stochastic Curtailment Stopper </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../../../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder=""Search""
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="../../../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../../../"versions.json"",
+        target_loc = "../../../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../../../index.html" class="md-tabs__link">catsim 0.21.0 documentation</a></li>
+          <li class="md-tabs__item"><a href="../../index.html" class="md-tabs__link">API Reference</a></li>
+          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">Techniques</a></li>
+          <li class="md-tabs__item"><a href="index.html" class="md-tabs__link">Stopping Criteria</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../../../index.html" title="catsim 0.21.0 documentation" class="md-nav__button md-logo">
+      
+        <img src="../../../_static/" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="../../../index.html"
+       title="catsim 0.21.0 documentation">catsim</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    catsim
+  </div>
+</a>
+    </div>
+  
+  
+
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../introduction.html" class="md-nav__link">Introduction</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../index.html" class="md-nav__link">API Reference</a>
+      <ul class="md-nav__list"> 
+    <li class="md-nav__item">
+    
+    
+      <a href="../index.html" class="md-nav__link">Techniques</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../engine.html" class="md-nav__link">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../state.html" class="md-nav__link">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      
+    
+    </li></ul>
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../reproducibility.html" class="md-nav__link">Reproducibility</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../contributing.html" class="md-nav__link">Contributing</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../references.html" class="md-nav__link">Bibliography</a>
+      
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+    <label class="md-nav__title" for="__toc">"Contents"</label>
+  <ul class="md-nav__list" data-md-scrollfix="">
+        <li class="md-nav__item"><a href="#api-techniques-stopping-stochastic-curtailment-stopper--page-root" class="md-nav__link">Stochastic Curtailment Stopper</a><nav class="md-nav">
+              <ul class="md-nav__list">
+        <li class="md-nav__item"><a href="#motivation" class="md-nav__link">Motivation</a>
+        </li>
+        <li class="md-nav__item"><a href="#definition" class="md-nav__link">Definition</a>
+        </li>
+        <li class="md-nav__item"><a href="#parameters" class="md-nav__link">Parameters</a>
+        </li>
+        <li class="md-nav__item"><a href="#behavioral-contracts" class="md-nav__link">Behavioral Contracts</a>
+        </li>
+        <li class="md-nav__item"><a href="#references" class="md-nav__link">References</a>
+        </li>
+        <li class="md-nav__item"><a href="#implementation-guidance" class="md-nav__link">Implementation Guidance</a>
+        </li></ul>
+            </nav>
+        </li>
+    
+<li class="md-nav__item"><a class="md-nav__extra_link" href="../../../_sources/api/techniques/stopping/stochastic-curtailment-stopper.rst.txt">Show Source</a> </li>
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <section id="stochastic-curtailment-stopper">
+<h1 id="api-techniques-stopping-stochastic-curtailment-stopper--page-root">Stochastic Curtailment Stopper<a class="headerlink" href="#api-techniques-stopping-stochastic-curtailment-stopper--page-root" title="Link to this heading">¶</a></h1>
+<dl class="field-list simple">
+<dt class="field-odd">Status<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Planned</p>
+</dd>
+<dt class="field-even">Module<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">catsim.stopping.classification.StochasticCurtailmentStopper</span></code> (planned)</p>
+</dd>
+<dt class="field-odd">Reference<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Finkelman (2008, 2010)</p>
+</dd>
+</dl>
+<section id="motivation">
+<h2 id="motivation">Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>SPRT and GLR stop only when their decision statistic already crosses a stopping
+boundary. Stochastic curtailment goes one step further: it stops when future
+responses are very unlikely to change the eventual classification decision.</p>
+<p>This provides another layer of test shortening on top of sequential
+classification, especially for examinees who are already clearly inside one
+decision region.</p>
+</section>
+<section id="definition">
+<h2 id="definition">Definition<a class="headerlink" href="#definition" title="Link to this heading">¶</a></h2>
+<p>Let <span class="math notranslate nohighlight">\(\Lambda_n\)</span> be the current sequential classification statistic and let
+<span class="math notranslate nohighlight">\(\hat{\theta}_n\)</span> be the current plug-in estimate. Stochastic curtailment
+computes the probability that the eventual classification outcome is still
+undecided or flips away from the currently implied decision if testing
+continues.</p>
+<p>In the fixed-horizon approximation described in the card, the key quantity is</p>
+<div class="math notranslate nohighlight">
+\[\gamma_n
+=
+\Pr_{\hat{\theta}_n}
+\left[
+  B &lt; \Lambda_N &lt; A \mid \mathcal{F}_n
+\right],\]</div>
+<p>the probability that the future trajectory remains undecided through the chosen
+horizon. If <span class="math notranslate nohighlight">\(\gamma_n \le \gamma_{\text{target}}\)</span>, the test is curtailed
+and the current trajectory’s implied classification is declared.</p>
+</section>
+<section id="parameters">
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
+<table>
+<colgroup>
+<col style="width: 20.0%"/>
+<col style="width: 15.0%"/>
+<col style="width: 65.0%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cut_score</span></code></p></td>
+<td><p>required</p></td>
+<td><p>Classification cut point inherited from the SPRT base.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">indifference</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></td>
+<td><p>Indifference half-width.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alpha</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Type I error rate for the underlying SPRT rule.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">beta</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Type II error rate for the underlying SPRT rule.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gamma</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
+<td><p>Curtailment threshold; lower values are more conservative.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">horizon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">20</span></code></p></td>
+<td><p>Number of future items considered in the forward-projection approximation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">min_items</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Minimum length before curtailment may occur.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_items</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Hard maximum length.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="behavioral-contracts">
+<h2 id="behavioral-contracts">Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">¶</a></h2>
+<p>Any correct implementation must satisfy the following properties:</p>
+<ol class="arabic simple">
+<li><p>If the underlying SPRT rule already stops, stochastic curtailment must respect that decision immediately.</p></li>
+<li><p>Curtailment depends on a forward projection under the current estimate; it is not a second independent classification statistic.</p></li>
+<li><p>If the probability of remaining undecided is less than or equal to <code class="docutils literal notranslate"><span class="pre">gamma</span></code>, the rule stops and emits the tentative classification implied by the projected trajectory.</p></li>
+<li><p>Invalid <code class="docutils literal notranslate"><span class="pre">gamma</span></code> or <code class="docutils literal notranslate"><span class="pre">horizon</span></code> values are rejected at construction time.</p></li>
+<li><p>The rule inherits the response-vector dependency of the SPRT family.</p></li>
+</ol>
+</section>
+<section id="references">
+<h2 id="references">References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<p>Finkelman, M. D. (2008). On using stochastic curtailment to shorten the SPRT in sequential mastery testing. <em>Journal of Educational and Behavioral Statistics</em>, 33(4), 442-463. <a class="reference external" href="https://doi.org/10.3102/1076998607302623">https://doi.org/10.3102/1076998607302623</a></p>
+<p>Finkelman, M. D. (2010). Variations on stochastic curtailment in sequential mastery testing. <em>Applied Psychological Measurement</em>, 34(1), 27-45. <a class="reference external" href="https://doi.org/10.1177/0146621609349807">https://doi.org/10.1177/0146621609349807</a></p>
+</section>
+<section id="implementation-guidance">
+<h2 id="implementation-guidance">Implementation Guidance<a class="headerlink" href="#implementation-guidance" title="Link to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section is for contributors and agents implementing this technique.
+It is removed when the spec is promoted to “Implemented” status.</p>
+</div>
+<p><strong>Proposed location:</strong> <code class="docutils literal notranslate"><span class="pre">src/catsim/stopping/classification.py</span></code></p>
+<p><strong>Mock implementation:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># src/catsim/stopping/classification.py  (alongside SPRTStopper/GLRStopper)</span>
+<span class="sd">"""Stochastic curtailment for classification CATs (Finkelman 2008)."""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.classification</span><span class="w"> </span><span class="kn">import</span> <span class="n">Classification</span><span class="p">,</span> <span class="n">SPRTStopper</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">StochasticCurtailmentStopper</span><span class="p">(</span><span class="n">SPRTStopper</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">"""SPRT with stochastic curtailment. Inherits Wald logic from SPRTStopper.</span>
+
+<span class="sd">  At each step, if the base SPRT stops, use its decision. Otherwise, estimate</span>
+<span class="sd">  the probability that the SPRT will still be undecided by ``horizon`` items</span>
+<span class="sd">  under the plug-in MLE :math:`\\hat\\theta_n`. If below ``gamma``, curtail.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  cut_score : float</span>
+<span class="sd">      Ability threshold.</span>
+<span class="sd">  indifference : float</span>
+<span class="sd">      Indifference half-width.</span>
+<span class="sd">  alpha, beta : float</span>
+<span class="sd">      SPRT error rates.</span>
+<span class="sd">  gamma : float</span>
+<span class="sd">      Curtailment threshold. Lower = more conservative.</span>
+<span class="sd">  horizon : int</span>
+<span class="sd">      Number of additional items to consider in the forward projection.</span>
+<span class="sd">  min_items, max_items : int or None</span>
+<span class="sd">      Usual bounds.</span>
+<span class="sd">  """</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">cut_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">indifference</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">horizon</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">min_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">gamma</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"gamma must be in (0, 1), got </span><span class="si">{</span><span class="n">gamma</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">horizon</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"horizon must be positive, got </span><span class="si">{</span><span class="n">horizon</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+      <span class="n">cut_score</span><span class="o">=</span><span class="n">cut_score</span><span class="p">,</span>
+      <span class="n">indifference</span><span class="o">=</span><span class="n">indifference</span><span class="p">,</span>
+      <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+      <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+      <span class="n">min_items</span><span class="o">=</span><span class="n">min_items</span><span class="p">,</span>
+      <span class="n">max_items</span><span class="o">=</span><span class="n">max_items</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_horizon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">horizon</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"StochasticCurtailmentStopper(gamma=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_gamma</span><span class="si">}</span><span class="s2">, horizon=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_horizon</span><span class="si">}</span><span class="s2">)"</span>
+
+  <span class="c1"># ---- core kernel ----</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_curtailment_probability</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">remaining_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
+    <span class="n">current_llr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Classification</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Normal-approximation forward projection of the LLR over the horizon.</span>
+
+<span class="sd">    Returns (undecided_probability, tentative_decision).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">remaining_items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">decision</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">ABOVE_CUT</span> <span class="k">if</span> <span class="n">current_llr</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">Classification</span><span class="o">.</span><span class="n">BELOW_CUT</span>
+      <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">decision</span>
+
+    <span class="c1"># Per-item LLR contribution under the plug-in theta_hat:</span>
+    <span class="c1">#   mean = P(theta_hat) * log(P_high/P_low) + (1 - P(theta_hat)) * log(Q_high/Q_low)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">remaining_items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">remaining_items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">remaining_items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">remaining_items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">p_hat</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">ai</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">di</span><span class="p">)</span> <span class="k">for</span> <span class="n">ai</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">di</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)])</span>
+    <span class="n">p_high</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_high</span><span class="p">,</span> <span class="n">ai</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">di</span><span class="p">)</span> <span class="k">for</span> <span class="n">ai</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">di</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)])</span>
+    <span class="n">p_low</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_theta_low</span><span class="p">,</span> <span class="n">ai</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">di</span><span class="p">)</span> <span class="k">for</span> <span class="n">ai</span><span class="p">,</span> <span class="n">bi</span><span class="p">,</span> <span class="n">ci</span><span class="p">,</span> <span class="n">di</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)])</span>
+
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-12</span>
+    <span class="n">log_ratio_correct</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p_high</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">p_low</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">log_ratio_wrong</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_high</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_low</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">per_item_mean</span> <span class="o">=</span> <span class="n">p_hat</span> <span class="o">*</span> <span class="n">log_ratio_correct</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_hat</span><span class="p">)</span> <span class="o">*</span> <span class="n">log_ratio_wrong</span>
+    <span class="n">per_item_var</span> <span class="o">=</span> <span class="n">p_hat</span> <span class="o">*</span> <span class="n">log_ratio_correct</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_hat</span><span class="p">)</span> <span class="o">*</span> <span class="n">log_ratio_wrong</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">per_item_mean</span><span class="o">**</span><span class="mi">2</span>
+
+    <span class="c1"># Take the first `horizon` *best* items by information at theta_hat.</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_horizon</span><span class="p">,</span> <span class="n">remaining_items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">per_item_mean</span> <span class="o">*</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">per_item_mean</span><span class="p">))[:</span><span class="n">k</span><span class="p">]</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">per_item_mean</span><span class="p">[</span><span class="n">selected</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">per_item_var</span><span class="p">[</span><span class="n">selected</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">0.0</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">sigma</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">final</span> <span class="o">=</span> <span class="n">current_llr</span> <span class="o">+</span> <span class="n">mu</span>
+      <span class="k">if</span> <span class="n">final</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_A</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Classification</span><span class="o">.</span><span class="n">ABOVE_CUT</span>
+      <span class="k">if</span> <span class="n">final</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_B</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Classification</span><span class="o">.</span><span class="n">BELOW_CUT</span>
+      <span class="k">return</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">Classification</span><span class="o">.</span><span class="n">UNDECIDED</span>
+
+    <span class="c1"># P[B &lt; Lambda_final &lt; A] under N(current + mu, sigma^2)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">norm</span>
+
+    <span class="n">upper</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_A</span> <span class="o">-</span> <span class="p">(</span><span class="n">current_llr</span> <span class="o">+</span> <span class="n">mu</span><span class="p">))</span> <span class="o">/</span> <span class="n">sigma</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_B</span> <span class="o">-</span> <span class="p">(</span><span class="n">current_llr</span> <span class="o">+</span> <span class="n">mu</span><span class="p">))</span> <span class="o">/</span> <span class="n">sigma</span>
+    <span class="n">undecided</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span> <span class="o">-</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">lower</span><span class="p">))</span>
+
+    <span class="c1"># Tentative decision: lean in the direction of the expected final LLR.</span>
+    <span class="n">expected_final</span> <span class="o">=</span> <span class="n">current_llr</span> <span class="o">+</span> <span class="n">mu</span>
+    <span class="k">if</span> <span class="n">expected_final</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">decision</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">ABOVE_CUT</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">decision</span> <span class="o">=</span> <span class="n">Classification</span><span class="o">.</span><span class="n">BELOW_CUT</span>
+    <span class="k">return</span> <span class="n">undecided</span><span class="p">,</span> <span class="n">decision</span>
+
+  <span class="c1"># The full stop() is built on top of SPRTStopper.stop() -- see card 16 for the</span>
+  <span class="c1"># API change and the base implementation. Pseudocode:</span>
+  <span class="c1">#</span>
+  <span class="c1">#   sprt_stop = super().stop(item_bank, administered_items, theta)</span>
+  <span class="c1">#   if sprt_stop:</span>
+  <span class="c1">#     return True  # last_classification already set by SPRT</span>
+  <span class="c1">#</span>
+  <span class="c1">#   remaining = mask out administered items</span>
+  <span class="c1">#   undecided_p, tentative = self._curtailment_probability(</span>
+  <span class="c1">#     theta,</span>
+  <span class="c1">#     item_bank.items[remaining, :4],</span>
+  <span class="c1">#     self.last_log_likelihood_ratio,</span>
+  <span class="c1">#   )</span>
+  <span class="c1">#   if undecided_p &lt;= self._gamma:</span>
+  <span class="c1">#     self._last_classification = tentative</span>
+  <span class="c1">#     return True</span>
+  <span class="c1">#   return False</span>
+</pre></div>
+</div>
+<p><strong>Implementation notes:</strong></p>
+<ul class="simple">
+<li><p>This rule should inherit from the implemented SPRT stopper rather than duplicate its stopping logic.</p></li>
+<li><p>The normal approximation is the first practical implementation; a Monte Carlo forward projection can be a later refinement.</p></li>
+<li><p>Curtailment assumptions depend on the future selector being reasonably informative.</p></li>
+</ul>
+<p><strong>Dependencies:</strong></p>
+<ul class="simple">
+<li><p>Depends on planned card 16 (<cite>SPRTStopper</cite>).</p></li>
+<li><p>Requires the same response-vector stopper API extension.</p></li>
+</ul>
+<p><strong>Testing notes:</strong></p>
+<ul class="simple">
+<li><p>Compare mean test length with and without curtailment on examinees far from the cut.</p></li>
+<li><p>Verify that very small <code class="docutils literal notranslate"><span class="pre">gamma</span></code> reproduces plain SPRT behavior.</p></li>
+<li><p>Validate that invalid parameter settings are rejected.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+            <a href="glr-stopper.html" title="Generalized Likelihood Ratio Stopper"
+               class="md-flex md-footer-nav__link md-footer-nav__link--prev"
+               rel="prev">
+              <div class="md-flex__cell md-flex__cell--shrink">
+                <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+              </div>
+              <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+                <span class="md-flex__ellipsis">
+                  <span
+                      class="md-footer-nav__direction"> "Previous" </span> Generalized Likelihood Ratio Stopper </span>
+              </div>
+            </a>
+          
+          
+            <a href="../initialization/index.html" title="Initialization Techniques"
+               class="md-flex md-footer-nav__link md-footer-nav__link--next"
+               rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
+                class="md-flex__ellipsis"> <span
+                class="md-footer-nav__direction"> "Next" </span> Initialization Techniques </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink"><i
+                class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+              
+          </div>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../../../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>

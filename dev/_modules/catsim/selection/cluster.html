@@ -215,63 +215,7 @@
     <li class="md-nav__item">
     
     
-      <a href="../../../initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="../../../api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -343,7 +287,7 @@
 
 
 <div class="viewcode-block" id="ClusterSelector">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.ClusterSelector">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ClusterSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Cluster-based Item Selection Method.</span>
 
@@ -370,7 +314,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/cluster-selector`.</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/cluster-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -452,7 +396,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="o">=</span> <span class="n">r_control</span>
 
 <div class="viewcode-block" id="ClusterSelector.select">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.ClusterSelector.select">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.select">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
@@ -588,7 +532,7 @@
 
 
 <div class="viewcode-block" id="ClusterSelector.sum_cluster_infos">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.ClusterSelector.sum_cluster_infos">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.sum_cluster_infos">[docs]</a>
   <span class="nd">@staticmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">sum_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the sum of item information values, separated by cluster.</span>
@@ -616,7 +560,7 @@
 
 
 <div class="viewcode-block" id="ClusterSelector.weighted_cluster_infos">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.ClusterSelector.weighted_cluster_infos">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.weighted_cluster_infos">[docs]</a>
   <span class="nd">@staticmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">weighted_cluster_infos</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the weighted sum of item information values, separated by cluster.</span>
@@ -649,7 +593,7 @@
 
 
 <div class="viewcode-block" id="ClusterSelector.sum_cluster_params">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.ClusterSelector.sum_cluster_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.sum_cluster_params">[docs]</a>
   <span class="nd">@staticmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">sum_cluster_params</span><span class="p">(</span><span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return the sum of item parameter values for each cluster.</span>
@@ -681,7 +625,7 @@
 
 
 <div class="viewcode-block" id="ClusterSelector.avg_cluster_params">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.ClusterSelector.avg_cluster_params">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.avg_cluster_params">[docs]</a>
   <span class="nd">@staticmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">avg_cluster_params</span><span class="p">(</span><span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return the average values of item parameters by cluster.</span>

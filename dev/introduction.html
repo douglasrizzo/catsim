@@ -58,7 +58,7 @@
     <link rel="icon" href="_static/logo.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Initialization Methods – catsim.initialization" href="initialization.html" />
+    <link rel="next" title="API Reference" href="api/index.html" />
     <link rel="prev" title="catsim - Computerized Adaptive Testing Toolkit" href="index.html" />
   
    
@@ -316,63 +316,7 @@
     <li class="md-nav__item">
     
     
-      <a href="initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -539,7 +483,7 @@
 <div class="math notranslate nohighlight">
 \[SEE = \sqrt{\frac{1}{I(\theta)}}\]</div>
 <p>Since the denominator in the calculation of the <span class="math notranslate nohighlight">\(SEE\)</span> is <span class="math notranslate nohighlight">\(I(\theta)\)</span>, it is clear to see that the more items an examinee answers, the smaller SEE gets.</p>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> provides these functions in the <a class="reference internal" href="irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt()</span></code></a> module.</p>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> provides these functions in the <a class="reference internal" href="api/irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt()</span></code></a> module.</p>
 <section id="the-item-matrix">
 <h3 id="the-item-matrix">The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Link to this heading">¶</a></h3>
 <p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, a collection of items is represented as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the <em>item matrix</em>. The most important features of the items are situated in the first three columns of the matrix, which represent the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span>, respectively. Item matrices can be generated via the <code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.cat.generate_item_bank()</span></code> function as follows:</p>
@@ -586,17 +530,17 @@
 <p>There is a considerable amount of literature covering these four phases proposed by many authors. In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, each phase is separated in its own module, which makes it easy to create simulations combining different methods for each phase. Each module will be explained separately, along with its API.</p>
 <section id="initialization">
 <h4 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h4>
-<p>The initialization procedure is done only once during each examinee’s test. In it, the initial value of an examinee’s ability <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (<a class="reference internal" href="initialization.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>); it can be chosen randomly from a probability distribution (<a class="reference internal" href="initialization.html#catsim.initialization.RandomInitializer" title="catsim.initialization.RandomInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.RandomInitializer</span></code></a>); the place in the item bank with items of more information can be chosen to initialize <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> etc.</p>
-<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, initialization procedures can be found in the <a class="reference internal" href="initialization.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a> module.</p>
+<p>The initialization procedure is done only once during each examinee’s test. In it, the initial value of an examinee’s ability <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (<a class="reference internal" href="api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>); it can be chosen randomly from a probability distribution (<a class="reference internal" href="api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer" title="catsim.initialization.RandomInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.RandomInitializer</span></code></a>); the place in the item bank with items of more information can be chosen to initialize <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> etc.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, initialization procedures can be found in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code> module.</p>
 </section>
 <section id="item-selection">
 <h4 id="item-selection">Item Selection<a class="headerlink" href="#item-selection" title="Link to this heading">¶</a></h4>
 <p>With a set value for <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>.</p>
-<p>Item selection methods are diverse. The most famous method is to choose the item that maximizes the <em>gain of information</em>, represented by <a class="reference internal" href="selection.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.</p>
-<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, an examinee’s response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of <span class="math notranslate nohighlight">\(p\)</span> is given by the IRT logistic model characteristic function (<a class="reference internal" href="irt.html#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.icc()</span></code></a>), given by:</p>
+<p>Item selection methods are diverse. The most famous method is to choose the item that maximizes the <em>gain of information</em>, represented by <a class="reference internal" href="api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, an examinee’s response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of <span class="math notranslate nohighlight">\(p\)</span> is given by the IRT logistic model characteristic function (<a class="reference internal" href="api/irt.html#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.icc()</span></code></a>), given by:</p>
 <div class="math notranslate nohighlight">
 \[P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{-a_i(\theta-b_i)}}\]</div>
-<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, item selection procedures can be found in the <a class="reference internal" href="selection.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> module.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, item selection procedures can be found in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code> module.</p>
 </section>
 <section id="proficiency-estimation">
 <h4 id="proficiency-estimation">Proficiency Estimation<a class="headerlink" href="#proficiency-estimation" title="Link to this heading">¶</a></h4>
@@ -605,13 +549,13 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">response_vector</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value that maximizes the <em>log-likelihood</em> function, presented in <a class="reference internal" href="irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee’s abilities to estimate new values for them.</p>
-<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, ability estimation procedures can be found in the <a class="reference internal" href="estimation.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a> module.</p>
+<p>Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value that maximizes the <em>log-likelihood</em> function, presented in <a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee’s abilities to estimate new values for them.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, ability estimation procedures can be found in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code> module.</p>
 </section>
 <section id="stopping-criterion">
 <h4 id="stopping-criterion">Stopping Criterion<a class="headerlink" href="#stopping-criterion" title="Link to this heading">¶</a></h4>
-<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold. These stopping criteria are implemented in <a class="reference internal" href="stopping.html#catsim.stopping.MinErrorStopper" title="catsim.stopping.MinErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MinErrorStopper</span></code></a> and <a class="reference internal" href="stopping.html#catsim.stopping.ConfidenceIntervalStopper" title="catsim.stopping.ConfidenceIntervalStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.ConfidenceIntervalStopper</span></code></a>, both supporting optional minimum and maximum item constraints and automatic item bank exhaustion detection.</p>
-<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, test stopping criteria can be found in the <a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> module.</p>
+<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation (<a class="reference internal" href="api/irt.html#catsim.irt.see" title="catsim.irt.see"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.see()</span></code></a>) reaches a lower threshold. These stopping criteria are implemented in <a class="reference internal" href="api/techniques/stopping/min-error-stopper.html#catsim.stopping.MinErrorStopper" title="catsim.stopping.MinErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MinErrorStopper</span></code></a> and <a class="reference internal" href="api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper" title="catsim.stopping.ConfidenceIntervalStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.ConfidenceIntervalStopper</span></code></a>, both supporting optional minimum and maximum item constraints and automatic item bank exhaustion detection.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code>, test stopping criteria can be found in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code> module.</p>
 </section>
 </section>
 </section>
@@ -626,17 +570,17 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="initialization.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></p></td>
-<td><p><a class="reference internal" href="initialization.html#catsim.initialization.BaseInitializer" title="catsim.initialization.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.BaseInitializer</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.BaseInitializer</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="selection.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></p></td>
-<td><p><a class="reference internal" href="selection.html#catsim.selection.BaseSelector" title="catsim.selection.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.BaseSelector</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.BaseSelector</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="estimation.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></p></td>
-<td><p><a class="reference internal" href="estimation.html#catsim.estimation.BaseEstimator" title="catsim.estimation.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.BaseEstimator</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.BaseEstimator</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="stopping.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></p></td>
-<td><p><a class="reference internal" href="stopping.html#catsim.stopping.BaseStopper" title="catsim.stopping.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.BaseStopper</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.BaseStopper</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -667,12 +611,12 @@
             </a>
           
           
-            <a href="initialization.html" title="Initialization Methods – catsim.initialization"
+            <a href="api/index.html" title="API Reference"
                class="md-flex md-footer-nav__link md-footer-nav__link--next"
                rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title"><span
                 class="md-flex__ellipsis"> <span
-                class="md-footer-nav__direction"> "Next" </span> Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code> </span>
+                class="md-footer-nav__direction"> "Next" </span> API Reference </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink"><i
                 class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>

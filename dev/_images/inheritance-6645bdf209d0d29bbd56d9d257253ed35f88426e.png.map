@@ -1,0 +1,6 @@
+<map id="inheritance23c86ba2b1" name="inheritance23c86ba2b1">
+<area shape="rect" id="node1" href="https://docs.python.org/3/library/abc.html#abc.ABC" target="_top" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,31,77,56"/>
+<area shape="rect" id="node2" title="Base class for CAT initializers." alt="" coords="125,31,240,56"/>
+<area shape="rect" id="node3" href="fixed-point-initializer.html#catsim.initialization.FixedPointInitializer" target="_top" title="Initialize every examinee&#39;s ability at the same fixed point." alt="" coords="288,5,439,31"/>
+<area shape="rect" id="node4" href="random-initializer.html#catsim.initialization.RandomInitializer" target="_top" title="Randomly initialize the first estimate of an examinee&#39;s ability from a statistical distribution." alt="" coords="295,55,432,80"/>
+</map>

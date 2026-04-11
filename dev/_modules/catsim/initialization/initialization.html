@@ -215,63 +215,7 @@
     <li class="md-nav__item">
     
     
-      <a href="../../../initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="../../../api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -341,7 +285,7 @@
 
 
 <div class="viewcode-block" id="InitializationDistribution">
-<a class="viewcode-back" href="../../../initialization.html#catsim.initialization.InitializationDistribution">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/initialization/random-initializer.html#catsim.initialization.InitializationDistribution">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InitializationDistribution</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Distribution to use for ability estimate initialization.</span>
 
@@ -359,7 +303,7 @@
 
 
 <div class="viewcode-block" id="RandomInitializer">
-<a class="viewcode-back" href="../../../initialization.html#catsim.initialization.RandomInitializer">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RandomInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Randomly initialize the first estimate of an examinee's ability from a statistical distribution.</span>
 
@@ -373,6 +317,10 @@
 <span class="sd">      - For uniform: tuple of (min, max) values (order doesn't matter)</span>
 <span class="sd">      - For normal: tuple of (mean, std) values (in this exact order)</span>
 <span class="sd">      Default is (-5, 5).</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -426,7 +374,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span> <span class="o">=</span> <span class="n">dist_params</span>
 
 <div class="viewcode-block" id="RandomInitializer.initialize">
-<a class="viewcode-back" href="../../../initialization.html#catsim.initialization.RandomInitializer.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer.initialize">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
 <span class="w">    </span><span class="sd">"""Generate an initial ability value using the chosen distribution and parameters.</span>
 
@@ -463,7 +411,7 @@
 
 
 <div class="viewcode-block" id="FixedPointInitializer">
-<a class="viewcode-back" href="../../../initialization.html#catsim.initialization.FixedPointInitializer">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Initialize every examinee's ability at the same fixed point.</span>
 
@@ -474,6 +422,10 @@
 <span class="sd">  ----------</span>
 <span class="sd">  start : float</span>
 <span class="sd">      The starting ability value for every examinee.</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/initialization/fixed-point-initializer`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -496,7 +448,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
 
 <div class="viewcode-block" id="FixedPointInitializer.initialize">
-<a class="viewcode-back" href="../../../initialization.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
 <span class="w">    </span><span class="sd">"""Return the same ability value that was passed to the constructor.</span>
 

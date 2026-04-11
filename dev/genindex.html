@@ -214,63 +214,7 @@
     <li class="md-nav__item">
     
     
-      <a href="initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -356,17 +300,27 @@
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.AStratBBlockSelector">AStratBBlockSelector (class in catsim.selection)</a>
+      <li><a href="api/state.html#catsim.state.CatSessionState.administered_count">administered_count (catsim.state.CatSessionState property)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.AStratSelector">AStratSelector (class in catsim.selection)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.administered_items">administered_items (catsim.state.SimulationResult property)</a>
 </li>
+      <li><a href="api/engine.html#catsim.engine.ResponseProvider.answer">answer() (catsim.engine.ResponseProvider method)</a>
+
+      <ul>
+        <li><a href="api/engine.html#catsim.engine.SimulatedResponseProvider.answer">(catsim.engine.SimulatedResponseProvider method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.available_methods">available_methods() (catsim.estimation.NumericalSearchEstimator static method)</a>
+      <li><a href="api/engine.html#catsim.engine.CatEngine.apply_response">apply_response() (catsim.engine.CatEngine method)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.avg_cluster_params">avg_cluster_params() (catsim.selection.ClusterSelector static method)</a>
+      <li><a href="api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector">AStratBBlockSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="estimation.html#catsim.estimation.BaseEstimator.avg_evaluations">avg_evaluations (catsim.estimation.BaseEstimator property)</a>
+      <li><a href="api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector">AStratSelector (class in catsim.selection)</a>
+</li>
+      <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.available_methods">available_methods() (catsim.estimation.NumericalSearchEstimator static method)</a>
+</li>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.avg_cluster_params">avg_cluster_params() (catsim.selection.ClusterSelector static method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -374,19 +328,13 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.BaseEstimator">BaseEstimator (class in catsim.estimation)</a>
-</li>
-      <li><a href="initialization.html#catsim.initialization.BaseInitializer">BaseInitializer (class in catsim.initialization)</a>
-</li>
-      <li><a href="selection.html#catsim.selection.BaseSelector">BaseSelector (class in catsim.selection)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.bias">bias (catsim.state.SimulationResult property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stopping.html#catsim.stopping.BaseStopper">BaseStopper (class in catsim.stopping)</a>
+      <li><a href="api/cat.html#catsim.cat.bias">bias() (in module catsim.cat)</a>
 </li>
-      <li><a href="cat.html#catsim.cat.bias">bias() (in module catsim.cat)</a>
-</li>
-      <li><a href="selection.html#catsim.selection.RandomesqueSelector.bin_size">bin_size (catsim.selection.RandomesqueSelector property)</a>
+      <li><a href="api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector.bin_size">bin_size (catsim.selection.RandomesqueSelector property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -394,77 +342,69 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.BaseEstimator.calls">calls (catsim.estimation.BaseEstimator property)</a>
+      <li><a href="api/engine.html#catsim.engine.CatEngine">CatEngine (class in catsim.engine)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.CatSessionSnapshot">CatSessionSnapshot (class in catsim.state)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.CatSessionState">CatSessionState (class in catsim.state)</a>
 </li>
       <li>
     catsim.cat
 
       <ul>
-        <li><a href="cat.html#module-catsim.cat">module</a>
+        <li><a href="api/cat.html#module-catsim.cat">module</a>
 </li>
       </ul></li>
       <li>
-    catsim.estimation
+    catsim.engine
 
       <ul>
-        <li><a href="estimation.html#module-catsim.estimation">module</a>
-</li>
-      </ul></li>
-      <li>
-    catsim.initialization
-
-      <ul>
-        <li><a href="initialization.html#module-catsim.initialization">module</a>
+        <li><a href="api/engine.html#module-catsim.engine">module</a>
 </li>
       </ul></li>
       <li>
     catsim.irt
 
       <ul>
-        <li><a href="irt.html#module-catsim.irt">module</a>
+        <li><a href="api/irt.html#module-catsim.irt">module</a>
 </li>
       </ul></li>
       <li>
     catsim.plot
 
       <ul>
-        <li><a href="plot.html#module-catsim.plot">module</a>
+        <li><a href="api/plot.html#module-catsim.plot">module</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
-    catsim.selection
-
-      <ul>
-        <li><a href="selection.html#module-catsim.selection">module</a>
-</li>
-      </ul></li>
-      <li>
     catsim.simulation
 
       <ul>
-        <li><a href="simulation.html#module-catsim.simulation">module</a>
+        <li><a href="api/simulation.html#module-catsim.simulation">module</a>
 </li>
       </ul></li>
       <li>
-    catsim.stopping
+    catsim.state
 
       <ul>
-        <li><a href="stopping.html#module-catsim.stopping">module</a>
+        <li><a href="api/state.html#module-catsim.state">module</a>
 </li>
       </ul></li>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.clusters">clusters (catsim.selection.ClusterSelector property)</a>
+      <li><a href="api/state.html#catsim.state.CatStepResult">CatStepResult (class in catsim.state)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.ClusterSelector">ClusterSelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.clusters">clusters (catsim.selection.ClusterSelector property)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.ConfidenceIntervalStopper.confidence">confidence (catsim.stopping.ConfidenceIntervalStopper property)</a>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector">ClusterSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.confidence_interval">confidence_interval() (in module catsim.irt)</a>
+      <li><a href="api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper.confidence">confidence (catsim.stopping.ConfidenceIntervalStopper property)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.ConfidenceIntervalStopper">ConfidenceIntervalStopper (class in catsim.stopping)</a>
+      <li><a href="api/irt.html#catsim.irt.confidence_interval">confidence_interval() (in module catsim.irt)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.LinearSelector.current">current (catsim.selection.LinearSelector property)</a>
+      <li><a href="api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper">ConfidenceIntervalStopper (class in catsim.stopping)</a>
+</li>
+      <li><a href="api/techniques/selection/linear-selector.html#catsim.selection.LinearSelector.current">current (catsim.selection.LinearSelector property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -472,13 +412,13 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.detect_model">detect_model() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.detect_model">detect_model() (in module catsim.irt)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.dodd">dodd (catsim.estimation.NumericalSearchEstimator property)</a>
+      <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.dodd">dodd (catsim.estimation.NumericalSearchEstimator property)</a>
 </li>
-      <li><a href="cat.html#catsim.cat.dodd">dodd() (in module catsim.cat)</a>
+      <li><a href="api/cat.html#catsim.cat.dodd">dodd() (in module catsim.cat)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -486,15 +426,17 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.BaseEstimator.estimate">estimate() (catsim.estimation.BaseEstimator method)</a>
-
-      <ul>
-        <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.estimate">(catsim.estimation.NumericalSearchEstimator method)</a>
+      <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.estimate">estimate() (catsim.estimation.NumericalSearchEstimator method)</a>
 </li>
-      </ul></li>
+      <li><a href="api/state.html#catsim.state.SimulationResult.estimations">estimations (catsim.state.SimulationResult property)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.BaseEstimator.evaluations">evaluations (catsim.estimation.BaseEstimator property)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.examinees">examinees (catsim.state.SimulationResult property)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.SimulationResult.exposure_rates">exposure_rates (catsim.state.SimulationResult property)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.ExposureTracker">ExposureTracker (class in catsim.state)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -502,11 +444,7 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.FiniteSelector">FiniteSelector (class in catsim.selection)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="initialization.html#catsim.initialization.FixedPointInitializer">FixedPointInitializer (class in catsim.initialization)</a>
+      <li><a href="api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer">FixedPointInitializer (class in catsim.initialization)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -514,7 +452,7 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="plot.html#catsim.plot.gen3d_dataset_scatter">gen3d_dataset_scatter() (in module catsim.plot)</a>
+      <li><a href="api/plot.html#catsim.plot.gen3d_dataset_scatter">gen3d_dataset_scatter() (in module catsim.plot)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -522,39 +460,37 @@
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.icc">icc() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.icc">icc() (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.icc_hpc">icc_hpc() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.icc_hpc">icc_hpc() (in module catsim.irt)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.LinearSelector.indexes">indexes (catsim.selection.LinearSelector property)</a>
+      <li><a href="api/techniques/selection/linear-selector.html#catsim.selection.LinearSelector.indexes">indexes (catsim.selection.LinearSelector property)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.inf">inf() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.inf">inf() (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.inf_hpc">inf_hpc() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.inf_hpc">inf_hpc() (in module catsim.irt)</a>
 </li>
-      <li><a href="initialization.html#catsim.initialization.InitializationDistribution">InitializationDistribution (class in catsim.initialization)</a>
+      <li><a href="api/techniques/initialization/random-initializer.html#catsim.initialization.InitializationDistribution">InitializationDistribution (class in catsim.initialization)</a>
 </li>
-      <li><a href="initialization.html#catsim.initialization.BaseInitializer.initialize">initialize() (catsim.initialization.BaseInitializer method)</a>
+      <li><a href="api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer.initialize">initialize() (catsim.initialization.FixedPointInitializer method)</a>
 
       <ul>
-        <li><a href="initialization.html#catsim.initialization.FixedPointInitializer.initialize">(catsim.initialization.FixedPointInitializer method)</a>
-</li>
-        <li><a href="initialization.html#catsim.initialization.RandomInitializer.initialize">(catsim.initialization.RandomInitializer method)</a>
+        <li><a href="api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer.initialize">(catsim.initialization.RandomInitializer method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.IntervalInfoSelector.interval">interval (catsim.selection.IntervalInfoSelector property)</a>
+      <li><a href="api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector.interval">interval (catsim.selection.IntervalInfoSelector property)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.ConfidenceIntervalStopper.interval_bounds">interval_bounds (catsim.stopping.ConfidenceIntervalStopper property)</a>
+      <li><a href="api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper.interval_bounds">interval_bounds (catsim.stopping.ConfidenceIntervalStopper property)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.IntervalInfoSelector">IntervalInfoSelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector">IntervalInfoSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="simulation.html#catsim.simulation.SimulationRunner.item_bank">item_bank (catsim.simulation.SimulationRunner property)</a>
+      <li><a href="api/simulation.html#catsim.simulation.SimulationRunner.item_bank">item_bank (catsim.simulation.SimulationRunner property)</a>
 </li>
-      <li><a href="plot.html#catsim.plot.item_curve">item_curve() (in module catsim.plot)</a>
+      <li><a href="api/plot.html#catsim.plot.item_curve">item_curve() (in module catsim.plot)</a>
 </li>
-      <li><a href="plot.html#catsim.plot.item_exposure">item_exposure() (in module catsim.plot)</a>
+      <li><a href="api/plot.html#catsim.plot.item_exposure">item_exposure() (in module catsim.plot)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -562,11 +498,15 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.LinearSelector">LinearSelector (class in catsim.selection)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.latest_estimations">latest_estimations (catsim.state.SimulationResult property)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.CatSessionState.latest_theta">latest_theta (catsim.state.CatSessionState property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.log_likelihood">log_likelihood() (in module catsim.irt)</a>
+      <li><a href="api/techniques/selection/linear-selector.html#catsim.selection.LinearSelector">LinearSelector (class in catsim.selection)</a>
+</li>
+      <li><a href="api/irt.html#catsim.irt.log_likelihood">log_likelihood() (in module catsim.irt)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -574,54 +514,52 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.max_info">max_info() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.max_info">max_info() (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.max_info_hpc">max_info_hpc() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.max_info_hpc">max_info_hpc() (in module catsim.irt)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.TestLengthStopper.max_items">max_items (catsim.stopping.TestLengthStopper property)</a>
+      <li><a href="api/techniques/stopping/test-length-stopper.html#catsim.stopping.TestLengthStopper.max_items">max_items (catsim.stopping.TestLengthStopper property)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.MaxInfoBBlockSelector">MaxInfoBBlockSelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector">MaxInfoBBlockSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.MaxInfoSelector">MaxInfoSelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector">MaxInfoSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.MaxInfoStratSelector">MaxInfoStratSelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector">MaxInfoStratSelector (class in catsim.selection)</a>
 </li>
-      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator.method">method (catsim.estimation.NumericalSearchEstimator property)</a>
+      <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.method">method (catsim.estimation.NumericalSearchEstimator property)</a>
 
       <ul>
-        <li><a href="selection.html#catsim.selection.ClusterSelector.method">(catsim.selection.ClusterSelector property)</a>
+        <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.method">(catsim.selection.ClusterSelector property)</a>
 </li>
       </ul></li>
-      <li><a href="stopping.html#catsim.stopping.MinErrorStopper.min_error">min_error (catsim.stopping.MinErrorStopper property)</a>
+      <li><a href="api/techniques/stopping/min-error-stopper.html#catsim.stopping.MinErrorStopper.min_error">min_error (catsim.stopping.MinErrorStopper property)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.TestLengthStopper.min_items">min_items (catsim.stopping.TestLengthStopper property)</a>
+      <li><a href="api/techniques/stopping/test-length-stopper.html#catsim.stopping.TestLengthStopper.min_items">min_items (catsim.stopping.TestLengthStopper property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="stopping.html#catsim.stopping.MinErrorStopper">MinErrorStopper (class in catsim.stopping)</a>
+      <li><a href="api/techniques/stopping/min-error-stopper.html#catsim.stopping.MinErrorStopper">MinErrorStopper (class in catsim.stopping)</a>
 </li>
       <li>
     module
 
       <ul>
-        <li><a href="cat.html#module-catsim.cat">catsim.cat</a>
+        <li><a href="api/cat.html#module-catsim.cat">catsim.cat</a>
 </li>
-        <li><a href="estimation.html#module-catsim.estimation">catsim.estimation</a>
+        <li><a href="api/engine.html#module-catsim.engine">catsim.engine</a>
 </li>
-        <li><a href="initialization.html#module-catsim.initialization">catsim.initialization</a>
+        <li><a href="api/irt.html#module-catsim.irt">catsim.irt</a>
 </li>
-        <li><a href="irt.html#module-catsim.irt">catsim.irt</a>
+        <li><a href="api/plot.html#module-catsim.plot">catsim.plot</a>
 </li>
-        <li><a href="plot.html#module-catsim.plot">catsim.plot</a>
+        <li><a href="api/simulation.html#module-catsim.simulation">catsim.simulation</a>
 </li>
-        <li><a href="selection.html#module-catsim.selection">catsim.selection</a>
-</li>
-        <li><a href="simulation.html#module-catsim.simulation">catsim.simulation</a>
-</li>
-        <li><a href="stopping.html#module-catsim.stopping">catsim.stopping</a>
+        <li><a href="api/state.html#module-catsim.state">catsim.state</a>
 </li>
       </ul></li>
-      <li><a href="cat.html#catsim.cat.mse">mse() (in module catsim.cat)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.mse">mse (catsim.state.SimulationResult property)</a>
+</li>
+      <li><a href="api/cat.html#catsim.cat.mse">mse() (in module catsim.cat)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -629,15 +567,15 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.negative_log_likelihood">negative_log_likelihood() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.negative_log_likelihood">negative_log_likelihood() (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.normalize_item_bank">normalize_item_bank() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.normalize_item_bank">normalize_item_bank() (in module catsim.irt)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="estimation.html#catsim.estimation.NumericalSearchEstimator">NumericalSearchEstimator (class in catsim.estimation)</a>
+      <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator">NumericalSearchEstimator (class in catsim.estimation)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.NumParams">NumParams (class in catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.NumParams">NumParams (class in catsim.irt)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -645,7 +583,11 @@
 <h2 id="O">O</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="cat.html#catsim.cat.overlap_rate">overlap_rate() (in module catsim.cat)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.overlap_rate">overlap_rate (catsim.state.SimulationResult property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/cat.html#catsim.cat.overlap_rate">overlap_rate() (in module catsim.cat)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -653,24 +595,24 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="plot.html#catsim.plot.PlotType">PlotType (class in catsim.plot)</a>
+      <li><a href="api/plot.html#catsim.plot.PlotType">PlotType (class in catsim.plot)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.MaxInfoStratSelector.postsort_items">postsort_items() (catsim.selection.MaxInfoStratSelector method)</a>
+      <li><a href="api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.postsort_items">postsort_items() (catsim.selection.MaxInfoStratSelector method)</a>
 
       <ul>
-        <li><a href="selection.html#catsim.selection.StratifiedSelector.postsort_items">(catsim.selection.StratifiedSelector method)</a>
+        <li><a href="api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.postsort_items">(catsim.selection.StratifiedSelector method)</a>
 </li>
       </ul></li>
-      <li><a href="selection.html#catsim.selection.AStratBBlockSelector.presort_items">presort_items() (catsim.selection.AStratBBlockSelector method)</a>
+      <li><a href="api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector.presort_items">presort_items() (catsim.selection.AStratBBlockSelector method)</a>
 
       <ul>
-        <li><a href="selection.html#catsim.selection.AStratSelector.presort_items">(catsim.selection.AStratSelector method)</a>
+        <li><a href="api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector.presort_items">(catsim.selection.AStratSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.MaxInfoBBlockSelector.presort_items">(catsim.selection.MaxInfoBBlockSelector method)</a>
+        <li><a href="api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector.presort_items">(catsim.selection.MaxInfoBBlockSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.MaxInfoStratSelector.presort_items">(catsim.selection.MaxInfoStratSelector method)</a>
+        <li><a href="api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.presort_items">(catsim.selection.MaxInfoStratSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.StratifiedSelector.presort_items">(catsim.selection.StratifiedSelector method)</a>
+        <li><a href="api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.presort_items">(catsim.selection.StratifiedSelector method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -679,31 +621,45 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.r_control">r_control (catsim.selection.ClusterSelector property)</a>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.r_control">r_control (catsim.selection.ClusterSelector property)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.r_max">r_max (catsim.selection.ClusterSelector property)</a>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.r_max">r_max (catsim.selection.ClusterSelector property)</a>
 
       <ul>
-        <li><a href="selection.html#catsim.selection.MaxInfoSelector.r_max">(catsim.selection.MaxInfoSelector property)</a>
+        <li><a href="api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector.r_max">(catsim.selection.MaxInfoSelector property)</a>
 </li>
       </ul></li>
-      <li><a href="cat.html#catsim.cat.random_response_vector">random_response_vector() (in module catsim.cat)</a>
+      <li><a href="api/cat.html#catsim.cat.random_response_vector">random_response_vector() (in module catsim.cat)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.RandomesqueSelector">RandomesqueSelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector">RandomesqueSelector (class in catsim.selection)</a>
+</li>
+      <li><a href="api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer">RandomInitializer (class in catsim.initialization)</a>
+</li>
+      <li><a href="api/techniques/selection/random-selector.html#catsim.selection.RandomSelector">RandomSelector (class in catsim.selection)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.ExposureTracker.rates">rates() (catsim.state.ExposureTracker method)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.ExposureTracker.record">record() (catsim.state.ExposureTracker method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="initialization.html#catsim.initialization.RandomInitializer">RandomInitializer (class in catsim.initialization)</a>
+      <li><a href="api/irt.html#catsim.irt.reliability">reliability() (in module catsim.irt)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.RandomSelector">RandomSelector (class in catsim.selection)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.response_vectors">response_vectors (catsim.state.SimulationResult property)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.reliability">reliability() (in module catsim.irt)</a>
+      <li><a href="api/engine.html#catsim.engine.ResponseProvider">ResponseProvider (class in catsim.engine)</a>
 </li>
-      <li><a href="cat.html#catsim.cat.rmse">rmse() (in module catsim.cat)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult.rmse">rmse (catsim.state.SimulationResult property)</a>
 </li>
-      <li><a href="simulation.html#catsim.simulation.SimulationRunner.rng">rng (catsim.simulation.SimulationRunner property)</a>
+      <li><a href="api/cat.html#catsim.cat.rmse">rmse() (in module catsim.cat)</a>
 </li>
-      <li><a href="simulation.html#catsim.simulation.SimulationRunner.run">run() (catsim.simulation.SimulationRunner method)</a>
+      <li><a href="api/simulation.html#catsim.simulation.SimulationRunner.rng">rng (catsim.simulation.SimulationRunner property)</a>
+</li>
+      <li><a href="api/simulation.html#catsim.simulation.SimulationRunner.run">run() (catsim.simulation.SimulationRunner method)</a>
+</li>
+      <li><a href="api/engine.html#catsim.engine.CatEngine.run_session">run_session() (catsim.engine.CatEngine method)</a>
+</li>
+      <li><a href="api/engine.html#catsim.engine.RunContext">RunContext (class in catsim.engine)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -711,47 +667,57 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.scale_to_theta">scale_to_theta() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.scale_to_theta">scale_to_theta() (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.see">see() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.see">see() (in module catsim.irt)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.BaseSelector.select">select() (catsim.selection.BaseSelector method)</a>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.select">select() (catsim.selection.ClusterSelector method)</a>
 
       <ul>
-        <li><a href="selection.html#catsim.selection.ClusterSelector.select">(catsim.selection.ClusterSelector method)</a>
+        <li><a href="api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector.select">(catsim.selection.IntervalInfoSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.IntervalInfoSelector.select">(catsim.selection.IntervalInfoSelector method)</a>
+        <li><a href="api/techniques/selection/linear-selector.html#catsim.selection.LinearSelector.select">(catsim.selection.LinearSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.LinearSelector.select">(catsim.selection.LinearSelector method)</a>
+        <li><a href="api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector.select">(catsim.selection.MaxInfoSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.MaxInfoSelector.select">(catsim.selection.MaxInfoSelector method)</a>
+        <li><a href="api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector.select">(catsim.selection.RandomesqueSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.RandomesqueSelector.select">(catsim.selection.RandomesqueSelector method)</a>
+        <li><a href="api/techniques/selection/random-selector.html#catsim.selection.RandomSelector.select">(catsim.selection.RandomSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.RandomSelector.select">(catsim.selection.RandomSelector method)</a>
+        <li><a href="api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.select">(catsim.selection.StratifiedSelector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.StratifiedSelector.select">(catsim.selection.StratifiedSelector method)</a>
+        <li><a href="api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector.select">(catsim.selection.The54321Selector method)</a>
 </li>
-        <li><a href="selection.html#catsim.selection.The54321Selector.select">(catsim.selection.The54321Selector method)</a>
-</li>
-        <li><a href="selection.html#catsim.selection.UrrySelector.select">(catsim.selection.UrrySelector method)</a>
+        <li><a href="api/techniques/selection/urry-selector.html#catsim.selection.UrrySelector.select">(catsim.selection.UrrySelector method)</a>
 </li>
       </ul></li>
+      <li><a href="api/engine.html#catsim.engine.CatEngine.select_next">select_next() (catsim.engine.CatEngine method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="simulation.html#catsim.simulation.SimulationRunner">SimulationRunner (class in catsim.simulation)</a>
+      <li><a href="api/state.html#catsim.state.SessionStatus">SessionStatus (class in catsim.state)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.BaseStopper.stop">stop() (catsim.stopping.BaseStopper method)</a>
-
-      <ul>
-        <li><a href="stopping.html#catsim.stopping.TestLengthStopper.stop">(catsim.stopping.TestLengthStopper method)</a>
+      <li><a href="api/engine.html#catsim.engine.CatEngine.should_stop">should_stop() (catsim.engine.CatEngine method)</a>
 </li>
-      </ul></li>
-      <li><a href="selection.html#catsim.selection.StratifiedSelector">StratifiedSelector (class in catsim.selection)</a>
+      <li><a href="api/engine.html#catsim.engine.SimulatedResponseProvider">SimulatedResponseProvider (class in catsim.engine)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.sum_cluster_infos">sum_cluster_infos() (catsim.selection.ClusterSelector static method)</a>
+      <li><a href="api/state.html#catsim.state.SimulationResult">SimulationResult (class in catsim.state)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.sum_cluster_params">sum_cluster_params() (catsim.selection.ClusterSelector static method)</a>
+      <li><a href="api/simulation.html#catsim.simulation.SimulationRunner">SimulationRunner (class in catsim.simulation)</a>
+</li>
+      <li><a href="api/state.html#catsim.state.CatSessionState.snapshot">snapshot() (catsim.state.CatSessionState method)</a>
+</li>
+      <li><a href="api/engine.html#catsim.engine.CatEngine.start_session">start_session() (catsim.engine.CatEngine method)</a>
+</li>
+      <li><a href="api/engine.html#catsim.engine.CatEngine.step">step() (catsim.engine.CatEngine method)</a>
+</li>
+      <li><a href="api/techniques/stopping/test-length-stopper.html#catsim.stopping.TestLengthStopper.stop">stop() (catsim.stopping.TestLengthStopper method)</a>
+</li>
+      <li><a href="api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector">StratifiedSelector (class in catsim.selection)</a>
+</li>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.sum_cluster_infos">sum_cluster_infos() (catsim.selection.ClusterSelector static method)</a>
+</li>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.sum_cluster_params">sum_cluster_params() (catsim.selection.ClusterSelector static method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -759,29 +725,25 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.test_info">test_info() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.test_info">test_info() (in module catsim.irt)</a>
 </li>
-      <li><a href="plot.html#catsim.plot.test_progress">test_progress() (in module catsim.plot)</a>
+      <li><a href="api/plot.html#catsim.plot.test_progress">test_progress() (in module catsim.plot)</a>
 </li>
-      <li><a href="selection.html#catsim.selection.FiniteSelector.test_size">test_size (catsim.selection.FiniteSelector property)</a>
+      <li><a href="api/techniques/stopping/test-length-stopper.html#catsim.stopping.TestLengthStopper">TestLengthStopper (class in catsim.stopping)</a>
 </li>
-      <li><a href="stopping.html#catsim.stopping.TestLengthStopper">TestLengthStopper (class in catsim.stopping)</a>
-</li>
-      <li><a href="selection.html#catsim.selection.The54321Selector">The54321Selector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector">The54321Selector (class in catsim.selection)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.THETA_MAX_EXTENDED">THETA_MAX_EXTENDED (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.THETA_MAX_EXTENDED">THETA_MAX_EXTENDED (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.THETA_MAX_TYPICAL">THETA_MAX_TYPICAL (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.THETA_MAX_TYPICAL">THETA_MAX_TYPICAL (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.THETA_MIN_EXTENDED">THETA_MIN_EXTENDED (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.THETA_MIN_EXTENDED">THETA_MIN_EXTENDED (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.THETA_MIN_TYPICAL">THETA_MIN_TYPICAL (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.THETA_MIN_TYPICAL">THETA_MIN_TYPICAL (in module catsim.irt)</a>
 </li>
-      <li><a href="irt.html#catsim.irt.theta_to_scale">theta_to_scale() (in module catsim.irt)</a>
-</li>
-      <li><a href="estimation.html#catsim.estimation.BaseEstimator.total_evaluations">total_evaluations (catsim.estimation.BaseEstimator property)</a>
+      <li><a href="api/irt.html#catsim.irt.theta_to_scale">theta_to_scale() (in module catsim.irt)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -789,7 +751,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.UrrySelector">UrrySelector (class in catsim.selection)</a>
+      <li><a href="api/techniques/selection/urry-selector.html#catsim.selection.UrrySelector">UrrySelector (class in catsim.selection)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -797,11 +759,11 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.validate_item_bank">validate_item_bank() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.validate_item_bank">validate_item_bank() (in module catsim.irt)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="irt.html#catsim.irt.var">var() (in module catsim.irt)</a>
+      <li><a href="api/irt.html#catsim.irt.var">var() (in module catsim.irt)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -809,7 +771,7 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="selection.html#catsim.selection.ClusterSelector.weighted_cluster_infos">weighted_cluster_infos() (catsim.selection.ClusterSelector static method)</a>
+      <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.weighted_cluster_infos">weighted_cluster_infos() (catsim.selection.ClusterSelector static method)</a>
 </li>
   </ul></td>
 </tr></table>

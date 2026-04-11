@@ -215,63 +215,7 @@
     <li class="md-nav__item">
     
     
-      <a href="../../../initialization.html" class="md-nav__link">Initialization Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../selection.html" class="md-nav__link">Item Selection Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../estimation.html" class="md-nav__link">Estimation Methods – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../stopping.html" class="md-nav__link">Stopping Criteria – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../specs/index.html" class="md-nav__link">Technique Specifications</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../simulation.html" class="md-nav__link">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../irt.html" class="md-nav__link">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../cat.html" class="md-nav__link">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../../plot.html" class="md-nav__link">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a>
+      <a href="../../../api/index.html" class="md-nav__link">API Reference</a>
       
     
     </li>
@@ -345,7 +289,7 @@
 
 
 <div class="viewcode-block" id="StratifiedSelector">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.StratifiedSelector">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StratifiedSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Abstract base class for finite selectors that divide the item bank into stage-aligned strata.</span>
 
@@ -359,7 +303,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  For full family-level details, see :doc:`/specs/selection/stratified-selector`.</span>
+<span class="sd">  For full family-level details, see :doc:`/api/techniques/selection/stratified-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -382,7 +326,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_item_bank_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="StratifiedSelector.presort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.StratifiedSelector.presort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.presort_items">[docs]</a>
   <span class="nd">@abstractmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Presort the item matrix according to the strategy employed by this selector.</span>
@@ -400,7 +344,7 @@
 
 
 <div class="viewcode-block" id="StratifiedSelector.postsort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.StratifiedSelector.postsort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.postsort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: ARG002</span>
 <span class="w">    </span><span class="sd">"""Sort the item matrix before selecting each new item.</span>
 
@@ -429,7 +373,7 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span>
 
 <div class="viewcode-block" id="StratifiedSelector.select">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.StratifiedSelector.select">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.select">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
@@ -491,7 +435,7 @@
 
 
 <div class="viewcode-block" id="AStratSelector">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.AStratSelector">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector.</span>
 
@@ -503,7 +447,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/a-strat-selector`.</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -521,7 +465,7 @@
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AStratSelector.presort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.AStratSelector.presort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
 <span class="w">    </span><span class="sd">"""Presort the item matrix in ascending order according to the discrimination of each item.</span>
 
@@ -541,7 +485,7 @@
 
 
 <div class="viewcode-block" id="AStratBBlockSelector">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.AStratBBlockSelector">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AStratBBlockSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking.</span>
 
@@ -553,7 +497,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/a-strat-b-block-selector`.</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -571,7 +515,7 @@
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AStratBBlockSelector.presort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.AStratBBlockSelector.presort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Presort items in ascending order of discrimination each item, then each strata according to item difficulty.</span>
 
@@ -606,7 +550,7 @@
 
 
 <div class="viewcode-block" id="MaxInfoStratSelector">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoStratSelector">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification (MIS) selector.</span>
 
@@ -618,7 +562,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/max-info-strat-selector`.</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -636,7 +580,7 @@
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MaxInfoStratSelector.presort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoStratSelector.presort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
 <span class="w">    </span><span class="sd">"""Presort items in ascending order of maximum information.</span>
 
@@ -659,7 +603,7 @@
 
 
 <div class="viewcode-block" id="MaxInfoStratSelector.postsort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoStratSelector.postsort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.postsort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
@@ -709,7 +653,7 @@
 
 
 <div class="viewcode-block" id="MaxInfoBBlockSelector">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoBBlockSelector">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoBBlockSelector</span><span class="p">(</span><span class="n">MaxInfoStratSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector.</span>
 
@@ -721,7 +665,7 @@
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  For full algorithmic details, see :doc:`/specs/selection/max-info-b-block-selector`.</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -729,7 +673,7 @@
     <span class="k">return</span> <span class="s2">"Maximum Information Stratification with b-Blocking Selector"</span>
 
 <div class="viewcode-block" id="MaxInfoBBlockSelector.presort_items">
-<a class="viewcode-back" href="../../../selection.html#catsim.selection.MaxInfoBBlockSelector.presort_items">[docs]</a>
+<a class="viewcode-back" href="../../../api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Presort the item matrix according to the information of each item at their maximum.</span>
 
