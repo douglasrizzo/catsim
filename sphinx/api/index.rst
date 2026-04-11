@@ -1,13 +1,16 @@
 API Reference
 #############
 
-These pages provide module-level API browsing. Technique-level API details are
-documented on the individual pages under :doc:`/techniques/index`.
+These pages provide the API reference for :mod:`catsim`. Technique pages combine
+algorithmic specifications, behavioral contracts, and class-level API details.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   selection
-   estimation
-   stopping
-   initialization
+   techniques/index
+   engine
+   state
+   simulation
+   cat
+   irt
+   plot

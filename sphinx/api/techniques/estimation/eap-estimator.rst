@@ -94,4 +94,4 @@ Wang, T., & Vispoel, W. P. (1998). Properties of ability estimation methods in c
 
 .. seealso::
 
-   Depends on :doc:`/techniques/estimation/bayesian-infrastructure`
+   Depends on :doc:`/api/techniques/estimation/bayesian-infrastructure`

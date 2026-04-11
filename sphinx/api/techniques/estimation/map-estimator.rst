@@ -83,5 +83,5 @@ Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item
 
 .. seealso::
 
-   Related planned specs: :doc:`/techniques/estimation/bayesian-infrastructure`,
-   :doc:`/techniques/estimation/eap-estimator`
+   Related planned specs: :doc:`/api/techniques/estimation/bayesian-infrastructure`,
+   :doc:`/api/techniques/estimation/eap-estimator`

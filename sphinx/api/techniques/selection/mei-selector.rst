@@ -74,4 +74,4 @@ Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria f
 
 .. seealso::
 
-   Sister planned spec: :doc:`/techniques/selection/mlwi-selector`
+   Sister planned spec: :doc:`/api/techniques/selection/mlwi-selector`

@@ -83,4 +83,4 @@ Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A method for the co
 
 .. seealso::
 
-   Companion planned spec: :doc:`/techniques/selection/proportional-selector`
+   Companion planned spec: :doc:`/api/techniques/selection/proportional-selector`

@@ -82,4 +82,4 @@ Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating rando
 
 .. seealso::
 
-   Companion planned spec: :doc:`/techniques/selection/progressive-selector`
+   Companion planned spec: :doc:`/api/techniques/selection/progressive-selector`

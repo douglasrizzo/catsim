@@ -78,4 +78,4 @@ Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria 
 
 .. seealso::
 
-   Sister planned spec: :doc:`/techniques/selection/mei-selector`
+   Sister planned spec: :doc:`/api/techniques/selection/mei-selector`

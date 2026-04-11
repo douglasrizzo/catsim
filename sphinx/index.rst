@@ -8,13 +8,8 @@
     :hidden:
 
     introduction.rst
-    techniques/index
-    simulation.rst
-    irt.rst
-    cat.rst
-    plot.rst
-    reproducibility.rst
     api/index
+    reproducibility.rst
     architecture_decisions.rst
     contributing.rst
     references.rst

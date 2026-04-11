@@ -105,5 +105,5 @@ Standard fixed-grid and Gauss-Hermite quadrature references apply to the numeric
 
 .. seealso::
 
-   Related planned specs: :doc:`/techniques/estimation/eap-estimator`,
-   :doc:`/techniques/estimation/map-estimator`
+   Related planned specs: :doc:`/api/techniques/estimation/eap-estimator`,
+   :doc:`/api/techniques/estimation/map-estimator`

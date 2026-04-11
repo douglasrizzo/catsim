@@ -21,7 +21,7 @@ class MaxInfoSelector(BaseSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/techniques/selection/max-info-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-selector`.
   """
 
   def __init__(self, r_max: float = 1) -> None:
@@ -104,7 +104,7 @@ class UrrySelector(BaseSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/techniques/selection/urry-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/urry-selector`.
   """
 
   def __init__(self) -> None:
@@ -157,7 +157,7 @@ class IntervalInfoSelector(BaseSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/techniques/selection/interval-info-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/interval-info-selector`.
   """
 
   def __str__(self) -> str:

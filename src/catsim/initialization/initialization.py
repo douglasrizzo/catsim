@@ -39,7 +39,7 @@ class RandomInitializer(BaseInitializer):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/techniques/initialization/random-initializer`.
+  For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.
   """
 
   def __str__(self) -> str:
@@ -138,7 +138,7 @@ class FixedPointInitializer(BaseInitializer):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/techniques/initialization/fixed-point-initializer`.
+  For full algorithmic details, see :doc:`/api/techniques/initialization/fixed-point-initializer`.
   """
 
   def __str__(self) -> str:
