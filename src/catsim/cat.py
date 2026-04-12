@@ -11,7 +11,7 @@ from catsim.item_bank import ItemBank
 def dodd(theta: float, item_bank: ItemBank, correct: bool) -> float:
   r"""Estimate :math:`\hat{\theta}` when the response vector is composed entirely of 1s or 0s.
 
-  Method proposed by [Dod90]_. This heuristic prevents the maximum likelihood
+  Method proposed by :cite:p:`Dod90`. This heuristic prevents the maximum likelihood
   estimator from returning infinity when all responses are correct or negative
   infinity when all responses are incorrect.
 
@@ -48,7 +48,7 @@ def bias(
   actual: npt.ArrayLike,
   predicted: npt.ArrayLike,
 ) -> float:
-  r"""Compute the test bias, an evaluation criterion for computerized adaptive test methodologies [Chang2001]_.
+  r"""Compute the test bias, an evaluation criterion for computerized adaptive test methodologies :cite:p:`Chang2001`.
 
   The value is computed as:
 
@@ -91,7 +91,7 @@ def mse(
   r"""Compute the mean squared error (MSE) between two array-like objects.
 
   The MSE is used when measuring the precision with which a computerized adaptive
-  test estimates examinees abilities [Chang2001]_. Lower MSE values indicate better
+  test estimates examinees abilities :cite:p:`Chang2001`. Lower MSE values indicate better
   estimation accuracy.
 
   The value is computed as:
@@ -135,7 +135,7 @@ def rmse(
   r"""Compute the root mean squared error (RMSE) between two array-like objects.
 
   A common value used when measuring the precision with which a computerized adaptive
-  test estimates examinees abilities [Bar10]_. RMSE is in the same units as the ability
+  test estimates examinees abilities :cite:p:`Bar10`. RMSE is in the same units as the ability
   scale, making it easier to interpret than MSE.
 
   The value is computed as:
@@ -168,7 +168,7 @@ def rmse(
 def overlap_rate(exposure_rates: npt.NDArray[numpy.floating], test_size: int) -> float:
   r"""Compute the test overlap rate.
 
-  An average measure of how much of the test two examinees take is equal [Bar10]_.
+  An average measure of how much of the test two examinees take is equal :cite:p:`Bar10`.
   The overlap rate provides insight into test security: higher values indicate that
   examinees see more similar items, potentially compromising test security.
 

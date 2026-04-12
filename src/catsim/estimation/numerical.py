@@ -21,7 +21,7 @@ class NumericalSearchEstimator(BaseEstimator):
   tol : float, optional
       Tolerance for convergence in the optimization algorithm. Default is 1e-6.
   dodd : bool, optional
-      Whether to employ Dodd's estimation heuristic [Dod90]_ when the response vector
+      Whether to employ Dodd's estimation heuristic :cite:p:`Dod90` when the response vector
       only has one kind of response (all correct or all incorrect, see
       :py:func:`catsim.cat.dodd`). Default is True.
   verbose : bool, optional
@@ -378,7 +378,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
   @property
   def dodd(self) -> bool:
-    """Whether Dodd's estimation heuristic [Dod90]_ will be used by the estimator.
+    """Whether Dodd's estimation heuristic :cite:p:`Dod90` will be used by the estimator.
 
     Dodd's method is used when the response vector is composed solely of correct or
     incorrect answers, to prevent maximum likelihood methods from returning -infinity

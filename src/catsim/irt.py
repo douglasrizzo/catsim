@@ -72,7 +72,7 @@ class NumParams(Enum):
 
 
 def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
-  r"""Compute the Item Response Theory four-parameter logistic function [Magis13]_.
+  r"""Compute the Item Response Theory four-parameter logistic function :cite:p:`Magis13`.
 
   The item characteristic curve (ICC) represents the probability that an examinee
   with ability :math:`\theta` will correctly answer an item with the given parameters.
@@ -233,7 +233,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 
   Item information quantifies how precisely an item can estimate ability at a given
   :math:`\theta` level. Higher information indicates better precision. References
-  are given in [Ayala2009]_, [Magis13]_.
+  are given in :cite:p:`Ayala2009,Magis13`.
 
   .. math:: I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}
 
@@ -268,7 +268,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 
 
 def test_info(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
-  r"""Compute the test information of a test at a specific :math:`\theta` value [Ayala2009]_.
+  r"""Compute the test information of a test at a specific :math:`\theta` value :cite:p:`Ayala2009`.
 
   Test information is the sum of individual item information values and indicates
   the precision of ability estimation at a given ability level.
@@ -338,7 +338,9 @@ def var(
 
 
 def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
-  r"""Compute the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\theta` value [Ayala2009]_.
+  r"""Compute the standard error of estimation (:math:`SEE`) of a test.
+
+  The estimate is computed at a specific :math:`\theta` value :cite:p:`Ayala2009`.
 
   The standard error of estimation is the square root of variance and represents
   the typical error in ability estimation. It is in the same units as the ability
@@ -587,7 +589,7 @@ def scale_to_theta(
 
 
 def reliability(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
-  r"""Compute test reliability [Thissen00]_.
+  r"""Compute test reliability :cite:p:`Thissen00`.
 
   Test reliability is a measure of internal consistency for the test, similar to
   Cronbach's :math:`\alpha` in Classical Test Theory. Its value is always lower than 1,
@@ -619,7 +621,7 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
 
   For the 1-parameter and 2-parameter logistic models, this :math:`\theta` equals :math:`b`.
   In the 3-parameter and 4-parameter logistic models, however, this value is given by
-  ([Magis13]_)
+  :cite:p:`Magis13`
 
   .. math:: argmax_{\theta}I(\theta) = b + \frac{1}{a} log \left(\frac{x^* - c}{d - x^*}\right)
 
@@ -729,7 +731,7 @@ def log_likelihood(
   r"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.
 
   The likelihood function of a given :math:`\theta` value given the answers to :math:`I`
-  items is given by [Ayala2009]_:
+  items is given by :cite:p:`Ayala2009`:
 
   .. math:: L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}
 

@@ -44,8 +44,19 @@ extensions = [
   "sphinx.ext.todo",
   "sphinx.ext.viewcode",
   "numpydoc",
-  "m2r2",
+  "myst_parser",
+  "sphinxcontrib.bibtex",
 ]
+
+myst_enable_extensions = [
+  "colon_fence",
+  "deflist",
+  "dollarmath",
+]
+
+bibtex_bibfiles = ["references.bib"]
+bibtex_default_style = "plain"
+bibtex_reference_style = "author_year"
 
 intersphinx_mapping = {
   "python": ("https://docs.python.org/3", None),
@@ -59,7 +70,10 @@ templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = [".rst", ".md"]
+source_suffix = {
+  ".md": "markdown",
+  ".rst": "restructuredtext",
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'

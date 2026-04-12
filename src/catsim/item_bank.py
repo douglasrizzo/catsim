@@ -400,7 +400,7 @@ class ItemBank:
   ) -> Self:
     """Generate a synthetic item bank with parameters following real-world distributions.
 
-    As proposed by [Bar10]_, item parameters are extracted from the following probability
+    As proposed by :cite:t:`Bar10`, item parameters are extracted from the following probability
     distributions:
 
     * discrimination: :math:`N(1.2, 0.25)`

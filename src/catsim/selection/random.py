@@ -78,7 +78,7 @@ class RandomSelector(BaseSelector):
 
 
 class The54321Selector(FiniteSelector):
-  r"""Implementation of the 5-4-3-2-1 selector proposed by [McBride83]_.
+  r"""Implementation of the 5-4-3-2-1 selector proposed by :cite:p:`McBride83`.
 
   In this selector, at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin containing the
   :math:`K-k` most informative items in the bank, given the current :math:`\\hat\\theta`. As the test progresses, the
@@ -145,7 +145,7 @@ class The54321Selector(FiniteSelector):
 
 
 class RandomesqueSelector(BaseSelector):
-  """Implementation of the randomesque selector proposed by [Kingsbury89]_.
+  """Implementation of the randomesque selector proposed by :cite:p:`Kingsbury89`.
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a predefined value (originally 5, but user-defined in this implementation).
