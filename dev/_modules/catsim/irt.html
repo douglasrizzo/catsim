@@ -1,285 +1,409 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../">
+
+<html lang="en" data-content_root="../../" >
+
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <meta name="lang:clipboard.copy" content="Copy to clipboard">
-  <meta name="lang:clipboard.copied" content="Copied to clipboard">
-  <meta name="lang:search.language" content="en">
-  <meta name="lang:search.pipeline.stopwords" content="True">
-  <meta name="lang:search.pipeline.trimmer" content="True">
-  <meta name="lang:search.result.none" content="No matching documents">
-  <meta name="lang:search.result.one" content="1 matching document">
-  <meta name="lang:search.result.other" content="# matching documents">
-  <meta name="lang:search.tokenizer" content="[\s\-]+">
-
-  
-    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
-
-    <style>
-      body,
-      input {
-        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
-      }
-
-      code,
-      kbd,
-      pre {
-        font-family: "Roboto Mono", "Courier New", Courier, monospace
-      }
-    </style>
-  
-
-  <link rel="stylesheet" href="../../_static/stylesheets/application.css"/>
-  <link rel="stylesheet" href="../../_static/stylesheets/application-palette.css"/>
-  <link rel="stylesheet" href="../../_static/stylesheets/application-fixes.css"/>
-  
-  <link rel="stylesheet" href="../../_static/fonts/material-icons.css"/>
-  
-  <meta name="theme-color" content="#3f51b5">
-  <script src="../../_static/javascripts/modernizr.js"></script>
-  
-  
-  
     <title>catsim.irt &#8212; catsim 0.21.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="../../_static/material.css?v=79c92029" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/catsim/irt';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../../_static/logo.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.21.0" />
   
-   
-
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
   </head>
-  <body dir=ltr
-        data-md-color-primary=blue data-md-color-accent=light-blue>
+  <body data-default-mode="">
   
-  <svg class="md-svg">
-    <defs data-children-count="0">
-      
-      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
-      
-    </defs>
-  </svg>
   
-  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
-  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
-  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
-  <a href="#_modules/catsim/irt" tabindex="1" class="md-skip"> Skip to content </a>
-  <header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid">
-    <div class="md-flex navheader">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="../../index.html" title="catsim 0.21.0 documentation"
-           class="md-header-nav__button md-logo">
-          
-            &nbsp;
-          
-        </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
-          <span class="md-header-nav__topic">catsim</span>
-          <span class="md-header-nav__topic"> catsim.irt </span>
-        </div>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-        
-<div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" action="../../search.html" method="get" name="search">
-      <input type="text" class="md-search__input" name="q" placeholder=""Search""
-             autocapitalize="off" autocomplete="off" spellcheck="false"
-             data-md-component="query" data-md-state="active">
-      <label class="md-icon md-search__icon" for="__search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
-        &#xE5CD;
-      </button>
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
-          <div class="md-search-result__meta">
-            Type to start searching
-          </div>
-          <ol class="md-search-result__list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
 </div>
 
-      </div>
-      
-        <div class="md-flex__cell md-flex__cell--shrink">
-          <div class="md-header-nav__source">
-            <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
-
-    <div class="md-source__icon">
-      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
-        <use xlink:href="#__github" width="24" height="24"></use>
-      </svg>
-    </div>
   
-  <div class="md-source__repository">
-    catsim
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo_text.svg" class="logo__image only-light" alt="catsim 0.21.0 documentation - Home"/>
+    <img src="../../_static/logo_text.svg" class="logo__image only-dark pst-js-only" alt="catsim 0.21.0 documentation - Home"/>
+  
+  
+</a></div>
+    
   </div>
-</a>
-          </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../introduction.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../reproducibility.html">
+    Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../references.html">
+    Bibliography
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
         </div>
       
       
-  
-  <script src="../../_static/javascripts/version_dropdown.js"></script>
-  <script>
-    var json_loc = "../../"versions.json"",
-        target_loc = "../../../",
-        text = "Versions";
-    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
-  </script>
-  
-
-    </div>
-  </nav>
-</header>
-
-  
-  <div class="md-container">
-    
-    
-    
-  <nav class="md-tabs" data-md-component="tabs">
-    <div class="md-tabs__inner md-grid">
-      <ul class="md-tabs__list">
-          <li class="md-tabs__item"><a href="../../index.html" class="md-tabs__link">catsim 0.21.0 documentation</a></li>
-          <li class="md-tabs__item"><a href="../index.html" class="md-tabs__link">Module code</a></li>
-      </ul>
-    </div>
-  </nav>
-    <main class="md-main">
-      <div class="md-main__inner md-grid" data-md-component="container">
-        
-          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
-            <div class="md-sidebar__scrollwrap">
-              <div class="md-sidebar__inner">
-                <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href="../../index.html" title="catsim 0.21.0 documentation" class="md-nav__button md-logo">
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
       
-        <img src="../../_static/" alt=" logo" width="48" height="48">
-      
-    </a>
-    <a href="../../index.html"
-       title="catsim 0.21.0 documentation">catsim</a>
-  </label>
-    <div class="md-nav__source">
-      <a href="https://github.com/douglasrizzo/catsim" title="Go to repository" class="md-source" data-md-source="github">
+        <div class="navbar-item">
 
-    <div class="md-source__icon">
-      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
-        <use xlink:href="#__github" width="24" height="24"></use>
-      </svg>
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
     </div>
-  
-  <div class="md-source__repository">
-    catsim
+    
   </div>
-</a>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../introduction.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../reproducibility.html">
+    Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../references.html">
+    Bibliography
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">catsim.irt</span></li>
+  </ul>
+</nav>
+</div>
+      
     </div>
   
   
-
-  
-  <ul class="md-nav__list">
-    <li class="md-nav__item">
-    
-    
-      <a href="../../introduction.html" class="md-nav__link">Introduction</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../api/index.html" class="md-nav__link">API Reference</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../reproducibility.html" class="md-nav__link">Reproducibility</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../architecture_decisions.html" class="md-nav__link">Architecture Decision Records</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../contributing.html" class="md-nav__link">Contributing</a>
-      
-    
-    </li>
-    <li class="md-nav__item">
-    
-    
-      <a href="../../references.html" class="md-nav__link">Bibliography</a>
-      
-    
-    </li>
-  </ul>
-  
-
-</nav>
-              </div>
-            </div>
-          </div>
-          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
-            <div class="md-sidebar__scrollwrap">
-              <div class="md-sidebar__inner">
+</div>
+</div>
+              
+              
+              
                 
-<nav class="md-nav md-nav--secondary">
-  <ul class="md-nav__list" data-md-scrollfix="">
-    
-
-<li id="searchbox" class="md-nav__item"></li>
-
-  </ul>
-</nav>
-              </div>
-            </div>
-          </div>
-        
-        <div class="md-content">
-          <article class="md-content__inner md-typeset" role="main">
-            
-  <h1 id="modules-catsim-irt--page-root">Source code for catsim.irt</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Item Response Theory (IRT) functions and utilities for computerized adaptive testing.</span>
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for catsim.irt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Item Response Theory (IRT) functions and utilities for computerized adaptive testing.</span>
 
 <span class="sd">This module provides core IRT functions including item characteristic curves (ICC),</span>
 <span class="sd">item information functions, and various utility functions for parameter estimation</span>
 <span class="sd">and scale transformations.</span>
-<span class="sd">"""</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
@@ -291,42 +415,42 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 
 <span class="n">THETA_MIN_TYPICAL</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.0</span>
-<span class="sd">"""Typical lower bound for ability (theta) estimation.</span>
+<span class="sd">&quot;&quot;&quot;Typical lower bound for ability (theta) estimation.</span>
 
 <span class="sd">This value covers approximately 99.99% of the population (±4 standard deviations)</span>
 <span class="sd">assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature</span>
-<span class="sd">for scale transformations and reporting."""</span>
+<span class="sd">for scale transformations and reporting.&quot;&quot;&quot;</span>
 
 <span class="n">THETA_MAX_TYPICAL</span> <span class="o">=</span> <span class="mf">4.0</span>
-<span class="sd">"""Typical upper bound for ability (theta) estimation.</span>
+<span class="sd">&quot;&quot;&quot;Typical upper bound for ability (theta) estimation.</span>
 
 <span class="sd">This value covers approximately 99.99% of the population (±4 standard deviations)</span>
 <span class="sd">assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature</span>
-<span class="sd">for scale transformations and reporting."""</span>
+<span class="sd">for scale transformations and reporting.&quot;&quot;&quot;</span>
 
 <span class="n">THETA_MIN_EXTENDED</span> <span class="o">=</span> <span class="o">-</span><span class="mf">6.0</span>
-<span class="sd">"""Extended lower bound for ability (theta) estimation.</span>
+<span class="sd">&quot;&quot;&quot;Extended lower bound for ability (theta) estimation.</span>
 
 <span class="sd">This value covers &gt;99.9999% of the population (±6 standard deviations) assuming</span>
 <span class="sd">abilities are normally distributed N(0, 1). Recommended for numerical search</span>
 <span class="sd">algorithms to avoid ceiling/floor effects during estimation. Using bounds wider</span>
 <span class="sd">than the item bank difficulty range prevents artificial restrictions on ability</span>
-<span class="sd">estimates."""</span>
+<span class="sd">estimates.&quot;&quot;&quot;</span>
 
 <span class="n">THETA_MAX_EXTENDED</span> <span class="o">=</span> <span class="mf">6.0</span>
-<span class="sd">"""Extended upper bound for ability (theta) estimation.</span>
+<span class="sd">&quot;&quot;&quot;Extended upper bound for ability (theta) estimation.</span>
 
 <span class="sd">This value covers &gt;99.9999% of the population (±6 standard deviations) assuming</span>
 <span class="sd">abilities are normally distributed N(0, 1). Recommended for numerical search</span>
 <span class="sd">algorithms to avoid ceiling/floor effects during estimation. Using bounds wider</span>
 <span class="sd">than the item bank difficulty range prevents artificial restrictions on ability</span>
-<span class="sd">estimates."""</span>
+<span class="sd">estimates.&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="NumParams">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.NumParams">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NumParams</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Enumerator that informs how many parameters each logistic model of IRT has.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Enumerator that informs how many parameters each logistic model of IRT has.</span>
 
 <span class="sd">  Created to avoid accessing magic numbers in the code. Each value corresponds</span>
 <span class="sd">  to the number of parameters in the respective IRT model.</span>
@@ -341,7 +465,7 @@
 <span class="sd">      Three-parameter logistic model.</span>
 <span class="sd">  PL4 : int</span>
 <span class="sd">      Four-parameter logistic model.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="n">PL1</span> <span class="o">=</span> <span class="mi">1</span>
   <span class="n">PL2</span> <span class="o">=</span> <span class="mi">2</span>
@@ -353,7 +477,7 @@
 <div class="viewcode-block" id="icc">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.icc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">icc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the Item Response Theory four-parameter logistic function [Magis13]_.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the Item Response Theory four-parameter logistic function :cite:p:`Magis13`.</span>
 
 <span class="sd">  The item characteristic curve (ICC) represents the probability that an examinee</span>
 <span class="sd">  with ability :math:`\theta` will correctly answer an item with the given parameters.</span>
@@ -363,7 +487,7 @@
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float</span>
-<span class="sd">      The individual's ability value. This parameter value has no boundary, but</span>
+<span class="sd">      The individual&#39;s ability value. This parameter value has no boundary, but</span>
 <span class="sd">      if a distribution of the form :math:`N(0, 1)` was used to estimate the</span>
 <span class="sd">      parameters, then typically :math:`-4 \leq \theta \leq 4`.</span>
 <span class="sd">  a : float</span>
@@ -388,7 +512,7 @@
 <span class="sd">  float</span>
 <span class="sd">      The probability :math:`P(X_i = 1| \theta)` of a correct response, a value</span>
 <span class="sd">      between c and d.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="n">c</span> <span class="o">+</span> <span class="p">((</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">e</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">b</span><span class="p">))))</span></div>
 
 
@@ -396,7 +520,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_split_params</span><span class="p">(</span>
   <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">  </span><span class="sd">"""Split the item matrix parameters into columns.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Split the item matrix parameters into columns.</span>
 
 <span class="sd">  This is a helper function to extract item parameters for vectorized operations.</span>
 
@@ -413,14 +537,14 @@
 <span class="sd">      - b: difficulty parameters</span>
 <span class="sd">      - c: pseudo-guessing parameters</span>
 <span class="sd">      - d: upper asymptote parameters</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="detect_model">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.detect_model">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Detect which logistic model an item matrix fits into.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Detect which logistic model an item matrix fits into.</span>
 
 <span class="sd">  Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,</span>
 <span class="sd">  or 4PL model based on which parameters vary.</span>
@@ -438,7 +562,7 @@
 <span class="sd">      - 2: 2PL (varying discrimination, no guessing, no upper asymptote)</span>
 <span class="sd">      - 3: 3PL (varying discrimination, guessing present, no upper asymptote variation)</span>
 <span class="sd">      - 4: 4PL (all parameters vary)</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">a</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">d</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
@@ -456,7 +580,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">icc_hpc</span><span class="p">(</span>
   <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">  </span><span class="sd">"""Compute item characteristic functions for all items in a numpy array at once.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compute item characteristic functions for all items in a numpy array at once.</span>
 
 <span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
 <span class="sd">  with numpy and numexpr for efficient batch processing of multiple items.</span>
@@ -464,7 +588,7 @@
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float or numpy.ndarray</span>
-<span class="sd">      The individual's ability value(s). Can be a scalar or an array for element-wise</span>
+<span class="sd">      The individual&#39;s ability value(s). Can be a scalar or an array for element-wise</span>
 <span class="sd">      computation with items (via numpy broadcasting).</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      Array containing item parameters with at least four columns</span>
@@ -475,11 +599,11 @@
 <span class="sd">  numpy.ndarray</span>
 <span class="sd">      An array of probabilities, one for each item, representing the probability</span>
 <span class="sd">      of a correct response given the current theta.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
-    <span class="s2">"c + ((d - c) / (1 + exp((-a * (theta - b)))))"</span><span class="p">,</span>
-    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">"theta"</span><span class="p">:</span> <span class="n">theta</span><span class="p">},</span>
+    <span class="s2">&quot;c + ((d - c) / (1 + exp((-a * (theta - b)))))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">theta</span><span class="p">},</span>
   <span class="p">)</span></div>
 
 
@@ -489,7 +613,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">inf_hpc</span><span class="p">(</span>
   <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">  </span><span class="sd">"""Compute the information values for all items in a numpy array using numpy and numexpr.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compute the information values for all items in a numpy array using numpy and numexpr.</span>
 
 <span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
 <span class="sd">  for efficient batch processing of item information values.</span>
@@ -497,7 +621,7 @@
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float or numpy.ndarray</span>
-<span class="sd">      The individual's ability value(s). Can be a scalar or an array for element-wise</span>
+<span class="sd">      The individual&#39;s ability value(s). Can be a scalar or an array for element-wise</span>
 <span class="sd">      computation with items (via numpy broadcasting).</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      Array containing item parameters with at least four columns [a, b, c, d, ...].</span>
@@ -508,13 +632,13 @@
 <span class="sd">      Array containing the information values for each item at the given theta.</span>
 <span class="sd">      Information quantifies how much an item contributes to ability estimation</span>
 <span class="sd">      precision at the specified ability level.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">a</span><span class="p">,</span> <span class="n">_b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
   <span class="n">p</span> <span class="o">=</span> <span class="n">icc_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
-    <span class="s2">"(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))"</span><span class="p">,</span>
-    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">"p"</span><span class="p">:</span> <span class="n">p</span><span class="p">},</span>
+    <span class="s2">&quot;(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="n">p</span><span class="p">},</span>
   <span class="p">)</span></div>
 
 
@@ -522,18 +646,18 @@
 <div class="viewcode-block" id="inf">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.inf">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">inf</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the information value of an item using the Item Response Theory four-parameter logistic model.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the information value of an item using the Item Response Theory four-parameter logistic model.</span>
 
 <span class="sd">  Item information quantifies how precisely an item can estimate ability at a given</span>
 <span class="sd">  :math:`\theta` level. Higher information indicates better precision. References</span>
-<span class="sd">  are given in [Ayala2009]_, [Magis13]_.</span>
+<span class="sd">  are given in :cite:p:`Ayala2009,Magis13`.</span>
 
 <span class="sd">  .. math:: I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2[1-P(\theta)]P(\theta)}</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float</span>
-<span class="sd">      The individual's ability value. This parameter value has no boundary, but</span>
+<span class="sd">      The individual&#39;s ability value. This parameter value has no boundary, but</span>
 <span class="sd">      if a distribution of the form :math:`N(0, 1)` was used to estimate the</span>
 <span class="sd">      parameters, then typically :math:`-4 \leq \theta \leq 4`.</span>
 <span class="sd">  a : float</span>
@@ -554,7 +678,7 @@
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
 <span class="sd">      The information value of the item at the designated `theta` point.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">p</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="p">(</span><span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span><span class="p">))</span></div>
@@ -564,7 +688,7 @@
 <div class="viewcode-block" id="test_info">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.test_info">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the test information of a test at a specific :math:`\theta` value [Ayala2009]_.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the test information of a test at a specific :math:`\theta` value :cite:p:`Ayala2009`.</span>
 
 <span class="sd">  Test information is the sum of individual item information values and indicates</span>
 <span class="sd">  the precision of ability estimation at a given ability level.</span>
@@ -583,7 +707,7 @@
 <span class="sd">  float</span>
 <span class="sd">      The test information at `theta` for a test represented by `items`.</span>
 <span class="sd">      Higher values indicate more precise ability estimation.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)))</span></div>
 
 
@@ -595,7 +719,7 @@
   <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">test_inf</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.</span>
 
 <span class="sd">  Variance quantifies the uncertainty in the ability estimate. Lower variance</span>
 <span class="sd">  indicates more precise estimation.</span>
@@ -625,14 +749,14 @@
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If neither `test_inf` nor both `theta` and `items` are provided.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">test_inf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">theta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Either theta and items or test_inf must be passed"</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Either theta and items or test_inf must be passed&quot;</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">test_inf</span> <span class="o">=</span> <span class="n">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">test_inf</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
   <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">test_inf</span></div>
 
 
@@ -640,7 +764,9 @@
 <div class="viewcode-block" id="see">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.see">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">see</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the standard error of estimation (:math:`SEE`) of a test at a specific :math:`\theta` value [Ayala2009]_.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the standard error of estimation (:math:`SEE`) of a test.</span>
+
+<span class="sd">  The estimate is computed at a specific :math:`\theta` value :cite:p:`Ayala2009`.</span>
 
 <span class="sd">  The standard error of estimation is the square root of variance and represents</span>
 <span class="sd">  the typical error in ability estimation. It is in the same units as the ability</span>
@@ -662,11 +788,11 @@
 <span class="sd">  float</span>
 <span class="sd">      The standard error of estimation at `theta` for a test represented by `items`.</span>
 <span class="sd">      Returns infinity if test information is 0.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">))</span>
   <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span></div>
 
 
 
@@ -675,7 +801,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">confidence_interval</span><span class="p">(</span>
   <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the confidence interval for an ability estimate.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the confidence interval for an ability estimate.</span>
 
 <span class="sd">  The confidence interval is computed using the normal approximation:</span>
 
@@ -711,11 +837,11 @@
 <span class="sd">  &gt;&gt;&gt; items = np.array([[1.0, 0.0, 0.0, 1.0], [1.2, -0.5, 0.0, 1.0]])</span>
 <span class="sd">  &gt;&gt;&gt; theta = 0.5</span>
 <span class="sd">  &gt;&gt;&gt; lower, upper = confidence_interval(theta, items, confidence=0.95)</span>
-<span class="sd">  &gt;&gt;&gt; print(f"95% CI: [{lower:.3f}, {upper:.3f}]")  # doctest: +SKIP</span>
+<span class="sd">  &gt;&gt;&gt; print(f&quot;95% CI: [{lower:.3f}, {upper:.3f}]&quot;)  # doctest: +SKIP</span>
 <span class="sd">  95% CI: [-0.234, 1.234]</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Confidence level must be between 0 and 1, got </span><span class="si">{</span><span class="n">confidence</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Confidence level must be between 0 and 1, got </span><span class="si">{</span><span class="n">confidence</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
   <span class="c1"># Compute standard error of estimation</span>
@@ -723,7 +849,7 @@
 
   <span class="c1"># If SEE is infinite, return infinite bounds</span>
   <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">standard_error</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
 
   <span class="c1"># Compute z-score for the given confidence level</span>
   <span class="c1"># For a two-tailed test, we need the (1 + confidence) / 2 quantile</span>
@@ -748,7 +874,7 @@
   <span class="n">theta_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
   <span class="n">theta_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Convert theta values to a custom score scale using linear transformation.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert theta values to a custom score scale using linear transformation.</span>
 
 <span class="sd">  This function transforms ability estimates from the standard IRT theta scale</span>
 <span class="sd">  (typically centered at 0) to any desired score scale (e.g., 0-100, 200-800).</span>
@@ -802,12 +928,12 @@
 <span class="sd">  &gt;&gt;&gt; thetas = np.array([-4, -2, 0, 2, 4])</span>
 <span class="sd">  &gt;&gt;&gt; theta_to_scale(thetas)  # doctest: +SKIP</span>
 <span class="sd">  array([  0.,  25.,  50.,  75., 100.])</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">theta_max</span> <span class="o">&lt;=</span> <span class="n">theta_min</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">scale_max</span> <span class="o">&lt;=</span> <span class="n">scale_min</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"scale_max (</span><span class="si">{</span><span class="n">scale_max</span><span class="si">}</span><span class="s2">) must be greater than scale_min (</span><span class="si">{</span><span class="n">scale_min</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;scale_max (</span><span class="si">{</span><span class="n">scale_max</span><span class="si">}</span><span class="s2">) must be greater than scale_min (</span><span class="si">{</span><span class="n">scale_min</span><span class="si">}</span><span class="s2">)&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
   <span class="c1"># Linear transformation: score = a * theta + b</span>
@@ -828,7 +954,7 @@
   <span class="n">theta_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
   <span class="n">theta_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Convert scores from a custom scale to theta values using linear transformation.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert scores from a custom scale to theta values using linear transformation.</span>
 
 <span class="sd">  This function transforms scores from any desired scale (e.g., 0-100, 200-800)</span>
 <span class="sd">  back to the standard IRT theta scale (typically centered at 0).</span>
@@ -882,12 +1008,12 @@
 <span class="sd">  &gt;&gt;&gt; scores = np.array([0, 25, 50, 75, 100])</span>
 <span class="sd">  &gt;&gt;&gt; scale_to_theta(scores)  # doctest: +SKIP</span>
 <span class="sd">  array([-4., -2.,  0.,  2.,  4.])</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="n">theta_max</span> <span class="o">&lt;=</span> <span class="n">theta_min</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;theta_max (</span><span class="si">{</span><span class="n">theta_max</span><span class="si">}</span><span class="s2">) must be greater than theta_min (</span><span class="si">{</span><span class="n">theta_min</span><span class="si">}</span><span class="s2">)&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">scale_max</span> <span class="o">&lt;=</span> <span class="n">scale_min</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"scale_max (</span><span class="si">{</span><span class="n">scale_max</span><span class="si">}</span><span class="s2">) must be greater than scale_min (</span><span class="si">{</span><span class="n">scale_min</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;scale_max (</span><span class="si">{</span><span class="n">scale_max</span><span class="si">}</span><span class="s2">) must be greater than scale_min (</span><span class="si">{</span><span class="n">scale_min</span><span class="si">}</span><span class="s2">)&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
   <span class="c1"># Inverse transformation: theta = (score - b) / a</span>
@@ -901,10 +1027,10 @@
 <div class="viewcode-block" id="reliability">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.reliability">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">reliability</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute test reliability [Thissen00]_.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute test reliability :cite:p:`Thissen00`.</span>
 
 <span class="sd">  Test reliability is a measure of internal consistency for the test, similar to</span>
-<span class="sd">  Cronbach's :math:`\alpha` in Classical Test Theory. Its value is always lower than 1,</span>
+<span class="sd">  Cronbach&#39;s :math:`\alpha` in Classical Test Theory. Its value is always lower than 1,</span>
 <span class="sd">  with values close to 1 indicating good reliability. If :math:`I(\theta) &lt; 1`,</span>
 <span class="sd">  :math:`Rel &lt; 0` and in these cases it does not make sense, but usually the</span>
 <span class="sd">  application of additional items solves this problem.</span>
@@ -924,7 +1050,7 @@
 <span class="sd">      The test reliability at `theta` for a test represented by `items`. Values</span>
 <span class="sd">      range from negative infinity to just below 1, with values closer to 1</span>
 <span class="sd">      indicating higher reliability.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">var</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span></div>
 
 
@@ -932,11 +1058,11 @@
 <div class="viewcode-block" id="max_info">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.max_info">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">max_info</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the :math:`\theta` value at which an item provides maximum information.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the :math:`\theta` value at which an item provides maximum information.</span>
 
 <span class="sd">  For the 1-parameter and 2-parameter logistic models, this :math:`\theta` equals :math:`b`.</span>
 <span class="sd">  In the 3-parameter and 4-parameter logistic models, however, this value is given by</span>
-<span class="sd">  ([Magis13]_)</span>
+<span class="sd">  :cite:p:`Magis13`</span>
 
 <span class="sd">  .. math:: argmax_{\theta}I(\theta) = b + \frac{1}{a} log \left(\frac{x^* - c}{d - x^*}\right)</span>
 
@@ -982,7 +1108,7 @@
 <span class="sd">  float</span>
 <span class="sd">      The :math:`\theta` value at which the item with the given parameters</span>
 <span class="sd">      provides maximum information.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="c1"># for explanations on finding the following values, see referenced work in function description</span>
   <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1005,7 +1131,7 @@
 <div class="viewcode-block" id="max_info_hpc">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.max_info_hpc">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">max_info_hpc</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">  </span><span class="sd">"""Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.</span>
 
 <span class="sd">  This high-performance computing version efficiently computes the theta values of</span>
 <span class="sd">  maximum information for multiple items simultaneously using vectorized operations.</span>
@@ -1018,26 +1144,26 @@
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  numpy.ndarray</span>
-<span class="sd">      An array of theta values, one for each item, indicating where each item's</span>
+<span class="sd">      An array of theta values, one for each item, indicating where each item&#39;s</span>
 <span class="sd">      information function reaches its maximum.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
       <span class="k">return</span> <span class="n">b</span>
-    <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">"b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)"</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)&quot;</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">})</span>
 
-  <span class="n">u</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">"-(3 / 4) + ((c + d - 2 * c * d) / 2)"</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
-  <span class="n">v</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">"(c + d - 1) / 4"</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
+  <span class="n">u</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;-(3 / 4) + ((c + d - 2 * c * d) / 2)&quot;</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
+  <span class="n">v</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">&quot;(c + d - 1) / 4&quot;</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
   <span class="n">x_star</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
-    <span class="s2">"2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5"</span><span class="p">,</span>
-    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"u"</span><span class="p">:</span> <span class="n">u</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">"pi"</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">},</span>
+    <span class="s2">&quot;2 * sqrt(-u / 3) * cos((1 / 3) * arccos(-(v / 2) * sqrt(27 / -(u ** 3))) + (4 * pi / 3)) + 0.5&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;u&quot;</span><span class="p">:</span> <span class="n">u</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">&quot;pi&quot;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">},</span>
   <span class="p">)</span>
 
   <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
-    <span class="s2">"b + (1 / a) * log((x_star - c) / (d - x_star))"</span><span class="p">,</span>
-    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">"x_star"</span><span class="p">:</span> <span class="n">x_star</span><span class="p">},</span>
+    <span class="s2">&quot;b + (1 / a) * log((x_star - c) / (d - x_star))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">,</span> <span class="s2">&quot;x_star&quot;</span><span class="p">:</span> <span class="n">x_star</span><span class="p">},</span>
   <span class="p">)</span></div>
 
 
@@ -1049,10 +1175,10 @@
   <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
   <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.</span>
 
 <span class="sd">  The likelihood function of a given :math:`\theta` value given the answers to :math:`I`</span>
-<span class="sd">  items is given by [Ayala2009]_:</span>
+<span class="sd">  items is given by :cite:p:`Ayala2009`:</span>
 
 <span class="sd">  .. math:: L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \prod_{i=1} ^ I P_{ij}(\theta)^{X_{ij}} Q_{ij}(\theta)^{1-X_{ij}}</span>
 
@@ -1089,17 +1215,17 @@
 <span class="sd">  ValueError</span>
 <span class="sd">      If response vector and administered items have different lengths or if the</span>
 <span class="sd">      response vector contains non-Boolean elements.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span> <span class="o">!=</span> <span class="n">administered_items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Response vector and administered items must have the same number of items"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Response vector and administered items must have the same number of items&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">response_vector</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">})</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Response vector must contain only Boolean elements"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Response vector must contain only Boolean elements&quot;</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="n">ps</span> <span class="o">=</span> <span class="n">icc_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
-    <span class="s2">"sum(where(response_vector, log(ps), log(1 - ps)))"</span><span class="p">,</span>
-    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"response_vector"</span><span class="p">:</span> <span class="n">response_vector</span><span class="p">,</span> <span class="s2">"ps"</span><span class="p">:</span> <span class="n">ps</span><span class="p">},</span>
+    <span class="s2">&quot;sum(where(response_vector, log(ps), log(1 - ps)))&quot;</span><span class="p">,</span>
+    <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;response_vector&quot;</span><span class="p">:</span> <span class="n">response_vector</span><span class="p">,</span> <span class="s2">&quot;ps&quot;</span><span class="p">:</span> <span class="n">ps</span><span class="p">},</span>
   <span class="p">)</span>
   <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
 
@@ -1108,7 +1234,7 @@
 <div class="viewcode-block" id="negative_log_likelihood">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.negative_log_likelihood">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.</span>
 
 <span class="sd">  This function is used by :py:mod:`scipy.optimize` optimization functions that tend to</span>
 <span class="sd">  minimize values, instead of maximizing them. Since we want to maximize the log-likelihood,</span>
@@ -1131,7 +1257,7 @@
 <span class="sd">  float</span>
 <span class="sd">      Negative log-likelihood of a given ability value, given the responses to the</span>
 <span class="sd">      administered items. Lower values indicate better fit.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="o">-</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
 
@@ -1139,7 +1265,7 @@
 <div class="viewcode-block" id="normalize_item_bank">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.normalize_item_bank">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">normalize_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Normalize an item matrix so that it conforms to the standard used by catsim.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Normalize an item matrix so that it conforms to the standard used by catsim.</span>
 
 <span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>
 <span class="sd">  discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing</span>
@@ -1162,7 +1288,7 @@
 <span class="sd">  numpy.ndarray</span>
 <span class="sd">      An :math:`n \times 4` item matrix conforming to the 4-parameter logistic model,</span>
 <span class="sd">      with columns [a, b, c, d].</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL1</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
@@ -1179,7 +1305,7 @@
 <div class="viewcode-block" id="validate_item_bank">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.validate_item_bank">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">raise_err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</span>
 
 <span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>
 <span class="sd">  discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing</span>
@@ -1204,38 +1330,38 @@
 <span class="sd">      If items is not a numpy.ndarray.</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If raise_err is True and the item matrix does not meet validation criteria.</span>
-<span class="sd">  """</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Item matrix is not of type numpy.ndarray"</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Item matrix is not of type numpy.ndarray&quot;</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-  <span class="n">err</span> <span class="o">=</span> <span class="s2">""</span>
+  <span class="n">err</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="n">err</span> <span class="o">+=</span> <span class="s2">"Item matrix has only one dimension."</span>
+    <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;Item matrix has only one dimension.&quot;</span>
   <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span>
-      <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has more than 4 columns. catsim tends to add </span><span class="se">\</span>
-<span class="s2">            columns to the matrix during the simulation, so it's not a good idea to keep them."</span>
+      <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has more than 4 columns. catsim tends to add </span><span class="se">\</span>
+<span class="s2">            columns to the matrix during the simulation, so it&#39;s not a good idea to keep them.&quot;</span>
     <span class="p">)</span>
   <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL1</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns&quot;</span>
     <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL2</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no pseudo-guessing or upper asymptote parameter columns"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has no pseudo-guessing or upper asymptote parameter columns&quot;</span>
     <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL3</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no upper asymptote parameter column"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Item matrix has no upper asymptote parameter column&quot;</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with discrimination &lt; 0"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with discrimination &lt; 0&quot;</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &lt; 0"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &lt; 0&quot;</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &gt; 1"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &gt; 1&quot;</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &gt; 1"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &gt; 1&quot;</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &lt; 0"</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &lt; 0&quot;</span>
 
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">raise_err</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
@@ -1244,37 +1370,75 @@
 
 </pre></div>
 
-          </article>
-        </div>
-      </div>
-    </main>
-  </div>
-  <footer class="md-footer">
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid">
-          
-          
-        </a>
-        
-      </nav>
-    </div>
-    <div class="md-footer-meta md-typeset">
-      <div class="md-footer-meta__inner md-grid">
-        <div class="md-footer-copyright">
-          <div class="md-footer-copyright__highlight">
-              &#169; Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+                </article>
               
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
           </div>
-            Created using
-            <a href="http://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
-             and
-            <a href="https://github.com/bashtage/sphinx-material/">Material for
-              Sphinx</a>
-        </div>
-      </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
     </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
   </footer>
-  <script src="../../_static/javascripts/application.js"></script>
-  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
   </body>
 </html>
