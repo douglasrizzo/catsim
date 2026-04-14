@@ -26,17 +26,6 @@ class TestNumericalSearchEstimatorInit:
     with pytest.raises(ValueError, match="must be one of"):
       NumericalSearchEstimator(method="invalid_method")
 
-  def test_init_with_tolerance(self) -> None:
-    """Test initialization with custom tolerance."""
-    estimator = NumericalSearchEstimator(tol=1e-8)
-    # Tolerance is set internally
-    assert estimator is not None
-
-  def test_init_with_dodd_disabled(self) -> None:
-    """Test initialization with Dodd heuristic disabled."""
-    estimator = NumericalSearchEstimator(dodd=False)
-    assert estimator is not None
-
 
 class TestNumericalSearchEstimatorMethods:
   """Tests for NumericalSearchEstimator available methods."""

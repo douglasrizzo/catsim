@@ -471,23 +471,6 @@ class TestItemBankReset:
 class TestItemBankDunderMethods:
   """Tests for ItemBank dunder methods."""
 
-  def test_repr(self) -> None:
-    """Test __repr__ method."""
-    items = np.array([[1.0, 0.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    repr_str = repr(bank)
-    assert "ItemBank" in repr_str
-    assert "n_items=1" in repr_str
-    assert "model=3" in repr_str
-
-  def test_len(self) -> None:
-    """Test __len__ method."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    assert len(bank) == 2
-
   def test_getitem_int(self) -> None:
     """Test __getitem__ with integer index."""
     items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])

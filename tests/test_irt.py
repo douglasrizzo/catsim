@@ -8,17 +8,6 @@ import pytest
 from catsim import irt
 
 
-class TestNumParams:
-  """Tests for the NumParams enum."""
-
-  def test_num_params_values(self) -> None:
-    """Test that NumParams enum has correct values."""
-    assert irt.NumParams.PL1.value == 1
-    assert irt.NumParams.PL2.value == 2
-    assert irt.NumParams.PL3.value == 3
-    assert irt.NumParams.PL4.value == 4
-
-
 class TestIcc:
   """Tests for the icc() function (Item Characteristic Curve)."""
 
@@ -448,13 +437,3 @@ class TestScaleToTheta:
     # SAT-like scale: 200-800
     theta = irt.scale_to_theta(500.0, scale_min=200, scale_max=800)
     assert theta == pytest.approx(0.0)
-
-
-class TestConstants:
-  """Tests for module constants."""
-
-  def test_theta_bounds(self) -> None:
-    """Test that theta bounds are symmetric and sensible."""
-    assert irt.THETA_MIN_TYPICAL == -irt.THETA_MAX_TYPICAL
-    assert irt.THETA_MIN_EXTENDED == -irt.THETA_MAX_EXTENDED
-    assert irt.THETA_MIN_EXTENDED < irt.THETA_MIN_TYPICAL

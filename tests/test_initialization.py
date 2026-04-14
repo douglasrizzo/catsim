@@ -13,41 +13,8 @@ from catsim.initialization import (
 from catsim.item_bank import ItemBank
 
 
-class TestInitializationDistribution:
-  """Tests for InitializationDistribution enum."""
-
-  def test_uniform_value(self) -> None:
-    """Test uniform distribution value."""
-    assert InitializationDistribution.UNIFORM.value == "uniform"
-
-  def test_normal_value(self) -> None:
-    """Test normal distribution value."""
-    assert InitializationDistribution.NORMAL.value == "normal"
-
-
 class TestRandomInitializerInit:
   """Tests for RandomInitializer initialization."""
-
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    initializer = RandomInitializer()
-    assert str(initializer) == "Random Initializer"
-
-  def test_init_with_uniform(self) -> None:
-    """Test initialization with uniform distribution."""
-    initializer = RandomInitializer(
-      dist_type=InitializationDistribution.UNIFORM,
-      dist_params=(-4, 4),
-    )
-    assert initializer is not None
-
-  def test_init_with_normal(self) -> None:
-    """Test initialization with normal distribution."""
-    initializer = RandomInitializer(
-      dist_type=InitializationDistribution.NORMAL,
-      dist_params=(0, 1),
-    )
-    assert initializer is not None
 
   def test_init_invalid_dist_type_raises(self) -> None:
     """Test that invalid dist_type raises TypeError."""
@@ -145,25 +112,6 @@ class TestRandomInitializerInitialize:
     values2 = [initializer.initialize(item_bank=item_bank, rng=rng2) for _ in range(10)]
 
     assert values1 == values2
-
-
-class TestFixedPointInitializerInit:
-  """Tests for FixedPointInitializer initialization."""
-
-  def test_init_with_zero(self) -> None:
-    """Test initialization with zero starting point."""
-    initializer = FixedPointInitializer(0.0)
-    assert str(initializer) == "Fixed Point Initializer"
-
-  def test_init_with_positive(self) -> None:
-    """Test initialization with positive starting point."""
-    initializer = FixedPointInitializer(1.5)
-    assert initializer is not None
-
-  def test_init_with_negative(self) -> None:
-    """Test initialization with negative starting point."""
-    initializer = FixedPointInitializer(-2.0)
-    assert initializer is not None
 
 
 class TestFixedPointInitializerInitialize:

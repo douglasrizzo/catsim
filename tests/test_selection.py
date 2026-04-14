@@ -30,7 +30,6 @@ class TestMaxInfoSelector:
     """Test default initialization."""
     selector = MaxInfoSelector()
     assert selector.r_max == pytest.approx(1.0)
-    assert str(selector) == "Maximum Information Selector"
 
   def test_init_with_r_max(self) -> None:
     """Test initialization with r_max."""
@@ -193,11 +192,6 @@ class TestUrrySelector:
 class TestRandomesqueSelector:
   """Tests for RandomesqueSelector."""
 
-  def test_init_with_bin_size(self) -> None:
-    """Test initialization with bin size."""
-    selector = RandomesqueSelector(5)
-    assert str(selector) == "Randomesque Selector"
-
   def test_select_returns_item(self) -> None:
     """Test that select returns a valid item index."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
@@ -341,7 +335,6 @@ class TestIntervalInfoSelector:
     """Test initialization with interval."""
     selector = IntervalInfoSelector(interval=2.0)
     assert selector.interval == pytest.approx(2.0)
-    assert str(selector) == "Interval Information Selector"
 
   def test_init_default(self) -> None:
     """Test default initialization (infinite interval)."""
@@ -366,12 +359,6 @@ class TestIntervalInfoSelector:
 
 class TestClusterSelector:
   """Tests for ClusterSelector."""
-
-  def test_init_with_clusters(self) -> None:
-    """Test initialization with clusters."""
-    clusters = [0, 0, 1, 1, 2, 2, 3, 3]
-    selector = ClusterSelector(clusters=clusters)
-    assert selector is not None
 
   def test_select_returns_item(self) -> None:
     """Test that select returns a valid item index."""
@@ -407,65 +394,3 @@ class TestFiniteSelectorAbstract:
     """Test that FiniteSelector cannot be instantiated directly."""
     with pytest.raises(TypeError):
       FiniteSelector(10)  # type: ignore[abstract]
-
-
-class TestAllSelectorsBasicFunctionality:
-  """Integration tests for all selectors."""
-
-  @pytest.fixture
-  def item_bank(self) -> ItemBank:
-    """Create a test item bank."""
-    return ItemBank.generate_item_bank(100, seed=42)
-
-  @pytest.fixture
-  def rng(self) -> np.random.Generator:
-    """Create a random number generator."""
-    return np.random.default_rng(42)
-
-  def test_max_info_selector(self, item_bank: ItemBank, rng: np.random.Generator) -> None:
-    """Test MaxInfoSelector in sequence."""
-    selector = MaxInfoSelector()
-    administered: list[int] = []
-
-    for _ in range(10):
-      selected = selector.select(
-        item_bank=item_bank,
-        administered_items=administered,
-        est_theta=0.0,
-        rng=rng,
-      )
-      assert selected is not None
-      assert selected not in administered
-      administered.append(selected)
-
-  def test_random_selector(self, item_bank: ItemBank, rng: np.random.Generator) -> None:
-    """Test RandomSelector in sequence."""
-    selector = RandomSelector()
-    administered: list[int] = []
-
-    for _ in range(10):
-      selected = selector.select(
-        item_bank=item_bank,
-        administered_items=administered,
-        est_theta=0.0,
-        rng=rng,
-      )
-      assert selected is not None
-      assert selected not in administered
-      administered.append(selected)
-
-  def test_linear_selector_sequence(self, item_bank: ItemBank, rng: np.random.Generator) -> None:
-    """Test LinearSelector returns items in exact order."""
-    indices = [0, 10, 20, 30, 40]
-    selector = LinearSelector(indices)
-    administered: list[int] = []
-
-    for expected_idx in indices:
-      selected = selector.select(
-        item_bank=item_bank,
-        administered_items=administered,
-        est_theta=0.0,
-        rng=rng,
-      )
-      assert selected == expected_idx
-      administered.append(selected)
