@@ -65,17 +65,23 @@ print(result.rmse)
 
 ## Dependencies
 
-All dependencies are listed on `setup.py` and should be installed automatically.
+Runtime dependencies are declared in `pyproject.toml` and are installed automatically with `pip install catsim` or `uv pip install catsim`.
 
-To run the tests, you will need to install the testing requirements with `pip install catsim[testing]`.
+If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage, mutation testing) with:
 
-To generate the documentation, install the necessary dependencies with `pip install catsim[docs]`.
+```bash
+uv sync --group dev
+```
 
-To ensure code is valid and formatted before submission, install the necessary development dependencies with `pip install catsim[dev]`.
+To build the HTML documentation locally, install Sphinx and its extensions with:
+
+```bash
+uv sync --group docs
+```
 
 ## Compatibility
 
-_catsim_ is compatible and tested against Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12.
+_catsim_ is compatible and tested against Python 3.11, 3.12, 3.13, and 3.14.
 
 ## Important links
 
