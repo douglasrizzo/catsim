@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import pytest
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, RandomInitializer
