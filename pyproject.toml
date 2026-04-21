@@ -111,6 +111,7 @@ convention = "numpy"
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
   "RUF069",   # Exact float expectations are acceptable in tests
   "S",        # Security rules are too noisy for intentionally non-production test code
+  "SLF001",   # Tests may access private members to set up or inspect internal state
   "TC001",    # Test-only type imports do not justify TYPE_CHECKING indirection
   "TC003",    # Test-only type imports do not justify TYPE_CHECKING indirection
 ]
@@ -148,11 +149,26 @@ docs = [
     "pydata-sphinx-theme>=0.16.0",
 ]
 testing = [
+    "mutmut>=3.5.0",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.15.9",
     "scikit-learn>=1.7.2",
 ]
+
+[tool.mutmut]
+paths_to_mutate = [
+    "src/catsim/engine.py",
+    "src/catsim/state.py",
+    "src/catsim/simulation.py",
+]
+tests_dir = ["tests/"]
+also_copy = ["src/catsim"]
+do_not_mutate = [
+    "*/__init__.py",
+    "src/catsim/plot.py",
+]
+max_stack_depth = 8
 
 [tool.ty.src]
 include = ["src/catsim"]
