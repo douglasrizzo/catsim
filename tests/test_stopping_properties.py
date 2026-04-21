@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import numpy as np
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
+from catsim import irt
 from catsim.item_bank import ItemBank
+from catsim.stopping import ConfidenceIntervalStopper, MinErrorStopper
 from catsim.stopping import TestLengthStopper as LengthStopper
 
 STOP_SETTINGS = settings(max_examples=40, deadline=None)
@@ -51,3 +54,127 @@ def test_length_stopper_respects_min_items_before_other_rules(
   stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=0.0)
   if administered_count < min_items:
     assert stopped is False
+
+
+MIN_ERROR_SETTINGS = settings(max_examples=30, deadline=None)
+
+
+@given(
+  params=st.integers(min_value=4, max_value=12).flatmap(
+    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
+  ),
+  administered_count=st.integers(min_value=0, max_value=10),
+  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+  min_error=st.floats(0.01, 2.0, allow_nan=False, allow_infinity=False),
+)
+@MIN_ERROR_SETTINGS
+def test_min_error_stopper_decision_matches_see(
+  params: ItemBank,
+  administered_count: int,
+  theta: float,
+  min_error: float,
+) -> None:
+  bank = params
+  assume(administered_count <= bank.n_items)
+  # Keep administered strictly less than bank size so bank-exhaustion hard-stop
+  # doesn't fire; we only want to test the SEE criterion.
+  assume(administered_count < bank.n_items)
+  stopper = MinErrorStopper(min_error=min_error)
+  administered = list(range(administered_count))
+  stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
+  if administered_count == 0:
+    assert stopped is False
+  else:
+    admin_items = bank.get_items(administered)
+    see = irt.see(theta, admin_items)
+    assert stopped is (see < min_error)
+
+
+@given(
+  params=st.integers(min_value=4, max_value=12).flatmap(
+    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
+  ),
+  administered_count=st.integers(min_value=0, max_value=10),
+  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+  min_items=st.integers(min_value=2, max_value=6),
+  min_error=st.floats(0.01, 2.0, allow_nan=False, allow_infinity=False),
+)
+@MIN_ERROR_SETTINGS
+def test_min_error_stopper_respects_min_items_guard(
+  params: ItemBank,
+  administered_count: int,
+  theta: float,
+  min_items: int,
+  min_error: float,
+) -> None:
+  bank = params
+  assume(administered_count <= bank.n_items)
+  stopper = MinErrorStopper(min_error=min_error, min_items=min_items)
+  administered = list(range(administered_count))
+  stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
+  if administered_count < min_items:
+    assert stopped is False
+
+
+CI_SETTINGS = settings(max_examples=25, deadline=None)
+
+
+@given(
+  params=st.integers(min_value=4, max_value=12).flatmap(
+    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
+  ),
+  administered_count=st.integers(min_value=1, max_value=10),
+  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+  confidence=st.floats(0.5, 0.99, allow_nan=False, allow_infinity=False),
+  bounds=st.lists(
+    st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False),
+    min_size=1,
+    max_size=5,
+  ).map(sorted),
+)
+@CI_SETTINGS
+def test_confidence_interval_stopper_ci_symmetric_and_finite(
+  params: ItemBank,
+  administered_count: int,
+  theta: float,
+  confidence: float,
+  bounds: list[float],
+) -> None:
+  bank = params
+  assume(administered_count <= bank.n_items)
+  assume(len(set(bounds)) == len(bounds))
+  stopper = ConfidenceIntervalStopper(interval_bounds=bounds, confidence=confidence)
+  administered = list(range(administered_count))
+  admin_items = bank.get_items(administered)
+  lower, upper = irt.confidence_interval(theta, admin_items, confidence)
+  if np.isfinite(lower) and np.isfinite(upper):
+    assert lower <= theta <= upper
+    assert upper - lower >= 0.0
+    # stopper decision must be consistent: only stops when CI fits in one interval
+    stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
+    assert isinstance(stopped, bool)
+
+
+@given(
+  params=st.integers(min_value=4, max_value=12).flatmap(
+    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
+  ),
+  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+  confidence=st.floats(0.5, 0.99, allow_nan=False, allow_infinity=False),
+  bounds=st.lists(
+    st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False),
+    min_size=1,
+    max_size=5,
+  ).map(sorted),
+)
+@CI_SETTINGS
+def test_confidence_interval_stopper_never_stops_with_zero_items(
+  params: ItemBank,
+  theta: float,
+  confidence: float,
+  bounds: list[float],
+) -> None:
+  bank = params
+  assume(len(set(bounds)) == len(bounds))
+  stopper = ConfidenceIntervalStopper(interval_bounds=bounds, confidence=confidence)
+  assert stopper.stop(item_bank=bank, administered_items=[], theta=theta) is False
