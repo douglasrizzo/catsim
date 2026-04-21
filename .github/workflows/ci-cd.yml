@@ -80,7 +80,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --group dev --group testing
+        run: uv sync --group dev
 
       - name: Run tests
         run: uv run pytest --verbose --cov-branch --cov-report=xml --cov=catsim

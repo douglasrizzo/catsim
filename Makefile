@@ -4,7 +4,7 @@ clean:
 install:
 	pip install .
 tests:
-	uv sync --group testing
+	uv sync --group dev
 	ruff check .
 	@echo "Running parallel tests with pytest-xdist..."
 	uv run pytest -m parallel -n auto
