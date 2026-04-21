@@ -131,11 +131,15 @@ line-ending = "auto"
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.127.0",
     "ipykernel>=7.1.0",
+    "mutmut>=3.5.0",
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
     "ruff>=0.15.9",
+    "scikit-learn>=1.7.2",
     "ty>=0.0.28",
 ]
 docs = [
@@ -147,13 +151,6 @@ docs = [
     "sphinx-autodoc-annotation>=1.0.post1",
     "sphinxcontrib-bibtex>=2.6.3",
     "pydata-sphinx-theme>=0.16.0",
-]
-testing = [
-    "mutmut>=3.5.0",
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-    "ruff>=0.15.9",
-    "scikit-learn>=1.7.2",
 ]
 
 [tool.mutmut]
