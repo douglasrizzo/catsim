@@ -131,11 +131,13 @@ line-ending = "auto"
 
 [dependency-groups]
 dev = [
+    "black>=26.3.1",
     "hypothesis>=6.127.0",
     "ipykernel>=7.1.0",
     "mutmut>=3.5.0",
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
+    "pylint>=4.0.5",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.15.9",
@@ -177,3 +179,49 @@ possibly-missing-import = "error"
 redundant-cast = "error"
 unused-ignore-comment = "error"
 unused-type-ignore-comment = "error"
+
+# ---------------------------------------------------------------------------
+# Pylint
+# ---------------------------------------------------------------------------
+[tool.pylint.messages-control]
+enable = [
+  "duplicate-code",
+  "too-many-ancestors",
+  "too-many-instance-attributes",
+  "arguments-differ",
+  "signature-differs",
+  "arguments-renamed",
+  "invalid-overridden-method",
+  "overridden-final-method",
+  "subclassed-final-class",
+  "attribute-defined-outside-init",
+  "super-init-not-called",
+  "non-parent-init-called",
+  "useless-parent-delegation",
+  "unused-private-member",
+  "redefined-slots-in-subclass",
+  "bad-classmethod-argument",
+  "bad-mcs-method-argument",
+  "no-classmethod-decorator",
+  "no-staticmethod-decorator",
+  "bad-except-order",
+  "duplicate-except",
+  "return-in-finally",
+  "lost-exception",
+  "cyclic-import",
+  "pointless-statement",
+  "duplicate-key",
+  "missing-parentheses-for-call-in-test",
+  "redefined-outer-name",
+]
+disable = ["all"]
+
+[tool.pylint.design]
+max-parents = 7
+max-attributes = 12
+
+[tool.pylint.similarities]
+min-similarity-lines = 10
+ignore-imports = true
+ignore-docstrings = true
+ignore-comments = true

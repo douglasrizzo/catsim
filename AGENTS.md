@@ -81,6 +81,7 @@ hidden runtime coupling.
 - Preferred validation commands:
   - `uv run pytest -q`
   - `uv run ruff check src/catsim tests`
+  - `uv run pylint src/catsim`
   - `uv run ty check`
 - Notebook validation command:
   - `uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb`
@@ -91,6 +92,7 @@ hidden runtime coupling.
 - Before finalizing meaningful code changes, run at least:
   - relevant pytest coverage for touched modules
   - `ruff check`
+  - `pylint src/catsim`
   - `ty check`
 - When notebook content or notebook-related tooling changes, validate the affected notebooks.
 
