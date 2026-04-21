@@ -437,14 +437,19 @@ with those components.</p></li>
 </section>
 <section id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h2>
-<p>All dependencies are listed on <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> and should be installed automatically.</p>
-<p>To run the tests, you will need to install the testing requirements with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[testing]</span></code>.</p>
-<p>To generate the documentation, install the necessary dependencies with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[docs]</span></code>.</p>
-<p>To ensure code is valid and formatted before submission, install the necessary development dependencies with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim[dev]</span></code>.</p>
+<p>Runtime dependencies are declared in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> and are installed automatically with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim</span></code> or <code class="docutils literal notranslate"><span class="pre">uv</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">catsim</span></code>.</p>
+<p>If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage, mutation testing) with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev
+</pre></div>
+</div>
+<p>To build the HTML documentation locally, install Sphinx and its extensions with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>docs
+</pre></div>
+</div>
 </section>
 <section id="compatibility">
 <h2>Compatibility<a class="headerlink" href="#compatibility" title="Link to this heading">#</a></h2>
-<p><em>catsim</em> is compatible and tested against Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12.</p>
+<p><em>catsim</em> is compatible and tested against Python 3.11, 3.12, 3.13, and 3.14.</p>
 </section>
 <section id="important-links">
 <h2>Important links<a class="headerlink" href="#important-links" title="Link to this heading">#</a></h2>
