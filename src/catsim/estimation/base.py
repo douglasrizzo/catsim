@@ -55,6 +55,19 @@ class BaseEstimator(ABC):
         The current estimated ability :math:`\hat\theta`.
     """
 
+  @staticmethod
+  def _require_inputs(
+    item_bank: ItemBank | None,
+    administered_items: list[int] | None,
+    response_vector: list[bool] | None,
+  ) -> None:
+    """Raise ``ValueError`` if a required estimation input is missing."""
+    inputs = {"item_bank": item_bank, "administered_items": administered_items, "response_vector": response_vector}
+    for name, value in inputs.items():
+      if value is None:
+        msg = f"{name} parameter cannot be None"
+        raise ValueError(msg)
+
   @property
   def calls(self) -> int:
     """Get how many times the estimator has been called to maximize/minimize the log-likelihood function.
