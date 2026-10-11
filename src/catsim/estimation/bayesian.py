@@ -150,7 +150,7 @@ def posterior_variance(post: FloatArray, nodes: FloatArray) -> float:
 class EAPEstimator(BaseEstimator):
   """Expected a Posteriori ability estimator.
 
-  For full algorithmic details, see :doc:`/specs/estimation/eap-estimator`.
+  For full algorithmic details, see :doc:`/api/techniques/estimation/eap-estimator`.
   """
 
   def __init__(
