@@ -400,13 +400,16 @@ class ItemBank:
   ) -> Self:
     """Generate a synthetic item bank with parameters following real-world distributions.
 
-    As proposed by :cite:t:`Bar10`, item parameters are extracted from the following probability
-    distributions:
+    Item parameters are drawn from the following distributions:
 
     * discrimination: :math:`N(1.2, 0.25)`, truncated to positive values
     * difficulty: :math:`N(0,  1)`
     * pseudo-guessing: :math:`N(0.25, 0.02)` (clipped at 0)
     * upper asymptote: :math:`U(0.94, 1)`
+
+    The first three are the distributions of the simulated 3PL banks of :cite:t:`Bar10` (p. 445), also
+    used in earlier studies by the same group. Those studies did not use an upper asymptote; its
+    distribution here is catsim's own choice.
 
     Parameters
     ----------
