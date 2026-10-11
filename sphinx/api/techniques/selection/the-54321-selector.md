@@ -50,7 +50,25 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-McBride, J. R., & Martin, J. T. (1983). Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss (Ed.), *New horizons in testing: Latent trait test theory and computerized adaptive testing* (pp. 224-236). Academic Press.
+McBride, J. R., & Martin, J. T. (1983). Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss (Ed.), *New horizons in testing: Latent trait test theory and computerized adaptive testing* (pp. 223-236). Academic Press.
+
+## Reading the Source
+
+McBride and Martin (1983) was **not checked**: it is a book chapter that is not
+openly available, and the open reviews that describe the technique could not be
+retrieved either. The schedule above follows the description those reviews are
+summarized as giving: random choice among the 5 best items for the first item,
+among the 4 best remaining for the second, and so on, then the single best item.
+Treat it as unverified until checked against the chapter or a review such as
+Georgiadou, Triantafillou and Economides (2007).
+
+Magis and Raîche (2012, p. 12), [open access](https://doi.org/10.18637/jss.v048.i08),
+list the 5-4-3-2-1 technique (McBride & Martin, 1983; Chang & Ansley, 2003) next
+to the randomesque method among exposure-control methods that choose at random
+among several near-optimal items, without defining it.
+
+**Checked by** `TestThe54321Selector` in `tests/test_selection.py`, which checks
+the pool size at each position, including past the fifth item.
 
 ## API Reference
 
