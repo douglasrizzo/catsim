@@ -24,19 +24,29 @@ S_i^{(n)}
 =
 (1-w_n)\,R_i
 +
-w_n\,\frac{I_i(\hat{\theta})}{\max_j I_j(\hat{\theta})},
+w_n\,\frac{I_i(\hat{\theta})}{\max_{j \in \mathcal{A}} I_j(\hat{\theta})},
 $$
 
-where $R_i$ is a fresh uniform random draw on $[0,1]$ and
+where $\mathcal{A}$ is the set of available (non-administered) items,
+$R_i$ is a fresh uniform random draw on $[0,1]$, and
 
 $$
 w_n
 =
-\left(\frac{n-1}{N-1}\right)^s,
+\min\!\left(1, \frac{n-1}{N-1}\right)^s,
 $$
 
-with acceleration parameter $s > 0$. The selector chooses the
-non-administered item with the largest score.
+with acceleration parameter $s > 0$. Dividing by the largest available
+information is equivalent to Revuelta and Ponsoda's (1998) random component
+drawn on $[0, \max_{j \in \mathcal{A}} I_j]$. The weight is clamped at 1 so
+that a session running past $N$ stays fully information-based. The selector
+chooses the available item with the largest score.
+
+Barrada et al. (2008) parameterize the schedule as a cumulative power sum,
+$w = \sum_{k=1}^{n-1} k^{t} / \sum_{k=1}^{N-1} k^{t}$ (as implemented in
+`catR`). It agrees with the power schedule above at $t = 0$, $s = 1$ (linear),
+and behaves like $s \approx t + 1$ otherwise, so `acceleration` is not
+interchangeable with their $t$.
 
 ## Parameters
 

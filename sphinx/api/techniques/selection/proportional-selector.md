@@ -30,11 +30,17 @@ where the exponent schedule is
 $$
 h(w_n) = k\,w_n,
 \qquad
-w_n = \left(\frac{n-1}{N-1}\right)^s.
+w_n = \min\!\left(1, \frac{n-1}{N-1}\right)^s.
 $$
 
 Here $k > 0$ is a sharpness parameter and $s > 0$ is the same
-acceleration parameter used by the progressive selector.
+acceleration parameter used by the progressive selector; the sums run over
+the available items, and the weight is clamped at 1 past position $N$.
+
+In Barrada et al. (2008), as implemented in `catR`, the exponent grows to the
+test length, $h = N\,w$ with the cumulative power-sum schedule described for
+the progressive selector. Setting `sharpness` to the test length reproduces
+that end point; the default $k = 6$ keeps more randomness late in longer tests.
 
 ## Parameters
 
