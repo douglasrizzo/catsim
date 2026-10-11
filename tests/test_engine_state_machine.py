@@ -12,7 +12,6 @@ from hypothesis.stateful import (
   RuleBasedStateMachine,
   initialize,
   invariant,
-  precondition,
   rule,
   run_state_machine_as_test,
 )
@@ -108,12 +107,9 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     )
     self.context = RunContext(rng=np.random.default_rng(12345))
     self.response_provider = FixedResponseProvider(True)
-    self.session: CatSessionState | None = None
-
-  @precondition(lambda self: self.session is None)
-  @rule()
-  def start_session(self) -> None:
-    self.session = self.engine.start_session(
+    # Start the session during initialization so every rule is valid at every step; rules
+    # guarded by mutually exclusive conditions made Hypothesis discard most rule draws.
+    self.session: CatSessionState = self.engine.start_session(
       session_id=0,
       item_bank=self.item_bank,
       context=self.context,
@@ -123,14 +119,18 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     assert self.session.current_theta == 0.0
     assert len(self.session.theta_history) == 1
 
-  @precondition(lambda self: self.session is not None and self.session.status == SessionStatus.IN_PROGRESS)
   @rule()
   def step(self) -> None:
-    assert self.session is not None
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_item_ids)
+    was_stopped = self.session.status == SessionStatus.STOPPED
     result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
-    if self.session.status == SessionStatus.IN_PROGRESS:
+    if was_stopped:
+      # Stepping a terminal session must be a no-op.
+      assert result.stopped is True
+      assert result.selected_item_id is None
+      assert len(self.session.administered_item_ids) == prev_admin
+    elif self.session.status == SessionStatus.IN_PROGRESS:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
         assert len(self.session.administered_item_ids) == prev_admin + 1
@@ -139,15 +139,8 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
       assert result.stopped is True
       assert self.session.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
 
-  @precondition(lambda self: self.session is not None and self.session.status == SessionStatus.STOPPED)
-  @rule()
-  def noop_after_stop(self) -> None:
-    """Allow Hypothesis to continue stepping once the session is terminal."""
-
   @invariant()
   def session_lists_consistent(self) -> None:
-    if self.session is None:
-      return
     s = self.session
     n = self.item_bank.n_items
     for i in s.administered_item_ids:
@@ -176,12 +169,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     )
     self.context = RunContext(rng=np.random.default_rng(999))
     self.response_provider = AlternatingResponseProvider()
-    self.session: CatSessionState | None = None
-
-  @precondition(lambda self: self.session is None)
-  @rule()
-  def start_session(self) -> None:
-    self.session = self.engine.start_session(
+    self.session: CatSessionState = self.engine.start_session(
       session_id=0,
       item_bank=self.item_bank,
       context=self.context,
@@ -189,14 +177,17 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     )
     assert self.session.status == SessionStatus.IN_PROGRESS
 
-  @precondition(lambda self: self.session is not None and self.session.status == SessionStatus.IN_PROGRESS)
   @rule()
   def step(self) -> None:
-    assert self.session is not None
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_item_ids)
+    was_stopped = self.session.status == SessionStatus.STOPPED
     result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
-    if self.session.status == SessionStatus.IN_PROGRESS:
+    if was_stopped:
+      assert result.stopped is True
+      assert result.selected_item_id is None
+      assert len(self.session.administered_item_ids) == prev_admin
+    elif self.session.status == SessionStatus.IN_PROGRESS:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
         assert len(self.session.administered_item_ids) == prev_admin + 1
@@ -205,15 +196,8 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
       assert result.stopped is True
       assert self.session.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
 
-  @precondition(lambda self: self.session is not None and self.session.status == SessionStatus.STOPPED)
-  @rule()
-  def noop_after_stop(self) -> None:
-    """Allow Hypothesis to continue stepping once the session is terminal."""
-
   @invariant()
   def session_lists_consistent(self) -> None:
-    if self.session is None:
-      return
     s = self.session
     n = self.item_bank.n_items
     for i in s.administered_item_ids:
