@@ -19,7 +19,7 @@ warm-wle
 ## Class Hierarchy
 
 ```{eval-rst}
-.. inheritance-diagram:: catsim.estimation.BaseEstimator catsim.estimation.NumericalSearchEstimator
+.. inheritance-diagram:: catsim.estimation.BaseEstimator catsim.estimation.NumericalSearchEstimator catsim.estimation.EAPEstimator catsim.estimation.MAPEstimator catsim.estimation.WarmLikelihoodEstimator
    :parts: 1
    :top-classes: catsim.estimation.BaseEstimator
 ```
