@@ -17,18 +17,17 @@ short-test behavior that matters most in adaptive testing.
 
 ## Definition
 
-Warm's estimator maximizes a weighted likelihood proportional to the square root
-of Fisher information times the ordinary likelihood. In the closed-form
-approximation used here, the estimate is expressed as an MLE plus a bias
-correction:
+Warm's estimator maximizes the likelihood multiplied by a weight function
+$w(\theta)$ chosen so that the first-order ($O(n^{-1})$) bias of the MLE cancels.
+The weight is defined through its log-derivative,
+$\frac{d}{d\theta}\ln w(\theta) = J(\theta) / [2 I(\theta)]$, so the estimate is the
+root of the modified score equation
 
 $$
-\hat{\theta}_{\mathrm{WLE}}
-=
-\hat{\theta}_{\mathrm{MLE}}
+\sum_i \frac{\bigl[u_i - P_i(\theta)\bigr] P_i'(\theta)}{P_i(\theta)\,[1-P_i(\theta)]}
 +
-\frac{J(\hat{\theta}_{\mathrm{MLE}})}
-     {2\,I(\hat{\theta}_{\mathrm{MLE}})^2},
+\frac{J(\theta)}{2\,I(\theta)}
+= 0,
 $$
 
 where $I(\theta)$ is test information and
@@ -41,8 +40,30 @@ J(\theta)
      {P_i(\theta)\,[1-P_i(\theta)]}.
 $$
 
-The implementation computes $\hat{\theta}_{\mathrm{MLE}}$ with the
-existing numerical optimizer and then applies the analytic correction term.
+For models without guessing or slipping ($c = 0$, $d = 1$), $J = I'$ and the
+weight is $w(\theta) = \sqrt{I(\theta)}$: the WLE then maximizes
+$L(\theta)\sqrt{I(\theta)}$, the likelihood under a Jeffreys prior. With guessing
+or slipping, $J \neq I'$, so the WLE is defined by the equation above and not by
+the $\sqrt{I}$-weighted likelihood.
+
+Expanding the equation around the MLE gives the familiar approximation
+$\hat{\theta}_{\mathrm{WLE}} \approx \hat{\theta}_{\mathrm{MLE}} + J/(2I^2)$, which
+is why $-J/(2I^2)$ is the MLE's first-order bias (Lord, 1983). The implementation
+does not use this approximation: it fails exactly where WLE matters most, because
+the MLE is infinite for all-correct and all-incorrect patterns, and with guessing it
+can sit on the search bound, where $I \approx 0$ makes the correction explode.
+
+### Computation
+
+The modified score is evaluated on a grid over
+$[\theta_{\min}, \theta_{\max}]$ (`THETA_MIN_EXTENDED`, `THETA_MAX_EXTENDED`) to
+bracket its roots. Each sign change from positive to negative brackets a maximum
+of the weighted likelihood and is refined with Brent's method. If several maxima
+exist, which can happen with guessing, the one with the largest weighted
+likelihood is returned; candidates are ranked by integrating the modified score,
+the derivative of the weighted log-likelihood. If the modified score never changes
+sign, the estimate is the bound it points to. This mirrors the root search used by
+`catR` (Magis and Raîche, 2012), with explicit handling of multiple roots.
 
 ## Parameters
 
@@ -56,7 +77,7 @@ existing numerical optimizer and then applies the analytic correction term.
      - Description
    * - ``tol``
      - ``1e-6``
-     - Tolerance passed to the underlying numerical MLE routine.
+     - Absolute tolerance of the Brent root refinement.
    * - ``verbose``
      - ``False``
      - Diagnostics flag inherited from the estimator base class.
@@ -67,18 +88,20 @@ existing numerical optimizer and then applies the analytic correction term.
 Any correct implementation must satisfy the following properties:
 
 1. With no administered items, the estimator returns the input starting value unchanged.
-2. When the MLE is an interior point of the search interval and the corrected value stays inside it, the
-   estimate equals the underlying MLE plus the analytic correction $J/(2I^2)$.
-3. When the MLE lies away from the population center, the WLE correction moves the estimate back toward the center rather than farther outward.
-4. On short tests, WLE should reduce average absolute bias relative to plain MLE under the same response data.
-5. If the computed information is nonpositive, the correction term degenerates safely instead of dividing by zero.
-6. If the MLE is non-finite or pinned to a search bound (for example, when guessing parameters flatten the
-   likelihood), or the corrected value would leave the search interval, the estimator maximizes the
-   weighted likelihood directly instead, so the one-step correction is never applied where near-zero
-   information would make it explode.
+2. Every interior estimate is a root of the modified score equation, including for items with guessing.
+3. For items without guessing or slipping, the estimate maximizes $L(\theta)\sqrt{I(\theta)}$.
+4. The estimate is finite and inside the search interval for every response pattern, including
+   all-correct and all-incorrect patterns where the MLE diverges.
+5. When the MLE lies away from the population center, the WLE lies closer to the center.
+6. On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
+   is small, and smaller than the MLE's first-order bias $-J/(2I^2)$ wherever that bias is
+   non-negligible. With guessing and few items, WLE is still pulled toward the center at low
+   ability, so no unconditional bias guarantee is made for that case.
 
 ## References
 
 Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. *Psychometrika*, 54(3), 427-450. <https://doi.org/10.1007/BF02294627>
 
 Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel forms reliability. *Psychometrika*, 48(2), 233-245.
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08>
