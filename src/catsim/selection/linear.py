@@ -89,4 +89,4 @@ class LinearSelector(FiniteSelector):
         f"Administered items:\t\t{sorted(administered_items)} (size: {len(administered_items)})"
       )
       raise NoItemsAvailableError(msg)
-    return valid_indexes[0]
+    return int(valid_indexes[0])
