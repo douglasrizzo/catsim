@@ -79,7 +79,7 @@ def test_estimation_methods_complete_simulation(method: str) -> None:
     pytest.param(lambda: AStratBBlockSelector(8), id="astrat_bblock"),
     pytest.param(lambda: MaxInfoStratSelector(8), id="max_info_strat"),
     pytest.param(lambda: MaxInfoBBlockSelector(8), id="max_info_bblock"),
-    pytest.param(lambda: The54321Selector(8), id="54321"),
+    pytest.param(The54321Selector, id="54321"),
     pytest.param(lambda: RandomesqueSelector(3), id="randomesque"),
   ],
 )

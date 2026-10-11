@@ -209,27 +209,33 @@ class TestRandomesqueSelector:
 
 
 class TestThe54321Selector:
-  """Tests for The54321Selector."""
+  """The 5-4-3-2-1 rule of McBride & Martin (1983)."""
 
-  def test_init_with_test_size(self) -> None:
-    """Test initialization with test size."""
-    selector = The54321Selector(15)
-    assert selector.test_size == 15
+  def test_init_default_and_validation(self) -> None:
+    """The first item is drawn from the 5 most informative items unless configured otherwise."""
+    assert The54321Selector().initial_bin_size == 5
+    assert The54321Selector(3).initial_bin_size == 3
+    with pytest.raises(ValueError, match="initial_bin_size"):
+      The54321Selector(0)
 
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
+  @pytest.mark.parametrize(("n_administered", "bin_size"), [(0, 5), (1, 4), (2, 3), (3, 2), (4, 1), (12, 1)])
+  def test_draws_from_a_shrinking_bin_of_most_informative_items(self, n_administered: int, bin_size: int) -> None:
+    """Item k is drawn from the 5 - k most informative remaining items, and from the fifth on it is the best one.
+
+    Earlier versions sized the bin as test_size - k, so a 20-item test drew its first item from the top
+    20, and past test_size the negative bin drew from almost the whole bank.
+    """
     item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = The54321Selector(15)
+    administered = list(range(n_administered))
+    by_information = [int(i) for i in np.argsort(-item_bank.information(0.3)) if i not in administered]
+    selector = The54321Selector()
+    rng = np.random.default_rng(0)
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
+    picks = {
+      selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.3, rng=rng) for _ in range(200)
+    }
 
-    assert selected is not None
-    assert 0 <= selected < 50
+    assert picks == set(by_information[:bin_size])
 
 
 class TestAStratSelector:
@@ -403,7 +409,7 @@ SELECTOR_FACTORIES = {
   "IntervalInfoSelector": IntervalInfoSelector,
   "RandomSelector": RandomSelector,
   "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=5),
-  "The54321Selector": lambda: The54321Selector(test_size=10),
+  "The54321Selector": The54321Selector,
   "LinearSelector": lambda: LinearSelector(list(range(_N_ITEMS))),
   "ClusterSelector": lambda: ClusterSelector(clusters=[i % 3 for i in range(_N_ITEMS)]),
   "AStratSelector": lambda: AStratSelector(test_size=10),
