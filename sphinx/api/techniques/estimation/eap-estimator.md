@@ -9,12 +9,12 @@
 EAP estimates ability by taking the mean of the posterior distribution rather
 than the maximizer of a likelihood. In CAT practice this is attractive because
 it always returns a finite value, even for all-correct or all-incorrect patterns
-where MLE becomes unstable or undefined.
+where the MLE does not exist, so no heuristic such as Dodd's is needed early in
+the test.
 
-EAP also exposes a posterior variance naturally, which makes it useful beyond
-estimation itself: the same posterior can drive stopping rules and
-posterior-weighted selectors. That makes it a foundational Bayesian estimator
-for the planned feature set.
+EAP also provides the posterior variance at no extra cost, and that variance
+serves as the error variance of the estimate. The same posterior can drive
+stopping rules and posterior-weighted selectors.
 
 ## Definition
 
@@ -29,8 +29,9 @@ $$
      {\int p(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta}.
 $$
 
-Using the shared quadrature grid from the Bayesian infrastructure, the
-implementation approximates this as
+Using the shared quadrature grid from the
+{doc}`Bayesian infrastructure </api/techniques/estimation/bayesian-infrastructure>`,
+the implementation approximates this as
 
 $$
 \hat{\theta}_{\mathrm{EAP}}
@@ -38,7 +39,7 @@ $$
 \sum_{q=1}^{Q}\theta_q\,\tilde{p}(\theta_q \mid \mathbf{u}),
 $$
 
-with posterior variance
+with posterior variance, available through `last_posterior_variance()`,
 
 $$
 \operatorname{Var}(\theta \mid \mathbf{u})
@@ -48,8 +49,10 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-The estimator therefore depends on the prior and the quadrature grid, but it
-avoids the divergence issues that motivate Dodd-style MLE fallbacks.
+The estimate depends on the prior and on the grid. The default grid (41 nodes
+on $[-6, 6]$) is accurate while the posterior standard deviation is at least
+about 0.2; longer tests need a finer grid (see
+{doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
 ## Parameters
 
@@ -88,6 +91,41 @@ Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a mi
 
 Wang, T., & Vispoel, W. P. (1998). Properties of ability estimation methods in computerized adaptive testing. *Journal of Educational Measurement*, 35(2), 109-135.
 
+## Reading the Source
+
+**Checked against** the full text of Bock and Mislevy (1982), openly available
+from the [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/101546).
+
+- **p. 431 (abstract):** EAP is computed noniteratively from sums of
+  log-likelihoods at a limited number of quadrature points, and the posterior
+  standard deviation behaves like the standard error of measurement.
+- **p. 433, Equation 4:** the provisional EAP estimate after each item, as a
+  weighted sum over the quadrature points; **Equation 5:** the posterior
+  standard deviation.
+- **p. 434, Table 1:** an illustrative 20-item session in which the posterior
+  standard deviation falls to about 0.25.
+- **p. 443:** the conclusion that the EAP estimator is stable at all adaptive
+  test lengths, including the first few items.
+
+Wang and Vispoel (1998) compare ML, Bayes modal and EAP estimates in CAT; it
+was not checked.
+
+In catsim, `EAPEstimator.estimate` returns Equation 4 and
+`last_posterior_variance()` returns the square of Equation 5 (without
+Sheppard's correction; see the Bayesian infrastructure page for why).
+
+**Checked by** `TestEAPEstimator` in `tests/test_estimation.py`, including
+`test_estimate_returns_prior_mean_with_no_data` and
+`test_estimate_converges_toward_mle_on_longer_test`.
+
 :::{seealso}
 Depends on {doc}`/api/techniques/estimation/bayesian-infrastructure`
 :::
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.estimation.EAPEstimator
+   :members:
+   :show-inheritance:
+```
