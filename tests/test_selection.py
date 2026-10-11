@@ -1017,6 +1017,7 @@ _N_ITEMS = 30
 SELECTOR_FACTORIES = {
   "MaxInfoSelector": MaxInfoSelector,
   "UrrySelector": UrrySelector,
+  "KLSelector": KLSelector,
   "IntervalInfoSelector": IntervalInfoSelector,
   "RandomSelector": RandomSelector,
   "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=5),

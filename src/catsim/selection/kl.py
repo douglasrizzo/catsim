@@ -99,4 +99,4 @@ class KLSelector(BaseSelector):
       exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
 
     valid_low_r = [idx for idx in valid if exposure_rates[idx] < self._r_max]
-    return valid_low_r[0] if valid_low_r else valid[0]
+    return int(valid_low_r[0] if valid_low_r else valid[0])
