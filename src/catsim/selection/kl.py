@@ -34,7 +34,7 @@ def _kl_integrand(
 class KLSelector(BaseSelector):
   """Kullback-Leibler global-information item selector.
 
-  For full algorithmic details, see :doc:`/specs/selection/kl-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/kl-selector`.
   """
 
   def __init__(self, c: float = 3.0, r_max: float = 1.0) -> None:
@@ -80,6 +80,7 @@ class KLSelector(BaseSelector):
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
     exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered."""
     n = max(1, len(administered_items))
