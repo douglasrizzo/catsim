@@ -205,7 +205,7 @@ class EAPEstimator(BaseEstimator):
 class MAPEstimator(BaseEstimator):
   """Maximum a Posteriori ability estimator.
 
-  For full algorithmic details, see :doc:`/specs/estimation/map-estimator`.
+  For full algorithmic details, see :doc:`/api/techniques/estimation/map-estimator`.
   """
 
   def __init__(
