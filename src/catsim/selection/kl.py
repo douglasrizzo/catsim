@@ -5,7 +5,6 @@ import numpy.typing as npt
 from scipy.integrate import quad
 
 from .. import irt
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import BaseSelector
 
@@ -83,20 +82,8 @@ class KLSelector(BaseSelector):
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered."""
-    n = max(1, len(administered_items))
-    half_width = self._c / numpy.sqrt(n)
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    half_width = self._c / numpy.sqrt(max(1, len(administered_items)))
 
-    kl_values = numpy.array([
-      self._kl_global(est_theta, item_bank.items[i], half_width) for i in range(item_bank.n_items)
-    ])
-    ordered = list((-kl_values).argsort())
-    valid = self._get_non_administered(ordered, administered_items)
-    if not valid:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-
-    valid_low_r = [idx for idx in valid if exposure_rates[idx] < self._r_max]
-    return int(valid_low_r[0] if valid_low_r else valid[0])
+    kl_values = numpy.array([self._kl_global(est_theta, item_bank.items[int(idx)], half_width) for idx in candidates])
+    return int(candidates[int(kl_values.argmax())])
