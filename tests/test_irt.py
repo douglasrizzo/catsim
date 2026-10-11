@@ -54,6 +54,11 @@ class TestIcc:
       prob = irt.icc(theta, a=1.0, b=0.0, c=0.1, d=0.9)
       assert 0.1 <= prob <= 0.9
 
+  def test_icc_reaches_its_asymptotes_without_overflowing(self) -> None:
+    """Far from b the ICC returns its asymptotes; Python floats used to raise OverflowError in math.e ** x."""
+    assert irt.icc(theta=-1000.0, a=1.0, b=0.0, c=0.2, d=0.9) == pytest.approx(0.2)
+    assert irt.icc(theta=1000.0, a=1.0, b=0.0, c=0.2, d=0.9) == pytest.approx(0.9)
+
 
 class TestDetectModel:
   """Tests for the detect_model() function."""
@@ -117,6 +122,29 @@ class TestInf:
       info = irt.inf(theta, a=1.0, b=0.0)
       assert info >= 0
 
+  @pytest.mark.parametrize("x", [40.0, -40.0, 700.0, -1000.0])
+  def test_inf_is_accurate_far_from_difficulty(self, x: float) -> None:
+    """Far from b the 2PL information a^2 L (1 - L) is tiny but finite.
+
+    The textbook formula computed 1 - P after P had rounded to 1, so it divided 0 by 0: Python floats
+    raised ZeroDivisionError and arrays returned NaN.
+    """
+    expected = math.exp(-abs(x)) / (1 + math.exp(-abs(x))) ** 2
+
+    assert irt.inf(theta=x, a=1.0, b=0.0) == pytest.approx(expected, rel=1e-12, abs=0.0)
+    np.testing.assert_allclose(irt.inf_hpc(x, np.array([[1.0, 0.0, 0.0, 1.0]])), [expected], rtol=1e-12, atol=0.0)
+
+  def test_inf_matches_the_textbook_formula(self) -> None:
+    """Where the textbook 4PL formula is well conditioned, both implementations agree with it."""
+    items = np.array([[1.4, -0.5, 0.2, 0.95], [0.8, 1.0, 0.0, 1.0], [2.0, 0.3, 0.1, 1.0]])
+    for theta in np.linspace(-4.0, 4.0, 17):
+      a, b, c, d = items.T
+      p = c + (d - c) / (1 + np.exp(-a * (theta - b)))
+      expected = a**2 * (p - c) ** 2 * (d - p) ** 2 / ((d - c) ** 2 * p * (1 - p))
+
+      np.testing.assert_allclose(irt.inf_hpc(theta, items), expected, rtol=1e-10)
+      np.testing.assert_allclose([irt.inf(theta, *item) for item in items], expected, rtol=1e-10)
+
 
 class TestTestInfo:
   """Tests for the test_info() function."""
@@ -165,10 +193,9 @@ class TestVar:
     with pytest.raises(ValueError, match="Either theta and items or test_inf"):
       irt.var()
 
-  def test_var_zero_info_returns_neg_inf(self) -> None:
-    """Test that zero information returns negative infinity."""
-    variance = irt.var(test_inf=0)
-    assert variance == float("-inf")
+  def test_var_zero_info_returns_inf(self) -> None:
+    """With no information the variance is unbounded; it used to be reported as negative infinity."""
+    assert irt.var(test_inf=0) == float("inf")
 
 
 class TestSee:
@@ -188,6 +215,10 @@ class TestSee:
     items5 = np.array([[1.0, 0.0, 0.0, 1.0]] * 5)
     theta = 0.0
     assert irt.see(theta, items5) < irt.see(theta, items1)
+
+  def test_see_zero_info_returns_inf(self) -> None:
+    """Items without information leave the standard error unbounded."""
+    assert irt.see(0.0, np.empty((0, 4))) == float("inf")
 
 
 class TestConfidenceInterval:
@@ -242,6 +273,10 @@ class TestReliability:
     items10 = np.array([[1.0, 0.0, 0.0, 1.0]] * 10)
     theta = 0.0
     assert irt.reliability(theta, items10) > irt.reliability(theta, items1)
+
+  def test_reliability_zero_info_is_negative_infinity(self) -> None:
+    """Reliability 1 - 1 / I is unbounded below without information; it used to be +inf."""
+    assert irt.reliability(0.0, np.empty((0, 4))) == float("-inf")
 
 
 class TestMaxInfo:
@@ -305,11 +340,12 @@ class TestNormalizeItemBank:
 class TestValidateItemBank:
   """Tests for the validate_item_bank() function."""
 
-  def test_validate_valid_bank(self) -> None:
-    """Test that valid item bank passes validation."""
+  def test_validate_valid_bank(self, capsys: pytest.CaptureFixture[str]) -> None:
+    """A valid item bank passes validation silently; an empty line used to be printed."""
     items = np.array([[1.0, 0.0, 0.1, 0.95], [1.2, 0.5, 0.15, 0.98]])
-    # Should not raise
     irt.validate_item_bank(items, raise_err=True)
+    irt.validate_item_bank(items, raise_err=False)
+    assert not capsys.readouterr().out
 
   def test_validate_not_numpy_array_raises(self) -> None:
     """Test that non-numpy array raises TypeError."""
@@ -320,7 +356,19 @@ class TestValidateItemBank:
   def test_validate_negative_discrimination_raises(self) -> None:
     """Test that negative discrimination raises ValueError."""
     items = np.array([[-0.5, 0.0, 0.1, 0.95]])
-    with pytest.raises(ValueError, match="discrimination < 0"):
+    with pytest.raises(ValueError, match="discrimination <= 0"):
+      irt.validate_item_bank(items, raise_err=True)
+
+  def test_validate_zero_discrimination_raises(self) -> None:
+    """An item with a = 0 carries no information, and its point of maximum information is undefined."""
+    items = np.array([[0.0, 0.0, 0.1, 0.95]])
+    with pytest.raises(ValueError, match="discrimination <= 0"):
+      irt.validate_item_bank(items, raise_err=True)
+
+  def test_validate_guessing_not_below_asymptote_raises(self) -> None:
+    """With c >= d the ICC is flat or decreasing, and the information formula divides by d - c = 0."""
+    items = np.array([[1.0, 0.0, 0.3, 0.3]])
+    with pytest.raises(ValueError, match="pseudo-guessing >= upper asymptote"):
       irt.validate_item_bank(items, raise_err=True)
 
   def test_validate_negative_guessing_raises(self) -> None:

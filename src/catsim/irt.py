@@ -13,6 +13,7 @@ import numexpr
 import numpy
 import numpy.typing as npt
 from scipy import stats
+from scipy.special import expit
 
 THETA_MIN_TYPICAL = -4.0
 """Typical lower bound for ability (theta) estimation.
@@ -45,6 +46,14 @@ abilities are normally distributed N(0, 1). Recommended for numerical search
 algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
 than the item bank difficulty range prevents artificial restrictions on ability
 estimates."""
+
+
+def _logistic(x: float) -> float:
+  """Return the logistic function 1 / (1 + exp(-x)) of a scalar without overflowing for large ``|x|``."""
+  if x >= 0:
+    return 1 / (1 + math.exp(-x))
+  exp_x = math.exp(x)
+  return exp_x / (1 + exp_x)
 
 
 class NumParams(Enum):
@@ -108,7 +117,7 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
       The probability :math:`P(X_i = 1| \theta)` of a correct response, a value
       between c and d.
   """
-  return c + ((d - c) / (1 + math.e ** (-a * (theta - b))))
+  return c + (d - c) * _logistic(a * (theta - b))
 
 
 def _split_params(
@@ -219,13 +228,16 @@ def inf_hpc(
       Information quantifies how much an item contributes to ability estimation
       precision at the specified ability level.
   """
-  a, _b, c, d = _split_params(items)
-  p = icc_hpc(theta, items)
-
-  return numexpr.evaluate(
-    "(a ** 2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))",
-    local_dict={"a": a, "c": c, "d": d, "p": p},
-  )
+  a, b, c, d = _split_params(items)
+  logistic = expit(a * (theta - b))
+  complement = expit(-a * (theta - b))
+  product = logistic * complement
+  above_floor = (d - c) * logistic
+  below_ceiling = (d - c) * complement
+  # see inf; where L (1 - L) underflows to 0, so does the information, and the ratios would be 0 / 0
+  with numpy.errstate(divide="ignore", invalid="ignore"):
+    information = a**2 * product * (above_floor / (c + above_floor)) * (below_ceiling / ((1 - d) + below_ceiling))
+  return numpy.where(product > 0, information, 0.0)
 
 
 def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
@@ -262,9 +274,17 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   float
       The information value of the item at the designated `theta` point.
   """
-  p = icc(theta, a, b, c, d)
-
-  return (a**2 * (p - c) ** 2 * (d - p) ** 2) / ((d - c) ** 2 * p * (1 - p))
+  # With L the logistic term, P - c = (d - c) L and 1 - P = (1 - d) + (d - c)(1 - L), so
+  # I = a^2 L (1 - L) [(d - c) L / P] [(d - c)(1 - L) / (1 - P)]. Unlike the textbook form, this never
+  # computes 1 - P after P has rounded to 1, which divided 0 by 0 far from b.
+  logistic = _logistic(a * (theta - b))
+  complement = _logistic(-a * (theta - b))
+  product = logistic * complement
+  if product <= 0:
+    return 0.0
+  above_floor = (d - c) * logistic
+  below_ceiling = (d - c) * complement
+  return a**2 * product * (above_floor / (c + above_floor)) * (below_ceiling / ((1 - d) + below_ceiling))
 
 
 def test_info(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
@@ -319,8 +339,8 @@ def var(
   Returns
   -------
   float
-      The variance of ability estimation. Returns negative infinity if test
-      information is 0.
+      The variance of ability estimation. Returns infinity if test information
+      is 0.
 
   Raises
   ------
@@ -333,7 +353,7 @@ def var(
       raise ValueError(msg)
     test_inf = test_info(theta, items)
   if test_inf == 0:
-    return float("-inf")
+    return float("inf")
   return 1 / test_inf
 
 
@@ -363,10 +383,7 @@ def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
       The standard error of estimation at `theta` for a test represented by `items`.
       Returns infinity if test information is 0.
   """
-  try:
-    return math.sqrt(var(theta, items))
-  except ValueError:
-    return float("inf")
+  return math.sqrt(var(theta, items))
 
 
 def confidence_interval(
@@ -858,7 +875,7 @@ def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool 
   The item matrix must have at least one line (representing an item) and exactly four columns,
   representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
   (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered
-  valid if, for all items in the matrix, :math:`a > 0 \wedge 0 \leq c \leq 1 \wedge 0 \leq d \leq 1`.
+  valid if, for all items in the matrix, :math:`a > 0 \wedge 0 \leq c < d \leq 1`.
 
   Parameters
   ----------
@@ -896,8 +913,8 @@ def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool 
     elif items.shape[1] == NumParams.PL3.value:
       err += "\nItem matrix has no upper asymptote parameter column"
   else:
-    if any(items[:, 0] < 0):
-      err += "\nThere are items with discrimination < 0"
+    if any(items[:, 0] <= 0):
+      err += "\nThere are items with discrimination <= 0"
     if any(items[:, 2] < 0):
       err += "\nThere are items with pseudo-guessing < 0"
     if any(items[:, 2] > 1):
@@ -906,8 +923,11 @@ def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool 
       err += "\nThere are items with upper asymptote > 1"
     if any(items[:, 3] < 0):
       err += "\nThere are items with upper asymptote < 0"
+    if any(items[:, 2] >= items[:, 3]):
+      err += "\nThere are items with pseudo-guessing >= upper asymptote"
 
-  if len(err) > 0 and raise_err:
+  if len(err) == 0:
+    return
+  if raise_err:
     raise ValueError(err)
-
   print(err)
