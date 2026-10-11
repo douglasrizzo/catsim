@@ -92,11 +92,11 @@ Any correct implementation must satisfy the following properties:
 3. For items without guessing or slipping, the estimate maximizes $L(\theta)\sqrt{I(\theta)}$.
 4. The estimate is finite and inside the search interval for every response pattern, including
    all-correct and all-incorrect patterns where the MLE diverges.
-5. When the MLE lies away from the population center, the WLE lies closer to the center.
+5. Relative to a finite MLE, the WLE is pulled toward the abilities at which the administered items are most informative.
 6. On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
    is small, and smaller than the MLE's first-order bias $-J/(2I^2)$ wherever that bias is
-   non-negligible. With guessing and few items, WLE is still pulled toward the center at low
-   ability, so no unconditional bias guarantee is made for that case.
+   non-negligible. With guessing and few items, the WLE at low ability is pulled upward, toward
+   the items, so no unconditional bias guarantee is made for that case.
 
 ## References
 
@@ -105,3 +105,43 @@ Warm, T. A. (1989). Weighted likelihood estimation of ability in item response t
 Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel forms reliability. *Psychometrika*, 48(2), 233-245.
 
 Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08>
+
+## Reading the Source
+
+Warm (1989) was **not checked**: it is not openly available. Warm's 1985
+doctoral dissertation, which develops the same estimator, is open at the
+[University of Oklahoma repository](https://shareok.org/handle/11244/5356) but
+was not checked either. The estimating equation was instead checked against:
+
+- **Magis and Raîche (2012, p. 6, Equations 12 and 13)**,
+  [open access](https://doi.org/10.18637/jss.v048.i08): the WL estimate
+  satisfies $J(\theta)/[2 I(\theta)] + d \log L(\theta)/d\theta = 0$ with
+  $J(\theta) = \sum_j P_j'(\theta) P_j''(\theta) / [P_j(\theta) Q_j(\theta)]$,
+  the equation solved here. Equation 14 gives its standard error, which catsim
+  does not implement. The same page notes, citing Warm (1989) and Hoijtink and
+  Boomsma (1995), that under the 1PL and 2PL models the WL estimator equals the
+  Bayes modal estimator with Jeffreys' prior.
+- **catR's source** (`thetaEst.R` and `Ji.R` in the
+  [CRAN mirror](https://github.com/cran/catR)), which solves the same equation
+  with a root finder.
+- **An independent derivation in the tests**: the modified score is written out
+  separately from the estimator, and the exact expected bias is computed by
+  enumerating every response pattern.
+
+Lord (1983) was not checked; the statement that $-J/(2I^2)$ is the MLE's
+first-order bias rests on Warm's construction, as summarized by Magis and
+Raîche (2012, p. 6).
+
+**Checked by** `TestWarmLikelihoodEstimator` in `tests/test_estimation.py`:
+`test_estimate_solves_warm_modified_score_equation` (contract 2, on a bank with
+guessing), `test_estimate_maximizes_jeffreys_weighted_likelihood_without_guessing`
+(contract 3) and `test_exact_bias_is_small_and_below_first_order_mle_bias`
+(contract 6).
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.estimation.WarmLikelihoodEstimator
+   :members:
+   :show-inheritance:
+```
