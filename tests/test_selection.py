@@ -920,6 +920,8 @@ SELECTOR_FACTORIES = {
   "AStratBBlockSelector": lambda: AStratBBlockSelector(test_size=10),
   "MaxInfoStratSelector": lambda: MaxInfoStratSelector(test_size=10),
   "MaxInfoBBlockSelector": lambda: MaxInfoBBlockSelector(test_size=10),
+  "MEISelector": MEISelector,
+  "MLWISelector": MLWISelector,
 }
 
 
@@ -933,6 +935,7 @@ def test_select_returns_builtin_int(make_selector) -> None:
     administered_items=[0, 1],
     est_theta=0.3,
     rng=np.random.default_rng(0),
+    response_vector=[True, False],
   )
 
   assert type(item_id) is int
