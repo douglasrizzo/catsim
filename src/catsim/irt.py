@@ -339,8 +339,8 @@ def var(
   Returns
   -------
   float
-      The variance of ability estimation. Returns negative infinity if test
-      information is 0.
+      The variance of ability estimation. Returns infinity if test information
+      is 0.
 
   Raises
   ------
@@ -353,7 +353,7 @@ def var(
       raise ValueError(msg)
     test_inf = test_info(theta, items)
   if test_inf == 0:
-    return float("-inf")
+    return float("inf")
   return 1 / test_inf
 
 
@@ -383,10 +383,7 @@ def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
       The standard error of estimation at `theta` for a test represented by `items`.
       Returns infinity if test information is 0.
   """
-  try:
-    return math.sqrt(var(theta, items))
-  except ValueError:
-    return float("inf")
+  return math.sqrt(var(theta, items))
 
 
 def confidence_interval(

@@ -193,10 +193,9 @@ class TestVar:
     with pytest.raises(ValueError, match="Either theta and items or test_inf"):
       irt.var()
 
-  def test_var_zero_info_returns_neg_inf(self) -> None:
-    """Test that zero information returns negative infinity."""
-    variance = irt.var(test_inf=0)
-    assert variance == float("-inf")
+  def test_var_zero_info_returns_inf(self) -> None:
+    """With no information the variance is unbounded; it used to be reported as negative infinity."""
+    assert irt.var(test_inf=0) == float("inf")
 
 
 class TestSee:
@@ -216,6 +215,10 @@ class TestSee:
     items5 = np.array([[1.0, 0.0, 0.0, 1.0]] * 5)
     theta = 0.0
     assert irt.see(theta, items5) < irt.see(theta, items1)
+
+  def test_see_zero_info_returns_inf(self) -> None:
+    """Items without information leave the standard error unbounded."""
+    assert irt.see(0.0, np.empty((0, 4))) == float("inf")
 
 
 class TestConfidenceInterval:
@@ -270,6 +273,10 @@ class TestReliability:
     items10 = np.array([[1.0, 0.0, 0.0, 1.0]] * 10)
     theta = 0.0
     assert irt.reliability(theta, items10) > irt.reliability(theta, items1)
+
+  def test_reliability_zero_info_is_negative_infinity(self) -> None:
+    """Reliability 1 - 1 / I is unbounded below without information; it used to be +inf."""
+    assert irt.reliability(0.0, np.empty((0, 4))) == float("-inf")
 
 
 class TestMaxInfo:
