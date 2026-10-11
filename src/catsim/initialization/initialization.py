@@ -31,11 +31,11 @@ class RandomInitializer(BaseInitializer):
   dist_type : InitializationDistribution, optional
       Distribution type to use for initialization (uniform or normal).
       Default is UNIFORM.
-  dist_params : tuple, optional
+  dist_params : tuple or None, optional
       Distribution parameters:
       - For uniform: tuple of (min, max) values (order doesn't matter)
       - For normal: tuple of (mean, std) values (in this exact order)
-      Default is (-5, 5).
+      Default is None, which uses (-0.5, 0.5) for uniform, as in Barrada et al. (2006), and (0, 1) for normal.
 
   Notes
   -----
@@ -47,7 +47,9 @@ class RandomInitializer(BaseInitializer):
     return "Random Initializer"
 
   def __init__(
-    self, dist_type: InitializationDistribution = InitializationDistribution.UNIFORM, dist_params: tuple = (-5, 5)
+    self,
+    dist_type: InitializationDistribution = InitializationDistribution.UNIFORM,
+    dist_params: tuple | None = None,
   ) -> None:
     """Initialize a RandomInitializer object.
 
@@ -55,8 +57,9 @@ class RandomInitializer(BaseInitializer):
     ----------
     dist_type : InitializationDistribution, optional
         Distribution to use for ability estimate initialization. Default is UNIFORM.
-    dist_params : tuple, optional
-        Parameters for the chosen distribution. Default is (-5, 5).
+    dist_params : tuple or None, optional
+        Parameters for the chosen distribution. Default is None, which uses (-0.5, 0.5) for uniform
+        and (0, 1) for normal.
         - For uniform: (min, max) values (order doesn't matter)
         - For normal: (mean, std) values (in this exact order)
 
@@ -71,6 +74,9 @@ class RandomInitializer(BaseInitializer):
     if not isinstance(dist_type, InitializationDistribution):
       msg = "dist_type must be of type InitializationDistribution"
       raise TypeError(msg)
+
+    if dist_params is None:
+      dist_params = (-0.5, 0.5) if dist_type == InitializationDistribution.UNIFORM else (0.0, 1.0)
 
     # Validate distribution parameters
     expected_param_count = 2

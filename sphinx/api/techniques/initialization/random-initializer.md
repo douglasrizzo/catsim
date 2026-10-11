@@ -45,10 +45,12 @@ affect the returned value.
      - ``InitializationDistribution.UNIFORM``
      - Distribution used for sampling the initial ability estimate.
    * - ``dist_params``
-     - ``(-5, 5)``
+     - ``None``
      - Distribution parameters. For the uniform distribution, the two values are
        the lower and upper bounds, in either order. For the normal distribution,
-       the values are mean and standard deviation, in that order.
+       the values are mean and standard deviation, in that order. ``None`` uses
+       :math:`U(-0.5, 0.5)`, the starting rule of Barrada et al. (2006), or
+       :math:`\mathcal{N}(0, 1)`.
 ```
 
 ## Behavioral Contracts
