@@ -32,7 +32,7 @@ mlwi-selector
 ## Class Hierarchy
 
 ```{eval-rst}
-.. inheritance-diagram:: catsim.selection.BaseSelector catsim.selection.FiniteSelector catsim.selection.MaxInfoSelector catsim.selection.UrrySelector catsim.selection.IntervalInfoSelector catsim.selection.LinearSelector catsim.selection.RandomSelector catsim.selection.RandomesqueSelector catsim.selection.The54321Selector catsim.selection.ClusterSelector catsim.selection.StratifiedSelector catsim.selection.AStratSelector catsim.selection.AStratBBlockSelector catsim.selection.MaxInfoStratSelector catsim.selection.MaxInfoBBlockSelector
+.. inheritance-diagram:: catsim.selection.BaseSelector catsim.selection.FiniteSelector catsim.selection.MaxInfoSelector catsim.selection.UrrySelector catsim.selection.IntervalInfoSelector catsim.selection.LinearSelector catsim.selection.RandomSelector catsim.selection.RandomesqueSelector catsim.selection.The54321Selector catsim.selection.ClusterSelector catsim.selection.StratifiedSelector catsim.selection.AStratSelector catsim.selection.AStratBBlockSelector catsim.selection.MaxInfoStratSelector catsim.selection.MaxInfoBBlockSelector catsim.selection.MEISelector catsim.selection.MLWISelector catsim.selection.KLSelector catsim.selection.ProgressiveSelector catsim.selection.ProportionalSelector
    :parts: 1
    :top-classes: catsim.selection.BaseSelector
 ```
