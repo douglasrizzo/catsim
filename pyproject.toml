@@ -89,7 +89,15 @@ select = [
     "S",
     "RUF",
 ]
-ignore = ["ANN401", "D100", "E111", "E114", "S101"]
+ignore = [
+  "ANN401",
+  "D100",
+  "D421",    # Google-style rule; numpy-style property docstrings here start with "Return ..."
+  "E111",
+  "E114",
+  "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
+  "S101",
+]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
