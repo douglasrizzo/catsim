@@ -27,7 +27,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
   MLE diverges for an extreme response pattern, the estimator falls back to a
   direct bounded maximization of the weighted likelihood.
 
-  For full algorithmic details, see :doc:`/specs/estimation/warm-wle`.
+  For full algorithmic details, see :doc:`/api/techniques/estimation/warm-wle`.
   """
 
   def __init__(self, tol: float = 1e-6, verbose: bool = False) -> None:
@@ -107,15 +107,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     est_theta: float,
   ) -> float:
     """Estimate ability using Warm's weighted likelihood correction."""
-    if item_bank is None:
-      msg = "item_bank parameter cannot be None"
-      raise ValueError(msg)
-    if administered_items is None:
-      msg = "administered_items parameter cannot be None"
-      raise ValueError(msg)
-    if response_vector is None:
-      msg = "response_vector parameter cannot be None"
-      raise ValueError(msg)
+    self._require_inputs(item_bank, administered_items, response_vector)
 
     self._calls += 1
     self._last_evaluations = 0
