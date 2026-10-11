@@ -67,10 +67,15 @@ existing numerical optimizer and then applies the analytic correction term.
 Any correct implementation must satisfy the following properties:
 
 1. With no administered items, the estimator returns the input starting value unchanged.
-2. For nondegenerate response patterns, the estimate equals the underlying MLE plus the analytic correction $J/(2I^2)$.
+2. When the MLE is an interior point of the search interval and the corrected value stays inside it, the
+   estimate equals the underlying MLE plus the analytic correction $J/(2I^2)$.
 3. When the MLE lies away from the population center, the WLE correction moves the estimate back toward the center rather than farther outward.
 4. On short tests, WLE should reduce average absolute bias relative to plain MLE under the same response data.
 5. If the computed information is nonpositive, the correction term degenerates safely instead of dividing by zero.
+6. If the MLE is non-finite or pinned to a search bound (for example, when guessing parameters flatten the
+   likelihood), or the corrected value would leave the search interval, the estimator maximizes the
+   weighted likelihood directly instead, so the one-step correction is never applied where near-zero
+   information would make it explode.
 
 ## References
 

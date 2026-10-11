@@ -118,10 +118,19 @@ class WarmLikelihoodEstimator(BaseEstimator):
     items = item_bank.items[administered_items, :4]
     theta_mle = self._mle.estimate(item_bank, administered_items, response_vector, est_theta)
 
-    if numpy.isfinite(theta_mle):
+    # The closed-form correction is a Taylor step around a stationary point of the likelihood.
+    # An MLE pinned to the search bounds (e.g. when guessing flattens the likelihood) is not one,
+    # and the near-zero information there makes J / (2 I^2) explode.
+    if self._is_interior(theta_mle):
       theta = float(theta_mle + self._bias_correction(theta_mle, items))
-      self._last_evaluations = self._mle.evaluations
-      self._total_evaluations += self._last_evaluations
-      return theta
+      if self._is_interior(theta):
+        self._last_evaluations = self._mle.evaluations
+        self._total_evaluations += self._last_evaluations
+        return theta
 
     return self._fallback_weighted_mle(response_vector, items)
+
+  def _is_interior(self, theta: float) -> bool:
+    """Return whether ``theta`` lies strictly inside the search interval."""
+    margin = max(10 * self._tol, 1e-4)
+    return bool(THETA_MIN_EXTENDED + margin < theta < THETA_MAX_EXTENDED - margin)
