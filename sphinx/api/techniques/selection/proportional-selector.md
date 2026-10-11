@@ -78,10 +78,43 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Segall, D. O. (2004). Computerized adaptive testing. In K. Kempf-Leonard (Ed.), *Encyclopedia of Social Measurement*. Academic Press.
+Segall, D. O. (2004). A sharing item response theory model for computerized adaptive testing. *Journal of Educational and Behavioral Statistics*, 29(4), 439-460.
 
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information function for item exposure control. *Methodology*, 4(2), 51-59.
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>
 
 :::{seealso}
 Companion spec: {doc}`/api/techniques/selection/progressive-selector`
 :::
+
+## Reading the Source
+
+Segall (2004), where the proportional idea originates, was **not checked**: it
+is not openly available. The method was checked against the full text of
+Barrada et al. (2008), [open copy on the first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf):
+
+- **p. 497, Equations 8–10:** Segall's proportional method selects item $i$
+  with probability $V_i / \sum_j V_j$, by drawing from the cumulative
+  distribution. In Segall's paper $V_i$ was an expected variance; with Fisher
+  information, $V_i = I_i(\hat{\theta})$.
+- **p. 497, Equation 11:** Barrada et al.'s modification raises the information
+  to a power that grows during the test, $V_i = I_i(\hat{\theta})^{P_k}$. A power
+  of 0 gives random selection and a large power approaches maximum information.
+- **p. 498, Equation 13:** the power is $P_k = K W_k$, with the same cumulative
+  power-sum schedule as the progressive method, so it reaches the test length
+  $K$ at the last item.
+
+catsim's exponent is $k\,w_n$ with a fixed sharpness $k$ (6 by default) and a
+power schedule for $w_n$; setting `sharpness` to the test length reproduces
+Barrada et al.'s end point.
+
+**Checked by** `TestProportionalSelector` in `tests/test_selection.py`, including
+`test_first_position_is_uniform_regardless_of_sharpness` and
+`test_exponent_is_clamped_past_test_size`.
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.ProportionalSelector
+   :members:
+   :show-inheritance:
+```

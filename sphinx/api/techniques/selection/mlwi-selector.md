@@ -49,7 +49,7 @@ before exponentiation; the constant factor cancels under $\arg\max$.
      - Description
    * - ``n_nodes``
      - ``41``
-     - Number of integration nodes used in the fixed-grid approximation. The feature card requires at least 5.
+     - Number of integration nodes used in the fixed-grid approximation; at least 5.
    * - ``bounds``
      - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
      - Theta range covered by the fixed integration grid.
@@ -75,3 +75,38 @@ Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria 
 :::{seealso}
 Sister spec: {doc}`/api/techniques/selection/mei-selector`
 :::
+
+## Reading the Source
+
+**Checked against** the 1994 research report that preceded the journal
+article, openly available from the
+[University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf)
+(Veerkamp & Berger, *Some new item selection criteria for adaptive testing*,
+Research Report 94-6). The 1997 journal version was not checked. Page numbers
+are the report's own.
+
+- **p. 7, Equations 7 and 8:** the general weighted information criterion,
+  $\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta$, of which the other criteria
+  are special cases.
+- **pp. 11–12, Equations 17 and 18:** the likelihood weighted information
+  criterion uses the likelihood as the weight, $W_n = L_n(\theta; \mathbf{x}_n)$,
+  and selects the item maximizing $\int L_n(\theta; \mathbf{x}_n)\, I_i(\theta)\, d\theta$.
+  The authors note that it needs no provisional ability estimate.
+- **p. 15, Equation 20:** in their simulation the integral is approximated by a
+  sum over a grid, as catsim does.
+- **pp. 17–18:** in their simulation, the criterion did better than maximum
+  information at the ML estimate.
+
+The criterion also matches Table 1 of Magis and Raîche (2012, p. 9).
+
+**Checked by** `TestMLWISelector` in `tests/test_selection.py`, including
+`test_select_matches_manual_weighted_information` and
+`test_select_with_empty_response_vector_reduces_to_information_integral`.
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.MLWISelector
+   :members:
+   :show-inheritance:
+```

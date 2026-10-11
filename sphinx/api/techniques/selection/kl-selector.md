@@ -40,7 +40,9 @@ K_i(\theta \,\|\, \hat{\theta})\,d\theta,
 $$
 
 where $n$ is the number of administered items and $c$ is a positive
-schedule constant. The selector chooses the non-administered item with the
+schedule constant. Before the first item, catsim uses $n = 1$, so the window
+is $\hat{\theta} \pm c$. Each integral is computed with SciPy's adaptive
+quadrature. The selector chooses the non-administered item with the
 largest value of $K_i(\hat{\theta})$.
 
 ## Parameters
@@ -56,7 +58,8 @@ largest value of $K_i(\hat{\theta})$.
    * - ``c``
      - ``3.0``
      - Positive constant controlling the half-width :math:`\delta_n = c/\sqrt{n}`.
-       The feature card follows Chang and Ying's recommended range of roughly 3 to 5.
+       Chang and Ying (1996) chose :math:`c` from the coverage probability of a
+       confidence interval for :math:`\theta` and used :math:`c = 3` in their simulation.
    * - ``r_max``
      - ``1.0``
      - Exposure cap applied after ordering candidate items by KL score.
@@ -79,3 +82,39 @@ Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized a
 :::{seealso}
 Posterior-weighted variant: {doc}`/api/techniques/selection/klp-selector`.
 :::
+
+## Reading the Source
+
+**Checked against** the full text of Chang and Ying (1996), openly available
+from the [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/119092).
+
+- **p. 217, Definition 2.1:** the KL information of an item, the expected
+  log-likelihood ratio of the response at the true ability against another
+  ability, which for a dichotomous item is the expression in the Definition
+  above. It is asymmetric, nonnegative, and zero when the two abilities
+  coincide. **Definition 2.2** makes it additive over items.
+- **p. 219, Equation 16:** the curvature of the KL function at the true
+  ability is the Fisher information, so KL information contains Fisher
+  information but not the reverse.
+- **pp. 219–220, Equation 17:** the selection index, the area under the item's
+  KL function between $\hat{\theta}_n - \delta_n$ and $\hat{\theta}_n + \delta_n$.
+  For a small $\delta_n$ it is governed by the curvature at $\hat{\theta}$, that
+  is, by the Fisher information; for a large one, by the tails.
+- **p. 221:** $\delta_n$ should shrink like a confidence interval for
+  $\theta$, $c/\sqrt{n}$, with $c$ chosen for a coverage probability.
+- **p. 222:** a Bayesian version that weights the KL function by the posterior
+  (the planned {doc}`/api/techniques/selection/klp-selector`).
+- **p. 223:** Study 1 uses $\delta_n = 3/\sqrt{n}$, "in accordance with
+  Equation 18", so $c = 3$, catsim's default.
+
+**Checked by** `TestKLSelector` in `tests/test_selection.py`, including
+`test_kl_integrand_is_zero_at_theta_hat` and
+`test_select_uses_half_width_c_over_sqrt_administered`.
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.KLSelector
+   :members:
+   :show-inheritance:
+```
