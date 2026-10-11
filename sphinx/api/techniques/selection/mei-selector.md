@@ -34,6 +34,14 @@ where $I(\cdot)$ is the information of the administered test extended by
 the candidate item. The selector chooses the non-administered item with the
 largest expected information value.
 
+With the default estimator (maximum likelihood with Dodd's heuristic), while the
+responses so far are all correct, the hypothetical correct branch is still an
+all-correct pattern, so Dodd's heuristic returns the same updated estimate for
+every candidate; the same happens on the incorrect branch while all responses
+are incorrect. On that branch the look-ahead is a fixed jump rather than an
+estimate. Bayesian estimators and WLE give a genuine updated estimate on both
+branches from the first item.
+
 ## Parameters
 
 ```{eval-rst}
@@ -46,7 +54,8 @@ largest expected information value.
      - Description
    * - ``estimator``
      - ``NumericalSearchEstimator()``
-     - Estimator used to compute the hypothetical one-step-ahead ability updates. The card explicitly allows alternative estimators such as WLE, EAP, or MAP.
+     - Estimator used to compute the hypothetical one-step-ahead ability updates. Any estimator can be
+       passed; EAP, MAP or WLE avoid the limitation described above.
    * - ``r_max``
      - ``1.0``
      - Exposure cap applied after candidate filtering.
@@ -71,3 +80,36 @@ Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria f
 :::{seealso}
 Sister spec: {doc}`/api/techniques/selection/mlwi-selector`
 :::
+
+## Reading the Source
+
+van der Linden (1998) was **not checked**: it is not openly available. The
+criterion was checked against an open secondary source:
+
+- **Magis and Raîche (2012, p. 9, Table 1, and p. 10)**,
+  [open access](https://doi.org/10.18637/jss.v048.i08): MEI maximizes
+  $\sum_{t \in \{0, 1\}} P(X_j = t \mid \hat{\theta}_{k-1})\, I_j(\hat{\theta}_k(X, t))$,
+  the probabilities of each response at the current estimate times an
+  information value at the estimate updated with that response.
+
+The two implementations differ in which information is evaluated. catR's
+`MEI` uses the **candidate item's** information at the updated estimate
+(observed information by default), as in Table 1. catsim uses the **Fisher
+information of the whole administered test extended by the candidate**. Which
+form van der Linden (1998) defines was not checked; both are one-step-ahead
+expected-information criteria, but they can rank items differently.
+
+Choi and Swartz (2009) compare selection criteria, including MEI, for
+polytomous items; it was not checked.
+
+**Checked by** `TestMEISelector` in `tests/test_selection.py`, including
+`test_select_matches_manual_expected_information` (the score is recomputed
+independently) and `test_select_diverges_from_max_info_when_one_step_estimates_shift`.
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.MEISelector
+   :members:
+   :show-inheritance:
+```
