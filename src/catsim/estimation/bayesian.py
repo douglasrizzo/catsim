@@ -1,7 +1,7 @@
 """Shared Bayesian helpers for ability estimation in CAT.
 
 For the full posterior specification and quadrature contract, see
-:doc:`/specs/estimation/bayesian-infrastructure`.
+:doc:`/api/techniques/estimation/bayesian-infrastructure`.
 """
 
 from __future__ import annotations
@@ -68,7 +68,7 @@ class QuadratureGrid:
   """A fixed quadrature grid for posterior computations.
 
   For the full posterior specification and quadrature contract, see
-  :doc:`/specs/estimation/bayesian-infrastructure`.
+  :doc:`/api/techniques/estimation/bayesian-infrastructure`.
   """
 
   nodes: FloatArray
