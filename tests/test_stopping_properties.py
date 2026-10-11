@@ -112,7 +112,10 @@ def test_min_error_stopper_respects_min_items_guard(
   stopper = MinErrorStopper(min_error=min_error, min_items=min_items)
   administered = list(range(administered_count))
   stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
-  if administered_count < min_items:
+  # Exhausting the bank always stops the test, even before min_items is reached.
+  if administered_count == bank.n_items:
+    assert stopped is True
+  elif administered_count < min_items:
     assert stopped is False
 
 

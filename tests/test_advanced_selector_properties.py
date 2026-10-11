@@ -77,7 +77,7 @@ def test_linear_selector_returns_first_non_administered_in_order(
   administered = indexes[:administered_count]
   item_id = selector.select(item_bank=bank, administered_items=administered, est_theta=0.0, rng=rng)
   assert item_id is not None
-  assert isinstance(item_id, (int, np.integer))
+  assert type(item_id) is int
   assert int(item_id) not in administered
   assert int(item_id) == administered_count
 
@@ -130,7 +130,7 @@ def test_cluster_selector_returns_valid_unseen_item(
     administered_items=administered,
     est_theta=est_theta,
   )
-  assert isinstance(item_id, (int, np.integer))
+  assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert int(item_id) not in administered
 
@@ -187,7 +187,7 @@ def _strat_simulate_steps(selector_cls, bank: ItemBank, test_size: int, steps: i
   for _ in range(steps):
     item_id = selector.select(item_bank=bank, administered_items=administered, est_theta=theta)
     assert item_id is not None
-    assert isinstance(item_id, (int, np.integer))
+    assert type(item_id) is int
     assert 0 <= int(item_id) < n
     assert int(item_id) not in administered
     administered.append(int(item_id))

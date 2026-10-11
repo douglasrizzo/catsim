@@ -48,6 +48,6 @@ def test_select_next_returns_unseen_item_within_bank(
   ctx = RunContext(rng=np.random.default_rng(seed))
   item_id = engine.select_next(state, bank, ctx)
   assert item_id is not None
-  assert isinstance(item_id, (int, np.integer))
+  assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert int(item_id) not in administered

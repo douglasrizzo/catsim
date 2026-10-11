@@ -394,3 +394,35 @@ class TestFiniteSelectorAbstract:
     """Test that FiniteSelector cannot be instantiated directly."""
     with pytest.raises(TypeError):
       FiniteSelector(10)  # type: ignore[abstract]
+
+
+_N_ITEMS = 30
+SELECTOR_FACTORIES = {
+  "MaxInfoSelector": MaxInfoSelector,
+  "UrrySelector": UrrySelector,
+  "IntervalInfoSelector": IntervalInfoSelector,
+  "RandomSelector": RandomSelector,
+  "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=5),
+  "The54321Selector": lambda: The54321Selector(test_size=10),
+  "LinearSelector": lambda: LinearSelector(list(range(_N_ITEMS))),
+  "ClusterSelector": lambda: ClusterSelector(clusters=[i % 3 for i in range(_N_ITEMS)]),
+  "AStratSelector": lambda: AStratSelector(test_size=10),
+  "AStratBBlockSelector": lambda: AStratBBlockSelector(test_size=10),
+  "MaxInfoStratSelector": lambda: MaxInfoStratSelector(test_size=10),
+  "MaxInfoBBlockSelector": lambda: MaxInfoBBlockSelector(test_size=10),
+}
+
+
+@pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())
+def test_select_returns_builtin_int(make_selector) -> None:
+  """select() promises ``int | None``; numpy integers must not leak into session state."""
+  item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
+
+  item_id = make_selector().select(
+    item_bank=item_bank,
+    administered_items=[0, 1],
+    est_theta=0.3,
+    rng=np.random.default_rng(0),
+  )
+
+  assert type(item_id) is int

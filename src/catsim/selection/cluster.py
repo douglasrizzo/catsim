@@ -248,7 +248,7 @@ class ClusterSelector(BaseSelector):
       min_rate_idx = cluster_exposure_rates.index(min(cluster_exposure_rates))
       selected_item = valid_indexes[min_rate_idx]
 
-    return selected_item
+    return int(selected_item)
 
   @staticmethod
   def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:

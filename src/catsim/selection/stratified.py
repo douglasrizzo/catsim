@@ -128,7 +128,7 @@ class StratifiedSelector(FiniteSelector):
         msg = f"There are no more items to be selected from stratum {slices[len(administered_items)]}"
         raise NoItemsAvailableError(msg)
 
-    return sorted_items[pointer]
+    return int(sorted_items[pointer])
 
   def _get_stratum(self, item_bank: ItemBank, stratum_index: int) -> tuple[NDArray[numpy.floating], int, int]:
     slices = numpy.linspace(0, item_bank.n_items, self._test_size, endpoint=False, dtype="i")

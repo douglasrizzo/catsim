@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from hypothesis import assume, given, settings
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from catsim import cat
@@ -54,13 +54,16 @@ def test_dodd_is_finite_for_nonempty_bank(theta: float, params: np.ndarray, corr
 
 
 @given(
-  rates=st.lists(st.floats(0.0, 1.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=25),
-  test_size=st.integers(min_value=1, max_value=25),
+  rates_and_test_size=st.lists(
+    st.floats(0.0, 1.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=25
+  ).flatmap(lambda rates: st.tuples(st.just(rates), st.integers(min_value=1, max_value=len(rates)))),
 )
 @CAT_SETTINGS
-def test_overlap_rate_finite_for_valid_inputs(rates: list[float], test_size: int) -> None:
+def test_overlap_rate_finite_for_valid_inputs(rates_and_test_size: tuple[list[float], int]) -> None:
+  # Draw test_size from the bank size instead of filtering with assume(), which discarded most
+  # examples and tripped Hypothesis's filter_too_much health check.
+  rates, test_size = rates_and_test_size
   arr = np.asarray(rates, dtype=np.float64)
-  assume(test_size <= arr.shape[0])
   val = cat.overlap_rate(arr, test_size)
   assert np.isfinite(val)
 

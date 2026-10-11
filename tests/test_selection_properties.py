@@ -40,7 +40,7 @@ def test_max_info_selector_returns_valid_unseen_item(
     est_theta=est_theta,
     rng=rng,
   )
-  assert isinstance(item_id, (int, np.integer))
+  assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert item_id not in administered
 
@@ -89,6 +89,6 @@ def test_random_selector_returns_valid_unseen_item(
     est_theta=est_theta,
     rng=rng,
   )
-  assert isinstance(item_id, (int, np.integer))
+  assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert item_id not in administered
