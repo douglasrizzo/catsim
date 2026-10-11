@@ -32,7 +32,7 @@ def _available_candidates(
 class ProgressiveSelector(FiniteSelector):
   """Progressive selector that blends random and information-based scoring.
 
-  For full algorithmic details, see :doc:`/specs/selection/progressive-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/progressive-selector`.
   """
 
   def __init__(
@@ -68,6 +68,7 @@ class ProgressiveSelector(FiniteSelector):
     est_theta: float,
     rng: numpy.random.Generator | None = None,
     exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the next item using blended random and information-based scoring."""
     if rng is None:
@@ -90,7 +91,7 @@ class ProgressiveSelector(FiniteSelector):
 class ProportionalSelector(FiniteSelector):
   """Proportional selector that samples items with probability proportional to weighted information.
 
-  For full algorithmic details, see :doc:`/specs/selection/proportional-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/proportional-selector`.
   """
 
   def __init__(
@@ -132,6 +133,7 @@ class ProportionalSelector(FiniteSelector):
     est_theta: float,
     rng: numpy.random.Generator | None = None,
     exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the next item using information-weighted sampling."""
     if rng is None:
