@@ -1171,3 +1171,27 @@ class TestWarmLikelihoodEstimator:
     assert estimator.calls == 1
     assert estimator.evaluations == 11
     assert estimator.total_evaluations == 11
+
+  def test_estimate_stays_in_bounds_when_mle_is_pinned_to_a_bound(self) -> None:
+    """A guessing-flattened likelihood must not blow up the one-step correction.
+
+    With guessing parameters, answering only the hard items correctly pins the bounded MLE to
+    the lower search bound, where information is near zero. Applying J / (2 I^2) there used to
+    produce estimates in the thousands; the estimator must fall back to maximizing the weighted
+    likelihood instead.
+    """
+    item_bank = ItemBank.generate_item_bank(100, seed=0)
+    administered_items = list(range(5))
+    response_vector = [False, False, False, True, False]
+    items = item_bank.items[administered_items, :4]
+    estimator = WarmLikelihoodEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert irt.THETA_MIN_EXTENDED <= theta <= irt.THETA_MAX_EXTENDED
+    assert theta == pytest.approx(estimator._fallback_weighted_mle(response_vector, items))
