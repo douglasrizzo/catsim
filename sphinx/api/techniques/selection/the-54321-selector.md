@@ -1,23 +1,56 @@
 **Status:** Implemented
 **Module:** {py:class}`catsim.selection.The54321Selector`
+**Reference:** McBride & Martin (1983)
 
 # 54321 Selector
 
 ## Specification
 
-`The54321Selector` is a finite ordered selector that administers items by a
-precomputed difficulty schedule. The schedule steps through five difficulty
-levels and selects available items in that deterministic order.
+Under maximum-information selection every examinee starts from the same
+ability estimate, so the opening items of every test are the same few items.
+The 5-4-3-2-1 technique of McBride and Martin (1983) randomizes only those
+opening items:
 
-This rule is primarily useful as a reproducible non-adaptive baseline.
+- the first item is drawn uniformly at random from the 5 most informative items
+  at the current estimate;
+- the second from the 4 most informative remaining items;
+- the third from 3 and the fourth from 2;
+- from the fifth item on, the most informative remaining item is administered.
+
+With `initial_bin_size` $n$, the item at 0-indexed test position $k$ is drawn
+from the $\max(1, n - k)$ most informative non-administered items. Unlike the
+randomesque selector, which keeps drawing from a fixed number of items for the
+whole test, the late items, which matter most for precision, are chosen by
+maximum information.
+
+## Parameters
+
+```{eval-rst}
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 65
+
+   * - Parameter
+     - Default
+     - Description
+   * - ``initial_bin_size``
+     - ``5``
+     - Number of most informative items the first item is drawn from; each
+       following item draws from one fewer, down to 1.
+```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
 1. It never returns an already administered item.
-2. It follows the deterministic difficulty-level ordering computed for the item bank.
-3. If no non-administered items remain, it raises `NoItemsAvailableError`.
+2. The item at position $k$ is drawn with the configured random number generator from the $\max(1, n - k)$ most informative non-administered items.
+3. From position $n - 1$ on, it returns the most informative non-administered item.
+4. If no non-administered items remain, it raises `NoItemsAvailableError`.
+
+## References
+
+McBride, J. R., & Martin, J. T. (1983). Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss (Ed.), *New horizons in testing: Latent trait test theory and computerized adaptive testing* (pp. 224-236). Academic Press.
 
 ## API Reference
 
