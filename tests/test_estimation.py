@@ -886,11 +886,11 @@ class TestWarmLikelihoodEstimator:
     assert estimator.calls == 0
     assert str(estimator) == "Warm Weighted Likelihood Estimator"
 
-  def test_estimate_pulls_toward_center_relative_to_mle(self) -> None:
+  def test_estimate_is_pulled_toward_the_items_relative_to_mle(self) -> None:
     """Warm correction should reduce the outward bias of a mixed-response MLE.
 
-    This is the direction-of-correction sanity check: the estimate should move
-    back toward the population center rather than farther away.
+    The items sit between b = 1 and b = 2 and four of five answers are correct, so the MLE lies
+    above them; the WLE must move back toward where the items are informative.
     """
     item_bank = ItemBank(
       np.array(
