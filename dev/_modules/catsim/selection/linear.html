@@ -507,7 +507,7 @@
         <span class="sa">f</span><span class="s2">"Administered items:</span><span class="se">\t\t</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> (size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
       <span class="p">)</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 </div>
 
 </pre></div>
