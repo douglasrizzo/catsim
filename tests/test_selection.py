@@ -1,6 +1,7 @@
 """Tests for catsim.selection module."""
 
 import importlib
+import inspect
 
 import numpy as np
 import pytest
@@ -893,3 +894,17 @@ def test_select_returns_builtin_int(make_selector) -> None:
   )
 
   assert type(item_id) is int
+
+
+def test_every_selector_accepts_the_engine_selection_inputs() -> None:
+  """CatEngine always passes response_vector, so every concrete selector must accept it."""
+  selectors = [
+    cls
+    for cls in vars(importlib.import_module("catsim.selection")).values()
+    if isinstance(cls, type) and issubclass(cls, BaseSelector) and not inspect.isabstract(cls)
+  ]
+
+  missing = [cls.__name__ for cls in selectors if "response_vector" not in inspect.signature(cls.select).parameters]
+
+  assert len(selectors) > 10
+  assert missing == []
