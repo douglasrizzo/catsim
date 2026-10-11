@@ -6,7 +6,6 @@ import numpy
 import numpy.typing as npt
 
 from .. import irt
-from ..exceptions import NoItemsAvailableError
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
 from .base import BaseSelector
@@ -81,20 +80,7 @@ class MLWISelector(BaseSelector):
       msg = "MLWISelector requires the response_vector for likelihood weighting."
       raise ValueError(msg)
 
-    candidate_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    candidate_mask[administered_items] = False
-    all_candidates = numpy.flatnonzero(candidate_mask)
-    if all_candidates.size == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    low_exposure_mask = candidate_mask & (exposure_rates < self._r_max)
-
-    candidates = numpy.flatnonzero(low_exposure_mask)
-    if candidates.size == 0:
-      candidates = all_candidates
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
 
     if administered_items:
       weights = self._likelihood_weights(response_vector, item_bank.items[administered_items, :4])
