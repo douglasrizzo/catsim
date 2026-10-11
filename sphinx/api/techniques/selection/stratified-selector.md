@@ -98,6 +98,43 @@ Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized 
 
 Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://pubmed.ncbi.nlm.nih.gov/17296025/>
 
+## Reading the Source
+
+Chang and Ying (1999) and Chang, Qian and Ying (2001) were **not checked**: they
+are not openly available. All four methods were checked against their
+step-by-step description in the full text of Barrada, Mazuela and Olea (2006),
+open access from [Psicothema](https://www.psicothema.com/pdf/3191.pdf):
+
+- **p. 157, a-stratification** (attributed to Chang & Ying, 1999): choose the
+  number of strata, the items per stratum and the items administered from each
+  (summing to the bank size and the test length); sort the bank by increasing
+  $a$ and fill the strata in that order; administer the first items from
+  stratum 1, the next from stratum 2, and so on, each time selecting the item
+  that minimizes $|\hat{\theta} - b|$.
+- **p. 157, b-blocking** (attributed to Chang, Qian & Ying, 2001): divide the
+  bank, sorted by $b$, into blocks; sort each block by increasing $a$; the first
+  item of every block forms stratum 1, the second items stratum 2, and so on.
+  Selection then follows the a-stratified rule. The purpose is to give every
+  stratum a balanced distribution of $b$ when $a$ and $b$ are correlated.
+- **p. 157, Equations 1 and 2, maximum information stratification:** replace
+  $a$ by the item's maximum information when stratifying, and $b$ by the
+  ability where that maximum is reached, both in the selection rule and as the
+  blocking variable. The authors' formulas include the scaling constant
+  $D = 1.7$; catsim's IRT functions use no scaling constant.
+- **pp. 157–158, simulation design:** 250-item banks, 30-item tests, 5 strata
+  of 50 items with 6 items administered from each, a starting estimate drawn
+  from $U(-0.5, 0.5)$, and Dodd's (1990) heuristic until the response pattern
+  is mixed.
+- **pp. 158–159:** blocking reduced the skew of the exposure rates whether or
+  not $a$ and $b$ were correlated, and the authors recommend MIS with blocking
+  whenever a stratified method is used.
+
+In catsim, `strata` builds the strata and `select` applies the stage rule. The
+number of strata defaults to one per test item, a special case of the
+published designs, which use a few strata with several items each.
+
+**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
+
 ## API Reference
 
 ```{eval-rst}

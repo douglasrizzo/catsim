@@ -67,6 +67,15 @@ Any correct implementation must satisfy the following properties:
 
 Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://pubmed.ncbi.nlm.nih.gov/17296025/>
 
+## Reading the Source
+
+**Checked against** the full text of the original paper, Barrada, Mazuela and
+Olea (2006, p. 157), open access from
+[Psicothema](https://www.psicothema.com/pdf/3191.pdf): maximum information stratification, Equations 1 and 2 (stratify by $I^{\max}$, select by $|\hat{\theta} - \theta^{\max}|$). See {doc}`stratified-selector` for the page-by-page reading
+guide shared by the whole family.
+
+**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
+
 ## API Reference
 
 ```{eval-rst}

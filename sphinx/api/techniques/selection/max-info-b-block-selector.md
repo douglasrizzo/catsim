@@ -63,6 +63,15 @@ Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratificati
 
 Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. *Applied Psychological Measurement*, 25(4), 333-341. <https://doi.org/10.1177/01466210122032181>
 
+## Reading the Source
+
+**Checked against** the full text of the original paper, Barrada, Mazuela and
+Olea (2006, p. 157), open access from
+[Psicothema](https://www.psicothema.com/pdf/3191.pdf): the blocking variant of maximum information stratification, which the authors recommend. See {doc}`stratified-selector` for the page-by-page reading
+guide shared by the whole family.
+
+**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
+
 ## API Reference
 
 ```{eval-rst}

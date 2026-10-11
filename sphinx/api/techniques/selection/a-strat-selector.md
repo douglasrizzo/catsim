@@ -63,6 +63,15 @@ Any correct implementation must satisfy the following properties:
 
 Chang, H.-H., & Ying, Z. (1999). A-stratified multistage computerized adaptive testing. *Applied Psychological Measurement*, 23(3), 211-222. <https://doi.org/10.1177/01466219922031338>
 
+## Reading the Source
+
+The original paper, Chang and Ying (1999), was **not checked**: it is not openly available.
+The method was checked against the description in Barrada, Mazuela and Olea (2006, p. 157), open access from
+[Psicothema](https://www.psicothema.com/pdf/3191.pdf): the a-stratified procedure (stratify by increasing $a$, select by $|\hat{\theta} - b|$). See {doc}`stratified-selector` for the page-by-page reading
+guide shared by the whole family.
+
+**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
+
 ## API Reference
 
 ```{eval-rst}
