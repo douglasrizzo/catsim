@@ -4,6 +4,7 @@ import math
 
 import numpy as np
 import pytest
+from scipy.integrate import quad
 
 from catsim import irt
 
@@ -116,6 +117,31 @@ class TestInf:
     for theta in np.linspace(-4, 4, 20):
       info = irt.inf(theta, a=1.0, b=0.0)
       assert info >= 0
+
+
+class TestInfIntegral:
+  """Tests for the closed-form integral of item information."""
+
+  def test_matches_numerical_integration(self) -> None:
+    """The closed form agrees with quadrature for 4PL items over finite intervals."""
+    rng = np.random.default_rng(0)
+    items = np.column_stack([
+      rng.uniform(0.5, 2.5, 30),
+      rng.uniform(-3, 3, 30),
+      rng.uniform(0, 0.35, 30),
+      rng.uniform(0.85, 1.0, 30),
+    ])
+    items[::3, 2] = 0.0
+    items[::4, 3] = 1.0
+    expected = [quad(irt.inf, -1.7, 2.4, args=tuple(item))[0] for item in items]
+
+    np.testing.assert_allclose(irt.inf_integral(-1.7, 2.4, items), expected, rtol=1e-9, atol=1e-12)
+
+  def test_whole_scale_integral_of_2pl_item_is_its_discrimination(self) -> None:
+    """For c = 0 and d = 1, the information integrates to a over the whole ability scale."""
+    items = np.array([[0.7, -1.0, 0.0, 1.0], [1.3, 0.0, 0.0, 1.0], [2.2, 2.5, 0.0, 1.0]])
+
+    np.testing.assert_allclose(irt.inf_integral(-np.inf, np.inf, items), items[:, 0])
 
 
 class TestTestInfo:
