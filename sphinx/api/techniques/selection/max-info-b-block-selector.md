@@ -6,35 +6,28 @@
 
 ## Motivation
 
-MIS-B combines the MIS idea with a blocking step on the location of each item's
-information peak. The goal is the same as in a-stratified b-blocking: reduce the
-risk that stage strata inherit an unwanted ordering artifact from correlated item
-parameters.
-
-In the current package this is realized by ordering first on the theta value at
-which each item reaches maximum information, then using maximum information to
-form within-block ordering.
+MIS-B applies the blocking idea of Chang, Qian and Ying (2001) to
+maximum-information stratification: it blocks on the ability at which each item
+is most informative, so that every stratum covers the whole ability range.
+Barrada et al. (2006) found that blocking reduced the skewness of the exposure
+rates both with and without correlation between $a$ and $b$, and recommended
+MIS-B whenever a stratified method is used.
 
 ## Definition
 
-For each item $i$, let
+With $\theta_i^{\max}$ and $I_i^{\max}$ as in {doc}`max-info-strat-selector`:
+
+1. Sort all items by increasing $\theta_i^{\max}$ and group them into
+   consecutive blocks of `n_strata` items.
+2. Within each block, sort the items by increasing $I_i^{\max}$.
+3. The $j$-th item of every block joins stratum $j$.
+
+At test position $t$ the selector returns the non-administered item of stratum
+$s(t)$ whose point of maximum information is closest to the current estimate,
 
 $$
-\theta_i^{\max} = \arg\max_{\theta} I_i(\theta),
-\qquad
-I_i^{\max} = I_i(\theta_i^{\max}).
+i^* = \arg\min_{i \in \mathcal{S}_{s(t)} \cap R_t} \left| \theta_i^{\max} - \hat{\theta} \right|.
 $$
-
-The package implementation presorts as follows:
-
-1. Sort items by increasing $\theta_i^{\max}$.
-2. Partition that order into `test_size` contiguous strata.
-3. Within each stratum, sort items by increasing $I_i^{\max}$.
-4. During selection, resort the active stratum by current information
-   $I_i(\hat{\theta})$ in descending order.
-
-The returned item is the first non-administered item in that final active-stratum
-ordering.
 
 ## Parameters
 
@@ -48,16 +41,19 @@ ordering.
      - Description
    * - ``test_size``
      - required
-     - Number of strata and intended test length.
+     - Intended test length.
+   * - ``n_strata``
+     - ``None``
+     - Number of strata and stages; ``None`` uses ``test_size``.
 ```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
-1. The initial blocking variable is the theta value where each item reaches maximum information.
-2. Within each block, items are presorted by increasing maximum information before runtime selection begins.
-3. The active stratum is resorted dynamically by information at the current `est_theta`.
+1. In every block of `n_strata` items ordered by $\theta_i^{\max}$, the `j`-th item by maximum information belongs to stratum `j`.
+2. Every stratum spans the range of $\theta_i^{\max}$ in the bank.
+3. The returned item minimizes $|\theta_i^{\max} - \hat{\theta}|$ among the non-administered items of the active stratum.
 4. The selector never returns an already administered item.
 5. If the active stratum has been exhausted, it raises `NoItemsAvailableError`.
 
@@ -66,6 +62,15 @@ Any correct implementation must satisfy the following properties:
 Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://pubmed.ncbi.nlm.nih.gov/17296025/>
 
 Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. *Applied Psychological Measurement*, 25(4), 333-341. <https://doi.org/10.1177/01466210122032181>
+
+## Reading the Source
+
+**Checked against** the full text of the original paper, Barrada, Mazuela and
+Olea (2006, p. 157), open access from
+[Psicothema](https://www.psicothema.com/pdf/3191.pdf): the blocking variant of maximum information stratification, which the authors recommend. See {doc}`stratified-selector` for the page-by-page reading
+guide shared by the whole family.
+
+**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
 
 ## API Reference
 

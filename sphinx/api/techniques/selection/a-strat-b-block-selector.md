@@ -6,27 +6,29 @@
 
 ## Motivation
 
-Plain a-stratification can be weakened when item difficulty and discrimination
-are correlated, because strata formed only by $a$ may also inherit skewed
-difficulty distributions. The b-blocking refinement addresses this by spreading
-difficulty more evenly before discrimination-based ordering is applied.
-
-In {mod}`catsim`, the selector operationalizes this through a two-step presort:
-global ordering by difficulty followed by within-stratum ordering by
-discrimination.
+Item discrimination and difficulty are often positively correlated. Strata
+formed on $a$ alone then inherit skewed difficulty distributions: early strata
+lack hard items and late strata lack easy ones, which hurts both precision and
+exposure balance. The b-blocking refinement forces every stratum to cover the
+whole difficulty range before discrimination-based stratification is applied.
 
 ## Definition
 
-Let $b_i$ be item difficulty and $a_i$ item discrimination. The
-package implementation performs the following presort:
+Following Chang, Qian and Ying (2001):
 
-1. Sort all items by increasing $b_i$.
-2. Partition that ordering into `test_size` contiguous strata.
-3. Within each stratum, sort items by increasing $a_i$.
-4. Concatenate the reordered strata and use the generic stratified family rule.
+1. Sort all items by increasing $b_i$ and group them into consecutive blocks of
+   `n_strata` items.
+2. Within each block, sort the items by increasing $a_i$.
+3. The $j$-th item of every block joins stratum $j$.
 
-At position $k+1$, the selector returns the first non-administered item in
-the $k$ th stratum of this final ordering.
+Each stratum therefore contains one item from every difficulty block, and the
+strata ascend in discrimination. Selection then follows the a-stratified rule:
+at test position $t$, return the non-administered item of stratum $s(t)$ whose
+difficulty is closest to the current estimate,
+
+$$
+i^* = \arg\min_{i \in \mathcal{S}_{s(t)} \cap R_t} \left| b_i - \hat{\theta} \right|.
+$$
 
 ## Parameters
 
@@ -40,22 +42,34 @@ the $k$ th stratum of this final ordering.
      - Description
    * - ``test_size``
      - required
-     - Number of strata and intended test length.
+     - Intended test length.
+   * - ``n_strata``
+     - ``None``
+     - Number of strata and stages; ``None`` uses ``test_size``.
 ```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
-1. The global presort starts from increasing item difficulty, not increasing discrimination.
-2. Each difficulty block is internally reordered by increasing discrimination before selection begins.
-3. The selector only draws from the active stage stratum determined by the current test position.
+1. In every block of `n_strata` items ordered by difficulty, the `j`-th item by discrimination belongs to stratum `j`.
+2. Every stratum spans the difficulty range of the bank.
+3. The returned item minimizes $|b_i - \hat{\theta}|$ among the non-administered items of the active stratum.
 4. It never returns an already administered item.
 5. If the active stratum has no non-administered items left, it raises `NoItemsAvailableError`.
 
 ## References
 
 Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. *Applied Psychological Measurement*, 25(4), 333-341. <https://doi.org/10.1177/01466210122032181>
+
+## Reading the Source
+
+The original paper, Chang, Qian and Ying (2001), was **not checked**: it is not openly available.
+The method was checked against the description in Barrada, Mazuela and Olea (2006, p. 157), open access from
+[Psicothema](https://www.psicothema.com/pdf/3191.pdf): the b-blocking procedure and its purpose (balanced $b$ distributions across strata). See {doc}`stratified-selector` for the page-by-page reading
+guide shared by the whole family.
+
+**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
 
 ## API Reference
 
