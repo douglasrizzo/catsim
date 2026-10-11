@@ -54,6 +54,11 @@ class TestIcc:
       prob = irt.icc(theta, a=1.0, b=0.0, c=0.1, d=0.9)
       assert 0.1 <= prob <= 0.9
 
+  def test_icc_reaches_its_asymptotes_without_overflowing(self) -> None:
+    """Far from b the ICC returns its asymptotes; Python floats used to raise OverflowError in math.e ** x."""
+    assert irt.icc(theta=-1000.0, a=1.0, b=0.0, c=0.2, d=0.9) == pytest.approx(0.2)
+    assert irt.icc(theta=1000.0, a=1.0, b=0.0, c=0.2, d=0.9) == pytest.approx(0.9)
+
 
 class TestDetectModel:
   """Tests for the detect_model() function."""
@@ -116,6 +121,29 @@ class TestInf:
     for theta in np.linspace(-4, 4, 20):
       info = irt.inf(theta, a=1.0, b=0.0)
       assert info >= 0
+
+  @pytest.mark.parametrize("x", [40.0, -40.0, 700.0, -1000.0])
+  def test_inf_is_accurate_far_from_difficulty(self, x: float) -> None:
+    """Far from b the 2PL information a^2 L (1 - L) is tiny but finite.
+
+    The textbook formula computed 1 - P after P had rounded to 1, so it divided 0 by 0: Python floats
+    raised ZeroDivisionError and arrays returned NaN.
+    """
+    expected = math.exp(-abs(x)) / (1 + math.exp(-abs(x))) ** 2
+
+    assert irt.inf(theta=x, a=1.0, b=0.0) == pytest.approx(expected, rel=1e-12, abs=0.0)
+    np.testing.assert_allclose(irt.inf_hpc(x, np.array([[1.0, 0.0, 0.0, 1.0]])), [expected], rtol=1e-12, atol=0.0)
+
+  def test_inf_matches_the_textbook_formula(self) -> None:
+    """Where the textbook 4PL formula is well conditioned, both implementations agree with it."""
+    items = np.array([[1.4, -0.5, 0.2, 0.95], [0.8, 1.0, 0.0, 1.0], [2.0, 0.3, 0.1, 1.0]])
+    for theta in np.linspace(-4.0, 4.0, 17):
+      a, b, c, d = items.T
+      p = c + (d - c) / (1 + np.exp(-a * (theta - b)))
+      expected = a**2 * (p - c) ** 2 * (d - p) ** 2 / ((d - c) ** 2 * p * (1 - p))
+
+      np.testing.assert_allclose(irt.inf_hpc(theta, items), expected, rtol=1e-10)
+      np.testing.assert_allclose([irt.inf(theta, *item) for item in items], expected, rtol=1e-10)
 
 
 class TestTestInfo:
