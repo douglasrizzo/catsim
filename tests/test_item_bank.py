@@ -73,7 +73,7 @@ class TestItemBankCreation:
     # Invalid: discrimination < 0
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
 
-    with pytest.raises(ValueError, match="discrimination < 0"):
+    with pytest.raises(ValueError, match="discrimination <= 0"):
       ItemBank(items)
 
   def test_validation_can_be_disabled(self) -> None:

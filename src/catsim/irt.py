@@ -875,7 +875,7 @@ def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool 
   The item matrix must have at least one line (representing an item) and exactly four columns,
   representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
   (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered
-  valid if, for all items in the matrix, :math:`a > 0 \wedge 0 \leq c \leq 1 \wedge 0 \leq d \leq 1`.
+  valid if, for all items in the matrix, :math:`a > 0 \wedge 0 \leq c < d \leq 1`.
 
   Parameters
   ----------
@@ -913,8 +913,8 @@ def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool 
     elif items.shape[1] == NumParams.PL3.value:
       err += "\nItem matrix has no upper asymptote parameter column"
   else:
-    if any(items[:, 0] < 0):
-      err += "\nThere are items with discrimination < 0"
+    if any(items[:, 0] <= 0):
+      err += "\nThere are items with discrimination <= 0"
     if any(items[:, 2] < 0):
       err += "\nThere are items with pseudo-guessing < 0"
     if any(items[:, 2] > 1):
@@ -923,8 +923,11 @@ def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool 
       err += "\nThere are items with upper asymptote > 1"
     if any(items[:, 3] < 0):
       err += "\nThere are items with upper asymptote < 0"
+    if any(items[:, 2] >= items[:, 3]):
+      err += "\nThere are items with pseudo-guessing >= upper asymptote"
 
-  if len(err) > 0 and raise_err:
+  if len(err) == 0:
+    return
+  if raise_err:
     raise ValueError(err)
-
   print(err)

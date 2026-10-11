@@ -340,11 +340,12 @@ class TestNormalizeItemBank:
 class TestValidateItemBank:
   """Tests for the validate_item_bank() function."""
 
-  def test_validate_valid_bank(self) -> None:
-    """Test that valid item bank passes validation."""
+  def test_validate_valid_bank(self, capsys: pytest.CaptureFixture[str]) -> None:
+    """A valid item bank passes validation silently; an empty line used to be printed."""
     items = np.array([[1.0, 0.0, 0.1, 0.95], [1.2, 0.5, 0.15, 0.98]])
-    # Should not raise
     irt.validate_item_bank(items, raise_err=True)
+    irt.validate_item_bank(items, raise_err=False)
+    assert not capsys.readouterr().out
 
   def test_validate_not_numpy_array_raises(self) -> None:
     """Test that non-numpy array raises TypeError."""
@@ -355,7 +356,19 @@ class TestValidateItemBank:
   def test_validate_negative_discrimination_raises(self) -> None:
     """Test that negative discrimination raises ValueError."""
     items = np.array([[-0.5, 0.0, 0.1, 0.95]])
-    with pytest.raises(ValueError, match="discrimination < 0"):
+    with pytest.raises(ValueError, match="discrimination <= 0"):
+      irt.validate_item_bank(items, raise_err=True)
+
+  def test_validate_zero_discrimination_raises(self) -> None:
+    """An item with a = 0 carries no information, and its point of maximum information is undefined."""
+    items = np.array([[0.0, 0.0, 0.1, 0.95]])
+    with pytest.raises(ValueError, match="discrimination <= 0"):
+      irt.validate_item_bank(items, raise_err=True)
+
+  def test_validate_guessing_not_below_asymptote_raises(self) -> None:
+    """With c >= d the ICC is flat or decreasing, and the information formula divides by d - c = 0."""
+    items = np.array([[1.0, 0.0, 0.3, 0.3]])
+    with pytest.raises(ValueError, match="pseudo-guessing >= upper asymptote"):
       irt.validate_item_bank(items, raise_err=True)
 
   def test_validate_negative_guessing_raises(self) -> None:
