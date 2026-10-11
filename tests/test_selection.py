@@ -989,6 +989,45 @@ class TestProgressiveSelector:
 
     assert selected == 2
 
+  def test_weight_is_clamped_past_test_size(self) -> None:
+    """FiniteSelector does not enforce test_size, so later positions must not extrapolate.
+
+    A weight above 1 would give the random component a negative coefficient and penalize
+    high random draws.
+    """
+    selector = ProgressiveSelector(test_size=5, acceleration=1.0)
+
+    assert [selector._weight(position) for position in range(5, 9)] == [1.0, 1.0, 1.0, 1.0]
+
+  def test_random_component_is_scaled_to_available_items(self) -> None:
+    """Both score components share the scale of the most informative available item.
+
+    Item 0 dominates the bank's information at theta=0 but is already administered. Normalizing
+    by the bank-wide maximum would shrink the remaining items' information toward 0 and let the
+    random draw decide (item 2); normalizing by the available maximum keeps the halfway blend
+    balanced, so the far more informative item 1 wins.
+    """
+    item_bank = ItemBank(
+      np.array(
+        [
+          [3.0, 0.0, 0.0, 1.0],
+          [1.0, 0.0, 0.0, 1.0],
+          [0.5, 0.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    selector = ProgressiveSelector(test_size=3, acceleration=1.0)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0],
+      est_theta=0.0,
+      rng=_DeterministicRNG([0.9, 0.1, 0.4]),
+    )
+
+    assert selected == 1
+
 
 class TestProportionalSelector:
   """Tests for ProportionalSelector."""
@@ -1048,6 +1087,12 @@ class TestProportionalSelector:
     expected = np.power(np.maximum(info, 0.0), exponent)
     expected /= expected.sum()
     np.testing.assert_allclose(probs, expected)
+
+  def test_exponent_is_clamped_past_test_size(self) -> None:
+    """Past test_size the exponent stays at the sharpness instead of growing without bound."""
+    selector = ProportionalSelector(test_size=5, acceleration=1.0, sharpness=6.0)
+
+    assert [selector._exponent(position) for position in range(5, 9)] == [6.0, 6.0, 6.0, 6.0]
 
   def test_late_position_becomes_near_deterministic_with_high_sharpness(self) -> None:
     """Test that late positions collapse toward the highest-information item.

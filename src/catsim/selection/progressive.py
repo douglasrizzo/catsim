@@ -3,30 +3,19 @@
 import numpy
 import numpy.typing as npt
 
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import FiniteSelector
 
 
-def _available_candidates(
-  item_bank: ItemBank,
-  administered_items: list[int],
-  exposure_rates: npt.NDArray[numpy.floating] | None,
-  r_max: float,
-) -> npt.NDArray[numpy.int_]:
-  """Return the non-administered candidate items honoring the exposure cap when possible."""
-  candidate_mask = numpy.ones(item_bank.n_items, dtype=bool)
-  candidate_mask[administered_items] = False
-  candidates = numpy.flatnonzero(candidate_mask)
-  if candidates.size == 0:
-    msg = "There are no more items to apply."
-    raise NoItemsAvailableError(msg)
+def _position_weight(position: int, test_size: int, acceleration: float) -> float:
+  """Return the progression weight ``((position - 1) / (test_size - 1)) ** acceleration``.
 
-  if exposure_rates is None:
-    exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-
-  low_exposure_candidates = candidates[exposure_rates[candidates] < r_max]
-  return low_exposure_candidates if low_exposure_candidates.size > 0 else candidates
+  The ratio is clamped to 1 so that sessions running past ``test_size`` (``FiniteSelector`` does
+  not enforce it) keep a fully information-based weight instead of extrapolating beyond 1.
+  """
+  if test_size <= 1:
+    return 1.0
+  return min(1.0, (position - 1) / (test_size - 1)) ** acceleration
 
 
 class ProgressiveSelector(FiniteSelector):
@@ -57,9 +46,7 @@ class ProgressiveSelector(FiniteSelector):
 
   def _weight(self, position: int) -> float:
     """Return the progression weight for the given 1-indexed test position."""
-    if self._test_size <= 1:
-      return 1.0
-    return ((position - 1) / (self._test_size - 1)) ** self._s
+    return _position_weight(position, self._test_size, self._s)
 
   def select(
     self,
@@ -75,12 +62,14 @@ class ProgressiveSelector(FiniteSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    candidates = _available_candidates(item_bank, administered_items, exposure_rates, self._r_max)
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
     position = len(administered_items) + 1
     weight = self._weight(position)
 
+    # Revuelta and Ponsoda (1998) draw the random component on [0, max information among the
+    # available items]; dividing by that maximum puts both components on [0, 1].
     info = numpy.asarray(item_bank.information(est_theta), dtype=float)
-    info_max = float(info.max()) if info.size > 0 else 0.0
+    info_max = float(info[candidates].max())
     info_norm = info / info_max if info_max > 0 else numpy.zeros_like(info)
 
     random_component = rng.uniform(0.0, 1.0, size=item_bank.n_items)
@@ -121,10 +110,7 @@ class ProportionalSelector(FiniteSelector):
 
   def _exponent(self, position: int) -> float:
     """Return the information exponent for the given 1-indexed test position."""
-    if self._test_size <= 1:
-      return self._k
-    weight = ((position - 1) / (self._test_size - 1)) ** self._s
-    return self._k * weight
+    return self._k * _position_weight(position, self._test_size, self._s)
 
   def select(
     self,
@@ -140,7 +126,7 @@ class ProportionalSelector(FiniteSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    candidates = _available_candidates(item_bank, administered_items, exposure_rates, self._r_max)
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
     position = len(administered_items) + 1
     exponent = self._exponent(position)
 
