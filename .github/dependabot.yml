@@ -3,10 +3,26 @@ updates:
   - package-ecosystem: "uv"
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     target-branch: "dev"
+    # One PR per update type instead of one per package; individual PRs all
+    # conflict on uv.lock and pile up waiting for rebases.
+    groups:
+      uv-dependencies:
+        applies-to: version-updates
+        patterns: ["*"]
+      uv-security:
+        applies-to: security-updates
+        patterns: ["*"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      target-branch: "dev"
+      interval: "monthly"
+    target-branch: "dev"
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns: ["*"]
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
