@@ -909,7 +909,7 @@ class TestProgressiveSelector:
     silently make the selector exposure-heavy from the first item.
     """
     selector = ProgressiveSelector(test_size=10, acceleration=1.0)
-    assert selector._weight(1) == pytest.approx(0.0)  # noqa: SLF001
+    assert selector._weight(1) == pytest.approx(0.0)
 
   def test_weight_is_one_at_last_position(self) -> None:
     """At the final position the blend weight must be exactly 1.
@@ -918,7 +918,7 @@ class TestProgressiveSelector:
     end of a fixed-length test.
     """
     selector = ProgressiveSelector(test_size=10, acceleration=1.0)
-    assert selector._weight(10) == pytest.approx(1.0)  # noqa: SLF001
+    assert selector._weight(10) == pytest.approx(1.0)
 
   def test_weight_formula_linear_schedule(self) -> None:
     """Midpoint weight should be 0.5 with s=1 and test_size=9.
@@ -927,7 +927,7 @@ class TestProgressiveSelector:
     selection-outcome test could miss.
     """
     selector = ProgressiveSelector(test_size=9, acceleration=1.0)
-    assert selector._weight(5) == pytest.approx(0.5)  # noqa: SLF001
+    assert selector._weight(5) == pytest.approx(0.5)
 
   def test_weight_formula_accelerated_schedule(self) -> None:
     """s=2 should delay the transition.
@@ -936,7 +936,7 @@ class TestProgressiveSelector:
     information-based behavior instead of speeding it up.
     """
     selector = ProgressiveSelector(test_size=9, acceleration=2.0)
-    assert selector._weight(5) == pytest.approx(0.25)  # noqa: SLF001
+    assert selector._weight(5) == pytest.approx(0.25)
 
   def test_weight_formula_fast_schedule(self) -> None:
     """s=0.5 should accelerate the transition.
@@ -945,7 +945,7 @@ class TestProgressiveSelector:
     pull the selector toward information earlier in the test.
     """
     selector = ProgressiveSelector(test_size=9, acceleration=0.5)
-    assert selector._weight(5) == pytest.approx((4 / 8) ** 0.5)  # noqa: SLF001
+    assert selector._weight(5) == pytest.approx((4 / 8) ** 0.5)
 
   def test_first_item_is_independent_of_information(self) -> None:
     """At position 1, high-information items should not be selected more often.
