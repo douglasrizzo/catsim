@@ -1101,6 +1101,8 @@ SELECTOR_FACTORIES = {
   "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=5),
   "The54321Selector": lambda: The54321Selector(test_size=10),
   "LinearSelector": lambda: LinearSelector(list(range(_N_ITEMS))),
+  "ProgressiveSelector": lambda: ProgressiveSelector(test_size=10),
+  "ProportionalSelector": lambda: ProportionalSelector(test_size=10),
   "ClusterSelector": lambda: ClusterSelector(clusters=[i % 3 for i in range(_N_ITEMS)]),
   "AStratSelector": lambda: AStratSelector(test_size=10),
   "AStratBBlockSelector": lambda: AStratBBlockSelector(test_size=10),
