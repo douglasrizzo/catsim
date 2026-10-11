@@ -15,8 +15,9 @@ and concrete initializers, selectors, and stoppers.
 Use explicit typed parameters for engine-managed strategy inputs:
 
 - initializers receive an `ItemBank` and a `numpy.random.Generator`
-- selectors receive explicit session inputs such as administered items, theta, RNG, and
-  exposure-rate snapshots
+- selectors receive explicit session inputs such as administered items, theta, RNG,
+  exposure-rate snapshots, and the session's response history (needed by look-ahead
+  selectors such as MEI and MLWI)
 - stoppers receive explicit item-bank, administered-item, and theta inputs
 
 ## Consequences
@@ -24,3 +25,5 @@ Use explicit typed parameters for engine-managed strategy inputs:
 - Public contracts are clearer for users implementing custom strategies.
 - Type checking can enforce the engine boundary more effectively.
 - Some permissive legacy call patterns are removed intentionally.
+- Adding an engine-managed input changes every strategy signature: custom selectors must
+  accept `response_vector` (optional, defaulting to `None`) because the engine always passes it.
