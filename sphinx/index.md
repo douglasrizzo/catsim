@@ -8,6 +8,7 @@
 :maxdepth: 2
 
 introduction
+study-guide
 api/index
 reproducibility
 architecture_decisions

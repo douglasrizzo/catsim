@@ -53,6 +53,16 @@ Any correct implementation must satisfy the following properties:
 
 \<Full bibliographic citations, one per line, in a consistent format.>
 
+## Reading the Source
+
+\<For each source: whether it was checked against its full text, a link to an
+open copy if there is one, and the page, equation, table or figure where each
+formula or design choice appears. Cite only locations you have read. If a source
+could not be checked, say so and name what was checked instead. Note where the
+implementation departs from the source. See the Study Guide for the conventions.>
+
+**Checked by** \<test classes or test names that verify the contracts.>
+
 % -----------------------------------------------------------------------
 
 % IMPLEMENTATION GUIDANCE — remove this entire section when promoting to

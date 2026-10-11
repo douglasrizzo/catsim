@@ -74,7 +74,21 @@ Any correct implementation must satisfy the following properties:
 
 Lord, F. M. (1980). *Applications of Item Response Theory to Practical Testing Problems*. Hillsdale, NJ: Lawrence Erlbaum Associates.
 
-Samejima, F. (1977). A use of the information function in tailored testing. *Applied Psychological Measurement*, 1(2), 233-247. <https://doi.org/10.1177/014662167700100209>
+Lord, F. M. (1977). A broad-range tailored test of verbal ability. *Applied Psychological Measurement*, 1(1), 95-100. <https://doi.org/10.1177/014662167700100115>
+
+## Reading the Source
+
+**Checked against** the full text of Lord (1977), openly available from the
+[University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/98423):
+on p. 97, after each response the ability is re-estimated and the next item is
+"the item that gives the most information at his estimated ability level".
+Lord (1980) was not checked.
+
+The 4PL information formula follows from $I_i = P_i'^2 / [P_i (1 - P_i)]$
+with $P_i' = a_i (P_i - c_i)(d_i - P_i)/(d_i - c_i)$; Magis and Raîche (2012,
+p. 4, Equation 4), [open access](https://doi.org/10.18637/jss.v048.i08), give the general form $P'^2/(PQ)$.
+
+**Checked by** `TestMaxInfoSelector` in `tests/test_selection.py`.
 
 ## API Reference
 
