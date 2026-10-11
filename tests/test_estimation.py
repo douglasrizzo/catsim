@@ -1,6 +1,6 @@
 """Tests for catsim.estimation module."""
 
-from itertools import pairwise
+from itertools import pairwise, product
 
 import numpy as np
 import pytest
@@ -886,54 +886,6 @@ class TestWarmLikelihoodEstimator:
     assert estimator.calls == 0
     assert str(estimator) == "Warm Weighted Likelihood Estimator"
 
-  @pytest.mark.xfail(
-    strict=True,
-    reason="Current Warm WLE branch does not yet show lower short-test bias than MLE on a reproducible simulation.",
-  )
-  def test_estimate_has_lower_bias_than_mle_on_short_tests(self) -> None:
-    """WLE absolute error should be smaller than MLE on average for a 5-item test.
-
-    This xfail documents Warm's headline short-test claim, so a plausible-looking
-    correction that moves in the wrong direction cannot hide behind formula-only tests.
-    """
-    rng = np.random.default_rng(42)
-    item_bank = ItemBank.generate_item_bank(100, seed=0)
-    mle = NumericalSearchEstimator(dodd=True)
-    wle = WarmLikelihoodEstimator()
-
-    theta_true = 1.5
-    administered_items = list(range(5))
-    items = item_bank.items[administered_items, :4]
-
-    mle_errors: list[float] = []
-    wle_errors: list[float] = []
-    for _ in range(500):
-      response_vector = [
-        bool(rng.random() < irt.icc(theta_true, *items[idx])) for idx in range(len(administered_items))
-      ]
-      if all(response_vector) or not any(response_vector):
-        continue
-
-      mle_theta = mle.estimate(
-        item_bank=item_bank,
-        administered_items=administered_items,
-        response_vector=response_vector,
-        est_theta=theta_true,
-      )
-      wle_theta = wle.estimate(
-        item_bank=item_bank,
-        administered_items=administered_items,
-        response_vector=response_vector,
-        est_theta=theta_true,
-      )
-      if np.isfinite(mle_theta) and np.isfinite(wle_theta):
-        mle_errors.append(abs(mle_theta - theta_true))
-        wle_errors.append(abs(wle_theta - theta_true))
-
-    assert mle_errors
-    assert wle_errors
-    assert float(np.mean(wle_errors)) < float(np.mean(mle_errors))
-
   def test_estimate_pulls_toward_center_relative_to_mle(self) -> None:
     """Warm correction should reduce the outward bias of a mixed-response MLE.
 
@@ -1113,85 +1065,104 @@ class TestWarmLikelihoodEstimator:
     assert estimator.evaluations > 0
     assert estimator.total_evaluations == estimator.evaluations
 
-  def test_estimate_applies_bias_correction_when_mle_is_finite(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    """WLE should add the Warm correction term on top of a finite MLE."""
-    item_bank = ItemBank(
-      np.array(
-        [
-          [1.0, -1.0, 0.0, 1.0],
-          [1.5, 0.0, 0.0, 1.0],
-          [2.0, 1.0, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
-    )
-    administered_items = [0, 1, 2]
-    response_vector = [True, False, True]
+  def test_estimate_solves_warm_modified_score_equation(self) -> None:
+    """Every estimate must be an interior root of Warm's modified score equation.
 
-    estimator = WarmLikelihoodEstimator()
-
-    class StubMLE:
-      evaluations = 11
-
-      @staticmethod
-      def estimate(
-        item_bank: ItemBank,
-        administered_items: list[int],
-        response_vector: list[bool],
-        est_theta: float,
-      ) -> float:
-        del item_bank, administered_items, response_vector, est_theta
-        return 0.75
-
-    monkeypatch.setattr(estimator, "_mle", StubMLE(), raising=False)
-
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    items = item_bank.items[administered_items, :4]
-    a = items[:, 0]
-    b = items[:, 1]
-    c = items[:, 2]
-    d = items[:, 3]
-    z = np.exp(-a * (0.75 - b))
-    one_plus_z = 1.0 + z
-    p = c + (d - c) / one_plus_z
-    p_prime = a * (d - c) * z / (one_plus_z**2)
-    p_double = a * a * (d - c) * z * (z - 1.0) / (one_plus_z**3)
-    denom = np.clip(p * (1.0 - p), np.finfo(float).eps, None)
-    info = float(np.sum((p_prime**2) / denom))
-    j = float(np.sum((p_prime * p_double) / denom))
-    expected = 0.75 if info <= 0 else 0.75 + j / (2.0 * info * info)
-
-    assert theta == pytest.approx(expected)
-    assert estimator.calls == 1
-    assert estimator.evaluations == 11
-    assert estimator.total_evaluations == 11
-
-  def test_estimate_stays_in_bounds_when_mle_is_pinned_to_a_bound(self) -> None:
-    """A guessing-flattened likelihood must not blow up the one-step correction.
-
-    With guessing parameters, answering only the hard items correctly pins the bounded MLE to
-    the lower search bound, where information is near zero. Applying J / (2 I^2) there used to
-    produce estimates in the thousands; the estimator must fall back to maximizing the weighted
-    likelihood instead.
+    The bank has guessing parameters, where the WLE is not the maximizer of L * sqrt(I), so this
+    checks Warm's (1989) defining equation directly. It covers every 5-item response pattern,
+    including those whose likelihood is maximized at the search bound: an earlier one-step
+    correction (MLE + J / (2 I^2)) returned about 2670 for the pattern 00010 on this bank.
     """
     item_bank = ItemBank.generate_item_bank(100, seed=0)
     administered_items = list(range(5))
-    response_vector = [False, False, False, True, False]
     items = item_bank.items[administered_items, :4]
     estimator = WarmLikelihoodEstimator()
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    for pattern in product([False, True], repeat=len(administered_items)):
+      response_vector = list(pattern)
+      theta = estimator.estimate(
+        item_bank=item_bank,
+        administered_items=administered_items,
+        response_vector=response_vector,
+        est_theta=0.0,
+      )
 
-    assert irt.THETA_MIN_EXTENDED <= theta <= irt.THETA_MAX_EXTENDED
-    assert theta == pytest.approx(estimator._fallback_weighted_mle(response_vector, items))
+      assert irt.THETA_MIN_EXTENDED < theta < irt.THETA_MAX_EXTENDED
+      assert _warm_modified_score(theta, response_vector, items) == pytest.approx(0.0, abs=1e-4)
+
+  def test_estimate_maximizes_jeffreys_weighted_likelihood_without_guessing(self) -> None:
+    """Without guessing or slipping, J = I' and the WLE maximizes L(theta) * sqrt(I(theta)).
+
+    The reference is a dense grid search of log L + 0.5 log I over every response pattern.
+    """
+    items = np.column_stack([np.linspace(0.8, 2.0, 5), np.linspace(-1.5, 1.5, 5), np.zeros(5), np.ones(5)])
+    item_bank = ItemBank(items)
+    grid = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 12001)
+    p = 1.0 / (1.0 + np.exp(-items[:, 0] * (grid[:, None] - items[:, 1])))
+    log_info = np.log(np.sum(items[:, 0] ** 2 * p * (1.0 - p), axis=1))
+    estimator = WarmLikelihoodEstimator()
+
+    for pattern in product([False, True], repeat=len(items)):
+      responses = np.array(pattern)
+      log_lik = np.sum(np.where(responses, np.log(p), np.log1p(-p)), axis=1)
+      reference = grid[np.argmax(log_lik + 0.5 * log_info)]
+
+      theta = estimator.estimate(
+        item_bank=item_bank,
+        administered_items=list(range(len(items))),
+        response_vector=list(pattern),
+        est_theta=0.0,
+      )
+
+      assert theta == pytest.approx(reference, abs=2e-3)
+
+  def test_exact_bias_is_small_and_below_first_order_mle_bias(self) -> None:
+    """WLE removes the first-order bias of the MLE on a short 2PL test (Warm, 1989).
+
+    The expected bias is computed exactly by enumerating all 2^8 response patterns weighted by
+    their probabilities, so the check is deterministic and needs no conditioning on mixed
+    patterns (the MLE diverges on the all-correct and all-incorrect ones). The MLE reference is
+    its first-order bias -J / (2 I^2) (Lord, 1983); wherever that is non-negligible, WLE's exact
+    bias must be less than half its size.
+    """
+    items = np.column_stack([np.linspace(0.8, 2.0, 8), np.linspace(-2.0, 2.0, 8), np.zeros(8), np.ones(8)])
+    item_bank = ItemBank(items)
+    patterns = [list(pattern) for pattern in product([False, True], repeat=len(items))]
+    estimator = WarmLikelihoodEstimator()
+    estimates = np.array([
+      estimator.estimate(
+        item_bank=item_bank,
+        administered_items=list(range(len(items))),
+        response_vector=pattern,
+        est_theta=0.0,
+      )
+      for pattern in patterns
+    ])
+
+    for theta in (-2.0, -1.0, 0.0, 1.0, 2.0):
+      p = 1.0 / (1.0 + np.exp(-items[:, 0] * (theta - items[:, 1])))
+      probabilities = np.array([np.prod(np.where(pattern, p, 1.0 - p)) for pattern in patterns])
+      wle_bias = float(probabilities @ (estimates - theta))
+
+      dp = items[:, 0] * p * (1.0 - p)
+      d2p = items[:, 0] * dp * (1.0 - 2.0 * p)
+      info = np.sum(dp**2 / (p * (1.0 - p)))
+      mle_bias = -np.sum(dp * d2p / (p * (1.0 - p))) / (2.0 * info**2)
+
+      assert abs(wle_bias) < 0.1
+      if abs(mle_bias) > 0.05:
+        assert abs(wle_bias) < 0.5 * abs(mle_bias)
+
+
+def _warm_modified_score(theta: float, response_vector: list[bool], items: np.ndarray) -> float:
+  """Warm's (1989) modified score, written out independently of the estimator under test."""
+  a, b, c, d = items.T
+  logistic = 1.0 / (1.0 + np.exp(-a * (theta - b)))
+  p = c + (d - c) * logistic
+  dp = a * (d - c) * logistic * (1.0 - logistic)
+  d2p = a * dp * (1.0 - 2.0 * logistic)
+  pq = p * (1.0 - p)
+  u = np.asarray(response_vector, dtype=float)
+  info = np.sum(dp**2 / pq)
+  j = np.sum(dp * d2p / pq)
+  return float(np.sum((u - p) * dp / pq) + j / (2.0 * info))
