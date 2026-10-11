@@ -82,6 +82,18 @@ Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *
 
 Wainer, H. (Ed.). (2000). *Computerized Adaptive Testing: A Primer* (2nd ed.). Mahwah, NJ: Lawrence Erlbaum Associates.
 
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08>
+
+## Reading the Source
+
+Magis and Raîche (2012, p. 11), [open access](https://doi.org/10.18637/jss.v048.i08), describe the classification criterion
+with a single ability threshold: a confidence interval for ability is built after
+every item, and the test stops once the threshold is no longer inside it.
+catsim generalizes this to several boundaries, stopping when the interval lies
+within one band. Thissen (2000) and Wainer (2000) were not checked.
+
+**Checked by** `TestConfidenceIntervalStopperStop` in `tests/test_stopping.py`.
+
 ## API Reference
 
 ```{eval-rst}

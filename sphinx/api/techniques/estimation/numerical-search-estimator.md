@@ -41,12 +41,18 @@ $$
 
 with search bounds given by the package's extended theta range. For mixed
 response patterns, the implementation solves this optimization numerically using
-either internal search procedures or SciPy's scalar minimization routines.
+either internal search procedures or SciPy's scalar minimization routines. The
+internal procedures and `bounded` stay within the bounds; `brent` and `golden`
+only start from them as a bracket and can return a value outside. With guessing,
+the likelihood can have several local maxima, and every method returns one of
+them.
 
 When every response is identical, the unconstrained MLE is not finite. In that
 case the implementation returns Dodd's heuristic estimate if `dodd=True` and
 otherwise returns $+\infty$ for all-correct or $-\infty$ for
-all-incorrect patterns.
+all-incorrect patterns. Dodd's heuristic moves the current estimate half the
+distance to the largest item difficulty in the bank after a correct answer, or
+to the smallest after an incorrect one.
 
 ## Parameters
 
@@ -92,6 +98,25 @@ Lord, F. M. (1980). *Applications of Item Response Theory to Practical Testing P
 Dodd, B. G. (1990). The effect of item selection procedure and stepsize on computerized adaptive attitude measurement using the rating scale model. *Applied Psychological Measurement*, 14(4), 355-366. <https://doi.org/10.1177/014662169001400403>
 
 Brent, R. P. (2002). *Algorithms for Minimization Without Derivatives*. Mineola, NY: Dover Publications.
+
+## Reading the Source
+
+**Checked against** the full text of Dodd (1990), openly available from the
+[University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/113936):
+on p. 359, before maximum likelihood can be used, the "variable stepsize"
+changes the estimate by half the distance to the highest (or lowest) scale value
+in the item pool, depending on the response. Dodd worked with the rating scale
+model; the dichotomous version, with the bank's largest and smallest $b$, is the
+one Barrada et al. (2008, p. 499) describe. Dodd also studied fixed steps of 0.4
+and 0.7, which catsim does not implement.
+
+The possibility of several likelihood maxima with guessing is noted, citing
+Samejima (1973), by Chang and Ying (1996, p. 223) and in Veerkamp and Berger's
+1994 report (p. 4). Birnbaum (1968), Lord (1980) and Brent (2002) are books
+and were not checked.
+
+**Checked by** the `TestNumericalSearchEstimator*` classes in
+`tests/test_estimation.py` and `TestDodd` in `tests/test_cat.py`.
 
 ## API Reference
 

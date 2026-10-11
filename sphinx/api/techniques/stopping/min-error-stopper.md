@@ -72,6 +72,19 @@ Samejima, F. (1977). A use of the information function in tailored testing. *App
 
 Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *Computerized Adaptive Testing: A Primer* (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.
 
+## Reading the Source
+
+**Checked against** the full text of Samejima (1977), openly available from the
+[University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/98492):
+on pp. 238–239 she suggests terminating an adaptive test when the test
+information function reaches a criterion value, or equivalently when the
+standard error of estimation falls to a small value, which can be constant
+across ability or depend on it; she argues the standard error, rather than
+reliability, should be the index of dependability (p. 233). Thissen (2000) was
+not checked.
+
+**Checked by** `TestMinErrorStopperStop` in `tests/test_stopping.py`.
+
 ## API Reference
 
 ```{eval-rst}
