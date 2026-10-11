@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,18 +25,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
     <script src="../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -48,6 +47,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.21.0" />
   
@@ -67,7 +67,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -95,7 +97,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -187,7 +189,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -206,18 +208,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -226,7 +234,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -325,18 +333,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
@@ -398,7 +412,7 @@
                 <article class="bd-article">
                   
   <h1>Source code for catsim.state</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;State models for CAT execution and simulation.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""State models for CAT execution and simulation."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -418,11 +432,11 @@
 <div class="viewcode-block" id="SessionStatus">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.SessionStatus">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SessionStatus</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Lifecycle state for a CAT session.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">"""Lifecycle state for a CAT session."""</span>
 
-  <span class="n">NOT_STARTED</span> <span class="o">=</span> <span class="s2">&quot;not_started&quot;</span>
-  <span class="n">IN_PROGRESS</span> <span class="o">=</span> <span class="s2">&quot;in_progress&quot;</span>
-  <span class="n">STOPPED</span> <span class="o">=</span> <span class="s2">&quot;stopped&quot;</span></div>
+  <span class="n">NOT_STARTED</span> <span class="o">=</span> <span class="s2">"not_started"</span>
+  <span class="n">IN_PROGRESS</span> <span class="o">=</span> <span class="s2">"in_progress"</span>
+  <span class="n">STOPPED</span> <span class="o">=</span> <span class="s2">"stopped"</span></div>
 
 
 
@@ -430,7 +444,7 @@
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatSessionState</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Mutable runtime state for a single examinee CAT session.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">"""Mutable runtime state for a single examinee CAT session."""</span>
 
   <span class="n">session_id</span><span class="p">:</span> <span class="nb">int</span>
   <span class="n">current_theta</span><span class="p">:</span> <span class="nb">float</span>
@@ -443,24 +457,24 @@
   <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Seed theta history with the initial theta when no history is provided.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Seed theta history with the initial theta when no history is provided."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_theta</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">administered_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the number of administered items.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the number of administered items."""</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">latest_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the latest theta estimate.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the latest theta estimate."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 <div class="viewcode-block" id="CatSessionState.snapshot">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState.snapshot">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionSnapshot</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an immutable snapshot of the current session state.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return an immutable snapshot of the current session state."""</span>
     <span class="k">return</span> <span class="n">CatSessionSnapshot</span><span class="p">(</span>
       <span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
       <span class="n">current_theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
@@ -480,7 +494,7 @@
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionSnapshot">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatSessionSnapshot</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Immutable snapshot of a session at a specific point in time.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">"""Immutable snapshot of a session at a specific point in time."""</span>
 
   <span class="n">session_id</span><span class="p">:</span> <span class="nb">int</span>
   <span class="n">current_theta</span><span class="p">:</span> <span class="nb">float</span>
@@ -498,7 +512,7 @@
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatStepResult">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatStepResult</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Result of applying one CAT step.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">"""Result of applying one CAT step."""</span>
 
   <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span>
   <span class="n">selected_item_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
@@ -513,26 +527,26 @@
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExposureTracker</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Track item usage counts during a simulation run.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">"""Track item usage counts during a simulation run."""</span>
 
   <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span>
   <span class="n">counts</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">integer</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Allocate the item exposure counter array.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Allocate the item exposure counter array."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExposureTracker.record">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.record">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Record one administration for an item.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Record one administration for an item."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="ExposureTracker.rates">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.rates">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">rates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return exposure rates for the tracked counts.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return exposure rates for the tracked counts."""</span>
     <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_sessions</span></div>
@@ -544,7 +558,7 @@
 <a class="viewcode-back" href="../../api/state.html#catsim.state.SimulationResult">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimulationResult</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Aggregate result for a batch of CAT sessions.&quot;&quot;&quot;</span>
+<span class="w">  </span><span class="sd">"""Aggregate result for a batch of CAT sessions."""</span>
 
   <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span>
   <span class="n">sessions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CatSessionState</span><span class="p">]</span>
@@ -553,7 +567,7 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">exposure_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return per-item exposure rates across the simulated sessions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return per-item exposure rates across the simulated sessions."""</span>
     <span class="n">n_sessions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -561,47 +575,47 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">administered_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return administered item ids for each session.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return administered item ids for each session."""</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return theta history for each session.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return theta history for each session."""</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return response vectors for each session.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return response vectors for each session."""</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">latest_estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return final theta estimates for each session.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return final theta estimates for each session."""</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">latest_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return true theta values for the simulated sessions.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return true theta values for the simulated sessions."""</span>
     <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">0.0</span> <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">])</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return simulation bias.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return simulation bias."""</span>
     <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return simulation MSE.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return simulation MSE."""</span>
     <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return simulation RMSE.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return simulation RMSE."""</span>
     <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return overlap rate when all sessions have the same test length.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return overlap rate when all sessions have the same test length."""</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
     <span class="n">test_sizes</span> <span class="o">=</span> <span class="p">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">}</span>
@@ -641,8 +655,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -663,7 +677,6 @@
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
-    <br/>
   </p>
 </div>
       
@@ -676,7 +689,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>

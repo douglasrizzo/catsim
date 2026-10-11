@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,18 +25,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -48,6 +47,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.21.0" />
   
@@ -67,7 +67,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -95,7 +97,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -187,7 +189,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -206,18 +208,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -226,7 +234,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -325,18 +333,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
@@ -398,7 +412,7 @@
                 <article class="bd-article">
                   
   <h1>Source code for catsim.initialization.initialization</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Concrete initialization implementations.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Concrete initialization implementations."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
 
@@ -411,7 +425,7 @@
 <div class="viewcode-block" id="InitializationDistribution">
 <a class="viewcode-back" href="../../../api/techniques/initialization/random-initializer.html#catsim.initialization.InitializationDistribution">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">InitializationDistribution</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Distribution to use for ability estimate initialization.</span>
+<span class="w">  </span><span class="sd">"""Distribution to use for ability estimate initialization.</span>
 
 <span class="sd">  Attributes</span>
 <span class="sd">  ----------</span>
@@ -419,17 +433,17 @@
 <span class="sd">      Uniform distribution for initialization.</span>
 <span class="sd">  NORMAL : str</span>
 <span class="sd">      Normal (Gaussian) distribution for initialization.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
-  <span class="n">UNIFORM</span> <span class="o">=</span> <span class="s2">&quot;uniform&quot;</span>
-  <span class="n">NORMAL</span> <span class="o">=</span> <span class="s2">&quot;normal&quot;</span></div>
+  <span class="n">UNIFORM</span> <span class="o">=</span> <span class="s2">"uniform"</span>
+  <span class="n">NORMAL</span> <span class="o">=</span> <span class="s2">"normal"</span></div>
 
 
 
 <div class="viewcode-block" id="RandomInitializer">
 <a class="viewcode-back" href="../../../api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RandomInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Randomly initialize the first estimate of an examinee&#39;s ability from a statistical distribution.</span>
+<span class="w">  </span><span class="sd">"""Randomly initialize the first estimate of an examinee's ability from a statistical distribution.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -438,23 +452,23 @@
 <span class="sd">      Default is UNIFORM.</span>
 <span class="sd">  dist_params : tuple, optional</span>
 <span class="sd">      Distribution parameters:</span>
-<span class="sd">      - For uniform: tuple of (min, max) values (order doesn&#39;t matter)</span>
+<span class="sd">      - For uniform: tuple of (min, max) values (order doesn't matter)</span>
 <span class="sd">      - For normal: tuple of (mean, std) values (in this exact order)</span>
 <span class="sd">      Default is (-5, 5).</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Initializer.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;Random Initializer&quot;</span>
+<span class="w">    </span><span class="sd">"""Get a string representation of the Initializer."""</span>
+    <span class="k">return</span> <span class="s2">"Random Initializer"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">dist_type</span><span class="p">:</span> <span class="n">InitializationDistribution</span> <span class="o">=</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">,</span> <span class="n">dist_params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a RandomInitializer object.</span>
+<span class="w">    </span><span class="sd">"""Initialize a RandomInitializer object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -462,7 +476,7 @@
 <span class="sd">        Distribution to use for ability estimate initialization. Default is UNIFORM.</span>
 <span class="sd">    dist_params : tuple, optional</span>
 <span class="sd">        Parameters for the chosen distribution. Default is (-5, 5).</span>
-<span class="sd">        - For uniform: (min, max) values (order doesn&#39;t matter)</span>
+<span class="sd">        - For uniform: (min, max) values (order doesn't matter)</span>
 <span class="sd">        - For normal: (mean, std) values (in this exact order)</span>
 
 <span class="sd">    Raises</span>
@@ -472,26 +486,26 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        If dist_params are invalid for the chosen distribution type (e.g., wrong</span>
 <span class="sd">        length, equal min/max for uniform, non-positive std for normal).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">InitializationDistribution</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;dist_type must be of type InitializationDistribution&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"dist_type must be of type InitializationDistribution"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="c1"># Validate distribution parameters</span>
     <span class="n">expected_param_count</span> <span class="o">=</span> <span class="mi">2</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_params</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span> <span class="o">!=</span> <span class="n">expected_param_count</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;dist_params must be a tuple of exactly 2 values&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"dist_params must be a tuple of exactly 2 values"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">:</span>
       <span class="n">min_val</span><span class="p">,</span> <span class="n">max_val</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">dist_params</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">min_val</span> <span class="o">==</span> <span class="n">max_val</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Uniform distribution parameters must have different min and max values, got </span><span class="si">{</span><span class="n">dist_params</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Uniform distribution parameters must have different min and max values, got </span><span class="si">{</span><span class="n">dist_params</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
       <span class="n">_</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">dist_params</span>  <span class="c1"># mean is not used in validation</span>
       <span class="k">if</span> <span class="n">std</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Normal distribution standard deviation must be positive, got </span><span class="si">{</span><span class="n">std</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Normal distribution standard deviation must be positive, got </span><span class="si">{</span><span class="n">std</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">=</span> <span class="n">dist_type</span>
@@ -500,7 +514,7 @@
 <div class="viewcode-block" id="RandomInitializer.initialize">
 <a class="viewcode-back" href="../../../api/techniques/initialization/random-initializer.html#catsim.initialization.RandomInitializer.initialize">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate an initial ability value using the chosen distribution and parameters.</span>
+<span class="w">    </span><span class="sd">"""Generate an initial ability value using the chosen distribution and parameters.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -520,13 +534,13 @@
 <span class="sd">    RuntimeError</span>
 <span class="sd">        If an invalid distribution type is encountered (should not happen after</span>
 <span class="sd">        validation in __init__).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">:</span>
       <span class="n">theta</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">))</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">NORMAL</span><span class="p">:</span>
       <span class="n">theta</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dist_params</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Invalid distribution type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span><span class="si">}</span><span class="s2">. This should not happen after validation.&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid distribution type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dist_type</span><span class="si">}</span><span class="s2">. This should not happen after validation."</span>
       <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">theta</span></div>
@@ -537,7 +551,7 @@
 <div class="viewcode-block" id="FixedPointInitializer">
 <a class="viewcode-back" href="../../../api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Initialize every examinee&#39;s ability at the same fixed point.</span>
+<span class="w">  </span><span class="sd">"""Initialize every examinee's ability at the same fixed point.</span>
 
 <span class="sd">  This initializer is useful for controlled experiments where you want all</span>
 <span class="sd">  examinees to start with the same initial ability estimate.</span>
@@ -550,14 +564,14 @@
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/initialization/fixed-point-initializer`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a string representation of the Initializer.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;Fixed Point Initializer&quot;</span>
+<span class="w">    </span><span class="sd">"""Get a string representation of the Initializer."""</span>
+    <span class="k">return</span> <span class="s2">"Fixed Point Initializer"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a FixedPointInitializer object.</span>
+<span class="w">    </span><span class="sd">"""Initialize a FixedPointInitializer object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -568,13 +582,13 @@
 <span class="sd">    ------</span>
 <span class="sd">    TypeError</span>
 <span class="sd">        If start is not a numeric value.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
 
 <div class="viewcode-block" id="FixedPointInitializer.initialize">
 <a class="viewcode-back" href="../../../api/techniques/initialization/fixed-point-initializer.html#catsim.initialization.FixedPointInitializer.initialize">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ARG002</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the same ability value that was passed to the constructor.</span>
+<span class="w">    </span><span class="sd">"""Return the same ability value that was passed to the constructor.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -587,7 +601,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The fixed ability value that was passed to the constructor.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span></div>
 </div>
 
@@ -620,8 +634,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -642,7 +656,6 @@
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
-    <br/>
   </p>
 </div>
       
@@ -655,7 +668,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>

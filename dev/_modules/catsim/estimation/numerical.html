@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,18 +25,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -48,6 +47,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.21.0" />
   
@@ -67,7 +67,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -95,7 +97,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -187,7 +189,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -206,18 +208,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -226,7 +234,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -325,18 +333,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
@@ -398,7 +412,7 @@
                 <article class="bd-article">
                   
   <h1>Source code for catsim.estimation.numerical</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Numerical estimation methods for ability estimation.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Numerical estimation methods for ability estimation."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
@@ -416,78 +430,78 @@
 <div class="viewcode-block" id="NumericalSearchEstimator">
 <a class="viewcode-back" href="../../../api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NumericalSearchEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Estimate ability by numerically maximizing the IRT log-likelihood.</span>
+<span class="w">  </span><span class="sd">"""Estimate ability by numerically maximizing the IRT log-likelihood.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  tol : float, optional</span>
 <span class="sd">      Tolerance for convergence in the optimization algorithm. Default is 1e-6.</span>
 <span class="sd">  dodd : bool, optional</span>
-<span class="sd">      Whether to employ Dodd&#39;s estimation heuristic :cite:p:`Dod90` when the response vector</span>
+<span class="sd">      Whether to employ Dodd's estimation heuristic :cite:p:`Dod90` when the response vector</span>
 <span class="sd">      only has one kind of response (all correct or all incorrect, see</span>
 <span class="sd">      :py:func:`catsim.cat.dodd`). Default is True.</span>
 <span class="sd">  verbose : bool, optional</span>
 <span class="sd">      Whether to print detailed information during optimization. Default is False.</span>
 <span class="sd">  method : str, optional</span>
-<span class="sd">      The search method to employ. Must be one of: &#39;ternary&#39;, &#39;dichotomous&#39;, &#39;fibonacci&#39;,</span>
-<span class="sd">      &#39;golden&#39;, &#39;brent&#39;, &#39;bounded&#39;, or &#39;golden2&#39;. Default is &#39;bounded&#39;.</span>
+<span class="sd">      The search method to employ. Must be one of: 'ternary', 'dichotomous', 'fibonacci',</span>
+<span class="sd">      'golden', 'brent', 'bounded', or 'golden2'. Default is 'bounded'.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/estimation/numerical-search-estimator`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
-  <span class="n">__methods</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s2">&quot;ternary&quot;</span><span class="p">,</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">,</span> <span class="s2">&quot;fibonacci&quot;</span><span class="p">,</span> <span class="s2">&quot;golden&quot;</span><span class="p">,</span> <span class="s2">&quot;brent&quot;</span><span class="p">,</span> <span class="s2">&quot;bounded&quot;</span><span class="p">,</span> <span class="s2">&quot;golden2&quot;</span><span class="p">])</span>
+  <span class="n">__methods</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s2">"ternary"</span><span class="p">,</span> <span class="s2">"dichotomous"</span><span class="p">,</span> <span class="s2">"fibonacci"</span><span class="p">,</span> <span class="s2">"golden"</span><span class="p">,</span> <span class="s2">"brent"</span><span class="p">,</span> <span class="s2">"bounded"</span><span class="p">,</span> <span class="s2">"golden2"</span><span class="p">])</span>
 
 <div class="viewcode-block" id="NumericalSearchEstimator.available_methods">
 <a class="viewcode-back" href="../../../api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.available_methods">[docs]</a>
   <span class="nd">@staticmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">available_methods</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a set of available estimation methods.</span>
+<span class="w">    </span><span class="sd">"""Get a set of available estimation methods.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    frozenset[str]</span>
-<span class="sd">        Set of available estimation methods: {&#39;ternary&#39;, &#39;dichotomous&#39;, &#39;fibonacci&#39;,</span>
-<span class="sd">        &#39;golden&#39;, &#39;brent&#39;, &#39;bounded&#39;, &#39;golden2&#39;}.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Set of available estimation methods: {'ternary', 'dichotomous', 'fibonacci',</span>
+<span class="sd">        'golden', 'brent', 'bounded', 'golden2'}.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">__methods</span></div>
 
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a string representation of the estimator.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Numerical Search Estimator (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span><span class="si">}</span><span class="s2">)&quot;</span>
+<span class="w">    </span><span class="sd">"""Return a string representation of the estimator."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Numerical Search Estimator (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span><span class="si">}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
     <span class="n">dodd</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bounded&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"bounded"</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the estimator.</span>
+<span class="w">    </span><span class="sd">"""Initialize the estimator.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    tol : float, optional</span>
 <span class="sd">        Tolerance for convergence in the optimization algorithm. Default is 1e-6.</span>
 <span class="sd">    dodd : bool, optional</span>
-<span class="sd">        Whether to use Dodd&#39;s estimation heuristic for edge cases (all correct or</span>
+<span class="sd">        Whether to use Dodd's estimation heuristic for edge cases (all correct or</span>
 <span class="sd">        all incorrect responses). Default is True.</span>
 <span class="sd">    verbose : bool, optional</span>
 <span class="sd">        Whether to print detailed information during optimization. Default is False.</span>
 <span class="sd">    method : str, optional</span>
-<span class="sd">        The numerical search method to use for optimization. Default is &quot;bounded&quot;.</span>
+<span class="sd">        The numerical search method to use for optimization. Default is "bounded".</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the parameter `method` is not one of the available methods.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">__methods</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Parameter &#39;method&#39; must be one of </span><span class="si">{</span><span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">__methods</span><span class="si">}</span><span class="s2">.&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Parameter 'method' must be one of </span><span class="si">{</span><span class="n">NumericalSearchEstimator</span><span class="o">.</span><span class="n">__methods</span><span class="si">}</span><span class="s2">."</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="n">tol</span>
@@ -503,7 +517,7 @@
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the theta value that maximizes the log-likelihood function for the given examinee.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Compute the theta value that maximizes the log-likelihood function for the given examinee.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -512,7 +526,7 @@
 <span class="sd">    administered_items : list[int]</span>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
 <span class="sd">    response_vector : list[bool]</span>
-<span class="sd">        A boolean list containing the examinee&#39;s answers to the administered items.</span>
+<span class="sd">        A boolean list containing the examinee's answers to the administered items.</span>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
 
@@ -525,15 +539,15 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If required parameters are missing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;item_bank parameter cannot be None&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;administered_items parameter cannot be None&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"administered_items parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;response_vector parameter cannot be None&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"response_vector parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -546,39 +560,39 @@
       <span class="n">answer</span> <span class="o">=</span> <span class="n">summarized_answers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
       <span class="c1"># if the estimator was initialized with dodd = True,</span>
-      <span class="c1"># use Dodd&#39;s estimation heuristic to return a theta value</span>
+      <span class="c1"># use Dodd's estimation heuristic to return a theta value</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span><span class="p">:</span>
         <span class="n">candidate_theta</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">dodd</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">answer</span><span class="p">)</span>
 
       <span class="c1"># otherwise, return positive or negative infinity,</span>
       <span class="c1"># in accordance with the definition of the MLE</span>
       <span class="k">elif</span> <span class="n">answer</span><span class="p">:</span>
-        <span class="n">candidate_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+        <span class="n">candidate_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">candidate_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+        <span class="n">candidate_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"-inf"</span><span class="p">)</span>
 
       <span class="k">return</span> <span class="n">candidate_theta</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;ternary&quot;</span><span class="p">,</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">}:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"ternary"</span><span class="p">,</span> <span class="s2">"dichotomous"</span><span class="p">}:</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_ternary_dichotomous</span><span class="p">(</span>
         <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
       <span class="p">)</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;fibonacci&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"fibonacci"</span><span class="p">:</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_fibonacci</span><span class="p">(</span>
         <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
       <span class="p">)</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;golden2&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"golden2"</span><span class="p">:</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solve_golden_section</span><span class="p">(</span>
         <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
       <span class="p">)</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;brent&quot;</span><span class="p">,</span> <span class="s2">&quot;bounded&quot;</span><span class="p">,</span> <span class="s2">&quot;golden&quot;</span><span class="p">}:</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"brent"</span><span class="p">,</span> <span class="s2">"bounded"</span><span class="p">,</span> <span class="s2">"golden"</span><span class="p">}:</span>
       <span class="n">res</span> <span class="o">=</span> <span class="n">minimize_scalar</span><span class="p">(</span>
         <span class="n">irt</span><span class="o">.</span><span class="n">negative_log_likelihood</span><span class="p">,</span>
         <span class="n">bracket</span><span class="o">=</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
-        <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;bounded&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"bounded"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span><span class="p">,</span>
         <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)),</span>
-        <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">!=</span> <span class="s2">&quot;bounded&quot;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">!=</span> <span class="s2">"bounded"</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
       <span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nfev</span>
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span>
@@ -586,7 +600,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-      <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span><span class="si">}</span><span class="s2"> evaluations&quot;</span><span class="p">)</span>
+      <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span><span class="si">}</span><span class="s2"> evaluations"</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">candidate_theta</span></div>
 
@@ -598,7 +612,7 @@
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="n">item_params</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the most likely ability using ternary or dichotomous search methods.</span>
+<span class="w">    </span><span class="sd">"""Find the most likely ability using ternary or dichotomous search methods.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -620,15 +634,15 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the search interval becomes invalid during iteration.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+<span class="sd">    """</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">error</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">+=</span> <span class="mi">2</span>
 
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;ternary&quot;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"ternary"</span><span class="p">:</span>
         <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span>
-      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"dichotomous"</span><span class="p">:</span>
         <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">m</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
@@ -642,17 +656,17 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">c</span>
 
       <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;=</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="n">d</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Invalid interval: a=</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">, c=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">, d=</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">, b=</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid interval: a=</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">, c=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">, d=</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">, b=</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
       <span class="n">candidate_theta</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
       <span class="n">error</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
-      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">&quot;dichotomous&quot;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span> <span class="o">==</span> <span class="s2">"dichotomous"</span><span class="p">:</span>
         <span class="n">error</span> <span class="o">/=</span> <span class="mi">2</span>
 
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{</span><span class="n">candidate_theta</span><span class="si">}</span><span class="s2">, LL: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span><span class="w"> </span><span class="n">right_side_ll</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{</span><span class="n">candidate_theta</span><span class="si">}</span><span class="s2">, LL: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span><span class="w"> </span><span class="n">right_side_ll</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">candidate_theta</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_solve_fibonacci</span><span class="p">(</span>
@@ -662,7 +676,7 @@
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="n">item_params</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the most likely ability using the Fibonacci search method.</span>
+<span class="w">    </span><span class="sd">"""Find the most likely ability using the Fibonacci search method.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -679,7 +693,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        The estimated ability.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">fib</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
     <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -718,7 +732,7 @@
       <span class="c1"># assert a &lt;= c &lt;= d &lt;= b</span>
 
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s2">, LL: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span><span class="w"> </span><span class="n">right_side_ll</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s2">, LL: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span><span class="w"> </span><span class="n">right_side_ll</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_solve_golden_section</span><span class="p">(</span>
@@ -728,7 +742,7 @@
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
     <span class="n">item_params</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find the most likely ability using the golden-section search method.</span>
+<span class="w">    </span><span class="sd">"""Find the most likely ability using the golden-section search method.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -750,7 +764,7 @@
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the golden section interval becomes invalid during iteration.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">c</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">/</span> <span class="n">GOLDEN_RATIO</span>
     <span class="n">d</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="n">GOLDEN_RATIO</span>
 
@@ -777,42 +791,42 @@
         <span class="n">right_side_ll</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">item_params</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">a</span> <span class="o">&lt;</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">b</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Invalid golden section interval: a=</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">, c=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">, d=</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">, b=</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid golden section interval: a=</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">, c=</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">, d=</span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">, b=</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_verbose</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s2">, LL: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span><span class="w"> </span><span class="n">right_side_ll</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\t\t</span><span class="s2">Theta: </span><span class="si">{</span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="si">}</span><span class="s2">, LL: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">left_side_ll</span><span class="p">,</span><span class="w"> </span><span class="n">right_side_ll</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">dodd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether Dodd&#39;s estimation heuristic :cite:p:`Dod90` will be used by the estimator.</span>
+<span class="w">    </span><span class="sd">"""Whether Dodd's estimation heuristic :cite:p:`Dod90` will be used by the estimator.</span>
 
-<span class="sd">    Dodd&#39;s method is used when the response vector is composed solely of correct or</span>
+<span class="sd">    Dodd's method is used when the response vector is composed solely of correct or</span>
 <span class="sd">    incorrect answers, to prevent maximum likelihood methods from returning -infinity</span>
 <span class="sd">    or +infinity.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    bool</span>
-<span class="sd">        Boolean value indicating if Dodd&#39;s method will be used or not.</span>
+<span class="sd">        Boolean value indicating if Dodd's method will be used or not.</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
-<span class="sd">    catsim.cat.dodd : Implementation of Dodd&#39;s estimation heuristic.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    catsim.cat.dodd : Implementation of Dodd's estimation heuristic.</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dodd</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">method</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the estimator search method selected during instantiation.</span>
+<span class="w">    </span><span class="sd">"""Get the estimator search method selected during instantiation.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    str</span>
-<span class="sd">        The search method (&#39;ternary&#39;, &#39;dichotomous&#39;, &#39;fibonacci&#39;, &#39;golden&#39;,</span>
-<span class="sd">        &#39;brent&#39;, &#39;bounded&#39;, or &#39;golden2&#39;).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        The search method ('ternary', 'dichotomous', 'fibonacci', 'golden',</span>
+<span class="sd">        'brent', 'bounded', or 'golden2').</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__search_method</span></div>
 
 </pre></div>
@@ -844,8 +858,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -866,7 +880,6 @@
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
-    <br/>
   </p>
 </div>
       
@@ -879,7 +892,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>

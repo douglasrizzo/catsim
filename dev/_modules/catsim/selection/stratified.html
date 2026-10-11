@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,18 +25,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=7f76b32a3354e82990f2" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
   
   <!-- So that users can add custom icons -->
-  <script defer src="../../../_static/scripts/fontawesome.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
     <script src="../../../_static/documentation_options.js?v=c4f92b34"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
@@ -48,6 +47,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="0.21.0" />
   
@@ -67,7 +67,9 @@
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -95,7 +97,7 @@
   
     <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -187,7 +189,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -206,18 +208,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
     </div>
     
@@ -226,7 +234,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -325,18 +333,24 @@
           
           
           
-          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
 </ul></div>
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
       </div>
     
@@ -398,7 +412,7 @@
                 <article class="bd-article">
                   
   <h1>Source code for catsim.selection.stratified</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Stratified selector implementations.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Stratified selector implementations."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -415,7 +429,7 @@
 <div class="viewcode-block" id="StratifiedSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StratifiedSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Abstract base class for finite selectors that divide the item bank into stage-aligned strata.</span>
+<span class="w">  </span><span class="sd">"""Abstract base class for finite selectors that divide the item bank into stage-aligned strata.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -428,14 +442,14 @@
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full family-level details, see :doc:`/api/techniques/selection/stratified-selector`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;General Stratified Selector&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
+    <span class="k">return</span> <span class="s2">"General Stratified Selector"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sort_once</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a StratifiedSelector.</span>
+<span class="w">    </span><span class="sd">"""Initialize a StratifiedSelector.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -443,7 +457,7 @@
 <span class="sd">        Number of items in the test.</span>
 <span class="sd">    sort_once : bool</span>
 <span class="sd">        Whether the strategy allows for the item matrix to be presorted.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_sort_once</span> <span class="o">=</span> <span class="n">sort_once</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -453,7 +467,7 @@
 <a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.presort_items">[docs]</a>
   <span class="nd">@abstractmethod</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix according to the strategy employed by this selector.</span>
+<span class="w">    </span><span class="sd">"""Presort the item matrix according to the strategy employed by this selector.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -464,13 +478,13 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Array of item indices sorted according to the strategy.</span>
-<span class="sd">    &quot;&quot;&quot;</span></div>
+<span class="sd">    """</span></div>
 
 
 <div class="viewcode-block" id="StratifiedSelector.postsort_items">
 <a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.postsort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: ARG002</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort the item matrix before selecting each new item.</span>
+<span class="w">    </span><span class="sd">"""Sort the item matrix before selecting each new item.</span>
 
 <span class="sd">    This default implementation simply returns the presorted items, or sorts them using</span>
 <span class="sd">    the :py:func:`presort_items` method and returns them.</span>
@@ -486,7 +500,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Array of item indices sorted according to the strategy.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_presorted_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span></div>
 
 
@@ -506,7 +520,7 @@
     <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the index of the next item to be administered.</span>
+<span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -521,7 +535,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    int or None</span>
 <span class="sd">        Index of the next item to be applied or `None` if there are no more strata to get items from.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># divide the item matrix into strata and get the stratum in which the examinee is</span>
     <span class="n">stratum_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
     <span class="n">slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
@@ -535,20 +549,20 @@
     <span class="k">while</span> <span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span> <span class="ow">in</span> <span class="n">administered_items</span><span class="p">:</span>
       <span class="n">pointer</span> <span class="o">+=</span> <span class="mi">1</span>
       <span class="k">if</span> <span class="n">pointer</span> <span class="o">==</span> <span class="n">max_pointer</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">slices</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">slices</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)]</span><span class="si">}</span><span class="s2">"</span>
         <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span></div>
 
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_get_stratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;i&quot;</span><span class="p">)</span>
+    <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"i"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">stratum_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">: test size is larger than was informed to the selector</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Length of administered items:</span><span class="se">\t</span><span class="si">{</span><span class="n">stratum_index</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Total length of the test:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot;Number of slices:</span><span class="se">\t</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">: test size is larger than was informed to the selector</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"Length of administered items:</span><span class="se">\t</span><span class="si">{</span><span class="n">stratum_index</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"Total length of the test:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"Number of slices:</span><span class="se">\t</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
       <span class="p">)</span>
       <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">pointer</span> <span class="o">=</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span><span class="p">]</span>
@@ -561,7 +575,7 @@
 <div class="viewcode-block" id="AStratSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implementation of the :math:`\alpha`-stratified selector.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -572,26 +586,26 @@
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;a-Stratified Selector&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
+    <span class="k">return</span> <span class="s2">"a-Stratified Selector"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an AStratSelector object.</span>
+<span class="w">    </span><span class="sd">"""Initialize an AStratSelector object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    test_size : int</span>
 <span class="sd">        Number of items the test contains.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AStratSelector.presort_items">
 <a class="viewcode-back" href="../../../api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix in ascending order according to the discrimination of each item.</span>
+<span class="w">    </span><span class="sd">"""Presort the item matrix in ascending order according to the discrimination of each item.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -602,7 +616,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        Array of item indices sorted in ascending order by discrimination (a parameter).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">discrimination</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
 </div>
 
@@ -611,7 +625,7 @@
 <div class="viewcode-block" id="AStratBBlockSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AStratBBlockSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -622,26 +636,26 @@
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;a-Stratified b-Blocking Selector&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
+    <span class="k">return</span> <span class="s2">"a-Stratified b-Blocking Selector"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a AStratBBlockSelector object.</span>
+<span class="w">    </span><span class="sd">"""Initialize a AStratBBlockSelector object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    test_size : int</span>
 <span class="sd">        Number of items the test contains.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
 <div class="viewcode-block" id="AStratBBlockSelector.presort_items">
 <a class="viewcode-back" href="../../../api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort items in ascending order of discrimination each item, then each strata according to item difficulty.</span>
+<span class="w">    </span><span class="sd">"""Presort items in ascending order of discrimination each item, then each strata according to item difficulty.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -652,7 +666,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        The sorted item matrix.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># sort items by their b values, in ascending order</span>
     <span class="n">presorted_items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
 
@@ -667,7 +681,7 @@
       <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">global_sorted_indices_current_stratum</span><span class="p">)</span>
 
     <span class="c1"># sort the item bank first by the items maximum information, ascending</span>
-    <span class="c1"># then by their information to the examinee&#39;s cuirrent theta, descending</span>
+    <span class="c1"># then by their information to the examinee's cuirrent theta, descending</span>
     <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
 </div>
 
@@ -676,7 +690,7 @@
 <div class="viewcode-block" id="MaxInfoStratSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Implementation of the maximum information stratification (MIS) selector.</span>
+<span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification (MIS) selector.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -687,26 +701,26 @@
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;Maximum Information Stratification Selector&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
+    <span class="k">return</span> <span class="s2">"Maximum Information Stratification Selector"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize a MaxInfoStratSelector object.</span>
+<span class="w">    </span><span class="sd">"""Initialize a MaxInfoStratSelector object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    test_size : int</span>
 <span class="sd">        Number of items the test contains.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MaxInfoStratSelector.presort_items">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort items in ascending order of maximum information.</span>
+<span class="w">    </span><span class="sd">"""Presort items in ascending order of maximum information.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -717,7 +731,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        The sorted item matrix.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Use cached max info values from ItemBank - this is a key optimization!</span>
     <span class="c1"># get the theta values in which items are maximally informative</span>
     <span class="c1"># get the information values for all items at their maximum points</span>
@@ -734,14 +748,14 @@
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Divide the item bank into strata and sort each one in descending order of information for the current theta.</span>
+<span class="w">    </span><span class="sd">"""Divide the item bank into strata and sort each one in descending order of information for the current theta.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    item_bank : ItemBank</span>
 <span class="sd">        An ItemBank containing item parameters.</span>
 <span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimate of the examinee&#39;s ability.</span>
+<span class="sd">        The current estimate of the examinee's ability.</span>
 <span class="sd">    **kwargs : dict</span>
 <span class="sd">        Additional keyword arguments.</span>
 
@@ -749,7 +763,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        The sorted item matrix.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># recover items presorted by the first rule</span>
     <span class="n">presorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_presorted_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
     <span class="c1"># run through each stratum and sort items in descending order according to</span>
@@ -770,7 +784,7 @@
       <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item_indices_current_stratum_sorted_by_info</span><span class="p">)</span>
 
     <span class="c1"># sort the item bank first by the items maximum information, ascending</span>
-    <span class="c1"># then by their information to the examinee&#39;s cuirrent theta, descending</span>
+    <span class="c1"># then by their information to the examinee's cuirrent theta, descending</span>
     <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
 </div>
 
@@ -779,7 +793,7 @@
 <div class="viewcode-block" id="MaxInfoBBlockSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoBBlockSelector</span><span class="p">(</span><span class="n">MaxInfoStratSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">&quot;&quot;&quot;Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector.</span>
+<span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -790,16 +804,16 @@
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.</span>
-<span class="sd">  &quot;&quot;&quot;</span>
+<span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the name of the selector.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;Maximum Information Stratification with b-Blocking Selector&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
+    <span class="k">return</span> <span class="s2">"Maximum Information Stratification with b-Blocking Selector"</span>
 
 <div class="viewcode-block" id="MaxInfoBBlockSelector.presort_items">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector.presort_items">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Presort the item matrix according to the information of each item at their maximum.</span>
+<span class="w">    </span><span class="sd">"""Presort the item matrix according to the information of each item at their maximum.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -810,7 +824,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        The sorted item matrix.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="c1"># Use cached max info values from ItemBank - key optimization!</span>
     <span class="c1"># get the theta values in which items are maximally informative</span>
     <span class="n">theta_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span>  <span class="c1"># Using cached values!</span>
@@ -830,7 +844,7 @@
 
     <span class="c1"># sanity check to make sure all indices are present and unique</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Presorted indices must be unique&quot;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Presorted indices must be unique"</span>
       <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
 </div>
@@ -864,8 +878,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=7f76b32a3354e82990f2"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=7f76b32a3354e82990f2"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -886,7 +900,6 @@
 
   <p class="sphinx-version">
     Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
-    <br/>
   </p>
 </div>
       
@@ -899,7 +912,7 @@
         <div class="footer-item">
 <p class="theme-version">
   <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.17.0.
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.23.0.
 </p></div>
       
     </div>
