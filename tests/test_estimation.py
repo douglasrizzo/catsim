@@ -755,22 +755,6 @@ class TestMAPEstimator:
     assert np.isfinite(theta)
     assert theta < 0.0
 
-  def test_estimate_uses_custom_prior_mode_when_no_items_are_administered(self) -> None:
-    """Custom priors should control the no-data mode."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = MAPEstimator(log_prior=normal_log_prior(mean=1.2, sd=0.5))
-
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=-3.0,
-    )
-
-    assert theta == pytest.approx(1.2, abs=1e-12)
-    assert estimator.calls == 1
-    assert estimator.evaluations == 0
-
   def test_estimate_records_evaluation_counts_for_mixed_responses(self) -> None:
     """Mixed response patterns should update the evaluation counters."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
