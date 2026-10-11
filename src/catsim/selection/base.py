@@ -6,6 +6,7 @@ import numpy
 import numpy.typing as npt
 from numpy.random import Generator
 
+from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 
 
@@ -36,6 +37,48 @@ class BaseSelector(ABC):
         `item_indices`.
     """
     return [x for x in item_indices if x not in administered_item_indices]
+
+  @staticmethod
+  def _exposure_filtered_candidates(
+    n_items: int,
+    administered_items: list[int],
+    exposure_rates: npt.NDArray[numpy.floating] | None,
+    r_max: float,
+  ) -> npt.NDArray[numpy.intp]:
+    """Return non-administered item indices, preferring items below the exposure cap.
+
+    Parameters
+    ----------
+    n_items : int
+        Number of items in the bank.
+    administered_items : list[int]
+        Indices of items already administered in the session.
+    exposure_rates : numpy.ndarray or None
+        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
+    r_max : float
+        Maximum exposure rate; items at or above it are only used when no other item remains.
+
+    Returns
+    -------
+    numpy.ndarray
+        Indices of the non-administered items below ``r_max``, or of all non-administered
+        items if every one of them is at or above ``r_max``.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item has already been administered.
+    """
+    candidate_mask = numpy.ones(n_items, dtype=bool)
+    candidate_mask[administered_items] = False
+    all_candidates = numpy.flatnonzero(candidate_mask)
+    if all_candidates.size == 0:
+      msg = "There are no more items to apply."
+      raise NoItemsAvailableError(msg)
+    if exposure_rates is None:
+      return all_candidates
+    low_exposure = numpy.flatnonzero(candidate_mask & (exposure_rates < r_max))
+    return low_exposure if low_exposure.size > 0 else all_candidates
 
   @staticmethod
   def _sort_by_info(item_bank: ItemBank, est_theta: float) -> list[int]:
