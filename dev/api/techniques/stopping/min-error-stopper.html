@@ -488,6 +488,12 @@ from <a class="reference internal" href="test-length-stopper.html#catsim.stoppin
 SEE(\hat{\theta}) &lt; \tau,
 \]</div>
 <p>where <span class="math notranslate nohighlight">\(\tau\)</span> is the configured <code class="docutils literal notranslate"><span class="pre">min_error</span></code> threshold.</p>
+<p>Samejima (1977, p. 238) suggests terminating an adaptive test when the test
+information function reaches a criterion value, or equivalently when the
+standard error of estimation falls to a small value, which can be constant
+across ability or depend on it; catsim uses a constant. She argues that the
+standard error, rather than reliability, should be the index of dependability
+(p. 233).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -533,7 +539,7 @@ SEE(\hat{\theta}) &lt; \tau,
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Samejima, F. (1977). A use of the information function in tailored testing. <em>Applied Psychological Measurement</em>, 1(2), 233-247. <a class="reference external" href="https://doi.org/10.1177/014662167700100209">https://doi.org/10.1177/014662167700100209</a></p>
+<p>Samejima, F. (1977). A use of the information function in tailored testing. <em>Applied Psychological Measurement</em>, 1(2), 233-247. <a class="reference external" href="https://doi.org/10.1177/014662167700100209">https://doi.org/10.1177/014662167700100209</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/98492">University of Minnesota Digital Conservancy</a>.</p>
 <p>Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), <em>Computerized Adaptive Testing: A Primer</em> (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.</p>
 </section>
 <section id="api-reference">

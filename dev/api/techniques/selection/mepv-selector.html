@@ -489,6 +489,14 @@ its empirical gains over MEI and MPWI are often modest.</p>
 (1-\tilde{P}_i)\, \mathrm{Var}[\theta \mid \mathbf{u}, U_i=0].
 \]</div>
 <p>The selector chooses the item with the smallest expected posterior variance.</p>
+<p>Choi and Swartz (2009, Equation 4) weight the two branches by the posterior
+predictive probabilities, as here. van der Linden’s 1996 report (p. 12,
+Equation 14), which calls the criterion minimum predicted expected variance, and
+<code class="docutils literal notranslate"><span class="pre">catR</span></code> (Magis &amp; Raîche, 2012, p. 9, Table 1) use the response probabilities at
+the current ability estimate instead. From a Bayesian point of view, van der
+Linden prefers this criterion to maximum expected information, because the
+reciprocal of the information only approximates the posterior variance in large
+samples (p. 12).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -538,8 +546,10 @@ its empirical gains over MEI and MPWI are often modest.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. <em>Psychometrika</em>, 63(2), 201-216. <a class="reference external" href="https://doi.org/10.1007/BF02294772">https://doi.org/10.1007/BF02294772</a></p>
-<p>Choi, S. W., &amp; Swartz, R. J. (2009). Comparison of CAT criteria for polytomous items. <em>Applied Psychological Measurement</em>, 33(6), 419-440. <a class="reference external" href="https://doi.org/10.1177/0146621608327800">https://doi.org/10.1177/0146621608327800</a></p>
+<p>van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. <em>Psychometrika</em>, 63(2), 201-216. <a class="reference external" href="https://doi.org/10.1007/BF02294775">https://doi.org/10.1007/BF02294775</a>. Not openly available; the 1996 report below preceded it.</p>
+<p>van der Linden, W. J. (1996). <em>Bayesian item selection criteria for adaptive testing</em> (Research Report 96-01). Enschede: University of Twente. Open copy: <a class="reference external" href="https://research.utwente.nl/files/247173933/Research_Report_96_01.pdf">University of Twente</a>.</p>
+<p>Choi, S. W., &amp; Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. <em>Applied Psychological Measurement</em>, 33(6), 419-440. <a class="reference external" href="https://doi.org/10.1177/0146621608327801">https://doi.org/10.1177/0146621608327801</a>. Open copy: <a class="reference external" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2791416/">PubMed Central</a>.</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 </section>
 <section id="implementation-guidance">
 <h2>Implementation Guidance<a class="headerlink" href="#implementation-guidance" title="Link to this heading">#</a></h2>

@@ -458,7 +458,7 @@
                   
   <p><strong>Status:</strong> Implemented
 <strong>Module:</strong> <a class="reference internal" href="#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>
-<strong>Reference:</strong> Lord (1980); Samejima (1977)</p>
+<strong>Reference:</strong> Lord (1977); Lord (1980)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="maximum-fisher-information-selector">
 <h1>Maximum Fisher Information Selector<a class="headerlink" href="#maximum-fisher-information-selector" title="Link to this heading">#</a></h1>
 <section id="motivation">
@@ -466,7 +466,9 @@
 <p>Maximum Fisher information is the canonical local item-selection rule in CAT. At
 each step it chooses the remaining item that is most informative at the current
 ability estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, which makes it the natural baseline for both
-efficiency and implementation simplicity.</p>
+efficiency and implementation simplicity. Lord (1977, p. 97) describes the
+rule: after each response the ability is re-estimated, and the next item is “the
+item that gives the most information at his estimated ability level”.</p>
 <p>Its main weakness is that it trusts <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> completely. Early in a test,
 when the estimate is still unstable, the rule can overuse highly discriminating
 items and produce skewed exposure patterns. The selector remains valuable because
@@ -484,6 +486,9 @@ I_i(\hat{\theta})
 \frac{a_i^2 [P_i(\hat{\theta})-c_i]^2 [d_i-P_i(\hat{\theta})]^2}
      {(d_i-c_i)^2 P_i(\hat{\theta}) [1-P_i(\hat{\theta})]}.
 \]</div>
+<p>This is the general item information <span class="math notranslate nohighlight">\(P_i'^2 / [P_i (1 - P_i)]\)</span> (Magis &amp;
+Raîche, 2012, p. 4, Equation 4) with the 4PL derivative
+<span class="math notranslate nohighlight">\(P_i' = a_i (P_i - c_i)(d_i - P_i)/(d_i - c_i)\)</span>.</p>
 <p>The selected item is</p>
 <div class="math notranslate nohighlight">
 \[
@@ -535,8 +540,9 @@ to the unrestricted maximum-information choice.</p></td>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<p>Lord, F. M. (1977). A broad-range tailored test of verbal ability. <em>Applied Psychological Measurement</em>, 1(1), 95-100. <a class="reference external" href="https://doi.org/10.1177/014662167700100115">https://doi.org/10.1177/014662167700100115</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/98423">University of Minnesota Digital Conservancy</a>.</p>
 <p>Lord, F. M. (1980). <em>Applications of Item Response Theory to Practical Testing Problems</em>. Hillsdale, NJ: Lawrence Erlbaum Associates.</p>
-<p>Lord, F. M. (1977). A broad-range tailored test of verbal ability. <em>Applied Psychological Measurement</em>, 1(1), 95-100. <a class="reference external" href="https://doi.org/10.1177/014662167700100115">https://doi.org/10.1177/014662167700100115</a></p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>

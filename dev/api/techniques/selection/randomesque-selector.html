@@ -466,7 +466,12 @@
 the current ability estimate, keeps the top <code class="docutils literal notranslate"><span class="pre">bin_size</span></code> candidates, and then
 selects uniformly at random from that candidate set.</p>
 <p>The technique relaxes maximum-information selection by adding controlled
-randomness among the most informative items.</p>
+randomness among the most informative items. Unlike the
+<a class="reference internal" href="the-54321-selector.html"><span class="doc">5-4-3-2-1 technique</span></a>, it keeps drawing from the same
+number of best items for the whole test instead of switching to maximum
+information (Georgiadou et al., 2007, p. 9). Magis and Raîche (2012, p. 12) list
+it among the exposure-control methods that choose at random among several
+optimal items near the current estimate.</p>
 </section>
 <section id="behavioral-contracts">
 <h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
@@ -480,7 +485,9 @@ randomness among the most informative items.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Kingsbury, G. G., &amp; Zara, A. R. (1989). Procedures for selecting items for computerized adaptive tests. <em>Applied Measurement in Education</em>, 2(4), 359-375.</p>
+<p>Kingsbury, G. G., &amp; Zara, A. R. (1989). Procedures for selecting items for computerized adaptive tests. <em>Applied Measurement in Education</em>, 2(4), 359-375. <a class="reference external" href="https://doi.org/10.1207/s15324818ame0204_6">https://doi.org/10.1207/s15324818ame0204_6</a>. Not openly available; Georgiadou et al. (2007) and Magis and Raîche (2012) describe the method.</p>
+<p>Georgiadou, E. G., Triantafillou, E., &amp; Economides, A. A. (2007). A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. <em>The Journal of Technology, Learning, and Assessment</em>, 5(8). <a class="reference external" href="https://ejournals.bc.edu/index.php/jtla/article/view/1647">https://ejournals.bc.edu/index.php/jtla/article/view/1647</a> (open access).</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
@@ -488,7 +495,7 @@ randomness among the most informative items.</p>
 <dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">RandomesqueSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/random.html#RandomesqueSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.RandomesqueSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
-<p>Implementation of the randomesque selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id6" title="G. G. Kingsbury and A. R. Zara. Procedures for selecting items for computerized adaptive tests. Applied Measurement in Education, 2(4):359–375, 1989.">Kingsbury and Zara, 1989</a>]</span>.</p>
+<p>Implementation of the randomesque selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id6" title="G. G. Kingsbury and A. R. Zara. Procedures for selecting items for computerized adaptive tests. Applied Measurement in Education, 2(4):359–375, 1989. doi:10.1207/s15324818ame0204_6.">Kingsbury and Zara, 1989</a>]</span>.</p>
 <p>In this selector, at each step of the test, an item is randomly chosen from the <span class="math notranslate nohighlight">\(n\)</span> most informative items in
 the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a user-defined value.</p>
 <dl class="py property">

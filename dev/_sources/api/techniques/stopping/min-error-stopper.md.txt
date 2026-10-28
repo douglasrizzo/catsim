@@ -35,6 +35,13 @@ $$
 
 where $\tau$ is the configured `min_error` threshold.
 
+Samejima (1977, p. 238) suggests terminating an adaptive test when the test
+information function reaches a criterion value, or equivalently when the
+standard error of estimation falls to a small value, which can be constant
+across ability or depend on it; catsim uses a constant. She argues that the
+standard error, rather than reliability, should be the index of dependability
+(p. 233).
+
 ## Parameters
 
 ```{eval-rst}
@@ -68,7 +75,7 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Samejima, F. (1977). A use of the information function in tailored testing. *Applied Psychological Measurement*, 1(2), 233-247. <https://doi.org/10.1177/014662167700100209>
+Samejima, F. (1977). A use of the information function in tailored testing. *Applied Psychological Measurement*, 1(2), 233-247. <https://doi.org/10.1177/014662167700100209>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/98492).
 
 Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *Computerized Adaptive Testing: A Primer* (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.
 
