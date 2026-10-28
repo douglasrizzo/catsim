@@ -2,7 +2,9 @@
 
 import numpy as np
 import pytest
+from scipy.optimize import minimize_scalar
 
+from catsim import irt
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.item_bank import ItemBank
 
@@ -171,6 +173,30 @@ class TestNumericalSearchEstimatorEstimate:
     avg = estimator.avg_evaluations
     assert avg == estimator.total_evaluations / estimator.calls
     assert avg >= 0
+
+  def test_bounded_search_honors_tol(self) -> None:
+    """The default bounded method used to ignore tol and always stop at SciPy's default of 1e-5."""
+    item_bank = ItemBank.generate_item_bank(30, seed=3)
+    administered_items = list(range(10))
+    response_vector = [True, False] * 5
+    reference = minimize_scalar(
+      irt.negative_log_likelihood,
+      bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
+      method="bounded",
+      args=(response_vector, item_bank.get_items(administered_items)),
+      options={"xatol": 1e-12},
+    ).x
+    coarse, fine = NumericalSearchEstimator(tol=1e-2), NumericalSearchEstimator(tol=1e-10)
+
+    estimates = [
+      estimator.estimate(
+        item_bank=item_bank, administered_items=administered_items, response_vector=response_vector, est_theta=0.0
+      )
+      for estimator in (coarse, fine)
+    ]
+
+    assert estimates[1] == pytest.approx(reference, abs=1e-7)
+    assert coarse.evaluations < fine.evaluations
 
 
 class TestNumericalSearchEstimatorWithMethods:
