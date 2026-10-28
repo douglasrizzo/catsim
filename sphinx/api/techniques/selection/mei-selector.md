@@ -34,6 +34,14 @@ where $I(\cdot)$ is the information of the administered test extended by
 the candidate item. The selector chooses the non-administered item with the
 largest expected information value.
 
+This departs from the published criterion. Magis and Raîche (2012, p. 9,
+Table 1, and p. 10) and Choi and Swartz (2009, Equation 3, extended to
+polytomous items), who attribute MEI to van der Linden (1998), weight the
+**candidate item's** information at each
+updated estimate, not the whole test's. Both use the observed information by
+default (Magis & Raîche, 2012, p. 17); Choi and Swartz also report a variant
+with Fisher information. The two forms can rank items differently.
+
 With the default estimator (maximum likelihood with Dodd's heuristic), while the
 responses so far are all correct, the hypothetical correct branch is still an
 all-correct pattern, so Dodd's heuristic returns the same updated estimate for
@@ -73,38 +81,15 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294772>
+van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294775>. Not openly available; the 1996 research report that preceded it is listed in the [University of Twente repository](https://research.utwente.nl/en/publications/bayesian-item-selection-criteria-for-adaptive-testing-2/), and Magis and Raîche (2012) and Choi and Swartz (2009) describe the criterion.
 
-Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440.
+Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440. <https://doi.org/10.1177/0146621608327801>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC2791416/).
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 :::{seealso}
 Sister spec: {doc}`/api/techniques/selection/mlwi-selector`
 :::
-
-## Reading the Source
-
-van der Linden (1998) was **not checked**: it is not openly available. The
-criterion was checked against an open secondary source:
-
-- **Magis and Raîche (2012, p. 9, Table 1, and p. 10)**,
-  [open access](https://doi.org/10.18637/jss.v048.i08): MEI maximizes
-  $\sum_{t \in \{0, 1\}} P(X_j = t \mid \hat{\theta}_{k-1})\, I_j(\hat{\theta}_k(X, t))$,
-  the probabilities of each response at the current estimate times an
-  information value at the estimate updated with that response.
-
-The two implementations differ in which information is evaluated. catR's
-`MEI` uses the **candidate item's** information at the updated estimate
-(observed information by default), as in Table 1. catsim uses the **Fisher
-information of the whole administered test extended by the candidate**. Which
-form van der Linden (1998) defines was not checked; both are one-step-ahead
-expected-information criteria, but they can rank items differently.
-
-Choi and Swartz (2009) compare selection criteria, including MEI, for
-polytomous items; it was not checked.
-
-**Checked by** `TestMEISelector` in `tests/test_selection.py`, including
-`test_select_matches_manual_expected_information` (the score is recomputed
-independently) and `test_select_diverges_from_max_info_when_one_step_estimates_shift`.
 
 ## API Reference
 

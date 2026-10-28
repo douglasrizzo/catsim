@@ -17,7 +17,8 @@ independent of the Bayesian infrastructure.
 
 ## Definition
 
-For candidate item $i$, MLWI is defined as
+For candidate item $i$, MLWI is defined as (Veerkamp & Berger, 1994,
+pp. 11–12, Equations 17 and 18)
 
 $$
 \mathrm{MLWI}_i
@@ -25,7 +26,16 @@ $$
 \int I_i(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta.
 $$
 
-The implementation approximates the integral on a fixed grid
+It is the general weighted information criterion of the same report (p. 7,
+Equations 7 and 8) with the likelihood as the weight, and it needs no
+provisional ability estimate (p. 12). Before any response the likelihood is 1,
+so the first item is the one with the most total information (p. 12). Magis and
+Raîche (2012, p. 9, Table 1) give the same criterion. In Veerkamp and Berger's
+simulations it did better than maximum information at the ML estimate
+(pp. 17–18).
+
+As in their simulations (p. 15, Equation 20), the implementation approximates
+the integral on a fixed grid
 $\{\theta_q\}_{q=1}^{Q}$ with spacing $\Delta_q$:
 
 $$
@@ -70,38 +80,15 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>
+Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>. Not openly available; the 1994 report below is the open version.
+
+Veerkamp, W. J. J., & Berger, M. P. F. (1994). *Some new item selection criteria for adaptive testing* (Research Report 94-6). Enschede: University of Twente. Open copy: [University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf).
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 :::{seealso}
 Sister spec: {doc}`/api/techniques/selection/mei-selector`
 :::
-
-## Reading the Source
-
-**Checked against** the 1994 research report that preceded the journal
-article, openly available from the
-[University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf)
-(Veerkamp & Berger, *Some new item selection criteria for adaptive testing*,
-Research Report 94-6). The 1997 journal version was not checked. Page numbers
-are the report's own.
-
-- **p. 7, Equations 7 and 8:** the general weighted information criterion,
-  $\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta$, of which the other criteria
-  are special cases.
-- **pp. 11–12, Equations 17 and 18:** the likelihood weighted information
-  criterion uses the likelihood as the weight, $W_n = L_n(\theta; \mathbf{x}_n)$,
-  and selects the item maximizing $\int L_n(\theta; \mathbf{x}_n)\, I_i(\theta)\, d\theta$.
-  The authors note that it needs no provisional ability estimate.
-- **p. 15, Equation 20:** in their simulation the integral is approximated by a
-  sum over a grid, as catsim does.
-- **pp. 17–18:** in their simulation, the criterion did better than maximum
-  information at the ML estimate.
-
-The criterion also matches Table 1 of Magis and Raîche (2012, p. 9).
-
-**Checked by** `TestMLWISelector` in `tests/test_selection.py`, including
-`test_select_matches_manual_weighted_information` and
-`test_select_with_empty_response_vector_reduces_to_information_integral`.
 
 ## API Reference
 
