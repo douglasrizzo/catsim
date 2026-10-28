@@ -7,13 +7,17 @@
 ## Motivation
 
 MAP, also called the Bayes modal estimator, is the posterior mode: the
-maximum-likelihood estimate with a prior added to the objective. The prior keeps
+maximum-likelihood estimate with a prior added to the objective. Samejima
+(1969, p. 7, Equations 2-5 and 2-6) defines the Bayes modal estimator as the
+value that maximizes the prior density times the likelihood; Bock and Mislevy
+(1982, p. 432) credit Bock and Aitkin (1981) with the name MAP, and Magis and
+Raîche (2012, p. 4) attribute the estimator to Birnbaum (1969). The prior keeps
 the estimate finite for all-correct and all-incorrect patterns, where the MLE
 does not exist, while the computation stays a one-dimensional optimization like
 the MLE's, with no quadrature grid.
 
-It is not necessarily cheaper than EAP: Bock and Mislevy (1982) argue the
-opposite for adaptive testing, since EAP's quadrature sums accumulate item by
+It is not necessarily cheaper than EAP: Bock and Mislevy (1982, p. 432) argue
+the opposite for adaptive testing, since EAP's quadrature sums accumulate item by
 item while MAP needs a new optimization after every response.
 
 ## Definition
@@ -38,6 +42,12 @@ $$
 
 with SciPy's bounded Brent method over the configured bounds. With guessing, the
 posterior can have several modes; the search returns one of them.
+
+Under the 1PL and 2PL models the log-likelihood is concave, so with a normal
+prior the derivative of the log-posterior points toward the prior mean at the
+MLE and toward the MLE at the prior mean, and its single root lies between them
+(contract 2). With a uniform prior over a wide enough interval, MAP coincides
+with the MLE (Magis & Raîche, 2012, p. 5).
 
 With no administered items, the estimate is the prior's mode, found by evaluating
 the prior on 201 equally spaced points across the bounds. On the default bounds
@@ -79,39 +89,15 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. *Psychometrika Monograph Supplement*, No. 17.
+Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. *Psychometrika Monograph Supplement*, No. 17. <https://doi.org/10.1007/BF03372160>. Open copy: [Psychometric Society](https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf).
 
-Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443-459.
+Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443-459. <https://doi.org/10.1007/BF02293801>. Not openly available.
 
-Birnbaum, A. (1969). Statistical theory for logistic mental test models with a prior distribution of ability. *Journal of Mathematical Psychology*, 6, 258-276.
+Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431-444. <https://doi.org/10.1177/014662168200600405>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/101546).
 
-Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08>
+Birnbaum, A. (1969). Statistical theory for logistic mental test models with a prior distribution of ability. *Journal of Mathematical Psychology*, 6(2), 258-276. <https://doi.org/10.1016/0022-2496(69)90005-4>. Not openly available.
 
-## Reading the Source
-
-None of the original sources was checked. The attributions rest on two open
-secondary sources that were:
-
-- **Bock and Mislevy (1982, p. 432)**, [open access](https://hdl.handle.net/11299/101546):
-  Samejima (1969) proposed the Bayes modal estimator, maximizing the posterior
-  density of ability, as an alternative to maximum likelihood, and Bock and
-  Aitkin (1981) introduced the term MAP. The same page argues that EAP needs
-  fewer operations than MAP or ML.
-- **Magis and Raîche (2012, pp. 4–5, Equations 5–6)**,
-  [open access](https://doi.org/10.18637/jss.v048.i08): the Bayes modal
-  estimator, attributed to Birnbaum (1969), maximizes
-  $\log f(\theta) + \log L(\theta)$; Equation 6 gives its standard error
-  under a normal prior, $1/\sqrt{1/\sigma^2 + I(\hat{\theta})}$. With a wide
-  uniform prior, it coincides with the MLE.
-
-Contract 2 follows from log-concavity: under the 1PL and 2PL models the
-log-likelihood is concave, so the log-posterior's derivative points toward the
-prior mean at the MLE and toward the MLE at the prior mean, and its single root
-lies between them. With guessing the log-likelihood need not be concave.
-
-**Checked by** `TestMAPEstimator` in `tests/test_estimation.py`, including
-`test_estimate_is_pulled_toward_prior_mean_vs_mle` and
-`test_estimate_and_posterior_mean_agree_on_a_long_test`.
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 :::{seealso}
 {doc}`/api/techniques/estimation/bayesian-infrastructure`,
