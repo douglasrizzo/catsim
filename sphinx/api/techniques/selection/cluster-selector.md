@@ -25,7 +25,7 @@ remaining items. The package supports three cluster-scoring rules:
 $$
 S_g^{\mathrm{item}}(\hat{\theta})
 =
-\max_{i \in C_g \cap R_k} I_i(\hat{\theta}),
+\max_{i \in C_g} I_i(\hat{\theta}),
 $$
 
 $$
@@ -40,9 +40,10 @@ S_g^{\mathrm{weighted}}(\hat{\theta})
 \frac{1}{|C_g|}\sum_{i \in C_g} I_i(\hat{\theta}).
 $$
 
-The selector first picks the best cluster according to the configured scoring
-rule among clusters that still contain non-administered items. It then chooses an
-item inside that cluster:
+All three scores use every item of the cluster, including items already
+administered. The selector first picks the best cluster according to the
+configured scoring rule among clusters that still contain non-administered
+items. It then chooses an item inside that cluster:
 
 $$
 i^*
@@ -53,6 +54,12 @@ $$
 whenever such items exist. If none do, `r_control="passive"` falls back to the
 highest-information item in the cluster, whereas `r_control="aggressive"`
 chooses the lowest-exposure item in the cluster.
+
+Two consequences follow. Because a cluster keeps its score after its best items
+are administered, the selector can return to a cluster whose remaining items are
+much less informative than items elsewhere in the bank. And because the cluster
+is chosen without looking at exposure rates, `r_max` only applies inside the
+chosen cluster; it does not cap exposure across the bank.
 
 ## Parameters
 

@@ -74,7 +74,7 @@ Any correct implementation must satisfy the following properties:
 
 Lord, F. M. (1980). *Applications of Item Response Theory to Practical Testing Problems*. Hillsdale, NJ: Lawrence Erlbaum Associates.
 
-Samejima, F. (1977). A use of the information function in tailored testing. *Applied Psychological Measurement*, 1(2), 233-247. <https://doi.org/10.1177/014662167700100209>
+Lord, F. M. (1977). A broad-range tailored test of verbal ability. *Applied Psychological Measurement*, 1(1), 95-100. <https://doi.org/10.1177/014662167700100115>
 
 ## API Reference
 

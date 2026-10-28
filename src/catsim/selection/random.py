@@ -148,7 +148,7 @@ class RandomesqueSelector(BaseSelector):
   """Implementation of the randomesque selector proposed by :cite:p:`Kingsbury89`.
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
-  the item bank, :math:`n` being a predefined value (originally 5, but user-defined in this implementation).
+  the item bank, :math:`n` being a user-defined value.
   """
 
   def __str__(self) -> str:
