@@ -61,6 +61,12 @@ much less informative than items elsewhere in the bank. And because the cluster
 is chosen without looking at exposure rates, `r_max` only applies inside the
 chosen cluster; it does not cap exposure across the bank.
 
+Meneghetti and Aquino Junior (2018, pp. 9–10) describe the selector as one that
+"clusters items according to their parameter values and selects items from the
+cluster that contains either the most informative item or the highest average
+information". They do not say whether administered items count toward a
+cluster's score; this page describes what the code does.
+
 ## Parameters
 
 ```{eval-rst}
@@ -100,6 +106,8 @@ Any correct implementation must satisfy the following properties:
 ## References
 
 Meneghetti, D. R. (2015). *Metodologia de selecao de itens em testes adaptativos informatizados baseada em agrupamento por similaridade* (Master's thesis). Centro Universitario da FEI. <https://www.researchgate.net/publication/283944553_Metodologia_de_selecao_de_itens_em_Testes_Adaptativos_Informatizados_baseada_em_Agrupamento_por_Similaridade>
+
+Meneghetti, D. D. R., & Aquino Junior, P. T. (2018). *Application and simulation of computerized adaptive tests through the package catsim* (arXiv:1707.03012v2). <https://arxiv.org/abs/1707.03012> (open access).
 
 ## API Reference
 
