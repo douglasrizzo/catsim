@@ -10,6 +10,10 @@ Point-information rules assume the current estimate is accurate enough to be
 trusted as a single design point, which is least true early in the test.
 The interval information criterion of Veerkamp and Berger (1997) instead
 integrates each item's information over a confidence interval for $\theta$.
+Page and equation numbers below are those of the openly available 1994 research
+report that preceded the article; there the criterion is one case of a general
+weighted information criterion, $\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta$
+(p. 7, Equations 7 and 8).
 The interval is wide while the estimate is uncertain and narrows as items are
 administered, so the rule moves from favoring broadly informative items towards
 local maximum-information selection.
@@ -22,8 +26,11 @@ is scored by
 $$
 S_i = \int_{\theta_L}^{\theta_U} I_i(\theta)\,d\theta,
 \qquad
-i^* = \arg\max_{i \in R_k} S_i.
+i^* = \arg\max_{i \in R_k} S_i
 $$
+
+(p. 10, Equation 14). Dividing by the interval's length would give a mean
+information, but the length is the same for every item.
 
 By default the interval is the confidence interval of the maximum-likelihood
 estimate, using the information $I(\hat{\theta})$ of the administered items:
@@ -35,8 +42,11 @@ $$
 \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right),
 $$
 
-where $\gamma$ is the confidence level. Before any item is administered the
-interval is the whole ability scale. With a fixed `interval` $\delta$, the
+where $\gamma$ is the confidence level (p. 9, Equation 11). Equation 12 gives
+an EAP version, with the posterior standard deviation in place of
+$I(\hat{\theta})^{-1/2}$; catsim always uses Equation 11, with the information
+at the current estimate, whatever estimator produced it. Before any item is
+administered the interval is the whole ability scale (p. 11, Equation 16). With a fixed `interval` $\delta$, the
 interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$ throughout the test.
 
 The integral has a closed form (see {py:func}`catsim.irt.inf_integral`). Since
@@ -48,7 +58,9 @@ $$
 $$
 
 so the scores of all items are computed exactly, without numerical quadrature.
-Under the 2PL model, the integral over the whole scale is $a_i$.
+This extends the 3PL closed form of Veerkamp and Berger (pp. 21–22, Appendix,
+Equation 25), to which it reduces when $d_i = 1$. Under the 2PL model, the
+integral over the whole scale is $a_i$ (Equation 28).
 
 ## Parameters
 
@@ -81,43 +93,9 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>
+Veerkamp, W. J. J., & Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. *Journal of Educational and Behavioral Statistics*, 22(2), 203-226. <https://doi.org/10.3102/10769986022002203>. Not openly available; the 1994 report below is the open version.
 
-## Reading the Source
-
-**Checked against** the 1994 research report that preceded the journal article,
-openly available from the
-[University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf)
-(Veerkamp & Berger, *Some new item selection criteria for adaptive testing*,
-Research Report 94-6). The 1997 journal version was not checked. Page numbers
-are the report's own.
-
-- **p. 7, Equations 7 and 8:** the general weighted information criterion,
-  $\max_i \int W_n(\theta)\, I_i(\theta)\, d\theta$.
-- **p. 9, Equation 11:** the confidence interval for the ML estimate,
-  $\hat{\theta} \pm \lambda\, I(\hat{\theta})^{-1/2}$ with
-  $\lambda = \Phi^{-1}[(1 + \gamma)/2]$; **Equation 12** gives the EAP version,
-  with the posterior standard deviation in place of $I^{-1/2}$.
-- **p. 10, Equation 14:** the interval information criterion, the area under
-  the item information function over that interval. Dividing by the interval's
-  length would give a mean, but the length is the same for every item.
-- **p. 11, Equations 15 and 16:** the criterion as a weight of 1 inside the
-  interval and 0 outside, and the starting interval $(-\infty, \infty)$ before
-  any item has been administered.
-- **pp. 21–22, Appendix, Equations 24–28:** 3PL information and the closed-form
-  integral
-  $\int_{\theta_L}^{\theta_R} I_i\, d\theta = \frac{a_i}{1 - c_i}\big[c_i \ln\frac{P_i(\theta_L)}{P_i(\theta_R)} + P_i(\theta_R) - P_i(\theta_L)\big]$
-  (Equation 25), which reduces to $a_i[P_i(\theta_R) - P_i(\theta_L)]$ for
-  the 2PL model (Equation 26) and to $a_i$ over the whole scale (Equation 28).
-
-catsim's `irt.inf_integral` extends Equation 25 to the 4PL model; with $d = 1$
-it is algebraically identical to Equation 25. The default interval always uses
-Equation 11, with the test information at the current estimate, whatever
-estimator produced it.
-
-**Checked by** `TestIntervalInfoSelector` in `tests/test_selection.py` and
-`TestInfIntegral` in `tests/test_irt.py`, which compare the closed form with
-numerical integration.
+Veerkamp, W. J. J., & Berger, M. P. F. (1994). *Some new item selection criteria for adaptive testing* (Research Report 94-6). Enschede: University of Twente. Open copy: [University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf).
 
 ## API Reference
 
