@@ -31,6 +31,12 @@ where `dist_params` provides the mean and standard deviation.
 The item bank is accepted to satisfy the initializer contract, but it does not
 affect the returned value.
 
+The default uniform range, $(-0.5, 0.5)$, is the starting rule of Barrada et
+al. (2006, p. 158) and Barrada et al. (2008, p. 499), who drew the first
+estimate from it for examinees simulated from $\mathcal{N}(0, 1)$. The normal
+default, $\mathcal{N}(0, 1)$, is not taken from a source; it matches the
+ability distribution those studies simulate.
+
 ## Parameters
 
 ```{eval-rst}
@@ -49,8 +55,7 @@ affect the returned value.
      - Distribution parameters. For the uniform distribution, the two values are
        the lower and upper bounds, in either order. For the normal distribution,
        the values are mean and standard deviation, in that order. ``None`` uses
-       :math:`U(-0.5, 0.5)`, the starting rule of Barrada et al. (2006), or
-       :math:`\mathcal{N}(0, 1)`.
+       :math:`U(-0.5, 0.5)` or :math:`\mathcal{N}(0, 1)`.
 ```
 
 ## Behavioral Contracts
@@ -66,21 +71,9 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://pubmed.ncbi.nlm.nih.gov/17296025/>
+Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
 
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>
-
-## Reading the Source
-
-**Checked against** the full texts of both papers. Barrada, Mazuela and Olea
-(2006, p. 158), open access from
-[Psicothema](https://www.psicothema.com/pdf/3191.pdf), and Barrada et al.
-(2008, p. 499), open on the
-[first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf),
-both draw the starting estimate at random from $(-0.5, 0.5)$ for examinees
-generated from $\mathcal{N}(0, 1)$, which is the default uniform range here.
-The normal default, $\mathcal{N}(0, 1)$, is not taken from a source; it
-matches the ability distribution those studies simulate.
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
 
 ## API Reference
 
