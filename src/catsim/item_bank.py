@@ -400,13 +400,16 @@ class ItemBank:
   ) -> Self:
     """Generate a synthetic item bank with parameters following real-world distributions.
 
-    As proposed by :cite:t:`Bar10`, item parameters are extracted from the following probability
-    distributions:
+    Item parameters are drawn from the following distributions:
 
-    * discrimination: :math:`N(1.2, 0.25)`
+    * discrimination: :math:`N(1.2, 0.25)`, truncated to positive values
     * difficulty: :math:`N(0,  1)`
     * pseudo-guessing: :math:`N(0.25, 0.02)` (clipped at 0)
     * upper asymptote: :math:`U(0.94, 1)`
+
+    The first three are the distributions of the simulated 3PL banks of :cite:t:`Bar10` (p. 445), also
+    used in earlier studies by the same group. Those studies did not use an upper asymptote; its
+    distribution here is catsim's own choice.
 
     Parameters
     ----------
@@ -470,11 +473,13 @@ class ItemBank:
 
     if itemtype == irt.NumParams.PL1:
       a = numpy.ones(n)
-    elif any(disc < 0 for disc in a):
-      # if by chance there is some discrimination value below zero
-      # this makes the problem go away
-      min_disc = min(a)
-      a = [disc + abs(min_disc) for disc in a]
+    else:
+      # redraw the rare non-positive discriminations, together with their difficulties, which samples
+      # the bivariate normal truncated to a > 0 and leaves every other item untouched
+      invalid = a <= 0
+      while invalid.any():
+        b[invalid], a[invalid] = rng.multivariate_normal(means, covs, int(invalid.sum())).T
+        invalid = a <= 0
 
     c = rng.normal(0.25, 0.02, n).clip(min=0) if itemtype in {irt.NumParams.PL3, irt.NumParams.PL4} else numpy.zeros(n)
     d = rng.uniform(0.94, 1, n) if itemtype == irt.NumParams.PL4 else numpy.ones(n)
