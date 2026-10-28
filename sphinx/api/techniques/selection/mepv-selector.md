@@ -36,6 +36,15 @@ $$
 
 The selector chooses the item with the smallest expected posterior variance.
 
+Choi and Swartz (2009, Equation 4) weight the two branches by the posterior
+predictive probabilities, as here. van der Linden's 1996 report (p. 12,
+Equation 14), which calls the criterion minimum predicted expected variance, and
+`catR` (Magis & Raîche, 2012, p. 9, Table 1) use the response probabilities at
+the current ability estimate instead. From a Bayesian point of view, van der
+Linden prefers this criterion to maximum expected information, because the
+reciprocal of the information only approximates the posterior variance in large
+samples (p. 12).
+
 ## Parameters
 
 ```{eval-rst}
@@ -72,9 +81,13 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294775>
+van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294775>. Not openly available; the 1996 report below preceded it.
 
-Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440. <https://doi.org/10.1177/0146621608327800>
+van der Linden, W. J. (1996). *Bayesian item selection criteria for adaptive testing* (Research Report 96-01). Enschede: University of Twente. Open copy: [University of Twente](https://research.utwente.nl/files/247173933/Research_Report_96_01.pdf).
+
+Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440. <https://doi.org/10.1177/0146621608327801>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC2791416/).
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 ## Implementation Guidance
 
