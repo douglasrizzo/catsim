@@ -12,7 +12,7 @@ discrimination no longer ranks its maximum information, and its information no
 longer peaks at $b$. Maximum-information stratification (MIS) replaces $a$ by
 the item's maximum information and $b$ by the ability at which that maximum is
 reached, which improved precision over the a-stratified method in Barrada et
-al. (2006).
+al. (2006, pp. 158–159).
 
 ## Definition
 
@@ -35,6 +35,10 @@ $$
 
 Under the 1PL and 2PL models $\theta_i^{\max} = b_i$ and $I_i^{\max}$ ranks
 items like $a_i$, so MIS coincides with the a-stratified method.
+
+Barrada et al. (2006, p. 157, Equations 1 and 2) give $I_i^{\max}$ and
+$\theta_i^{\max}$ in closed form for the 3PL model, with the scaling constant
+$D = 1.7$; catsim's IRT functions use no scaling constant.
 
 ## Parameters
 
@@ -65,16 +69,7 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://pubmed.ncbi.nlm.nih.gov/17296025/>
-
-## Reading the Source
-
-**Checked against** the full text of the original paper, Barrada, Mazuela and
-Olea (2006, p. 157), open access from
-[Psicothema](https://www.psicothema.com/pdf/3191.pdf): maximum information stratification, Equations 1 and 2 (stratify by $I^{\max}$, select by $|\hat{\theta} - \theta^{\max}|$). See {doc}`stratified-selector` for the page-by-page reading
-guide shared by the whole family.
-
-**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
+Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
 
 ## API Reference
 

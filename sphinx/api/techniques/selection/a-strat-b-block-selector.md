@@ -14,7 +14,8 @@ whole difficulty range before discrimination-based stratification is applied.
 
 ## Definition
 
-Following Chang, Qian and Ying (2001):
+Following Chang, Qian and Ying (2001), as described by Barrada et al. (2006,
+p. 157):
 
 1. Sort all items by increasing $b_i$ and group them into consecutive blocks of
    `n_strata` items.
@@ -60,16 +61,9 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. *Applied Psychological Measurement*, 25(4), 333-341. <https://doi.org/10.1177/01466210122032181>
+Chang, H.-H., Qian, J., & Ying, Z. (2001). A-stratified multistage computerized adaptive testing with b blocking. *Applied Psychological Measurement*, 25(4), 333-341. <https://doi.org/10.1177/01466210122032181>. Not openly available; Barrada et al. (2006) describe the method.
 
-## Reading the Source
-
-The original paper, Chang, Qian and Ying (2001), was **not checked**: it is not openly available.
-The method was checked against the description in Barrada, Mazuela and Olea (2006, p. 157), open access from
-[Psicothema](https://www.psicothema.com/pdf/3191.pdf): the b-blocking procedure and its purpose (balanced $b$ distributions across strata). See {doc}`stratified-selector` for the page-by-page reading
-guide shared by the whole family.
-
-**Checked by** `TestStratifiedSelectors` in `tests/test_selection.py`.
+Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
 
 ## API Reference
 
