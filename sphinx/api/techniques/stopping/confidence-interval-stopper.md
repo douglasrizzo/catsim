@@ -42,6 +42,11 @@ Operationally, the implementation checks whether the upper bound lies below the
 first boundary, the lower bound lies above the last boundary, or both endpoints
 lie between the same adjacent pair of boundaries.
 
+Magis and Raîche (2012, p. 11) describe the classification criterion with a
+single ability threshold: a confidence interval for ability is built after every
+item, and the test stops once the threshold is no longer inside it. catsim
+generalizes this to several boundaries; with one boundary the two rules agree.
+
 ## Parameters
 
 ```{eval-rst}
@@ -81,6 +86,8 @@ Any correct implementation must satisfy the following properties:
 Thissen, D. (2000). Reliability and measurement precision. In H. Wainer (Ed.), *Computerized Adaptive Testing: A Primer* (2nd ed., pp. 159-184). Mahwah, NJ: Lawrence Erlbaum Associates.
 
 Wainer, H. (Ed.). (2000). *Computerized Adaptive Testing: A Primer* (2nd ed.). Mahwah, NJ: Lawrence Erlbaum Associates.
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 ## API Reference
 

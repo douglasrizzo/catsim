@@ -24,7 +24,10 @@ $$
 <equation>
 $$
 
-\<Prose explaining the components of the equation.>
+\<Prose explaining the components of the equation. Cite the source of each
+formula or design choice where it appears, with the page, equation, table or
+figure, e.g. "(Barrada et al., 2008, p. 498, Equation 12)". Cite only locations
+you have read. Say where the implementation departs from its sources.>
 
 ## Parameters
 
@@ -51,7 +54,11 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-\<Full bibliographic citations, one per line, in a consistent format.>
+\<Full bibliographic citations, one per line, in a consistent format: every source
+the implementation follows or was checked against, with its DOI. When the
+published version is not open, add a link to an open copy ("Open copy: ...") or,
+if there is none, say so and name the open source that describes the method
+("Not openly available; X (Year) describes the method.").>
 
 % -----------------------------------------------------------------------
 

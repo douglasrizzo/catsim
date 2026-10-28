@@ -72,7 +72,7 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294772>
+van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. *Psychometrika*, 63(2), 201-216. <https://doi.org/10.1007/BF02294775>
 
 Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440. <https://doi.org/10.1177/0146621608327800>
 

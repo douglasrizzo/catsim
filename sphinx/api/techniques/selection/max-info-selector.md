@@ -1,6 +1,6 @@
 **Status:** Implemented
 **Module:** {py:class}`catsim.selection.MaxInfoSelector`
-**Reference:** Lord (1980); Samejima (1977)
+**Reference:** Lord (1977); Lord (1980)
 
 # Maximum Fisher Information Selector
 
@@ -9,7 +9,9 @@
 Maximum Fisher information is the canonical local item-selection rule in CAT. At
 each step it chooses the remaining item that is most informative at the current
 ability estimate $\hat{\theta}$, which makes it the natural baseline for both
-efficiency and implementation simplicity.
+efficiency and implementation simplicity. Lord (1977, p. 97) describes the
+rule: after each response the ability is re-estimated, and the next item is "the
+item that gives the most information at his estimated ability level".
 
 Its main weakness is that it trusts $\hat{\theta}$ completely. Early in a test,
 when the estimate is still unstable, the rule can overuse highly discriminating
@@ -28,6 +30,10 @@ I_i(\hat{\theta})
 \frac{a_i^2 [P_i(\hat{\theta})-c_i]^2 [d_i-P_i(\hat{\theta})]^2}
      {(d_i-c_i)^2 P_i(\hat{\theta}) [1-P_i(\hat{\theta})]}.
 $$
+
+This is the general item information $P_i'^2 / [P_i (1 - P_i)]$ (Magis &
+Raîche, 2012, p. 4, Equation 4) with the 4PL derivative
+$P_i' = a_i (P_i - c_i)(d_i - P_i)/(d_i - c_i)$.
 
 The selected item is
 
@@ -72,9 +78,11 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
+Lord, F. M. (1977). A broad-range tailored test of verbal ability. *Applied Psychological Measurement*, 1(1), 95-100. <https://doi.org/10.1177/014662167700100115>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/98423).
+
 Lord, F. M. (1980). *Applications of Item Response Theory to Practical Testing Problems*. Hillsdale, NJ: Lawrence Erlbaum Associates.
 
-Lord, F. M. (1977). A broad-range tailored test of verbal ability. *Applied Psychological Measurement*, 1(1), 95-100. <https://doi.org/10.1177/014662167700100115>
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 ## API Reference
 
