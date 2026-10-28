@@ -495,11 +495,17 @@ heuristic to handle degenerate all-correct and all-incorrect response patterns.<
 \]</div>
 <p>with search bounds given by the package’s extended theta range. For mixed
 response patterns, the implementation solves this optimization numerically using
-either internal search procedures or SciPy’s scalar minimization routines.</p>
+either internal search procedures or SciPy’s scalar minimization routines. The
+internal procedures and <code class="docutils literal notranslate"><span class="pre">bounded</span></code> stay within the bounds; <code class="docutils literal notranslate"><span class="pre">brent</span></code> and <code class="docutils literal notranslate"><span class="pre">golden</span></code>
+only start from them as a bracket and can return a value outside. With guessing,
+the likelihood can have several local maxima, and every method returns one of
+them.</p>
 <p>When every response is identical, the unconstrained MLE is not finite. In that
 case the implementation returns Dodd’s heuristic estimate if <code class="docutils literal notranslate"><span class="pre">dodd=True</span></code> and
 otherwise returns <span class="math notranslate nohighlight">\(+\infty\)</span> for all-correct or <span class="math notranslate nohighlight">\(-\infty\)</span> for
-all-incorrect patterns.</p>
+all-incorrect patterns. Dodd’s heuristic moves the current estimate half the
+distance to the largest item difficulty in the bank after a correct answer, or
+to the smallest after an incorrect one.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>

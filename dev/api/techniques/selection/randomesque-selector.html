@@ -478,6 +478,10 @@ randomness among the most informative items.</p>
 <li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 </ol>
 </section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<p>Kingsbury, G. G., &amp; Zara, A. R. (1989). Procedures for selecting items for computerized adaptive tests. <em>Applied Measurement in Education</em>, 2(4), 359-375.</p>
+</section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
@@ -486,7 +490,7 @@ randomness among the most informative items.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
 <p>Implementation of the randomesque selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id6" title="G. G. Kingsbury and A. R. Zara. Procedures for selecting items for computerized adaptive tests. Applied Measurement in Education, 2(4):359–375, 1989.">Kingsbury and Zara, 1989</a>]</span>.</p>
 <p>In this selector, at each step of the test, an item is randomly chosen from the <span class="math notranslate nohighlight">\(n\)</span> most informative items in
-the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a predefined value (originally 5, but user-defined in this implementation).</p>
+the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a user-defined value.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector.bin_size">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bin_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.RandomesqueSelector.bin_size" title="Link to this definition">#</a></dt>
@@ -573,6 +577,7 @@ the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a p
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.RandomesqueSelector"><code class="docutils literal notranslate"><span class="pre">RandomesqueSelector</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.RandomesqueSelector.bin_size"><code class="docutils literal notranslate"><span class="pre">RandomesqueSelector.bin_size</span></code></a></li>

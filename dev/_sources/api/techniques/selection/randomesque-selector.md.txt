@@ -21,6 +21,10 @@ Any correct implementation must satisfy the following properties:
 3. It samples from the candidate set using the configured random number generator.
 4. If no non-administered items remain, it raises `NoItemsAvailableError`.
 
+## References
+
+Kingsbury, G. G., & Zara, A. R. (1989). Procedures for selecting items for computerized adaptive tests. *Applied Measurement in Education*, 2(4), 359-375.
+
 ## API Reference
 
 ```{eval-rst}

@@ -41,12 +41,18 @@ $$
 
 with search bounds given by the package's extended theta range. For mixed
 response patterns, the implementation solves this optimization numerically using
-either internal search procedures or SciPy's scalar minimization routines.
+either internal search procedures or SciPy's scalar minimization routines. The
+internal procedures and `bounded` stay within the bounds; `brent` and `golden`
+only start from them as a bracket and can return a value outside. With guessing,
+the likelihood can have several local maxima, and every method returns one of
+them.
 
 When every response is identical, the unconstrained MLE is not finite. In that
 case the implementation returns Dodd's heuristic estimate if `dodd=True` and
 otherwise returns $+\infty$ for all-correct or $-\infty$ for
-all-incorrect patterns.
+all-incorrect patterns. Dodd's heuristic moves the current estimate half the
+distance to the largest item difficulty in the bank after a correct answer, or
+to the smallest after an incorrect one.
 
 ## Parameters
 

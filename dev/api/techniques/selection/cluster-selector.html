@@ -481,7 +481,7 @@ remaining items. The package supports three cluster-scoring rules:</p>
 \[
 S_g^{\mathrm{item}}(\hat{\theta})
 =
-\max_{i \in C_g \cap R_k} I_i(\hat{\theta}),
+\max_{i \in C_g} I_i(\hat{\theta}),
 \]</div>
 <div class="math notranslate nohighlight">
 \[
@@ -495,9 +495,10 @@ S_g^{\mathrm{weighted}}(\hat{\theta})
 =
 \frac{1}{|C_g|}\sum_{i \in C_g} I_i(\hat{\theta}).
 \]</div>
-<p>The selector first picks the best cluster according to the configured scoring
-rule among clusters that still contain non-administered items. It then chooses an
-item inside that cluster:</p>
+<p>All three scores use every item of the cluster, including items already
+administered. The selector first picks the best cluster according to the
+configured scoring rule among clusters that still contain non-administered
+items. It then chooses an item inside that cluster:</p>
 <div class="math notranslate nohighlight">
 \[
 i^*
@@ -507,6 +508,11 @@ i^*
 <p>whenever such items exist. If none do, <code class="docutils literal notranslate"><span class="pre">r_control=&quot;passive&quot;</span></code> falls back to the
 highest-information item in the cluster, whereas <code class="docutils literal notranslate"><span class="pre">r_control=&quot;aggressive&quot;</span></code>
 chooses the lowest-exposure item in the cluster.</p>
+<p>Two consequences follow. Because a cluster keeps its score after its best items
+are administered, the selector can return to a cluster whose remaining items are
+much less informative than items elsewhere in the bank. And because the cluster
+is chosen without looking at exposure rates, <code class="docutils literal notranslate"><span class="pre">r_max</span></code> only applies inside the
+chosen cluster; it does not cap exposure across the bank.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
