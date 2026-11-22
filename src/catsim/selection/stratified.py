@@ -1,27 +1,30 @@
 """Stratified selector implementations."""
 
 from abc import abstractmethod
-from typing import Any
 
 import numpy
 from numpy.typing import NDArray
 
-from .. import irt
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import FiniteSelector
 
 
 class StratifiedSelector(FiniteSelector):
-  """Abstract base class for finite selectors that divide the item bank into stage-aligned strata.
+  """Abstract base class for selectors that divide the item bank into stage-aligned strata.
+
+  The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking
+  on a location key so that every stratum covers the whole ability range. The test is split into
+  ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item
+  whose location is closest to the current ability estimate.
 
   Parameters
   ----------
   test_size : int
       Number of items in the test.
-  sort_once : bool
-      Whether the strategy allows for the item matrix to be presorted once at the
-      beginning of the simulation (True) or requires resorting during the test (False).
+  n_strata : int or None, optional
+      Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which
+      uses one stratum per test item.
 
   Notes
   -----
@@ -32,24 +35,55 @@ class StratifiedSelector(FiniteSelector):
     """Return the name of the selector."""
     return "General Stratified Selector"
 
-  def __init__(self, test_size: int, sort_once: bool) -> None:
+  def __init__(self, test_size: int, n_strata: int | None = None) -> None:
     """Initialize a StratifiedSelector.
 
     Parameters
     ----------
     test_size : int
         Number of items in the test.
-    sort_once : bool
-        Whether the strategy allows for the item matrix to be presorted.
+    n_strata : int or None, optional
+        Number of strata. Default is None, which uses ``test_size`` strata.
+
+    Raises
+    ------
+    ValueError
+        If ``n_strata`` is not between 1 and ``test_size``.
     """
     super().__init__(test_size)
-    self._sort_once = sort_once
-    self._presorted_items: NDArray[numpy.floating] | None = None
-    self._presorted_item_bank_id: int | None = None
+    n_strata = test_size if n_strata is None else n_strata
+    if not 1 <= n_strata <= test_size:
+      msg = f"n_strata must be between 1 and test_size ({test_size}), got {n_strata}"
+      raise ValueError(msg)
+    self._n_strata = n_strata
+    self._strata: list[NDArray[numpy.intp]] | None = None
+    self._strata_item_bank: ItemBank | None = None
+
+  @property
+  def n_strata(self) -> int:
+    """Get the number of strata (and test stages)."""
+    return self._n_strata
 
   @abstractmethod
-  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
-    """Presort the item matrix according to the strategy employed by this selector.
+  def _stratification_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
+    """Return the per-item values whose ascending order assigns items to strata."""
+
+  @abstractmethod
+  def _location(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
+    """Return the per-item ability-scale locations matched against the current estimate."""
+
+  def _blocking_key(self, item_bank: ItemBank) -> NDArray[numpy.floating] | None:  # noqa: ARG002, PLR6301
+    """Return the per-item values to block on before stratifying, or None for no blocking."""
+    return None
+
+  def strata(self, item_bank: ItemBank) -> list[NDArray[numpy.intp]]:
+    """Return the item indices of each stratum, from the first test stage to the last.
+
+    Without blocking, items are sorted by the stratification key and split into ``n_strata`` contiguous
+    groups. With blocking :cite:p:`Chang2001`, items are sorted by the blocking key and grouped into
+    consecutive blocks of ``n_strata`` items; each block is sorted by the stratification key and its
+    :math:`j`-th item goes to stratum :math:`j`, so every stratum spans the range of the blocking key.
+    The strata are computed once per item bank.
 
     Parameters
     ----------
@@ -58,35 +92,33 @@ class StratifiedSelector(FiniteSelector):
 
     Returns
     -------
-    numpy.ndarray
-        Array of item indices sorted according to the strategy.
+    list[numpy.ndarray]
+        One array of item indices per stratum.
     """
+    if self._strata is None or self._strata_item_bank is not item_bank:
+      self._strata = self._build_strata(item_bank)
+      self._strata_item_bank = item_bank
+    return self._strata
 
-  def postsort_items(self, item_bank: ItemBank, **kwargs: Any) -> NDArray[numpy.floating]:  # noqa: ARG002
-    """Sort the item matrix before selecting each new item.
+  def _build_strata(self, item_bank: ItemBank) -> list[NDArray[numpy.intp]]:
+    key = self._stratification_key(item_bank)
+    blocking_key = self._blocking_key(item_bank)
+    if blocking_key is None:
+      return numpy.array_split(numpy.argsort(key, kind="stable"), self._n_strata)
 
-    This default implementation simply returns the presorted items, or sorts them using
-    the :py:func:`presort_items` method and returns them.
+    by_block_key = numpy.argsort(blocking_key, kind="stable")
+    members: list[list[int]] = [[] for _ in range(self._n_strata)]
+    for start in range(0, item_bank.n_items, self._n_strata):
+      block = by_block_key[start : start + self._n_strata]
+      block = block[numpy.argsort(key[block], kind="stable")]
+      # a trailing block smaller than n_strata is spread evenly across the strata
+      for rank, item in enumerate(block):
+        members[rank * self._n_strata // len(block)].append(int(item))
+    return [numpy.array(stratum, dtype=numpy.intp) for stratum in members]
 
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    **kwargs : dict
-        Additional keyword arguments.
-
-    Returns
-    -------
-    numpy.ndarray
-        Array of item indices sorted according to the strategy.
-    """
-    return self._get_presorted_items(item_bank)
-
-  def _get_presorted_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
-    if self._presorted_items is None or self._presorted_item_bank_id != id(item_bank):
-      self._presorted_items = self.presort_items(item_bank)
-      self._presorted_item_bank_id = id(item_bank)
-    return self._presorted_items
+  def _stage(self, position: int) -> int:
+    """Return the 0-indexed stage of a 0-indexed test position, staying in the last stage past ``test_size``."""
+    return min(position * self._n_strata // self._test_size, self._n_strata - 1)
 
   def select(
     self,
@@ -104,56 +136,40 @@ class StratifiedSelector(FiniteSelector):
         An ItemBank containing item parameters.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
-    **kwargs
-        Additional keyword arguments.
+    est_theta : float
+        The current estimated ability.
 
     Returns
     -------
     int or None
-        Index of the next item to be applied or `None` if there are no more strata to get items from.
+        Index of the non-administered item in the current stratum whose location is closest to
+        ``est_theta``.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item in the current stratum has been administered.
     """
-    # divide the item matrix into strata and get the stratum in which the examinee is
-    stratum_index = len(administered_items)
-    slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
+    stage = self._stage(len(administered_items))
+    stratum = self.strata(item_bank)[stage]
+    candidates = stratum[~numpy.isin(stratum, administered_items)]
+    if candidates.size == 0:
+      msg = f"There are no more items to be selected from stratum {stage}"
+      raise NoItemsAvailableError(msg)
 
-    if self._sort_once:
-      sorted_items = self._get_presorted_items(item_bank)
-    else:
-      sorted_items = self.postsort_items(item_bank, est_theta=est_theta)
-
-    # if the selected item has already been administered, select the next one
-    while sorted_items[pointer] in administered_items:
-      pointer += 1
-      if pointer == max_pointer:
-        msg = f"There are no more items to be selected from stratum {slices[len(administered_items)]}"
-        raise NoItemsAvailableError(msg)
-
-    return int(sorted_items[pointer])
-
-  def _get_stratum(self, item_bank: ItemBank, stratum_index: int) -> tuple[NDArray[numpy.floating], int, int]:
-    slices = numpy.linspace(0, item_bank.n_items, self._test_size, endpoint=False, dtype="i")
-    if stratum_index >= len(slices):
-      msg = (
-        f"{self}: test size is larger than was informed to the selector\n"
-        f"Length of administered items:\t{stratum_index}\n"
-        f"Total length of the test:\t{self._test_size}\n"
-        f"Number of slices:\t{len(slices)}"
-      )
-      raise RuntimeError(msg)
-    pointer = slices[stratum_index]
-    max_pointer = item_bank.n_items if stratum_index == self._test_size - 1 else slices[stratum_index + 1]
-
-    return slices, pointer, max_pointer
+    distances = numpy.abs(self._location(item_bank)[candidates] - est_theta)
+    return int(candidates[numpy.argmin(distances)])
 
 
 class AStratSelector(StratifiedSelector):
-  r"""Implementation of the :math:`\alpha`-stratified selector.
+  r"""Implementation of the :math:`\alpha`-stratified selector :cite:p:`Chang1999`.
 
   Parameters
   ----------
   test_size : int
-      The number of items the test contains. The selector uses this parameter to create
-      the correct number of strata.
+      The number of items the test contains.
+  n_strata : int or None, optional
+      Number of strata. Default is None, which uses ``test_size`` strata.
 
   Notes
   -----
@@ -164,40 +180,24 @@ class AStratSelector(StratifiedSelector):
     """Return the name of the selector."""
     return "a-Stratified Selector"
 
-  def __init__(self, test_size: int) -> None:
-    """Initialize an AStratSelector object.
+  def _stratification_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+    """Stratify by increasing discrimination."""
+    return item_bank.discrimination
 
-    Parameters
-    ----------
-    test_size : int
-        Number of items the test contains.
-    """
-    super().__init__(test_size, True)
-
-  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
-    """Presort the item matrix in ascending order according to the discrimination of each item.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-
-    Returns
-    -------
-    numpy.ndarray
-        Array of item indices sorted in ascending order by discrimination (a parameter).
-    """
-    return item_bank.discrimination.argsort()
+  def _location(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+    """Match item difficulty to the ability estimate."""
+    return item_bank.difficulty
 
 
-class AStratBBlockSelector(StratifiedSelector):
-  r"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking.
+class AStratBBlockSelector(AStratSelector):
+  r"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking :cite:p:`Chang2001`.
 
   Parameters
   ----------
   test_size : int
-      The number of items the test contains. The selector uses this parameter to
-      create the correct number of strata.
+      The number of items the test contains.
+  n_strata : int or None, optional
+      Number of strata. Default is None, which uses ``test_size`` strata.
 
   Notes
   -----
@@ -208,55 +208,20 @@ class AStratBBlockSelector(StratifiedSelector):
     """Return the name of the selector."""
     return "a-Stratified b-Blocking Selector"
 
-  def __init__(self, test_size: int) -> None:
-    """Initialize a AStratBBlockSelector object.
-
-    Parameters
-    ----------
-    test_size : int
-        Number of items the test contains.
-    """
-    super().__init__(test_size, True)
-
-  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
-    """Presort items in ascending order of discrimination each item, then each strata according to item difficulty.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-
-    Returns
-    -------
-    numpy.ndarray
-        The sorted item matrix.
-    """
-    # sort items by their b values, in ascending order
-    presorted_items = item_bank.difficulty.argsort()
-
-    final_indices = []
-    for stratum_index in range(self._test_size):
-      _slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
-      indices_current_stratum = presorted_items[pointer:max_pointer]
-      items_current_stratum = item_bank.get_items(indices_current_stratum)
-      sorted_indices_current_stratum = items_current_stratum[:, 0].argsort()
-      # sort the items in the current stratum by their discrimination values, in ascending order
-      global_sorted_indices_current_stratum = indices_current_stratum[sorted_indices_current_stratum]
-      final_indices.extend(global_sorted_indices_current_stratum)
-
-    # sort the item bank first by the items maximum information, ascending
-    # then by their information to the examinee's cuirrent theta, descending
-    return numpy.array(final_indices)
+  def _blocking_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+    """Block on item difficulty so every stratum spans the difficulty range."""
+    return item_bank.difficulty
 
 
 class MaxInfoStratSelector(StratifiedSelector):
-  """Implementation of the maximum information stratification (MIS) selector.
+  """Implementation of the maximum information stratification (MIS) selector :cite:p:`Barrada2006`.
 
   Parameters
   ----------
   test_size : int
-      The number of items the test contains. The selector uses this parameter to create
-      the correct number of strata.
+      The number of items the test contains.
+  n_strata : int or None, optional
+      Number of strata. Default is None, which uses ``test_size`` strata.
 
   Notes
   -----
@@ -267,90 +232,24 @@ class MaxInfoStratSelector(StratifiedSelector):
     """Return the name of the selector."""
     return "Maximum Information Stratification Selector"
 
-  def __init__(self, test_size: int) -> None:
-    """Initialize a MaxInfoStratSelector object.
+  def _stratification_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+    """Stratify by increasing maximum information."""
+    return item_bank.max_info_values
 
-    Parameters
-    ----------
-    test_size : int
-        Number of items the test contains.
-    """
-    super().__init__(test_size, False)
-
-  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
-    """Presort items in ascending order of maximum information.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-
-    Returns
-    -------
-    numpy.ndarray
-        The sorted item matrix.
-    """
-    # Use cached max info values from ItemBank - this is a key optimization!
-    # get the theta values in which items are maximally informative
-    # get the information values for all items at their maximum points
-    item_maxinfo = item_bank.max_info_values  # Using cached values!
-    # globally sort item bank by item max information
-    return item_maxinfo.argsort()
-
-  def postsort_items(
-    self,
-    item_bank: ItemBank,
-    est_theta: float,
-    **kwargs: Any,  # noqa: ARG002
-  ) -> NDArray[numpy.floating]:
-    """Divide the item bank into strata and sort each one in descending order of information for the current theta.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    est_theta : float
-        The current estimate of the examinee's ability.
-    **kwargs : dict
-        Additional keyword arguments.
-
-    Returns
-    -------
-    numpy.ndarray
-        The sorted item matrix.
-    """
-    # recover items presorted by the first rule
-    presorted_items = self._get_presorted_items(item_bank)
-    # run through each stratum and sort items in descending order according to
-    # their information for the current theta value
-    final_indices = []
-    for stratum_index in range(self._test_size):
-      # grab stratum pointers
-      _slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
-      item_indices_current_stratum = presorted_items[pointer:max_pointer]  # item indices for the current stratum
-      items_current_stratum: NDArray[numpy.floating] = item_bank.get_items(
-        item_indices_current_stratum
-      )  # item params for the current stratum
-      # their information for this theta
-      info_items_current_stratum_current_theta: NDArray[numpy.floating] = irt.inf_hpc(est_theta, items_current_stratum)
-      item_indices_current_stratum_sorted_by_info = item_indices_current_stratum[
-        (-info_items_current_stratum_current_theta).argsort()
-      ]
-      final_indices.extend(item_indices_current_stratum_sorted_by_info)
-
-    # sort the item bank first by the items maximum information, ascending
-    # then by their information to the examinee's cuirrent theta, descending
-    return numpy.array(final_indices)
+  def _location(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+    """Match the ability at which each item is most informative to the ability estimate."""
+    return item_bank.max_info_thetas
 
 
 class MaxInfoBBlockSelector(MaxInfoStratSelector):
-  """Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector.
+  """Implementation of the maximum information stratification with blocking (MIS-B) selector :cite:p:`Barrada2006`.
 
   Parameters
   ----------
   test_size : int
-      The number of items the test contains. The selector uses this parameter to
-      create the correct number of strata.
+      The number of items the test contains.
+  n_strata : int or None, optional
+      Number of strata. Default is None, which uses ``test_size`` strata.
 
   Notes
   -----
@@ -361,38 +260,6 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
     """Return the name of the selector."""
     return "Maximum Information Stratification with b-Blocking Selector"
 
-  def presort_items(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
-    """Presort the item matrix according to the information of each item at their maximum.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-
-    Returns
-    -------
-    numpy.ndarray
-        The sorted item matrix.
-    """
-    # Use cached max info values from ItemBank - key optimization!
-    # get the theta values in which items are maximally informative
-    theta_maxinfo = item_bank.max_info_thetas  # Using cached values!
-    # sort items by theta
-    presorted_items = theta_maxinfo.argsort()
-    # get the information values for all items at their maximum points
-    item_maxinfo = item_bank.max_info_values  # Using cached values!
-
-    final_indices = []
-    for stratum_index in range(self._test_size):
-      _slices, pointer, max_pointer = self._get_stratum(item_bank, stratum_index)
-      indices_current_stratum = presorted_items[pointer:max_pointer]
-      # sort items in the current stratum by maximum information, in ascending order
-      sorted_indices_current_stratum = item_maxinfo[indices_current_stratum].argsort()
-      global_sorted_indices_current_stratum = indices_current_stratum[sorted_indices_current_stratum]
-      final_indices.extend(global_sorted_indices_current_stratum)
-
-    # sanity check to make sure all indices are present and unique
-    if len(final_indices) != len(set(final_indices)):
-      msg = "Presorted indices must be unique"
-      raise RuntimeError(msg)
-    return numpy.array(final_indices)
+  def _blocking_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+    """Block on the ability of maximum information so every stratum spans the ability range."""
+    return item_bank.max_info_thetas

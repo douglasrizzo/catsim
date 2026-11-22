@@ -6,40 +6,39 @@
 
 ## Motivation
 
-Maximum-information stratification (MIS) adapts the stratified-exposure idea to
-item pools where the 3PL or 4PL information maximum is not captured well by
-difficulty alone. Instead of reserving high-discrimination items for later
-stages, it reserves items with larger *maximum attainable information* for later
-stages.
-
-This makes MIS a closer relative of the maximum-information selector than the
-original a-stratified family, while still moderating exposure through stagewise
-access to the bank.
+The a-stratified method ignores the pseudo-guessing parameter, both when
+stratifying and when selecting. Under the 3PL and 4PL models an item's
+discrimination no longer ranks its maximum information, and its information no
+longer peaks at $b$. Maximum-information stratification (MIS) replaces $a$ by
+the item's maximum information and $b$ by the ability at which that maximum is
+reached, which improved precision over the a-stratified method in Barrada et
+al. (2006, pp. 158–159).
 
 ## Definition
 
 For each item $i$, let
 
 $$
-I_i^{\max} = \max_{\theta} I_i(\theta).
+\theta_i^{\max} = \arg\max_{\theta} I_i(\theta),
+\qquad
+I_i^{\max} = I_i(\theta_i^{\max}).
 $$
 
-The package implementation first presorts items by increasing
-$I_i^{\max}$. After partitioning that order into stage strata, it postsorts
-items *within the active stratum* by current information
-$I_i(\hat{\theta})$ in descending order, and returns the first
-non-administered item.
-
-Equivalently, at position $k+1$, selection is
+Items are sorted by increasing $I_i^{\max}$ and split into `n_strata`
+contiguous strata. At test position $t$ the selector returns the
+non-administered item of stratum $s(t)$ (see {doc}`stratified-selector`) whose
+point of maximum information is closest to the current estimate:
 
 $$
-i^*
-=
-\arg\max_{i \in S_k \cap R_k} I_i(\hat{\theta}),
+i^* = \arg\min_{i \in \mathcal{S}_{s(t)} \cap R_t} \left| \theta_i^{\max} - \hat{\theta} \right|.
 $$
 
-where $S_k$ is the active MIS stratum induced by ordering items on
-$I_i^{\max}$.
+Under the 1PL and 2PL models $\theta_i^{\max} = b_i$ and $I_i^{\max}$ ranks
+items like $a_i$, so MIS coincides with the a-stratified method.
+
+Barrada et al. (2006, p. 157, Equations 1 and 2) give $I_i^{\max}$ and
+$\theta_i^{\max}$ in closed form for the 3PL model, with the scaling constant
+$D = 1.7$; catsim's IRT functions use no scaling constant.
 
 ## Parameters
 
@@ -53,22 +52,24 @@ $I_i^{\max}$.
      - Description
    * - ``test_size``
      - required
-     - Number of strata and intended test length.
+     - Intended test length.
+   * - ``n_strata``
+     - ``None``
+     - Number of strata and stages; ``None`` uses ``test_size``.
 ```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
-1. Strata are formed from a presort by increasing maximum attainable item information.
-2. The active stratum is resorted on every selection step by information at the current `est_theta`.
-3. The returned item maximizes current information within the active stratum among non-administered items.
-4. It never returns an already administered item.
-5. If the active stratum has been exhausted, it raises `NoItemsAvailableError`.
+1. Strata are contiguous groups of increasing maximum information.
+2. The returned item minimizes $|\theta_i^{\max} - \hat{\theta}|$ among the non-administered items of the active stratum.
+3. It never returns an already administered item.
+4. If the active stratum has been exhausted, it raises `NoItemsAvailableError`.
 
 ## References
 
-Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://pubmed.ncbi.nlm.nih.gov/17296025/>
+Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
 
 ## API Reference
 
