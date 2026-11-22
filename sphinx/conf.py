@@ -154,6 +154,10 @@ html_theme_options = {
   "collapse_navigation": True,
   "show_nav_level": 2,
   "navbar_end": ["navbar-icon-links", "theme-switcher"],
+  "logo": {
+    "image_light": "logo/horizontal-light.svg",
+    "image_dark": "logo/horizontal-dark.svg",
+  },
 }
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -166,14 +170,11 @@ html_theme_options = {
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
 
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "logo_text.svg"
+# The navbar logo is set per color mode in html_theme_options["logo"].
 
-# The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-html_favicon = "logo.svg"
+# The favicon is one file shown on the browser's own tab bar, whatever the page's
+# color mode, so it uses the tile version of the mark, which carries its own background.
+html_favicon = "logo/favicon.svg"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
