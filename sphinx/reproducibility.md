@@ -17,7 +17,7 @@ for _ in range(5):
     item_bank = ItemBank.generate_item_bank(5000, seed=42)
     print(
         RandomSelector().select(item_bank=item_bank, administered_items=[], rng=default_rng(42)),
-        The54321Selector(test_size=10).select(
+        The54321Selector().select(
             item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
         ),
         RandomesqueSelector(bin_size=10).select(
