@@ -188,6 +188,12 @@ redundant-cast = "error"
 unused-ignore-comment = "error"
 unused-type-ignore-comment = "error"
 
+[tool.uv]
+# soupsieve 4 (the first release without its ReDoS) needs Python >= 3.11.5. Resolving the lock
+# for 3.11.0-3.11.4 as well would keep a vulnerable soupsieve 2.x in uv.lock for those patch
+# releases. Published metadata still says >= 3.11; this only scopes the development lock.
+environments = ["python_full_version >= '3.11.5'"]
+
 # ---------------------------------------------------------------------------
 # Pylint
 # ---------------------------------------------------------------------------
