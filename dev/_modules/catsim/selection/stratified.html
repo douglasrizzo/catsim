@@ -415,12 +415,10 @@
 <span></span><span class="sd">"""Stratified selector implementations."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiniteSelector</span>
@@ -429,15 +427,20 @@
 <div class="viewcode-block" id="StratifiedSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StratifiedSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Abstract base class for finite selectors that divide the item bank into stage-aligned strata.</span>
+<span class="w">  </span><span class="sd">"""Abstract base class for selectors that divide the item bank into stage-aligned strata.</span>
+
+<span class="sd">  The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking</span>
+<span class="sd">  on a location key so that every stratum covers the whole ability range. The test is split into</span>
+<span class="sd">  ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item</span>
+<span class="sd">  whose location is closest to the current ability estimate.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
 <span class="sd">      Number of items in the test.</span>
-<span class="sd">  sort_once : bool</span>
-<span class="sd">      Whether the strategy allows for the item matrix to be presorted once at the</span>
-<span class="sd">      beginning of the simulation (True) or requires resorting during the test (False).</span>
+<span class="sd">  n_strata : int or None, optional</span>
+<span class="sd">      Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which</span>
+<span class="sd">      uses one stratum per test item.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -448,26 +451,57 @@
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"General Stratified Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sort_once</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_strata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a StratifiedSelector.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    test_size : int</span>
 <span class="sd">        Number of items in the test.</span>
-<span class="sd">    sort_once : bool</span>
-<span class="sd">        Whether the strategy allows for the item matrix to be presorted.</span>
+<span class="sd">    n_strata : int or None, optional</span>
+<span class="sd">        Number of strata. Default is None, which uses ``test_size`` strata.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``n_strata`` is not between 1 and ``test_size``.</span>
 <span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_sort_once</span> <span class="o">=</span> <span class="n">sort_once</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_item_bank_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">n_strata</span> <span class="o">=</span> <span class="n">test_size</span> <span class="k">if</span> <span class="n">n_strata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_strata</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">n_strata</span> <span class="o">&lt;=</span> <span class="n">test_size</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_strata must be between 1 and test_size (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2">), got </span><span class="si">{</span><span class="n">n_strata</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span> <span class="o">=</span> <span class="n">n_strata</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_strata</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">intp</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_strata_item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="StratifiedSelector.presort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.presort_items">[docs]</a>
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">n_strata</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Get the number of strata (and test stages)."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span>
+
   <span class="nd">@abstractmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Presort the item matrix according to the strategy employed by this selector.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the per-item values whose ascending order assigns items to strata."""</span>
+
+  <span class="nd">@abstractmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the per-item ability-scale locations matched against the current estimate."""</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># noqa: ARG002, PLR6301</span>
+<span class="w">    </span><span class="sd">"""Return the per-item values to block on before stratifying, or None for no blocking."""</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="StratifiedSelector.strata">
+<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.strata">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">strata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">intp</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return the item indices of each stratum, from the first test stage to the last.</span>
+
+<span class="sd">    Without blocking, items are sorted by the stratification key and split into ``n_strata`` contiguous</span>
+<span class="sd">    groups. With blocking :cite:p:`Chang2001`, items are sorted by the blocking key and grouped into</span>
+<span class="sd">    consecutive blocks of ``n_strata`` items; each block is sorted by the stratification key and its</span>
+<span class="sd">    :math:`j`-th item goes to stratum :math:`j`, so every stratum spans the range of the blocking key.</span>
+<span class="sd">    The strata are computed once per item bank.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -476,39 +510,34 @@
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        Array of item indices sorted according to the strategy.</span>
-<span class="sd">    """</span></div>
-
-
-<div class="viewcode-block" id="StratifiedSelector.postsort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.postsort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: ARG002</span>
-<span class="w">    </span><span class="sd">"""Sort the item matrix before selecting each new item.</span>
-
-<span class="sd">    This default implementation simply returns the presorted items, or sorts them using</span>
-<span class="sd">    the :py:func:`presort_items` method and returns them.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        Array of item indices sorted according to the strategy.</span>
+<span class="sd">    list[numpy.ndarray]</span>
+<span class="sd">        One array of item indices per stratum.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_presorted_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span></div>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strata_item_bank</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">item_bank</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_strata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_strata</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_strata_item_bank</span> <span class="o">=</span> <span class="n">item_bank</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strata</span></div>
 
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_get_presorted_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_item_bank_id</span> <span class="o">!=</span> <span class="nb">id</span><span class="p">(</span><span class="n">item_bank</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">presort_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_item_bank_id</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_presorted_items</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_build_strata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">intp</span><span class="p">]]:</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stratification_key</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
+    <span class="n">blocking_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocking_key</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">blocking_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span><span class="p">)</span>
+
+    <span class="n">by_block_key</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">blocking_key</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
+    <span class="n">members</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span><span class="p">):</span>
+      <span class="n">block</span> <span class="o">=</span> <span class="n">by_block_key</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span><span class="p">]</span>
+      <span class="n">block</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="n">block</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)]</span>
+      <span class="c1"># a trailing block smaller than n_strata is spread evenly across the strata</span>
+      <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">block</span><span class="p">):</span>
+        <span class="n">members</span><span class="p">[</span><span class="n">rank</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">stratum</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span> <span class="k">for</span> <span class="n">stratum</span> <span class="ow">in</span> <span class="n">members</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the 0-indexed stage of a 0-indexed test position, staying in the last stage past ``test_size``."""</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">position</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="StratifiedSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/stratified-selector.html#catsim.selection.StratifiedSelector.select">[docs]</a>
@@ -528,60 +557,44 @@
 <span class="sd">        An ItemBank containing item parameters.</span>
 <span class="sd">    administered_items : list[int]</span>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
-<span class="sd">    **kwargs</span>
-<span class="sd">        Additional keyword arguments.</span>
+<span class="sd">    est_theta : float</span>
+<span class="sd">        The current estimated ability.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more strata to get items from.</span>
+<span class="sd">        Index of the non-administered item in the current stratum whose location is closest to</span>
+<span class="sd">        ``est_theta``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item in the current stratum has been administered.</span>
 <span class="sd">    """</span>
-    <span class="c1"># divide the item matrix into strata and get the stratum in which the examinee is</span>
-    <span class="n">stratum_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
-    <span class="n">slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
+    <span class="n">stage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span>
+    <span class="n">stratum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strata</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">stage</span><span class="p">]</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">stratum</span><span class="p">[</span><span class="o">~</span><span class="n">numpy</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">stratum</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">candidates</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_once</span><span class="p">:</span>
-      <span class="n">sorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_presorted_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">sorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">postsort_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">)</span>
-
-    <span class="c1"># if the selected item has already been administered, select the next one</span>
-    <span class="k">while</span> <span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">]</span> <span class="ow">in</span> <span class="n">administered_items</span><span class="p">:</span>
-      <span class="n">pointer</span> <span class="o">+=</span> <span class="mi">1</span>
-      <span class="k">if</span> <span class="n">pointer</span> <span class="o">==</span> <span class="n">max_pointer</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">slices</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)]</span><span class="si">}</span><span class="s2">"</span>
-        <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">sorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">])</span></div>
-
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_get_stratum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-    <span class="n">slices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"i"</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">stratum_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">: test size is larger than was informed to the selector</span><span class="se">\n</span><span class="s2">"</span>
-        <span class="sa">f</span><span class="s2">"Length of administered items:</span><span class="se">\t</span><span class="si">{</span><span class="n">stratum_index</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
-        <span class="sa">f</span><span class="s2">"Total length of the test:</span><span class="se">\t</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
-        <span class="sa">f</span><span class="s2">"Number of slices:</span><span class="se">\t</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
-      <span class="p">)</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="n">pointer</span> <span class="o">=</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span><span class="p">]</span>
-    <span class="n">max_pointer</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="k">if</span> <span class="n">stratum_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">slices</span><span class="p">[</span><span class="n">stratum_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span></div>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_location</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">distances</span><span class="p">)])</span></div>
+</div>
 
 
 
 <div class="viewcode-block" id="AStratSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">AStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector :cite:p:`Chang1999`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      The number of items the test contains. The selector uses this parameter to create</span>
-<span class="sd">      the correct number of strata.</span>
+<span class="sd">      The number of items the test contains.</span>
+<span class="sd">  n_strata : int or None, optional</span>
+<span class="sd">      Number of strata. Default is None, which uses ``test_size`` strata.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -592,46 +605,27 @@
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"a-Stratified Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize an AStratSelector object.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Stratify by increasing discrimination."""</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">discrimination</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    test_size : int</span>
-<span class="sd">        Number of items the test contains.</span>
-<span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-
-<div class="viewcode-block" id="AStratSelector.presort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/a-strat-selector.html#catsim.selection.AStratSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
-<span class="w">    </span><span class="sd">"""Presort the item matrix in ascending order according to the discrimination of each item.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        Array of item indices sorted in ascending order by discrimination (a parameter).</span>
-<span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">discrimination</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
-</div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Match item difficulty to the ability estimate."""</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span></div>
 
 
 
 <div class="viewcode-block" id="AStratBBlockSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">AStratBBlockSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking.</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AStratBBlockSelector</span><span class="p">(</span><span class="n">AStratSelector</span><span class="p">):</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the :math:`\alpha`-stratified selector with :math:`b` blocking :cite:p:`Chang2001`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      The number of items the test contains. The selector uses this parameter to</span>
-<span class="sd">      create the correct number of strata.</span>
+<span class="sd">      The number of items the test contains.</span>
+<span class="sd">  n_strata : int or None, optional</span>
+<span class="sd">      Number of strata. Default is None, which uses ``test_size`` strata.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -642,61 +636,23 @@
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"a-Stratified b-Blocking Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a AStratBBlockSelector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    test_size : int</span>
-<span class="sd">        Number of items the test contains.</span>
-<span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-
-<div class="viewcode-block" id="AStratBBlockSelector.presort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/a-strat-b-block-selector.html#catsim.selection.AStratBBlockSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Presort items in ascending order of discrimination each item, then each strata according to item difficulty.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        The sorted item matrix.</span>
-<span class="sd">    """</span>
-    <span class="c1"># sort items by their b values, in ascending order</span>
-    <span class="n">presorted_items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-
-    <span class="n">final_indices</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">stratum_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">):</span>
-      <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
-      <span class="n">indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>
-      <span class="n">items_current_stratum</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">indices_current_stratum</span><span class="p">)</span>
-      <span class="n">sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">items_current_stratum</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-      <span class="c1"># sort the items in the current stratum by their discrimination values, in ascending order</span>
-      <span class="n">global_sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">indices_current_stratum</span><span class="p">[</span><span class="n">sorted_indices_current_stratum</span><span class="p">]</span>
-      <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">global_sorted_indices_current_stratum</span><span class="p">)</span>
-
-    <span class="c1"># sort the item bank first by the items maximum information, ascending</span>
-    <span class="c1"># then by their information to the examinee's cuirrent theta, descending</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
-</div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Block on item difficulty so every stratum spans the difficulty range."""</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span></div>
 
 
 
 <div class="viewcode-block" id="MaxInfoStratSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoStratSelector</span><span class="p">(</span><span class="n">StratifiedSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification (MIS) selector.</span>
+<span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification (MIS) selector :cite:p:`Barrada2006`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      The number of items the test contains. The selector uses this parameter to create</span>
-<span class="sd">      the correct number of strata.</span>
+<span class="sd">      The number of items the test contains.</span>
+<span class="sd">  n_strata : int or None, optional</span>
+<span class="sd">      Number of strata. Default is None, which uses ``test_size`` strata.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -707,99 +663,27 @@
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"Maximum Information Stratification Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a MaxInfoStratSelector object.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_stratification_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Stratify by increasing maximum information."""</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_values</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    test_size : int</span>
-<span class="sd">        Number of items the test contains.</span>
-<span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-
-<div class="viewcode-block" id="MaxInfoStratSelector.presort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
-<span class="w">    </span><span class="sd">"""Presort items in ascending order of maximum information.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        The sorted item matrix.</span>
-<span class="sd">    """</span>
-    <span class="c1"># Use cached max info values from ItemBank - this is a key optimization!</span>
-    <span class="c1"># get the theta values in which items are maximally informative</span>
-    <span class="c1"># get the information values for all items at their maximum points</span>
-    <span class="n">item_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_values</span>  <span class="c1"># Using cached values!</span>
-    <span class="c1"># globally sort item bank by item max information</span>
-    <span class="k">return</span> <span class="n">item_maxinfo</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="MaxInfoStratSelector.postsort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/max-info-strat-selector.html#catsim.selection.MaxInfoStratSelector.postsort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">postsort_items</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
-    <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Divide the item bank into strata and sort each one in descending order of information for the current theta.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-<span class="sd">    est_theta : float</span>
-<span class="sd">        The current estimate of the examinee's ability.</span>
-<span class="sd">    **kwargs : dict</span>
-<span class="sd">        Additional keyword arguments.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        The sorted item matrix.</span>
-<span class="sd">    """</span>
-    <span class="c1"># recover items presorted by the first rule</span>
-    <span class="n">presorted_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_presorted_items</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
-    <span class="c1"># run through each stratum and sort items in descending order according to</span>
-    <span class="c1"># their information for the current theta value</span>
-    <span class="n">final_indices</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">stratum_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">):</span>
-      <span class="c1"># grab stratum pointers</span>
-      <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
-      <span class="n">item_indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>  <span class="c1"># item indices for the current stratum</span>
-      <span class="n">items_current_stratum</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span>
-        <span class="n">item_indices_current_stratum</span>
-      <span class="p">)</span>  <span class="c1"># item params for the current stratum</span>
-      <span class="c1"># their information for this theta</span>
-      <span class="n">info_items_current_stratum_current_theta</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">items_current_stratum</span><span class="p">)</span>
-      <span class="n">item_indices_current_stratum_sorted_by_info</span> <span class="o">=</span> <span class="n">item_indices_current_stratum</span><span class="p">[</span>
-        <span class="p">(</span><span class="o">-</span><span class="n">info_items_current_stratum_current_theta</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-      <span class="p">]</span>
-      <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">item_indices_current_stratum_sorted_by_info</span><span class="p">)</span>
-
-    <span class="c1"># sort the item bank first by the items maximum information, ascending</span>
-    <span class="c1"># then by their information to the examinee's cuirrent theta, descending</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
-</div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Match the ability at which each item is most informative to the ability estimate."""</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span></div>
 
 
 
 <div class="viewcode-block" id="MaxInfoBBlockSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MaxInfoBBlockSelector</span><span class="p">(</span><span class="n">MaxInfoStratSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification with :math:`b` blocking (MIS-B) selector.</span>
+<span class="w">  </span><span class="sd">"""Implementation of the maximum information stratification with blocking (MIS-B) selector :cite:p:`Barrada2006`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      The number of items the test contains. The selector uses this parameter to</span>
-<span class="sd">      create the correct number of strata.</span>
+<span class="sd">      The number of items the test contains.</span>
+<span class="sd">  n_strata : int or None, optional</span>
+<span class="sd">      Number of strata. Default is None, which uses ``test_size`` strata.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -810,44 +694,9 @@
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"Maximum Information Stratification with b-Blocking Selector"</span>
 
-<div class="viewcode-block" id="MaxInfoBBlockSelector.presort_items">
-<a class="viewcode-back" href="../../../api/techniques/selection/max-info-b-block-selector.html#catsim.selection.MaxInfoBBlockSelector.presort_items">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">presort_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Presort the item matrix according to the information of each item at their maximum.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    item_bank : ItemBank</span>
-<span class="sd">        An ItemBank containing item parameters.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        The sorted item matrix.</span>
-<span class="sd">    """</span>
-    <span class="c1"># Use cached max info values from ItemBank - key optimization!</span>
-    <span class="c1"># get the theta values in which items are maximally informative</span>
-    <span class="n">theta_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span>  <span class="c1"># Using cached values!</span>
-    <span class="c1"># sort items by theta</span>
-    <span class="n">presorted_items</span> <span class="o">=</span> <span class="n">theta_maxinfo</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-    <span class="c1"># get the information values for all items at their maximum points</span>
-    <span class="n">item_maxinfo</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_values</span>  <span class="c1"># Using cached values!</span>
-
-    <span class="n">final_indices</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">stratum_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">):</span>
-      <span class="n">_slices</span><span class="p">,</span> <span class="n">pointer</span><span class="p">,</span> <span class="n">max_pointer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stratum</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">stratum_index</span><span class="p">)</span>
-      <span class="n">indices_current_stratum</span> <span class="o">=</span> <span class="n">presorted_items</span><span class="p">[</span><span class="n">pointer</span><span class="p">:</span><span class="n">max_pointer</span><span class="p">]</span>
-      <span class="c1"># sort items in the current stratum by maximum information, in ascending order</span>
-      <span class="n">sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">item_maxinfo</span><span class="p">[</span><span class="n">indices_current_stratum</span><span class="p">]</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-      <span class="n">global_sorted_indices_current_stratum</span> <span class="o">=</span> <span class="n">indices_current_stratum</span><span class="p">[</span><span class="n">sorted_indices_current_stratum</span><span class="p">]</span>
-      <span class="n">final_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">global_sorted_indices_current_stratum</span><span class="p">)</span>
-
-    <span class="c1"># sanity check to make sure all indices are present and unique</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Presorted indices must be unique"</span>
-      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">final_indices</span><span class="p">)</span></div>
-</div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_blocking_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>  <span class="c1"># noqa: PLR6301</span>
+<span class="w">    </span><span class="sd">"""Block on the ability of maximum information so every stratum spans the ability range."""</span>
+    <span class="k">return</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">max_info_thetas</span></div>
 
 </pre></div>
 

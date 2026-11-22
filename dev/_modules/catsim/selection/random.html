@@ -419,7 +419,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">FiniteSelector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
 
 
 <div class="viewcode-block" id="RandomSelector">
@@ -499,30 +499,53 @@
 
 <div class="viewcode-block" id="The54321Selector">
 <a class="viewcode-back" href="../../../api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">The54321Selector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">The54321Selector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the 5-4-3-2-1 selector proposed by :cite:p:`McBride83`.</span>
 
-<span class="sd">  In this selector, at each step :math:`k` of a test of size :math:`K`, an item is chosen from a bin containing the</span>
-<span class="sd">  :math:`K-k` most informative items in the bank, given the current :math:`\\hat\\theta`. As the test progresses, the</span>
-<span class="sd">  bin gets smaller and more informative items have a higher probability of being chosen by the end of the test, when the</span>
-<span class="sd">  estimation of ':math:`\\hat\\theta` is more precise. The 5-4-3-2-1 selector can be viewed as a specialization of the</span>
-<span class="sd">  :py:class:`catsim.selection.RandomesqueSelector`, in which the bin size of most informative items gets smaller as the</span>
-<span class="sd">  test progresses.</span>
+<span class="sd">  The first item is drawn at random from the 5 most informative items at the current :math:`\hat\theta`,</span>
+<span class="sd">  the second from the 4 most informative remaining items, and so on, so that from the fifth item on the</span>
+<span class="sd">  most informative item is administered. Randomizing the opening items, which every examinee would</span>
+<span class="sd">  otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in</span>
+<span class="sd">  precision.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  initial_bin_size : int, optional</span>
+<span class="sd">      Number of most informative items the first item is drawn from; each following item draws from</span>
+<span class="sd">      one fewer. Default is 5.</span>
+
+<span class="sd">  Notes</span>
+<span class="sd">  -----</span>
+<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/the-54321-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"5-4-3-2-1 Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_bin_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a The54321Selector object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    test_size : int</span>
-<span class="sd">        The number of items the test contains. The selector uses this parameter to set the bin size.</span>
+<span class="sd">    initial_bin_size : int, optional</span>
+<span class="sd">        Number of most informative items the first item is drawn from. Default is 5.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``initial_bin_size`` is smaller than 1.</span>
 <span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">initial_bin_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"initial_bin_size must be at least 1, got </span><span class="si">{</span><span class="n">initial_bin_size</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span> <span class="o">=</span> <span class="n">initial_bin_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">initial_bin_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Get the number of most informative items the first item is drawn from."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span>
 
 <div class="viewcode-block" id="The54321Selector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector.select">[docs]</a>
@@ -564,8 +587,8 @@
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">bin_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">organized_items</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">bin_size</span><span class="p">]))</span></div>
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">organized_items</span><span class="p">[:</span><span class="n">bin_size</span><span class="p">]))</span></div>
 </div>
 
 

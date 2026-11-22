@@ -451,7 +451,7 @@
 <section id="what-is-computerized-adaptive-testing">
 <h2>What is Computerized Adaptive Testing?<a class="headerlink" href="#what-is-computerized-adaptive-testing" title="Link to this heading">#</a></h2>
 <p>Computerized adaptive testing (CAT) emerged in the 1970s as <em>tailored testing</em>
-<span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id10" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. doi:10.1177/014662167700100115.">Lord, 1977</a>]</span>. Unlike linear tests, CAT adapts in real time:</p>
+<span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id11" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. doi:10.1177/014662167700100115.">Lord, 1977</a>]</span>. Unlike linear tests, CAT adapts in real time:</p>
 <ol class="arabic simple">
 <li><p>After each item, the examinee’s ability is re-estimated</p></li>
 <li><p>The next item is selected based on the updated ability estimate</p></li>
@@ -463,7 +463,7 @@
 <h2>About catsim<a class="headerlink" href="#about-catsim" title="Link to this heading">#</a></h2>
 <p>CAT systems rely on Item Response Theory (IRT), which provides the mathematical
 framework for modeling tests, items, and examinees. While CAT packages exist for
-R <span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id12" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>]</span>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> brings these capabilities to Python. Built
+R <span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id13" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>]</span>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> brings these capabilities to Python. Built
 on <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://docs.scipy.org/doc/scipy/index.html#module-scipy" title="(in SciPy v1.18.0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scipy</span></code></a>, it provides:</p>
 <ul class="simple">
 <li><p>Multiple initialization, selection, estimation, and stopping methods</p></li>
@@ -474,7 +474,7 @@ on <a class="reference external" href="https://numpy.org/doc/stable/reference/in
 <section id="item-response-theory-models">
 <h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading">#</a></h2>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> borrows many concepts from Item Response Theory
-<span class="bibtex-citation" id="id3">[<a class="reference internal" href="references.html#id9" title="F. M. Lord, M. R. Novick, and A. Birnbaum. Statistical theories of mental test scores. Addison-Wesley, Reading, MA, 1968.">Lord <em>et al.</em>, 1968</a>, <a class="reference internal" href="references.html#id11" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>, a series of models created in the second part of the 20th century
+<span class="bibtex-citation" id="id3">[<a class="reference internal" href="references.html#id10" title="F. M. Lord, M. R. Novick, and A. Birnbaum. Statistical theories of mental test scores. Addison-Wesley, Reading, MA, 1968.">Lord <em>et al.</em>, 1968</a>, <a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>, a series of models created in the second part of the 20th century
 with the goal of <em>measuring latent traits</em>. <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> makes use of Item
 Response Theory one-, two- and three-parameter logistic models, a series of models
 in which examinees and items are represented by a set of numerical values (the
@@ -497,16 +497,16 @@ adaptive testing.</p>
 three-parameter logistic model is reduced to the two-parameter logistic model.
 Additionally, if all values of <span class="math notranslate nohighlight">\(a\)</span> are equal, the two-parameter logistic
 model is reduced to the one-parameter logistic model. Finally, when
-<span class="math notranslate nohighlight">\(\forall i \in I, a_i = 1\)</span>, we have the Rasch model <span class="bibtex-citation" id="id4">[<a class="reference internal" href="references.html#id11" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>. Thus,
+<span class="math notranslate nohighlight">\(\forall i \in I, a_i = 1\)</span>, we have the Rasch model <span class="bibtex-citation" id="id4">[<a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>. Thus,
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> is able of treating all of the logistic models presented above,
 since the underlying functions of all logistic models related to test simulations
 are the same, given the correct item paramaters.</p>
 <p>Under IRT, the probability of an examinee with a given <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value
 to answer item <span class="math notranslate nohighlight">\(i\)</span> correctly, given the item parameters, is given by
-<span class="bibtex-citation" id="id5">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id8" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
+<span class="bibtex-citation" id="id5">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id9" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
 <div class="math notranslate nohighlight">
 \[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.\]</div>
-<p>The information this item gives is computed as <span class="bibtex-citation" id="id6">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id8" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
+<p>The information this item gives is computed as <span class="bibtex-citation" id="id6">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id9" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
 <div class="math notranslate nohighlight">
 \[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.\]</div>
 <p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s ability.</p>
@@ -539,7 +539,7 @@ called the <em>standard error of estimation</em> <span class="bibtex-citation" i
 <p>These examples depict the generation of an array of five items according to the
 different logistic models. In the last example, parameters <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> have a
 correlation of <span class="math notranslate nohighlight">\(0.5\)</span>, an adjustment that may be useful in case simulations
-require it <span class="bibtex-citation" id="id9">[<a class="reference internal" href="references.html#id13" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
+require it <span class="bibtex-citation" id="id9">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
 <p>Historically, catsim stored item exposure rates in an additional item-matrix column. In the current architecture, exposure is better treated as run-level output derived from simulation results. When represented, the exposure rate is commonly denoted as <span class="math notranslate nohighlight">\(r\)</span> and computed as follows:</p>
 <div class="math notranslate nohighlight">
 \[r_i = \frac{q_i}{N}\]</div>

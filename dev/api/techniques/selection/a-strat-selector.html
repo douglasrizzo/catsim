@@ -466,22 +466,23 @@
 <p>The a-stratified method reduces overexposure of highly discriminating items by
 reserving them for later stages of the test. Early stages use lower-
 discrimination items, when the ability estimate is still unstable; later stages
-unlock higher-discrimination items once <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is more reliable.</p>
-<p>The implementation in <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> follows the same high-level motivation with a
-simple stage-based ordering rule built on the generic stratified family base.</p>
+unlock higher-discrimination items once <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is more reliable.
+Within each stage the selector stays adaptive by matching item difficulty to the
+current estimate.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
-<p>Let <span class="math notranslate nohighlight">\(a_i\)</span> be the discrimination parameter of item <span class="math notranslate nohighlight">\(i\)</span>. The package
-implementation first presorts all items by increasing discrimination:</p>
+<p>Following Chang and Ying (1999), as described by Barrada et al. (2006,
+p. 157), items are sorted by increasing discrimination and split into
+<code class="docutils literal notranslate"><span class="pre">n_strata</span></code> contiguous strata,</p>
 <div class="math notranslate nohighlight">
 \[a_{(1)} \le a_{(2)} \le \dots \le a_{(J)}.\]</div>
-<p>The presorted bank is then partitioned into <code class="docutils literal notranslate"><span class="pre">test_size</span></code> contiguous strata using
-the generic stratified slicing rule. At test position <span class="math notranslate nohighlight">\(k+1\)</span>, the selector
-returns the first non-administered item from stratum <span class="math notranslate nohighlight">\(k\)</span>.</p>
-<p>This is a simplified operational form of the a-stratified idea: strata are based
-on ascending <span class="math notranslate nohighlight">\(a\)</span>, and selection inside the active stratum follows the fixed
-presorted order.</p>
+<p>The test is split into as many stages, and the item at test position <span class="math notranslate nohighlight">\(t\)</span> comes
+from stratum <span class="math notranslate nohighlight">\(s(t)\)</span> (see <a class="reference internal" href="stratified-selector.html"><span class="doc">Stratified Selector</span></a>). Within that stratum the
+selector returns the non-administered item whose difficulty is closest to the
+current estimate:</p>
+<div class="math notranslate nohighlight">
+\[i^* = \arg\min_{i \in \mathcal{S}_{s(t)} \cap R_t} \left| b_i - \hat{\theta} \right|.\]</div>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -500,7 +501,11 @@ presorted order.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test_size</span></code></p></td>
 <td><p>required</p></td>
-<td><p>Number of strata and intended test length.</p></td>
+<td><p>Intended test length.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_strata</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+<td><p>Number of strata and stages; <code class="docutils literal notranslate"><span class="pre">None</span></code> uses <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -510,55 +515,37 @@ presorted order.</p>
 <h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
-<li><p>The bank is presorted once in ascending order of item discrimination.</p></li>
-<li><p>Early stages can only draw from lower-discrimination strata and later stages from higher-discrimination strata.</p></li>
+<li><p>Strata are contiguous groups of increasing discrimination.</p></li>
+<li><p>Early stages draw only from lower-discrimination strata and later stages from higher-discrimination strata.</p></li>
+<li><p>The returned item minimizes <span class="math notranslate nohighlight">\(|b_i - \hat{\theta}|\)</span> among the non-administered items of the active stratum.</p></li>
 <li><p>The selector never returns an already administered item.</p></li>
-<li><p>Selection inside a stratum is deterministic given the presorted order and administered-item set.</p></li>
 <li><p>If the active stratum has been exhausted, the selector raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 </ol>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Chang, H.-H., &amp; Ying, Z. (1999). A-stratified multistage computerized adaptive testing. <em>Applied Psychological Measurement</em>, 23(3), 211-221. <a class="reference external" href="https://doi.org/10.1177/01466219922031338">https://doi.org/10.1177/01466219922031338</a></p>
+<p>Chang, H.-H., &amp; Ying, Z. (1999). A-stratified multistage computerized adaptive testing. <em>Applied Psychological Measurement</em>, 23(3), 211-222. <a class="reference external" href="https://doi.org/10.1177/01466219922031338">https://doi.org/10.1177/01466219922031338</a>. Not openly available; Barrada et al. (2006) describe the method.</p>
+<p>Barrada, J. R., Mazuela, P., &amp; Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. <em>Psicothema</em>, 18(1), 156-159. <a class="reference external" href="https://www.psicothema.com/pdf/3191.pdf">https://www.psicothema.com/pdf/3191.pdf</a> (open access).</p>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.AStratSelector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">AStratSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#AStratSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratSelector" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">AStratSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#AStratSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="stratified-selector.html#catsim.selection.StratifiedSelector" title="catsim.selection.stratified.StratifiedSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">StratifiedSelector</span></code></a></p>
-<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector.</p>
+<p>Implementation of the <span class="math notranslate nohighlight">\(\alpha\)</span>-stratified selector <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id15" title="H.-H. Chang and Z. Ying. A-stratified multistage computerized adaptive testing. Applied Psychological Measurement, 23(3):211–222, 1999. doi:10.1177/01466219922031338.">Chang and Ying, 1999</a>]</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>The number of items the test contains. The selector uses this parameter to create
-the correct number of strata.</p>
+<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>The number of items the test contains.</p>
+</dd>
+<dt><strong>n_strata</strong><span class="classifier">int or None, optional</span></dt><dd><p>Number of strata. Default is None, which uses <code class="docutils literal notranslate"><span class="pre">test_size</span></code> strata.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">A-Stratified Selector</span></a>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="catsim.selection.AStratSelector.presort_items">
-<span class="sig-name descname"><span class="pre">presort_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#AStratSelector.presort_items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.AStratSelector.presort_items" title="Link to this definition">#</a></dt>
-<dd><p>Presort the item matrix in ascending order according to the discrimination of each item.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>Array of item indices sorted in ascending order by discrimination (a parameter).</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -617,10 +604,7 @@ the correct number of strata.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.AStratSelector"><code class="docutils literal notranslate"><span class="pre">AStratSelector</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.AStratSelector.presort_items"><code class="docutils literal notranslate"><span class="pre">AStratSelector.presort_items()</span></code></a></li>
-</ul>
-</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.AStratSelector"><code class="docutils literal notranslate"><span class="pre">AStratSelector</span></code></a></li>
 </ul>
 </li>
 </ul>

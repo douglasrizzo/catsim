@@ -479,6 +479,11 @@ random number generator.</p>
 <p>where <code class="docutils literal notranslate"><span class="pre">dist_params</span></code> provides the mean and standard deviation.</p>
 <p>The item bank is accepted to satisfy the initializer contract, but it does not
 affect the returned value.</p>
+<p>The default uniform range, <span class="math notranslate nohighlight">\((-0.5, 0.5)\)</span>, is the starting rule of Barrada et
+al. (2006, p. 158) and Barrada et al. (2008, p. 499), who drew the first
+estimate from it for examinees simulated from <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>. The normal
+default, <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>, is not taken from a source; it matches the
+ability distribution those studies simulate.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -500,10 +505,11 @@ affect the returned value.</p>
 <td><p>Distribution used for sampling the initial ability estimate.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dist_params</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">(-5,</span> <span class="pre">5)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
 <td><p>Distribution parameters. For the uniform distribution, the two values are
 the lower and upper bounds, in either order. For the normal distribution,
-the values are mean and standard deviation, in that order.</p></td>
+the values are mean and standard deviation, in that order. <code class="docutils literal notranslate"><span class="pre">None</span></code> uses
+<span class="math notranslate nohighlight">\(U(-0.5, 0.5)\)</span> or <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -521,11 +527,16 @@ the values are mean and standard deviation, in that order.</p></td>
 <li><p>It does not depend on the item bank.</p></li>
 </ol>
 </section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<p>Barrada, J. R., Mazuela, P., &amp; Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. <em>Psicothema</em>, 18(1), 156-159. <a class="reference external" href="https://www.psicothema.com/pdf/3191.pdf">https://www.psicothema.com/pdf/3191.pdf</a> (open access).</p>
+<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2), 493-513. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">https://doi.org/10.1348/000711007X230937</a>. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">first author’s page</a>.</p>
+</section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.initialization.RandomInitializer">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">RandomInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.initialization.InitializationDistribution" title="catsim.initialization.initialization.InitializationDistribution"><span class="pre">InitializationDistribution</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">InitializationDistribution.UNIFORM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-5,</span> <span class="pre">5)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/initialization/initialization.html#RandomInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">RandomInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dist_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.initialization.InitializationDistribution" title="catsim.initialization.initialization.InitializationDistribution"><span class="pre">InitializationDistribution</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">InitializationDistribution.UNIFORM</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dist_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/initialization/initialization.html#RandomInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.RandomInitializer" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></p>
 <p>Randomly initialize the first estimate of an examinee’s ability from a statistical distribution.</p>
 <dl class="field-list simple">
@@ -534,10 +545,10 @@ the values are mean and standard deviation, in that order.</p></td>
 <dt><strong>dist_type</strong><span class="classifier">InitializationDistribution, optional</span></dt><dd><p>Distribution type to use for initialization (uniform or normal).
 Default is UNIFORM.</p>
 </dd>
-<dt><strong>dist_params</strong><span class="classifier">tuple, optional</span></dt><dd><p>Distribution parameters:
+<dt><strong>dist_params</strong><span class="classifier">tuple or None, optional</span></dt><dd><p>Distribution parameters:
 - For uniform: tuple of (min, max) values (order doesn’t matter)
 - For normal: tuple of (mean, std) values (in this exact order)
-Default is (-5, 5).</p>
+Default is None, which uses (-0.5, 0.5) for uniform, as in Barrada et al. (2006), and (0, 1) for normal.</p>
 </dd>
 </dl>
 </dd>
@@ -646,6 +657,7 @@ validation in __init__).</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.RandomInitializer"><code class="docutils literal notranslate"><span class="pre">RandomInitializer</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.RandomInitializer.initialize"><code class="docutils literal notranslate"><span class="pre">RandomInitializer.initialize()</span></code></a></li>

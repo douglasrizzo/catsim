@@ -416,7 +416,6 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
@@ -578,10 +577,27 @@
 <div class="viewcode-block" id="IntervalInfoSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IntervalInfoSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Selects the item that maximizes the integral of the information function at a predetermined ``interval``.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Select the item whose information, integrated over an interval around the estimate, is largest.</span>
 
-<span class="sd">  The interval is defined by a parameter :math:`\\delta` above and below the current :math:`\\hat\\theta`, like so:</span>
-<span class="sd">  .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta + \\delta}I_i(\\hat\\theta)</span>
+<span class="sd">  By default the interval is the confidence interval of the interval information criterion</span>
+<span class="sd">  :cite:p:`Veerkamp1997`, which narrows as the test information grows:</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">      \arg\max_{i \in R} \int_{\theta_L}^{\theta_U} I_i(\theta)\, d\theta, \qquad</span>
+<span class="sd">      \theta_{L, U} = \hat\theta \mp \frac{\lambda}{\sqrt{I(\hat\theta)}}, \qquad</span>
+<span class="sd">      \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)</span>
+
+<span class="sd">  where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the</span>
+<span class="sd">  confidence level. A fixed half-width :math:`\delta` can be used instead.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  interval : float or None, optional</span>
+<span class="sd">      Fixed half-width :math:`\delta` of the interval. Default is None, which uses the confidence</span>
+<span class="sd">      interval above.</span>
+<span class="sd">  confidence : float, optional</span>
+<span class="sd">      Confidence level :math:`\gamma` of the default interval. Default is 0.95.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -592,22 +608,42 @@
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"Interval Information Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Initialize an IntervalInfoSelector object.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    interval : float or None, optional</span>
-<span class="sd">        The interval of the integral. If no interval is passed, the integral is computed from</span>
-<span class="sd">        :math:`[-\\infty, \\infty]`. Default is None.</span>
+<span class="sd">        Fixed half-width of the interval. Default is None, which uses a confidence interval of</span>
+<span class="sd">        :math:`\hat\theta`.</span>
+<span class="sd">    confidence : float, optional</span>
+<span class="sd">        Confidence level of the default interval. Default is 0.95.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``interval`` is not positive or ``confidence`` is not between 0 and 1.</span>
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">interval</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"interval must be positive, got </span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">confidence</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"confidence must be between 0 and 1, got </span><span class="si">{</span><span class="n">confidence</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="o">=</span> <span class="n">interval</span> <span class="k">if</span> <span class="n">interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">numpy</span><span class="o">.</span><span class="n">inf</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="o">=</span> <span class="n">interval</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span> <span class="o">=</span> <span class="n">confidence</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Get the size of the interval under which the integral of the information function will be computed."""</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Get the fixed half-width of the interval, or None when the confidence interval is used."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">confidence</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Get the confidence level of the default interval."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span>
 
 <div class="viewcode-block" id="IntervalInfoSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector.select">[docs]</a>
@@ -635,26 +671,19 @@
 <span class="sd">    int or None</span>
 <span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
 <span class="sd">    """</span>
-    <span class="c1"># compute the integral of the information function around an examinee's ability</span>
-    <span class="n">information_integral</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-      <span class="n">quad</span><span class="p">(</span>
-        <span class="n">irt</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
-        <span class="n">est_theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span>
-        <span class="n">est_theta</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
-      <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span>
-    <span class="p">])</span>
-    <span class="c1"># sort by that integral in descending order</span>
-    <span class="n">ordered_items</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">information_integral</span><span class="p">)</span><span class="o">.</span><span class="n">argsort</span><span class="p">()</span>
-    <span class="c1"># remove administered items</span>
-    <span class="n">organized_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">),</span> <span class="n">administered_items</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">candidates</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">organized_items</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="c1"># infinite before any item is administered, since there is no information yet</span>
+      <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">est_theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
+
+    <span class="n">information_integral</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_integral</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidates</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">information_integral</span><span class="p">)])</span></div>
 </div>
 
 </pre></div>

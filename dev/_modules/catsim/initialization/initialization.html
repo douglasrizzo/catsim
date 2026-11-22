@@ -450,11 +450,11 @@
 <span class="sd">  dist_type : InitializationDistribution, optional</span>
 <span class="sd">      Distribution type to use for initialization (uniform or normal).</span>
 <span class="sd">      Default is UNIFORM.</span>
-<span class="sd">  dist_params : tuple, optional</span>
+<span class="sd">  dist_params : tuple or None, optional</span>
 <span class="sd">      Distribution parameters:</span>
 <span class="sd">      - For uniform: tuple of (min, max) values (order doesn't matter)</span>
 <span class="sd">      - For normal: tuple of (mean, std) values (in this exact order)</span>
-<span class="sd">      Default is (-5, 5).</span>
+<span class="sd">      Default is None, which uses (-0.5, 0.5) for uniform, as in Barrada et al. (2006), and (0, 1) for normal.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -466,7 +466,9 @@
     <span class="k">return</span> <span class="s2">"Random Initializer"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">dist_type</span><span class="p">:</span> <span class="n">InitializationDistribution</span> <span class="o">=</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">,</span> <span class="n">dist_params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">dist_type</span><span class="p">:</span> <span class="n">InitializationDistribution</span> <span class="o">=</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span><span class="p">,</span>
+    <span class="n">dist_params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a RandomInitializer object.</span>
 
@@ -474,8 +476,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    dist_type : InitializationDistribution, optional</span>
 <span class="sd">        Distribution to use for ability estimate initialization. Default is UNIFORM.</span>
-<span class="sd">    dist_params : tuple, optional</span>
-<span class="sd">        Parameters for the chosen distribution. Default is (-5, 5).</span>
+<span class="sd">    dist_params : tuple or None, optional</span>
+<span class="sd">        Parameters for the chosen distribution. Default is None, which uses (-0.5, 0.5) for uniform</span>
+<span class="sd">        and (0, 1) for normal.</span>
 <span class="sd">        - For uniform: (min, max) values (order doesn't matter)</span>
 <span class="sd">        - For normal: (mean, std) values (in this exact order)</span>
 
@@ -490,6 +493,9 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">InitializationDistribution</span><span class="p">):</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"dist_type must be of type InitializationDistribution"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dist_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">dist_params</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span> <span class="k">if</span> <span class="n">dist_type</span> <span class="o">==</span> <span class="n">InitializationDistribution</span><span class="o">.</span><span class="n">UNIFORM</span> <span class="k">else</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
     <span class="c1"># Validate distribution parameters</span>
     <span class="n">expected_param_count</span> <span class="o">=</span> <span class="mi">2</span>

@@ -457,38 +457,102 @@
                 <article class="bd-article">
                   
   <p><strong>Status:</strong> Implemented
-<strong>Module:</strong> <a class="reference internal" href="#catsim.selection.The54321Selector" title="catsim.selection.The54321Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.The54321Selector</span></code></a></p>
+<strong>Module:</strong> <a class="reference internal" href="#catsim.selection.The54321Selector" title="catsim.selection.The54321Selector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.The54321Selector</span></code></a>
+<strong>Reference:</strong> McBride &amp; Martin (1983)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="selector">
 <h1>54321 Selector<a class="headerlink" href="#selector" title="Link to this heading">#</a></h1>
 <section id="specification">
 <h2>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">The54321Selector</span></code> is a finite ordered selector that administers items by a
-precomputed difficulty schedule. The schedule steps through five difficulty
-levels and selects available items in that deterministic order.</p>
-<p>This rule is primarily useful as a reproducible non-adaptive baseline.</p>
+<p>Under maximum-information selection every examinee starts from the same
+ability estimate, so the opening items of every test are the same few items.
+The 5-4-3-2-1 technique of McBride and Martin (1983) randomizes only those
+opening items:</p>
+<ul class="simple">
+<li><p>the first item is drawn uniformly at random from the 5 most informative items
+at the current estimate;</p></li>
+<li><p>the second from the 4 most informative remaining items;</p></li>
+<li><p>the third from 3 and the fourth from 2;</p></li>
+<li><p>from the fifth item on, the most informative remaining item is administered.</p></li>
+</ul>
+<p>This is the schedule described by Georgiadou et al. (2007, p. 9) in their
+review of exposure-control strategies. Magis and Raîche (2012, p. 12) list the
+technique among the methods that choose at random among several near-optimal
+items, without defining it.</p>
+<p>With <code class="docutils literal notranslate"><span class="pre">initial_bin_size</span></code> <span class="math notranslate nohighlight">\(n\)</span>, the item at 0-indexed test position <span class="math notranslate nohighlight">\(k\)</span> is drawn
+from the <span class="math notranslate nohighlight">\(\max(1, n - k)\)</span> most informative non-administered items. Unlike the
+randomesque selector, which keeps drawing from a fixed number of items for the
+whole test (Georgiadou et al., 2007, p. 9), the late items, which matter most
+for precision, are chosen by maximum information.</p>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 15.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initial_bin_size</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">5</span></code></p></td>
+<td><p>Number of most informative items the first item is drawn from; each
+following item draws from one fewer, down to 1.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 <section id="behavioral-contracts">
 <h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
 <li><p>It never returns an already administered item.</p></li>
-<li><p>It follows the deterministic difficulty-level ordering computed for the item bank.</p></li>
+<li><p>The item at position <span class="math notranslate nohighlight">\(k\)</span> is drawn with the configured random number generator from the <span class="math notranslate nohighlight">\(\max(1, n - k)\)</span> most informative non-administered items.</p></li>
+<li><p>From position <span class="math notranslate nohighlight">\(n - 1\)</span> on, it returns the most informative non-administered item.</p></li>
 <li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 </ol>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<p>McBride, J. R., &amp; Martin, J. T. (1983). Reliability and validity of adaptive ability tests in a military setting. In D. J. Weiss (Ed.), <em>New horizons in testing: Latent trait test theory and computerized adaptive testing</em> (pp. 223-236). Academic Press. <a class="reference external" href="https://doi.org/10.1016/B978-0-12-742780-5.50022-6">https://doi.org/10.1016/B978-0-12-742780-5.50022-6</a>. Not openly available; Georgiadou et al. (2007) describe the method.</p>
+<p>Georgiadou, E. G., Triantafillou, E., &amp; Economides, A. A. (2007). A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. <em>The Journal of Technology, Learning, and Assessment</em>, 5(8). <a class="reference external" href="https://ejournals.bc.edu/index.php/jtla/article/view/1647">https://ejournals.bc.edu/index.php/jtla/article/view/1647</a> (open access).</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.The54321Selector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">The54321Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/random.html#The54321Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></p>
-<p>Implementation of the 5-4-3-2-1 selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id7" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In New horizons in testing: Latent trait test theory and computerized adaptive testing, pages 224–236. Academic Press, New York, 1983.">McBride and Martin, 1983</a>]</span>.</p>
-<p>In this selector, at each step <span class="math notranslate nohighlight">\(k\)</span> of a test of size <span class="math notranslate nohighlight">\(K\)</span>, an item is chosen from a bin containing the
-<span class="math notranslate nohighlight">\(K-k\)</span> most informative items in the bank, given the current <span class="math notranslate nohighlight">\(\\hat\\theta\)</span>. As the test progresses, the
-bin gets smaller and more informative items have a higher probability of being chosen by the end of the test, when the
-estimation of ‘<span class="math notranslate nohighlight">\(\\hat\\theta\)</span> is more precise. The 5-4-3-2-1 selector can be viewed as a specialization of the
-<a class="reference internal" href="randomesque-selector.html#catsim.selection.RandomesqueSelector" title="catsim.selection.RandomesqueSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.RandomesqueSelector</span></code></a>, in which the bin size of most informative items gets smaller as the
-test progresses.</p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">The54321Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/random.html#The54321Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
+<p>Implementation of the 5-4-3-2-1 selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id8" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In New horizons in testing: Latent trait test theory and computerized adaptive testing, pages 223–236. Academic Press, New York, 1983. doi:10.1016/B978-0-12-742780-5.50022-6.">McBride and Martin, 1983</a>]</span>.</p>
+<p>The first item is drawn at random from the 5 most informative items at the current <span class="math notranslate nohighlight">\(\hat\theta\)</span>,
+the second from the 4 most informative remaining items, and so on, so that from the fifth item on the
+most informative item is administered. Randomizing the opening items, which every examinee would
+otherwise share while <span class="math notranslate nohighlight">\(\hat\theta\)</span> is still rough, reduces their exposure at little cost in
+precision.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>initial_bin_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of most informative items the first item is drawn from; each following item draws from
+one fewer. Default is 5.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">54321 Selector</span></a>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.The54321Selector.initial_bin_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">initial_bin_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.The54321Selector.initial_bin_size" title="Link to this definition">#</a></dt>
+<dd><p>Get the number of most informative items the first item is drawn from.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.The54321Selector.select">
 <span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/random.html#The54321Selector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Link to this definition">#</a></dt>
@@ -568,9 +632,12 @@ test progresses.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.The54321Selector"><code class="docutils literal notranslate"><span class="pre">The54321Selector</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.The54321Selector.initial_bin_size"><code class="docutils literal notranslate"><span class="pre">The54321Selector.initial_bin_size</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.The54321Selector.select"><code class="docutils literal notranslate"><span class="pre">The54321Selector.select()</span></code></a></li>
 </ul>
 </li>
