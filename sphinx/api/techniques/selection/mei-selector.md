@@ -34,6 +34,11 @@ where $I(\cdot)$ is the information of the administered test extended by
 the candidate item. The selector chooses the non-administered item with the
 largest expected information value.
 
+If an updated estimate is not finite, as with maximum likelihood without Dodd's
+heuristic after an all-correct or all-incorrect pattern, the candidate is scored
+by the information at the current estimate instead, so that step reduces to
+maximum-information selection.
+
 ## Parameters
 
 ```{eval-rst}
@@ -46,7 +51,9 @@ largest expected information value.
      - Description
    * - ``estimator``
      - ``NumericalSearchEstimator()``
-     - Estimator used to compute the hypothetical one-step-ahead ability updates. The card explicitly allows alternative estimators such as WLE, EAP, or MAP.
+     - Estimator used to compute the hypothetical one-step-ahead ability updates. Give the selector
+       its own instance: it calls ``estimate`` twice per candidate, which would inflate the counters
+       of an estimator shared with the engine.
    * - ``r_max``
      - ``1.0``
      - Exposure cap applied after candidate filtering.

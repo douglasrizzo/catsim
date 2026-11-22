@@ -50,6 +50,20 @@ class RecordingEstimator(BaseEstimator):
     return float(len(response_vector))
 
 
+class ShiftEstimator(BaseEstimator):
+  """Estimator stub that moves the estimate 0.5 toward the last response."""
+
+  def estimate(
+    self,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,
+  ) -> float:
+    del item_bank, administered_items
+    return est_theta + (0.5 if response_vector[-1] else -0.5)
+
+
 class TestMaxInfoSelector:
   """Tests for MaxInfoSelector."""
 
@@ -729,6 +743,45 @@ class TestMEISelector:
     assert selected == 1
     assert selected == int(candidates[int(manual_scores.argmax())])
 
+  def test_expected_information_matches_the_closed_form_on_1pl_items(self) -> None:
+    """Under the 1PL model an item's information is P(1 - P), so each MEI score has a closed form."""
+    difficulties = np.array([0.0, 0.8, -0.6, 1.5])
+    item_bank = ItemBank(np.column_stack([np.ones(4), difficulties, np.zeros(4), np.ones(4)]))
+    selector = MEISelector(estimator=ShiftEstimator())
+    est_theta = 0.2
+
+    def probability(theta: float, b: float) -> float:
+      return 1.0 / (1.0 + np.exp(-(theta - b)))
+
+    def test_information(theta: float, items: list[int]) -> float:
+      return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in items)
+
+    expected = {}
+    for candidate in (1, 2, 3):
+      p_correct = probability(est_theta, difficulties[candidate])
+      expected[candidate] = p_correct * test_information(est_theta + 0.5, [0, candidate]) + (
+        1.0 - p_correct
+      ) * test_information(est_theta - 0.5, [0, candidate])
+      score = selector._expected_information(item_bank, [0], [True], candidate, est_theta)
+      assert score == pytest.approx(expected[candidate], rel=1e-12)
+
+    selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=est_theta, response_vector=[True])
+    assert selected == max(expected, key=expected.__getitem__)
+
+  def test_select_falls_back_to_max_info_when_a_look_ahead_is_infinite(self) -> None:
+    """Without Dodd's heuristic an all-correct look-ahead is +inf; MEI should then match MaxInfo, not pick item 0."""
+    item_bank = ItemBank(
+      np.array(
+        [[1.0, 2.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0], [1.5, 0.1, 0.0, 1.0]],
+        dtype=float,
+      )
+    )
+    selector = MEISelector(estimator=NumericalSearchEstimator(dodd=False))
+
+    selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=0.0, response_vector=[True])
+
+    assert selected == MaxInfoSelector().select(item_bank=item_bank, administered_items=[0], est_theta=0.0) == 3
+
 
 class TestMLWISelector:
   """Tests for MLWISelector."""
@@ -828,6 +881,43 @@ class TestMLWISelector:
     )
 
     assert selected == int(manual_scores.argmax())
+
+  def test_select_with_no_data_prefers_the_most_discriminating_item(self) -> None:
+    """With flat weights a 2PL item's integrated information is its discrimination a, whatever its difficulty."""
+    item_bank = ItemBank(
+      np.array(
+        [[0.8, 2.0, 0.0, 1.0], [1.9, -2.5, 0.0, 1.0], [1.2, 0.0, 0.0, 1.0], [1.5, 1.0, 0.0, 1.0]],
+        dtype=float,
+      )
+    )
+
+    selected = MLWISelector().select(item_bank=item_bank, administered_items=[], est_theta=0.0, response_vector=[])
+
+    assert selected == 1
+
+  def test_select_stays_finite_on_a_long_test(self) -> None:
+    """Normalizing the log-likelihood keeps 300-item likelihood weights from underflowing."""
+    item_bank = ItemBank.generate_item_bank(320, seed=7)
+    rng = np.random.default_rng(7)
+    administered_items = list(range(300))
+    response_vector = [bool(rng.random() < irt.icc(0.4, *item_bank.items[idx, :4])) for idx in administered_items]
+    selector = MLWISelector()
+
+    weights = selector._likelihood_weights(response_vector, item_bank.items[administered_items, :4])
+    selected = selector.select(
+      item_bank=item_bank, administered_items=administered_items, est_theta=0.0, response_vector=response_vector
+    )
+
+    assert np.isfinite(weights).all()
+    assert weights.max() == pytest.approx(1.0)
+    assert selected in range(300, 320)
+
+  def test_init_rejects_non_increasing_bounds(self) -> None:
+    """Reversed bounds would flip the sign of every score and select the least informative item."""
+    with pytest.raises(ValueError, match="bounds must be increasing"):
+      MLWISelector(bounds=(4.0, -4.0))
+    with pytest.raises(ValueError, match="bounds must be increasing"):
+      MLWISelector(bounds=(1.0, 1.0))
 
   def test_select_converges_to_max_info_on_long_test(self) -> None:
     """On a long test, MLWI should agree with MaxInfo near the MLE.
