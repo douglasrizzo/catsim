@@ -4,11 +4,11 @@ from enum import Enum, auto
 
 import matplotlib.pyplot as plt
 import numpy
-import numpy.typing as npt
 from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from . import irt
+from ._typing import FloatArray
 from .item_bank import ItemBank
 from .state import CatSessionState, SimulationResult
 
@@ -155,7 +155,7 @@ def item_curve(
 
 
 def gen3d_dataset_scatter(
-  item_bank: ItemBank | npt.NDArray[numpy.floating],
+  item_bank: ItemBank | FloatArray,
   title: str | None = None,
   figsize: tuple | None = None,
 ) -> Axes:
@@ -212,8 +212,8 @@ def item_exposure(
   ax: Axes | None = None,
   title: str | None = None,
   simulation: SimulationResult | None = None,
-  item_bank: ItemBank | npt.NDArray[numpy.floating] | None = None,
-  exposure_rates: npt.NDArray[numpy.floating] | None = None,
+  item_bank: ItemBank | FloatArray | None = None,
+  exposure_rates: FloatArray | None = None,
   par: str | None = None,
   hist: bool = False,
 ) -> Axes:
@@ -348,7 +348,7 @@ def test_progress(
   index: int | None = None,
   session: CatSessionState | None = None,
   thetas: list[float] | None = None,
-  administered_items: npt.NDArray[numpy.floating] | None = None,
+  administered_items: FloatArray | None = None,
   true_theta: float | None = None,
   info: bool = False,
   var: bool = False,

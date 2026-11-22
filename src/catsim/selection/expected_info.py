@@ -3,9 +3,9 @@
 import math
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator
 from ..item_bank import ItemBank
@@ -108,7 +108,7 @@ class MEISelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
     """Return the index of the item with the highest expected post-response information.

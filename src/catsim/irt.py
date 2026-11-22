@@ -11,9 +11,10 @@ from typing import Any
 
 import numexpr
 import numpy
-import numpy.typing as npt
 from scipy import stats
 from scipy.special import expit
+
+from ._typing import FloatArray
 
 THETA_MIN_TYPICAL = -4.0
 """Typical lower bound for ability (theta) estimation.
@@ -121,7 +122,7 @@ def icc(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
 
 
 def _split_params(
-  items: npt.NDArray[numpy.floating[Any]],
+  items: FloatArray,
 ) -> tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
   """Split the item matrix parameters into columns.
 
@@ -144,7 +145,7 @@ def _split_params(
   return items[:, 0], items[:, 1], items[:, 2], items[:, 3]
 
 
-def detect_model(items: npt.NDArray[numpy.floating[Any]]) -> int:
+def detect_model(items: FloatArray) -> int:
   """Detect which logistic model an item matrix fits into.
 
   Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,
@@ -175,9 +176,7 @@ def detect_model(items: npt.NDArray[numpy.floating[Any]]) -> int:
   return 1
 
 
-def icc_hpc(
-  theta: float | npt.NDArray[numpy.floating[Any]], items: npt.NDArray[numpy.floating[Any]]
-) -> npt.NDArray[numpy.floating[Any]]:
+def icc_hpc(theta: float | FloatArray, items: FloatArray) -> FloatArray:
   """Compute item characteristic functions for all items in a numpy array at once.
 
   This is a high-performance computing (HPC) version that uses vectorized operations
@@ -205,9 +204,7 @@ def icc_hpc(
   )
 
 
-def inf_hpc(
-  theta: float | npt.NDArray[numpy.floating[Any]], items: npt.NDArray[numpy.floating[Any]]
-) -> npt.NDArray[numpy.floating[Any]]:
+def inf_hpc(theta: float | FloatArray, items: FloatArray) -> FloatArray:
   """Compute the information values for all items in a numpy array using numpy and numexpr.
 
   This is a high-performance computing (HPC) version that uses vectorized operations
@@ -287,7 +284,7 @@ def inf(theta: float, a: float, b: float, c: float = 0, d: float = 1) -> float:
   return a**2 * product * (above_floor / (c + above_floor)) * (below_ceiling / ((1 - d) + below_ceiling))
 
 
-def test_info(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
+def test_info(theta: float, items: FloatArray) -> float:
   r"""Compute the test information of a test at a specific :math:`\theta` value :cite:p:`Ayala2009`.
 
   Test information is the sum of individual item information values and indicates
@@ -313,7 +310,7 @@ def test_info(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
 
 def var(
   theta: float | None = None,
-  items: npt.NDArray[numpy.floating[Any]] | None = None,
+  items: FloatArray | None = None,
   test_inf: float | None = None,
 ) -> float:
   r"""Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.
@@ -357,7 +354,7 @@ def var(
   return 1 / test_inf
 
 
-def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
+def see(theta: float, items: FloatArray) -> float:
   r"""Compute the standard error of estimation (:math:`SEE`) of a test.
 
   The estimate is computed at a specific :math:`\theta` value :cite:p:`Ayala2009`.
@@ -374,7 +371,7 @@ def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
   ----------
   theta : float
       An ability value.
-  items : npt.NDArray[numpy.floating[Any]]
+  items : numpy.ndarray
       A matrix containing item parameters.
 
   Returns
@@ -386,9 +383,7 @@ def see(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
   return math.sqrt(var(theta, items))
 
 
-def confidence_interval(
-  theta: float, items: npt.NDArray[numpy.floating[Any]], confidence: float = 0.95
-) -> tuple[float, float]:
+def confidence_interval(theta: float, items: FloatArray, confidence: float = 0.95) -> tuple[float, float]:
   r"""Compute the confidence interval for an ability estimate.
 
   The confidence interval is computed using the normal approximation:
@@ -403,7 +398,7 @@ def confidence_interval(
   ----------
   theta : float
       The estimated ability value.
-  items : npt.NDArray[numpy.floating[Any]]
+  items : numpy.ndarray
       A matrix containing item parameters for administered items.
   confidence : float, optional
       The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).
@@ -453,12 +448,12 @@ def confidence_interval(
 
 
 def theta_to_scale(
-  theta: float | npt.NDArray[numpy.floating[Any]],
+  theta: float | FloatArray,
   scale_min: float = 0,
   scale_max: float = 100,
   theta_min: float = -4,
   theta_max: float = 4,
-) -> float | npt.NDArray[numpy.floating[Any]]:
+) -> float | FloatArray:
   r"""Convert theta values to a custom score scale using linear transformation.
 
   This function transforms ability estimates from the standard IRT theta scale
@@ -530,12 +525,12 @@ def theta_to_scale(
 
 
 def scale_to_theta(
-  score: float | npt.NDArray[numpy.floating[Any]],
+  score: float | FloatArray,
   scale_min: float = 0,
   scale_max: float = 100,
   theta_min: float = -4,
   theta_max: float = 4,
-) -> float | npt.NDArray[numpy.floating[Any]]:
+) -> float | FloatArray:
   r"""Convert scores from a custom scale to theta values using linear transformation.
 
   This function transforms scores from any desired scale (e.g., 0-100, 200-800)
@@ -605,7 +600,7 @@ def scale_to_theta(
   return (score - b) / a
 
 
-def reliability(theta: float, items: npt.NDArray[numpy.floating[Any]]) -> float:
+def reliability(theta: float, items: FloatArray) -> float:
   r"""Compute test reliability :cite:p:`Thissen00`.
 
   Test reliability is a measure of internal consistency for the test, similar to
@@ -703,7 +698,7 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
   return b + (1 / a) * math.log((x_star - c) / (d - x_star))
 
 
-def max_info_hpc(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
+def max_info_hpc(items: FloatArray) -> FloatArray:
   """Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.
 
   This high-performance computing version efficiently computes the theta values of
@@ -740,9 +735,7 @@ def max_info_hpc(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.f
   )
 
 
-def inf_integral(
-  lower: float, upper: float, items: npt.NDArray[numpy.floating[Any]]
-) -> npt.NDArray[numpy.floating[Any]]:
+def inf_integral(lower: float, upper: float, items: FloatArray) -> FloatArray:
   r"""Integrate the information function of each item between two ability values, in closed form.
 
   Since :math:`dP/d\theta = a (P - c)(d - P) / (d - c)`, the item information
@@ -773,7 +766,7 @@ def inf_integral(
   """
   a, _b, c, d = _split_params(items)
 
-  def antiderivative(theta: float) -> npt.NDArray[numpy.floating[Any]]:
+  def antiderivative(theta: float) -> FloatArray:
     # the logarithms only matter when their coefficients are positive; `where` drops 0 * log(0)
     return numexpr.evaluate(
       "a / (d - c) * (p - where(c * d > 0, c * d * log(p), 0)"
@@ -787,7 +780,7 @@ def inf_integral(
 def log_likelihood(
   est_theta: float,
   response_vector: list[bool],
-  administered_items: npt.NDArray[numpy.floating[Any]],
+  administered_items: FloatArray,
 ) -> float:
   r"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.
 
@@ -872,7 +865,7 @@ def negative_log_likelihood(est_theta: float, *args: Any) -> float:
   return -log_likelihood(est_theta, args[0], args[1])
 
 
-def normalize_item_bank(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.floating[Any]]:
+def normalize_item_bank(items: FloatArray) -> FloatArray:
   r"""Normalize an item matrix so that it conforms to the standard used by catsim.
 
   The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item
@@ -909,7 +902,7 @@ def normalize_item_bank(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[
   return items
 
 
-def validate_item_bank(items: npt.NDArray[numpy.floating[Any]], raise_err: bool = False) -> None:
+def validate_item_bank(items: FloatArray, raise_err: bool = False) -> None:
   r"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.
 
   The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item

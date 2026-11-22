@@ -9,15 +9,13 @@ from __future__ import annotations
 import math
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 
-FloatArray = npt.NDArray[numpy.floating[Any]]
 LogPrior = Callable[[FloatArray], FloatArray]
 MIN_QUADRATURE_NODES = 2
 

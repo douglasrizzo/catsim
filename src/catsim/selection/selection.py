@@ -1,9 +1,9 @@
 """Concrete selector implementations."""
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import BaseSelector
@@ -64,7 +64,7 @@ class MaxInfoSelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
@@ -121,7 +121,7 @@ class UrrySelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,  # noqa: ARG002
+    exposure_rates: FloatArray | None = None,  # noqa: ARG002
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
@@ -225,7 +225,7 @@ class IntervalInfoSelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,  # noqa: ARG002
+    exposure_rates: FloatArray | None = None,  # noqa: ARG002
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.

@@ -1,11 +1,7 @@
 """Concrete stopping criteria implementations."""
 
-from typing import Any
-
-import numpy
-import numpy.typing as npt
-
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .base import BaseStopper
 
@@ -114,7 +110,7 @@ class TestLengthStopper(BaseStopper):
 
   def _check_stopping_criterion(  # noqa: PLR6301
     self,
-    administered_items: npt.NDArray[numpy.floating[Any]],  # noqa: ARG002
+    administered_items: FloatArray,  # noqa: ARG002
     theta: float,  # noqa: ARG002
   ) -> bool:
     """Check the specific stopping criterion implemented by the subclass.
@@ -124,7 +120,7 @@ class TestLengthStopper(BaseStopper):
 
     Parameters
     ----------
-    administered_items : npt.NDArray[numpy.floating[Any]]
+    administered_items : numpy.ndarray
         Array containing the parameters of administered items.
     theta : float
         Current ability estimate.
@@ -215,14 +211,14 @@ class MinErrorStopper(TestLengthStopper):
 
   def _check_stopping_criterion(
     self,
-    administered_items: npt.NDArray[numpy.floating[Any]],
+    administered_items: FloatArray,
     theta: float,
   ) -> bool:
     """Check if the standard error is below the threshold.
 
     Parameters
     ----------
-    administered_items : npt.NDArray[numpy.floating[Any]]
+    administered_items : numpy.ndarray
         Array of administered item parameters.
     theta : float
         Current ability estimate.
@@ -337,14 +333,14 @@ class ConfidenceIntervalStopper(TestLengthStopper):
 
   def _check_stopping_criterion(
     self,
-    administered_items: npt.NDArray[numpy.floating[Any]],
+    administered_items: FloatArray,
     theta: float,
   ) -> bool:
     """Check if the confidence interval falls entirely within a discrete interval.
 
     Parameters
     ----------
-    administered_items : npt.NDArray[numpy.floating[Any]]
+    administered_items : numpy.ndarray
         Array of administered item parameters.
     theta : float
         Current ability estimate.
