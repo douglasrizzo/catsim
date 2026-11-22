@@ -73,7 +73,7 @@ class TestItemBankCreation:
     # Invalid: discrimination < 0
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
 
-    with pytest.raises(ValueError, match="discrimination < 0"):
+    with pytest.raises(ValueError, match="discrimination <= 0"):
       ItemBank(items)
 
   def test_validation_can_be_disabled(self) -> None:
@@ -153,6 +153,21 @@ class TestItemBankGenerate:
     """Test generating with irt.NumParams enum."""
     bank = ItemBank.generate(10, item_type=irt.NumParams.PL3, seed=42)
     assert bank.model == 3
+
+  def test_generate_redraws_non_positive_discriminations(self) -> None:
+    """A negative draw is redrawn rather than shifting every discrimination.
+
+    With seed 876, one of the 500 drawn discriminations is negative. Earlier versions added its absolute
+    value to every item, which left one item with a = 0 and moved the whole distribution.
+    """
+    rng = np.random.default_rng(876)
+    _, raw_a = rng.multivariate_normal([0, 1.2], [[1, 0], [0, 0.25**2]], 500).T
+    assert (raw_a <= 0).sum() == 1
+
+    bank = ItemBank.generate_item_bank(500, itemtype="2PL", seed=876)
+
+    assert bank.discrimination.min() > 0
+    np.testing.assert_array_equal(bank.discrimination[raw_a > 0], raw_a[raw_a > 0])
 
 
 class TestItemBankProperties:
