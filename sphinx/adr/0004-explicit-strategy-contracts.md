@@ -27,3 +27,4 @@ Use explicit typed parameters for engine-managed strategy inputs:
 - Some permissive legacy call patterns are removed intentionally.
 - Adding an engine-managed input changes every strategy signature: custom selectors must
   accept `response_vector` (optional, defaulting to `None`) because the engine always passes it.
+  Selectors that need the history, such as MEI and MLWI, raise `ValueError` when it is `None`.

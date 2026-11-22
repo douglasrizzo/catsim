@@ -172,8 +172,10 @@ class BaseSelector(ABC):
     exposure_rates : numpy.ndarray or None, optional
         Explicit run-level exposure-rate snapshot.
     response_vector : list[bool] or None, optional
-        Responses observed so far in the current session. Selectors that need
-        response history can use this without relying on hidden engine state.
+        Responses observed so far in the current session. The engine always passes
+        it, so selectors can use the response history without relying on hidden
+        engine state. Selectors that need it, such as MEISelector and MLWISelector,
+        raise ValueError when it is None.
 
     Returns
     -------
