@@ -51,9 +51,8 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-The default configuration is a uniform grid over the extended theta
-range with a standard normal prior, matching the conventions already used in the
-feature card.
+By default the grid has 41 equally spaced nodes on $[-6, 6]$ (spacing 0.3) and
+the prior is $\mathcal{N}(0, 1)$.
 
 ## Parameters
 
@@ -67,18 +66,19 @@ feature card.
      - Description
    * - ``n_nodes``
      - ``41``
-     - Number of quadrature nodes. Exposed on consuming estimators/selectors so
-       integration resolution can be tuned without changing the shared kernel.
+     - Number of quadrature nodes of ``QuadratureGrid.uniform``. Consuming
+       estimators take a whole grid, so resolution can be tuned without
+       changing the shared kernel.
    * - ``low``
      - ``THETA_MIN_EXTENDED``
-     - Lower bound of the planned uniform grid.
+     - Lower bound of the uniform grid.
    * - ``high``
      - ``THETA_MAX_EXTENDED``
-     - Upper bound of the planned uniform grid.
+     - Upper bound of the uniform grid.
    * - ``log_prior``
      - ``normal_log_prior(0, 1)``
-     - Vectorized log-density used in posterior evaluation. The infrastructure
-       also plans to expose a uniform prior factory for flatter weighting.
+     - Vectorized log-density used in posterior evaluation.
+       ``uniform_log_prior(low, high)`` gives a flat prior instead.
 ```
 
 ## Behavioral Contracts

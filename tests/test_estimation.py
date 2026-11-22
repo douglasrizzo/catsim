@@ -308,6 +308,10 @@ class TestBayesianHelpers:
       normal_log_prior(sd=0.0)
     with pytest.raises(ValueError, match="sd must be positive"):
       normal_log_prior(sd=-1.0)
+    with pytest.raises(ValueError, match="sd must be positive"):
+      normal_log_prior(sd=float("nan"))
+    with pytest.raises(ValueError, match="mean must be finite"):
+      normal_log_prior(mean=float("inf"))
 
   def test_uniform_log_prior_rejects_inverted_bounds(self) -> None:
     """Uniform priors require a strictly increasing interval."""
@@ -315,6 +319,8 @@ class TestBayesianHelpers:
       uniform_log_prior(1.0, 1.0)
     with pytest.raises(ValueError, match="high must be greater than low"):
       uniform_log_prior(2.0, 1.0)
+    with pytest.raises(ValueError, match="must be finite"):
+      uniform_log_prior(float("nan"), 1.0)
 
   def test_quadrature_grid_uniform_defaults(self) -> None:
     """Test the default uniform quadrature grid."""
@@ -334,6 +340,23 @@ class TestBayesianHelpers:
       QuadratureGrid.uniform(low=1.0, high=1.0)
     with pytest.raises(ValueError, match="high must be greater than low"):
       QuadratureGrid.uniform(low=2.0, high=1.0)
+
+  @pytest.mark.parametrize(
+    ("nodes", "weights", "match"),
+    [
+      (np.linspace(-1.0, 1.0, 5), np.array([0.3]), "same length"),
+      (np.linspace(-1.0, 1.0, 5), np.ones(4), "same length"),
+      (np.ones((2, 3)), np.ones((2, 3)), "one-dimensional"),
+      (np.array([0.0]), np.array([1.0]), "at least 2"),
+      (np.array([0.0, np.nan]), np.ones(2), "nodes must be finite"),
+      (np.array([0.0, 1.0]), np.array([1.0, -1.0]), "weights must be finite and positive"),
+      (np.array([0.0, 1.0]), np.array([1.0, np.inf]), "weights must be finite and positive"),
+    ],
+  )
+  def test_quadrature_grid_rejects_invalid_arrays(self, nodes: np.ndarray, weights: np.ndarray, match: str) -> None:
+    """A grid built directly from arrays should validate them."""
+    with pytest.raises(ValueError, match=match):
+      QuadratureGrid(nodes=nodes, weights=weights)
 
   def test_posterior_normalizes_to_one(self) -> None:
     """Test that the discrete posterior is normalized."""
@@ -365,6 +388,57 @@ class TestBayesianHelpers:
 
     assert mean == pytest.approx(0.0, abs=1e-12)
     assert posterior_variance(post, grid.nodes) > 0
+
+  def test_posterior_with_no_data_is_the_weighted_prior(self) -> None:
+    """With no responses the posterior is the prior times the grid weights, normalized (contract 3)."""
+    nodes = np.linspace(-3.0, 3.0, 7)
+    weights = np.array([1.0, 2.0, 1.0, 3.0, 1.0, 2.0, 1.0])
+    grid = QuadratureGrid(nodes=nodes, weights=weights)
+    log_prior = normal_log_prior(0.5, 2.0)
+
+    post = posterior([], np.empty((0, 4)), grid, log_prior)
+
+    expected = np.exp(log_prior(nodes)) * weights
+    assert post == pytest.approx(expected / expected.sum())
+
+  def test_posterior_matches_a_brute_force_integral(self) -> None:
+    """The default grid reproduces the posterior moments of a fine numerical integral."""
+    items = np.array([[1.2, -0.5, 0.0, 1.0], [0.8, 0.3, 0.2, 1.0], [1.6, 1.0, 0.1, 0.95]])
+    responses = [True, False, True]
+    grid = QuadratureGrid.uniform()
+
+    post = posterior(responses, items, grid, normal_log_prior())
+
+    fine = np.linspace(-6.0, 6.0, 20001)
+    a, b, c, d = (items[:, [k]] for k in range(4))
+    p = c + (d - c) / (1.0 + np.exp(-a * (fine - b)))
+    likelihood = np.prod(np.where(np.array(responses)[:, None], p, 1.0 - p), axis=0)
+    density = likelihood * np.exp(-0.5 * fine**2)
+    density /= np.trapezoid(density, fine)
+    mean = np.trapezoid(fine * density, fine)
+    variance = np.trapezoid((fine - mean) ** 2 * density, fine)
+
+    assert posterior_mean(post, grid.nodes) == pytest.approx(mean, abs=1e-6)
+    assert posterior_variance(post, grid.nodes) == pytest.approx(variance, rel=1e-5)
+
+  def test_posterior_rejects_nan_log_prior(self) -> None:
+    """A NaN in the log-prior should raise instead of returning an all-NaN posterior."""
+    grid = QuadratureGrid.uniform()
+
+    def nan_prior(theta: np.ndarray) -> np.ndarray:
+      values = np.zeros_like(theta, dtype=float)
+      values[0] = np.nan
+      return values
+
+    with pytest.raises(ValueError, match="NaN or \\+inf"):
+      posterior([], np.empty((0, 4)), grid, nan_prior)
+
+  def test_posterior_rejects_mismatched_responses_without_items(self) -> None:
+    """Responses without matching items should raise, not silently return the prior."""
+    grid = QuadratureGrid.uniform()
+
+    with pytest.raises(ValueError, match="same length"):
+      posterior([True, False], np.empty((0, 4)), grid, normal_log_prior())
 
   def test_posterior_shifts_positive_after_correct_response(self) -> None:
     """Test that a correct response on a difficult item moves the posterior upward."""
