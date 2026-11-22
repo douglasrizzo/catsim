@@ -157,7 +157,7 @@ class QuadratureGrid:
   @classmethod
   def uniform(
     cls,
-    n_nodes: int = 41,
+    n_nodes: int = 121,
     low: float = THETA_MIN_EXTENDED,
     high: float = THETA_MAX_EXTENDED,
   ) -> QuadratureGrid:
@@ -166,7 +166,7 @@ class QuadratureGrid:
     Parameters
     ----------
     n_nodes : int, optional
-        Number of nodes, including both bounds. Default is 41, a spacing of 0.3 on the
+        Number of nodes, including both bounds. Default is 121, a spacing of 0.1 on the
         default bounds.
     low : float, optional
         First node. Default is ``THETA_MIN_EXTENDED``.

@@ -51,7 +51,7 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
-By default the grid has 41 equally spaced nodes on $[-6, 6]$ (spacing 0.3) and
+By default the grid has 121 equally spaced nodes on $[-6, 6]$ (spacing 0.1) and
 the prior is $\mathcal{N}(0, 1)$.
 
 ## Parameters
@@ -65,7 +65,7 @@ the prior is $\mathcal{N}(0, 1)$.
      - Default
      - Description
    * - ``n_nodes``
-     - ``41``
+     - ``121``
      - Number of quadrature nodes of ``QuadratureGrid.uniform``. Consuming
        estimators take a whole grid, so resolution can be tuned without
        changing the shared kernel.

@@ -326,8 +326,9 @@ class TestBayesianHelpers:
     """Test the default uniform quadrature grid."""
     grid = QuadratureGrid.uniform()
 
-    assert len(grid.nodes) == 41
-    assert len(grid.weights) == 41
+    assert len(grid.nodes) == 121
+    assert len(grid.weights) == 121
+    assert np.diff(grid.nodes) == pytest.approx(np.full(120, 0.1))
     assert grid.nodes[0] == pytest.approx(-6.0)
     assert grid.nodes[-1] == pytest.approx(6.0)
     assert np.allclose(grid.weights, grid.weights[0])
