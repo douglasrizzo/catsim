@@ -70,6 +70,19 @@ class TestRandomInitializerInitialize:
       theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert -3 <= theta <= 3
 
+  def test_initialize_defaults_start_near_the_center(self) -> None:
+    """Defaults draw from U(-0.5, 0.5), as in Barrada et al. (2006), or N(0, 1); they used to be U(-5, 5)."""
+    rng = np.random.default_rng(42)
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+
+    uniform = [RandomInitializer().initialize(item_bank=item_bank, rng=rng) for _ in range(1000)]
+    normal_initializer = RandomInitializer(dist_type=InitializationDistribution.NORMAL)
+    normal = [normal_initializer.initialize(item_bank=item_bank, rng=rng) for _ in range(5000)]
+
+    assert -0.5 <= min(uniform) < max(uniform) <= 0.5
+    assert np.mean(normal) == pytest.approx(0.0, abs=0.05)
+    assert np.std(normal) == pytest.approx(1.0, abs=0.05)
+
   def test_initialize_uniform_reversed_params(self) -> None:
     """Test that uniform handles reversed params correctly."""
     rng = np.random.default_rng(42)

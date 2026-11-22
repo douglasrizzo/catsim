@@ -165,13 +165,16 @@ class NumericalSearchEstimator(BaseEstimator):
         THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
       )
     elif self.__search_method in {"brent", "bounded", "golden"}:
+      bounded = self.__search_method == "bounded"
       res = minimize_scalar(
         irt.negative_log_likelihood,
         bracket=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
-        bounds=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED) if self.__search_method == "bounded" else None,
+        bounds=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED) if bounded else None,
         method=self.__search_method,
         args=(response_vector, item_bank.get_items(administered_items)),
-        tol=self._tol if self.__search_method != "bounded" else None,
+        # SciPy only takes an absolute tolerance for the bounded method, through its options
+        tol=None if bounded else self._tol,
+        options={"xatol": self._tol} if bounded else None,
       )
       self._last_evaluations = res.nfev
       candidate_theta = res.x

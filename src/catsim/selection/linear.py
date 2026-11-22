@@ -46,17 +46,11 @@ class LinearSelector(FiniteSelector):
 
     super().__init__(len(indexes))
     self._indexes = indexes
-    self._current = 0
 
   @property
   def indexes(self) -> list[int]:
     """The indexes of the items that will be returned in order."""
     return self._indexes
-
-  @property
-  def current(self) -> int:
-    """The index of the current item."""
-    return self._current
 
   def select(
     self,
@@ -84,7 +78,6 @@ class LinearSelector(FiniteSelector):
     if len(valid_indexes) == 0:
       msg = (
         f"A new index was asked for, but there are no more item indexes to present.\n"
-        f"Current item:\t\t\t{self._current}\n"
         f"Items to be administered:\t{sorted(self._indexes)} (size: {len(self._indexes)})\n"
         f"Administered items:\t\t{sorted(administered_items)} (size: {len(administered_items)})"
       )
