@@ -2,7 +2,6 @@
 
 import numpy
 import numpy.typing as npt
-from scipy.integrate import quad
 
 from .. import irt
 from ..exceptions import NoItemsAvailableError
@@ -150,10 +149,27 @@ class UrrySelector(BaseSelector):
 
 
 class IntervalInfoSelector(BaseSelector):
-  r"""Selects the item that maximizes the integral of the information function at a predetermined ``interval``.
+  r"""Select the item whose information, integrated over an interval around the estimate, is largest.
 
-  The interval is defined by a parameter :math:`\\delta` above and below the current :math:`\\hat\\theta`, like so:
-  .. math:: argmax_{i \\in I} \\int_{\\hat\\theta - \\delta}^{\\hat\\theta + \\delta}I_i(\\hat\\theta)
+  By default the interval is the confidence interval of the interval information criterion
+  :cite:p:`Veerkamp1997`, which narrows as the test information grows:
+
+  .. math::
+
+      \arg\max_{i \in R} \int_{\theta_L}^{\theta_U} I_i(\theta)\, d\theta, \qquad
+      \theta_{L, U} = \hat\theta \mp \frac{\lambda}{\sqrt{I(\hat\theta)}}, \qquad
+      \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)
+
+  where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the
+  confidence level. A fixed half-width :math:`\delta` can be used instead.
+
+  Parameters
+  ----------
+  interval : float or None, optional
+      Fixed half-width :math:`\delta` of the interval. Default is None, which uses the confidence
+      interval above.
+  confidence : float, optional
+      Confidence level :math:`\gamma` of the default interval. Default is 0.95.
 
   Notes
   -----
@@ -164,22 +180,42 @@ class IntervalInfoSelector(BaseSelector):
     """Return the name of the selector."""
     return "Interval Information Selector"
 
-  def __init__(self, interval: float | None = None) -> None:
+  def __init__(self, interval: float | None = None, confidence: float = 0.95) -> None:
     r"""Initialize an IntervalInfoSelector object.
 
     Parameters
     ----------
     interval : float or None, optional
-        The interval of the integral. If no interval is passed, the integral is computed from
-        :math:`[-\\infty, \\infty]`. Default is None.
+        Fixed half-width of the interval. Default is None, which uses a confidence interval of
+        :math:`\hat\theta`.
+    confidence : float, optional
+        Confidence level of the default interval. Default is 0.95.
+
+    Raises
+    ------
+    ValueError
+        If ``interval`` is not positive or ``confidence`` is not between 0 and 1.
     """
+    if interval is not None and interval <= 0:
+      msg = f"interval must be positive, got {interval}"
+      raise ValueError(msg)
+    if not 0 < confidence < 1:
+      msg = f"confidence must be between 0 and 1, got {confidence}"
+      raise ValueError(msg)
+
     super().__init__()
-    self._interval = interval if interval is not None else numpy.inf
+    self._interval = interval
+    self._confidence = confidence
 
   @property
-  def interval(self) -> float:
-    """Get the size of the interval under which the integral of the information function will be computed."""
+  def interval(self) -> float | None:
+    """Get the fixed half-width of the interval, or None when the confidence interval is used."""
     return self._interval
+
+  @property
+  def confidence(self) -> float:
+    """Get the confidence level of the default interval."""
+    return self._confidence
 
   def select(
     self,
@@ -205,23 +241,16 @@ class IntervalInfoSelector(BaseSelector):
     int or None
         Index of the next item to be applied or `None` if there are no more items in the item bank.
     """
-    # compute the integral of the information function around an examinee's ability
-    information_integral = numpy.array([
-      quad(
-        irt.inf,
-        est_theta - self._interval,
-        est_theta + self._interval,
-        args=(item[0], item[1], item[2], item[3]),
-      )[0]
-      for item in item_bank.items
-    ])
-    # sort by that integral in descending order
-    ordered_items = (-information_integral).argsort()
-    # remove administered items
-    organized_items = self._get_non_administered(ordered_items, administered_items)
-
-    if len(organized_items) == 0:
+    candidates = numpy.setdiff1d(numpy.arange(item_bank.n_items), administered_items)
+    if candidates.size == 0:
       msg = "There are no more items to apply."
       raise NoItemsAvailableError(msg)
 
-    return int(organized_items[0])
+    if self._interval is None:
+      # infinite before any item is administered, since there is no information yet
+      lower, upper = irt.confidence_interval(est_theta, item_bank.get_items(administered_items), self._confidence)
+    else:
+      lower, upper = est_theta - self._interval, est_theta + self._interval
+
+    information_integral = irt.inf_integral(lower, upper, item_bank.items[candidates])
+    return int(candidates[numpy.argmax(information_integral)])

@@ -723,6 +723,50 @@ def max_info_hpc(items: npt.NDArray[numpy.floating[Any]]) -> npt.NDArray[numpy.f
   )
 
 
+def inf_integral(
+  lower: float, upper: float, items: npt.NDArray[numpy.floating[Any]]
+) -> npt.NDArray[numpy.floating[Any]]:
+  r"""Integrate the information function of each item between two ability values, in closed form.
+
+  Since :math:`dP/d\theta = a (P - c)(d - P) / (d - c)`, the item information
+  :math:`I(\theta) = (dP/d\theta)^2 / [P (1 - P)]` can be integrated by substituting :math:`P` for
+  :math:`\theta`:
+
+  .. math::
+
+      \int_{\theta_L}^{\theta_U} I(\theta)\, d\theta =
+      \frac{a}{d - c} \Big[ P - c\, d \log P + (1 - c)(1 - d) \log(1 - P) \Big]_{P(\theta_L)}^{P(\theta_U)}
+
+  The bounds may be infinite. Under the 2PL model, the integral over the whole ability scale equals
+  :math:`a`.
+
+  Parameters
+  ----------
+  lower : float
+      Lower integration bound, possibly ``-inf``.
+  upper : float
+      Upper integration bound, possibly ``inf``.
+  items : numpy.ndarray
+      Array containing item parameters with at least four columns [a, b, c, d, ...].
+
+  Returns
+  -------
+  numpy.ndarray
+      The integral of each item's information function over ``[lower, upper]``.
+  """
+  a, _b, c, d = _split_params(items)
+
+  def antiderivative(theta: float) -> npt.NDArray[numpy.floating[Any]]:
+    # the logarithms only matter when their coefficients are positive; `where` drops 0 * log(0)
+    return numexpr.evaluate(
+      "a / (d - c) * (p - where(c * d > 0, c * d * log(p), 0)"
+      " + where((1 - c) * (1 - d) > 0, (1 - c) * (1 - d) * log(1 - p), 0))",
+      local_dict={"a": a, "c": c, "d": d, "p": icc_hpc(theta, items)},
+    )
+
+  return antiderivative(upper) - antiderivative(lower)
+
+
 def log_likelihood(
   est_theta: float,
   response_vector: list[bool],
