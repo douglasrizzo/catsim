@@ -101,12 +101,10 @@ It is removed when the spec is promoted to "Implemented" status.
 # src/catsim/stopping/classification.py  (alongside SPRTStopper)
 """Generalized Likelihood Ratio classification stopper (Bartroff, Finkelman & Lai, 2008)."""
 
-from typing import Any
-
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .classification import Classification
 from .stopping import TestLengthStopper
@@ -164,7 +162,7 @@ class GLRStopper(TestLengthStopper):
     self,
     theta_hat: float,
     response_vector: list[bool],
-    administered_items: npt.NDArray[numpy.floating],
+    administered_items: FloatArray,
   ) -> tuple[float, Classification]:
     """Return (statistic, proposed_decision)."""
     if self._theta_low < theta_hat < self._theta_high:

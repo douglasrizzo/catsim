@@ -75,11 +75,9 @@ It is removed when the spec is promoted to "Implemented" status.
 # src/catsim/stopping/stopping.py  (alongside MinErrorStopper and PredictedSEMStopper)
 """Minimum-information-in-bank stopper (Choi, Grady & Dodd, 2011)."""
 
-from typing import Any
-
 import numpy
-import numpy.typing as npt
 
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .stopping import TestLengthStopper
 
@@ -131,7 +129,7 @@ class MinInfoInBankStopper(TestLengthStopper):
 
   def _check_stopping_criterion(  # noqa: PLR6301
     self,
-    administered_items: npt.NDArray[numpy.floating[Any]],  # noqa: ARG002
+    administered_items: FloatArray,  # noqa: ARG002
     theta: float,  # noqa: ARG002
   ) -> bool:
     return False
