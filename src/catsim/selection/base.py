@@ -266,8 +266,15 @@ class BaseSelector(ABC):
     Returns
     -------
     int or None
-        Index of the next item to be applied, or None if there are no more items
-        to be presented.
+        Index of the next item to be applied. None ends the session on the selector's
+        own terms, with stop reason ``"selector_stopped"``; no built-in selector returns it.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If no item can be administered, for example because every item has already been
+        administered. The engine then ends the session with stop reason
+        ``"item_bank_exhausted"``.
     """
 
 

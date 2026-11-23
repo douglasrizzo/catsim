@@ -18,7 +18,7 @@ alternatives, and what makes it distinctive.>
 
 ## Definition
 
-\<Mathematical formulation. Use `.. math::` for display equations.>
+\<Mathematical formulation. Use `$$` blocks for display equations.>
 
 $$
 <equation>

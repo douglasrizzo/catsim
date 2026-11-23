@@ -41,7 +41,7 @@ on {py:mod}`numpy` and {py:mod}`scipy`, it provides:
 {py:mod}`catsim` borrows many concepts from Item Response Theory
 {cite:p}`Lord68,Rasch66`, a series of models created in the second part of the 20th century
 with the goal of *measuring latent traits*. {py:mod}`catsim` makes use of Item
-Response Theory one-, two- and three-parameter logistic models, a series of models
+Response Theory one-, two-, three- and four-parameter logistic models, a series of models
 in which examinees and items are represented by a set of numerical values (the
 models' parameters). Item Response Theory itself was created with the goal of
 measuring latent traits as well as assessing and comparing individuals' abilities
@@ -56,17 +56,19 @@ Under the logistic models of IRT, an item is represented by the following parame
 
 > - $a$ represents an item's *discrimination* parameter, that is, how well it discriminates individuals who answer the item correctly (or, in an alternative interpretation, individuals who agree with the idea of the item) and those who don't. An item with a high $a$ value tends to be answered correctly by all individuals whose $\theta$ is above the items difficulty level and wrongly by all the others; as this value gets lower, this threshold gets blurry and the item starts not to be as informative. It is common for $a > 0$.
 > - $b$ represents an item's *difficulty* parameter. This parameter, which is measured in the same scale as $\theta$, shows at which point of the ability scale an item is more informative, that is, where it discriminates the individuals who agree and those who disagree with the item. Since $b$ and $\theta$ are measured in the same scale, $b$ follows the same distributions as $\theta$. For a CAT, it is good for an item bank to have as many items as possible in all difficulty levels, so that the CAT may select the best item for each individual in all ability levels.
-> - $c$ represents an item's *pseudo-guessing* parameter. This parameter denotes what is the probability of individuals with low ability values to still answer the item correctly. Since $c$ is a probability, $0 < c \leq 1$, but the lower the value of this parameter, the better the item is considered.
-> - $d$ represents an item's *upper asymptote*. This parameter denotes what is the probability of individuals with high ability values to still answer the item incorrectly. Since $d$ is a probability, $0 < d \leq 1$, but the higher the value of this parameter, the better the item is considered.
+> - $c$ represents an item's *pseudo-guessing* parameter, the lower asymptote of its characteristic curve. This parameter denotes what is the probability of individuals with low ability values to still answer the item correctly. {py:mod}`catsim` requires $0 \leq c < d$, and the lower the value of this parameter, the better the item is considered.
+> - $d$ represents an item's *upper asymptote*. This parameter denotes what is the probability of individuals with high ability values to answer the item correctly, so $1 - d$ is the probability that they still answer it incorrectly. {py:mod}`catsim` requires $c < d \leq 1$, and the higher the value of this parameter, the better the item is considered.
 
-For a set of items $I$, when $\forall i \in I, c_i = 0$, the
-three-parameter logistic model is reduced to the two-parameter logistic model.
+For a set of items $I$, when $\forall i \in I, d_i = 1$, the four-parameter
+logistic model is reduced to the three-parameter logistic model. When, in
+addition, $\forall i \in I, c_i = 0$, the three-parameter logistic model is
+reduced to the two-parameter logistic model.
 Additionally, if all values of $a$ are equal, the two-parameter logistic
 model is reduced to the one-parameter logistic model. Finally, when
 $\forall i \in I, a_i = 1$, we have the Rasch model {cite:p}`Rasch66`. Thus,
-{py:mod}`catsim` is able of treating all of the logistic models presented above,
+{py:mod}`catsim` can treat all of the logistic models presented above,
 since the underlying functions of all logistic models related to test simulations
-are the same, given the correct item paramaters.
+are the same, given the correct item parameters.
 
 Under IRT, the probability of an examinee with a given $\hat{\theta}$ value
 to answer item $i$ correctly, given the item parameters, is given by
@@ -114,25 +116,33 @@ $$
 
 Since the denominator in the calculation of the $SEE$ is $I(\theta)$, it is clear to see that the more items an examinee answers, the smaller SEE gets.
 
-{py:mod}`catsim` provides these functions in the {py:func}`catsim.irt` module.
+{py:mod}`catsim` provides these functions in the {py:mod}`catsim.irt` module.
 
 ### The Item Matrix
 
-In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The most important features of the items are situated in the first three columns of the matrix, which represent the parameters $a$, $b$ and $c$, respectively. Item matrices can be generated via the {py:func}`catsim.cat.generate_item_bank` function as follows:
+In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The item matrix has four columns, which hold the parameters $a$, $b$, $c$ and $d$, in this order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing parameters are filled in with $a = 1$, $c = 0$ and $d = 1$. An {py:class}`catsim.item_bank.ItemBank` holds an item matrix, and its {py:meth}`~catsim.item_bank.ItemBank.generate_item_bank` method generates one as follows:
 
 ```pycon
->>> generate_item_bank(5, '1PL')
->>> generate_item_bank(5, '2PL')
->>> generate_item_bank(5, '3PL')
->>> generate_item_bank(5, '3PL', corr=0.5)
+>>> from catsim import ItemBank
+>>> ItemBank.generate_item_bank(5, "1PL")
+ItemBank(n_items=5, model=1PL)
+>>> ItemBank.generate_item_bank(5, "2PL")
+ItemBank(n_items=5, model=2PL)
+>>> ItemBank.generate_item_bank(5, "3PL")
+ItemBank(n_items=5, model=3PL)
+>>> ItemBank.generate_item_bank(5, "4PL")
+ItemBank(n_items=5, model=4PL)
+>>> ItemBank.generate_item_bank(5, "3PL", corr=0.5).items.shape
+(5, 4)
 ```
 
-These examples depict the generation of an array of five items according to the
-different logistic models. In the last example, parameters $a$ and $b$ have a
+These examples depict the generation of five items according to the
+different logistic models. Whatever the model, the item matrix has four columns.
+In the last example, parameters $a$ and $b$ have a
 correlation of $0.5$, an adjustment that may be useful in case simulations
 require it {cite:p}`Chang2001`.
 
-Historically, catsim stored item exposure rates in an additional item-matrix column. In the current architecture, exposure is better treated as run-level output derived from simulation results. When represented, the exposure rate is commonly denoted as $r$ and computed as follows:
+The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results ({py:attr}`catsim.state.SimulationResult.exposure_rates`). The exposure rate is commonly denoted as $r$ and computed as follows:
 
 $$
 r_i = \frac{q_i}{N}
@@ -178,10 +188,10 @@ With a set value for $\hat{\theta}$, an item is chosen from the item bank and pr
 
 Item selection methods are diverse. The most famous method is to choose the item that maximizes the *gain of information*, represented by {py:class}`catsim.selection.MaxInfoSelector`. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.
 
-In {py:mod}`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of $p$ is given by the IRT logistic model characteristic function ({py:func}`catsim.irt.icc`), given by:
+In {py:mod}`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of $p$ is given by the IRT logistic model characteristic function ({py:func}`catsim.irt.icc`) at the examinee's true ability $\theta$, given by:
 
 $$
-P(X_i = 1| \theta) = c_i + \frac{1-c_i}{1+ e^{-a_i(\theta-b_i)}}
+P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}
 $$
 
 In {py:mod}`catsim`, item selection procedures can be found in the {py:mod}`catsim.selection` module.
@@ -208,7 +218,7 @@ In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.
 
 ## Package architecture
 
-{py:mod}`catsim` was built using an object-oriented architecture,which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionaly, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module's respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using {py:mod}`catsim` and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on {numref}`modules_classes`.
+{py:mod}`catsim` was built using an object-oriented architecture, which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionally, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module's respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using {py:mod}`catsim` and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on {numref}`modules_classes`.
 
 ```{eval-rst}
 .. table:: Modules and their corresponding abstract classes

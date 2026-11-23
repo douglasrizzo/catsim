@@ -72,8 +72,13 @@ class LinearSelector(FiniteSelector):
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied: the first of the selector's indexes not yet administered.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every one of the selector's indexes has already been administered.
     """
     valid_indexes = self._get_non_administered(self._indexes, administered_items)
     if len(valid_indexes) == 0:

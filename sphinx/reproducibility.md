@@ -1,7 +1,5 @@
 # Reproducibility
 
-**New** in {py:mod}`catsim` 0.18.0!
-
 Objects that use random number generation directly, mainly initializers and selectors, can have reproducible outputs by receiving a {py:class}`numpy.random.Generator` instance in the `rng` keyword argument of their main method.
 
 In the snippet below, all selectors that have random behavior produce the same outputs, when given the same input arguments.
@@ -16,7 +14,9 @@ from numpy.random import default_rng
 for _ in range(5):
     item_bank = ItemBank.generate_item_bank(5000, seed=42)
     print(
-        RandomSelector().select(item_bank=item_bank, administered_items=[], rng=default_rng(42)),
+        RandomSelector().select(
+            item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
+        ),
         The54321Selector().select(
             item_bank=item_bank, administered_items=[], rng=default_rng(42), est_theta=0
         ),
@@ -26,34 +26,31 @@ for _ in range(5):
     )
 ```
 
-Simulations can also be entirely reproduced by passing a seed to a {py:class}`catsim.simulation.SimulationRunner` object, which instantiates a {py:class}`numpy.random.Generator` and carries it through the run context used by the CAT engine.
+A {py:class}`catsim.simulation.SimulationRunner` creates one {py:class}`numpy.random.Generator` from its `seed` argument when it is built. `seed` defaults to 0, so a runner built without a seed is deterministic too. Every random draw in a simulation comes from that one generator: sampling the examinees' abilities, the initializer, the selectors and the simulated responses. Sessions run one after another, in order, so each session's draws depend on the sessions before it.
 
-```{eval-rst}
-.. plot::
-    :include-source: true
-    :caption: Generating a reproducible CAT simulation using seeds.
+Two runners built with the same seed and the same components give identical results. Each call to `run()`, however, continues the runner's generator instead of restarting it, so a second `run()` on the same runner gives different results. To repeat a simulation exactly, build a new runner.
 
-    import matplotlib.pyplot as plt
-    from catsim import ItemBank
-    from catsim.estimation import NumericalSearchEstimator
-    from catsim.initialization import RandomInitializer
-    from catsim.plot import test_progress
-    from catsim.selection import MaxInfoSelector
-    from catsim.simulation import SimulationRunner
-    from catsim.stopping import MinErrorStopper
-
-    figure, axes = plt.subplots(2, 1, figsize=(10, 12))
-
-    for ax in axes:
-        item_bank = ItemBank.generate_item_bank(5000, seed=42)
-        runner = SimulationRunner(
-            item_bank,
-            RandomInitializer(),
-            MaxInfoSelector(),
-            NumericalSearchEstimator(),
-            MinErrorStopper(0.2),
-            seed=42,
-        )
-        result = runner.run(1)
-        test_progress(ax=ax, simulation=result, index=0, see=True, marker="|")
+```pycon
+>>> from catsim import ItemBank
+>>> from catsim.estimation import NumericalSearchEstimator
+>>> from catsim.initialization import RandomInitializer
+>>> from catsim.selection import MaxInfoSelector
+>>> from catsim.simulation import SimulationRunner
+>>> from catsim.stopping import MinErrorStopper
+>>> item_bank = ItemBank.generate_item_bank(500, seed=42)
+>>> def make_runner():
+...     return SimulationRunner(
+...         item_bank,
+...         RandomInitializer(),
+...         MaxInfoSelector(),
+...         NumericalSearchEstimator(),
+...         MinErrorStopper(0.4, max_items=20),
+...         seed=42,
+...     )
+>>> first, second = make_runner().run(10), make_runner().run(10)
+>>> first.latest_estimations == second.latest_estimations
+True
+>>> runner = make_runner()
+>>> runner.run(10).latest_estimations == runner.run(10).latest_estimations
+False
 ```

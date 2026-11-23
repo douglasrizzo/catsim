@@ -61,8 +61,16 @@ class RandomSelector(BaseSelector):
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied, drawn uniformly at random from the items not yet
+        administered, or from every item when ``replace`` is True.
+
+    Raises
+    ------
+    ValueError
+        If ``rng`` is None.
+    NoItemsAvailableError
+        If every item has already been administered and ``replace`` is False.
     """
     if rng is None:
       msg = "rng parameter cannot be None"

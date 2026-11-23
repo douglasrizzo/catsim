@@ -21,21 +21,3 @@ confidence-interval-stopper
 :strict:
 :namespace: catsim
 ```
-
-## Planned
-
-:::{warning}
-The techniques in this section are not yet available in the released package.
-They describe planned additions to {mod}`catsim.stopping`.
-:::
-
-```{toctree}
-:maxdepth: 1
-
-predicted-sem-stopper
-min-info-bank-stopper
-kl-stopper
-sprt-stopper
-glr-stopper
-stochastic-curtailment-stopper
-```
