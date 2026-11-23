@@ -22,13 +22,16 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
+      # setup-uv's default enable-cache (auto) already skips the cache on release events.
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-        with:
-          enable-cache: true
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
+      # No pre-commit cache in the release run, which gates the PyPI upload. zizmor does not
+      # evaluate step conditions, so it would still report this step.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name != 'release' # zizmor: ignore[cache-poisoning]
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -60,11 +63,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          enable-cache: true
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ matrix.python-version }}
@@ -98,6 +102,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
@@ -115,7 +121,7 @@ jobs:
           # Get current version from pyproject.toml
           CURRENT_VERSION=$(grep -E '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
           # Create release candidate version with PR number and run number
-          NEW_VERSION="${CURRENT_VERSION}rc${{ github.run_number }}"
+          NEW_VERSION="${CURRENT_VERSION}rc${GITHUB_RUN_NUMBER}"
           # Update pyproject.toml
           sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" pyproject.toml
           echo "Updated version to ${NEW_VERSION} for TestPyPI"
@@ -242,11 +248,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-        with:
-          enable-cache: true
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -281,14 +287,16 @@ jobs:
 
       - name: Add build info
         run: |
-          echo "📚 Documentation built successfully!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download the built documentation from the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "📚 Documentation built successfully!"
+            echo ""
+            echo "**Build Details:**"
+            echo "- Event: $GITHUB_EVENT_NAME"
+            echo "- Branch: $GITHUB_REF_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo ""
+            echo "Download the built documentation from the workflow artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy-docs-dev:
     name: Deploy documentation (dev preview)
@@ -328,9 +336,11 @@ jobs:
 
       - name: Comment deployment URL
         run: |
-          echo "🚀 **Dev documentation deployed!**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Preview at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/dev/" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "🚀 **Dev documentation deployed!**"
+            echo ""
+            echo "Preview at: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/dev/"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy-docs-production:
     name: Deploy documentation (production)
@@ -379,9 +389,11 @@ jobs:
 
       - name: Comment deployment URL
         run: |
-          echo "🎉 **Production documentation deployed!**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Live at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "🎉 **Production documentation deployed!**"
+            echo ""
+            echo "Live at: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   github-release:
     name: Sign and upload to GitHub Release
