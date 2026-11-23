@@ -143,6 +143,20 @@ class TestSimulationRunnerRun:
     assert all(len(session.theta_history) >= 2 for session in simulation_result.sessions)
     assert all(len(session.administered_item_ids) == 10 for session in simulation_result.sessions)
 
+  def test_verbose_run_matches_a_quiet_run(self, item_bank: ItemBank) -> None:
+    """verbose=True only adds a progress bar: the run completes and gives the same sessions as a quiet run."""
+
+    def run(verbose: bool) -> SimulationResult:
+      runner = SimulationRunner(
+        item_bank, FixedPointInitializer(0.0), RandomSelector(), NumericalSearchEstimator(), LengthStopper(max_items=3)
+      )
+      return runner.run(3, verbose=verbose)
+
+    quiet, verbose = run(verbose=False), run(verbose=True)
+
+    assert verbose.administered_items == quiet.administered_items
+    assert verbose.latest_estimations == pytest.approx(quiet.latest_estimations)
+
   def test_each_session_sees_the_exposure_of_the_sessions_before_it(self, item_bank: ItemBank) -> None:
     """Selectors see the share of examinees in the whole run who were already given each item.
 

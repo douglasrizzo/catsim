@@ -860,11 +860,21 @@ class TestClusterSelector:
 
     assert self._select([], exposure_rates, method="weighted_info", r_max=0.5) == 12
 
-  @pytest.mark.parametrize(("r_control", "expected"), [("passive", 13), ("aggressive", 12)])
-  def test_r_control_decides_when_the_whole_cluster_is_over_the_cap(self, r_control: str, expected: int) -> None:
+  @pytest.mark.parametrize(
+    ("rates", "r_control", "expected"),
+    [
+      ((0.8, 0.9), "passive", 13),
+      ((0.8, 0.9), "aggressive", 12),
+      # item 13 is now the least exposed and still the more informative: not the first or least informative item
+      ((0.9, 0.8), "aggressive", 13),
+    ],
+  )
+  def test_r_control_decides_when_the_whole_cluster_is_over_the_cap(
+    self, rates: tuple[float, float], r_control: str, expected: int
+  ) -> None:
     """Passive control still administers the most informative item; aggressive control the least exposed one."""
     exposure_rates = np.zeros(len(self.CLUSTERS))
-    exposure_rates[[12, 13]] = [0.8, 0.9]
+    exposure_rates[[12, 13]] = rates
 
     assert self._select([], exposure_rates, method="weighted_info", r_max=0.5, r_control=r_control) == expected
 

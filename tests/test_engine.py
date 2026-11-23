@@ -388,20 +388,33 @@ def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
   assert str(exc_info.value) == "true_theta is required to simulate responses"
 
 
-@pytest.mark.parametrize(("draw", "expected"), [(0.5, True), (0.9, False)])
+@pytest.mark.parametrize(
+  ("item_id", "draw", "expected"),
+  [
+    # 2PL item at b = 0: P = 0.82; the estimate (-1.5) or item 0 would both give P below 0.2
+    pytest.param(1, 0.5, True, id="2pl-correct"),
+    pytest.param(1, 0.9, False, id="2pl-incorrect"),
+    # 4PL item with c = 0.2, d = 0.9: P = 0.2 + 0.7 * 0.82 = 0.77; without c and d it would be 0.82
+    pytest.param(2, 0.79, False, id="4pl-upper-asymptote"),
+    # 3PL item at b = 5 with c = 0.3: P = 0.3 + 0.7 * 0.03 = 0.32; without c it would be 0.03
+    pytest.param(3, 0.31, True, id="3pl-guessing"),
+  ],
+)
 def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_probability(
-  draw: float, expected: bool
+  item_id: int, draw: float, expected: bool
 ) -> None:
-  """The response is correct when the uniform draw falls below P(correct) for the chosen item at the true theta.
+  """The response is correct when the uniform draw falls below the chosen item's 4PL probability at the true theta.
 
-  For item 1 at the true theta 1.5, P = 1 / (1 + e^-1.5) = 0.82. The estimate (-1.5) or item 0 would both give
-  P below 0.2, so a draw of 0.5 tells them apart; a draw of 0.9, above 0.82, must give an incorrect response.
+  Together the cases fail if the response used the estimate instead of the true theta (1.5), another item,
+  or dropped the item's guessing or upper-asymptote parameter.
   """
-  item_bank = ItemBank(np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]]))
+  item_bank = ItemBank(
+    np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
+  )
   state = CatSessionState(session_id=0, current_theta=-1.5, true_theta=1.5)
   context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
 
-  assert SimulatedResponseProvider().answer(state, item_bank, 1, context) is expected
+  assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
 
 
 def test_select_next_returns_none_for_stopped_session(
