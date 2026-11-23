@@ -91,20 +91,59 @@ class CatEngine:
     )
 
   def select_next(self, state: CatSessionState, item_bank: ItemBank, context: RunContext) -> int | None:
-    """Select the next item to administer."""
+    """Select the next item to administer, or end the session.
+
+    This is the one place that decides whether a session continues, so a manual loop needs no
+    other check::
+
+      while (item_id := engine.select_next(state, item_bank, context)) is not None:
+        engine.apply_response(state, item_bank, item_id, ask_examinee(item_id), context)
+
+    The stopper is consulted here only for a session that has no responses yet. After that,
+    :meth:`apply_response` evaluates it once for every new state, and the status it records is
+    final.
+
+    Parameters
+    ----------
+    state : CatSessionState
+        The session to continue. It is marked stopped when this method returns None for it.
+    item_bank : ItemBank
+        Item bank used by the session.
+    context : RunContext
+        Runtime services of the run: the random generator and, optionally, the exposure tracker.
+
+    Returns
+    -------
+    int or None
+        Index of the next item to administer. None when the session has ended: it was already
+        stopped (and is left untouched), its stopper is satisfied (reason ``StopReason.STOPPER``),
+        or the selector has no item to offer (reason ``StopReason.NO_ITEMS``).
+    """
     if state.status == SessionStatus.STOPPED:
       return None
+    if state.administered_count == 0 and self.should_stop(state, item_bank):
+      _end(state, StopReason.STOPPER)
+      return None
+
     exposure_rates = None
     if context.exposure_tracker is not None and context.total_sessions is not None:
       exposure_rates = context.exposure_tracker.rates(context.total_sessions)
-    return self._selector.select(
-      item_bank=item_bank,
-      administered_items=state.administered_item_ids,
-      est_theta=state.current_theta,
-      rng=context.rng,
-      exposure_rates=exposure_rates,
-      response_vector=state.responses,
-    )
+    try:
+      item_id = self._selector.select(
+        item_bank=item_bank,
+        administered_items=state.administered_item_ids,
+        est_theta=state.current_theta,
+        rng=context.rng,
+        exposure_rates=exposure_rates,
+        response_vector=state.responses,
+      )
+    except NoItemsAvailableError:
+      item_id = None
+    # BaseSelector.select is typed int | None, so a custom selector may say "no item" with None.
+    if item_id is None:
+      _end(state, StopReason.NO_ITEMS)
+      return None
+    return item_id
 
   def apply_response(
     self,
@@ -140,8 +179,7 @@ class CatEngine:
     # After updating the estimate, check whether the completed step satisfied the stop rule.
     stopped = self.should_stop(state, item_bank)
     if stopped:
-      state.status = SessionStatus.STOPPED
-      state.stop_reason = StopReason.STOPPER
+      _end(state, StopReason.STOPPER)
 
     return CatStepResult(
       session=state.snapshot(),
@@ -159,26 +197,29 @@ class CatEngine:
     response_provider: ResponseProvider,
     context: RunContext,
   ) -> CatStepResult:
-    """Execute one full CAT step."""
-    # Guard against callers stepping a session that already satisfies the stop rule
-    # before item selection begins.
-    if self.should_stop(state, item_bank):
-      state.status = SessionStatus.STOPPED
-      state.stop_reason = StopReason.STOPPER
-      return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
+    """Execute one full CAT step: select an item, get its response and apply it.
 
-    try:
-      item_id = self.select_next(state, item_bank, context)
-    except NoItemsAvailableError:
-      state.status = SessionStatus.STOPPED
-      state.stop_reason = StopReason.NO_ITEMS
-      return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
+    Parameters
+    ----------
+    state : CatSessionState
+        The session to advance.
+    item_bank : ItemBank
+        Item bank used by the session.
+    response_provider : ResponseProvider
+        Source of the examinee's response to the selected item.
+    context : RunContext
+        Runtime services of the run.
 
+    Returns
+    -------
+    CatStepResult
+        The result of :meth:`apply_response`. When :meth:`select_next` returns None instead, a
+        result with no item and no response that reports the session stopped, with the stop
+        reason it has (an already stopped session keeps its earlier one).
+    """
+    item_id = self.select_next(state, item_bank, context)
     if item_id is None:
-      state.status = SessionStatus.STOPPED
-      state.stop_reason = StopReason.NO_ITEMS
       return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
-
     response = response_provider.answer(state, item_bank, item_id, context)
     return self.apply_response(state, item_bank, item_id, response, context)
 
@@ -193,3 +234,8 @@ class CatEngine:
     while state.status != SessionStatus.STOPPED:
       self.step(state, item_bank, response_provider, context)
     return state
+
+
+def _end(state: CatSessionState, reason: StopReason) -> None:
+  state.status = SessionStatus.STOPPED
+  state.stop_reason = reason

@@ -13,7 +13,7 @@ from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import RandomSelector
 from catsim.state import CatSessionState, ExposureTracker, SessionStatus, StopReason
-from catsim.stopping import MaxLengthStopper
+from catsim.stopping import BaseStopper, MaxLengthStopper
 
 
 @dataclass
@@ -110,6 +110,19 @@ class RecordingEstimator:
     self.seen_response_vector = response_vector
     self.seen_theta = est_theta
     return self.theta
+
+
+class CountingLengthStopper(BaseStopper):
+  """Stopper that ends the test at a fixed length and counts how often it is asked."""
+
+  def __init__(self, max_items: int) -> None:
+    self.max_items = max_items
+    self.calls = 0
+
+  def stop(self, item_bank, administered_items, theta) -> bool:
+    del item_bank, theta
+    self.calls += 1
+    return len(administered_items) >= self.max_items
 
 
 @dataclass
@@ -313,26 +326,21 @@ def test_apply_response_returns_immutable_session_snapshot(
   assert second.session.responses == [True, False]
 
 
-def test_step_executes_full_transition(
-  item_bank,
-  fixed_initializer,
-  max_info_selector,
-  estimator,
-  fixed_length_stopper,
-) -> None:
-  """One engine step should select an item, answer it, and update theta."""
-  engine = CatEngine(fixed_initializer, max_info_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=np.random.default_rng(42), total_sessions=1)
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  response_provider = FixedResponseProvider(True)
+def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> None:
+  """One step administers the item the selector chose and records the provider's response to it.
 
-  result = engine.step(session, item_bank, response_provider, context)
+  Fails if step applies a different item or response, or skips the estimate.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
-  assert result.selected_item_id is not None
-  assert result.response is True
-  assert len(session.administered_item_ids) == 1
-  assert len(session.responses) == 1
-  assert len(session.theta_history) == 2
+  result = engine.step(session, item_bank, FixedResponseProvider(False), context)
+
+  assert (result.selected_item_id, result.response, result.updated_theta) == (4, False, pytest.approx(0.7))
+  assert session.administered_item_ids == [4]
+  assert session.responses == [False]
+  assert session.theta_history == [0.0, pytest.approx(0.7)]
 
 
 def test_run_session_stops_at_fixed_length(
@@ -354,6 +362,23 @@ def test_run_session_stops_at_fixed_length(
   assert len(final_session.administered_item_ids) == 3
 
 
+def test_the_stopper_is_evaluated_once_per_session_state(item_bank, max_info_selector) -> None:
+  """A session of n items asks its stopper n + 1 times: about the initial state and after each response.
+
+  Fails if step asks the stopper again before selecting, about the state apply_response has just
+  evaluated, which doubled the calls (a 5-item session made 10).
+  """
+  stopper = CountingLengthStopper(max_items=5)
+  engine = CatEngine(RecordingInitializer(0.0), max_info_selector, RecordingEstimator(0.0), stopper)
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+
+  engine.run_session(session, item_bank, FixedResponseProvider(True), context)
+
+  assert session.administered_count == 5
+  assert stopper.calls == 6
+
+
 def test_select_next_passes_response_history(
   item_bank,
   fixed_initializer,
@@ -361,7 +386,7 @@ def test_select_next_passes_response_history(
   fixed_length_stopper,
 ) -> None:
   """Selectors should receive the current response history from the engine."""
-  selector = RecordingSelector(item_id=None)
+  selector = RecordingSelector(item_id=2)
   engine = CatEngine(fixed_initializer, selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42), total_sessions=10)
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
@@ -370,7 +395,7 @@ def test_select_next_passes_response_history(
 
   selected = engine.select_next(session, item_bank, context)
 
-  assert selected is None
+  assert selected == 2
   assert selector.seen_response_vector == [True, False]
 
 
@@ -415,20 +440,22 @@ def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_pro
   assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
 
 
-def test_select_next_returns_none_for_stopped_session(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
-) -> None:
-  """Stopped sessions should not request another item."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  session.status = SessionStatus.STOPPED
+def test_stepping_a_stopped_session_keeps_its_stop_reason(item_bank) -> None:
+  """Stepping a session that has already stopped changes nothing about it.
 
-  assert engine.select_next(session, item_bank, context) is None
+  Fails if the engine decides again why a stopped session ended: a session whose selector ran out
+  was relabelled as stopped by its selector on the next step.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine.step(session, item_bank, FixedResponseProvider(True), context)
+
+  result = engine.step(session, item_bank, FixedResponseProvider(True), context)
+
+  assert (result.stopped, result.selected_item_id, result.stop_reason) == (True, None, StopReason.NO_ITEMS)
+  assert session.stop_reason is StopReason.NO_ITEMS
+  assert session.administered_item_ids == []
 
 
 def test_apply_response_rejects_invalid_item_index(
@@ -468,24 +495,22 @@ def test_apply_response_rejects_duplicate_items(
     engine.apply_response(session, item_bank, 0, False, context)
 
 
-def test_step_stops_immediately_when_stop_rule_is_already_met(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-) -> None:
-  """The engine should stop before selecting when the rule is already met."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, MaxLengthStopper(1))
+def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank) -> None:
+  """A stopper satisfied before the first item ends the session without selecting one.
+
+  Fails if the stopper is not asked about the initial state, so the session gets an item it should
+  not, or if the terminal step result misreports the session.
+  """
+  selector = RecordingSelector(item_id=0)
+  engine = CatEngine(RecordingInitializer(0.4), selector, RecordingEstimator(0.0), RecordingStopper(True))
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  session.administered_item_ids.append(0)
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
   result = engine.step(session, item_bank, FixedResponseProvider(True), context)
 
-  assert result.stopped is True
-  assert result.selected_item_id is None
-  assert result.response is None
-  assert result.updated_theta == pytest.approx(session.current_theta)
+  assert selector.seen_item_bank is None
+  assert (result.stopped, result.selected_item_id, result.response) == (True, None, None)
+  assert result.updated_theta == pytest.approx(0.4)
   assert result.stop_reason is StopReason.STOPPER
   assert result.session.status == SessionStatus.STOPPED
   assert result.session.stop_reason is StopReason.STOPPER
@@ -493,37 +518,17 @@ def test_step_stops_immediately_when_stop_rule_is_already_met(
   assert session.stop_reason is StopReason.STOPPER
 
 
-def test_step_stops_when_selector_returns_none(item_bank, fixed_initializer, estimator) -> None:
-  """A selector that returns None ends the session as one that has no item to offer."""
-  engine = CatEngine(fixed_initializer, NullSelector(), estimator, MaxLengthStopper(10))
+@pytest.mark.parametrize("selector", [ExhaustedSelector(), NullSelector()], ids=["raises", "returns-none"])
+def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank, selector) -> None:
+  """A selector with no item to offer ends the session with ``NO_ITEMS``, however it says so.
+
+  Fails if select_next lets ``NoItemsAvailableError`` escape, or returns None, while leaving the
+  session in progress: a manual loop then had to copy step's handling, and notebook 02's did not.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
-  result = engine.step(session, item_bank, FixedResponseProvider(True), context)
-
-  assert result.stopped is True
-  assert result.selected_item_id is None
-  assert result.response is None
-  assert result.updated_theta == pytest.approx(session.current_theta)
-  assert result.stop_reason is StopReason.NO_ITEMS
-  assert result.session.status == SessionStatus.STOPPED
-  assert result.session.stop_reason is StopReason.NO_ITEMS
+  assert engine.select_next(session, item_bank, context) is None
   assert session.status == SessionStatus.STOPPED
-
-
-def test_step_stops_when_selector_raises_no_items(item_bank, fixed_initializer, estimator) -> None:
-  """A selector that raises NoItemsAvailableError ends the session with the no-items reason."""
-  engine = CatEngine(fixed_initializer, ExhaustedSelector(), estimator, MaxLengthStopper(10))
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-
-  result = engine.step(session, item_bank, FixedResponseProvider(True), context)
-
-  assert result.stopped is True
-  assert result.selected_item_id is None
-  assert result.response is None
-  assert result.updated_theta == pytest.approx(session.current_theta)
-  assert result.stop_reason is StopReason.NO_ITEMS
-  assert result.session.status == SessionStatus.STOPPED
-  assert result.session.stop_reason is StopReason.NO_ITEMS
-  assert session.status == SessionStatus.STOPPED
+  assert session.stop_reason is StopReason.NO_ITEMS
