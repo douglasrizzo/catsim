@@ -912,6 +912,19 @@ class TestMLWISelector:
     assert weights.max() == pytest.approx(1.0)
     assert selected in range(300, 320)
 
+  def test_likelihood_weights_stay_finite_for_extreme_items(self) -> None:
+    """Items far from every node should give finite weights, not NaN.
+
+    With log(1 - P) computed after P rounded to 1, these two responses made the log-likelihood
+    -inf at every node, and subtracting its maximum gave NaN weights.
+    """
+    items = np.array([[200.0, -6.0, 0.0, 1.0], [200.0, 6.0, 0.0, 1.0]])
+
+    weights = MLWISelector()._likelihood_weights([False, True], items)
+
+    assert np.isfinite(weights).all()
+    assert weights.max() == pytest.approx(1.0)
+
   def test_init_rejects_non_increasing_bounds(self) -> None:
     """Reversed bounds would flip the sign of every score and select the least informative item."""
     with pytest.raises(ValueError, match="bounds must be increasing"):

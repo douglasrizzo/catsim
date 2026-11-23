@@ -422,6 +422,26 @@ class TestBayesianHelpers:
     assert posterior_mean(post, grid.nodes) == pytest.approx(mean, abs=1e-6)
     assert posterior_variance(post, grid.nodes) == pytest.approx(variance, rel=1e-5)
 
+  @pytest.mark.parametrize("discrimination", [10.0, 200.0])
+  def test_posterior_is_the_prior_when_the_likelihood_is_flat(self, discrimination: float) -> None:
+    """Items whose likelihood is flat across the grid should leave the prior unchanged.
+
+    An incorrect answer to an item at b = -6 and a correct one to an item at b = 6, both very
+    discriminating, have a log-likelihood of about -12a at every node, dipping by up to log 2 at the
+    two ends of the grid. When log(1 - P) was computed after P rounded to 1, it was -inf at most
+    nodes: a = 10 pulled the posterior mean to -2.69 and its variance to 0.094, and a = 200 left no
+    node with any mass.
+    """
+    grid = QuadratureGrid.uniform()
+    items = np.array([[discrimination, -6.0, 0.0, 1.0], [discrimination, 6.0, 0.0, 1.0]])
+
+    post = posterior([False, True], items, grid, normal_log_prior())
+    prior = posterior([], np.empty((0, 4)), grid, normal_log_prior())
+
+    # the likelihood is symmetric about 0, so the mean stays exact; the dips at the ends move the variance by ~1e-7
+    assert posterior_mean(post, grid.nodes) == pytest.approx(posterior_mean(prior, grid.nodes), abs=1e-9)
+    assert posterior_variance(post, grid.nodes) == pytest.approx(posterior_variance(prior, grid.nodes), rel=1e-6)
+
   def test_posterior_rejects_nan_log_prior(self) -> None:
     """A NaN in the log-prior should raise instead of returning an all-NaN posterior."""
     grid = QuadratureGrid.uniform()
