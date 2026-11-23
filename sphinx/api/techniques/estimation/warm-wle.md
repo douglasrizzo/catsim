@@ -58,9 +58,11 @@ can sit on the search bound, where $I \approx 0$ makes the correction explode.
 
 ### Computation
 
-The modified score is evaluated on a grid over
-$[\theta_{\min}, \theta_{\max}]$ (`THETA_MIN_EXTENDED`, `THETA_MAX_EXTENDED`) to
-bracket its roots. Each sign change from positive to negative brackets a maximum
+The modified score is evaluated at 121 equally spaced points over the fixed
+search range $[\theta_{\min}, \theta_{\max}] = [-6, 6]$ (`THETA_MIN_EXTENDED`,
+`THETA_MAX_EXTENDED`; unlike MAP, the range is not a parameter) to bracket its
+roots. The points are 0.1 apart, so two roots closer than that can fall in one
+interval and go unseen. Each sign change from positive to negative brackets a maximum
 of the weighted likelihood and is refined with Brent's method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
 likelihood is returned; candidates are ranked by integrating the modified score,

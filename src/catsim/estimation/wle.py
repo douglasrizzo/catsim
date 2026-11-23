@@ -36,8 +36,9 @@ class WarmLikelihoodEstimator(BaseEstimator):
   (:math:`c = 0`, :math:`d = 1`), :math:`J = I'` and the estimate maximizes
   :math:`L(\theta)\sqrt{I(\theta)}`.
 
-  The modified score is scanned on a grid over the search interval to bracket its roots, which
-  are then refined with Brent's method. If several roots exist, the one with the largest weighted
+  The modified score is scanned at 121 points, 0.1 apart, over the fixed search interval
+  ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]`` to bracket its roots, which are then refined
+  with Brent's method. If several roots exist, the one with the largest weighted
   likelihood is returned; if none does, the estimate is the search bound the modified score
   points to.
 
