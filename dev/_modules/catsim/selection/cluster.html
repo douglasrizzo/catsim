@@ -867,9 +867,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  :doc:`/api/techniques/selection/cluster-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
-    <span class="k">return</span> <span class="s2">"Cluster Selector"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(clusters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">clusters</span><span class="si">!r}</span><span class="s2">, method=ClusterMethod.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, "</span>
+      <span class="sa">f</span><span class="s2">"r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">, r_control=ExposureControl.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)"</span>
+    <span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">r_max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>

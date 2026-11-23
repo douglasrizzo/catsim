@@ -783,16 +783,21 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c_param</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">  </span><span class="sd">"""Return the log-probabilities of a correct and an incorrect response at ``theta``.</span>
 
 <span class="sd">  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood_hpc`, so</span>
 <span class="sd">  the log-probability of an incorrect response stays exact where the probability of a correct one</span>
 <span class="sd">  rounds to 1.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  tuple[float, float]</span>
+<span class="sd">      The log-probabilities of a correct and of an incorrect response.</span>
 <span class="sd">  """</span>
   <span class="n">z</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-  <span class="n">log_dmc</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c_param</span><span class="p">)</span>
-  <span class="n">log_c</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c_param</span><span class="p">)</span> <span class="k">if</span> <span class="n">c_param</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+  <span class="n">log_dmc</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span>
+  <span class="n">log_c</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span>
   <span class="n">log_1md</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span>
   <span class="k">return</span> <span class="p">(</span>
     <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">log_c</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">+</span> <span class="n">log_expit</span><span class="p">(</span><span class="n">z</span><span class="p">))),</span>
@@ -805,12 +810,12 @@ window.runMermaid = runMermaid;</script>
   <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="n">c_param</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+  <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Return the KL divergence between response distributions at two ability values."""</span>
-  <span class="n">log_p_hat</span><span class="p">,</span> <span class="n">log_q_hat</span> <span class="o">=</span> <span class="n">_log_probabilities</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c_param</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
-  <span class="n">log_p</span><span class="p">,</span> <span class="n">log_q</span> <span class="o">=</span> <span class="n">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c_param</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+  <span class="n">log_p_hat</span><span class="p">,</span> <span class="n">log_q_hat</span> <span class="o">=</span> <span class="n">_log_probabilities</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+  <span class="n">log_p</span><span class="p">,</span> <span class="n">log_q</span> <span class="o">=</span> <span class="n">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_p_hat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_p_hat</span> <span class="o">-</span> <span class="n">log_p</span><span class="p">)</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_q_hat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_q_hat</span> <span class="o">-</span> <span class="n">log_q</span><span class="p">)</span>
 
 
@@ -821,14 +826,14 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Each candidate's KL divergence between the response distributions at the current estimate</span>
 <span class="sd">  and at nearby abilities is integrated over :math:`\hat\theta \pm c / \sqrt{\max(1, n)}`,</span>
-<span class="sd">  where :math:`n` is the number of administered items, and the item with the largest integral</span>
-<span class="sd">  is selected.</span>
+<span class="sd">  where :math:`c` is ``window`` and :math:`n` the number of administered items, and the item with</span>
+<span class="sd">  the largest integral is selected.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  c : float, optional</span>
-<span class="sd">      Width constant of the integration window, which narrows as items are administered.</span>
-<span class="sd">      Default is 3.</span>
+<span class="sd">  window : float, optional</span>
+<span class="sd">      Chang and Ying's constant :math:`c`, the half-width of the integration window before it</span>
+<span class="sd">      narrows as items are administered. Default is 3.</span>
 <span class="sd">  r_max : float, optional</span>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected</span>
 <span class="sd">      unless no other items are available. Default is 1 (no restriction).</span>
@@ -838,29 +843,29 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/kl-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a KLSelector object.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If c is not positive, or if r_max is not in (0, 1].</span>
+<span class="sd">        If window is not positive, or if r_max is not in (0, 1].</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"c must be positive, got </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="n">window</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"window must be positive, got </span><span class="si">{</span><span class="n">window</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">window</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Kullback-Leibler Selector (c=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_c</span><span class="si">}</span><span class="s2">)"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(window=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_window</span><span class="si">!r}</span><span class="s2">, r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the schedule constant used to define the integration window."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">window</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return Chang and Ying's constant :math:`c`: the integration half-width is :math:`c / \sqrt{\max(1, n)}`."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">r_max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -921,7 +926,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        If every item has been administered.</span>
 <span class="sd">    """</span>
     <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">),</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)))</span>
+    <span class="n">half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)))</span>
 
     <span class="n">kl_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_kl_global</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="p">)],</span> <span class="n">half_width</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">kl_values</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span></div>

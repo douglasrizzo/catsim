@@ -776,36 +776,79 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiniteSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="n">require_rng</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">check_test_size</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="n">require_rng</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_position_weight</span><span class="p">(</span><span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Return the progression weight ``((position - 1) / (test_size - 1)) ** acceleration``.</span>
+<span class="w">  </span><span class="sd">"""Return Barrada et al.'s (2008) weight on item information at a test position.</span>
 
-<span class="sd">  The ratio is clamped to 1 so that sessions running past ``test_size`` (``FiniteSelector`` does</span>
-<span class="sd">  not enforce it) keep a fully information-based weight instead of extrapolating beyond 1.</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  position : int</span>
+<span class="sd">      1-indexed position of the item about to be selected.</span>
+<span class="sd">  test_size : int</span>
+<span class="sd">      Planned number of items in the test, at least 1.</span>
+<span class="sd">  acceleration : float</span>
+<span class="sd">      Acceleration parameter of the schedule.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      ``sum(k ** acceleration for k in range(1, position))`` divided by the same sum up to</span>
+<span class="sd">      ``test_size``: 0 at the first position and 1 at ``test_size``. Past ``test_size``, where the</span>
+<span class="sd">      stopper may let a session run, the weight stays 1 instead of exceeding it.</span>
 <span class="sd">  """</span>
-  <span class="k">if</span> <span class="n">test_size</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">position</span> <span class="o">&gt;=</span> <span class="n">test_size</span><span class="p">:</span>
     <span class="k">return</span> <span class="mf">1.0</span>
-  <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">test_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">**</span> <span class="n">acceleration</span>
+  <span class="n">steps</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+  <span class="c1"># Dividing every term by the largest, the last for a positive acceleration and the first</span>
+  <span class="c1"># otherwise, keeps the sums from overflowing and leaves their ratio unchanged.</span>
+  <span class="n">terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">steps</span> <span class="o">/</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">acceleration</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">steps</span><span class="p">)</span> <span class="o">**</span> <span class="n">acceleration</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">terms</span><span class="p">[:</span> <span class="n">position</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">terms</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return ``acceleration`` as a float, after checking that it is finite.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  acceleration : float</span>
+<span class="sd">      Acceleration parameter of the schedule.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  float</span>
+<span class="sd">      ``acceleration``.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``acceleration`` is infinite or NaN.</span>
+<span class="sd">  """</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">acceleration</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"acceleration must be finite, got </span><span class="si">{</span><span class="n">acceleration</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ProgressiveSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/progressive-selector.html#catsim.selection.ProgressiveSelector">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ProgressiveSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProgressiveSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Progressive selector that blends random and information-based scoring.</span>
 
 <span class="sd">  Each available item scores a uniform random draw blended with its information, scaled by the</span>
-<span class="sd">  largest available information; the weight on information grows from 0 at the first position</span>
-<span class="sd">  to 1 at ``test_size``, and the item with the largest score is selected.</span>
+<span class="sd">  largest available information; the weight on information follows Barrada et al.'s (2008)</span>
+<span class="sd">  schedule from 0 at the first position to 1 at ``test_size``, and the item with the largest score</span>
+<span class="sd">  is selected.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      Planned number of items in the test, at which the weight on information reaches 1.</span>
+<span class="sd">      Planned number of items in the test, at least 1, at which the weight on information reaches 1.</span>
 <span class="sd">  acceleration : float, optional</span>
-<span class="sd">      Exponent of the position schedule. Values above 1 delay the shift toward information and</span>
-<span class="sd">      values below 1 hasten it. Default is 1 (linear).</span>
+<span class="sd">      Barrada et al.'s acceleration parameter :math:`t`, any finite number. 0 makes the schedule</span>
+<span class="sd">      linear, positive values keep the random component longer and negative values drop it sooner.</span>
+<span class="sd">      Default is 0.</span>
 <span class="sd">  r_max : float, optional</span>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected</span>
 <span class="sd">      unless no other items are available. Default is 1 (no restriction).</span>
@@ -818,7 +861,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a ProgressiveSelector object.</span>
@@ -826,27 +869,35 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If ``acceleration`` is not positive or ``r_max`` is not in (0, 1].</span>
+<span class="sd">        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in</span>
+<span class="sd">        (0, 1].</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">acceleration</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"acceleration must be positive, got </span><span class="si">{</span><span class="n">acceleration</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">check_test_size</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span> <span class="o">=</span> <span class="n">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the selector name."""</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Progressive Selector (s=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="si">}</span><span class="s2">)"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(test_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">!r}</span><span class="s2">, acceleration=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="si">!r}</span><span class="s2">, "</span>
+      <span class="sa">f</span><span class="s2">"r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">)"</span>
+    <span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">test_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the planned number of items in the test."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">acceleration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the acceleration parameter of the schedule."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">r_max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the maximum exposure rate accepted by the selector."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_weight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the progression weight for the given 1-indexed test position."""</span>
-    <span class="k">return</span> <span class="n">_position_weight</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProgressiveSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/progressive-selector.html#catsim.selection.ProgressiveSelector.select">[docs]</a>
@@ -892,8 +943,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
 
     <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">),</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_weight</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">_position_weight</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="p">)</span>
 
     <span class="c1"># Revuelta and Ponsoda (1998) draw the random component on [0, max information among the</span>
     <span class="c1"># available items]; dividing by that maximum puts both components on [0, 1].</span>
@@ -910,22 +960,21 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ProportionalSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/proportional-selector.html#catsim.selection.ProportionalSelector">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ProportionalSelector</span><span class="p">(</span><span class="n">FiniteSelector</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProportionalSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Proportional selector that samples items with probability proportional to weighted information.</span>
 
-<span class="sd">  Each available item is drawn with probability proportional to its information raised to</span>
-<span class="sd">  ``sharpness`` times the position weight, which grows from 0 at the first position (uniform</span>
-<span class="sd">  sampling) to 1 at ``test_size``.</span>
+<span class="sd">  Each available item is drawn with probability proportional to its information raised to a</span>
+<span class="sd">  power that follows Barrada et al.'s (2008) schedule from 0 at the first position, where sampling</span>
+<span class="sd">  is uniform, to the test length at ``test_size``.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      Planned number of items in the test, at which the exponent reaches ``sharpness``.</span>
+<span class="sd">      Planned number of items in the test, at least 1. From that position on, the exponent equals it.</span>
 <span class="sd">  acceleration : float, optional</span>
-<span class="sd">      Exponent of the position schedule, as in :py:class:`ProgressiveSelector`. Default is 1.</span>
-<span class="sd">  sharpness : float, optional</span>
-<span class="sd">      Largest exponent applied to the information. 0 keeps sampling uniform; the test length</span>
-<span class="sd">      reproduces Barrada et al.'s end point. Default is 6.</span>
+<span class="sd">      Barrada et al.'s acceleration parameter :math:`s`, any finite number, which shapes the</span>
+<span class="sd">      exponent's growth as :math:`t` shapes :py:class:`ProgressiveSelector`'s weight. 0 makes the</span>
+<span class="sd">      growth linear. Default is 0.</span>
 <span class="sd">  r_max : float, optional</span>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected</span>
 <span class="sd">      unless no other items are available. Default is 1 (no restriction).</span>
@@ -938,8 +987,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">sharpness</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">6.0</span><span class="p">,</span>
+    <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a ProportionalSelector object.</span>
@@ -947,32 +995,35 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If ``acceleration`` is not positive, ``sharpness`` is negative, or ``r_max`` is not</span>
-<span class="sd">        in (0, 1].</span>
+<span class="sd">        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in</span>
+<span class="sd">        (0, 1].</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">acceleration</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"acceleration must be positive, got </span><span class="si">{</span><span class="n">acceleration</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sharpness</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"sharpness must be non-negative, got </span><span class="si">{</span><span class="n">sharpness</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sharpness</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">check_test_size</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span> <span class="o">=</span> <span class="n">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the selector name."""</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Proportional Selector (s=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="si">}</span><span class="s2">, k=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_k</span><span class="si">}</span><span class="s2">)"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(test_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">!r}</span><span class="s2">, acceleration=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="si">!r}</span><span class="s2">, "</span>
+      <span class="sa">f</span><span class="s2">"r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">)"</span>
+    <span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">test_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the planned number of items in the test."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">acceleration</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the acceleration parameter of the schedule."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">r_max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the maximum exposure rate accepted by the selector."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_exponent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the information exponent for the given 1-indexed test position."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="o">*</span> <span class="n">_position_weight</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_s</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ProportionalSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/proportional-selector.html#catsim.selection.ProportionalSelector.select">[docs]</a>
@@ -1018,8 +1069,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
 
     <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">),</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
-    <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exponent</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>
+    <span class="n">exponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">*</span> <span class="n">_position_weight</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span><span class="p">)</span>
 
     <span class="n">info</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">)</span>
     <span class="n">info_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>

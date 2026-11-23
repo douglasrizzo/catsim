@@ -42,8 +42,8 @@ K_i(\theta \,\|\, \hat{\theta})\,d\theta,
 \delta_n = \frac{c}{\sqrt{n}},
 $$
 
-where $n$ is the number of administered items and $c$ is a positive
-schedule constant. For a small window the criterion is governed by the
+where $n$ is the number of administered items and $c$, the `window`
+parameter, is a positive schedule constant. For a small window the criterion is governed by the
 curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
 window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
@@ -62,9 +62,9 @@ largest value of $K_i(\hat{\theta})$.
    * - Parameter
      - Default
      - Description
-   * - ``c``
+   * - ``window``
      - ``3.0``
-     - Positive constant controlling the half-width :math:`\delta_n = c/\sqrt{n}`.
+     - Positive constant :math:`c` controlling the half-width :math:`\delta_n = c/\sqrt{n}`.
        Chang and Ying (1996) chose :math:`c` from the coverage probability of a
        confidence interval for :math:`\theta` (p. 221) and used :math:`c = 3` in
        their simulation (p. 223).

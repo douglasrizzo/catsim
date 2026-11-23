@@ -523,11 +523,12 @@ sorted by increasing <span class="math notranslate nohighlight">\(k_i\)</span>, 
 stratum therefore spans the whole range of locations, while the strata still
 ascend in <span class="math notranslate nohighlight">\(k_i\)</span>. A trailing block with <span class="math notranslate nohighlight">\(r &lt; S\)</span> items sends its <span class="math notranslate nohighlight">\(j\)</span>-th item
 to stratum <span class="math notranslate nohighlight">\(\lfloor jS/r \rfloor\)</span>.</p>
-<p><strong>Stages.</strong> The item at 0-indexed test position <span class="math notranslate nohighlight">\(t\)</span> is drawn from stratum</p>
+<p><strong>Stages.</strong> The item at 0-indexed test position <span class="math notranslate nohighlight">\(t &lt; L\)</span> is drawn from stratum</p>
 <div class="math notranslate nohighlight">
-\[s(t) = \min\left(\left\lfloor \frac{tS}{L} \right\rfloor,\; S - 1\right),\]</div>
-<p>so each stratum serves about <span class="math notranslate nohighlight">\(L/S\)</span> consecutive positions, and a session that
-runs past <span class="math notranslate nohighlight">\(L\)</span> items stays in the last stratum.</p>
+\[s(t) = \left\lfloor \frac{tS}{L} \right\rfloor,\]</div>
+<p>so each stratum serves about <span class="math notranslate nohighlight">\(L/S\)</span> consecutive positions. There is no stage
+for position <span class="math notranslate nohighlight">\(L\)</span> or later: asked for an item there, the selector raises
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
 <p><strong>Selection.</strong> Within the active stratum, the selector takes the item whose
 location is closest to the estimate (Barrada et al., 2006, p. 157). With <span class="math notranslate nohighlight">\(R_t\)</span>
 the non-administered items,</p>
@@ -552,7 +553,9 @@ the non-administered items,</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test_size</span></code></p></td>
 <td><p>required</p></td>
-<td><p>Intended test length <span class="math notranslate nohighlight">\(L\)</span>.</p></td>
+<td><p>Intended test length <span class="math notranslate nohighlight">\(L\)</span>, at least 1. The stopper must end the
+test by then: the selector raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when asked for an item
+past it.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">n_strata</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
@@ -571,7 +574,7 @@ items from each in a 30-item test.</p></td>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
 <li><p>The strata partition the bank and ascend in the stratification key; with blocking, every block of <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> items ordered by location contributes its <code class="docutils literal notranslate"><span class="pre">j</span></code>-th item by key to stratum <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p></li>
-<li><p>The active stratum is determined solely by the number of administered items, <code class="docutils literal notranslate"><span class="pre">test_size</span></code> and <code class="docutils literal notranslate"><span class="pre">n_strata</span></code>, and stays at the last stratum past <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p></li>
+<li><p>The active stratum is determined solely by the number of administered items, <code class="docutils literal notranslate"><span class="pre">test_size</span></code> and <code class="docutils literal notranslate"><span class="pre">n_strata</span></code>. Asked for an item once <code class="docutils literal notranslate"><span class="pre">test_size</span></code> items have been administered, the selector raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> naming both numbers, so a stopper that allows longer tests than <code class="docutils literal notranslate"><span class="pre">test_size</span></code> fails loudly instead of ending sessions as if the bank were exhausted.</p></li>
 <li><p>The returned item is the non-administered item of the active stratum whose location is closest to <code class="docutils literal notranslate"><span class="pre">est_theta</span></code>.</p></li>
 <li><p>If the active stratum has no non-administered items left, the selector raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 <li><p>The class itself is abstract; subclasses only choose the key, the location and the blocking variable.</p></li>
@@ -589,7 +592,7 @@ items from each in a 30-item test.</p></td>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.StratifiedSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">StratifiedSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#StratifiedSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
 <p>Abstract base class for selectors that divide the item bank into stage-aligned strata.</p>
 <p>The bank is sorted by a stratification key and split into <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> strata, optionally after blocking
 on a location key so that every stratum covers the whole ability range. The test is split into
@@ -599,7 +602,8 @@ control: it applies no exposure cap, and <code class="docutils literal notransla
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>Number of items in the test.</p>
+<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>Number of items in the test, at least 1. The selector raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when asked for an
+item past it, so the stopper must end the test by then.</p>
 </dd>
 <dt><strong>n_strata</strong><span class="classifier">int or None, optional</span></dt><dd><p>Number of strata (and test stages). Must be between 1 and <code class="docutils literal notranslate"><span class="pre">test_size</span></code>. Default is None, which
 uses one stratum per test item.</p>
@@ -647,7 +651,8 @@ uses one stratum per test item.</p>
 <dd class="field-odd"><dl class="simple">
 <dt>NoItemsAvailableError</dt><dd><p>If every item in the current stratum has been administered.</p>
 </dd>
-<dt>ValueError</dt><dd><p>If items tie for the closest location and <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">test_size</span></code> items have already been administered, or if items tie for the closest
+location and <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
 </dd>
 </dl>
 </dd>
@@ -677,6 +682,12 @@ The strata are computed once per item bank.</p>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.StratifiedSelector.test_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">test_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.StratifiedSelector.test_size" title="Link to this definition">#</a></dt>
+<dd><p>Get the number of items in the test.</p>
 </dd></dl>
 
 </dd></dl>
@@ -741,6 +752,7 @@ The strata are computed once per item bank.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.StratifiedSelector.n_strata"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector.n_strata</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.StratifiedSelector.select"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector.select()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.StratifiedSelector.strata"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector.strata()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.StratifiedSelector.test_size"><code class="docutils literal notranslate"><span class="pre">StratifiedSelector.test_size</span></code></a></li>
 </ul>
 </li>
 </ul>

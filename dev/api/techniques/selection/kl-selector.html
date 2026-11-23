@@ -492,8 +492,8 @@ integrates this divergence over a symmetric window (pp. 219–220, Equation 17):
 K_i(\theta \,\|\, \hat{\theta})\,d\theta,
 \qquad
 \delta_n = \frac{c}{\sqrt{n}},\]</div>
-<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number of administered items and <span class="math notranslate nohighlight">\(c\)</span> is a positive
-schedule constant. For a small window the criterion is governed by the
+<p>where <span class="math notranslate nohighlight">\(n\)</span> is the number of administered items and <span class="math notranslate nohighlight">\(c\)</span>, the <code class="docutils literal notranslate"><span class="pre">window</span></code>
+parameter, is a positive schedule constant. For a small window the criterion is governed by the
 curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses <span class="math notranslate nohighlight">\(n = 1\)</span>, so the
 window is <span class="math notranslate nohighlight">\(\hat{\theta} \pm c\)</span>. Chang and Ying also define a Bayesian version
@@ -517,9 +517,9 @@ largest value of <span class="math notranslate nohighlight">\(K_i(\hat{\theta})\
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">c</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">window</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.0</span></code></p></td>
-<td><p>Positive constant controlling the half-width <span class="math notranslate nohighlight">\(\delta_n = c/\sqrt{n}\)</span>.
+<td><p>Positive constant <span class="math notranslate nohighlight">\(c\)</span> controlling the half-width <span class="math notranslate nohighlight">\(\delta_n = c/\sqrt{n}\)</span>.
 Chang and Ying (1996) chose <span class="math notranslate nohighlight">\(c\)</span> from the coverage probability of a
 confidence interval for <span class="math notranslate nohighlight">\(\theta\)</span> (p. 221) and used <span class="math notranslate nohighlight">\(c = 3\)</span> in
 their simulation (p. 223).</p></td>
@@ -556,18 +556,18 @@ out before the KL scores are computed, unless every remaining item is.</p></td>
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.KLSelector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">KLSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/kl.html#KLSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.KLSelector" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">KLSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/kl.html#KLSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.KLSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
 <p>Kullback-Leibler global-information item selector.</p>
 <p>Each candidate’s KL divergence between the response distributions at the current estimate
 and at nearby abilities is integrated over <span class="math notranslate nohighlight">\(\hat\theta \pm c / \sqrt{\max(1, n)}\)</span>,
-where <span class="math notranslate nohighlight">\(n\)</span> is the number of administered items, and the item with the largest integral
-is selected.</p>
+where <span class="math notranslate nohighlight">\(c\)</span> is <code class="docutils literal notranslate"><span class="pre">window</span></code> and <span class="math notranslate nohighlight">\(n\)</span> the number of administered items, and the item with
+the largest integral is selected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>c</strong><span class="classifier">float, optional</span></dt><dd><p>Width constant of the integration window, which narrows as items are administered.
-Default is 3.</p>
+<dt><strong>window</strong><span class="classifier">float, optional</span></dt><dd><p>Chang and Ying’s constant <span class="math notranslate nohighlight">\(c\)</span>, the half-width of the integration window before it
+narrows as items are administered. Default is 3.</p>
 </dd>
 <dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected
 unless no other items are available. Default is 1 (no restriction).</p>
@@ -577,12 +577,6 @@ unless no other items are available. Default is 1 (no restriction).</p>
 </dl>
 <p class="rubric">Notes</p>
 <p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Kullback-Leibler Selector</span></a>.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.selection.KLSelector.c">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">c</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.selection.KLSelector.c" title="Link to this definition">#</a></dt>
-<dd><p>Return the schedule constant used to define the integration window.</p>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.KLSelector.r_max">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">r_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.selection.KLSelector.r_max" title="Link to this definition">#</a></dt>
@@ -627,6 +621,12 @@ random (ADR-0008).</p>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.KLSelector.window">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">window</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.selection.KLSelector.window" title="Link to this definition">#</a></dt>
+<dd><p>Return Chang and Ying’s constant <span class="math notranslate nohighlight">\(c\)</span>: the integration half-width is <span class="math notranslate nohighlight">\(c / \sqrt{\max(1, n)}\)</span>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -688,9 +688,9 @@ random (ADR-0008).</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.KLSelector"><code class="docutils literal notranslate"><span class="pre">KLSelector</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.KLSelector.c"><code class="docutils literal notranslate"><span class="pre">KLSelector.c</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.KLSelector.r_max"><code class="docutils literal notranslate"><span class="pre">KLSelector.r_max</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.KLSelector.select"><code class="docutils literal notranslate"><span class="pre">KLSelector.select()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.KLSelector.window"><code class="docutils literal notranslate"><span class="pre">KLSelector.window</span></code></a></li>
 </ul>
 </li>
 </ul>

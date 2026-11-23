@@ -61,7 +61,7 @@ $D = 1.7$; catsim's IRT functions use no scaling constant.
      - Description
    * - ``test_size``
      - required
-     - Intended test length.
+     - Intended test length, at least 1.
    * - ``n_strata``
      - ``None``
      - Number of strata and stages; ``None`` uses ``test_size``.

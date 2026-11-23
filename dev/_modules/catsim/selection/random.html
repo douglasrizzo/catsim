@@ -772,6 +772,8 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for catsim.selection.random</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Random selector implementations."""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
@@ -788,9 +790,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  item selection strategies.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
-    <span class="k">return</span> <span class="s2">"Random Selector"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">()"</span>
 
 <div class="viewcode-block" id="RandomSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/random-selector.html#catsim.selection.RandomSelector.select">[docs]</a>
@@ -862,9 +864,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/the-54321-selector`.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
-    <span class="k">return</span> <span class="s2">"5-4-3-2-1 Selector"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(initial_bin_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_bin_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a The54321Selector object.</span>
@@ -876,9 +878,12 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``initial_bin_size`` is not an integer.</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If ``initial_bin_size`` is smaller than 1.</span>
 <span class="sd">    """</span>
+    <span class="n">initial_bin_size</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">initial_bin_size</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">initial_bin_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"initial_bin_size must be at least 1, got </span><span class="si">{</span><span class="n">initial_bin_size</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -950,11 +955,16 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in</span>
 <span class="sd">  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also</span>
 <span class="sd">  join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  bin_size : int</span>
+<span class="sd">      Number of most informative remaining items each item is drawn from, at least 1.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
-    <span class="k">return</span> <span class="s2">"Randomesque Selector"</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(bin_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a RandomesqueSelector object.</span>
@@ -964,7 +974,18 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    bin_size : int</span>
 <span class="sd">        The number of most informative items to be taken into consideration when</span>
 <span class="sd">        randomly selecting one of them.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``bin_size`` is not an integer.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``bin_size`` is smaller than 1.</span>
 <span class="sd">    """</span>
+    <span class="n">bin_size</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">bin_size</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bin_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bin_size must be at least 1, got </span><span class="si">{</span><span class="n">bin_size</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span> <span class="o">=</span> <span class="n">bin_size</span>
 

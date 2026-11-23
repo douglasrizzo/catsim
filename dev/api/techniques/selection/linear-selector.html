@@ -467,6 +467,30 @@ already been administered.</p>
 fixed-form tests through the CAT engine contract. It does not use the current
 ability estimate, response vector, or item information.</p>
 </section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 18.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">items</span></code></p></td>
+<td><p>required</p></td>
+<td><p>Non-empty list of non-negative item indices, administered in the order
+given.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="behavioral-contracts">
 <h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
 <p>Any correct implementation must satisfy the following properties:</p>
@@ -474,29 +498,31 @@ ability estimate, response vector, or item information.</p>
 <li><p>It never returns an already administered item.</p></li>
 <li><p>It follows the order of its list, whatever the order of the items in the bank.</p></li>
 <li><p>Once every item of its list has been administered, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>, even if other items of the bank remain.</p></li>
+<li><p>If an item of its list is not an index of the item bank, it raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of returning that index.</p></li>
 </ol>
 </section>
 <section id="api-reference">
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.LinearSelector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">LinearSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indexes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/linear.html#LinearSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.LinearSelector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></p>
-<p>Selector that returns item indexes in a linear order, simulating a standard (non-adaptive) test.</p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">LinearSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/linear.html#LinearSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.LinearSelector" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
+<p>Selector that administers a fixed list of items in order, simulating a standard (non-adaptive) test.</p>
 <p>This selector is useful for baseline comparisons or for administering a fixed set
 of items in a predetermined order.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>indexes</strong><span class="classifier">list[int]</span></dt><dd><p>The indexes of the items that will be returned in order.</p>
+<dt><strong>items</strong><span class="classifier">list[int]</span></dt><dd><p>Indices of the items to administer, in order. They are checked against the item bank at
+every selection.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.selection.LinearSelector.indexes">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">indexes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.selection.LinearSelector.indexes" title="Link to this definition">#</a></dt>
-<dd><p>The indexes of the items that will be returned in order.</p>
+<dt class="sig sig-object py" id="catsim.selection.LinearSelector.items">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">items</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.selection.LinearSelector.items" title="Link to this definition">#</a></dt>
+<dd><p>Get the indices of the items to administer, in order.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -506,21 +532,31 @@ of items in a predetermined order.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Unused for linear selection.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>The item bank the selector’s items must belong to.</p>
 </dd>
 <dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing the indexes of items that were already administered.</p>
+</dd>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Unused: the order of the items is fixed.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Unused: the order of the items is fixed.</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Ignored: this selector applies no exposure cap.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Unused; accepted for the engine’s selector contract.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>int</dt><dd><p>Index of the next item to be applied: the first of the selector’s indexes not yet administered.</p>
+<dt>int</dt><dd><p>Index of the next item to be applied: the first of the selector’s items not yet administered.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>NoItemsAvailableError</dt><dd><p>If every one of the selector’s indexes has already been administered.</p>
+<dt>ValueError</dt><dd><p>If any of the selector’s items is not an index of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>.</p>
+</dd>
+<dt>NoItemsAvailableError</dt><dd><p>If every one of the selector’s items has already been administered.</p>
 </dd>
 </dl>
 </dd>
@@ -580,10 +616,11 @@ of items in a predetermined order.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.LinearSelector"><code class="docutils literal notranslate"><span class="pre">LinearSelector</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.LinearSelector.indexes"><code class="docutils literal notranslate"><span class="pre">LinearSelector.indexes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.LinearSelector.items"><code class="docutils literal notranslate"><span class="pre">LinearSelector.items</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.LinearSelector.select"><code class="docutils literal notranslate"><span class="pre">LinearSelector.select()</span></code></a></li>
 </ul>
 </li>

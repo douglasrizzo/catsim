@@ -472,7 +472,7 @@ near-Fisher behavior late, and no need for offline calibration.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
-<p>At test position <span class="math notranslate nohighlight">\(n\)</span> out of a fixed total length <span class="math notranslate nohighlight">\(N\)</span>, the candidate
+<p>At test position <span class="math notranslate nohighlight">\(n\)</span> out of a planned total length <span class="math notranslate nohighlight">\(N\)</span>, the candidate
 score for item <span class="math notranslate nohighlight">\(i\)</span> is</p>
 <div class="math notranslate nohighlight">
 \[S_i^{(n)}
@@ -482,27 +482,47 @@ score for item <span class="math notranslate nohighlight">\(i\)</span> is</p>
 w_n\,\frac{I_i(\hat{\theta})}{\max_{j \in \mathcal{A}} I_j(\hat{\theta})},\]</div>
 <p>where <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> is the set of available items (the non-administered items
 under the exposure cap, or every non-administered item when the cap excludes
-them all), <span class="math notranslate nohighlight">\(R_i\)</span> is a fresh uniform random draw on <span class="math notranslate nohighlight">\([0,1]\)</span>, and</p>
+them all), <span class="math notranslate nohighlight">\(R_i\)</span> is a fresh uniform random draw on <span class="math notranslate nohighlight">\([0,1]\)</span>, and the weight on
+information is</p>
 <div class="math notranslate nohighlight">
 \[w_n
 =
-\min\!\left(1, \frac{n-1}{N-1}\right)^s,\]</div>
-<p>with acceleration parameter <span class="math notranslate nohighlight">\(s &gt; 0\)</span>. Dividing by the largest available
-information is equivalent to Revuelta and Ponsoda’s (1998) random component
-drawn on <span class="math notranslate nohighlight">\([0, \max_{j \in \mathcal{A}} I_j]\)</span>, as Barrada et al. (2008, p. 496,
-Equation 6) describe it. The weight is clamped at 1 so
-that a session running past <span class="math notranslate nohighlight">\(N\)</span> stays fully information-based. The selector
-chooses the available item with the largest score.</p>
-<p>Barrada et al. (2008, p. 498, Equation 12; Figure 1, p. 499) parameterize the
-schedule as a cumulative power sum with an acceleration parameter <span class="math notranslate nohighlight">\(t\)</span>,
-<span class="math notranslate nohighlight">\(w = \sum_{k=1}^{n-1} k^{t} / \sum_{k=1}^{N-1} k^{t}\)</span>, which is also what <code class="docutils literal notranslate"><span class="pre">catR</span></code>
-implements in
-<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>. It agrees with the power schedule above at <span class="math notranslate nohighlight">\(t = 0\)</span>, <span class="math notranslate nohighlight">\(s = 1\)</span> (linear),
-and for long tests approaches the power schedule with <span class="math notranslate nohighlight">\(s = t + 1\)</span>, since
-<span class="math notranslate nohighlight">\(\sum_{k=1}^{m} k^{t} \approx m^{t+1}/(t+1)\)</span>; for short tests the two differ, so
-<code class="docutils literal notranslate"><span class="pre">acceleration</span></code> is not interchangeable with their <span class="math notranslate nohighlight">\(t\)</span>. Revuelta and Ponsoda’s original schedule,
-<span class="math notranslate nohighlight">\(w = (n - 1)/N\)</span>, stops just short of 1 at the last item (Barrada et al., 2008,
-p. 496, Equation 7).</p>
+\frac{\sum_{m=1}^{n-1} m^{t}}{\sum_{m=1}^{N-1} m^{t}}
+\quad (n &lt; N),
+\qquad
+w_n = 1
+\quad (n \ge N),\]</div>
+<p>with acceleration parameter <span class="math notranslate nohighlight">\(t\)</span>, any real number. The weight is 0 at the first
+position and 1 at the last. With <span class="math notranslate nohighlight">\(t = 0\)</span> it is linear, <span class="math notranslate nohighlight">\(w_n = (n-1)/(N-1)\)</span>;
+positive <span class="math notranslate nohighlight">\(t\)</span> keeps the random component longer and negative <span class="math notranslate nohighlight">\(t\)</span> drops it sooner
+(Barrada et al., 2008, p. 498; Figure 1, p. 499, plots <span class="math notranslate nohighlight">\(t = -1, 0, 1, 2\)</span>).
+Dividing by the largest available information is equivalent to Revuelta and
+Ponsoda’s (1998) random component drawn on <span class="math notranslate nohighlight">\([0, \max_{j \in \mathcal{A}} I_j]\)</span>,
+as Barrada et al. (2008, p. 496, Equation 6) describe it. The selector chooses
+the available item with the largest score.</p>
+<p>The schedule is Barrada et al.’s (2008, p. 498, Equation 12), with <span class="math notranslate nohighlight">\(m\)</span> for their
+<span class="math notranslate nohighlight">\(h - 1\)</span> and <span class="math notranslate nohighlight">\(n\)</span>, <span class="math notranslate nohighlight">\(N\)</span> for their <span class="math notranslate nohighlight">\(k\)</span>, <span class="math notranslate nohighlight">\(K\)</span>. As printed, both sums in Equation 12 run
+to <span class="math notranslate nohighlight">\(k\)</span>, and Equations 12 and 13 both use the exponent <span class="math notranslate nohighlight">\(s\)</span>; the text under them,
+which names <span class="math notranslate nohighlight">\(t\)</span> and <span class="math notranslate nohighlight">\(s\)</span> as the two acceleration parameters and gives a weight of
+1 at the last item, puts <span class="math notranslate nohighlight">\(K\)</span> in the denominator and <span class="math notranslate nohighlight">\(t\)</span> in Equation 12. <code class="docutils literal notranslate"><span class="pre">catR</span></code>
+computes it that way in
+<a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>, with its
+argument <code class="docutils literal notranslate"><span class="pre">AP</span></code> as <span class="math notranslate nohighlight">\(t\)</span> and <code class="docutils literal notranslate"><span class="pre">thr</span></code> as <span class="math notranslate nohighlight">\(N\)</span> when <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">=</span> <span class="pre">&quot;length&quot;</span></code>. catsim departs
+from both in three places:</p>
+<ul class="simple">
+<li><p>The default is <span class="math notranslate nohighlight">\(t = 0\)</span>, the linear schedule; <code class="docutils literal notranslate"><span class="pre">catR</span></code>’s <code class="docutils literal notranslate"><span class="pre">nextItem</span></code> defaults to
+<code class="docutils literal notranslate"><span class="pre">AP</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p></li>
+<li><p>Past position <span class="math notranslate nohighlight">\(N\)</span>, which a session reaches when its stopper allows more items
+than planned, the weight stays 1. In <code class="docutils literal notranslate"><span class="pre">catR</span></code> the sums keep growing, and the
+weight passes 1 and gives the random component a negative coefficient.</p></li>
+<li><p>With <span class="math notranslate nohighlight">\(N = 1\)</span> the only position is the last, and the weight is 1. Equation 12
+and <code class="docutils literal notranslate"><span class="pre">catR</span></code> give 0 at the first position whatever <span class="math notranslate nohighlight">\(N\)</span> is.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">catR</span></code>’s other schedule, for its precision stopping rule, is not implemented.
+Revuelta and Ponsoda’s original schedule, <span class="math notranslate nohighlight">\(w = (n - 1)/N\)</span>, stops just short of 1
+at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
+not test it separately, since it differs little from Equation 12 with <span class="math notranslate nohighlight">\(t = 0\)</span>
+(p. 500).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -521,15 +541,16 @@ p. 496, Equation 7).</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test_size</span></code></p></td>
 <td><p>required</p></td>
-<td><p>Total number of administered items <span class="math notranslate nohighlight">\(N\)</span>; required because the schedule depends on test position.</p></td>
+<td><p>Planned test length <span class="math notranslate nohighlight">\(N\)</span>, at least 1; required because the schedule depends on test position.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">acceleration</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
-<td><p>Positive exponent <span class="math notranslate nohighlight">\(s\)</span>. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></td>
+<td><p>Acceleration parameter <span class="math notranslate nohighlight">\(t\)</span>, any finite number. 0 makes the schedule linear; positive values keep the random component longer and negative values drop it sooner.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
-<td><p>Exposure cap applied before scoring; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.</p></td>
+<td><p>Maximum exposure rate, in <span class="math notranslate nohighlight">\((0, 1]\)</span>. Items at or above it are left
+out before the scores are computed, unless every remaining item is.</p></td>
 </tr>
 </tbody>
 </table>
@@ -540,7 +561,7 @@ p. 496, Equation 7).</p>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
 <li><p>The blend weight is exactly 0 at position 1 and exactly 1 at the final test position when <code class="docutils literal notranslate"><span class="pre">test_size</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>.</p></li>
-<li><p>With <code class="docutils literal notranslate"><span class="pre">acceleration</span> <span class="pre">=</span> <span class="pre">1</span></code>, the schedule is linear in test position; larger acceleration delays the shift toward information-based scoring and smaller acceleration speeds it up.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">acceleration</span> <span class="pre">=</span> <span class="pre">0</span></code>, the schedule is linear in test position; positive acceleration delays the shift toward information-based scoring and negative acceleration speeds it up.</p></li>
 <li><p>At the first position, selection is driven only by the random component and is therefore independent of item information.</p></li>
 <li><p>At the final position, the score reduces to normalized information and behaves like an information-based selector subject to the exposure rule.</p></li>
 <li><p>The random component must be drawn from the provided RNG when one is supplied so repeated simulations remain reproducible.</p></li>
@@ -560,19 +581,21 @@ p. 496, Equation 7).</p>
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.ProgressiveSelector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ProgressiveSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/progressive.html#ProgressiveSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ProgressiveSelector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ProgressiveSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/progressive.html#ProgressiveSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ProgressiveSelector" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
 <p>Progressive selector that blends random and information-based scoring.</p>
 <p>Each available item scores a uniform random draw blended with its information, scaled by the
-largest available information; the weight on information grows from 0 at the first position
-to 1 at <code class="docutils literal notranslate"><span class="pre">test_size</span></code>, and the item with the largest score is selected.</p>
+largest available information; the weight on information follows Barrada et al.’s (2008)
+schedule from 0 at the first position to 1 at <code class="docutils literal notranslate"><span class="pre">test_size</span></code>, and the item with the largest score
+is selected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>Planned number of items in the test, at which the weight on information reaches 1.</p>
+<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>Planned number of items in the test, at least 1, at which the weight on information reaches 1.</p>
 </dd>
-<dt><strong>acceleration</strong><span class="classifier">float, optional</span></dt><dd><p>Exponent of the position schedule. Values above 1 delay the shift toward information and
-values below 1 hasten it. Default is 1 (linear).</p>
+<dt><strong>acceleration</strong><span class="classifier">float, optional</span></dt><dd><p>Barrada et al.’s acceleration parameter <span class="math notranslate nohighlight">\(t\)</span>, any finite number. 0 makes the schedule
+linear, positive values keep the random component longer and negative values drop it sooner.
+Default is 0.</p>
 </dd>
 <dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected
 unless no other items are available. Default is 1 (no restriction).</p>
@@ -582,6 +605,12 @@ unless no other items are available. Default is 1 (no restriction).</p>
 </dl>
 <p class="rubric">Notes</p>
 <p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Progressive Selector</span></a>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.ProgressiveSelector.acceleration">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">acceleration</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.selection.ProgressiveSelector.acceleration" title="Link to this definition">#</a></dt>
+<dd><p>Return the acceleration parameter of the schedule.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.ProgressiveSelector.r_max">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">r_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.selection.ProgressiveSelector.r_max" title="Link to this definition">#</a></dt>
@@ -625,6 +654,12 @@ the test position.</p>
 </dl>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.ProgressiveSelector.test_size">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">test_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.ProgressiveSelector.test_size" title="Link to this definition">#</a></dt>
+<dd><p>Return the planned number of items in the test.</p>
 </dd></dl>
 
 </dd></dl>
@@ -686,8 +721,10 @@ the test position.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProgressiveSelector"><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProgressiveSelector.acceleration"><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector.acceleration</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProgressiveSelector.r_max"><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector.r_max</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProgressiveSelector.select"><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector.select()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProgressiveSelector.test_size"><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector.test_size</span></code></a></li>
 </ul>
 </li>
 </ul>
