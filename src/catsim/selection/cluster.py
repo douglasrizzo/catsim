@@ -1,3 +1,12 @@
+"""Cluster-based item selection (Meneghetti, 2015).
+
+:class:`ClusterSelector` chooses a cluster of items before it chooses an item. :class:`ClusterMethod`
+names the ways it can score a cluster, and :class:`ExposureControl` what it administers when the chosen
+cluster has no item below the exposure cap.
+"""
+
+from enum import StrEnum
+
 import numpy
 
 from .._typing import FloatArray, IntArray
@@ -6,36 +15,61 @@ from ..item_bank import ItemBank
 from .base import BaseSelector
 
 
+class ClusterMethod(StrEnum):
+  """How :class:`ClusterSelector` scores a cluster at the current ability estimate.
+
+  Every score counts all the items of a cluster, including those already administered.
+
+  Attributes
+  ----------
+  ITEM_INFO : str
+      The information of the cluster's most informative item.
+  CLUSTER_INFO : str
+      The sum of the information of the cluster's items.
+  WEIGHTED_INFO : str
+      The mean information of the cluster's items: their sum divided by the cluster's size.
+  """
+
+  ITEM_INFO = "item_info"
+  CLUSTER_INFO = "cluster_info"
+  WEIGHTED_INFO = "weighted_info"
+
+
+class ExposureControl(StrEnum):
+  """What :class:`ClusterSelector` administers when no remaining item of the chosen cluster is below ``r_max``.
+
+  Attributes
+  ----------
+  PASSIVE : str
+      The most informative remaining item of the cluster, as if there were no cap.
+  AGGRESSIVE : str
+      The remaining item of the cluster with the smallest exposure rate, regardless of information.
+  """
+
+  PASSIVE = "passive"
+  AGGRESSIVE = "aggressive"
+
+
 class ClusterSelector(BaseSelector):
   """Cluster-based Item Selection Method.
+
+  Exact ties between clusters and between items are broken uniformly at random (ADR-0008).
 
   Parameters
   ----------
   clusters : list[int]
       One non-negative integer cluster label per item of the bank the selector is used with. The labels
       are checked against the bank's size at every selection.
-  method : str, optional
-      One of the available methods for cluster selection. Given the estimated theta
-      value at each step:
-
-      - 'item_info': selects the cluster which has the item with maximum information
-      - 'cluster_info': selects the cluster whose items' sum of information is maximum
-      - 'weighted_info': selects the cluster whose average item information is
-        maximum (its sum of information divided by its number of items)
-
-      Every score counts all the items in a cluster, including those already
-      administered, as long as the cluster still has an item left. Clusters whose
-      scores tie exactly are chosen between uniformly at random (ADR-0008). Default is
-      'item_info'.
+  method : ClusterMethod or str, optional
+      How clusters are scored; see :class:`ClusterMethod`. Every score counts all the items in a cluster,
+      including those already administered. Default is ``ClusterMethod.ITEM_INFO``.
   r_max : float, optional
-      Exposure-rate cap for choosing an item inside the selected cluster: items at
-      or above it are passed over unless no other item in the cluster remains. It
-      does not affect which cluster is chosen. Default is 1 (no cap).
-  r_control : str, optional
-      Item exposure control method, used when every remaining item in the selected
-      cluster has an exposure rate at or above r_max. 'passive' applies the most
-      informative of them; 'aggressive' applies the one with the smallest exposure
-      rate. Default is 'passive'.
+      Exposure-rate cap for choosing an item inside the selected cluster: items at or above it are
+      passed over unless no other item in the cluster remains. It does not affect which cluster is
+      chosen. Default is 1 (no cap).
+  r_control : ExposureControl or str, optional
+      What to administer when every remaining item in the selected cluster is at or above ``r_max``; see
+      :class:`ExposureControl`. Default is ``ExposureControl.PASSIVE``.
 
   Notes
   -----
@@ -57,21 +91,21 @@ class ClusterSelector(BaseSelector):
     return self._clusters.tolist()
 
   @property
-  def method(self) -> str:
+  def method(self) -> ClusterMethod:
     """Return the method used for cluster selection."""
     return self._method
 
   @property
-  def r_control(self) -> str:
+  def r_control(self) -> ExposureControl:
     """Return the item exposure control method."""
     return self._r_control
 
   def __init__(
     self,
     clusters: list[int],
-    method: str = "item_info",
+    method: ClusterMethod | str = ClusterMethod.ITEM_INFO,
     r_max: float = 1,
-    r_control: str = "passive",
+    r_control: ExposureControl | str = ExposureControl.PASSIVE,
   ) -> None:
     """Initialize a ClusterSelector object.
 
@@ -79,13 +113,12 @@ class ClusterSelector(BaseSelector):
     ----------
     clusters : list[int]
         One non-negative integer cluster label per item.
-    method : str, optional
-        Cluster selection method, one of ['item_info', 'cluster_info', 'weighted_info'].
-        Default is 'item_info'.
+    method : ClusterMethod or str, optional
+        Cluster-scoring method. Default is ``ClusterMethod.ITEM_INFO``.
     r_max : float, optional
         Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.
-    r_control : str, optional
-        Item exposure control method, one of ['passive', 'aggressive']. Default is 'passive'.
+    r_control : ExposureControl or str, optional
+        Item exposure control method. Default is ``ExposureControl.PASSIVE``.
 
     Raises
     ------
@@ -101,19 +134,23 @@ class ClusterSelector(BaseSelector):
       msg = "All cluster values must be non-negative integers"
       raise ValueError(msg)
 
-    available_methods = ["item_info", "cluster_info", "weighted_info"]
-    if method not in available_methods:
-      msg = f"{method} is not a valid cluster selection method; choose one from {available_methods}"
-      raise ValueError(msg)
+    try:
+      method = ClusterMethod(method)
+    except ValueError:
+      msg = f"{method} is not a valid cluster selection method; choose one from {list(map(str, ClusterMethod))}"
+      raise ValueError(msg) from None
 
     if not 0 <= r_max <= 1:
       msg = f"r_max must be between 0 and 1, got {r_max}"
       raise ValueError(msg)
 
-    available_rcontrol = ["passive", "aggressive"]
-    if r_control not in available_rcontrol:
-      msg = f"{r_control} is not a valid item exposure control method; choose one from {available_rcontrol}"
-      raise ValueError(msg)
+    try:
+      r_control = ExposureControl(r_control)
+    except ValueError:
+      msg = (
+        f"{r_control} is not a valid item exposure control method; choose one from {list(map(str, ExposureControl))}"
+      )
+      raise ValueError(msg) from None
 
     super().__init__()
     self._clusters: IntArray = labels
@@ -181,7 +218,7 @@ class ClusterSelector(BaseSelector):
     below_cap = in_cluster[exposure_rates[in_cluster] < self._r_max]
     if below_cap.size > 0:
       return self._pick_best(below_cap, information[below_cap], rng)
-    if self._r_control == "passive":
+    if self._r_control is ExposureControl.PASSIVE:
       return self._pick_best(in_cluster, information[in_cluster], rng)
     return self._pick_best(in_cluster, -exposure_rates[in_cluster], rng)
 
@@ -202,13 +239,13 @@ class ClusterSelector(BaseSelector):
     numpy.ndarray
         One score per cluster in ``open_clusters``.
     """
-    if self._method == "item_info":
+    if self._method is ClusterMethod.ITEM_INFO:
       best = numpy.full(self._clusters.max() + 1, -numpy.inf)
       numpy.maximum.at(best, self._clusters, item_bank.information(theta))
       return best[open_clusters]
     scores = (
       self.sum_cluster_infos(theta, item_bank, self._clusters)
-      if self._method == "cluster_info"
+      if self._method is ClusterMethod.CLUSTER_INFO
       else self.weighted_cluster_infos(theta, item_bank, self._clusters)
     )
     return numpy.array([scores[label] for label in open_clusters.tolist()])

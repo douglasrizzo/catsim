@@ -81,16 +81,18 @@ cluster's score; this page describes what the code does.
      - required
      - Cluster membership label for each item in the bank.
    * - ``method``
-     - ``"item_info"``
-     - Cluster-scoring rule: maximum item information, sum of cluster
-       information, or average cluster information.
+     - ``ClusterMethod.ITEM_INFO``
+     - Cluster-scoring rule, a ``ClusterMethod`` or its string value:
+       ``"item_info"`` (maximum item information), ``"cluster_info"`` (sum of
+       cluster information) or ``"weighted_info"`` (average cluster information).
    * - ``r_max``
      - ``1.0``
      - Soft maximum exposure rate for choosing an item inside the selected cluster.
    * - ``r_control``
-     - ``"passive"``
+     - ``ExposureControl.PASSIVE``
      - Fallback rule when every remaining item in the chosen cluster violates
-       the exposure cap.
+       the exposure cap, an ``ExposureControl`` or its string value
+       (``"passive"`` or ``"aggressive"``).
 ```
 
 ## Behavioral Contracts
@@ -115,4 +117,14 @@ Meneghetti, D. D. R., & Aquino Junior, P. T. (2018). *Application and simulation
 .. autoclass:: catsim.selection.ClusterSelector
    :members:
    :show-inheritance:
+```
+
+```{eval-rst}
+.. autoclass:: catsim.selection.ClusterMethod
+   :members:
+```
+
+```{eval-rst}
+.. autoclass:: catsim.selection.ExposureControl
+   :members:
 ```
