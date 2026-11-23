@@ -111,6 +111,21 @@ class TestStopRule:
     with pytest.raises(ValueError, match="min_items must not be negative"):
       StopRule(MaxLengthStopper(10), min_items=-1)
 
+  def test_rejects_min_items_above_a_length_cap(self) -> None:
+    """A minimum length above the cap, which makes every session run past the cap, is accepted instead of raising.
+
+    MinErrorStopper(0.01, min_items=30, max_items=20) raised; its StopRule translation must too.
+    """
+    with pytest.raises(ValueError, match=r"min_items \(30\) must not exceed the MaxLengthStopper cap \(20\)"):
+      StopRule(StandardErrorStopper(0.01), MaxLengthStopper(20), min_items=30)
+
+  def test_accepts_min_items_equal_to_the_length_cap(self) -> None:
+    """A fixed-length test written as min_items equal to the cap is rejected as if the floor overrode the cap."""
+    rule = StopRule(StandardErrorStopper(0.01), MaxLengthStopper(20), min_items=20)
+    bank = identical_1pl_bank(30, 0.0)
+
+    assert [rule.stop(bank, list(range(n)), 0.0) for n in (19, 20)] == [False, True]
+
   def test_rejects_a_child_that_is_not_a_stopper(self) -> None:
     """A number passed where a stopper belongs, as in StopRule(StandardErrorStopper(0.3), 40), is accepted.
 

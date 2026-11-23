@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .base import BaseStopper
+from .length import MaxLengthStopper
 
 if TYPE_CHECKING:
   from ..item_bank import ItemBank
@@ -26,13 +27,15 @@ class StopRule(BaseStopper):
   *stoppers : BaseStopper
       The stoppers to combine. At least one is required.
   min_items : int, optional
-      Number of administered items before which the rule never stops. Must not be negative.
-      Default is 0.
+      Number of administered items before which the rule never stops. Must not be negative,
+      nor greater than the `max_items` of a :class:`~catsim.stopping.MaxLengthStopper` among
+      `stoppers`, whose cap it would override. Default is 0.
 
   Raises
   ------
   ValueError
-      If no stopper is given, or if `min_items` is negative.
+      If no stopper is given, or if `min_items` is negative or greater than the cap of a
+      :class:`~catsim.stopping.MaxLengthStopper` among `stoppers`.
   TypeError
       If any of `stoppers` is not a :class:`~catsim.stopping.BaseStopper`.
 
@@ -71,6 +74,10 @@ class StopRule(BaseStopper):
         raise TypeError(msg)
     if min_items < 0:
       msg = f"min_items must not be negative, got {min_items}"
+      raise ValueError(msg)
+    caps = [stopper.max_items for stopper in stoppers if isinstance(stopper, MaxLengthStopper)]
+    if caps and min_items > min(caps):
+      msg = f"min_items ({min_items}) must not exceed the MaxLengthStopper cap ({min(caps)}), which it would override"
       raise ValueError(msg)
     object.__setattr__(self, "stoppers", stoppers)
     object.__setattr__(self, "min_items", min_items)
