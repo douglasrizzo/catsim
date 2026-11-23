@@ -256,17 +256,21 @@ def item_exposure(
   title : str or None, optional
       The plot title. Default is None.
   simulation : SimulationResult or None, optional
-      Simulation result containing exposure data. Default is None.
+      Simulation result containing exposure data and the item bank. Pass either this or
+      ``exposure_rates``. Default is None.
   item_bank : ItemBank or numpy.ndarray or None, optional
       An ItemBank, or an item matrix of [a, b, c, d] parameters, which is converted to an ItemBank.
-      Exposure rates come from ``simulation`` or ``exposure_rates``. Default is None.
+      Only used with ``exposure_rates``, and required when ``par`` is given. Default is None.
+  exposure_rates : numpy.ndarray or None, optional
+      The exposure rate of each item, in item bank order. Pass either this or ``simulation``.
+      Default is None.
   par : str or None, optional
-      A string representing one of the item parameters ('a', 'b', 'c', 'd') to order
-      the items by and use on the x axis, or None to use the default order of the item
-      bank. If `hist=True`, no sorting will be done. Default is None.
+      A string representing one of the item parameters ('a', 'b', 'c', 'd') to plot on
+      the x axis, or None to plot the exposures in item bank order. If `hist=True`, no
+      sorting will be done. Default is None.
   hist : bool, optional
       If True, plots a histogram of item exposures. Otherwise, plots a line chart of
-      the exposures, sorted in the x-axis by the parameter chosen in `par`. Default is False.
+      the exposures against the parameter chosen in `par`. Default is False.
 
   Returns
   -------
@@ -276,11 +280,34 @@ def item_exposure(
   Raises
   ------
   ValueError
-      If neither simulation, item_bank, nor exposure_rates is provided, or if
-      par is not one of 'a', 'b', 'c', 'd', or None.
+      If neither or both of ``simulation`` and ``exposure_rates`` are given, if ``item_bank`` is
+      passed with ``simulation``, if ``par`` is not one of 'a', 'b', 'c', 'd' or None, if ``par``
+      is given with ``exposure_rates`` but no ``item_bank``, or if ``exposure_rates`` and
+      ``item_bank`` differ in length.
   """
-  if simulation is None and item_bank is None and exposure_rates is None:
-    msg = "One of: simulation, item_bank, exposure_rates must be passed."
+  if simulation is not None:
+    if item_bank is not None or exposure_rates is not None:
+      msg = "Pass either simulation or exposure_rates (with item_bank), not both; simulation already holds them."
+      raise ValueError(msg)
+    item_bank = simulation.item_bank
+    exposure_rates = simulation.exposure_rates
+  if exposure_rates is None:
+    msg = "Exposure data must be passed, either as simulation or as exposure_rates."
+    raise ValueError(msg)
+
+  supported_parameters = ("a", "b", "c", "d")
+  if par is not None and par not in supported_parameters:
+    msg = f"Unsupported parameter {par!r} for 'par'. Supported parameters are: {', '.join(supported_parameters)}."
+    raise ValueError(msg)
+
+  if isinstance(item_bank, numpy.ndarray):
+    item_bank = ItemBank(item_bank)
+  if item_bank is None:
+    if par is not None:
+      msg = f"item_bank must be passed with exposure_rates to plot exposure against parameter {par!r}."
+      raise ValueError(msg)
+  elif len(exposure_rates) != item_bank.n_items:
+    msg = f"exposure_rates has {len(exposure_rates)} values but the item bank has {item_bank.n_items} items."
     raise ValueError(msg)
 
   if ax is None:
@@ -289,24 +316,10 @@ def item_exposure(
   if title is not None:
     ax.set_title(title, size=18)
 
-  if simulation is not None:
-    item_bank = simulation.item_bank
-    exposure_rates = simulation.exposure_rates
-  elif isinstance(item_bank, numpy.ndarray):
-    item_bank = ItemBank(item_bank)
-
-  if item_bank is None:
-    msg = "item_bank must be provided when simulation is not passed"
-    raise ValueError(msg)
-  if exposure_rates is None:
-    exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-
-  supported_parameters = {"a", "b", "c", "d"}
-  if par is not None and par not in supported_parameters:
-    msg = "Unsupported parameter 'par'. Supported parameters are: " + ", ".join(supported_parameters) + "."
-    raise ValueError(msg)
-
-  if par == "a":
+  if item_bank is None or par is None:
+    parameter = numpy.arange(len(exposure_rates))
+    xlabel = "Items"
+  elif par == "a":
     parameter = item_bank.discrimination
     xlabel = "Item discrimination"
   elif par == "b":
@@ -315,27 +328,19 @@ def item_exposure(
   elif par == "c":
     parameter = item_bank.pseudo_guessing
     xlabel = "Item Guessing"
-  elif par == "d":
+  else:
     parameter = item_bank.upper_asymptote
     xlabel = "Item upper asymptote"
-  else:
-    parameter = numpy.array(range(item_bank.n_items))
-    xlabel = "Items"
 
   if hist:
-    ax.hist(exposure_rates, max(int(item_bank.n_items / 10), 3))
+    ax.hist(exposure_rates, max(len(exposure_rates) // 10, 3))
     ax.set_xlabel("Item exposure")
     ax.set_ylabel("Items")
   else:
-    indexes = parameter.argsort()
-    ax.plot(exposure_rates[indexes], marker="o")
+    indexes = parameter.argsort(kind="stable")
+    ax.plot(parameter[indexes], exposure_rates[indexes], marker="o")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Item exposure")
-
-  # Only show legend if there are labeled artists
-  handles, _ = ax.get_legend_handles_labels()
-  if handles:
-    plt.legend(loc="best")
 
   return ax
 
