@@ -305,6 +305,11 @@ class TestUrrySelector:
 class TestRandomesqueSelector:
   """Tests for RandomesqueSelector."""
 
+  def test_init_rejects_a_bin_smaller_than_one(self) -> None:
+    """RandomesqueSelector(bin_size=0) used to construct and fail only at its first selection."""
+    with pytest.raises(ValueError, match="bin_size must be at least 1, got 0"):
+      RandomesqueSelector(bin_size=0)
+
   def test_draws_from_the_bin_of_most_informative_remaining_items(self) -> None:
     """Every pick is one of the bin_size most informative remaining items, and each of them gets picked."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
@@ -324,10 +329,9 @@ class TestThe54321Selector:
   """The 5-4-3-2-1 rule of McBride & Martin (1983)."""
 
   def test_init_default_and_validation(self) -> None:
-    """The first item is drawn from the 5 most informative items unless configured otherwise."""
+    """McBride and Martin draw the first item from the top 5; an initial bin of 0 would leave nothing to draw from."""
     assert The54321Selector().initial_bin_size == 5
-    assert The54321Selector(3).initial_bin_size == 3
-    with pytest.raises(ValueError, match="initial_bin_size"):
+    with pytest.raises(ValueError, match="initial_bin_size must be at least 1, got 0"):
       The54321Selector(0)
 
   @pytest.mark.parametrize(("n_administered", "bin_size"), [(0, 5), (1, 4), (2, 3), (3, 2), (4, 1), (12, 1)])

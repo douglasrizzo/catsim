@@ -54,13 +54,25 @@ class MLWISelector(BaseSelector):
       raise ValueError(msg)
 
     super().__init__()
+    self._n_nodes = n_nodes
+    self._bounds = (float(bounds[0]), float(bounds[1]))
     self._nodes = numpy.linspace(bounds[0], bounds[1], n_nodes)
     self._delta = (bounds[1] - bounds[0]) / (n_nodes - 1)
     self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
-    return f"Maximum Likelihood Weighted Information Selector (Q={len(self._nodes)})"
+    return f"Maximum Likelihood Weighted Information Selector (Q={self._n_nodes})"
+
+  @property
+  def n_nodes(self) -> int:
+    """Return the number of grid nodes, including both bounds."""
+    return self._n_nodes
+
+  @property
+  def bounds(self) -> tuple[float, float]:
+    """Return the first and last grid node."""
+    return self._bounds
 
   @property
   def r_max(self) -> float:

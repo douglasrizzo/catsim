@@ -164,6 +164,11 @@ class RandomesqueSelector(BaseSelector):
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
   join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.
+
+  Parameters
+  ----------
+  bin_size : int
+      Number of most informative remaining items each item is drawn from, at least 1.
   """
 
   def __str__(self) -> str:
@@ -178,7 +183,15 @@ class RandomesqueSelector(BaseSelector):
     bin_size : int
         The number of most informative items to be taken into consideration when
         randomly selecting one of them.
+
+    Raises
+    ------
+    ValueError
+        If ``bin_size`` is smaller than 1.
     """
+    if bin_size < 1:
+      msg = f"bin_size must be at least 1, got {bin_size}"
+      raise ValueError(msg)
     super().__init__()
     self._bin_size = bin_size
 

@@ -60,17 +60,22 @@ class ProgressiveSelector(BaseSelector):
       raise ValueError(msg)
     super().__init__()
     self._test_size = check_test_size(test_size)
-    self._s = float(acceleration)
+    self._acceleration = float(acceleration)
     self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
-    return f"Progressive Selector (s={self._s})"
+    return f"Progressive Selector (acceleration={self._acceleration})"
 
   @property
   def test_size(self) -> int:
     """Return the planned number of items in the test."""
     return self._test_size
+
+  @property
+  def acceleration(self) -> float:
+    """Return the exponent of the position schedule."""
+    return self._acceleration
 
   @property
   def r_max(self) -> float:
@@ -79,7 +84,7 @@ class ProgressiveSelector(BaseSelector):
 
   def _weight(self, position: int) -> float:
     """Return the progression weight for the given 1-indexed test position."""
-    return _position_weight(position, self._test_size, self._s)
+    return _position_weight(position, self._test_size, self._acceleration)
 
   def select(
     self,
@@ -185,18 +190,28 @@ class ProportionalSelector(BaseSelector):
       raise ValueError(msg)
     super().__init__()
     self._test_size = check_test_size(test_size)
-    self._s = float(acceleration)
-    self._k = float(sharpness)
+    self._acceleration = float(acceleration)
+    self._sharpness = float(sharpness)
     self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
-    return f"Proportional Selector (s={self._s}, k={self._k})"
+    return f"Proportional Selector (acceleration={self._acceleration}, sharpness={self._sharpness})"
 
   @property
   def test_size(self) -> int:
     """Return the planned number of items in the test."""
     return self._test_size
+
+  @property
+  def acceleration(self) -> float:
+    """Return the exponent of the position schedule."""
+    return self._acceleration
+
+  @property
+  def sharpness(self) -> float:
+    """Return the largest exponent applied to the information."""
+    return self._sharpness
 
   @property
   def r_max(self) -> float:
@@ -205,7 +220,7 @@ class ProportionalSelector(BaseSelector):
 
   def _exponent(self, position: int) -> float:
     """Return the information exponent for the given 1-indexed test position."""
-    return self._k * _position_weight(position, self._test_size, self._s)
+    return self._sharpness * _position_weight(position, self._test_size, self._acceleration)
 
   def select(
     self,

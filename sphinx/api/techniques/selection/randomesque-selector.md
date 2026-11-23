@@ -19,6 +19,22 @@ information (Georgiadou et al., 2007, p. 9). Magis and Raîche (2012, p. 12) lis
 it among the exposure-control methods that choose at random among several
 optimal items near the current estimate.
 
+## Parameters
+
+```{eval-rst}
+.. list-table::
+   :header-rows: 1
+   :widths: 22 18 60
+
+   * - Parameter
+     - Default
+     - Description
+   * - ``bin_size``
+     - required
+     - Number of most informative remaining items each item is drawn from, at
+       least 1. A bin of 1 is maximum-information selection.
+```
+
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
