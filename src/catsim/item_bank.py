@@ -452,6 +452,6 @@ class ItemBank:
       if array is not None:
         array.flags.writeable = False
 
-  def __getitem__(self, index: int | slice | list | IntArray) -> FloatArray:
+  def __getitem__(self, index: int | slice | list[int] | IntArray) -> FloatArray:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]

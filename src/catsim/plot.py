@@ -40,7 +40,7 @@ def item_curve(
   title: str | None = None,
   ptype: PlotType = PlotType.ICC,
   max_info: bool = True,
-  figsize: tuple | None = None,
+  figsize: tuple[float, float] | None = None,
 ) -> Axes:
   """Plot Item Response Theory-related item plots.
 
@@ -92,7 +92,7 @@ def item_curve(
   if ax is None:
     _, ax = plt.subplots(figsize=figsize)
 
-  thetas = numpy.arange(b - 4, b + 4, 0.1, "double")
+  thetas = numpy.arange(b - 4, b + 4, 0.1)
   p_thetas = []
   i_thetas = []
   for theta in thetas:
@@ -164,7 +164,7 @@ def _annotate_parameters(ax: Axes, a: float, b: float, c: float, d: float) -> No
 def gen3d_dataset_scatter(
   item_bank: ItemBank | FloatArray,
   title: str | None = None,
-  figsize: tuple | None = None,
+  figsize: tuple[float, float] | None = None,
 ) -> Axes:
   """Generate a 3D scatter plot of item parameters.
 
@@ -366,7 +366,7 @@ def test_progress(
   see: bool = False,
   reliability: bool = False,
   marker: str | int | None = None,
-  figsize: tuple | None = None,
+  figsize: tuple[float, float] | None = None,
 ) -> Axes:
   """Generate a plot representing an examinee's test progress over time.
 

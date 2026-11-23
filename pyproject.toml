@@ -207,7 +207,12 @@ markers = [
 include = ["src/catsim"]
 
 [tool.ty.rules]
-all = "ignore"
+# ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (SciPy and
+# numexpr stubs leak Any into return values), and missing-override-decorator until the strategies use
+# typing.override.
+possibly-unresolved-reference = "error"
+missing-type-argument = "error"
+blanket-ignore-comment = "error"
 division-by-zero = "error"
 possibly-missing-import = "error"
 redundant-cast = "error"
