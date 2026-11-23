@@ -1,6 +1,8 @@
 **Status:** Planned
 **Module:** `catsim.selection.weighted_info.MEPVSelector` (planned)
 **Reference:** van der Linden (1998); Choi and Swartz (2009)
+**Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`EPV.R`, `eapEst.R`, `eapSem.R`, `nextItem.R`).
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Minimum Expected Posterior Variance Selector
 
@@ -8,10 +10,16 @@
 
 MEPV is the decision-theoretic sibling of MEI. Rather than maximizing expected
 information after the next response, it minimizes the expected posterior
-variance, which directly targets squared-error loss under the posterior.
+variance, which directly targets squared-error loss under the posterior. van
+der Linden (1996, p. 8) traces it to Owen's empirical Bayes procedure, which
+mentioned minimizing the preposterior risk under quadratic loss as an
+alternative item selection rule.
 
 This makes it conceptually attractive for pure ability estimation, even though
-its empirical gains over MEI and MPWI are often modest.
+its empirical gains over MEI and MPWI are modest. In van der Linden's
+simulation with two-parameter logistic items, its bias and mean squared error
+did not differ in practice from those of MPWI and MEI at 5 and 10 items; at 20
+and 30 items MEI fell behind, while MEPV and MPWI did not (pp. 18–19).
 
 ## Definition
 
@@ -40,10 +48,27 @@ Choi and Swartz (2009, Equation 4) weight the two branches by the posterior
 predictive probabilities, as here. van der Linden's 1996 report (p. 12,
 Equation 14), which calls the criterion minimum predicted expected variance, and
 `catR` (Magis & Raîche, 2012, p. 9, Table 1) use the response probabilities at
-the current ability estimate instead. From a Bayesian point of view, van der
-Linden prefers this criterion to maximum expected information, because the
-reciprocal of the information only approximates the posterior variance in large
-samples (p. 12).
+the current ability estimate instead; the report mentions replacing them by
+expectations over posterior distributions as a possible variant (p. 13). Both
+Equation 14 of the report and Equation 4 of Choi and Swartz print a maximum;
+the criterion's name and purpose make it a minimum. From a Bayesian point of
+view, van der Linden prefers this criterion to maximum expected information,
+because the reciprocal of the information only approximates the posterior
+variance in large samples (p. 12).
+
+`catR`'s [`EPV.R`](https://github.com/cran/catR/blob/master/R/EPV.R), called
+from [`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R),
+follows van der Linden: it weights the branches by $P_i(\hat{\theta})$ and
+$1 - P_i(\hat{\theta})$ at the current estimate, and takes each branch's
+posterior variance as the square of the posterior standard deviation from
+[`eapSem.R`](https://github.com/cran/catR/blob/master/R/eapSem.R), around the
+EAP estimate from [`eapEst.R`](https://github.com/cran/catR/blob/master/R/eapEst.R)
+after the hypothetical response is appended. Those integrals use the
+trapezoidal rule on 33 equally spaced nodes over $[-4, 4]$
+(`parInt = c(-4, 4, 33)`), and the default prior is standard normal, as is
+catsim's. catsim agrees on the branch variances, which it computes on its
+default grid of 121 equally weighted nodes over $[-6, 6]$, and departs in the
+branch weights, which can rank items differently.
 
 ## Parameters
 

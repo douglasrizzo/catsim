@@ -1,40 +1,78 @@
 **Status:** Planned
 **Module:** `catsim.exposure.sympson_hetter.SympsonHetterControl` (planned)
 **Reference:** Sympson and Hetter (1985); Stocking and Lewis (1998)
+**Last validated:** 2026-11-23, against Barrada et al. (2008); Georgiadou et al. (2007); Stocking & Lewis (1995, ETS RR-95-24).
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Sympson-Hetter Exposure Control
 
 ## Motivation
 
-Sympson-Hetter (SH) is the classic operational exposure-control method for CAT.
-It is conceptually orthogonal to item selection: a selector proposes an item,
-then SH decides whether that proposed item is actually administered.
+Sympson-Hetter (SH) is the classic operational exposure-control method for CAT,
+the most widely used way of capping item exposure rates (Barrada et al., 2008,
+p. 495). It is conceptually orthogonal to item selection: a selector proposes
+an item, then SH decides whether that proposed item is actually administered.
 
-That separation is useful because the same control table can wrap different
-selectors, and calibration happens offline rather than during live testing.
+That separation lets the same mechanism wrap any selector. The control table,
+however, belongs to one selector, test design and examinee population: it is
+calibrated offline, before live testing, by simulating that design with
+examinees drawn from a typical ability distribution, and is recalibrated when
+test conditions change (Stocking & Lewis, 1995, p. 8; Georgiadou et al., 2007,
+p. 11). It caps exposure in that population only: an item given to no more
+than 20% of all examinees can still be given to every high-ability examinee,
+which led Stocking and Lewis to condition the control on ability (1995,
+pp. 4–5).
 
 ## Definition
 
-For each item $i$, SH stores an acceptance probability $K_i$. Live
-administration proceeds as follows:
+For each item $i$, SH stores an acceptance probability $K_i$, the probability
+that the item is administered given that the selector proposed it (Stocking &
+Lewis, 1995, p. 8). Live administration proceeds as follows (Georgiadou et al.,
+2007, p. 12; Barrada et al., 2008, p. 495):
 
 1. Select a candidate item with the wrapped selector.
 2. Draw a Bernoulli random variable with success probability $K_i$.
 3. If the draw succeeds, administer the item.
-4. If the draw fails, temporarily mark the item ineligible for that examinee and ask the selector for another candidate.
+4. If the draw fails, do not administer the item, exclude it for the rest of that examinee's test, and ask the selector for another candidate.
 
-The $K_i$ values are calibrated offline so the empirical exposure rate of
-each item stays below a target $r_{\max}$. Starting from
-$K_i^{(0)} = 1$, the basic update is
+Because a rejected item is lost to that examinee, an $n$-item test is
+guaranteed only if at least $n$ items have $K_i = 1$ (Stocking & Lewis, 1995,
+pp. 21–22).
+
+The $K_i$ values are calibrated offline so that no item's exposure rate exceeds
+a target $r_{\max}$. An item is administered only if it is proposed and then
+accepted, so its administration rate is $r_i = K_i s_i$, where $s_i$ is the
+rate at which the selector proposes it (Barrada et al., 2008, p. 495,
+Equation 4). Starting from $K_i^{(0)} = 1$, as Sympson and Hetter recommended
+(Stocking & Lewis, 1995, pp. 21–22), each calibration iteration simulates the
+test with the current values and sets (Barrada et al., 2008, p. 495,
+Equation 5; Stocking & Lewis, 1995, p. 8)
 
 $$
 K_i^{(k+1)}
 =
-\min\left(1, K_i^{(k)} \frac{r_{\max}}{r_i^{(k)}}\right),
+\begin{cases}
+1 & \text{if } s_i^{(k)} \le r_{\max},\\
+r_{\max} / s_i^{(k)} & \text{if } s_i^{(k)} > r_{\max},
+\end{cases}
 $$
 
-where $r_i^{(k)}$ is the empirical administration rate in calibration
-iteration $k$.
+where $s_i^{(k)}$ is the proportion of simulated examinees for whom the
+selector proposed item $i$ in iteration $k$. Since $r_i = K_i s_i$, this is the
+update
+
+$$
+K_i^{(k+1)}
+=
+\min\left(1, K_i^{(k)} \frac{r_{\max}}{r_i^{(k)}}\right)
+$$
+
+written with the administration rate $r_i^{(k)}$, the form the implementation
+guidance below uses. With simulated counts the two forms differ by sampling
+noise, and only the first is defined for an item that was proposed but never
+administered. The iterations stop when the $K_i$ have stabilized and the
+largest administration rate is about $r_{\max}$, or after a fixed number of
+iterations (Stocking & Lewis, 1995, p. 8; Barrada et al., 2008, p. 495).
 
 ## Parameters
 
@@ -60,15 +98,21 @@ Any correct implementation must satisfy the following properties:
 
 1. Live administration separates candidate selection from candidate acceptance.
 2. If `k_values` are missing, live selection is invalid until calibration has been performed.
-3. A rejected item is not administered for the current examinee and the selector is queried again for another candidate.
+3. A rejected item is not administered to the current examinee for the rest of the test, and the selector is queried again for another candidate.
 4. Offline calibration updates item-specific acceptance probabilities toward the target marginal exposure rate.
 5. The wrapper should preserve the selector contract so it can be slotted into the engine as a selector-like component.
 
 ## References
 
-Sympson, J. B., & Hetter, R. D. (1985). Controlling item-exposure rates in computerized adaptive testing. *Proceedings of the 27th Annual Meeting of the Military Testing Association* (pp. 973-977). San Diego, CA: Navy Personnel Research and Development Center.
+Sympson, J. B., & Hetter, R. D. (1985). Controlling item-exposure rates in computerized adaptive testing. In *Proceedings of the 27th Annual Meeting of the Military Testing Association* (pp. 973-977). San Diego, CA: Navy Personnel Research and Development Center. Not openly available; Barrada et al. (2008), Georgiadou et al. (2007) and Stocking and Lewis (1995) describe the method.
 
-Stocking, M. L., & Lewis, C. (1998). Controlling item exposure conditional on ability in computerized adaptive testing. *Journal of Educational and Behavioral Statistics*, 23(1), 57-75. <https://doi.org/10.3102/10769986023001057>
+Stocking, M. L., & Lewis, C. (1998). Controlling item exposure conditional on ability in computerized adaptive testing. *Journal of Educational and Behavioral Statistics*, 23(1), 57-75. <https://doi.org/10.3102/10769986023001057>. Not openly available; the 1995 report below preceded it.
+
+Stocking, M. L., & Lewis, C. (1995). *Controlling item exposure conditional on ability in computerized adaptive testing* (Research Report 95-24). Princeton, NJ: Educational Testing Service. <https://doi.org/10.1002/j.2333-8504.1995.tb01659.x>. Open copy: [ERIC](https://files.eric.ed.gov/fulltext/ED389740.pdf).
+
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
+
+Georgiadou, E. G., Triantafillou, E., & Economides, A. A. (2007). A review of item exposure control strategies for computerized adaptive testing developed from 1983 to 2005. *The Journal of Technology, Learning, and Assessment*, 5(8). <https://ejournals.bc.edu/index.php/jtla/article/view/1647> (open access).
 
 ## Implementation Guidance
 
