@@ -483,6 +483,12 @@ def theta_to_scale(
   float or numpy.ndarray
       The transformed score(s) on the target scale. Returns the same type as input.
 
+  Raises
+  ------
+  ValueError
+      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
+      ``scale_min``.
+
   Notes
   -----
   - Values outside [theta_min, theta_max] are extrapolated linearly
@@ -559,6 +565,12 @@ def scale_to_theta(
   -------
   float or numpy.ndarray
       The transformed theta value(s). Returns the same type as input.
+
+  Raises
+  ------
+  ValueError
+      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
+      ``scale_min``.
 
   Notes
   -----

@@ -415,6 +415,9 @@ def test_progress(
       Simulation result containing session traces. Default is None.
   index : int or None, optional
       The index of the session to be plotted when ``simulation`` is provided.
+  session : CatSessionState or None, optional
+      Not plotted on its own: passing it without ``simulation`` raises ``ValueError``, and with
+      ``simulation`` the session at ``index`` is plotted instead. Default is None.
   thetas : list[float] or None, optional
       If a simulation result is not passed, then a list of ability estimations can be manually
       passed to the function. Default is None.
@@ -449,8 +452,9 @@ def test_progress(
   Raises
   ------
   ValueError
-      If neither simulation nor the required manual parameters are provided, or if thetas
-      and administered_items have mismatched lengths.
+      If ``simulation`` is passed without ``index``, ``session`` without ``simulation``, or
+      neither ``simulation`` nor both ``thetas`` and ``administered_items``; or if ``thetas``
+      does not hold one more estimate than there are administered items.
   """
   if simulation is None and session is None and thetas is None and administered_items is None:
     msg = "One of: simulation, session, thetas, administered_items must be passed."

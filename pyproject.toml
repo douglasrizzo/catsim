@@ -67,6 +67,8 @@ select = [
     "I",
     "N",
     "D",
+    "D417",  # every parameter documented; the numpy convention turns it off
+    "DOC",
     "UP",
     "ANN",
     "B",
@@ -111,6 +113,7 @@ ignore = [
   "ANN401",
   "D100",
   "D421",    # Google-style rule; numpy-style property docstrings here start with "Return ..."
+  "DOC502",  # numpydoc lists the exceptions a function lets propagate from its callees
   "E111",
   "E114",
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
@@ -128,6 +131,10 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
+[tool.ruff.lint.pydoclint]
+# A one-line docstring has no sections to check.
+ignore-one-line-docstrings = true
+
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy.typing.NDArray".msg = "Use FloatArray or IntArray from catsim._typing; add an alias there for other dtypes."
 
@@ -137,6 +144,7 @@ convention = "numpy"
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
   "D",        # Test names already communicate intent; per-test docstring churn is low value
+  "DOC",      # Test and fixture docstrings have no Returns or Raises sections
   "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations

@@ -109,6 +109,11 @@ class BaseEstimator(ABC):
 
     Every estimator calls this first, so a response vector that is too short, too long or not
     Boolean fails the same way everywhere, before any estimator-specific shortcut runs.
+
+    Raises
+    ------
+    ValueError
+        If an input is None, or the response vector does not fit the administered items.
     """
     if item_bank is None:
       msg = "item_bank parameter cannot be None"
