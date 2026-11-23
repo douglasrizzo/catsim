@@ -18,6 +18,13 @@ repos:
         language: pygrep
         args: [--multiline]
         files: ^tests/
+      # sphinx/conf.py writes README.md from these sources; an edit to README.md alone is lost.
+      - id: readme-generated
+        name: README.md is generated from sphinx/readme_*.md
+        entry: sh -c 'cat sphinx/readme_head.md sphinx/readme_body.md | cmp -s - README.md || { echo "README.md differs from sphinx/readme_head.md + sphinx/readme_body.md. Edit those, then regenerate it with cat sphinx/readme_head.md sphinx/readme_body.md > README.md"; exit 1; }'
+        language: system
+        pass_filenames: false
+        files: ^(README\.md|sphinx/readme_(head|body)\.md)$
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -125,7 +132,7 @@ repos:
     rev: 1.0.0
     hooks:
       - id: mdformat
-        exclude: ^(sphinx|specs|\.github)/
+        exclude: ^(sphinx|specs|\.github)/|^README\.md$  # README.md is generated from sphinx/
         additional_dependencies:
           - mdformat-gfm
           - mdformat-toc
