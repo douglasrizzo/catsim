@@ -48,14 +48,14 @@ class WarmLikelihoodEstimator(BaseEstimator):
   Parameters
   ----------
   tol : float, optional
-      Absolute tolerance of the root refinement. Default is 1e-6.
+      Absolute tolerance of the root refinement. Must be positive. Default is 1e-6.
   bounds : tuple[float, float], optional
       Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
 
   Raises
   ------
   ValueError
-      If ``bounds`` is not a finite interval with low < high.
+      If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
   """
 
   def __init__(
@@ -64,7 +64,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
     super().__init__()
-    self._tol = float(tol)
+    self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
   def __str__(self) -> str:

@@ -401,12 +401,9 @@ class MAPEstimator(BaseEstimator):
     tol: float = 1e-6,
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
-    if not tol > 0:
-      msg = f"tol must be positive, got {tol}"
-      raise ValueError(msg)
     super().__init__()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._tol = float(tol)
+    self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
   def __str__(self) -> str:

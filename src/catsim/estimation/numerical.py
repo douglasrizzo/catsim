@@ -92,12 +92,8 @@ class NumericalSearchEstimator(BaseEstimator):
     ValueError
         If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
     """
-    if not tol > 0:
-      msg = f"tol must be positive, got {tol}"
-      raise ValueError(msg)
     super().__init__()
-
-    self._tol = float(tol)
+    self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
   def estimate(

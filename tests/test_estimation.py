@@ -30,16 +30,6 @@ from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
 
 
-class TestNumericalSearchEstimatorInit:
-  """Tests for NumericalSearchEstimator initialization."""
-
-  @pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
-  def test_init_rejects_a_tolerance_that_is_not_positive(self, tol: float) -> None:
-    """A tol that is not positive fails at construction instead of reaching SciPy unchecked."""
-    with pytest.raises(ValueError, match="tol must be positive"):
-      NumericalSearchEstimator(tol=tol)
-
-
 class TestNumericalSearchEstimatorEstimate:
   """Tests for NumericalSearchEstimator.estimate() method."""
 
@@ -282,6 +272,14 @@ def test_estimators_accept_numpy_item_indices(
   from_array = make_estimator().estimate(item_bank, np.array(administered_items), response_vector, 0.7)
 
   assert from_array == pytest.approx(from_list, abs=1e-15)
+
+
+@pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
+@pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
+def test_estimators_reject_a_tolerance_that_is_not_positive(estimator_class: type[BaseEstimator], tol: float) -> None:
+  """A tol that is not positive fails at construction, not mid-session inside SciPy (WLE's brentq raised there)."""
+  with pytest.raises(ValueError, match="tol must be positive"):
+    estimator_class(tol=tol)
 
 
 @pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
@@ -699,18 +697,6 @@ class TestEAPEstimator:
 
 class TestMAPEstimator:
   """Tests for the Maximum a Posteriori estimator."""
-
-  @pytest.mark.parametrize(
-    "tol",
-    [
-      pytest.param(0.0, id="zero_tol"),
-      pytest.param(-1e-6, id="negative_tol"),
-    ],
-  )
-  def test_init_rejects_a_tolerance_that_is_not_positive(self, tol: float) -> None:
-    """A tol that is not positive fails at construction, not inside SciPy."""
-    with pytest.raises(ValueError, match="tol must be positive"):
-      MAPEstimator(tol=tol)
 
   def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
     """With no responses the estimate is the default prior's mode, 0, not the est_theta passed in."""

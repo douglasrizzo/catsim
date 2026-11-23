@@ -51,6 +51,30 @@ class BaseEstimator(ABC):
     """
 
   @staticmethod
+  def _check_tol(tol: float) -> float:
+    """Return ``tol`` as a float, after checking that it is positive.
+
+    Parameters
+    ----------
+    tol : float
+        The tolerance of the estimator's numerical search.
+
+    Returns
+    -------
+    float
+        The tolerance, as a float.
+
+    Raises
+    ------
+    ValueError
+        If ``tol`` is not positive (NaN included).
+    """
+    if not tol > 0:
+      msg = f"tol must be positive, got {tol}"
+      raise ValueError(msg)
+    return float(tol)
+
+  @staticmethod
   def _check_bounds(bounds: tuple[float, float]) -> tuple[float, float]:
     """Return ``bounds`` as floats, after checking that they are finite with low < high.
 

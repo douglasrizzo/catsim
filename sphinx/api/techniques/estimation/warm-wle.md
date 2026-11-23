@@ -87,7 +87,7 @@ catsim does not compute.
      - Description
    * - ``tol``
      - ``1e-6``
-     - Absolute tolerance of the Brent root refinement.
+     - Absolute tolerance of the Brent root refinement. Must be positive.
    * - ``bounds``
      - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
      - Search range of the estimate. Must be finite, with the lower bound below the upper one.
