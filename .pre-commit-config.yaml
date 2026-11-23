@@ -66,6 +66,12 @@ repos:
         language: system
         pass_filenames: false
         types_or: [python, pyi]
+      - id: pylint
+        name: pylint
+        entry: uv run --group dev pylint src/catsim
+        language: system
+        pass_filenames: false  # cyclic-import and duplicate-code need the whole package
+        files: ^(src/.*\.py|pyproject\.toml)$
       - id: pytest-nbmake
         name: pytest nbmake
         entry: env MPLBACKEND=Agg uv run --group dev pytest --nbmake --nbmake-timeout=300 -q
