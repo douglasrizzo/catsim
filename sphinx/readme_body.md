@@ -43,13 +43,13 @@ The main architecture decisions behind the current engine and simulation model a
 1. [Plot](https://douglasrizzo.com.br/catsim/api/plot.html) your results.
 
 ```python
-from catsim.initialization import RandomInitializer
+from catsim.initialization import UniformInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 from catsim.simulation import SimulationRunner
 from catsim import ItemBank
-initializer = RandomInitializer()
+initializer = UniformInitializer()
 selector = MaxInfoSelector()
 estimator = NumericalSearchEstimator()
 stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))

@@ -235,7 +235,7 @@ def item_exposure(
       import matplotlib.pyplot as plt
       from catsim.item_bank import ItemBank
       from catsim import plot
-      from catsim.initialization import RandomInitializer
+      from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
@@ -245,7 +245,7 @@ def item_exposure(
 
       runner = SimulationRunner(
           ItemBank.generate_item_bank(100),
-          RandomInitializer(),
+          UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
@@ -385,7 +385,7 @@ def test_progress(
       import matplotlib.pyplot as plt
       from catsim.item_bank import ItemBank
       from catsim import plot
-      from catsim.initialization import RandomInitializer
+      from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
@@ -394,7 +394,7 @@ def test_progress(
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
       runner = SimulationRunner(
           ItemBank.generate_item_bank(100),
-          RandomInitializer(),
+          UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),

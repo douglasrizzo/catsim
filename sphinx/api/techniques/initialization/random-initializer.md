@@ -1,7 +1,7 @@
 **Status:** Implemented
-**Module:** {py:class}`catsim.initialization.RandomInitializer`
+**Module:** {py:class}`catsim.initialization.UniformInitializer`, {py:class}`catsim.initialization.NormalInitializer`
 
-# Random Initializer
+# Random Initializers
 
 ## Motivation
 
@@ -12,21 +12,17 @@ random number generator.
 
 ## Definition
 
-For the uniform distribution, the initializer samples
+{py:class}`~catsim.initialization.UniformInitializer` samples
 
 $$
-\hat{\theta}_0 \sim U(a, b),
+\hat{\theta}_0 \sim U(\text{low}, \text{high}).
 $$
 
-where `dist_params` provides the two bounds.
-
-For the normal distribution, the initializer samples
+{py:class}`~catsim.initialization.NormalInitializer` samples
 
 $$
-\hat{\theta}_0 \sim \mathcal{N}(\mu, \sigma),
+\hat{\theta}_0 \sim \mathcal{N}(\text{mean}, \text{sd}^2).
 $$
-
-where `dist_params` provides the mean and standard deviation.
 
 The item bank is accepted to satisfy the initializer contract, but it does not
 affect the returned value.
@@ -42,32 +38,34 @@ ability distribution those studies simulate.
 ```{eval-rst}
 .. list-table::
    :header-rows: 1
-   :widths: 20 15 65
+   :widths: 25 15 60
 
    * - Parameter
      - Default
      - Description
-   * - ``dist_type``
-     - ``InitializationDistribution.UNIFORM``
-     - Distribution used for sampling the initial ability estimate.
-   * - ``dist_params``
-     - ``None``
-     - Distribution parameters. For the uniform distribution, the two values are
-       the lower and upper bounds, in either order. For the normal distribution,
-       the values are mean and standard deviation, in that order. ``None`` uses
-       :math:`U(-0.5, 0.5)` or :math:`\mathcal{N}(0, 1)`.
+   * - ``UniformInitializer(low)``
+     - ``-0.5``
+     - Lower bound of the interval.
+   * - ``UniformInitializer(high)``
+     - ``0.5``
+     - Upper bound of the interval; must be greater than ``low``.
+   * - ``NormalInitializer(mean)``
+     - ``0.0``
+     - Mean of the distribution.
+   * - ``NormalInitializer(sd)``
+     - ``1.0``
+     - Standard deviation of the distribution; must be positive.
 ```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
-1. It validates that `dist_type` is an `InitializationDistribution` value.
-2. It validates that `dist_params` contains exactly two values.
-3. For uniform initialization, it rejects equal bounds and samples between the lower and upper values.
-4. For normal initialization, it rejects non-positive standard deviations.
-5. It samples using the random number generator passed to `initialize`.
-6. It does not depend on the item bank.
+1. It rejects non-finite parameters when it is constructed.
+2. A uniform initializer rejects `high <= low` and samples between `low` and `high`.
+3. A normal initializer rejects a non-positive `sd`.
+4. It samples using the random number generator passed to `initialize`.
+5. It does not depend on the item bank.
 
 ## References
 
@@ -78,12 +76,13 @@ Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating rando
 ## API Reference
 
 ```{eval-rst}
-.. autoclass:: catsim.initialization.RandomInitializer
+.. autoclass:: catsim.initialization.UniformInitializer
    :members:
    :show-inheritance:
 ```
 
 ```{eval-rst}
-.. autoclass:: catsim.initialization.InitializationDistribution
+.. autoclass:: catsim.initialization.NormalInitializer
    :members:
+   :show-inheritance:
 ```

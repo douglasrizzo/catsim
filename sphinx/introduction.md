@@ -178,7 +178,7 @@ There is a considerable amount of literature covering these four phases proposed
 
 #### Initialization
 
-The initialization procedure is done only once during each examinee's test. In it, the initial value of an examinee's ability $\hat\theta_0$ is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees ({py:class}`catsim.initialization.FixedPointInitializer`); it can be chosen randomly from a probability distribution ({py:class}`catsim.initialization.RandomInitializer`); the place in the item bank with items of more information can be chosen to initialize $\hat\theta_0$ etc.
+The initialization procedure is done only once during each examinee's test. In it, the initial value of an examinee's ability $\hat\theta_0$ is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees ({py:class}`catsim.initialization.FixedPointInitializer`); it can be drawn from a uniform or a normal distribution ({py:class}`catsim.initialization.UniformInitializer`, {py:class}`catsim.initialization.NormalInitializer`); the place in the item bank with items of more information can be chosen to initialize $\hat\theta_0$ etc.
 
 In {py:mod}`catsim`, initialization procedures can be found in the {py:mod}`catsim.initialization` module.
 

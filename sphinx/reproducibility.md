@@ -33,7 +33,7 @@ Two runners built with the same seed and the same components give identical resu
 ```pycon
 >>> from catsim import ItemBank
 >>> from catsim.estimation import NumericalSearchEstimator
->>> from catsim.initialization import RandomInitializer
+>>> from catsim.initialization import UniformInitializer
 >>> from catsim.selection import MaxInfoSelector
 >>> from catsim.simulation import SimulationRunner
 >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
@@ -41,7 +41,7 @@ Two runners built with the same seed and the same components give identical resu
 >>> def make_runner():
 ...     return SimulationRunner(
 ...         item_bank,
-...         RandomInitializer(),
+...         UniformInitializer(),
 ...         MaxInfoSelector(),
 ...         NumericalSearchEstimator(),
 ...         StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),

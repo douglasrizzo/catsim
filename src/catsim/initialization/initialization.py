@@ -1,7 +1,6 @@
 """Concrete initialization implementations."""
 
 import math
-from enum import StrEnum
 
 import numpy
 
@@ -9,127 +8,110 @@ from ..item_bank import ItemBank
 from .base import BaseInitializer
 
 
-class InitializationDistribution(StrEnum):
-  """Distribution to use for ability estimate initialization.
+class UniformInitializer(BaseInitializer):
+  """Draw each examinee's initial ability from a uniform distribution.
 
-  Attributes
-  ----------
-  UNIFORM : str
-      Uniform distribution for initialization.
-  NORMAL : str
-      Normal (Gaussian) distribution for initialization.
-  """
-
-  UNIFORM = "uniform"
-  NORMAL = "normal"
-
-
-class RandomInitializer(BaseInitializer):
-  """Randomly initialize the first estimate of an examinee's ability from a statistical distribution.
+  The default interval, :math:`(-0.5, 0.5)`, is the starting rule of Barrada et al. (2006).
 
   Parameters
   ----------
-  dist_type : InitializationDistribution, optional
-      Distribution type to use for initialization (uniform or normal).
-      Default is UNIFORM.
-  dist_params : tuple or None, optional
-      Distribution parameters:
-      - For uniform: tuple of (min, max) values (order doesn't matter)
-      - For normal: tuple of (mean, std) values (in this exact order)
-      Default is None, which uses (-0.5, 0.5) for uniform, as in Barrada et al. (2006), and (0, 1) for normal.
+  low : float, optional
+      Lower bound of the interval. Default is -0.5.
+  high : float, optional
+      Upper bound of the interval. Default is 0.5.
+
+  Raises
+  ------
+  ValueError
+      If either bound is not finite or ``high <= low``.
 
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.
   """
 
+  def __init__(self, low: float = -0.5, high: float = 0.5) -> None:
+    if not (math.isfinite(low) and math.isfinite(high)):
+      msg = f"low and high must be finite, got low={low}, high={high}"
+      raise ValueError(msg)
+    if high <= low:
+      msg = f"high must be greater than low, got low={low}, high={high}"
+      raise ValueError(msg)
+    self._low = float(low)
+    self._high = float(high)
+
   def __str__(self) -> str:
     """Get a string representation of the Initializer."""
-    return "Random Initializer"
-
-  def __init__(
-    self,
-    dist_type: InitializationDistribution = InitializationDistribution.UNIFORM,
-    dist_params: tuple | None = None,
-  ) -> None:
-    """Initialize a RandomInitializer object.
-
-    Parameters
-    ----------
-    dist_type : InitializationDistribution, optional
-        Distribution to use for ability estimate initialization. Default is UNIFORM.
-    dist_params : tuple or None, optional
-        Parameters for the chosen distribution. Default is None, which uses (-0.5, 0.5) for uniform
-        and (0, 1) for normal.
-        - For uniform: (min, max) values (order doesn't matter)
-        - For normal: (mean, std) values (in this exact order)
-
-    Raises
-    ------
-    TypeError
-        If dist_type is not an InitializationDistribution enum value.
-    ValueError
-        If dist_params are invalid for the chosen distribution type (e.g., wrong
-        length, equal min/max for uniform, non-positive std for normal).
-    """
-    if not isinstance(dist_type, InitializationDistribution):
-      msg = "dist_type must be of type InitializationDistribution"
-      raise TypeError(msg)
-
-    if dist_params is None:
-      dist_params = (-0.5, 0.5) if dist_type == InitializationDistribution.UNIFORM else (0.0, 1.0)
-
-    # Validate distribution parameters
-    expected_param_count = 2
-    if not isinstance(dist_params, tuple) or len(dist_params) != expected_param_count:
-      msg = "dist_params must be a tuple of exactly 2 values"
-      raise ValueError(msg)
-
-    if dist_type == InitializationDistribution.UNIFORM:
-      min_val, max_val = min(dist_params), max(dist_params)
-      if min_val == max_val:
-        msg = f"Uniform distribution parameters must have different min and max values, got {dist_params}"
-        raise ValueError(msg)
-    elif dist_type == InitializationDistribution.NORMAL:
-      _, std = dist_params  # mean is not used in validation
-      if std <= 0:
-        msg = f"Normal distribution standard deviation must be positive, got {std}"
-        raise ValueError(msg)
-
-    self._dist_type = dist_type
-    self._dist_params = dist_params
+    return "Uniform Initializer"
 
   def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
-    """Generate an initial ability value using the chosen distribution and parameters.
+    """Draw an initial ability value between ``low`` and ``high``.
 
     Parameters
     ----------
-    item_bank : Any
+    item_bank : ItemBank
         Unused by this initializer.
-    rng : Any
-        Random number generator used by the object, guaranteeing reproducibility.
+    rng : numpy.random.Generator
+        Generator the value is drawn from.
 
     Returns
     -------
     float
-        An ability value generated from the chosen distribution using the specified
-        parameters.
-
-    Raises
-    ------
-    RuntimeError
-        If an invalid distribution type is encountered (should not happen after
-        validation in __init__).
+        An ability value drawn uniformly from the interval.
     """
-    if self._dist_type == InitializationDistribution.UNIFORM:
-      theta = rng.uniform(min(self._dist_params), max(self._dist_params))
-    elif self._dist_type == InitializationDistribution.NORMAL:
-      theta = rng.normal(self._dist_params[0], self._dist_params[1])
-    else:
-      msg = f"Invalid distribution type: {self._dist_type}. This should not happen after validation."
-      raise RuntimeError(msg)
+    return rng.uniform(self._low, self._high)
 
-    return theta
+
+class NormalInitializer(BaseInitializer):
+  """Draw each examinee's initial ability from a normal distribution.
+
+  Parameters
+  ----------
+  mean : float, optional
+      Mean of the distribution. Default is 0.
+  sd : float, optional
+      Standard deviation of the distribution. Default is 1.
+
+  Raises
+  ------
+  ValueError
+      If ``mean`` is not finite, or ``sd`` is not finite and positive.
+
+  Notes
+  -----
+  For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.
+  """
+
+  def __init__(self, mean: float = 0.0, sd: float = 1.0) -> None:
+    if not math.isfinite(mean):
+      msg = f"mean must be finite, got {mean}"
+      raise ValueError(msg)
+    if not (math.isfinite(sd) and sd > 0):
+      msg = f"sd must be positive and finite, got {sd}"
+      raise ValueError(msg)
+    self._mean = float(mean)
+    self._sd = float(sd)
+
+  def __str__(self) -> str:
+    """Get a string representation of the Initializer."""
+    return "Normal Initializer"
+
+  def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+    r"""Draw an initial ability value from :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.
+
+    Parameters
+    ----------
+    item_bank : ItemBank
+        Unused by this initializer.
+    rng : numpy.random.Generator
+        Generator the value is drawn from.
+
+    Returns
+    -------
+    float
+        An ability value drawn from the normal distribution.
+    """
+    return rng.normal(self._mean, self._sd)
 
 
 class FixedPointInitializer(BaseInitializer):
