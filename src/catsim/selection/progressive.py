@@ -63,9 +63,12 @@ class ProgressiveSelector(BaseSelector):
     self._acceleration = float(acceleration)
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the selector name."""
-    return f"Progressive Selector (acceleration={self._acceleration})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return (
+      f"{type(self).__name__}(test_size={self._test_size!r}, acceleration={self._acceleration!r}, "
+      f"r_max={self._r_max!r})"
+    )
 
   @property
   def test_size(self) -> int:
@@ -194,9 +197,12 @@ class ProportionalSelector(BaseSelector):
     self._sharpness = float(sharpness)
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the selector name."""
-    return f"Proportional Selector (acceleration={self._acceleration}, sharpness={self._sharpness})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return (
+      f"{type(self).__name__}(test_size={self._test_size!r}, acceleration={self._acceleration!r}, "
+      f"sharpness={self._sharpness!r}, r_max={self._r_max!r})"
+    )
 
   @property
   def test_size(self) -> int:

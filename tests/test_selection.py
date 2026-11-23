@@ -55,6 +55,9 @@ class RecordingEstimator(BaseEstimator):
     self.records.append((list(administered_items), list(response_vector), est_theta))
     return float(len(response_vector))
 
+  def __repr__(self) -> str:
+    return "RecordingEstimator()"
+
 
 class ShiftEstimator(BaseEstimator):
   """Estimator stub that moves the estimate 0.5 toward the last response."""
@@ -1422,10 +1425,47 @@ def test_select_returns_builtin_int(make_selector) -> None:
   assert type(item_id) is int
 
 
-def test_selector_factories_cover_every_concrete_selector() -> None:
-  """Every concrete selector exported by catsim.selection runs through the engine-input test above.
+SELECTOR_REPRS = {
+  "MaxInfoSelector": "MaxInfoSelector(r_max=0.5)",
+  "UrrySelector": "UrrySelector()",
+  "KLSelector": "KLSelector(window=2.0, r_max=0.5)",
+  "IntervalInfoSelector": "IntervalInfoSelector(interval=0.5, confidence=0.9)",
+  "RandomSelector": "RandomSelector()",
+  "RandomesqueSelector": "RandomesqueSelector(bin_size=4)",
+  "The54321Selector": "The54321Selector(initial_bin_size=3)",
+  "LinearSelector": "LinearSelector(items=[3, 1, 2])",
+  "ProgressiveSelector": "ProgressiveSelector(test_size=12, acceleration=2.0, r_max=0.5)",
+  "ProportionalSelector": "ProportionalSelector(test_size=12, acceleration=2.0, sharpness=3.0, r_max=0.5)",
+  "ClusterSelector": (
+    "ClusterSelector(clusters=[0, 1, 0], method=ClusterMethod.CLUSTER_INFO, r_max=0.5, "
+    "r_control=ExposureControl.AGGRESSIVE)"
+  ),
+  "AStratSelector": "AStratSelector(test_size=12, n_strata=4)",
+  "AStratBBlockSelector": "AStratBBlockSelector(test_size=12, n_strata=4)",
+  "MaxInfoStratSelector": "MaxInfoStratSelector(test_size=12, n_strata=4)",
+  "MaxInfoBBlockSelector": "MaxInfoBBlockSelector(test_size=12, n_strata=4)",
+  "MEISelector": "MEISelector(estimator=RecordingEstimator(), r_max=0.5)",
+  "MLWISelector": "MLWISelector(n_nodes=21, bounds=(-4.0, 4.0), r_max=0.5)",
+}
 
-  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs without any test noticing.
+
+@pytest.mark.parametrize("source", SELECTOR_REPRS.values(), ids=SELECTOR_REPRS.keys())
+def test_repr_is_the_constructor_call(source: str) -> None:
+  """A selector's repr names every constructor argument with its value, so evaluating it rebuilds the selector.
+
+  Selectors used to print display names, some without their arguments (MaxInfo, Randomesque, the stratified
+  selectors) and others under names their constructors do not take (s=, k=, Q=).
+  """
+  namespace = {**vars(importlib.import_module("catsim.selection")), "RecordingEstimator": RecordingEstimator}
+
+  assert repr(eval(source, namespace)) == source
+
+
+def test_selector_tables_cover_every_concrete_selector() -> None:
+  """Every concrete selector exported by catsim.selection runs through the engine-input and repr tests above.
+
+  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs, and one left out of SELECTOR_REPRS could
+  hide an argument from its repr, without any test noticing.
   """
   exported = {
     name
@@ -1434,3 +1474,4 @@ def test_selector_factories_cover_every_concrete_selector() -> None:
   }
 
   assert exported == set(SELECTOR_FACTORIES)
+  assert exported == set(SELECTOR_REPRS)

@@ -33,9 +33,9 @@ class StratifiedSelector(BaseSelector):
   For full family-level details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "General Stratified Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(test_size={self._test_size!r}, n_strata={self._n_strata!r})"
 
   def __init__(self, test_size: int, n_strata: int | None = None) -> None:
     """Initialize a StratifiedSelector.
@@ -201,10 +201,6 @@ class AStratSelector(StratifiedSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "a-Stratified Selector"
-
   def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Stratify by increasing discrimination."""
     return item_bank.discrimination
@@ -229,10 +225,6 @@ class AStratBBlockSelector(AStratSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "a-Stratified b-Blocking Selector"
-
   def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Block on item difficulty so every stratum spans the difficulty range."""
     return item_bank.difficulty
@@ -252,10 +244,6 @@ class MaxInfoStratSelector(StratifiedSelector):
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.
   """
-
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Maximum Information Stratification Selector"
 
   def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Stratify by increasing maximum information."""
@@ -280,10 +268,6 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.
   """
-
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Maximum Information Stratification with b-Blocking Selector"
 
   def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Block on the ability of maximum information so every stratum spans the ability range."""

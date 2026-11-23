@@ -38,9 +38,9 @@ class MaxInfoSelector(BaseSelector):
     super().__init__()
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Maximum Information Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(r_max={self._r_max!r})"
 
   @property
   def r_max(self) -> float:
@@ -107,9 +107,9 @@ class UrrySelector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/urry-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Urry Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}()"
 
   def select(  # noqa: PLR6301
     self,
@@ -185,9 +185,9 @@ class IntervalInfoSelector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/interval-info-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Interval Information Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(interval={self._interval!r}, confidence={self._confidence!r})"
 
   def __init__(self, interval: float | None = None, confidence: float = 0.95) -> None:
     r"""Initialize an IntervalInfoSelector object.

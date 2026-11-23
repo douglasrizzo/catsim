@@ -60,9 +60,9 @@ class MLWISelector(BaseSelector):
     self._delta = (bounds[1] - bounds[0]) / (n_nodes - 1)
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the selector name."""
-    return f"Maximum Likelihood Weighted Information Selector (Q={self._n_nodes})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(n_nodes={self._n_nodes!r}, bounds={self._bounds!r}, r_max={self._r_max!r})"
 
   @property
   def n_nodes(self) -> int:

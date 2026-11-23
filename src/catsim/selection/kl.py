@@ -84,9 +84,9 @@ class KLSelector(BaseSelector):
     self._window = float(window)
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return f"Kullback-Leibler Selector (window={self._window})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(window={self._window!r}, r_max={self._r_max!r})"
 
   @property
   def window(self) -> float:
