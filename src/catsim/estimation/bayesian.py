@@ -293,6 +293,16 @@ class EAPEstimator(BaseEstimator):
   a session's posterior with :py:func:`posterior` when it is needed.
 
   For full algorithmic details, see :doc:`/api/techniques/estimation/eap-estimator`.
+
+  Parameters
+  ----------
+  grid : QuadratureGrid or None, optional
+      Quadrature grid over which the posterior is evaluated. Default is
+      ``QuadratureGrid.uniform()``.
+  log_prior : LogPrior or None, optional
+      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
+  verbose : bool, optional
+      Diagnostics flag inherited from :py:class:`BaseEstimator`. Default is False.
   """
 
   def __init__(
@@ -316,7 +326,33 @@ class EAPEstimator(BaseEstimator):
     response_vector: list[bool],
     est_theta: float,  # noqa: ARG002
   ) -> float:
-    """Return the posterior mean for the administered response pattern."""
+    r"""Return the posterior mean for the administered response pattern.
+
+    Each call evaluates the likelihood once per grid node, which the ``evaluations`` counters
+    report.
+
+    Parameters
+    ----------
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        Indices of the items administered so far. With none, the estimate is the prior mean.
+    response_vector : list[bool]
+        The examinee's answers to the administered items, in the same order.
+    est_theta : float
+        Unused; the posterior mean does not depend on a previous estimate.
+
+    Returns
+    -------
+    float
+        The posterior mean of :math:`\theta`.
+
+    Raises
+    ------
+    ValueError
+        If ``response_vector`` and ``administered_items`` have different lengths, or if
+        ``response_vector`` contains non-Boolean elements.
+    """
     self._calls += 1
     self._last_evaluations = self._grid.nodes.size
     self._total_evaluations += self._last_evaluations
