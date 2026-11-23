@@ -258,9 +258,8 @@ def item_exposure(
   simulation : SimulationResult or None, optional
       Simulation result containing exposure data. Default is None.
   item_bank : ItemBank or numpy.ndarray or None, optional
-      An ItemBank or item matrix containing item parameters and their exposure rate in the last column.
-      If a numpy array is provided, it will be converted to an ItemBank.
-      Default is None.
+      An ItemBank, or an item matrix of [a, b, c, d] parameters, which is converted to an ItemBank.
+      Exposure rates come from ``simulation`` or ``exposure_rates``. Default is None.
   par : str or None, optional
       A string representing one of the item parameters ('a', 'b', 'c', 'd') to order
       the items by and use on the x axis, or None to use the default order of the item
