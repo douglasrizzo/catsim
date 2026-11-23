@@ -55,6 +55,9 @@ class RecordingEstimator(BaseEstimator):
     self.records.append((list(administered_items), list(response_vector), est_theta))
     return float(len(response_vector))
 
+  def __repr__(self) -> str:
+    return "RecordingEstimator()"
+
 
 class ShiftEstimator(BaseEstimator):
   """Estimator stub that moves the estimate 0.5 toward the last response."""
@@ -188,6 +191,28 @@ def test_capped_selectors_cover_every_selector_with_r_max() -> None:
   assert takes_r_max == set(CAPPED_SELECTORS)
 
 
+@pytest.mark.parametrize("test_size", [0, -5])
+@pytest.mark.parametrize(
+  "selector_class",
+  [
+    AStratSelector,
+    AStratBBlockSelector,
+    MaxInfoStratSelector,
+    MaxInfoBBlockSelector,
+    ProgressiveSelector,
+    ProportionalSelector,
+  ],
+)
+def test_selectors_reject_test_size_below_one(selector_class: Callable[..., BaseSelector], test_size: int) -> None:
+  """ProgressiveSelector(test_size=-5) used to construct and select by maximum information from the first item.
+
+  ProportionalSelector(test_size=0) constructed too, and the stratified selectors rejected it only through a message
+  about n_strata.
+  """
+  with pytest.raises(ValueError, match="test_size must be at least 1"):
+    selector_class(test_size=test_size)
+
+
 class TestMaxInfoSelector:
   """Tests for MaxInfoSelector."""
 
@@ -246,38 +271,24 @@ class TestRandomSelector:
 class TestLinearSelector:
   """Tests for LinearSelector."""
 
-  def test_select_returns_items_in_order(self) -> None:
-    """Test that select returns items in the specified order."""
-    indices = [5, 10, 15]
-    selector = LinearSelector(indices)
+  def test_select_follows_the_order_of_the_list(self) -> None:
+    """A selector that administered its items in bank order would return 5 first instead of 15."""
+    selector = LinearSelector([15, 5, 10])
     item_bank = ItemBank.generate_item_bank(50, seed=42)
 
-    # First selection
-    selected1 = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    assert selected1 == 5
+    administered: list[int] = []
+    for _ in range(3):
+      administered.append(selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0))
 
-    # Second selection
-    selected2 = selector.select(
-      item_bank=item_bank,
-      administered_items=[5],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    assert selected2 == 10
+    assert administered == [15, 5, 10]
 
-    # Third selection
-    selected3 = selector.select(
-      item_bank=item_bank,
-      administered_items=[5, 10],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    assert selected3 == 15
+  def test_select_rejects_items_outside_the_bank(self) -> None:
+    """LinearSelector([0, 99]) on a 20-item bank used to return 99, an index the engine then rejected."""
+    selector = LinearSelector([0, 99])
+    item_bank = ItemBank.generate_item_bank(20, seed=1)
+
+    with pytest.raises(ValueError, match=r"items \[99\] are not in the item bank, whose indices run from 0 to 19"):
+      selector.select(item_bank=item_bank, administered_items=[0], est_theta=0.0)
 
 
 class TestUrrySelector:
@@ -296,6 +307,11 @@ class TestUrrySelector:
 
 class TestRandomesqueSelector:
   """Tests for RandomesqueSelector."""
+
+  def test_init_rejects_a_bin_smaller_than_one(self) -> None:
+    """RandomesqueSelector(bin_size=0) used to construct and fail only at its first selection."""
+    with pytest.raises(ValueError, match="bin_size must be at least 1, got 0"):
+      RandomesqueSelector(bin_size=0)
 
   def test_draws_from_the_bin_of_most_informative_remaining_items(self) -> None:
     """Every pick is one of the bin_size most informative remaining items, and each of them gets picked."""
@@ -316,10 +332,9 @@ class TestThe54321Selector:
   """The 5-4-3-2-1 rule of McBride & Martin (1983)."""
 
   def test_init_default_and_validation(self) -> None:
-    """The first item is drawn from the 5 most informative items unless configured otherwise."""
+    """McBride and Martin draw the first item from the top 5; an initial bin of 0 would leave nothing to draw from."""
     assert The54321Selector().initial_bin_size == 5
-    assert The54321Selector(3).initial_bin_size == 3
-    with pytest.raises(ValueError, match="initial_bin_size"):
+    with pytest.raises(ValueError, match="initial_bin_size must be at least 1, got 0"):
       The54321Selector(0)
 
   @pytest.mark.parametrize(("n_administered", "bin_size"), [(0, 5), (1, 4), (2, 3), (3, 2), (4, 1), (12, 1)])
@@ -424,15 +439,20 @@ class TestStratifiedSelectors:
       assert item in strata[position // 6]
       administered.append(item)
 
-  def test_stays_in_the_last_stratum_past_test_size(self) -> None:
-    """Sessions longer than test_size keep drawing from the last stratum instead of raising RuntimeError."""
+  def test_raises_when_run_past_test_size(self) -> None:
+    """A test longer than test_size used to stay in the last stratum and, once it emptied, end as an exhausted bank.
+
+    AStratSelector(test_size=4) under a 20-item stopper stopped every session at 13 items of a 40-item bank with
+    stop reason "item_bank_exhausted".
+    """
     item_bank = ItemBank.generate_item_bank(60, seed=5)
     selector = MaxInfoStratSelector(5)
     administered: list[int] = []
-    for _ in range(8):
+    for _ in range(5):
       administered.append(selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0))
 
-    assert set(administered[4:]) <= set(selector.strata(item_bank)[-1].tolist())
+    with pytest.raises(ValueError, match="MaxInfoStratSelector has test_size=5, but 5 items have already been"):
+      selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0)
 
   def test_raises_when_the_current_stratum_is_exhausted(self) -> None:
     """A stage whose stratum has no items left raises NoItemsAvailableError."""
@@ -902,8 +922,8 @@ class TestKLSelector:
   @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-      pytest.param({"c": 0.0}, "c must be positive", id="zero_c"),
-      pytest.param({"c": -1.0}, "c must be positive", id="negative_c"),
+      pytest.param({"window": 0.0}, "window must be positive", id="zero_window"),
+      pytest.param({"window": -1.0}, "window must be positive", id="negative_window"),
     ],
   )
   def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
@@ -971,13 +991,13 @@ class TestKLSelector:
       reference = np.trapezoid(divergence, grid, axis=1)
       reference[administered] = -np.inf
 
-      picked = KLSelector(c=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
+      picked = KLSelector(window=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
 
       assert reference[picked] == pytest.approx(reference.max(), rel=1e-6)
 
   @pytest.mark.parametrize(("administered", "expected"), [([2], 1), ([2, 3, 4, 5], 0)])
   def test_window_shrinks_with_the_square_root_of_the_test_length(self, administered: list[int], expected: int) -> None:
-    """With c = 2 the window is theta_hat +- 2 after one item and +- 1 after four.
+    """With window c = 2 the window is theta_hat +- 2 after one item and +- 1 after four.
 
     At theta_hat = 0, item 0 (a = 1, b = 0) and item 1 (a = 4, b = 1.5) trade places as the window narrows:
     their KL integrals are 0.610 and 0.869 over +- 2, 0.225 and 0.146 over +- 1.41, and 0.081 and 0.028
@@ -986,12 +1006,12 @@ class TestKLSelector:
     filler = [1.0, 3.0, 0.0, 1.0]
     item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [4.0, 1.5, 0.0, 1.0], filler, filler, filler, filler]))
 
-    assert KLSelector(c=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
+    assert KLSelector(window=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
 
   def test_select_skips_items_at_the_exposure_cap(self) -> None:
     """The item with the most KL information is passed over while its exposure rate is at r_max."""
     item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0]]))
-    selector = KLSelector(c=0.5, r_max=0.5)
+    selector = KLSelector(window=0.5, r_max=0.5)
 
     uncapped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0))
     capped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0), exposure_rates=np.array([0.0, 0.5, 0.0]))
@@ -1180,8 +1200,8 @@ class TestProgressiveSelector:
   ) -> None:
     """The weight on information is ((position - 1) / (test_size - 1)) ** acceleration, capped at 1.
 
-    FiniteSelector does not enforce test_size, and a weight above 1 past it would give the random
-    component a negative coefficient and penalize high random draws.
+    The stopper, not the selector, ends the test, and a weight above 1 past test_size would give the
+    random component a negative coefficient and penalize high random draws.
     """
     assert ProgressiveSelector(test_size=test_size, acceleration=acceleration)._weight(position) == pytest.approx(
       expected
@@ -1405,10 +1425,85 @@ def test_select_returns_builtin_int(make_selector) -> None:
   assert type(item_id) is int
 
 
-def test_selector_factories_cover_every_concrete_selector() -> None:
-  """Every concrete selector exported by catsim.selection runs through the engine-input test above.
+SELECTOR_REPRS = {
+  "MaxInfoSelector": "MaxInfoSelector(r_max=0.5)",
+  "UrrySelector": "UrrySelector()",
+  "KLSelector": "KLSelector(window=2.0, r_max=0.5)",
+  "IntervalInfoSelector": "IntervalInfoSelector(interval=0.5, confidence=0.9)",
+  "RandomSelector": "RandomSelector()",
+  "RandomesqueSelector": "RandomesqueSelector(bin_size=4)",
+  "The54321Selector": "The54321Selector(initial_bin_size=3)",
+  "LinearSelector": "LinearSelector(items=[3, 1, 2])",
+  "ProgressiveSelector": "ProgressiveSelector(test_size=12, acceleration=2.0, r_max=0.5)",
+  "ProportionalSelector": "ProportionalSelector(test_size=12, acceleration=2.0, sharpness=3.0, r_max=0.5)",
+  "ClusterSelector": (
+    "ClusterSelector(clusters=[0, 1, 0], method=ClusterMethod.CLUSTER_INFO, r_max=0.5, "
+    "r_control=ExposureControl.AGGRESSIVE)"
+  ),
+  "AStratSelector": "AStratSelector(test_size=12, n_strata=4)",
+  "AStratBBlockSelector": "AStratBBlockSelector(test_size=12, n_strata=4)",
+  "MaxInfoStratSelector": "MaxInfoStratSelector(test_size=12, n_strata=4)",
+  "MaxInfoBBlockSelector": "MaxInfoBBlockSelector(test_size=12, n_strata=4)",
+  "MEISelector": "MEISelector(estimator=RecordingEstimator(), r_max=0.5)",
+  "MLWISelector": "MLWISelector(n_nodes=21, bounds=(-4.0, 4.0), r_max=0.5)",
+}
 
-  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs without any test noticing.
+
+@pytest.mark.parametrize("source", SELECTOR_REPRS.values(), ids=SELECTOR_REPRS.keys())
+def test_repr_is_the_constructor_call(source: str) -> None:
+  """A selector's repr names every constructor argument with its value, so evaluating it rebuilds the selector.
+
+  Selectors used to print display names, some without their arguments (MaxInfo, Randomesque, the stratified
+  selectors) and others under names their constructors do not take (s=, k=, Q=).
+  """
+  namespace = {**vars(importlib.import_module("catsim.selection")), "RecordingEstimator": RecordingEstimator}
+
+  assert repr(eval(source, namespace)) == source
+
+
+@pytest.mark.parametrize(
+  ("numpy_source", "source"),
+  [
+    ("RandomesqueSelector(bin_size=np.int64(4))", "RandomesqueSelector(bin_size=4)"),
+    ("The54321Selector(initial_bin_size=np.int64(3))", "The54321Selector(initial_bin_size=3)"),
+    ("AStratSelector(test_size=np.int64(12), n_strata=np.int64(4))", "AStratSelector(test_size=12, n_strata=4)"),
+    (
+      "ProgressiveSelector(test_size=np.int64(12), acceleration=2.0, r_max=0.5)",
+      "ProgressiveSelector(test_size=12, acceleration=2.0, r_max=0.5)",
+    ),
+  ],
+)
+def test_numpy_integer_arguments_are_stored_as_python_ints(numpy_source: str, source: str) -> None:
+  """Integer arguments taken from a NumPy array are stored as Python ints, so the repr still evaluates.
+
+  Fails if np.int64(4) is kept as given: the repr then reads bin_size=np.int64(4), naming a module that the
+  catsim.selection namespace does not have.
+  """
+  namespace = {**vars(importlib.import_module("catsim.selection")), "np": np}
+
+  assert repr(eval(numpy_source, namespace)) == source
+
+
+@pytest.mark.parametrize(
+  "build",
+  [
+    lambda: RandomesqueSelector(bin_size=2.5),
+    lambda: AStratSelector(test_size=12.5),
+    lambda: AStratSelector(test_size=12, n_strata=4.5),
+  ],
+  ids=["bin_size", "test_size", "n_strata"],
+)
+def test_integer_arguments_reject_fractions(build: Callable[[], BaseSelector]) -> None:
+  """A fractional size is rejected at construction instead of being stored and used to slice or count items."""
+  with pytest.raises(TypeError, match="cannot be interpreted as an integer"):
+    build()
+
+
+def test_selector_tables_cover_every_concrete_selector() -> None:
+  """Every concrete selector exported by catsim.selection runs through the engine-input and repr tests above.
+
+  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs, and one left out of SELECTOR_REPRS could
+  hide an argument from its repr, without any test noticing.
   """
   exported = {
     name
@@ -1417,3 +1512,4 @@ def test_selector_factories_cover_every_concrete_selector() -> None:
   }
 
   assert exported == set(SELECTOR_FACTORIES)
+  assert exported == set(SELECTOR_REPRS)

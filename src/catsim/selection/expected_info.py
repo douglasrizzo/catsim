@@ -46,9 +46,9 @@ class MEISelector(BaseSelector):
     self._estimator = estimator if estimator is not None else NumericalSearchEstimator()
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the selector name."""
-    return f"Maximum Expected Information Selector ({self._estimator})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(estimator={self._estimator!r}, r_max={self._r_max!r})"
 
   @property
   def estimator(self) -> BaseEstimator:

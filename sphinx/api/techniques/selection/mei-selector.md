@@ -77,7 +77,9 @@ branches from the first item.
        estimator shared with the engine.
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied after candidate filtering.
+     - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
+       out before the expected information is computed, unless every remaining
+       item is.
 ```
 
 ## Behavioral Contracts

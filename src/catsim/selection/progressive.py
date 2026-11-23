@@ -4,21 +4,21 @@ import numpy
 
 from .._typing import FloatArray
 from ..item_bank import ItemBank
-from .base import FiniteSelector, below_cap, check_r_max, pick_best, remaining, require_rng
+from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_best, remaining, require_rng
 
 
 def _position_weight(position: int, test_size: int, acceleration: float) -> float:
   """Return the progression weight ``((position - 1) / (test_size - 1)) ** acceleration``.
 
-  The ratio is clamped to 1 so that sessions running past ``test_size`` (``FiniteSelector`` does
-  not enforce it) keep a fully information-based weight instead of extrapolating beyond 1.
+  The ratio is clamped to 1 so that sessions running past ``test_size``, which the stopper decides,
+  keep a fully information-based weight instead of extrapolating beyond 1.
   """
   if test_size <= 1:
     return 1.0
   return min(1.0, (position - 1) / (test_size - 1)) ** acceleration
 
 
-class ProgressiveSelector(FiniteSelector):
+class ProgressiveSelector(BaseSelector):
   """Progressive selector that blends random and information-based scoring.
 
   Each available item scores a uniform random draw blended with its information, scaled by the
@@ -28,7 +28,7 @@ class ProgressiveSelector(FiniteSelector):
   Parameters
   ----------
   test_size : int
-      Planned number of items in the test, at which the weight on information reaches 1.
+      Planned number of items in the test, at least 1, at which the weight on information reaches 1.
   acceleration : float, optional
       Exponent of the position schedule. Values above 1 delay the shift toward information and
       values below 1 hasten it. Default is 1 (linear).
@@ -52,18 +52,33 @@ class ProgressiveSelector(FiniteSelector):
     Raises
     ------
     ValueError
-        If ``acceleration`` is not positive or ``r_max`` is not in (0, 1].
+        If ``test_size`` is smaller than 1, ``acceleration`` is not positive or ``r_max`` is not in
+        (0, 1].
     """
     if acceleration <= 0:
       msg = f"acceleration must be positive, got {acceleration}"
       raise ValueError(msg)
-    super().__init__(test_size=test_size)
-    self._s = float(acceleration)
+    super().__init__()
+    self._test_size = check_test_size(test_size)
+    self._acceleration = float(acceleration)
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the selector name."""
-    return f"Progressive Selector (s={self._s})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return (
+      f"{type(self).__name__}(test_size={self._test_size!r}, acceleration={self._acceleration!r}, "
+      f"r_max={self._r_max!r})"
+    )
+
+  @property
+  def test_size(self) -> int:
+    """Return the planned number of items in the test."""
+    return self._test_size
+
+  @property
+  def acceleration(self) -> float:
+    """Return the exponent of the position schedule."""
+    return self._acceleration
 
   @property
   def r_max(self) -> float:
@@ -72,7 +87,7 @@ class ProgressiveSelector(FiniteSelector):
 
   def _weight(self, position: int) -> float:
     """Return the progression weight for the given 1-indexed test position."""
-    return _position_weight(position, self._test_size, self._s)
+    return _position_weight(position, self._test_size, self._acceleration)
 
   def select(
     self,
@@ -130,7 +145,7 @@ class ProgressiveSelector(FiniteSelector):
     return pick_best(candidates, scores[candidates], rng)
 
 
-class ProportionalSelector(FiniteSelector):
+class ProportionalSelector(BaseSelector):
   """Proportional selector that samples items with probability proportional to weighted information.
 
   Each available item is drawn with probability proportional to its information raised to
@@ -140,7 +155,7 @@ class ProportionalSelector(FiniteSelector):
   Parameters
   ----------
   test_size : int
-      Planned number of items in the test, at which the exponent reaches ``sharpness``.
+      Planned number of items in the test, at least 1, at which the exponent reaches ``sharpness``.
   acceleration : float, optional
       Exponent of the position schedule, as in :py:class:`ProgressiveSelector`. Default is 1.
   sharpness : float, optional
@@ -167,8 +182,8 @@ class ProportionalSelector(FiniteSelector):
     Raises
     ------
     ValueError
-        If ``acceleration`` is not positive, ``sharpness`` is negative, or ``r_max`` is not
-        in (0, 1].
+        If ``test_size`` is smaller than 1, ``acceleration`` is not positive, ``sharpness`` is
+        negative, or ``r_max`` is not in (0, 1].
     """
     if acceleration <= 0:
       msg = f"acceleration must be positive, got {acceleration}"
@@ -176,14 +191,33 @@ class ProportionalSelector(FiniteSelector):
     if sharpness < 0:
       msg = f"sharpness must be non-negative, got {sharpness}"
       raise ValueError(msg)
-    super().__init__(test_size=test_size)
-    self._s = float(acceleration)
-    self._k = float(sharpness)
+    super().__init__()
+    self._test_size = check_test_size(test_size)
+    self._acceleration = float(acceleration)
+    self._sharpness = float(sharpness)
     self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    """Return the selector name."""
-    return f"Proportional Selector (s={self._s}, k={self._k})"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return (
+      f"{type(self).__name__}(test_size={self._test_size!r}, acceleration={self._acceleration!r}, "
+      f"sharpness={self._sharpness!r}, r_max={self._r_max!r})"
+    )
+
+  @property
+  def test_size(self) -> int:
+    """Return the planned number of items in the test."""
+    return self._test_size
+
+  @property
+  def acceleration(self) -> float:
+    """Return the exponent of the position schedule."""
+    return self._acceleration
+
+  @property
+  def sharpness(self) -> float:
+    """Return the largest exponent applied to the information."""
+    return self._sharpness
 
   @property
   def r_max(self) -> float:
@@ -192,7 +226,7 @@ class ProportionalSelector(FiniteSelector):
 
   def _exponent(self, position: int) -> float:
     """Return the information exponent for the given 1-indexed test position."""
-    return self._k * _position_weight(position, self._test_size, self._s)
+    return self._sharpness * _position_weight(position, self._test_size, self._acceleration)
 
   def select(
     self,

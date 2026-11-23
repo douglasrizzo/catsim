@@ -1,5 +1,7 @@
 """Random selector implementations."""
 
+import operator
+
 from numpy.random import Generator
 
 from .._typing import FloatArray
@@ -14,9 +16,9 @@ class RandomSelector(BaseSelector):
   item selection strategies.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Random Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}()"
 
   def select(  # noqa: PLR6301
     self,
@@ -82,9 +84,9 @@ class The54321Selector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/the-54321-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "5-4-3-2-1 Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(initial_bin_size={self._initial_bin_size!r})"
 
   def __init__(self, initial_bin_size: int = 5) -> None:
     """Initialize a The54321Selector object.
@@ -96,9 +98,12 @@ class The54321Selector(BaseSelector):
 
     Raises
     ------
+    TypeError
+        If ``initial_bin_size`` is not an integer.
     ValueError
         If ``initial_bin_size`` is smaller than 1.
     """
+    initial_bin_size = operator.index(initial_bin_size)
     if initial_bin_size < 1:
       msg = f"initial_bin_size must be at least 1, got {initial_bin_size}"
       raise ValueError(msg)
@@ -164,11 +169,16 @@ class RandomesqueSelector(BaseSelector):
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
   join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.
+
+  Parameters
+  ----------
+  bin_size : int
+      Number of most informative remaining items each item is drawn from, at least 1.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Randomesque Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(bin_size={self._bin_size!r})"
 
   def __init__(self, bin_size: int) -> None:
     """Initialize a RandomesqueSelector object.
@@ -178,7 +188,18 @@ class RandomesqueSelector(BaseSelector):
     bin_size : int
         The number of most informative items to be taken into consideration when
         randomly selecting one of them.
+
+    Raises
+    ------
+    TypeError
+        If ``bin_size`` is not an integer.
+    ValueError
+        If ``bin_size`` is smaller than 1.
     """
+    bin_size = operator.index(bin_size)
+    if bin_size < 1:
+      msg = f"bin_size must be at least 1, got {bin_size}"
+      raise ValueError(msg)
     super().__init__()
     self._bin_size = bin_size
 

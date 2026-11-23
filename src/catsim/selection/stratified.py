@@ -1,5 +1,6 @@
 """Stratified selector implementations."""
 
+import operator
 from abc import abstractmethod
 
 import numpy
@@ -7,10 +8,10 @@ import numpy
 from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import FiniteSelector, pick_best
+from .base import BaseSelector, check_test_size, pick_best
 
 
-class StratifiedSelector(FiniteSelector):
+class StratifiedSelector(BaseSelector):
   """Abstract base class for selectors that divide the item bank into stage-aligned strata.
 
   The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking
@@ -22,7 +23,8 @@ class StratifiedSelector(FiniteSelector):
   Parameters
   ----------
   test_size : int
-      Number of items in the test.
+      Number of items in the test, at least 1. The selector raises ``ValueError`` when asked for an
+      item past it, so the stopper must end the test by then.
   n_strata : int or None, optional
       Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which
       uses one stratum per test item.
@@ -32,9 +34,9 @@ class StratifiedSelector(FiniteSelector):
   For full family-level details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "General Stratified Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return f"{type(self).__name__}(test_size={self._test_size!r}, n_strata={self._n_strata!r})"
 
   def __init__(self, test_size: int, n_strata: int | None = None) -> None:
     """Initialize a StratifiedSelector.
@@ -48,17 +50,25 @@ class StratifiedSelector(FiniteSelector):
 
     Raises
     ------
+    TypeError
+        If ``test_size`` or ``n_strata`` is not an integer.
     ValueError
-        If ``n_strata`` is not between 1 and ``test_size``.
+        If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.
     """
-    super().__init__(test_size)
-    n_strata = test_size if n_strata is None else n_strata
-    if not 1 <= n_strata <= test_size:
+    super().__init__()
+    self._test_size = check_test_size(test_size)
+    n_strata = self._test_size if n_strata is None else operator.index(n_strata)
+    if not 1 <= n_strata <= self._test_size:
       msg = f"n_strata must be between 1 and test_size ({test_size}), got {n_strata}"
       raise ValueError(msg)
     self._n_strata = n_strata
     self._strata: list[IntArray] | None = None
     self._strata_item_bank: ItemBank | None = None
+
+  @property
+  def test_size(self) -> int:
+    """Get the number of items in the test."""
+    return self._test_size
 
   @property
   def n_strata(self) -> int:
@@ -118,8 +128,8 @@ class StratifiedSelector(FiniteSelector):
     return [numpy.array(stratum, dtype=numpy.intp) for stratum in members]
 
   def _stage(self, position: int) -> int:
-    """Return the 0-indexed stage of a 0-indexed test position, staying in the last stage past ``test_size``."""
-    return min(position * self._n_strata // self._test_size, self._n_strata - 1)
+    """Return the 0-indexed stage of a 0-indexed test position below ``test_size``."""
+    return position * self._n_strata // self._test_size
 
   def select(
     self,
@@ -158,9 +168,18 @@ class StratifiedSelector(FiniteSelector):
     NoItemsAvailableError
         If every item in the current stratum has been administered.
     ValueError
-        If items tie for the closest location and ``rng`` is None.
+        If ``test_size`` items have already been administered, or if items tie for the closest
+        location and ``rng`` is None.
     """
-    stage = self._stage(len(administered_items))
+    position = len(administered_items)
+    if position >= self._test_size:
+      msg = (
+        f"{type(self).__name__} has test_size={self._test_size}, but {position} items have already been "
+        "administered: the test ran past the length its strata were planned for. Give the selector the "
+        "stopper's maximum test length as test_size."
+      )
+      raise ValueError(msg)
+    stage = self._stage(position)
     stratum = self.strata(item_bank)[stage]
     candidates = stratum[~numpy.isin(stratum, administered_items)]
     if candidates.size == 0:
@@ -184,10 +203,6 @@ class AStratSelector(StratifiedSelector):
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.
   """
-
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "a-Stratified Selector"
 
   def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Stratify by increasing discrimination."""
@@ -213,10 +228,6 @@ class AStratBBlockSelector(AStratSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "a-Stratified b-Blocking Selector"
-
   def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Block on item difficulty so every stratum spans the difficulty range."""
     return item_bank.difficulty
@@ -236,10 +247,6 @@ class MaxInfoStratSelector(StratifiedSelector):
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.
   """
-
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Maximum Information Stratification Selector"
 
   def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Stratify by increasing maximum information."""
@@ -264,10 +271,6 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.
   """
-
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Maximum Information Stratification with b-Blocking Selector"
 
   def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Block on the ability of maximum information so every stratum spans the ability range."""

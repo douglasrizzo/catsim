@@ -87,9 +87,12 @@ class ClusterSelector(BaseSelector):
   :doc:`/api/techniques/selection/cluster-selector`.
   """
 
-  def __str__(self) -> str:
-    """Return the name of the selector."""
-    return "Cluster Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument."""
+    return (
+      f"{type(self).__name__}(clusters={self.clusters!r}, method=ClusterMethod.{self._method.name}, "
+      f"r_max={self._r_max!r}, r_control=ExposureControl.{self._r_control.name})"
+    )
 
   @property
   def r_max(self) -> float:

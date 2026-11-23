@@ -67,13 +67,14 @@ p. 496, Equation 7).
      - Description
    * - ``test_size``
      - required
-     - Total number of administered items :math:`N`; required because the schedule depends on test position.
+     - Planned test length :math:`N`, at least 1; required because the schedule depends on test position.
    * - ``acceleration``
      - ``1.0``
      - Positive exponent :math:`s`. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied before scoring; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.
+     - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
+       out before the scores are computed, unless every remaining item is.
 ```
 
 ## Behavioral Contracts
