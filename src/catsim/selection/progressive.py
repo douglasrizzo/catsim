@@ -8,30 +8,73 @@ from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_be
 
 
 def _position_weight(position: int, test_size: int, acceleration: float) -> float:
-  """Return the progression weight ``((position - 1) / (test_size - 1)) ** acceleration``.
+  """Return Barrada et al.'s (2008) weight on item information at a test position.
 
-  The ratio is clamped to 1 so that sessions running past ``test_size``, which the stopper decides,
-  keep a fully information-based weight instead of extrapolating beyond 1.
+  Parameters
+  ----------
+  position : int
+      1-indexed position of the item about to be selected.
+  test_size : int
+      Planned number of items in the test, at least 1.
+  acceleration : float
+      Acceleration parameter of the schedule.
+
+  Returns
+  -------
+  float
+      ``sum(k ** acceleration for k in range(1, position))`` divided by the same sum up to
+      ``test_size``: 0 at the first position and 1 at ``test_size``. Past ``test_size``, where the
+      stopper may let a session run, the weight stays 1 instead of exceeding it.
   """
-  if test_size <= 1:
+  if position >= test_size:
     return 1.0
-  return min(1.0, (position - 1) / (test_size - 1)) ** acceleration
+  steps = numpy.arange(1, test_size, dtype=float)
+  # Dividing every term by the largest, the last for a positive acceleration and the first
+  # otherwise, keeps the sums from overflowing and leaves their ratio unchanged.
+  terms = (steps / steps[-1] if acceleration > 0 else steps) ** acceleration
+  return float(terms[: position - 1].sum() / terms.sum())
+
+
+def _check_acceleration(acceleration: float) -> float:
+  """Return ``acceleration`` as a float, after checking that it is finite.
+
+  Parameters
+  ----------
+  acceleration : float
+      Acceleration parameter of the schedule.
+
+  Returns
+  -------
+  float
+      ``acceleration``.
+
+  Raises
+  ------
+  ValueError
+      If ``acceleration`` is infinite or NaN.
+  """
+  if not numpy.isfinite(acceleration):
+    msg = f"acceleration must be finite, got {acceleration}"
+    raise ValueError(msg)
+  return float(acceleration)
 
 
 class ProgressiveSelector(BaseSelector):
   """Progressive selector that blends random and information-based scoring.
 
   Each available item scores a uniform random draw blended with its information, scaled by the
-  largest available information; the weight on information grows from 0 at the first position
-  to 1 at ``test_size``, and the item with the largest score is selected.
+  largest available information; the weight on information follows Barrada et al.'s (2008)
+  schedule from 0 at the first position to 1 at ``test_size``, and the item with the largest score
+  is selected.
 
   Parameters
   ----------
   test_size : int
       Planned number of items in the test, at least 1, at which the weight on information reaches 1.
   acceleration : float, optional
-      Exponent of the position schedule. Values above 1 delay the shift toward information and
-      values below 1 hasten it. Default is 1 (linear).
+      Barrada et al.'s acceleration parameter :math:`t`, any finite number. 0 makes the schedule
+      linear, positive values keep the random component longer and negative values drop it sooner.
+      Default is 0.
   r_max : float, optional
       Maximum exposure rate for items. Items with exposure rates >= r_max will not be selected
       unless no other items are available. Default is 1 (no restriction).
@@ -44,7 +87,7 @@ class ProgressiveSelector(BaseSelector):
   def __init__(
     self,
     test_size: int,
-    acceleration: float = 1.0,
+    acceleration: float = 0.0,
     r_max: float = 1.0,
   ) -> None:
     """Initialize a ProgressiveSelector object.
@@ -52,15 +95,12 @@ class ProgressiveSelector(BaseSelector):
     Raises
     ------
     ValueError
-        If ``test_size`` is smaller than 1, ``acceleration`` is not positive or ``r_max`` is not in
+        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
         (0, 1].
     """
-    if acceleration <= 0:
-      msg = f"acceleration must be positive, got {acceleration}"
-      raise ValueError(msg)
     super().__init__()
     self._test_size = check_test_size(test_size)
-    self._acceleration = float(acceleration)
+    self._acceleration = _check_acceleration(acceleration)
     self._r_max = check_r_max(r_max)
 
   def __repr__(self) -> str:
@@ -77,17 +117,13 @@ class ProgressiveSelector(BaseSelector):
 
   @property
   def acceleration(self) -> float:
-    """Return the exponent of the position schedule."""
+    """Return the acceleration parameter of the schedule."""
     return self._acceleration
 
   @property
   def r_max(self) -> float:
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
-
-  def _weight(self, position: int) -> float:
-    """Return the progression weight for the given 1-indexed test position."""
-    return _position_weight(position, self._test_size, self._acceleration)
 
   def select(
     self,
@@ -131,8 +167,7 @@ class ProgressiveSelector(BaseSelector):
     rng = require_rng(rng)
 
     candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-    position = len(administered_items) + 1
-    weight = self._weight(position)
+    weight = _position_weight(len(administered_items) + 1, self._test_size, self._acceleration)
 
     # Revuelta and Ponsoda (1998) draw the random component on [0, max information among the
     # available items]; dividing by that maximum puts both components on [0, 1].
@@ -148,19 +183,18 @@ class ProgressiveSelector(BaseSelector):
 class ProportionalSelector(BaseSelector):
   """Proportional selector that samples items with probability proportional to weighted information.
 
-  Each available item is drawn with probability proportional to its information raised to
-  ``sharpness`` times the position weight, which grows from 0 at the first position (uniform
-  sampling) to 1 at ``test_size``.
+  Each available item is drawn with probability proportional to its information raised to a
+  power that follows Barrada et al.'s (2008) schedule from 0 at the first position, where sampling
+  is uniform, to the test length at ``test_size``.
 
   Parameters
   ----------
   test_size : int
-      Planned number of items in the test, at least 1, at which the exponent reaches ``sharpness``.
+      Planned number of items in the test, at least 1. From that position on, the exponent equals it.
   acceleration : float, optional
-      Exponent of the position schedule, as in :py:class:`ProgressiveSelector`. Default is 1.
-  sharpness : float, optional
-      Largest exponent applied to the information. 0 keeps sampling uniform; the test length
-      reproduces Barrada et al.'s end point. Default is 6.
+      Barrada et al.'s acceleration parameter :math:`s`, any finite number, which shapes the
+      exponent's growth as :math:`t` shapes :py:class:`ProgressiveSelector`'s weight. 0 makes the
+      growth linear. Default is 0.
   r_max : float, optional
       Maximum exposure rate for items. Items with exposure rates >= r_max will not be selected
       unless no other items are available. Default is 1 (no restriction).
@@ -173,8 +207,7 @@ class ProportionalSelector(BaseSelector):
   def __init__(
     self,
     test_size: int,
-    acceleration: float = 1.0,
-    sharpness: float = 6.0,
+    acceleration: float = 0.0,
     r_max: float = 1.0,
   ) -> None:
     """Initialize a ProportionalSelector object.
@@ -182,26 +215,19 @@ class ProportionalSelector(BaseSelector):
     Raises
     ------
     ValueError
-        If ``test_size`` is smaller than 1, ``acceleration`` is not positive, ``sharpness`` is
-        negative, or ``r_max`` is not in (0, 1].
+        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
+        (0, 1].
     """
-    if acceleration <= 0:
-      msg = f"acceleration must be positive, got {acceleration}"
-      raise ValueError(msg)
-    if sharpness < 0:
-      msg = f"sharpness must be non-negative, got {sharpness}"
-      raise ValueError(msg)
     super().__init__()
     self._test_size = check_test_size(test_size)
-    self._acceleration = float(acceleration)
-    self._sharpness = float(sharpness)
+    self._acceleration = _check_acceleration(acceleration)
     self._r_max = check_r_max(r_max)
 
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return (
       f"{type(self).__name__}(test_size={self._test_size!r}, acceleration={self._acceleration!r}, "
-      f"sharpness={self._sharpness!r}, r_max={self._r_max!r})"
+      f"r_max={self._r_max!r})"
     )
 
   @property
@@ -211,22 +237,13 @@ class ProportionalSelector(BaseSelector):
 
   @property
   def acceleration(self) -> float:
-    """Return the exponent of the position schedule."""
+    """Return the acceleration parameter of the schedule."""
     return self._acceleration
-
-  @property
-  def sharpness(self) -> float:
-    """Return the largest exponent applied to the information."""
-    return self._sharpness
 
   @property
   def r_max(self) -> float:
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
-
-  def _exponent(self, position: int) -> float:
-    """Return the information exponent for the given 1-indexed test position."""
-    return self._sharpness * _position_weight(position, self._test_size, self._acceleration)
 
   def select(
     self,
@@ -270,8 +287,7 @@ class ProportionalSelector(BaseSelector):
     rng = require_rng(rng)
 
     candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
-    position = len(administered_items) + 1
-    exponent = self._exponent(position)
+    exponent = self._test_size * _position_weight(len(administered_items) + 1, self._test_size, self._acceleration)
 
     info = numpy.maximum(numpy.asarray(item_bank.information(est_theta), dtype=float)[candidates], 0.0)
     info_max = float(info.max())
