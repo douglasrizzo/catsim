@@ -468,6 +468,10 @@ objects in ways that made repeated runs and object reuse harder to reason about.
 <li><p>Reusing an item bank across sessions or simulations is safer.</p></li>
 <li><p>Exposure becomes a property of a run, not of the calibrated bank itself.</p></li>
 <li><p>Run metrics have a clearer ownership model and are easier to validate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.items</span></code> has exactly four columns, <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d]</span></code>. The fifth exposure-rate column that
+earlier versions kept for compatibility is gone, together with <code class="docutils literal notranslate"><span class="pre">ItemBank.exposure_rates</span></code>,
+<code class="docutils literal notranslate"><span class="pre">update_exposure_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">reset_exposure_rates</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code>. An item matrix with more than four
+columns raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of having its extra column read as exposure rates.</p></li>
 </ul>
 </section>
 </section>

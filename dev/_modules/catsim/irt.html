@@ -1834,10 +1834,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
     <span class="n">err</span> <span class="o">+=</span> <span class="s2">"Item matrix has only one dimension."</span>
   <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span>
-      <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has more than 4 columns. catsim tends to add </span><span class="se">\</span>
-<span class="s2">            columns to the matrix during the simulation, so it's not a good idea to keep them."</span>
-    <span class="p">)</span>
+    <span class="n">err</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has </span><span class="si">{</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> columns; it must have exactly 4: a, b, c and d"</span>
   <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL1</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
       <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"</span>
@@ -1845,6 +1842,8 @@ window.runMermaid = runMermaid;</script>
       <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no pseudo-guessing or upper asymptote parameter columns"</span>
     <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL3</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
       <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no upper asymptote parameter column"</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no columns; it must have exactly 4: a, b, c and d"</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
       <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with discrimination &lt;= 0"</span>

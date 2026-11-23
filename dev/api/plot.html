@@ -562,9 +562,8 @@ which is important for assessing item security and test balance.</p>
 </dd>
 <dt><strong>simulation</strong><span class="classifier">SimulationResult or None, optional</span></dt><dd><p>Simulation result containing exposure data. Default is None.</p>
 </dd>
-<dt><strong>item_bank</strong><span class="classifier">ItemBank or numpy.ndarray or None, optional</span></dt><dd><p>An ItemBank or item matrix containing item parameters and their exposure rate in the last column.
-If a numpy array is provided, it will be converted to an ItemBank.
-Default is None.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank or numpy.ndarray or None, optional</span></dt><dd><p>An ItemBank, or an item matrix of [a, b, c, d] parameters, which is converted to an ItemBank.
+Exposure rates come from <code class="docutils literal notranslate"><span class="pre">simulation</span></code> or <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. Default is None.</p>
 </dd>
 <dt><strong>par</strong><span class="classifier">str or None, optional</span></dt><dd><p>A string representing one of the item parameters (‘a’, ‘b’, ‘c’, ‘d’) to order
 the items by and use on the x axis, or None to use the default order of the item

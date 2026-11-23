@@ -22,3 +22,7 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
 - Reusing an item bank across sessions or simulations is safer.
 - Exposure becomes a property of a run, not of the calibrated bank itself.
 - Run metrics have a clearer ownership model and are easier to validate.
+- `ItemBank.items` has exactly four columns, `[a, b, c, d]`. The fifth exposure-rate column that
+  earlier versions kept for compatibility is gone, together with `ItemBank.exposure_rates`,
+  `update_exposure_rate`, `reset_exposure_rates` and `reset`. An item matrix with more than four
+  columns raises `ValueError` instead of having its extra column read as exposure rates.
