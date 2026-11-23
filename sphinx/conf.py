@@ -46,6 +46,7 @@ extensions = [
   "numpydoc",
   "myst_parser",
   "sphinxcontrib.bibtex",
+  "sphinxcontrib.mermaid",
 ]
 
 myst_enable_extensions = [
@@ -53,6 +54,21 @@ myst_enable_extensions = [
   "deflist",
   "dollarmath",
 ]
+
+# Mermaid diagrams are drawn in the reader's browser, and sphinxcontrib-mermaid redraws them
+# when the page switches between light and dark mode. Mermaid writes each diagram's natural
+# size into the SVG (useMaxWidth off), which _static/mermaid.css keeps unless the diagram is
+# wider than the page. Class trees leave out UML's empty member boxes, since they only show
+# inheritance.
+mermaid_light_theme = "neutral"
+mermaid_dark_theme = "dark"
+mermaid_init_config = {
+  "startOnLoad": False,
+  "flowchart": {"useMaxWidth": False},
+  "class": {"useMaxWidth": False, "hideEmptyMembersBox": True},
+  # Mermaid 11's class diagram renderer reads useMaxWidth from the state diagram settings.
+  "state": {"useMaxWidth": False},
+}
 
 bibtex_bibfiles = ["references.bib"]
 bibtex_default_style = "plain"
@@ -179,8 +195,8 @@ html_favicon = "logo/favicon.svg"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ["_static"]
-# html_context = {"css_files": ["_static/css/custom.css"]}
+html_static_path = ["_static"]
+html_css_files = ["mermaid.css"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

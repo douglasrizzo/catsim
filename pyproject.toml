@@ -161,6 +161,7 @@ docs = [
     "sphinx-autodoc-annotation>=1.0.post1",
     "sphinxcontrib-bibtex>=2.6.3",
     "pydata-sphinx-theme>=0.16.0",
+    "sphinxcontrib-mermaid>=2.1.1",
 ]
 
 [tool.mutmut]
