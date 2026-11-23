@@ -1528,14 +1528,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  numpy.ndarray</span>
-<span class="sd">      An array of theta values, one for each item, indicating where each item's</span>
+<span class="sd">      A new array of theta values, one for each item, indicating where each item's</span>
 <span class="sd">      information function reaches its maximum.</span>
 <span class="sd">  """</span>
   <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">d</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="k">return</span> <span class="n">b</span>
+      <span class="c1"># a copy, so writing into the result cannot change the caller's item matrix</span>
+      <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">"b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)"</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"a"</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">})</span>
 
   <span class="n">u</span> <span class="o">=</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="s2">"-(3 / 4) + ((c + d - 2 * c * d) / 2)"</span><span class="p">,</span> <span class="n">local_dict</span><span class="o">=</span><span class="p">{</span><span class="s2">"c"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"d"</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
@@ -1817,7 +1818,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="validate_item_bank">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.validate_item_bank">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">raise_err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</span>
 
 <span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>
@@ -1827,61 +1828,52 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  The item matrix must have at least one line (representing an item) and exactly four columns,</span>
 <span class="sd">  representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters</span>
 <span class="sd">  (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered</span>
-<span class="sd">  valid if, for all items in the matrix, :math:`a &gt; 0 \wedge 0 \leq c &lt; d \leq 1`.</span>
+<span class="sd">  valid if every parameter is finite and, for all items in the matrix,</span>
+<span class="sd">  :math:`a &gt; 0 \wedge 0 \leq c &lt; d \leq 1`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      The item matrix to validate.</span>
-<span class="sd">  raise_err : bool, optional</span>
-<span class="sd">      Whether to raise an error in case the validation fails (True) or just print</span>
-<span class="sd">      the error message to standard output (False). Default is False.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  TypeError</span>
 <span class="sd">      If items is not a numpy.ndarray.</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If raise_err is True and the item matrix does not meet validation criteria.</span>
+<span class="sd">      If the item matrix is not :math:`n \times 4`, has no items, or has a parameter that is NaN,</span>
+<span class="sd">      infinite or out of its range. The message lists every parameter violation found, separated by</span>
+<span class="sd">      ``"; "``.</span>
 <span class="sd">  """</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Item matrix is not of type numpy.ndarray"</span>
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-  <span class="n">err</span> <span class="o">=</span> <span class="s2">""</span>
+  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="p">(</span><span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">,):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item matrix has shape </span><span class="si">{</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">; it must be 2-D with exactly 4 columns: a, b, c and d"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Item matrix has no items"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-    <span class="n">err</span> <span class="o">+=</span> <span class="s2">"Item matrix has only one dimension."</span>
-  <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-    <span class="n">err</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has </span><span class="si">{</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> columns; it must have exactly 4: a, b, c and d"</span>
-  <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL4</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL1</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"</span>
-    <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL2</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no pseudo-guessing or upper asymptote parameter columns"</span>
-    <span class="k">elif</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">NumParams</span><span class="o">.</span><span class="n">PL3</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no upper asymptote parameter column"</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">Item matrix has no columns; it must have exactly 4: a, b, c and d"</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with discrimination &lt;= 0"</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &lt; 0"</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &gt; 1"</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &gt; 1"</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with upper asymptote &lt; 0"</span>
-    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]):</span>
-      <span class="n">err</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">There are items with pseudo-guessing &gt;= upper asymptote"</span>
+  <span class="n">errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with NaN or infinite parameters"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with discrimination &lt;= 0"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with pseudo-guessing &lt; 0"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with pseudo-guessing &gt; 1"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with upper asymptote &gt; 1"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with upper asymptote &lt; 0"</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]):</span>
+    <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"There are items with pseudo-guessing &gt;= upper asymptote"</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="k">return</span>
-  <span class="k">if</span> <span class="n">raise_err</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
-  <span class="nb">print</span><span class="p">(</span><span class="n">err</span><span class="p">)</span></div>
+  <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">))</span></div>
 
 </pre></div>
 
@@ -1924,7 +1916,7 @@ window.runMermaid = runMermaid;</script>
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>

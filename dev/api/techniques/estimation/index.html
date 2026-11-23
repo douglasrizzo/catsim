@@ -408,7 +408,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Numerical Search Estimator (MLE)" href="numerical-search-estimator.html" />
-    <link rel="prev" title="Minimum Expected Posterior Variance Selector" href="../selection/mepv-selector.html" />
+    <link rel="prev" title="Maximum Likelihood Weighted Information Selector" href="../selection/mlwi-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -837,19 +837,6 @@ accuracy, bias, and the availability of uncertainty quantification.</p>
   BaseEstimator &lt;|-- NumericalSearchEstimator
   BaseEstimator &lt;|-- WarmLikelihoodEstimator
     </pre></section>
-<section id="planned">
-<h2>Planned<a class="headerlink" href="#planned" title="Link to this heading">#</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The techniques in this section are not yet available in the released package.
-They describe planned additions to <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code>.</p>
-</div>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="owen-estimator.html">Owen Sequential Bayesian Estimator</a></li>
-</ul>
-</div>
-</section>
 </section>
 
 
@@ -863,12 +850,12 @@ They describe planned additions to <code class="xref py py-mod docutils literal 
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../selection/mepv-selector.html"
+       href="../selection/mlwi-selector.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Minimum Expected Posterior Variance Selector</p>
+        <p class="prev-next-title">Maximum Likelihood Weighted Information Selector</p>
       </div>
     </a>
     <a class="right-next"
@@ -901,7 +888,6 @@ They describe planned additions to <code class="xref py py-mod docutils literal 
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented">Implemented</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-hierarchy">Class Hierarchy</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#planned">Planned</a></li>
 </ul>
   </nav></div>
 
@@ -939,7 +925,7 @@ They describe planned additions to <code class="xref py py-mod docutils literal 
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>

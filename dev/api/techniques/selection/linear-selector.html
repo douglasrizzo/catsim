@@ -513,7 +513,13 @@ of items in a predetermined order.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>int or None</dt><dd><p>Index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt>int</dt><dd><p>Index of the next item to be applied: the first of the selector’s indexes not yet administered.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>NoItemsAvailableError</dt><dd><p>If every one of the selector’s indexes has already been administered.</p>
 </dd>
 </dl>
 </dd>
@@ -619,7 +625,7 @@ of items in a predetermined order.</p>
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>

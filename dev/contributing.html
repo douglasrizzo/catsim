@@ -432,26 +432,56 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">#</a></h1>
-<p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/initialization.html">initializers</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/selection.html">selectors</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/estimation.html">estimators</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/stopping.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. You can also write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/irt.html">IRT-related functions</a>, as long as you have the right academic papers to prove they are relevant.</p>
-<p>If you think the <a class="reference external" href="https://douglasrizzo.com.br/catsim/simulation.html">simulator</a> could be doing something it is currently not doing, feel free to study it and make a contribution.</p>
-<p>If you know a better way to present all the data collected during simulation, feel free to contribute with your own <a class="reference external" href="https://douglasrizzo.com.br/catsim/plot.html">plots</a>.</p>
+<p><strong>catsim</strong> is built in an object-oriented paradigm (or as object-oriented as Python allows) so it is rather simple to extend it. You can write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">initializers</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selectors</a>, <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">estimators</a> or <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">stopping criteria</a> by extending the base classes that are present in each of the corresponding modules. You can also write new <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/irt.html">IRT-related functions</a>, as long as you have the right academic papers to prove they are relevant.</p>
+<p>If you think the <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/engine.html">CAT engine</a> or the <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html">simulation runner</a> could be doing something it is currently not doing, feel free to study it and make a contribution.</p>
+<p>If you know a better way to present all the data collected during simulation, feel free to contribute with your own <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/plot.html">plots</a>.</p>
 <section id="psychometrics">
 <h2>Psychometrics<a class="headerlink" href="#psychometrics" title="Link to this heading">#</a></h2>
 <p><strong>catsim</strong> still has a way to go before it can be considered a mature package. Here is a list of features that may be of interest:</p>
 <ul class="simple">
-<li><p>Bayesian ability estimators (maybe using <a class="reference external" href="https://www.pymc.io/">PyMC</a>);</p></li>
 <li><p>Other test evaluation methods;</p></li>
 <li><p>Comparisons between simulation results (for example <a class="footnote-reference brackets" href="#barr2010" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>);</p></li>
-<li><p>Other information functions, selection methods based on intervals or areas of information etc. (see <a class="footnote-reference brackets" href="#lind2010" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>).</p></li>
+<li><p>Other item selection criteria (see <a class="footnote-reference brackets" href="#lind2010" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> for a survey).</p></li>
 </ul>
 </section>
-<section id="unit-testing">
-<h2>Unit testing<a class="headerlink" href="#unit-testing" title="Link to this heading">#</a></h2>
-<p>If you are interested in making a contribution to <strong>catsim</strong>, I’d encourage you to also contribute with unit tests in the package’s testing module.</p>
+<section id="development-setup">
+<h2>Development setup<a class="headerlink" href="#development-setup" title="Link to this heading">#</a></h2>
+<p>Clone the repository, then install the development tools with <a class="reference external" href="https://docs.astral.sh/uv/">uv</a> and the pre-commit hooks:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--group<span class="w"> </span>dev
+uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>pre-commit then runs the repository’s formatters and checks on every commit.</p>
+</section>
+<section id="quality-gate">
+<h2>Quality gate<a class="headerlink" href="#quality-gate" title="Link to this heading">#</a></h2>
+<p>Changes that alter behavior come with new or updated tests in <code class="docutils literal notranslate"><span class="pre">tests/</span></code>. Before you send a pull request, run the checks listed in <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/AGENTS.md">AGENTS.md</a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>-q
+uv<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>src/catsim<span class="w"> </span>tests
+uv<span class="w"> </span>run<span class="w"> </span>pylint<span class="w"> </span>src/catsim
+uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>check
+</pre></div>
+</div>
+<p>If you change a tutorial notebook in <code class="docutils literal notranslate"><span class="pre">notebooks/</span></code>, run the notebooks too:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--nbmake<span class="w"> </span>--nbmake-timeout<span class="o">=</span><span class="m">300</span><span class="w"> </span>notebooks/*.ipynb
+</pre></div>
+</div>
+</section>
+<section id="building-the-documentation">
+<h2>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Link to this heading">#</a></h2>
+<p>The documentation sources are in <code class="docutils literal notranslate"><span class="pre">sphinx/</span></code>. Build the HTML pages with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>--group<span class="w"> </span>docs<span class="w"> </span>sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>-W<span class="w"> </span>--keep-going<span class="w"> </span>sphinx<span class="w"> </span>sphinx/_build/html
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">-W</span></code> turns warnings into errors. The build also regenerates <code class="docutils literal notranslate"><span class="pre">README.md</span></code> from <code class="docutils literal notranslate"><span class="pre">sphinx/readme_head.md</span></code> and <code class="docutils literal notranslate"><span class="pre">sphinx/readme_body.md</span></code>, so edit those two files instead of <code class="docutils literal notranslate"><span class="pre">README.md</span></code>.</p>
+</section>
+<section id="adding-a-technique">
+<h2>Adding a technique<a class="headerlink" href="#adding-a-technique" title="Link to this heading">#</a></h2>
+<p>Each implemented technique has a page under <code class="docutils literal notranslate"><span class="pre">sphinx/api/techniques/</span></code> with its definition, parameters and behavioral contracts. A new technique starts as a spec in <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/dev/specs"><code class="docutils literal notranslate"><span class="pre">specs/</span></code></a>, written from the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md">spec template</a>; <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md"><code class="docutils literal notranslate"><span class="pre">specs/README.md</span></code></a> explains how a spec is revalidated, implemented and then promoted into the documentation. The template’s Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists.</p>
 </section>
 <section id="how-to-contribute">
 <h2>How to contribute<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h2>
-<p><strong>Contributing code:</strong> create a fork on GitHub, make your changes on your own repo and then send a pull request to our <strong>testing</strong> branch so that we can check your contributions. Make sure your version passes on the unit tests.</p>
+<p><strong>Contributing code:</strong> create a fork on GitHub, make your changes on your own repo and then send a pull request to our <strong>dev</strong> branch so that we can check your contributions. Make sure your changes pass the quality gate above.</p>
 <p><strong>Contributing ideas:</strong> file an <a class="reference external" href="https://github.com/douglasrizzo/catsim/issues">issue on GitHub</a>, label it as an <strong>enhancement</strong> and describe as thoroughly as possible what could be done.</p>
 <p><strong>Blaming me:</strong> file an <a class="reference external" href="https://github.com/douglasrizzo/catsim/issues">issue on GitHub</a> describing as thoroughly as possible the problem, with error messages, descriptions of your tests and possibly suggestions for fixing it.</p>
 </section>
@@ -519,7 +549,10 @@
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#psychometrics">Psychometrics</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unit-testing">Unit testing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#development-setup">Development setup</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#quality-gate">Quality gate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-documentation">Building the documentation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-a-technique">Adding a technique</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-contribute">How to contribute</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 </ul>
@@ -559,7 +592,7 @@
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>

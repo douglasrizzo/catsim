@@ -467,6 +467,9 @@ objects in ways that made repeated runs and object reuse harder to reason about.
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p>Reusing an item bank across sessions or simulations is safer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> keeps its own copy of the parameters and makes it read-only, together with the column
+views its properties return, so the values derived and cached from them (<code class="docutils literal notranslate"><span class="pre">max_info_thetas</span></code>,
+<code class="docutils literal notranslate"><span class="pre">model</span></code>, a stratified selector’s strata) cannot go stale.</p></li>
 <li><p>Exposure becomes a property of a run, not of the calibrated bank itself.</p></li>
 <li><p>Run metrics have a clearer ownership model and are easier to validate.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.items</span></code> has exactly four columns, <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d]</span></code>. The fifth exposure-rate column that
@@ -565,7 +568,7 @@ columns raises <code class="docutils literal notranslate"><span class="pre">Valu
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>

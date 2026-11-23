@@ -20,6 +20,9 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
 ## Consequences
 
 - Reusing an item bank across sessions or simulations is safer.
+- `ItemBank` keeps its own copy of the parameters and makes it read-only, together with the column
+  views its properties return, so the values derived and cached from them (`max_info_thetas`,
+  `model`, a stratified selector's strata) cannot go stale.
 - Exposure becomes a property of a run, not of the calibrated bank itself.
 - Run metrics have a clearer ownership model and are easier to validate.
 - `ItemBank.items` has exactly four columns, `[a, b, c, d]`. The fifth exposure-rate column that

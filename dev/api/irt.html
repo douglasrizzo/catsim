@@ -913,7 +913,7 @@ maximum information for multiple items simultaneously using vectorized operation
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>An array of theta values, one for each item, indicating where each item’s
+<dt>numpy.ndarray</dt><dd><p>A new array of theta values, one for each item, indicating where each item’s
 information function reaches its maximum.</p>
 </dd>
 </dl>
@@ -1198,7 +1198,7 @@ Higher values indicate more precise ability estimation.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="catsim.irt.validate_item_bank">
-<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">validate_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_err</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/irt.html#validate_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.validate_item_bank" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">validate_item_bank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/irt.html#validate_item_bank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.validate_item_bank" title="Link to this definition">#</a></dt>
 <dd><p>Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</p>
 <p>The item matrix must have dimension <span class="math notranslate nohighlight">\(n \times 4\)</span>, in which column 0 represents item
 discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
@@ -1206,14 +1206,12 @@ parameter and column 3 represents the item upper asymptote.</p>
 <p>The item matrix must have at least one line (representing an item) and exactly four columns,
 representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
 (<span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>), respectively. The item matrix is considered
-valid if, for all items in the matrix, <span class="math notranslate nohighlight">\(a &gt; 0 \wedge 0 \leq c &lt; d \leq 1\)</span>.</p>
+valid if every parameter is finite and, for all items in the matrix,
+<span class="math notranslate nohighlight">\(a &gt; 0 \wedge 0 \leq c &lt; d \leq 1\)</span>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The item matrix to validate.</p>
-</dd>
-<dt><strong>raise_err</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to raise an error in case the validation fails (True) or just print
-the error message to standard output (False). Default is False.</p>
 </dd>
 </dl>
 </dd>
@@ -1221,7 +1219,9 @@ the error message to standard output (False). Default is False.</p>
 <dd class="field-even"><dl class="simple">
 <dt>TypeError</dt><dd><p>If items is not a numpy.ndarray.</p>
 </dd>
-<dt>ValueError</dt><dd><p>If raise_err is True and the item matrix does not meet validation criteria.</p>
+<dt>ValueError</dt><dd><p>If the item matrix is not <span class="math notranslate nohighlight">\(n \times 4\)</span>, has no items, or has a parameter that is NaN,
+infinite or out of its range. The message lists every parameter violation found, separated by
+<code class="docutils literal notranslate"><span class="pre">&quot;;</span> <span class="pre">&quot;</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -1401,7 +1401,7 @@ is 0.</p>
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>

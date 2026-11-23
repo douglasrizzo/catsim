@@ -848,8 +848,13 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied: the first of the selector's indexes not yet administered.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every one of the selector's indexes has already been administered.</span>
 <span class="sd">    """</span>
     <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -903,7 +908,7 @@ window.runMermaid = runMermaid;</script>
 
   <p class="copyright">
     
-      © Copyright 2017-2025, Douglas De Rizzo Meneghetti.
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
       <br/>
     
   </p>
