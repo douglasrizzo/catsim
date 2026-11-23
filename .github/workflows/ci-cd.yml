@@ -327,7 +327,7 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
       (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
        github.event.pull_request.head.repo.full_name == github.repository)
-    needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
+    needs: [pre-commit, test, build, test-wheel, build-docs] # Docs go live only for a commit that passes every check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
