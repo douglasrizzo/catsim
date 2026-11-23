@@ -1004,8 +1004,9 @@ def validate_item_bank(items: FloatArray) -> None:
   TypeError
       If items is not a numpy.ndarray.
   ValueError
-      If the item matrix is not :math:`n \times 4`, or if any parameter is NaN, infinite or out of
-      its range. The message lists every violation found, separated by ``"; "``.
+      If the item matrix is not :math:`n \times 4`, has no items, or has a parameter that is NaN,
+      infinite or out of its range. The message lists every parameter violation found, separated by
+      ``"; "``.
   """
   if not isinstance(items, numpy.ndarray):
     msg = "Item matrix is not of type numpy.ndarray"
@@ -1013,6 +1014,9 @@ def validate_item_bank(items: FloatArray) -> None:
 
   if items.shape[1:] != (NumParams.PL4.value,):
     msg = f"Item matrix has shape {items.shape}; it must be 2-D with exactly 4 columns: a, b, c and d"
+    raise ValueError(msg)
+  if items.shape[0] == 0:
+    msg = "Item matrix has no items"
     raise ValueError(msg)
 
   errors: list[str] = []

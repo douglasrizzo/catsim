@@ -407,6 +407,11 @@ class TestValidateItemBank:
     with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
       irt.validate_item_bank(items)
 
+  def test_validate_rejects_a_matrix_without_items(self) -> None:
+    """A 0 x 4 matrix raises ValueError: with no rows, every parameter check passes vacuously."""
+    with pytest.raises(ValueError, match="no items"):
+      irt.validate_item_bank(np.empty((0, 4)))
+
   @pytest.mark.parametrize(
     ("item", "message"),
     [
