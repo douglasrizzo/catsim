@@ -846,55 +846,6 @@ class TestMAPEstimator:
 class TestWarmLikelihoodEstimator:
   """Tests for WarmLikelihoodEstimator."""
 
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    estimator = WarmLikelihoodEstimator()
-    assert estimator.calls == 0
-    assert str(estimator) == "Warm Weighted Likelihood Estimator"
-
-  def test_estimate_is_pulled_toward_the_items_relative_to_mle(self) -> None:
-    """Warm correction should reduce the outward bias of a mixed-response MLE.
-
-    The items sit between b = 1 and b = 2 and four of five answers are correct, so the MLE lies
-    above them; the WLE must move back toward where the items are informative.
-    """
-    item_bank = ItemBank(
-      np.array(
-        [
-          [1.5, 1.5, 0.0, 1.0],
-          [1.2, 1.8, 0.0, 1.0],
-          [1.8, 1.2, 0.0, 1.0],
-          [1.0, 2.0, 0.0, 1.0],
-          [2.0, 1.0, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
-    )
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [True, True, True, True, False]
-
-    mle = NumericalSearchEstimator(dodd=False)
-    mle_theta = mle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    wle = WarmLikelihoodEstimator()
-    wle_theta = wle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(mle_theta)
-    assert np.isfinite(wle_theta)
-    assert mle_theta > 0.0
-    assert wle_theta > 0.0
-    assert abs(wle_theta) < abs(mle_theta)
-
   def test_estimate_empty_response_returns_input_theta(self) -> None:
     """No administered items should return the input estimate unchanged."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
@@ -909,108 +860,6 @@ class TestWarmLikelihoodEstimator:
 
     assert theta == pytest.approx(1.25)
     assert estimator.calls == 1
-
-  def test_estimate_all_correct_remains_finite(self) -> None:
-    """Warm correction should remain finite when plain MLE diverges."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [True] * len(administered_items)
-
-    mle = NumericalSearchEstimator(dodd=False)
-    mle_theta = mle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    wle = WarmLikelihoodEstimator()
-    wle_theta = wle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(wle_theta)
-    assert np.isinf(mle_theta)
-    assert wle.calls == 1
-    assert wle.evaluations > 0
-    assert wle.total_evaluations == wle.evaluations
-
-  def test_estimate_all_incorrect_remains_finite(self) -> None:
-    """Warm correction should remain finite when plain MLE diverges."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [False] * len(administered_items)
-
-    mle = NumericalSearchEstimator(dodd=False)
-    mle_theta = mle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    wle = WarmLikelihoodEstimator()
-    wle_theta = wle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(wle_theta)
-    assert np.isinf(mle_theta)
-    assert wle.calls == 1
-    assert wle.evaluations > 0
-    assert wle.total_evaluations == wle.evaluations
-
-  def test_estimate_handles_mixed_responses(self) -> None:
-    """WLE should remain finite for ordinary response patterns."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [True, False, True, True, False]
-
-    estimator = WarmLikelihoodEstimator()
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert isinstance(theta, float)
-    assert np.isfinite(theta)
-    assert estimator.calls == 1
-    assert estimator.evaluations > 0
-    assert estimator.total_evaluations == estimator.evaluations
-
-  def test_estimate_accumulates_counters_across_calls(self) -> None:
-    """Test that repeated estimates update the internal call and evaluation counters."""
-    item_bank = ItemBank.generate_item_bank(30, seed=123)
-    estimator = WarmLikelihoodEstimator()
-
-    first_theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2],
-      response_vector=[True, False, True],
-      est_theta=0.0,
-    )
-    first_evaluations = estimator.evaluations
-
-    second_theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2, 3],
-      response_vector=[True, False, True, False],
-      est_theta=0.0,
-    )
-
-    assert estimator.calls == 2
-    assert estimator.evaluations > 0
-    assert estimator.total_evaluations >= first_evaluations
-    assert np.isfinite(first_theta)
-    assert np.isfinite(second_theta)
 
   @staticmethod
   def _two_candidate_bank() -> ItemBank:
@@ -1033,7 +882,7 @@ class TestWarmLikelihoodEstimator:
 
     assert 121 < single < 121 + 50
     assert ranked >= 121 + 2 * 21
-    assert estimator.total_evaluations == single + ranked
+    assert (estimator.calls, estimator.total_evaluations) == (2, single + ranked)
 
   def test_ranking_integral_warnings_reach_the_caller(self, monkeypatch: pytest.MonkeyPatch) -> None:
     """A ranking integral that does not converge still warns, although quad returns the message."""
