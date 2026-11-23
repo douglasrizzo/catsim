@@ -1,6 +1,8 @@
 """Tests for the ItemBank class."""
 
+import copy
 import operator
+import pickle
 from collections.abc import Callable
 
 import numpy as np
@@ -138,6 +140,37 @@ class TestItemBankCreation:
 
     assert bank.max_info_thetas.tolist() == [0.5, -0.2]
     assert bank.max_info_values.tolist() == pytest.approx([0.25, 0.4225])
+
+  @pytest.mark.parametrize(
+    "duplicate",
+    [
+      pytest.param(copy.deepcopy, id="deepcopy"),
+      pytest.param(lambda bank: pickle.loads(pickle.dumps(bank)), id="pickle"),
+    ],
+  )
+  @pytest.mark.parametrize(
+    "array",
+    [
+      pytest.param(lambda bank: bank.items, id="items"),
+      pytest.param(lambda bank: bank.max_info_thetas, id="max_info_thetas"),
+      pytest.param(lambda bank: bank.max_info_values, id="max_info_values"),
+    ],
+  )
+  def test_copies_stay_read_only(
+    self, duplicate: Callable[[ItemBank], ItemBank], array: Callable[[ItemBank], np.ndarray]
+  ) -> None:
+    """A deep-copied or unpickled bank, e.g. one sent to a worker process, is as read-only as the original.
+
+    NumPy does not keep the read-only flag through deepcopy or pickle, so without restoring it a copy's parameters
+    and caches became writable again.
+    """
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]))
+    bank.max_info_values  # noqa: B018 - fill both caches before copying, so the copy carries them
+
+    copied = duplicate(bank)
+
+    with pytest.raises(ValueError, match="read-only"):
+      array(copied)[0] = 99.0
 
   def test_validation_enabled_by_default(self) -> None:
     """A bank is validated unless told otherwise, so a = -1 raises instead of being accepted."""

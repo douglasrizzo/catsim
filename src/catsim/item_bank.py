@@ -441,6 +441,16 @@ class ItemBank:
     """Get number of items (allows len(bank))."""
     return self.n_items
 
+  def __setstate__(self, state: dict[str, Any]) -> None:
+    """Restore a deep-copied or unpickled bank with its arrays read-only again.
+
+    NumPy does not keep the read-only flag through deepcopy or pickle.
+    """
+    self.__dict__.update(state)
+    for array in (self._items, self._max_info_thetas, self._max_info_values):
+      if array is not None:
+        array.flags.writeable = False
+
   def __getitem__(self, index: int | slice | list | IntArray) -> FloatArray:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]
