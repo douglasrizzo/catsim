@@ -21,10 +21,12 @@ that syntax and breaks the `$$` math.
 
 ## Status
 
-The specs here were written together in April 2026 and have not been through the revalidation
-checklist below yet. Their implementation sketches predate the catsim 1.0 strategy contract and do
-not follow it; they will be updated once that contract is on `dev`. Do not implement a technique
-from a sketch that does not follow the contract.
+The specs here were written together in April 2026. Their citations, cited locations, definitions
+and catR comparisons were revalidated against their sources in November 2026 (checklist steps 1-4
+and 6 below); each spec's status lines say when and against which sources. Their implementation
+sketches (step 5) predate the catsim 1.0 strategy contract and do not follow it; they will be
+updated once that contract is on `dev`, and some still contradict their corrected definitions. Do
+not implement a technique from a sketch that does not follow the contract.
 
 ## Workflow
 
