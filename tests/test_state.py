@@ -6,12 +6,12 @@ import numpy as np
 import pytest
 
 from catsim.item_bank import ItemBank
-from catsim.state import CatSessionState, ExposureTracker, SessionStatus, SimulationResult
+from catsim.state import CatSessionState, ExposureTracker, SimulationResult
 
 
 def test_session_state_initializes_theta_history_and_count() -> None:
   """Sessions should seed theta history from the initial theta."""
-  session = CatSessionState(session_id=7, current_theta=1.25, status=SessionStatus.IN_PROGRESS)
+  session = CatSessionState(session_id=7, current_theta=1.25)
 
   assert session.theta_history == [1.25]
   assert session.latest_theta == 1.25

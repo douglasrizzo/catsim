@@ -11,7 +11,7 @@ from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
-from catsim.state import CatSessionState, SessionStatus
+from catsim.state import CatSessionState
 from catsim.stopping import MaxLengthStopper
 from tests.hypothesis_strategies import item_params_matrix
 
@@ -42,7 +42,6 @@ def test_select_next_returns_unseen_item_within_bank(
   state = CatSessionState(
     session_id=0,
     current_theta=0.0,
-    status=SessionStatus.IN_PROGRESS,
     administered_item_ids=administered,
   )
   ctx = RunContext(rng=np.random.default_rng(seed))

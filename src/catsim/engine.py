@@ -10,7 +10,7 @@ import numpy
 
 from .exceptions import NoItemsAvailableError
 from .irt import icc
-from .state import CatSessionState, CatStepResult, ExposureTracker, SessionStatus, StopReason
+from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
   from .estimation import BaseEstimator
@@ -80,7 +80,6 @@ class CatEngine:
       session_id=session_id,
       current_theta=initial_theta,
       true_theta=true_theta,
-      status=SessionStatus.IN_PROGRESS,
     )
 
   def should_stop(self, state: CatSessionState, item_bank: ItemBank) -> bool:
@@ -101,8 +100,7 @@ class CatEngine:
         engine.apply_response(state, item_bank, item_id, ask_examinee(item_id), context)
 
     The stopper is consulted here only for a session that has no responses yet. After that,
-    :meth:`apply_response` evaluates it once for every new state, and the status it records is
-    final.
+    :meth:`apply_response` evaluates it once for every new state, and what it records is final.
 
     Parameters
     ----------
@@ -120,10 +118,10 @@ class CatEngine:
         stopped (and is left untouched), its stopper is satisfied (reason ``StopReason.STOPPER``),
         or the selector has no item to offer (reason ``StopReason.NO_ITEMS``).
     """
-    if state.status == SessionStatus.STOPPED:
+    if state.is_stopped:
       return None
     if state.administered_count == 0 and self.should_stop(state, item_bank):
-      _end(state, StopReason.STOPPER)
+      state.stop_reason = StopReason.STOPPER
       return None
 
     exposure_rates = None
@@ -142,7 +140,7 @@ class CatEngine:
       item_id = None
     # BaseSelector.select is typed int | None, so a custom selector may say "no item" with None.
     if item_id is None:
-      _end(state, StopReason.NO_ITEMS)
+      state.stop_reason = StopReason.NO_ITEMS
       return None
     return int(item_id)
 
@@ -187,7 +185,7 @@ class CatEngine:
     TypeError
         If the item index is not an integer, or the response is not a ``bool`` or ``numpy.bool_``.
     """
-    if state.status == SessionStatus.STOPPED:
+    if state.is_stopped:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
       raise ValueError(msg)
     # Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.
@@ -225,7 +223,7 @@ class CatEngine:
     state.current_theta = updated_theta
     state.theta_history.append(updated_theta)
     if stopped:
-      _end(state, StopReason.STOPPER)
+      state.stop_reason = StopReason.STOPPER
 
     return CatStepResult(
       session=state.snapshot(),
@@ -277,11 +275,6 @@ class CatEngine:
     context: RunContext,
   ) -> CatSessionState:
     """Run a session until a stop condition is reached."""
-    while state.status != SessionStatus.STOPPED:
+    while not state.is_stopped:
       self.step(state, item_bank, response_provider, context)
     return state
-
-
-def _end(state: CatSessionState, reason: StopReason) -> None:
-  state.status = SessionStatus.STOPPED
-  state.stop_reason = reason

@@ -10,7 +10,7 @@ from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, RandomSelector
 from catsim.simulation import SimulationRunner
-from catsim.state import SessionStatus, SimulationResult
+from catsim.state import SimulationResult, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -137,11 +137,14 @@ class TestSimulationRunnerRun:
     assert np.array_equal(result1.exposure_counts, result2.exposure_counts)
 
   def test_run_populates_sessions(self, simulation_result: SimulationResult) -> None:
-    """Completed runs should produce stopped sessions with histories."""
+    """Every session of a run is run to its stopper: 10 items, 10 responses and 11 estimates.
+
+    Fails if run returns sessions before they end, or loses part of a session's history.
+    """
     assert len(simulation_result.sessions) == 5
-    assert all(session.status == SessionStatus.STOPPED for session in simulation_result.sessions)
-    assert all(len(session.theta_history) >= 2 for session in simulation_result.sessions)
-    assert all(len(session.administered_item_ids) == 10 for session in simulation_result.sessions)
+    for session in simulation_result.sessions:
+      assert session.stop_reason is StopReason.STOPPER
+      assert (len(session.administered_item_ids), len(session.responses), len(session.theta_history)) == (10, 10, 11)
 
   def test_verbose_run_matches_a_quiet_run(self, item_bank: ItemBank) -> None:
     """verbose=True only adds a progress bar: the run completes and gives the same sessions as a quiet run."""
@@ -181,8 +184,11 @@ class TestSimulationResult:
   """Tests for SimulationResult derived properties."""
 
   def test_latest_estimations_matches_session_thetas(self, simulation_result: SimulationResult) -> None:
-    """Latest estimations should match each session's final theta."""
-    assert simulation_result.latest_estimations == [session.latest_theta for session in simulation_result.sessions]
+    """latest_estimations holds the last estimate of each session's history.
+
+    Fails if it reports an earlier estimate, such as the initial one.
+    """
+    assert simulation_result.latest_estimations == [session.theta_history[-1] for session in simulation_result.sessions]
 
   def test_estimations_returns_theta_histories(self, simulation_result: SimulationResult) -> None:
     """Estimations should expose one theta-history per session."""

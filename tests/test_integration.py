@@ -27,7 +27,7 @@ from catsim.selection import (
 )
 from catsim.selection.base import BaseSelector
 from catsim.simulation import SimulationRunner
-from catsim.state import ExposureTracker, SessionStatus, SimulationResult, StopReason
+from catsim.state import ExposureTracker, SimulationResult, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
@@ -51,7 +51,7 @@ def run_simulation(
   )
   result = runner.run(examinees)
   assert len(result.sessions) == examinees
-  assert all(session.status == SessionStatus.STOPPED for session in result.sessions)
+  assert all(session.is_stopped for session in result.sessions)
   assert result.exposure_counts.sum() == sum(len(session.administered_item_ids) for session in result.sessions)
   return result
 

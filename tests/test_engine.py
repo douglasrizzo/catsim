@@ -13,7 +13,7 @@ from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import RandomSelector
-from catsim.state import CatSessionState, ExposureTracker, SessionStatus, StopReason
+from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 
 
@@ -188,7 +188,7 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   assert session.current_theta == pytest.approx(1.25)
   assert session.true_theta == pytest.approx(-0.5)
   assert session.theta_history == [pytest.approx(1.25)]
-  assert session.status == SessionStatus.IN_PROGRESS
+  assert session.stop_reason is None
 
 
 def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
@@ -262,14 +262,12 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert estimator.seen_administered_items == [3]
   assert estimator.seen_response_vector == [True]
   assert estimator.seen_theta == pytest.approx(0.0)
-  assert session.status == SessionStatus.IN_PROGRESS
   assert session.stop_reason is None
   assert result.selected_item_id == 3
   assert result.response is True
   assert result.updated_theta == pytest.approx(1.1)
   assert result.stopped is False
   assert result.stop_reason is None
-  assert result.session.status == SessionStatus.IN_PROGRESS
   assert result.session.stop_reason is None
   assert result.session.administered_item_ids == [3]
   assert result.session.responses == [True]
@@ -289,12 +287,10 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
 
   result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
 
-  assert session.status == SessionStatus.STOPPED
   assert session.stop_reason is StopReason.STOPPER
   assert result.stopped is True
   assert result.stop_reason is StopReason.STOPPER
   assert result.updated_theta == pytest.approx(0.3)
-  assert result.session.status == SessionStatus.STOPPED
   assert result.session.stop_reason is StopReason.STOPPER
 
 
@@ -474,7 +470,6 @@ def test_run_session_stops_at_fixed_length(
 
   final_session = engine.run_session(session, item_bank, FixedResponseProvider(True), context)
 
-  assert final_session.status == SessionStatus.STOPPED
   assert final_session.stop_reason is StopReason.STOPPER
   assert len(final_session.administered_item_ids) == 3
 
@@ -629,9 +624,7 @@ def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank
   assert (result.stopped, result.selected_item_id, result.response) == (True, None, None)
   assert result.updated_theta == pytest.approx(0.4)
   assert result.stop_reason is StopReason.STOPPER
-  assert result.session.status == SessionStatus.STOPPED
   assert result.session.stop_reason is StopReason.STOPPER
-  assert session.status == SessionStatus.STOPPED
   assert session.stop_reason is StopReason.STOPPER
 
 
@@ -647,5 +640,4 @@ def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank, s
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
   assert engine.select_next(session, item_bank, context) is None
-  assert session.status == SessionStatus.STOPPED
   assert session.stop_reason is StopReason.NO_ITEMS

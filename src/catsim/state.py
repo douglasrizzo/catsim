@@ -15,14 +15,6 @@ if TYPE_CHECKING:
   from .item_bank import ItemBank
 
 
-class SessionStatus(StrEnum):
-  """Lifecycle state for a CAT session."""
-
-  NOT_STARTED = "not_started"
-  IN_PROGRESS = "in_progress"
-  STOPPED = "stopped"
-
-
 class StopReason(StrEnum):
   """Why a CAT session ended.
 
@@ -45,7 +37,6 @@ class CatSessionState:
   administered_item_ids: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
   theta_history: list[float] = field(default_factory=list)
-  status: SessionStatus = SessionStatus.NOT_STARTED
   stop_reason: StopReason | None = None
   metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -53,6 +44,11 @@ class CatSessionState:
     """Seed theta history with the initial theta when no history is provided."""
     if not self.theta_history:
       self.theta_history.append(self.current_theta)
+
+  @property
+  def is_stopped(self) -> bool:
+    """Return whether the session has ended."""
+    return self.stop_reason is not None
 
   @property
   def administered_count(self) -> int:
@@ -73,7 +69,6 @@ class CatSessionState:
       administered_item_ids=self.administered_item_ids.copy(),
       responses=self.responses.copy(),
       theta_history=self.theta_history.copy(),
-      status=self.status,
       stop_reason=self.stop_reason,
       metadata=self.metadata.copy(),
     )
@@ -89,9 +84,13 @@ class CatSessionSnapshot:
   administered_item_ids: list[int]
   responses: list[bool]
   theta_history: list[float]
-  status: SessionStatus
   stop_reason: StopReason | None
   metadata: dict[str, Any]
+
+  @property
+  def is_stopped(self) -> bool:
+    """Return whether the session had ended at the time of the snapshot."""
+    return self.stop_reason is not None
 
 
 @dataclass(slots=True)
