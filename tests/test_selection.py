@@ -2,6 +2,7 @@
 
 import importlib
 import inspect
+from collections.abc import Callable
 from itertools import pairwise
 
 import numpy as np
@@ -1284,6 +1285,27 @@ class TestProportionalSelector:
     selections = [selector.select(item_bank, [9], -4.5, rng=rng) for _ in range(100)]
 
     assert selections.count(0) == 100
+
+
+@pytest.mark.parametrize(
+  "make_selector",
+  [
+    pytest.param(lambda: ProgressiveSelector(test_size=8), id="progressive"),
+    pytest.param(lambda: ProportionalSelector(test_size=8), id="proportional"),
+  ],
+)
+def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[[], BaseSelector]) -> None:
+  """Two runs seeded alike choose the same items at every position, as contract 5 promises."""
+  item_bank = ItemBank.generate_item_bank(40, seed=5)
+
+  def run(seed: int) -> list[int | None]:
+    selector, rng, administered = make_selector(), np.random.default_rng(seed), []
+    for _ in range(8):
+      administered.append(selector.select(item_bank, administered, 0.3, rng=rng))
+    return administered
+
+  assert run(11) == run(11)
+  assert run(11) != run(12)
 
 
 _N_ITEMS = 30
