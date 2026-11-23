@@ -65,6 +65,11 @@ class ProgressiveSelector(FiniteSelector):
     """Return the selector name."""
     return f"Progressive Selector (s={self._s})"
 
+  @property
+  def r_max(self) -> float:
+    """Return the maximum exposure rate accepted by the selector."""
+    return self._r_max
+
   def _weight(self, position: int) -> float:
     """Return the progression weight for the given 1-indexed test position."""
     return _position_weight(position, self._test_size, self._s)
@@ -179,6 +184,11 @@ class ProportionalSelector(FiniteSelector):
   def __str__(self) -> str:
     """Return the selector name."""
     return f"Proportional Selector (s={self._s}, k={self._k})"
+
+  @property
+  def r_max(self) -> float:
+    """Return the maximum exposure rate accepted by the selector."""
+    return self._r_max
 
   def _exponent(self, position: int) -> float:
     """Return the information exponent for the given 1-indexed test position."""
