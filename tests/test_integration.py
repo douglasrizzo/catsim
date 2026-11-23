@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+import numpy as np
 import pytest
 from sklearn.cluster import KMeans
 
+from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
@@ -25,7 +27,7 @@ from catsim.selection import (
 )
 from catsim.selection.base import BaseSelector
 from catsim.simulation import SimulationRunner
-from catsim.state import SessionStatus, SimulationResult
+from catsim.state import ExposureTracker, SessionStatus, SimulationResult
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MinErrorStopper
 from catsim.stopping import TestLengthStopper as LengthStopper
 
@@ -147,26 +149,29 @@ def test_stoppers_complete_runs(stopper: BaseStopper, expected_min: int, expecte
 
 
 @pytest.mark.integration
-def test_manual_and_batched_flows_share_equivalent_fixed_length_behavior() -> None:
-  """Manual and automated execution should agree on core stopping semantics."""
+def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() -> None:
+  """A session stepped through CatEngine matches the one SimulationRunner produces from the same seed.
+
+  The randomesque selector and the simulated responses draw from the same generator in turn, so the two
+  paths agree only if they make the same draws in the same order.
+  """
   item_bank = ItemBank.generate_item_bank(40, seed=42)
-  initializer = FixedPointInitializer(0.0)
-  selector = MaxInfoSelector()
-  estimator = NumericalSearchEstimator()
-  stopper = LengthStopper(max_items=4)
 
-  manual_runner = SimulationRunner(item_bank, initializer, selector, estimator, stopper, seed=42)
-  batched_runner = SimulationRunner(
-    item_bank,
-    initializer,
-    MaxInfoSelector(),
-    NumericalSearchEstimator(),
-    stopper,
-    seed=42,
+  def components() -> tuple[FixedPointInitializer, RandomesqueSelector, NumericalSearchEstimator, LengthStopper]:
+    return FixedPointInitializer(0.0), RandomesqueSelector(3), NumericalSearchEstimator(), LengthStopper(max_items=6)
+
+  batched = SimulationRunner(item_bank, *components(), seed=7).run([0.3]).sessions[0]
+
+  engine = CatEngine(*components())
+  context = RunContext(
+    rng=np.random.default_rng(7), exposure_tracker=ExposureTracker(item_bank.n_items), total_sessions=1
   )
+  manual = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.3)
+  # step one item at a time, as an interactive caller would, until a step reports the session stopped
+  while not engine.step(manual, item_bank, SimulatedResponseProvider(), context).stopped:
+    pass
 
-  manual_result = manual_runner.run([0.0])
-  batched_result = batched_runner.run(1)
-
-  assert len(manual_result.sessions[0].administered_item_ids) == 4
-  assert len(batched_result.sessions[0].administered_item_ids) == 4
+  assert manual.administered_item_ids == batched.administered_item_ids
+  assert manual.responses == batched.responses
+  assert manual.theta_history == pytest.approx(batched.theta_history)
+  assert manual.stop_reason == batched.stop_reason == "stop_rule"

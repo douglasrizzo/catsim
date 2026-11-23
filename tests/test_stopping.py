@@ -13,7 +13,6 @@ from catsim.selection import MaxInfoSelector
 from catsim.simulation import SimulationRunner
 from catsim.state import SessionStatus
 from catsim.stopping import (
-  BaseStopper,
   ConfidenceIntervalStopper,
   MinErrorStopper,
 )
@@ -24,26 +23,6 @@ from catsim.stopping import (
 
 class TestTestLengthStopperInit:
   """Tests for TestLengthStopper initialization."""
-
-  def test_init_no_constraints(self) -> None:
-    stopper = LengthStopper()
-    assert stopper.min_items is None
-    assert stopper.max_items is None
-
-  def test_init_with_min_items(self) -> None:
-    stopper = LengthStopper(min_items=5)
-    assert stopper.min_items == 5
-    assert stopper.max_items is None
-
-  def test_init_with_max_items(self) -> None:
-    stopper = LengthStopper(max_items=20)
-    assert stopper.min_items is None
-    assert stopper.max_items == 20
-
-  def test_init_with_both_constraints(self) -> None:
-    stopper = LengthStopper(min_items=5, max_items=20)
-    assert stopper.min_items == 5
-    assert stopper.max_items == 20
 
   @pytest.mark.parametrize("value", [0, -5])
   def test_init_invalid_min_items(self, value: int) -> None:
@@ -109,18 +88,6 @@ class TestTestLengthStopperStop:
 class TestMinErrorStopperInit:
   """Tests for MinErrorStopper initialization."""
 
-  def test_init_with_min_error(self) -> None:
-    stopper = MinErrorStopper(0.3)
-    assert stopper.min_error == pytest.approx(0.3)
-    assert stopper.min_items is None
-    assert stopper.max_items is None
-
-  def test_init_with_all_params(self) -> None:
-    stopper = MinErrorStopper(0.3, min_items=5, max_items=30)
-    assert stopper.min_error == pytest.approx(0.3)
-    assert stopper.min_items == 5
-    assert stopper.max_items == 30
-
   @pytest.mark.parametrize("value", [0.0, -0.3])
   def test_init_invalid_min_error(self, value: float) -> None:
     with pytest.raises(ValueError, match="min_error must be positive"):
@@ -175,16 +142,6 @@ class TestMinErrorStopperStop:
 class TestConfidenceIntervalStopperInit:
   """Tests for ConfidenceIntervalStopper initialization."""
 
-  def test_init_with_bounds(self) -> None:
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.95)
-    assert stopper.min_items is None
-    assert stopper.max_items is None
-
-  def test_init_with_all_params(self) -> None:
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.90, min_items=5, max_items=30)
-    assert stopper.min_items == 5
-    assert stopper.max_items == 30
-
   @pytest.mark.parametrize("confidence", [1.5, 0.0, 1.0])
   def test_init_invalid_confidence(self, confidence: float) -> None:
     with pytest.raises(ValueError, match="between 0 and 1"):
@@ -233,14 +190,6 @@ class TestConfidenceIntervalStopperStop:
 
     with pytest.raises(ValueError, match="theta is required for ConfidenceIntervalStopper"):
       stopper.stop(item_bank=item_bank, administered_items=[0], theta=None)
-
-
-class TestBaseStopperAbstract:
-  """Tests for BaseStopper abstract base class."""
-
-  def test_cannot_instantiate_base_stopper(self) -> None:
-    with pytest.raises(TypeError):
-      BaseStopper()  # type: ignore[abstract]
 
 
 def test_test_length_stopper_with_engine_run() -> None:

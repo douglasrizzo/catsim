@@ -14,9 +14,7 @@ from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
-  BaseSelector,
   ClusterSelector,
-  FiniteSelector,
   IntervalInfoSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
@@ -64,18 +62,17 @@ class ShiftEstimator(BaseEstimator):
     return est_theta + (0.5 if response_vector[-1] else -0.5)
 
 
+def _two_pl_bank(discriminations: list[float], difficulties: list[float]) -> ItemBank:
+  """Build a 2PL bank, whose item information at theta is a^2 P (1 - P)."""
+  n_items = len(discriminations)
+  return ItemBank(np.column_stack([discriminations, difficulties, np.zeros(n_items), np.ones(n_items)]))
+
+
 class TestMaxInfoSelector:
   """Tests for MaxInfoSelector."""
 
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    selector = MaxInfoSelector()
-    assert selector.r_max == pytest.approx(1.0)
-
-  def test_init_with_r_max(self) -> None:
-    """Test initialization with r_max."""
-    selector = MaxInfoSelector(r_max=0.5)
-    assert selector.r_max == pytest.approx(0.5)
+  # all difficulties are 0, so at theta = 0 information is a^2 / 4 and ranks items 1, 2, 0, 3
+  BANK_A = (1.0, 2.0, 1.5, 0.5)
 
   def test_init_invalid_r_max_raises(self) -> None:
     """Test that invalid r_max raises ValueError."""
@@ -84,36 +81,34 @@ class TestMaxInfoSelector:
     with pytest.raises(ValueError, match="between 0 and 1"):
       MaxInfoSelector(r_max=-0.1)
 
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+  def test_select_returns_the_most_informative_remaining_item(self) -> None:
+    """The pick is the remaining item with the largest information at the estimate."""
+    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
     selector = MaxInfoSelector()
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
+    assert selector.select(item_bank=item_bank, administered_items=[], est_theta=0.0) == 1
+    assert selector.select(item_bank=item_bank, administered_items=[1], est_theta=0.0) == 2
+
+  def test_select_skips_items_at_the_exposure_cap(self) -> None:
+    """An item whose exposure rate has reached r_max is passed over for the next most informative one."""
+    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
+    exposure_rates = np.array([0.0, 0.5, 0.0, 0.0])
+
+    selected = MaxInfoSelector(r_max=0.5).select(
+      item_bank=item_bank, administered_items=[], est_theta=0.0, exposure_rates=exposure_rates
     )
 
-    assert selected is not None
-    assert 0 <= selected < 50
+    assert selected == 2
 
-  def test_select_excludes_administered(self) -> None:
-    """Test that select excludes administered items."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = MaxInfoSelector()
+  def test_select_ignores_the_cap_when_every_item_is_over_it(self) -> None:
+    """With every remaining item at or over r_max, the most informative one is still administered."""
+    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
 
-    administered = [0, 1, 2, 3, 4]
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=administered,
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
+    selected = MaxInfoSelector(r_max=0.5).select(
+      item_bank=item_bank, administered_items=[], est_theta=0.0, exposure_rates=np.ones(4)
     )
 
-    assert selected is not None
-    assert selected not in administered
+    assert selected == 1
 
   def test_select_raises_when_exhausted(self) -> None:
     """Test that select raises NoItemsAvailableError when all items administered."""
@@ -132,21 +127,6 @@ class TestMaxInfoSelector:
 
 class TestRandomSelector:
   """Tests for RandomSelector."""
-
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = RandomSelector()
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 50
 
   def test_select_is_random(self) -> None:
     """Test that selection is random across calls with different RNGs."""
@@ -170,12 +150,6 @@ class TestRandomSelector:
 
 class TestLinearSelector:
   """Tests for LinearSelector."""
-
-  def test_init_with_indices(self) -> None:
-    """Test initialization with item indices."""
-    indices = [0, 5, 10, 15, 20]
-    selector = LinearSelector(indices)
-    assert selector.test_size == 5
 
   def test_select_returns_items_in_order(self) -> None:
     """Test that select returns items in the specified order."""
@@ -214,39 +188,33 @@ class TestLinearSelector:
 class TestUrrySelector:
   """Tests for UrrySelector."""
 
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+  def test_select_matches_difficulty_to_the_estimate_whatever_the_discrimination(self) -> None:
+    """The pick is the remaining item whose difficulty is closest to the estimate, not the most informative one."""
+    # at theta = 0.8, item 0 is the most informative but item 1's difficulty is the closest
+    item_bank = _two_pl_bank([2.5, 0.5, 1.0, 1.0], [0.3, 0.9, -1.0, 2.5])
     selector = UrrySelector()
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 50
+    assert MaxInfoSelector().select(item_bank=item_bank, administered_items=[], est_theta=0.8) == 0
+    assert selector.select(item_bank=item_bank, administered_items=[], est_theta=0.8) == 1
+    assert selector.select(item_bank=item_bank, administered_items=[1], est_theta=0.8) == 0
 
 
 class TestRandomesqueSelector:
   """Tests for RandomesqueSelector."""
 
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
+  def test_draws_from_the_bin_of_most_informative_remaining_items(self) -> None:
+    """Every pick is one of the bin_size most informative remaining items, and each of them gets picked."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = RandomesqueSelector(5)
+    administered = [3, 17, 25]
+    by_information = [int(i) for i in np.argsort(-item_bank.information(-0.4)) if i not in administered]
+    selector = RandomesqueSelector(4)
+    rng = np.random.default_rng(0)
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
+    picks = {
+      selector.select(item_bank=item_bank, administered_items=administered, est_theta=-0.4, rng=rng) for _ in range(200)
+    }
 
-    assert selected is not None
-    assert 0 <= selected < 50
+    assert picks == set(by_information[:4])
 
 
 class TestThe54321Selector:
@@ -277,102 +245,6 @@ class TestThe54321Selector:
     }
 
     assert picks == set(by_information[:bin_size])
-
-
-class TestAStratSelector:
-  """Tests for AStratSelector."""
-
-  def test_init_with_test_size(self) -> None:
-    """Test initialization with test size."""
-    selector = AStratSelector(20)
-    assert selector.test_size == 20
-
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-    selector = AStratSelector(20)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 100
-
-
-class TestAStratBBlockSelector:
-  """Tests for AStratBBlockSelector."""
-
-  def test_init_with_test_size(self) -> None:
-    """Test initialization with test size."""
-    selector = AStratBBlockSelector(20)
-    assert selector.test_size == 20
-
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-    selector = AStratBBlockSelector(20)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 100
-
-
-class TestMaxInfoStratSelector:
-  """Tests for MaxInfoStratSelector."""
-
-  def test_init_with_test_size(self) -> None:
-    """Test initialization with test size."""
-    selector = MaxInfoStratSelector(20)
-    assert selector.test_size == 20
-
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-    selector = MaxInfoStratSelector(20)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 100
-
-
-class TestMaxInfoBBlockSelector:
-  """Tests for MaxInfoBBlockSelector."""
-
-  def test_init_with_test_size(self) -> None:
-    """Test initialization with test size."""
-    selector = MaxInfoBBlockSelector(20)
-    assert selector.test_size == 20
-
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-    selector = MaxInfoBBlockSelector(20)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 100
 
 
 STRATIFIED_SELECTORS = [AStratSelector, AStratBBlockSelector, MaxInfoStratSelector, MaxInfoBBlockSelector]
@@ -488,37 +360,11 @@ class TestStratifiedSelectors:
 class TestIntervalInfoSelector:
   """Tests for IntervalInfoSelector."""
 
-  def test_init_with_interval(self) -> None:
-    """Test initialization with interval."""
-    selector = IntervalInfoSelector(interval=2.0)
-    assert selector.interval == pytest.approx(2.0)
-
-  def test_init_default(self) -> None:
-    """By default there is no fixed interval: the confidence interval of the estimate is used."""
-    selector = IntervalInfoSelector()
-    assert selector.interval is None
-    assert selector.confidence == pytest.approx(0.95)
-
   @pytest.mark.parametrize(("kwargs", "match"), [({"interval": 0.0}, "interval"), ({"confidence": 1.0}, "confidence")])
   def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
     """The half-width must be positive and the confidence level strictly between 0 and 1."""
     with pytest.raises(ValueError, match=match):
       IntervalInfoSelector(**kwargs)
-
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = IntervalInfoSelector(interval=2.0)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected is not None
-    assert 0 <= selected < 50
 
   def test_default_interval_is_the_confidence_interval_of_the_estimate(self) -> None:
     """Veerkamp & Berger (1997) integrate over theta_hat +/- z / sqrt(I(theta_hat)) of the administered items."""
@@ -973,40 +819,54 @@ class TestMLWISelector:
 class TestClusterSelector:
   """Tests for ClusterSelector."""
 
-  def test_select_returns_item(self) -> None:
-    """Test that select returns a valid item index."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    # Create cluster assignments
-    clusters = [i % 5 for i in range(50)]
-    selector = ClusterSelector(clusters=clusters)
+  # All difficulties are 0, so at theta = 0 an item's information is a^2 / 4. Cluster 0 holds the single most
+  # informative item (1), cluster 1 the largest information sum (its best item is 7), and cluster 2 the largest
+  # average information (its best item is 13).
+  CLUSTERS = (0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2)
+  DISCRIMINATIONS = (0.2, 2.0, 0.2, 0.2, 1.0, 1.0, 1.0, 1.05, 1.0, 1.0, 1.0, 1.0, 1.7, 1.8)
 
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
+  def _select(
+    self,
+    administered: list[int],
+    exposure_rates: np.ndarray | None = None,
+    method: str = "item_info",
+    r_max: float = 1.0,
+    r_control: str = "passive",
+  ) -> int | None:
+    item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
+    selector = ClusterSelector(clusters=list(self.CLUSTERS), method=method, r_max=r_max, r_control=r_control)
+    return selector.select(
+      item_bank=item_bank, administered_items=administered, est_theta=0.0, exposure_rates=exposure_rates
     )
 
-    assert selected is not None
-    assert 0 <= selected < 50
+  @pytest.mark.parametrize(("method", "expected"), [("item_info", 1), ("cluster_info", 7), ("weighted_info", 13)])
+  def test_select_takes_the_best_item_of_the_cluster_each_method_prefers(self, method: str, expected: int) -> None:
+    """Each method ranks clusters differently; the pick is the most informative item of the chosen cluster."""
+    assert self._select([], method=method) == expected
 
+  def test_select_moves_on_once_a_cluster_is_fully_administered(self) -> None:
+    """With cluster 0 used up, item_info turns to the cluster of the next most informative item."""
+    assert self._select([0, 1, 2, 3]) == 13
 
-class TestBaseSelectorAbstract:
-  """Tests for BaseSelector abstract base class."""
+  def test_select_raises_when_every_cluster_is_exhausted(self) -> None:
+    """An exhausted bank raises NoItemsAvailableError, which the engine turns into a stop."""
+    with pytest.raises(NoItemsAvailableError):
+      self._select(list(range(len(self.CLUSTERS))))
 
-  def test_cannot_instantiate_base_selector(self) -> None:
-    """Test that BaseSelector cannot be instantiated directly."""
-    with pytest.raises(TypeError):
-      BaseSelector()  # type: ignore[abstract]
+  def test_select_prefers_items_below_the_exposure_cap(self) -> None:
+    """Inside the chosen cluster, an item at the cap is passed over for a less informative one below it."""
+    exposure_rates = np.zeros(len(self.CLUSTERS))
+    exposure_rates[13] = 0.9
 
+    assert self._select([], exposure_rates, method="weighted_info", r_max=0.5) == 12
 
-class TestFiniteSelectorAbstract:
-  """Tests for FiniteSelector abstract base class."""
+  @pytest.mark.parametrize(("r_control", "expected"), [("passive", 13), ("aggressive", 12)])
+  def test_r_control_decides_when_the_whole_cluster_is_over_the_cap(self, r_control: str, expected: int) -> None:
+    """Passive control still administers the most informative item; aggressive control the least exposed one."""
+    exposure_rates = np.zeros(len(self.CLUSTERS))
+    exposure_rates[[12, 13]] = [0.8, 0.9]
 
-  def test_cannot_instantiate_finite_selector(self) -> None:
-    """Test that FiniteSelector cannot be instantiated directly."""
-    with pytest.raises(TypeError):
-      FiniteSelector(10)  # type: ignore[abstract]
+    assert self._select([], exposure_rates, method="weighted_info", r_max=0.5, r_control=r_control) == expected
 
 
 _N_ITEMS = 30

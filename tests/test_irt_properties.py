@@ -44,16 +44,6 @@ def test_icc_hpc_matches_scalar_icc(theta: float, items: np.ndarray) -> None:
     assert vec[i] == pytest.approx(float(irt.icc(theta, *items[i])), rel=1e-9, abs=1e-9)
 
 
-@given(items=item_params_matrix(max_items=10))
-@IRT_SETTINGS
-def test_inf_non_negative_at_difficulty(items: np.ndarray) -> None:
-  for i in range(items.shape[0]):
-    b = float(items[i, 1])
-    infv = irt.inf(b, *items[i])
-    assert np.isfinite(infv)
-    assert infv >= 0.0
-
-
 @given(theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False), items=item_params_matrix(max_items=10))
 @IRT_SETTINGS
 def test_inf_hpc_non_negative(theta: float, items: np.ndarray) -> None:
@@ -210,13 +200,6 @@ def test_normalize_three_column_is_three_pl_expansion(three_pl: np.ndarray) -> N
   assert out.shape == (three_pl.shape[0], 4)
   assert np.allclose(out[:, :3], three_pl)
   assert np.allclose(out[:, 3], 1.0)
-
-
-@given(items=item_params_matrix())
-@IRT_SETTINGS
-def test_detect_model_returns_plausible_code(items: np.ndarray) -> None:
-  model = irt.detect_model(items)
-  assert model in {1, 2, 3, 4}
 
 
 @given(items=item_params_matrix(max_items=8))

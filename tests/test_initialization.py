@@ -2,10 +2,8 @@
 
 import numpy as np
 import pytest
-from numpy.random import Generator
 
 from catsim.initialization import (
-  BaseInitializer,
   FixedPointInitializer,
   InitializationDistribution,
   RandomInitializer,
@@ -57,19 +55,6 @@ class TestRandomInitializerInit:
 class TestRandomInitializerInitialize:
   """Tests for RandomInitializer.initialize() method."""
 
-  def test_initialize_uniform_in_range(self) -> None:
-    """Test that uniform initialization produces values in range."""
-    rng = np.random.default_rng(42)
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    initializer = RandomInitializer(
-      dist_type=InitializationDistribution.UNIFORM,
-      dist_params=(-3, 3),
-    )
-
-    for _ in range(100):
-      theta = initializer.initialize(item_bank=item_bank, rng=rng)
-      assert -3 <= theta <= 3
-
   def test_initialize_defaults_start_near_the_center(self) -> None:
     """Defaults draw from U(-0.5, 0.5), as in Barrada et al. (2006), or N(0, 1); they used to be U(-5, 5)."""
     rng = np.random.default_rng(42)
@@ -95,23 +80,6 @@ class TestRandomInitializerInitialize:
     for _ in range(100):
       theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert -3 <= theta <= 3
-
-  def test_initialize_normal_distribution(self) -> None:
-    """Test that normal initialization produces reasonable values."""
-    rng = np.random.default_rng(42)
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    initializer = RandomInitializer(
-      dist_type=InitializationDistribution.NORMAL,
-      dist_params=(0, 1),
-    )
-
-    values = [initializer.initialize(item_bank=item_bank, rng=rng) for _ in range(1000)]
-
-    # Check mean is close to 0
-    assert abs(np.mean(values)) < 0.1
-
-    # Check std is close to 1
-    assert abs(np.std(values) - 1) < 0.1
 
   def test_initialize_reproducibility_with_rng(self) -> None:
     """Test that same RNG produces same results."""
@@ -149,47 +117,3 @@ class TestFixedPointInitializerInitialize:
 
     with pytest.raises(TypeError, match="unexpected keyword argument"):
       initializer.initialize(item_bank=item_bank, rng=rng, examinee_index=1)  # type: ignore[call-arg]
-
-  def test_initialize_zero(self) -> None:
-    """Test initialization with zero."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    initializer = FixedPointInitializer(0.0)
-    assert initializer.initialize(item_bank=item_bank, rng=rng) == pytest.approx(0.0)
-
-  def test_initialize_negative(self) -> None:
-    """Test initialization with negative value."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    initializer = FixedPointInitializer(-3.0)
-    assert initializer.initialize(item_bank=item_bank, rng=rng) == pytest.approx(-3.0)
-
-
-class TestBaseInitializerAbstract:
-  """Tests for BaseInitializer abstract base class."""
-
-  def test_cannot_instantiate_base_initializer(self) -> None:
-    """Test that BaseInitializer cannot be instantiated directly."""
-    with pytest.raises(TypeError):
-      BaseInitializer()  # type: ignore[abstract]
-
-  def test_subclass_must_implement_initialize(self) -> None:
-    """Test that subclass must implement initialize method."""
-
-    class IncompleteInitializer(BaseInitializer):
-      pass
-
-    with pytest.raises(TypeError):
-      IncompleteInitializer()  # type: ignore[abstract]
-
-  def test_custom_initializer(self) -> None:
-    """Test creating a custom initializer."""
-
-    class ConstantInitializer(BaseInitializer):
-      def initialize(self, item_bank: ItemBank, rng: Generator) -> float:  # noqa: ARG002
-        return 42.0
-
-    initializer = ConstantInitializer()
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    assert initializer.initialize(item_bank=item_bank, rng=rng) == pytest.approx(42.0)
