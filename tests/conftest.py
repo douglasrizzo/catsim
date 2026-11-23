@@ -15,8 +15,10 @@ from catsim.initialization import FixedPointInitializer, RandomInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector, RandomSelector
 from catsim.simulation import SimulationRunner
-from catsim.stopping import MinErrorStopper
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import MaxLengthStopper
+
+# pytester runs pytest on generated test modules (test_stopping checks what pytest collects from catsim)
+pytest_plugins = ["pytester"]
 
 
 @pytest.fixture
@@ -62,15 +64,9 @@ def estimator() -> NumericalSearchEstimator:
 
 
 @pytest.fixture
-def fixed_length_stopper() -> LengthStopper:
+def fixed_length_stopper() -> MaxLengthStopper:
   """Provide a fixed-length stopper."""
-  return LengthStopper(max_items=10)
-
-
-@pytest.fixture
-def min_error_stopper() -> MinErrorStopper:
-  """Provide a min-error stopper."""
-  return MinErrorStopper(0.5, max_items=10)
+  return MaxLengthStopper(10)
 
 
 @pytest.fixture
@@ -81,7 +77,7 @@ def simulation_runner(item_bank: ItemBank) -> SimulationRunner:
     FixedPointInitializer(0.0),
     RandomSelector(),
     NumericalSearchEstimator(),
-    LengthStopper(max_items=10),
+    MaxLengthStopper(10),
     seed=42,
   )
 

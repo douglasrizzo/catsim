@@ -212,7 +212,7 @@ In {py:mod}`catsim`, ability estimation procedures can be found in the {py:mod}`
 
 #### Stopping Criterion
 
-Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items or when the standard error of estimation ({py:func}`catsim.irt.see`) reaches a lower threshold. These stopping criteria are implemented in {py:class}`catsim.stopping.MinErrorStopper` and {py:class}`catsim.stopping.ConfidenceIntervalStopper`, both supporting optional minimum and maximum item constraints and automatic item bank exhaustion detection.
+Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items ({py:class}`catsim.stopping.MaxLengthStopper`), when the standard error of estimation ({py:func}`catsim.irt.see`) reaches a lower threshold ({py:class}`catsim.stopping.StandardErrorStopper`), or when a confidence interval for the ability estimate falls within one ability band ({py:class}`catsim.stopping.ConfidenceIntervalStopper`). A {py:class}`catsim.stopping.StopRule` combines several of them, ending the test as soon as any one holds, after an optional minimum number of items.
 
 In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.stopping` module.
 

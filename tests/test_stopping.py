@@ -5,226 +5,142 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
-from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer
+from catsim import stopping
 from catsim.item_bank import ItemBank
-from catsim.selection import MaxInfoSelector
-from catsim.simulation import SimulationRunner
-from catsim.state import SessionStatus
-from catsim.stopping import (
-  ConfidenceIntervalStopper,
-  MinErrorStopper,
-)
-from catsim.stopping import (
-  TestLengthStopper as LengthStopper,
-)
+from catsim.stopping import ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
-class TestTestLengthStopperInit:
-  """Tests for TestLengthStopper initialization."""
+def identical_1pl_bank(n_items: int, difficulty: float) -> ItemBank:
+  """Return `n_items` copies of a 1PL item; at theta = `difficulty`, n of them give a standard error of 2/sqrt(n)."""
+  return ItemBank(np.tile([1.0, difficulty, 0.0, 1.0], (n_items, 1)))
+
+
+class TestMaxLengthStopper:
+  """Tests for MaxLengthStopper."""
 
   @pytest.mark.parametrize("value", [0, -5])
-  def test_init_invalid_min_items(self, value: int) -> None:
-    with pytest.raises(ValueError, match="min_items must be positive"):
-      LengthStopper(min_items=value)
-
-  @pytest.mark.parametrize("value", [0, -5])
-  def test_init_invalid_max_items(self, value: int) -> None:
-    with pytest.raises(ValueError, match="max_items must be positive"):
-      LengthStopper(max_items=value)
-
-  def test_init_min_greater_than_max(self) -> None:
-    with pytest.raises(ValueError, match=r"min_items.*cannot be greater than max_items"):
-      LengthStopper(min_items=20, max_items=10)
-
-  def test_init_min_equals_max(self) -> None:
-    stopper = LengthStopper(min_items=10, max_items=10)
-    assert stopper.min_items == 10
-    assert stopper.max_items == 10
+  def test_rejects_max_items_below_one(self, value: int) -> None:
+    """A maximum below one item, which would end every test before it starts, is accepted instead of raising."""
+    with pytest.raises(ValueError, match="max_items must be at least 1"):
+      MaxLengthStopper(value)
 
 
-class TestTestLengthStopperStop:
-  """Tests for TestLengthStopper.stop()."""
+class TestStandardErrorStopper:
+  """Tests for StandardErrorStopper."""
 
-  def test_stop_max_items_reached(self) -> None:
-    stopper = LengthStopper(max_items=5)
-    item_bank = ItemBank.generate_item_bank(100)
+  @pytest.mark.parametrize("value", [0.0, -0.3, float("nan")])
+  def test_rejects_a_target_that_is_not_positive(self, value: float) -> None:
+    """A target of zero or less, or NaN, which no standard error ever reaches, is accepted instead of raising."""
+    with pytest.raises(ValueError, match="max_se must be positive"):
+      StandardErrorStopper(value)
 
-    assert stopper.stop(item_bank=item_bank, administered_items=[0, 1, 2, 3, 4], theta=0.0) is True
+  def test_first_stops_when_the_standard_error_reaches_the_target(self) -> None:
+    """A stopper that compares strictly (first stopping at 17), or reads the wrong items or theta, fails.
 
-  def test_stop_max_items_not_reached(self) -> None:
-    stopper = LengthStopper(max_items=10)
-    item_bank = ItemBank.generate_item_bank(100)
+    At theta = b, n identical 1PL items give a standard error of 2/sqrt(n), which is 0.5 exactly at n = 16.
+    """
+    theta = 0.3
+    item_bank = identical_1pl_bank(20, difficulty=theta)
+    stopper = StandardErrorStopper(0.5)
 
-    assert stopper.stop(item_bank=item_bank, administered_items=[0, 1, 2], theta=0.0) is False
+    stops = [stopper.stop(item_bank=item_bank, administered_items=list(range(n)), theta=theta) for n in range(21)]
 
-  def test_stop_min_items_not_reached(self) -> None:
-    stopper = LengthStopper(min_items=5, max_items=20)
-    item_bank = ItemBank.generate_item_bank(100)
-
-    assert stopper.stop(item_bank=item_bank, administered_items=[0, 1, 2], theta=0.0) is False
-
-  def test_stop_item_bank_exhausted(self) -> None:
-    stopper = LengthStopper(max_items=100)
-    item_bank = ItemBank.generate_item_bank(5)
-
-    assert stopper.stop(item_bank=item_bank, administered_items=[0, 1, 2, 3, 4], theta=0.0) is True
-
-  def test_stop_requires_item_bank(self) -> None:
-    stopper = LengthStopper(max_items=10)
-
-    with pytest.raises(ValueError, match="item_bank is required"):
-      stopper.stop(item_bank=None, administered_items=[], theta=0.0)
-
-  def test_stop_requires_administered_items(self) -> None:
-    stopper = LengthStopper(max_items=10)
-    item_bank = ItemBank.generate_item_bank(10)
-
-    with pytest.raises(ValueError, match="administered_items is required"):
-      stopper.stop(item_bank=item_bank, administered_items=None, theta=0.0)
+    assert stops == [n >= 16 for n in range(21)]
 
 
-class TestMinErrorStopperInit:
-  """Tests for MinErrorStopper initialization."""
-
-  @pytest.mark.parametrize("value", [0.0, -0.3])
-  def test_init_invalid_min_error(self, value: float) -> None:
-    with pytest.raises(ValueError, match="min_error must be positive"):
-      MinErrorStopper(value)
-
-  def test_str_representation(self) -> None:
-    stopper = MinErrorStopper(0.3, min_items=5, max_items=30)
-    string = str(stopper)
-    assert "min_error=0.3" in string
-    assert "min_items=5" in string
-    assert "max_items=30" in string
-
-
-class TestMinErrorStopperStop:
-  """Tests for MinErrorStopper.stop()."""
-
-  def test_stop_when_error_below_threshold(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("catsim.stopping.stopping.irt.see", lambda theta, items: 0.2)
-    stopper = MinErrorStopper(0.3, max_items=50)
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-
-    result = stopper.stop(item_bank=item_bank, administered_items=list(range(20)), theta=0.0)
-
-    assert result is True
-
-  def test_stop_when_error_above_threshold(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("catsim.stopping.stopping.irt.see", lambda theta, items: 0.5)
-    stopper = MinErrorStopper(0.3, max_items=50)
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-
-    result = stopper.stop(item_bank=item_bank, administered_items=[0, 1], theta=0.0)
-
-    assert result is False
-
-  def test_stop_respects_max_items(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("catsim.stopping.stopping.irt.see", lambda theta, items: 0.5)
-    stopper = MinErrorStopper(0.01, max_items=5)
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-
-    result = stopper.stop(item_bank=item_bank, administered_items=[0, 1, 2, 3, 4], theta=0.0)
-
-    assert result is True
-
-  def test_stop_requires_theta(self) -> None:
-    stopper = MinErrorStopper(0.3)
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-
-    with pytest.raises(ValueError, match="theta is required for MinErrorStopper"):
-      stopper.stop(item_bank=item_bank, administered_items=[0], theta=None)
-
-
-class TestConfidenceIntervalStopperInit:
-  """Tests for ConfidenceIntervalStopper initialization."""
+class TestConfidenceIntervalStopper:
+  """Tests for ConfidenceIntervalStopper."""
 
   @pytest.mark.parametrize("confidence", [1.5, 0.0, 1.0])
-  def test_init_invalid_confidence(self, confidence: float) -> None:
+  def test_rejects_a_confidence_outside_zero_and_one(self, confidence: float) -> None:
+    """A confidence level of 0, 1 or more, which gives no usable interval, is accepted instead of raising."""
     with pytest.raises(ValueError, match="between 0 and 1"):
       ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=confidence)
 
-  def test_init_unsorted_bounds_raises(self) -> None:
-    with pytest.raises(ValueError, match="sorted"):
-      ConfidenceIntervalStopper([2.0, 0.0, -2.0], confidence=0.95)
+  @pytest.mark.parametrize("bounds", [[2.0, 0.0, -2.0], [-1.0, 0.0, 0.0, 1.0]], ids=["unsorted", "repeated"])
+  def test_rejects_bounds_that_are_not_strictly_increasing(self, bounds: list[float]) -> None:
+    """Unsorted or repeated bounds, which do not describe consecutive bands, are accepted instead of raising."""
+    with pytest.raises(ValueError, match="strictly increasing"):
+      ConfidenceIntervalStopper(bounds)
 
-  def test_init_empty_bounds_raises(self) -> None:
+  def test_rejects_empty_bounds(self) -> None:
+    """An empty list of bounds, which leaves a single band and so stops every test at once, is accepted."""
     with pytest.raises(ValueError, match="at least one"):
-      ConfidenceIntervalStopper([], confidence=0.95)
+      ConfidenceIntervalStopper([])
 
-  def test_str_representation(self) -> None:
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.95, max_items=30)
-    assert "ConfidenceIntervalStopper" in str(stopper)
+  @pytest.mark.parametrize("theta", [-4.0, -2.0, 0.0, 2.0, 4.0])
+  def test_first_stops_when_the_interval_fits_in_a_band(self, theta: float) -> None:
+    """A stopper that misreads a band, outer or inner, or stops while a bound still splits the interval, fails.
 
+    At theta = b, n identical 1PL items give a standard error of 2/sqrt(n), so the 95% interval is
+    theta +/- 1.96 * 2/sqrt(n). The bounds [-3, -1, 1, 3] make five bands, and each estimate lies in a
+    different one, 1 from its nearest bound, so the interval first fits in its band when
+    3.92/sqrt(n) <= 1, at n = 16 (at n = 15 the half-width is 1.012).
+    """
+    item_bank = identical_1pl_bank(20, difficulty=theta)
+    stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-class TestConfidenceIntervalStopperStop:
-  """Tests for ConfidenceIntervalStopper.stop()."""
+    stops = [stopper.stop(item_bank=item_bank, administered_items=list(range(n)), theta=theta) for n in range(21)]
 
-  def test_stop_respects_max_items(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("catsim.stopping.stopping.irt.confidence_interval", lambda theta, items, c: (-10.0, 10.0))
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.95, max_items=5)
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
+    assert stops == [n >= 16 for n in range(21)]
 
-    assert stopper.stop(item_bank=item_bank, administered_items=[0, 1, 2, 3, 4], theta=0.0) is True
+  @pytest.mark.parametrize("theta", [-3.0, -1.0, 1.0, 3.0])
+  def test_never_stops_while_the_estimate_sits_on_a_bound(self, theta: float) -> None:
+    """A stopper that skips a bound, merging the two bands around it, classifies an estimate that sits on it.
 
-  def test_stop_when_ci_falls_inside_middle_interval(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("catsim.stopping.stopping.irt.confidence_interval", lambda theta, items, c: (0.1, 0.9))
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.95, max_items=100)
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
+    The interval around an estimate always contains the estimate, so with the estimate on a bound it never
+    fits in one band, however many items are administered.
+    """
+    item_bank = identical_1pl_bank(20, difficulty=theta)
+    stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    assert stopper.stop(item_bank=item_bank, administered_items=list(range(10)), theta=0.5) is True
+    stops = [stopper.stop(item_bank=item_bank, administered_items=list(range(n)), theta=theta) for n in range(21)]
 
-  def test_stop_when_ci_crosses_interval_boundary(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("catsim.stopping.stopping.irt.confidence_interval", lambda theta, items, c: (-0.5, 0.5))
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.95, max_items=100)
-    item_bank = ItemBank.generate_item_bank(100, seed=42)
-
-    assert stopper.stop(item_bank=item_bank, administered_items=list(range(10)), theta=0.0) is False
-
-  def test_stop_requires_theta(self) -> None:
-    stopper = ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.95)
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-
-    with pytest.raises(ValueError, match="theta is required for ConfidenceIntervalStopper"):
-      stopper.stop(item_bank=item_bank, administered_items=[0], theta=None)
+    assert not any(stops)
 
 
-def test_test_length_stopper_with_engine_run() -> None:
-  """A fixed-length stopper should stop a manual engine session at the configured length."""
-  item_bank = ItemBank.generate_item_bank(30, seed=42)
-  engine = CatEngine(
-    FixedPointInitializer(0.0),
-    MaxInfoSelector(),
-    NumericalSearchEstimator(),
-    LengthStopper(max_items=4),
-  )
-  context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+class TestStopRule:
+  """Tests for StopRule."""
 
-  final_session = engine.run_session(session, item_bank, SimulatedResponseProvider(), context)
+  def test_rejects_a_rule_without_stoppers(self) -> None:
+    """A rule with no stoppers, which can never stop a test, is accepted instead of raising."""
+    with pytest.raises(ValueError, match="at least one stopper"):
+      StopRule()
 
-  assert final_session.status == SessionStatus.STOPPED
-  assert final_session.stop_reason == "stop_rule"
-  assert len(final_session.administered_item_ids) == 4
+  def test_rejects_negative_min_items(self) -> None:
+    """A negative minimum length is accepted instead of raising."""
+    with pytest.raises(ValueError, match="min_items must not be negative"):
+      StopRule(MaxLengthStopper(10), min_items=-1)
+
+  def test_rejects_min_items_above_a_length_cap(self) -> None:
+    """A minimum length above the cap, which makes every session run past the cap, is accepted instead of raising.
+
+    MinErrorStopper(0.01, min_items=30, max_items=20) raised; its StopRule translation must too.
+    """
+    with pytest.raises(ValueError, match=r"min_items \(30\) must not exceed the MaxLengthStopper cap \(20\)"):
+      StopRule(StandardErrorStopper(0.01), MaxLengthStopper(20), min_items=30)
+
+  def test_accepts_min_items_equal_to_the_length_cap(self) -> None:
+    """A fixed-length test written as min_items equal to the cap is rejected as if the floor overrode the cap."""
+    rule = StopRule(StandardErrorStopper(0.01), MaxLengthStopper(20), min_items=20)
+    bank = identical_1pl_bank(30, 0.0)
+
+    assert [rule.stop(bank, list(range(n)), 0.0) for n in (19, 20)] == [False, True]
+
+  def test_rejects_a_child_that_is_not_a_stopper(self) -> None:
+    """A number passed where a stopper belongs, as in StopRule(StandardErrorStopper(0.3), 40), is accepted.
+
+    The rule would then fail on its first stop check, in the middle of a run, instead of when it is built.
+    """
+    with pytest.raises(TypeError, match="got int"):
+      StopRule(StandardErrorStopper(0.3), 40)
 
 
-def test_min_error_stopper_with_simulation_runner(monkeypatch: pytest.MonkeyPatch) -> None:
-  """SimulationRunner should respect MinErrorStopper through the shared engine path."""
-  monkeypatch.setattr("catsim.stopping.stopping.irt.see", lambda theta, items: 0.1)
-  item_bank = ItemBank.generate_item_bank(30, seed=42)
-  runner = SimulationRunner(
-    item_bank,
-    FixedPointInitializer(0.0),
-    MaxInfoSelector(),
-    NumericalSearchEstimator(),
-    MinErrorStopper(0.3, min_items=2, max_items=10),
-    seed=42,
-  )
+def test_importing_every_public_stopper_collects_no_test_class(pytester: pytest.Pytester) -> None:
+  """A public stopper named like a test class, as TestLengthStopper was, makes pytest warn wherever it is imported."""
+  pytester.makepyfile(test_user_module=f"from catsim.stopping import {', '.join(stopping.__all__)}\n")
 
-  result = runner.run(5)
+  result = pytester.runpytest("--collect-only", "-q")
 
-  assert all(session.status == SessionStatus.STOPPED for session in result.sessions)
-  assert all(len(session.administered_item_ids) == 2 for session in result.sessions)
+  result.stdout.no_fnmatch_line("*PytestCollectionWarning*")
+  assert result.ret == pytest.ExitCode.NO_TESTS_COLLECTED

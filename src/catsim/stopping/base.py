@@ -8,8 +8,12 @@ from ..item_bank import ItemBank
 class BaseStopper(ABC):
   """Base class for CAT stopping criteria.
 
-  Stoppers determine when a test should end based on specific criteria such as
-  test length, measurement precision, or other conditions.
+  A stopper checks one criterion, such as the test length or the precision of the ability
+  estimate, and :class:`~catsim.stopping.StopRule` combines several of them.
+
+  Stoppers are pure: the same inputs always give the same answer, and a stopper keeps no
+  per-session state. One engine, and so one stopper, serves every session of a run, and an
+  application may interleave the sessions of several examinees on it.
   """
 
   @abstractmethod

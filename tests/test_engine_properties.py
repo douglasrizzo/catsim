@@ -12,7 +12,7 @@ from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
 from catsim.state import CatSessionState, SessionStatus
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import MaxLengthStopper
 from tests.hypothesis_strategies import item_params_matrix
 
 ENGINE_SETTINGS = settings(max_examples=20, deadline=None)
@@ -36,7 +36,7 @@ def test_select_next_returns_unseen_item_within_bank(
     FixedPointInitializer(0.0),
     MaxInfoSelector(),
     NumericalSearchEstimator(method="bounded"),
-    LengthStopper(max_items=500),
+    MaxLengthStopper(500),
   )
   administered = list(range(administered_prefix))
   state = CatSessionState(

@@ -36,7 +36,7 @@ Two runners built with the same seed and the same components give identical resu
 >>> from catsim.initialization import RandomInitializer
 >>> from catsim.selection import MaxInfoSelector
 >>> from catsim.simulation import SimulationRunner
->>> from catsim.stopping import MinErrorStopper
+>>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 >>> item_bank = ItemBank.generate_item_bank(500, seed=42)
 >>> def make_runner():
 ...     return SimulationRunner(
@@ -44,7 +44,7 @@ Two runners built with the same seed and the same components give identical resu
 ...         RandomInitializer(),
 ...         MaxInfoSelector(),
 ...         NumericalSearchEstimator(),
-...         MinErrorStopper(0.4, max_items=20),
+...         StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
 ...         seed=42,
 ...     )
 >>> first, second = make_runner().run(10), make_runner().run(10)

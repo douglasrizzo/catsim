@@ -28,8 +28,7 @@ from catsim.selection import (
 from catsim.selection.base import BaseSelector
 from catsim.simulation import SimulationRunner
 from catsim.state import ExposureTracker, SessionStatus, SimulationResult
-from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MinErrorStopper
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
 def run_simulation(
@@ -65,7 +64,7 @@ def test_estimation_methods_complete_simulation(method: str) -> None:
   result = run_simulation(
     item_bank,
     MaxInfoSelector(),
-    LengthStopper(max_items=6),
+    MaxLengthStopper(6),
     estimator=NumericalSearchEstimator(method=method),
   )
 
@@ -81,7 +80,7 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
   responses, so sharing one instance between the engine and MEI must not change any estimate.
   """
   item_bank = ItemBank.generate_item_bank(80, seed=42)
-  stopper = LengthStopper(max_items=6)
+  stopper = MaxLengthStopper(6)
   shared = factory()
   reused = run_simulation(item_bank, MEISelector(estimator=shared), stopper, estimator=shared, examinees=4)
   fresh = run_simulation(item_bank, MEISelector(estimator=factory()), stopper, estimator=factory(), examinees=4)
@@ -106,7 +105,7 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
 def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector]) -> None:
   """Finite selectors should drive the shared simulation path without legacy adapters."""
   item_bank = ItemBank.generate_item_bank(80, seed=42)
-  result = run_simulation(item_bank, factory(), LengthStopper(max_items=8))
+  result = run_simulation(item_bank, factory(), MaxLengthStopper(8))
 
   assert all(len(session.administered_item_ids) == 8 for session in result.sessions)
   assert result.overlap_rate is not None
@@ -122,9 +121,9 @@ def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseS
   ],
 )
 def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector) -> None:
-  """An infinite selector that raises, or ends a session outside MinErrorStopper's 3 to 10 items, fails the run."""
+  """An infinite selector that raises, or ends a session outside its stopping rule's 3 to 10 items, fails the run."""
   item_bank = ItemBank.generate_item_bank(100, seed=42)
-  result = run_simulation(item_bank, selector, MinErrorStopper(0.6, min_items=3, max_items=10))
+  result = run_simulation(item_bank, selector, StopRule(StandardErrorStopper(0.6), MaxLengthStopper(10), min_items=3))
 
   assert all(3 <= len(session.administered_item_ids) <= 10 for session in result.sessions)
 
@@ -142,7 +141,7 @@ def test_cluster_selector_completes_runs(method: str) -> None:
   result = run_simulation(
     item_bank,
     ClusterSelector(clusters=clusters, method=method, r_max=0.3),
-    LengthStopper(max_items=6),
+    MaxLengthStopper(6),
   )
 
   assert all(len(session.administered_item_ids) == 6 for session in result.sessions)
@@ -150,12 +149,12 @@ def test_cluster_selector_completes_runs(method: str) -> None:
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-  "stopper,expected_min,expected_max",
+  ("stopper", "expected_min", "expected_max"),
   [
-    pytest.param(LengthStopper(max_items=5), 5, 5, id="fixed_length"),
-    pytest.param(MinErrorStopper(0.6, min_items=3, max_items=9), 3, 9, id="min_error"),
+    pytest.param(MaxLengthStopper(5), 5, 5, id="fixed_length"),
+    pytest.param(StopRule(StandardErrorStopper(0.6), MaxLengthStopper(9), min_items=3), 3, 9, id="standard_error"),
     pytest.param(
-      ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.8, min_items=3, max_items=9),
+      StopRule(ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=0.8), MaxLengthStopper(9), min_items=3),
       3,
       9,
       id="confidence_interval",
@@ -171,6 +170,18 @@ def test_stoppers_complete_runs(stopper: BaseStopper, expected_min: int, expecte
 
 
 @pytest.mark.integration
+def test_a_session_whose_stopper_never_holds_ends_when_the_bank_runs_out() -> None:
+  """No stopper checks bank exhaustion, so an engine that mishandles an exhausted selector raises or ends early.
+
+  A standard error of 0.001 needs an information of a million, which five items cannot give.
+  """
+  item_bank = ItemBank.generate_item_bank(5, seed=42)
+  result = run_simulation(item_bank, MaxInfoSelector(), StandardErrorStopper(0.001))
+
+  assert all(sorted(session.administered_item_ids) == [0, 1, 2, 3, 4] for session in result.sessions)
+
+
+@pytest.mark.integration
 def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() -> None:
   """A session stepped through CatEngine matches the one SimulationRunner produces from the same seed.
 
@@ -179,8 +190,8 @@ def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() ->
   """
   item_bank = ItemBank.generate_item_bank(40, seed=42)
 
-  def components() -> tuple[FixedPointInitializer, RandomesqueSelector, NumericalSearchEstimator, LengthStopper]:
-    return FixedPointInitializer(0.0), RandomesqueSelector(3), NumericalSearchEstimator(), LengthStopper(max_items=6)
+  def components() -> tuple[FixedPointInitializer, RandomesqueSelector, NumericalSearchEstimator, MaxLengthStopper]:
+    return FixedPointInitializer(0.0), RandomesqueSelector(3), NumericalSearchEstimator(), MaxLengthStopper(6)
 
   batched = SimulationRunner(item_bank, *components(), seed=7).run([0.3]).sessions[0]
 

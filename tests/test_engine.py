@@ -13,7 +13,7 @@ from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import RandomSelector
 from catsim.state import CatSessionState, ExposureTracker, SessionStatus
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import MaxLengthStopper
 
 
 @dataclass
@@ -143,7 +143,7 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   initializer = RecordingInitializer(theta=1.25)
   selector = RandomSelector()
   estimator = NumericalSearchEstimator()
-  stopper = LengthStopper(max_items=5)
+  stopper = MaxLengthStopper(5)
   engine = CatEngine(initializer, selector, estimator, stopper)
   rng = np.random.default_rng(123)
   context = RunContext(rng=rng)
@@ -342,9 +342,7 @@ def test_run_session_stops_at_fixed_length(
   estimator,
 ) -> None:
   """Run session should stop once the stopper condition is reached."""
-  from catsim.stopping import TestLengthStopper
-
-  stopper = TestLengthStopper(max_items=3)
+  stopper = MaxLengthStopper(3)
   engine = CatEngine(fixed_initializer, random_selector, estimator, stopper)
   context = RunContext(rng=np.random.default_rng(42), total_sessions=1)
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
@@ -477,7 +475,7 @@ def test_step_stops_immediately_when_stop_rule_is_already_met(
   estimator,
 ) -> None:
   """The engine should stop before selecting when the rule is already met."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, LengthStopper(max_items=1))
+  engine = CatEngine(fixed_initializer, random_selector, estimator, MaxLengthStopper(1))
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
   session.administered_item_ids.append(0)
@@ -497,7 +495,7 @@ def test_step_stops_immediately_when_stop_rule_is_already_met(
 
 def test_step_stops_when_selector_returns_none(item_bank, fixed_initializer, estimator) -> None:
   """Selectors can explicitly signal that the session should stop."""
-  engine = CatEngine(fixed_initializer, NullSelector(), estimator, LengthStopper(max_items=10))
+  engine = CatEngine(fixed_initializer, NullSelector(), estimator, MaxLengthStopper(10))
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 
@@ -515,7 +513,7 @@ def test_step_stops_when_selector_returns_none(item_bank, fixed_initializer, est
 
 def test_step_stops_when_selector_raises_no_items(item_bank, fixed_initializer, estimator) -> None:
   """Exhausted selectors should map to an item-bank-exhausted stop reason."""
-  engine = CatEngine(fixed_initializer, ExhaustedSelector(), estimator, LengthStopper(max_items=10))
+  engine = CatEngine(fixed_initializer, ExhaustedSelector(), estimator, MaxLengthStopper(10))
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 

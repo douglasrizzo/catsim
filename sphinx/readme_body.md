@@ -46,13 +46,13 @@ The main architecture decisions behind the current engine and simulation model a
 from catsim.initialization import RandomInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
-from catsim.stopping import MinErrorStopper
+from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 from catsim.simulation import SimulationRunner
 from catsim import ItemBank
 initializer = RandomInitializer()
 selector = MaxInfoSelector()
 estimator = NumericalSearchEstimator()
-stopper = MinErrorStopper(0.4, max_items=20)
+stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))
 runner = SimulationRunner(ItemBank.generate_item_bank(100), initializer, selector, estimator, stopper)
 result = runner.run(10)
 print(result.rmse)

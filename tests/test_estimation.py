@@ -922,7 +922,7 @@ class TestWarmLikelihoodEstimator:
     The weighted log-likelihood is the integral of the modified score, so its maximum is found
     here by integrating the independent reference score on a fine grid.
     """
-    items = self._two_candidate_bank().items[:, :4]
+    items = self._two_candidate_bank().items
     response_vector = [True, True]
     scan = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 121)
     scan_scores = np.array([_warm_modified_score(theta, response_vector, items) for theta in scan])
@@ -976,7 +976,7 @@ class TestWarmLikelihoodEstimator:
     """
     item_bank = ItemBank.generate_item_bank(100, seed=0)
     administered_items = list(range(5))
-    items = item_bank.items[administered_items, :4]
+    items = item_bank.get_items(administered_items)
     estimator = WarmLikelihoodEstimator()
 
     for pattern in product([False, True], repeat=len(administered_items)):

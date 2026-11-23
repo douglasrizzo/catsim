@@ -23,7 +23,7 @@ from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
 from catsim.state import CatSessionState, SessionStatus
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import MaxLengthStopper
 
 
 @dataclass
@@ -104,7 +104,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
       FixedPointInitializer(0.0),
       self.selector,
       RecordingEstimator(theta=0.5),
-      LengthStopper(max_items=max_items),
+      MaxLengthStopper(max_items),
     )
     self.context = RunContext(rng=np.random.default_rng(12345))
     self.response_provider = FixedResponseProvider(True)
@@ -166,7 +166,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
       NumericalSearchEstimator(method="bounded", dodd=True),
-      LengthStopper(max_items=max_items),
+      MaxLengthStopper(max_items),
     )
     self.context = RunContext(rng=np.random.default_rng(999))
     self.response_provider = AlternatingResponseProvider()

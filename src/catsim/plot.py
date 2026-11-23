@@ -238,7 +238,7 @@ def item_exposure(
       from catsim.initialization import RandomInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
-      from catsim.stopping import MinErrorStopper
+      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
       from catsim.simulation import SimulationRunner
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
@@ -248,7 +248,7 @@ def item_exposure(
           RandomInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
-          MinErrorStopper(0.4, max_items=20),
+          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
       result = runner.run(10)
       plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])
@@ -388,7 +388,7 @@ def test_progress(
       from catsim.initialization import RandomInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
-      from catsim.stopping import MinErrorStopper
+      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
       from catsim.simulation import SimulationRunner
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
@@ -397,7 +397,7 @@ def test_progress(
           RandomInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
-          MinErrorStopper(0.4, max_items=20),
+          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
       result = runner.run(10)
       plot.test_progress(simulation=result, index=0, ax=axes[0])

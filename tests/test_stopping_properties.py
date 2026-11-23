@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
-from catsim import irt
 from catsim.item_bank import ItemBank
-from catsim.stopping import ConfidenceIntervalStopper, MinErrorStopper
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StopRule
 
 STOP_SETTINGS = settings(max_examples=40, deadline=None)
 
@@ -18,146 +18,80 @@ STOP_SETTINGS = settings(max_examples=40, deadline=None)
   bank_size=st.integers(min_value=8, max_value=40),
   administered_count=st.integers(min_value=0, max_value=35),
 )
+@example(max_items=20, bank_size=30, administered_count=19)
+@example(max_items=20, bank_size=30, administered_count=20)
+# the whole bank is administered before the cap: the engine, not the stopper, ends that session
+@example(max_items=20, bank_size=10, administered_count=10)
 @STOP_SETTINGS
-def test_length_stopper_max_items_rule(
+def test_length_stopper_stops_once_max_items_are_administered(
   max_items: int,
   bank_size: int,
   administered_count: int,
 ) -> None:
-  assume(bank_size > max_items)
+  """A length stopper that stops one item early or late, or because the bank ran out, fails."""
   assume(administered_count <= bank_size)
   bank = ItemBank.generate_item_bank(bank_size, seed=123)
-  stopper = LengthStopper(max_items=max_items)
+  stopper = MaxLengthStopper(max_items)
   administered = list(range(administered_count))
+
   stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=0.0)
-  expected = administered_count >= max_items or administered_count >= bank_size
-  assert stopped is expected
+
+  assert stopped is (administered_count >= max_items)
+
+
+@dataclass(frozen=True)
+class FixedStopper(BaseStopper):
+  """Stopper whose criterion holds, or not, whatever the session; `label` tells equal stubs apart."""
+
+  holds: bool
+  label: int
+
+  def stop(self, item_bank, administered_items, theta) -> bool:  # noqa: ARG002
+    return self.holds
+
+
+RULE_BANK = ItemBank.generate_item_bank(12, seed=0)
 
 
 @given(
-  min_items=st.integers(min_value=2, max_value=8),
-  max_items=st.integers(min_value=10, max_value=20),
-  administered_count=st.integers(min_value=0, max_value=15),
+  holds=st.lists(st.booleans(), min_size=1, max_size=5),
+  min_items=st.integers(min_value=0, max_value=10),
+  administered_count=st.integers(min_value=0, max_value=12),
 )
 @STOP_SETTINGS
-def test_length_stopper_respects_min_items_before_other_rules(
+def test_stop_rule_stops_once_min_items_are_administered_and_any_stopper_holds(
+  holds: list[bool],
   min_items: int,
-  max_items: int,
   administered_count: int,
 ) -> None:
-  assume(min_items < max_items)
-  assume(administered_count < max_items)
-  bank = ItemBank.generate_item_bank(30, seed=7)
-  stopper = LengthStopper(min_items=min_items, max_items=max_items)
-  administered = list(range(administered_count))
-  stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=0.0)
-  if administered_count < min_items:
-    assert stopped is False
+  """A rule that stops before min_items, ignores a stopper that holds, or stops when none holds fails."""
+  rule = StopRule(*(FixedStopper(held, label) for label, held in enumerate(holds)), min_items=min_items)
 
+  stopped = rule.stop(item_bank=RULE_BANK, administered_items=list(range(administered_count)), theta=0.0)
 
-MIN_ERROR_SETTINGS = settings(max_examples=30, deadline=None)
+  assert stopped is (administered_count >= min_items and any(holds))
 
 
 @given(
-  params=st.integers(min_value=4, max_value=12).flatmap(
-    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
-  ),
-  administered_count=st.integers(min_value=0, max_value=10),
-  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-  min_error=st.floats(0.01, 2.0, allow_nan=False, allow_infinity=False),
+  holds=st.lists(st.booleans(), min_size=1, max_size=5),
+  min_items=st.integers(min_value=0, max_value=10),
+  administered_count=st.integers(min_value=0, max_value=12),
 )
-@MIN_ERROR_SETTINGS
-def test_min_error_stopper_decision_matches_see(
-  params: ItemBank,
-  administered_count: int,
-  theta: float,
-  min_error: float,
-) -> None:
-  bank = params
-  assume(administered_count <= bank.n_items)
-  # Keep administered strictly less than bank size so bank-exhaustion hard-stop
-  # doesn't fire; we only want to test the SEE criterion.
-  assume(administered_count < bank.n_items)
-  stopper = MinErrorStopper(min_error=min_error)
-  administered = list(range(administered_count))
-  stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
-  if administered_count == 0:
-    assert stopped is False
-  else:
-    admin_items = bank.get_items(administered)
-    see = irt.see(theta, admin_items)
-    assert stopped is (see < min_error)
-
-
-@given(
-  params=st.integers(min_value=4, max_value=12).flatmap(
-    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
-  ),
-  administered_count=st.integers(min_value=0, max_value=10),
-  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-  min_items=st.integers(min_value=2, max_value=6),
-  min_error=st.floats(0.01, 2.0, allow_nan=False, allow_infinity=False),
-)
-@MIN_ERROR_SETTINGS
-def test_min_error_stopper_respects_min_items_guard(
-  params: ItemBank,
-  administered_count: int,
-  theta: float,
+@STOP_SETTINGS
+def test_stop_rule_satisfied_returns_exactly_the_stoppers_that_hold(
+  holds: list[bool],
   min_items: int,
-  min_error: float,
+  administered_count: int,
 ) -> None:
-  bank = params
-  assume(administered_count <= bank.n_items)
-  stopper = MinErrorStopper(min_error=min_error, min_items=min_items)
-  administered = list(range(administered_count))
-  stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
-  # Exhausting the bank always stops the test, even before min_items is reached.
-  if administered_count == bank.n_items:
-    assert stopped is True
-  elif administered_count < min_items:
-    assert stopped is False
+  """satisfied() that drops a stopper that holds, adds one that does not, reorders them or applies min_items fails."""
+  rule = StopRule(*(FixedStopper(held, label) for label, held in enumerate(holds)), min_items=min_items)
+
+  satisfied = rule.satisfied(item_bank=RULE_BANK, administered_items=list(range(administered_count)), theta=0.0)
+
+  assert [stopper.label for stopper in satisfied] == [label for label, held in enumerate(holds) if held]
 
 
 CI_SETTINGS = settings(max_examples=25, deadline=None)
-
-
-@given(
-  params=st.integers(min_value=4, max_value=12).flatmap(
-    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
-  ),
-  administered_count=st.integers(min_value=1, max_value=10),
-  theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-  confidence=st.floats(0.5, 0.99, allow_nan=False, allow_infinity=False),
-  bounds=st.lists(
-    st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False),
-    min_size=1,
-    max_size=5,
-  ).map(sorted),
-)
-# random draws rarely give an interval that fits a middle band; this one is (-0.56, 0.56), inside [-3, 3)
-@example(
-  params=ItemBank.generate_item_bank(12, seed=0), administered_count=10, theta=0.0, confidence=0.5, bounds=[-3.0, 3.0]
-)
-@CI_SETTINGS
-def test_confidence_interval_stopper_stops_when_no_bound_splits_the_interval(
-  params: ItemBank,
-  administered_count: int,
-  theta: float,
-  confidence: float,
-  bounds: list[float],
-) -> None:
-  """The confidence interval lies inside one ability band exactly when no band boundary falls strictly inside it."""
-  bank = params
-  # administering the whole bank is a hard stop that bypasses the interval check
-  assume(administered_count < bank.n_items)
-  assume(len(set(bounds)) == len(bounds))
-  stopper = ConfidenceIntervalStopper(interval_bounds=bounds, confidence=confidence)
-  administered = list(range(administered_count))
-  lower, upper = irt.confidence_interval(theta, bank.get_items(administered), confidence)
-
-  fits_in_one_band = not any(lower < bound < upper for bound in bounds)
-
-  assert stopper.stop(item_bank=bank, administered_items=administered, theta=theta) is fits_in_one_band
 
 
 @given(
@@ -179,6 +113,7 @@ def test_confidence_interval_stopper_never_stops_with_zero_items(
   confidence: float,
   bounds: list[float],
 ) -> None:
+  """A stopper that classifies an examinee before any item, with an infinite interval, fails."""
   bank = params
   assume(len(set(bounds)) == len(bounds))
   stopper = ConfidenceIntervalStopper(interval_bounds=bounds, confidence=confidence)
