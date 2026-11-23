@@ -105,9 +105,9 @@ It is removed when the spec is promoted to "Implemented" status.
 """Stochastic curtailment for classification CATs (Finkelman 2008)."""
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .classification import Classification, SPRTStopper
 
@@ -168,7 +168,7 @@ class StochasticCurtailmentStopper(SPRTStopper):
   def _curtailment_probability(
     self,
     theta_hat: float,
-    remaining_items: npt.NDArray[numpy.floating],
+    remaining_items: FloatArray,
     current_llr: float,
   ) -> tuple[float, Classification]:
     """Normal-approximation forward projection of the LLR over the horizon.

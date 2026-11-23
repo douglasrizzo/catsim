@@ -3,9 +3,9 @@
 from abc import ABC, abstractmethod
 
 import numpy
-import numpy.typing as npt
 from numpy.random import Generator
 
+from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 
@@ -42,9 +42,9 @@ class BaseSelector(ABC):
   def _exposure_filtered_candidates(
     n_items: int,
     administered_items: list[int],
-    exposure_rates: npt.NDArray[numpy.floating] | None,
+    exposure_rates: FloatArray | None,
     r_max: float,
-  ) -> npt.NDArray[numpy.intp]:
+  ) -> IntArray:
     """Return non-administered item indices, preferring items below the exposure cap.
 
     Parameters
@@ -154,7 +154,7 @@ class BaseSelector(ABC):
     administered_items: list[int],
     est_theta: float,
     rng: Generator | None = None,
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
     """Return the index of the next item to be administered.

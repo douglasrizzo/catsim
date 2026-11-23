@@ -99,13 +99,11 @@ It is removed when the spec is promoted to "Implemented" status.
 # src/catsim/stopping/stopping.py  (alongside the other Choi 2011 stoppers)
 """Kullback-Leibler information stopper."""
 
-from typing import Any
-
 import numpy
-import numpy.typing as npt
 from scipy.integrate import quad
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .stopping import TestLengthStopper
 
@@ -152,7 +150,7 @@ class KLInfoStopper(TestLengthStopper):
     return f"KLInfoStopper(min_kl={self._min_kl}, c={self._c})"
 
   # ---- core kernel ----
-  def _kl_global(self, theta_hat: float, item: npt.NDArray[numpy.floating], half_width: float) -> float:
+  def _kl_global(self, theta_hat: float, item: FloatArray, half_width: float) -> float:
     a, b, c_param, d = item[0], item[1], item[2], item[3]
     val, _ = quad(
       _kl_integrand,
@@ -188,7 +186,7 @@ class KLInfoStopper(TestLengthStopper):
 
   def _check_stopping_criterion(  # noqa: PLR6301
     self,
-    administered_items: npt.NDArray[numpy.floating[Any]],  # noqa: ARG002
+    administered_items: FloatArray,  # noqa: ARG002
     theta: float,  # noqa: ARG002
   ) -> bool:
     return False

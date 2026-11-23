@@ -119,12 +119,11 @@ It is removed when the spec is promoted to "Implemented" status.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .stopping import TestLengthStopper
 
@@ -193,7 +192,7 @@ class SPRTStopper(TestLengthStopper):
   def _log_likelihood_ratio(
     self,
     response_vector: list[bool],
-    administered_items: npt.NDArray[numpy.floating],
+    administered_items: FloatArray,
   ) -> float:
     """Compute :math:`\\log L(u | theta_high) - \\log L(u | theta_low)`."""
     ll_high = irt.log_likelihood(self._theta_high, response_vector, administered_items)

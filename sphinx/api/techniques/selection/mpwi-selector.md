@@ -104,9 +104,9 @@ It is removed when the spec is promoted to "Implemented" status.
 """Posterior-weighted information selector (van der Linden, 1998)."""
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..estimation.bayesian import (
   LogPrior,
   QuadratureGrid,
@@ -116,8 +116,6 @@ from ..estimation.bayesian import (
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import BaseSelector
-
-FloatArray = npt.NDArray[numpy.floating]
 
 
 class MPWISelector(BaseSelector):
@@ -193,7 +191,7 @@ class MPWISelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,  # noqa: ARG002 -- unused; the posterior owns the theta info
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
     if response_vector is None:

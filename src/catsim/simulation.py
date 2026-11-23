@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy
 import numpy.typing as npt
@@ -14,6 +14,7 @@ from .item_bank import ItemBank
 from .state import ExposureTracker, SimulationResult
 
 if TYPE_CHECKING:
+  from ._typing import FloatArray
   from .estimation import BaseEstimator
   from .initialization import BaseInitializer
   from .selection import BaseSelector
@@ -25,7 +26,7 @@ class SimulationRunner:
 
   def __init__(
     self,
-    item_bank: ItemBank | npt.NDArray[numpy.floating[Any]],
+    item_bank: ItemBank | FloatArray,
     initializer: BaseInitializer,
     selector: BaseSelector,
     estimator: BaseEstimator,
@@ -52,7 +53,7 @@ class SimulationRunner:
     """Return the simulation RNG."""
     return self._rng
 
-  def _to_distribution(self, examinees: int | npt.ArrayLike) -> npt.NDArray[numpy.floating[Any]]:
+  def _to_distribution(self, examinees: int | npt.ArrayLike) -> FloatArray:
     if isinstance(examinees, int):
       if examinees <= 0:
         msg = f"Number of examinees must be positive, got {examinees}"

@@ -7,6 +7,8 @@ import numpy.typing as npt
 
 from catsim.item_bank import ItemBank
 
+from ._typing import FloatArray
+
 
 def dodd(theta: float, item_bank: ItemBank, correct: bool) -> float:
   r"""Estimate :math:`\hat{\theta}` when the response vector is composed entirely of 1s or 0s.
@@ -165,7 +167,7 @@ def rmse(
   return numpy.sqrt(mse(actual, predicted))
 
 
-def overlap_rate(exposure_rates: npt.NDArray[numpy.floating], test_size: int) -> float:
+def overlap_rate(exposure_rates: FloatArray, test_size: int) -> float:
   r"""Compute the test overlap rate.
 
   An average measure of how much of the test two examinees take is equal :cite:p:`Bar10`.

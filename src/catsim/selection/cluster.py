@@ -1,10 +1,9 @@
 import operator
 
 import numpy
-import numpy.typing as npt
-from numpy.typing import NDArray
 
 from .. import irt
+from .._typing import FloatArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import BaseSelector
@@ -123,7 +122,7 @@ class ClusterSelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
@@ -307,7 +306,7 @@ class ClusterSelector(BaseSelector):
     return cluster_infos
 
   @staticmethod
-  def sum_cluster_params(item_bank: ItemBank, c: list[int]) -> NDArray[numpy.float64]:
+  def sum_cluster_params(item_bank: ItemBank, c: list[int]) -> FloatArray:
     """Return the sum of item parameter values for each cluster.
 
     Parameters
@@ -336,7 +335,7 @@ class ClusterSelector(BaseSelector):
     return averages
 
   @staticmethod
-  def avg_cluster_params(item_bank: ItemBank, c: list[int]) -> NDArray[numpy.float64]:
+  def avg_cluster_params(item_bank: ItemBank, c: list[int]) -> FloatArray:
     """Return the average values of item parameters by cluster.
 
     Parameters

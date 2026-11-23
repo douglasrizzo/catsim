@@ -7,11 +7,11 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 import numpy
-import numpy.typing as npt
 
 from . import cat
 
 if TYPE_CHECKING:
+  from ._typing import FloatArray, IntArray
   from .item_bank import ItemBank
 
 
@@ -99,7 +99,7 @@ class ExposureTracker:
   """Track item usage counts during a simulation run."""
 
   n_items: int
-  counts: npt.NDArray[numpy.integer[Any]] = field(init=False)
+  counts: IntArray = field(init=False)
 
   def __post_init__(self) -> None:
     """Allocate the item exposure counter array."""
@@ -109,7 +109,7 @@ class ExposureTracker:
     """Record one administration for an item."""
     self.counts[item_id] += 1
 
-  def rates(self, n_sessions: int) -> npt.NDArray[numpy.floating[Any]]:
+  def rates(self, n_sessions: int) -> FloatArray:
     """Return exposure rates for the tracked counts."""
     if n_sessions <= 0:
       return numpy.zeros(self.n_items, dtype=float)
@@ -122,11 +122,11 @@ class SimulationResult:
 
   item_bank: ItemBank
   sessions: list[CatSessionState]
-  exposure_counts: npt.NDArray[numpy.integer[Any]]
+  exposure_counts: IntArray
   duration: float
 
   @property
-  def exposure_rates(self) -> npt.NDArray[numpy.floating[Any]]:
+  def exposure_rates(self) -> FloatArray:
     """Return per-item exposure rates across the simulated sessions."""
     n_sessions = len(self.sessions)
     if n_sessions == 0:
@@ -154,7 +154,7 @@ class SimulationResult:
     return [session.latest_theta for session in self.sessions]
 
   @property
-  def examinees(self) -> npt.NDArray[numpy.floating[Any]]:
+  def examinees(self) -> FloatArray:
     """Return true theta values for the simulated sessions."""
     return numpy.asarray([0.0 if session.true_theta is None else session.true_theta for session in self.sessions])
 

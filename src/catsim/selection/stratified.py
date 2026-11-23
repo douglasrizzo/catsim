@@ -3,8 +3,8 @@
 from abc import abstractmethod
 
 import numpy
-from numpy.typing import NDArray
 
+from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import FiniteSelector
@@ -56,7 +56,7 @@ class StratifiedSelector(FiniteSelector):
       msg = f"n_strata must be between 1 and test_size ({test_size}), got {n_strata}"
       raise ValueError(msg)
     self._n_strata = n_strata
-    self._strata: list[NDArray[numpy.intp]] | None = None
+    self._strata: list[IntArray] | None = None
     self._strata_item_bank: ItemBank | None = None
 
   @property
@@ -65,18 +65,18 @@ class StratifiedSelector(FiniteSelector):
     return self._n_strata
 
   @abstractmethod
-  def _stratification_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
+  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:
     """Return the per-item values whose ascending order assigns items to strata."""
 
   @abstractmethod
-  def _location(self, item_bank: ItemBank) -> NDArray[numpy.floating]:
+  def _location(self, item_bank: ItemBank) -> FloatArray:
     """Return the per-item ability-scale locations matched against the current estimate."""
 
-  def _blocking_key(self, item_bank: ItemBank) -> NDArray[numpy.floating] | None:  # noqa: ARG002, PLR6301
+  def _blocking_key(self, item_bank: ItemBank) -> FloatArray | None:  # noqa: ARG002, PLR6301
     """Return the per-item values to block on before stratifying, or None for no blocking."""
     return None
 
-  def strata(self, item_bank: ItemBank) -> list[NDArray[numpy.intp]]:
+  def strata(self, item_bank: ItemBank) -> list[IntArray]:
     """Return the item indices of each stratum, from the first test stage to the last.
 
     Without blocking, items are sorted by the stratification key and split into ``n_strata`` contiguous
@@ -100,7 +100,7 @@ class StratifiedSelector(FiniteSelector):
       self._strata_item_bank = item_bank
     return self._strata
 
-  def _build_strata(self, item_bank: ItemBank) -> list[NDArray[numpy.intp]]:
+  def _build_strata(self, item_bank: ItemBank) -> list[IntArray]:
     key = self._stratification_key(item_bank)
     blocking_key = self._blocking_key(item_bank)
     if blocking_key is None:
@@ -126,7 +126,7 @@ class StratifiedSelector(FiniteSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: NDArray[numpy.floating] | None = None,  # noqa: ARG002
+    exposure_rates: FloatArray | None = None,  # noqa: ARG002
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
@@ -181,11 +181,11 @@ class AStratSelector(StratifiedSelector):
     """Return the name of the selector."""
     return "a-Stratified Selector"
 
-  def _stratification_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Stratify by increasing discrimination."""
     return item_bank.discrimination
 
-  def _location(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+  def _location(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Match item difficulty to the ability estimate."""
     return item_bank.difficulty
 
@@ -209,7 +209,7 @@ class AStratBBlockSelector(AStratSelector):
     """Return the name of the selector."""
     return "a-Stratified b-Blocking Selector"
 
-  def _blocking_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+  def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Block on item difficulty so every stratum spans the difficulty range."""
     return item_bank.difficulty
 
@@ -233,11 +233,11 @@ class MaxInfoStratSelector(StratifiedSelector):
     """Return the name of the selector."""
     return "Maximum Information Stratification Selector"
 
-  def _stratification_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Stratify by increasing maximum information."""
     return item_bank.max_info_values
 
-  def _location(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+  def _location(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Match the ability at which each item is most informative to the ability estimate."""
     return item_bank.max_info_thetas
 
@@ -261,6 +261,6 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
     """Return the name of the selector."""
     return "Maximum Information Stratification with b-Blocking Selector"
 
-  def _blocking_key(self, item_bank: ItemBank) -> NDArray[numpy.floating]:  # noqa: PLR6301
+  def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
     """Block on the ability of maximum information so every stratum spans the ability range."""
     return item_bank.max_info_thetas

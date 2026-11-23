@@ -94,8 +94,8 @@ It is removed when the spec is promoted to "Implemented" status.
 """Posterior Kullback-Leibler selector."""
 
 import numpy
-import numpy.typing as npt
 
+from .._typing import FloatArray
 from ..estimation.bayesian import (
   LogPrior,
   QuadratureGrid,
@@ -106,8 +106,6 @@ from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import BaseSelector
 from .kl import _kl_integrand  # reuse the kernel from card 03
-
-FloatArray = npt.NDArray[numpy.floating]
 
 
 class KLPSelector(BaseSelector):
@@ -180,7 +178,7 @@ class KLPSelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
     if response_vector is None:

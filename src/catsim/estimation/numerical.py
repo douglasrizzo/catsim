@@ -1,10 +1,9 @@
 """Numerical estimation methods for ability estimation."""
 
-import numpy
-import numpy.typing as npt
 from scipy.optimize import minimize_scalar
 
 from .. import cat, irt
+from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
 from .base import BaseEstimator
@@ -191,7 +190,7 @@ class NumericalSearchEstimator(BaseEstimator):
     b: float,
     a: float,
     response_vector: list[bool],
-    item_params: npt.NDArray[numpy.floating],
+    item_params: FloatArray,
   ) -> float:
     """Find the most likely ability using ternary or dichotomous search methods.
 
@@ -255,7 +254,7 @@ class NumericalSearchEstimator(BaseEstimator):
     b: float,
     a: float,
     response_vector: list[bool],
-    item_params: npt.NDArray[numpy.floating],
+    item_params: FloatArray,
   ) -> float:
     """Find the most likely ability using the Fibonacci search method.
 
@@ -321,7 +320,7 @@ class NumericalSearchEstimator(BaseEstimator):
     b: float,
     a: float,
     response_vector: list[bool],
-    item_params: npt.NDArray[numpy.floating],
+    item_params: FloatArray,
   ) -> float:
     """Find the most likely ability using the golden-section search method.
 

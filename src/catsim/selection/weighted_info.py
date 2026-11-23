@@ -1,9 +1,9 @@
 """Likelihood-weighted information selector implementations."""
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
 from .base import BaseSelector
@@ -73,8 +73,8 @@ class MLWISelector(BaseSelector):
   def _likelihood_weights(
     self,
     response_vector: list[bool],
-    administered_items: npt.NDArray[numpy.floating],
-  ) -> npt.NDArray[numpy.floating]:
+    administered_items: FloatArray,
+  ) -> FloatArray:
     log_likelihood = numpy.array(
       [irt.log_likelihood(float(theta), response_vector, administered_items) for theta in self._nodes],
       dtype=float,
@@ -88,7 +88,7 @@ class MLWISelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,  # noqa: ARG002
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
     """Return the index of the item with the highest likelihood-weighted information.
