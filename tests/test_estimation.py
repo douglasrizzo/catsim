@@ -620,6 +620,28 @@ class TestEAPEstimator:
     assert theta == pytest.approx(1.5, abs=0.05)
     assert estimator.grid is grid
 
+  def test_evaluations_count_one_per_grid_node(self) -> None:
+    """Each estimate evaluates the likelihood once per grid node, and the counters say so."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=31))
+
+    estimator.estimate(item_bank=item_bank, administered_items=[0], response_vector=[True], est_theta=0.0)
+    estimator.estimate(item_bank=item_bank, administered_items=[0, 1], response_vector=[True, False], est_theta=0.0)
+
+    assert estimator.calls == 2
+    assert estimator.evaluations == 31
+    assert estimator.total_evaluations == 62
+
+  def test_estimate_accepts_numpy_item_indices(self) -> None:
+    """A NumPy index array gives the same estimate as the equivalent list."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator()
+
+    from_list = estimator.estimate(item_bank, [0, 3], [True, False], 0.0)
+    from_array = estimator.estimate(item_bank, np.array([0, 3]), [True, False], 0.0)
+
+    assert from_array == pytest.approx(from_list, abs=1e-15)
+
   def test_estimate_converges_toward_mle_on_longer_test(self) -> None:
     """Test that EAP tracks MLE on a longer, information-rich response pattern."""
     item_bank = ItemBank.generate_item_bank(30, seed=1)

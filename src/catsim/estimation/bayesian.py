@@ -318,9 +318,10 @@ class EAPEstimator(BaseEstimator):
   ) -> float:
     """Return the posterior mean for the administered response pattern."""
     self._calls += 1
+    self._last_evaluations = self._grid.nodes.size
+    self._total_evaluations += self._last_evaluations
 
-    items = item_bank.items[administered_items, :4] if administered_items else numpy.empty((0, 4), dtype=float)
-    post = posterior(response_vector, items, self._grid, self._log_prior)
+    post = posterior(response_vector, item_bank.items[administered_items, :4], self._grid, self._log_prior)
     return posterior_mean(post, self._grid.nodes)
 
   @property
