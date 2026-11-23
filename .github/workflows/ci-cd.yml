@@ -43,6 +43,9 @@ jobs:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
       - run: uv run --only-group dev pre-commit run --all-files
+        env:
+          # The test job runs the notebooks; running them here too only doubles the time.
+          SKIP: pytest-nbmake
 
   test:
     name: Run tests
