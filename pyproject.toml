@@ -68,7 +68,7 @@ select = [
     "TC",
     "ARG",
     "PTH",
-    "TD",
+    "FIX",  # bans TODO/FIXME/XXX/HACK comments outright, which leaves TD nothing to check
     "TID251",  # banned APIs only; TID252 would ban the package's relative imports
     "PD",
     "PLE",
@@ -81,8 +81,8 @@ select = [
     "PLR2",
     "PLR5",
     "PLR6",
-    "TRY201",
-    "TRY400",
+    "TRY",
+    "PGH",
     "FLY",
     "NPY",
     "PERF",
