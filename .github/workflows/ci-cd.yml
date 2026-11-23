@@ -148,10 +148,44 @@ jobs:
           name: python-package-distributions
           path: dist/
 
+  test-wheel:
+    name: Test the built wheel
+    # Runs the suite against the wheel the publish jobs upload, installed into a clean environment,
+    # so a packaging mistake (a missing module or data file) fails here instead of shipping.
+    needs: [build]
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+
+      - name: Download all the dists
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Install the wheel into a clean environment
+        run: |
+          # Without the source tree, the only catsim the tests can import is the installed wheel.
+          rm -rf src
+          uv venv --python 3.11 "$RUNNER_TEMP/wheel-venv"
+          uv pip install --python "$RUNNER_TEMP/wheel-venv" dist/*.whl pytest hypothesis
+
+      - name: Run tests against the installed wheel
+        run: |
+          "$RUNNER_TEMP/wheel-venv/bin/python" -c "import catsim; assert 'site-packages' in catsim.__file__, catsim.__file__"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pytest -q -p no:cacheprovider
+
   publish-to-pypi:
     name: Publish to PyPI
     if: github.event_name == 'release'
-    needs: [pre-commit, test, build, deploy-docs-production] # Wait for quality gates, package build, and live docs
+    needs: [pre-commit, test, build, test-wheel, deploy-docs-production] # Wait for quality gates, the tested package, and live docs
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -175,7 +209,7 @@ jobs:
     if: |
       github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
       github.event.pull_request.head.repo.full_name == github.repository
-    needs: [pre-commit, test, build, deploy-docs-dev] # Wait for quality gates, package build, and live docs
+    needs: [pre-commit, test, build, test-wheel, deploy-docs-dev] # Wait for quality gates, the tested package, and live docs
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -301,7 +335,7 @@ jobs:
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       github.event_name == 'release'
-    needs: [pre-commit, test, build, build-docs] # Docs go live only for a commit that passes every check
+    needs: [pre-commit, test, build, test-wheel, build-docs] # Docs go live only for a commit that passes every check
     runs-on: ubuntu-latest
     permissions:
       contents: write
