@@ -103,12 +103,7 @@ def item_curve(
     if title is not None:
       ax.set_title(title, size=18)
 
-    ax.annotate(
-      "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " + format(d) + "$",
-      bbox={"facecolor": "white", "alpha": 1},
-      xy=(0.75, 0.05),
-      xycoords="axes fraction",
-    )
+    _annotate_parameters(ax, a, b, c, d)
     ax.set_xlabel(r"$\theta$")
     ax.grid()
 
@@ -144,14 +139,26 @@ def item_curve(
     if title is not None:
       ax.set_title(title, size=18)
 
-    ax2.annotate(
-      "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " + format(d) + "$",
-      bbox={"facecolor": "white", "alpha": 1},
-      xy=(0.75, 0.05),
-      xycoords="axes fraction",
-    )
+    _annotate_parameters(ax2, a, b, c, d)
 
   return ax
+
+
+def _annotate_parameters(ax: Axes, a: float, b: float, c: float, d: float) -> None:
+  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes.
+
+  The curves of typical items keep clear of that corner: at the low end of the ability range the ICC is
+  near its lower asymptote and the IIC near zero. A very flat item with d < 1 (a around 0.1) is the
+  exception, as its information curve leans left into the corner.
+  """
+  ax.annotate(
+    f"$a = {a:.3g}$\n$b = {b:.3g}$\n$c = {c:.3g}$\n$d = {d:.3g}$",
+    bbox={"facecolor": "white", "alpha": 1},
+    xy=(0.02, 0.97),
+    xycoords="axes fraction",
+    ha="left",
+    va="top",
+  )
 
 
 def gen3d_dataset_scatter(

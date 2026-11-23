@@ -5,7 +5,6 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from matplotlib.axes import Axes
 from mpl_toolkits.mplot3d import Axes3D
 
 from catsim import plot
@@ -15,18 +14,47 @@ from catsim.plot import PlotType
 class TestItemCurve:
   """Tests for item_curve()."""
 
-  @pytest.mark.parametrize("ptype", [PlotType.ICC, PlotType.IIC, PlotType.BOTH])
-  def test_item_curve_returns_axes(self, ptype: PlotType) -> None:
-    """Every item curve mode should return axes."""
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, ptype=ptype)
-    assert isinstance(ax, Axes)
-    plt.close("all")
+  # A three-parameter item whose discrimination has more digits than the parameter box should show.
+  ITEM = (1.1669737841771746, -0.4321, 0.2, 1.0)
+
+  @pytest.mark.parametrize("ptype", list(PlotType))
+  def test_item_curve_rounds_the_parameters(self, ptype: PlotType) -> None:
+    """The parameter box shows each parameter to three significant digits.
+
+    Fails if a parameter is printed at full float precision (a = 1.1669737841771746), which made the
+    box wider than the axes.
+    """
+    ax = plot.item_curve(*self.ITEM, ptype=ptype)
+    texts = [text.get_text() for axis in ax.figure.axes for text in axis.texts]
+    assert texts == ["$a = 1.17$\n$b = -0.432$\n$c = 0.2$\n$d = 1$"]
+
+  @pytest.mark.parametrize("ptype", list(PlotType))
+  def test_item_curve_parameter_box_stays_inside_the_axes_and_off_the_curves(self, ptype: PlotType) -> None:
+    """The parameter box lies within the axes and no plotted point falls under it.
+
+    Fails if the box sticks out past the edge of the axes, or sits where a curve passes, as the
+    information curve's tail does in the lower right corner.
+    """
+    ax = plot.item_curve(*self.ITEM, ptype=ptype)
+    figure = ax.figure
+    figure.canvas.draw()
+    (annotation,) = [text for axis in figure.axes for text in axis.texts]
+    box = annotation.get_bbox_patch().get_window_extent()
+    axes_box = ax.get_window_extent()
+
+    assert axes_box.x0 <= box.x0 < box.x1 <= axes_box.x1
+    assert axes_box.y0 <= box.y0 < box.y1 <= axes_box.y1
+    for axis in figure.axes:
+      for line in axis.get_lines():
+        assert box.count_contains(line.get_transform().transform(line.get_xydata())) == 0
 
   def test_item_curve_respects_title(self) -> None:
-    """Custom titles should be applied."""
+    """A title passed in is set on the axes.
+
+    Fails if the title argument is ignored.
+    """
     ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, title="Test Item")
     assert ax.get_title() == "Test Item"
-    plt.close("all")
 
 
 class TestGen3dDatasetScatter:
