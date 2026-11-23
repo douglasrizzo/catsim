@@ -57,14 +57,29 @@ def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> Non
     CatSessionState(session_id=0, theta_history=[0.0], stop_reason=persisted["unknown"])
 
 
-def test_exposure_tracker_returns_zero_rates_for_non_positive_session_counts() -> None:
-  """Exposure rates should stay zero when no sessions have been completed."""
-  tracker = ExposureTracker(4)
-  tracker.record(1)
-  tracker.record(1)
+def test_exposure_tracker_gives_each_session_the_rates_of_the_sessions_before_it() -> None:
+  """A session sees each item's share of the sessions started before it, as catR does, from start to end.
 
-  assert np.array_equal(tracker.rates(0), np.zeros(4))
-  assert np.array_equal(tracker.rates(-1), np.zeros(4))
+  Three sessions administer [0, 1], [0, 2] and [0, 3] on a 4-item bank, and a fourth starts. Fails if the first
+  session sees anything but zeros, if the rates divide by a count that includes the session in progress (the
+  second session would see 0.5 for items 0 and 1), or if a session's own items show before the next one starts.
+  """
+  tracker = ExposureTracker(4)
+  assert tracker.rates().tolist() == [0.0, 0.0, 0.0, 0.0]
+
+  at_start, at_end = [], []
+  for items in ([0, 1], [0, 2], [0, 3], []):
+    tracker.start_session()
+    at_start.append(tracker.rates())
+    for item_id in items:
+      tracker.record(item_id)
+    at_end.append(tracker.rates())
+
+  expected = [[0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0], [1.0, 0.5, 0.5, 0.0], [1.0, 1 / 3, 1 / 3, 1 / 3]]
+  assert np.allclose(at_start, expected)
+  assert np.allclose(at_end, expected)
+  assert tracker.n_sessions == 4
+  assert tracker.counts.tolist() == [3, 1, 1, 1]
 
 
 def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
@@ -88,7 +103,11 @@ def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
 
 
 def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
-  """Empty simulation results should expose safe default aggregates."""
+  """A result with no sessions has zero exposure rates and no overlap rate.
+
+  Fails if exposure_rates divides the counts by zero sessions (NaN, with a warning that the test settings turn into
+  an error), or if overlap_rate computes a number for a run without tests.
+  """
   result = SimulationResult(
     item_bank=item_bank,
     sessions=[],

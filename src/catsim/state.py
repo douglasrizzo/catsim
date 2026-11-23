@@ -155,24 +155,51 @@ class CatStepResult:
 
 @dataclass(slots=True)
 class ExposureTracker:
-  """Track item usage counts during a simulation run."""
+  """Count item administrations and sessions across a run, and give each session its exposure rates.
+
+  One tracker is shared by every session of a run or of a live deployment, through
+  :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts and
+  :meth:`record` for every administered item. ``counts`` holds each item's administrations so far,
+  those of sessions still in progress included, and ``n_sessions`` the number of sessions started.
+
+  The rates a session sees divide by the examinees tested before it, as catR's
+  ``simulateRespondents`` does (ADR-0003): when a session starts, each item's rate becomes its
+  administrations divided by the number of sessions that started earlier, and stays so until the
+  next session starts. The first session therefore sees every rate at 0, and a session's own items
+  count from the next session on.
+  """
 
   n_items: int
   counts: IntArray = field(init=False)
+  n_sessions: int = field(init=False, default=0)
+  _rates: FloatArray = field(init=False, repr=False)
 
   def __post_init__(self) -> None:
-    """Allocate the item exposure counter array."""
+    """Allocate the item counts and the rates the first session sees, all zero."""
     self.counts = numpy.zeros(self.n_items, dtype=int)
+    self._rates = numpy.zeros(self.n_items, dtype=float)
+
+  def start_session(self) -> None:
+    """Count a new session and fix the rates it sees: over the sessions that started before it."""
+    if self.n_sessions > 0:
+      self._rates = self.counts / self.n_sessions
+    self.n_sessions += 1
 
   def record(self, item_id: int) -> None:
     """Record one administration for an item."""
     self.counts[item_id] += 1
 
-  def rates(self, n_sessions: int) -> FloatArray:
-    """Return exposure rates for the tracked counts."""
-    if n_sessions <= 0:
-      return numpy.zeros(self.n_items, dtype=float)
-    return self.counts.astype(float) / n_sessions
+  def rates(self) -> FloatArray:
+    """Return the exposure rates the latest session sees.
+
+    Returns
+    -------
+    numpy.ndarray
+        A new array holding, for each item, the share of the sessions started before the latest one
+        that administered it; all zero until a second session starts. This is not the run's final
+        exposure, which :attr:`SimulationResult.exposure_rates` gives.
+    """
+    return self._rates.copy()
 
 
 @dataclass(slots=True)

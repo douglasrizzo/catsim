@@ -181,9 +181,7 @@ def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() ->
   batched = SimulationRunner(item_bank, *components(), seed=7).run([0.3]).sessions[0]
 
   engine = CatEngine(*components())
-  context = RunContext(
-    rng=np.random.default_rng(7), exposure_tracker=ExposureTracker(item_bank.n_items), total_sessions=1
-  )
+  context = RunContext(rng=np.random.default_rng(7), exposure_tracker=ExposureTracker(item_bank.n_items))
   manual = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.3)
   # step one item at a time, as an interactive caller would, until a step reports the session stopped
   while not engine.step(manual, item_bank, SimulatedResponseProvider(), context).stopped:

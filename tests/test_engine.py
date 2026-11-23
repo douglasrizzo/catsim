@@ -13,7 +13,7 @@ from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
 from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
-from catsim.selection import RandomSelector
+from catsim.selection import MaxInfoSelector, RandomSelector
 from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 
@@ -123,6 +123,15 @@ class FailingEstimator:
     raise ValueError(msg)
 
 
+class FailingInitializer:
+  """Initializer stub that fails on every call."""
+
+  def initialize(self, *, item_bank, rng) -> float:
+    del item_bank, rng
+    msg = "initialization failed"
+    raise ValueError(msg)
+
+
 class FailingStopper(BaseStopper):
   """Stopper stub that fails on every call."""
 
@@ -172,7 +181,11 @@ class FakeRng:
 
 
 def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> None:
-  """Engine should forward the configured item bank and RNG to the initializer and start a live session."""
+  """start_session gives the initializer the bank and the run's generator, and starts a running session at its estimate.
+
+  Fails if the initializer gets another bank or generator, or if the session starts with another estimate or true
+  theta, or already stopped.
+  """
   initializer = RecordingInitializer(theta=1.25)
   selector = RandomSelector()
   estimator = NumericalSearchEstimator()
@@ -192,6 +205,23 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   assert session.stop_reason is None
 
 
+def test_start_session_counts_a_session_in_the_tracker_only_once_it_has_started(item_bank) -> None:
+  """A session whose initializer raises is not counted in the exposure tracker; one that starts is.
+
+  Fails if the tracker counts the session before the initializer runs: every later session would see rates divided
+  by one session too many.
+  """
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
+  strategies = (RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False))
+
+  with pytest.raises(ValueError, match="initialization failed"):
+    CatEngine(FailingInitializer(), *strategies).start_session(0, item_bank, context)
+  CatEngine(RecordingInitializer(0.0), *strategies).start_session(1, item_bank, context)
+
+  assert tracker.n_sessions == 1
+
+
 def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   """Stopping checks should forward the item bank, administered items, and latest theta."""
   stopper = RecordingStopper(should_stop=True)
@@ -209,14 +239,20 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
 
 
 def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
-  """Selection should forward state, RNG, and exposure rates when available."""
+  """select_next hands the selector the bank, the session's items and current estimate, the generator and the rates.
+
+  Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
+  input is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
+  """
   selector = RecordingSelector(item_id=4)
   tracker = ExposureTracker(item_bank.n_items)
-  tracker.record(0)
-  tracker.record(0)
-  tracker.record(3)
+  for items in ([0, 3], [0]):
+    tracker.start_session()
+    for item_id in items:
+      tracker.record(item_id)
+  tracker.start_session()
   rng = np.random.default_rng(99)
-  context = RunContext(rng=rng, exposure_tracker=tracker, total_sessions=4)
+  context = RunContext(rng=rng, exposure_tracker=tracker)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
   state = CatSessionState(
     session_id=0, theta_history=[0.0, 0.5, -0.25], administered_item_ids=[1, 2], responses=[True, False]
@@ -229,32 +265,59 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   assert selector.seen_administered_items is state.administered_item_ids
   assert selector.seen_theta == pytest.approx(-0.25)
   assert selector.seen_rng is rng
-  assert selector.seen_exposure_rates is not None
-  assert np.allclose(selector.seen_exposure_rates, tracker.rates(4))
+  expected_rates = np.zeros(item_bank.n_items)
+  expected_rates[[0, 3]] = [1.0, 0.5]
+  assert np.array_equal(selector.seen_exposure_rates, expected_rates)
 
 
-def test_select_next_passes_none_exposure_rates_without_total_sessions(item_bank) -> None:
-  """Selection should not derive exposure rates without the total session count."""
+def test_a_tracker_caps_exposure_across_sessions_with_no_other_setting() -> None:
+  """A tracker in the context is all r_max needs: an item the earlier examinees reached is held back.
+
+  At theta 0 the items rank 0, 1, 2, 3 by information, and each session takes one item. The second session sees
+  item 0 at 1/1, the third sees items 0 and 1 at 1/2, both at the cap of 0.5, and the fourth sees items 0, 1 and 2
+  at 1/3, below it. Fails if the selector gets no rates from a context that holds only a tracker (every session
+  takes item 0), or if the rates divide by anything but the number of sessions started before the current one.
+  """
+  item_bank = ItemBank(np.array([[a, 0.0, 0.0, 1.0] for a in (2.0, 1.5, 1.0, 0.5)]))
+  engine = CatEngine(
+    RecordingInitializer(0.0), MaxInfoSelector(r_max=0.5), RecordingEstimator(0.0), RecordingStopper(False)
+  )
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=ExposureTracker(item_bank.n_items))
+
+  first_items = []
+  for session_id in range(4):
+    session = engine.start_session(session_id, item_bank, context)
+    item_id = engine.select_next(session, item_bank, context)
+    engine.apply_response(session, item_bank, item_id, True, context)
+    first_items.append(item_id)
+
+  assert first_items == [0, 1, 2, 0]
+
+
+def test_select_next_passes_no_exposure_rates_without_a_tracker(item_bank) -> None:
+  """Without an exposure tracker in the context, the selector gets no rates, and so applies no cap.
+
+  Fails if the engine makes up rates for a run that does not track exposure, or fails on the missing tracker.
+  """
   selector = RecordingSelector(item_id=2)
-  tracker = ExposureTracker(item_bank.n_items)
-  rng = np.random.default_rng(11)
-  context = RunContext(rng=rng, exposure_tracker=tracker, total_sessions=None)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  state = CatSessionState(session_id=0, theta_history=[0.5])
+  context = RunContext(rng=np.random.default_rng(11))
+  session = engine.start_session(0, item_bank, context)
 
-  selected = engine.select_next(state, item_bank, context)
-
-  assert selected == 2
-  assert selector.seen_rng is rng
+  assert engine.select_next(session, item_bank, context) == 2
   assert selector.seen_exposure_rates is None
 
 
 def test_apply_response_records_exposure_and_returns_complete_step_result(item_bank) -> None:
-  """Applying a response should record exposure and return a faithful step result."""
+  """apply_response counts the item once in the tracker and reports the step the session took.
+
+  Fails if the administration is not recorded or recorded twice, if the estimator gets other items, responses or
+  estimate than the session's, or if the result reports another item, response, estimate or stop state.
+  """
   estimator = RecordingEstimator(theta=1.1)
   tracker = ExposureTracker(item_bank.n_items)
   engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
-  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker, total_sessions=5)
+  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
   session = engine.start_session(session_id=1, item_bank=item_bank, context=context, true_theta=0.2)
 
   result = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
@@ -519,10 +582,13 @@ def test_run_session_stops_at_fixed_length(
   random_selector,
   estimator,
 ) -> None:
-  """Run session should stop once the stopper condition is reached."""
+  """run_session runs until the stopper says stop: three items for a three-item test.
+
+  Fails if it returns before the session ends or keeps administering items after the stopper is satisfied.
+  """
   stopper = MaxLengthStopper(3)
   engine = CatEngine(fixed_initializer, random_selector, estimator, stopper)
-  context = RunContext(rng=np.random.default_rng(42), total_sessions=1)
+  context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 
   final_session = engine.run_session(session, item_bank, FixedResponseProvider(True), context)
@@ -554,10 +620,13 @@ def test_select_next_passes_response_history(
   estimator,
   fixed_length_stopper,
 ) -> None:
-  """Selectors should receive the current response history from the engine."""
+  """select_next hands the selector the session's responses, which look-ahead selectors score items with.
+
+  Fails if the selector gets no responses, or responses other than the session's.
+  """
   selector = RecordingSelector(item_id=2)
   engine = CatEngine(fixed_initializer, selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=np.random.default_rng(42), total_sessions=10)
+  context = RunContext(rng=np.random.default_rng(42))
   session = CatSessionState(
     session_id=0, theta_history=[0.0, 0.5, 0.2], administered_item_ids=[0, 1], responses=[True, False]
   )
