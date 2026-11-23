@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Maximum Likelihood Weighted Information Selector" href="mlwi-selector.html" />
-    <link rel="prev" title="Proportional Selector" href="proportional-selector.html" />
+    <link rel="prev" title="Maximum-Information with B-Blocking Selector" href="max-info-b-block-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -456,8 +456,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.selection.expected_info.MEISelector</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MEISelector</span></code>
 <strong>Reference:</strong> van der Linden (1998)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="maximum-expected-information-selector">
 <h1>Maximum Expected Information Selector<a class="headerlink" href="#maximum-expected-information-selector" title="Link to this heading">#</a></h1>
@@ -486,6 +486,10 @@ P_i(\hat{\theta})\,I(\hat{\theta}_i^{(1)})
 <p>where <span class="math notranslate nohighlight">\(I(\cdot)\)</span> is the information of the administered test extended by
 the candidate item. The selector chooses the non-administered item with the
 largest expected information value.</p>
+<p>If an updated estimate is not finite, as with maximum likelihood without Dodd’s
+heuristic after an all-correct or all-incorrect pattern, the candidate is scored
+by the information at the current estimate instead, so that step reduces to
+maximum-information selection.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -504,7 +508,9 @@ largest expected information value.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator()</span></code></p></td>
-<td><p>Estimator used to compute the hypothetical one-step-ahead ability updates. The card explicitly allows alternative estimators such as WLE, EAP, or MAP.</p></td>
+<td><p>Estimator used to compute the hypothetical one-step-ahead ability updates. Give the selector
+its own instance: it calls <code class="docutils literal notranslate"><span class="pre">estimate</span></code> twice per candidate, which would inflate the counters
+of an estimator shared with the engine.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
@@ -531,7 +537,7 @@ largest expected information value.</p>
 <p>Choi, S. W., &amp; Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. <em>Applied Psychological Measurement</em>, 33(6), 419-440.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Sister planned spec: <a class="reference internal" href="mlwi-selector.html"><span class="doc">Maximum Likelihood Weighted Information Selector</span></a></p>
+<p>Sister spec: <a class="reference internal" href="mlwi-selector.html"><span class="doc">Maximum Likelihood Weighted Information Selector</span></a></p>
 </div>
 </section>
 </section>
@@ -547,12 +553,12 @@ largest expected information value.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="proportional-selector.html"
+       href="max-info-b-block-selector.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Proportional Selector</p>
+        <p class="prev-next-title">Maximum-Information with B-Blocking Selector</p>
       </div>
     </a>
     <a class="right-next"

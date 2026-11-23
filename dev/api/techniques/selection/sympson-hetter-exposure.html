@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Maximum Posterior Weighted Information Selector" href="mpwi-selector.html" />
-    <link rel="prev" title="Maximum Likelihood Weighted Information Selector" href="mlwi-selector.html" />
+    <link rel="prev" title="Proportional Selector" href="proportional-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -586,6 +586,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_k</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"SympsonHetterControl was not calibrated; call .calibrate() first."</span><span class="p">)</span>
@@ -598,6 +599,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
         <span class="n">est_theta</span><span class="p">,</span>
         <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
         <span class="n">exposure_rates</span><span class="o">=</span><span class="n">exposure_rates</span><span class="p">,</span>
+        <span class="n">response_vector</span><span class="o">=</span><span class="n">response_vector</span><span class="p">,</span>
       <span class="p">)</span>
       <span class="k">if</span> <span class="n">candidate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="s2">"No item passed Sympson-Hetter filter."</span><span class="p">)</span>
@@ -674,12 +676,12 @@ It is removed when the spec is promoted to “Implemented” status.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="mlwi-selector.html"
+       href="proportional-selector.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Maximum Likelihood Weighted Information Selector</p>
+        <p class="prev-next-title">Proportional Selector</p>
       </div>
     </a>
     <a class="right-next"

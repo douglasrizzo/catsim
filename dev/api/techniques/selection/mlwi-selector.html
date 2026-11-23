@@ -49,7 +49,7 @@
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Sympson-Hetter Exposure Control" href="sympson-hetter-exposure.html" />
+    <link rel="next" title="Kullback-Leibler Selector" href="kl-selector.html" />
     <link rel="prev" title="Maximum Expected Information Selector" href="mei-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -456,8 +456,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.selection.weighted_info.MLWISelector</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MLWISelector</span></code>
 <strong>Reference:</strong> Veerkamp &amp; Berger (1997)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="maximum-likelihood-weighted-information-selector">
 <h1>Maximum Likelihood Weighted Information Selector<a class="headerlink" href="#maximum-likelihood-weighted-information-selector" title="Link to this heading">#</a></h1>
@@ -478,7 +478,7 @@ independent of the Bayesian infrastructure.</p>
 \[\mathrm{MLWI}_i
 =
 \int I_i(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta.\]</div>
-<p>The planned implementation approximates the integral on a fixed grid
+<p>The implementation approximates the integral on a fixed grid
 <span class="math notranslate nohighlight">\(\{\theta_q\}_{q=1}^{Q}\)</span> with spacing <span class="math notranslate nohighlight">\(\Delta_q\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[\mathrm{MLWI}_i
@@ -534,7 +534,7 @@ before exponentiation; the constant factor cancels under <span class="math notra
 <p>Veerkamp, W. J. J., &amp; Berger, M. P. F. (1997). Some new item selection criteria for adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 22(2), 203-226. <a class="reference external" href="https://doi.org/10.3102/10769986022002203">https://doi.org/10.3102/10769986022002203</a></p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Sister planned spec: <a class="reference internal" href="mei-selector.html"><span class="doc">Maximum Expected Information Selector</span></a></p>
+<p>Sister spec: <a class="reference internal" href="mei-selector.html"><span class="doc">Maximum Expected Information Selector</span></a></p>
 </div>
 </section>
 </section>
@@ -559,11 +559,11 @@ before exponentiation; the constant factor cancels under <span class="math notra
       </div>
     </a>
     <a class="right-next"
-       href="sympson-hetter-exposure.html"
+       href="kl-selector.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Sympson-Hetter Exposure Control</p>
+        <p class="prev-next-title">Kullback-Leibler Selector</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

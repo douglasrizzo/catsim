@@ -459,8 +459,9 @@ and concrete initializers, selectors, and stoppers.</p>
 <p>Use explicit typed parameters for engine-managed strategy inputs:</p>
 <ul class="simple">
 <li><p>initializers receive an <code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> and a <code class="docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></p></li>
-<li><p>selectors receive explicit session inputs such as administered items, theta, RNG, and
-exposure-rate snapshots</p></li>
+<li><p>selectors receive explicit session inputs such as administered items, theta, RNG,
+exposure-rate snapshots, and the session’s response history (needed by look-ahead
+selectors such as MEI and MLWI)</p></li>
 <li><p>stoppers receive explicit item-bank, administered-item, and theta inputs</p></li>
 </ul>
 </section>
@@ -470,6 +471,9 @@ exposure-rate snapshots</p></li>
 <li><p>Public contracts are clearer for users implementing custom strategies.</p></li>
 <li><p>Type checking can enforce the engine boundary more effectively.</p></li>
 <li><p>Some permissive legacy call patterns are removed intentionally.</p></li>
+<li><p>Adding an engine-managed input changes every strategy signature: custom selectors must
+accept <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> (optional, defaulting to <code class="docutils literal notranslate"><span class="pre">None</span></code>) because the engine always passes it.
+Selectors that need the history, such as MEI and MLWI, raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when it is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
 </ul>
 </section>
 </section>

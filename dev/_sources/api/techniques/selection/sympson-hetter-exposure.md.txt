@@ -127,6 +127,7 @@ class SympsonHetterControl:
     est_theta: float,
     rng: numpy.random.Generator,
     exposure_rates: FloatArray | None = None,
+    response_vector: list[bool] | None = None,
   ) -> int | None:
     if self._k is None:
       raise RuntimeError("SympsonHetterControl was not calibrated; call .calibrate() first.")
@@ -139,6 +140,7 @@ class SympsonHetterControl:
         est_theta,
         rng=rng,
         exposure_rates=exposure_rates,
+        response_vector=response_vector,
       )
       if candidate is None:
         raise NoItemsAvailableError("No item passed Sympson-Hetter filter.")
