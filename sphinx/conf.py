@@ -76,7 +76,7 @@ release = version
 
 language = "en"
 
-exclude_patterns = ["_build", "readme_head.md", "readme_body.md", "api/techniques/_templates"]
+exclude_patterns = ["_build", "readme_head.md", "readme_body.md"]
 
 pygments_style = "sphinx"
 
