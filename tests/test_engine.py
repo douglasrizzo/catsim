@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
+import dataclasses
+from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
 import pytest
@@ -13,7 +14,7 @@ from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import RandomSelector
-from catsim.state import CatSessionState, ExposureTracker, SessionStatus, StopReason
+from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 
 
@@ -188,15 +189,16 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   assert session.current_theta == pytest.approx(1.25)
   assert session.true_theta == pytest.approx(-0.5)
   assert session.theta_history == [pytest.approx(1.25)]
-  assert session.status == SessionStatus.IN_PROGRESS
+  assert session.stop_reason is None
 
 
 def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   """Stopping checks should forward the item bank, administered items, and latest theta."""
   stopper = RecordingStopper(should_stop=True)
   engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
-  state = CatSessionState(session_id=3, current_theta=1.75)
-  state.administered_item_ids.extend([2, 4])
+  state = CatSessionState(
+    session_id=3, theta_history=[0.0, 0.5, 1.75], administered_item_ids=[2, 4], responses=[True, True]
+  )
 
   stopped = engine.should_stop(state, item_bank)
 
@@ -216,8 +218,9 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   rng = np.random.default_rng(99)
   context = RunContext(rng=rng, exposure_tracker=tracker, total_sessions=4)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  state = CatSessionState(session_id=0, current_theta=-0.25)
-  state.administered_item_ids.extend([1, 2])
+  state = CatSessionState(
+    session_id=0, theta_history=[0.0, 0.5, -0.25], administered_item_ids=[1, 2], responses=[True, False]
+  )
 
   selected = engine.select_next(state, item_bank, context)
 
@@ -237,7 +240,7 @@ def test_select_next_passes_none_exposure_rates_without_total_sessions(item_bank
   rng = np.random.default_rng(11)
   context = RunContext(rng=rng, exposure_tracker=tracker, total_sessions=None)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  state = CatSessionState(session_id=0, current_theta=0.5)
+  state = CatSessionState(session_id=0, theta_history=[0.5])
 
   selected = engine.select_next(state, item_bank, context)
 
@@ -262,18 +265,16 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert estimator.seen_administered_items == [3]
   assert estimator.seen_response_vector == [True]
   assert estimator.seen_theta == pytest.approx(0.0)
-  assert session.status == SessionStatus.IN_PROGRESS
   assert session.stop_reason is None
   assert result.selected_item_id == 3
   assert result.response is True
   assert result.updated_theta == pytest.approx(1.1)
   assert result.stopped is False
   assert result.stop_reason is None
-  assert result.session.status == SessionStatus.IN_PROGRESS
   assert result.session.stop_reason is None
-  assert result.session.administered_item_ids == [3]
-  assert result.session.responses == [True]
-  assert result.session.theta_history == [0.0, pytest.approx(1.1)]
+  assert result.session.administered_item_ids == (3,)
+  assert result.session.responses == (True,)
+  assert result.session.theta_history == pytest.approx((0.0, 1.1))
 
 
 def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
@@ -289,12 +290,10 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
 
   result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
 
-  assert session.status == SessionStatus.STOPPED
   assert session.stop_reason is StopReason.STOPPER
   assert result.stopped is True
   assert result.stop_reason is StopReason.STOPPER
   assert result.updated_theta == pytest.approx(0.3)
-  assert result.session.status == SessionStatus.STOPPED
   assert result.session.stop_reason is StopReason.STOPPER
 
 
@@ -419,28 +418,82 @@ def test_apply_response_rejects_an_item_index_that_is_not_an_integer(item_bank, 
   assert session == before
 
 
-def test_apply_response_returns_immutable_session_snapshot(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
-) -> None:
-  """Step results should preserve the session state observed at that step."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
+def test_a_session_rebuilt_from_a_snapshot_takes_the_next_step(item_bank) -> None:
+  """A session rebuilt from a snapshot's fields continues like the original, and the snapshot stays as it was.
+
+  Fails if the rebuilt state keeps the snapshot's tuples: apply_response appended the item and the response,
+  then failed on the history tuple, leaving a step half-applied and the item impossible to retry.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  snapshot = session.snapshot()
+  rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
+
+  engine.apply_response(rebuilt, item_bank, item_id=4, response=False, context=context)
+
+  assert (rebuilt.administered_item_ids, rebuilt.responses, rebuilt.theta_history) == (
+    [3, 4],
+    [True, False],
+    [0.0, 0.5, 0.5],
+  )
+  assert (snapshot.administered_item_ids, snapshot.responses, snapshot.theta_history) == ((3,), (True,), (0.0, 0.5))
+
+
+def test_a_step_result_keeps_the_session_as_the_step_left_it(item_bank) -> None:
+  """A step result's snapshot does not change when the session takes further steps.
+
+  Fails if the snapshot shares the session's lists, so the next response also shows up in the
+  earlier result.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
   first = engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
-  session.metadata["phase"] = "mutated"
   second = engine.apply_response(session, item_bank, item_id=1, response=False, context=context)
 
-  assert first.session.administered_item_ids == [0]
-  assert first.session.responses == [True]
-  assert len(first.session.theta_history) == 2
-  assert first.session.metadata == {}
-  assert second.session.administered_item_ids == [0, 1]
-  assert second.session.responses == [True, False]
+  assert (first.session.administered_item_ids, first.session.responses) == ((0,), (True,))
+  assert first.session.theta_history == (0.0, 0.5)
+  assert (second.session.administered_item_ids, second.session.responses) == ((0, 1), (True, False))
+  assert second.session.theta_history == (0.0, 0.5, 0.5)
+
+
+def test_a_step_result_cannot_be_changed(item_bank) -> None:
+  """Neither a step result's fields nor the sequences in its session snapshot can be changed.
+
+  Fails if CatStepResult is not frozen, or if the snapshot holds lists: ADR-0005 promises immutable
+  step results, but ``result.response = False`` and ``result.session.responses.append(True)`` both
+  worked.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  result = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+
+  with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
+    result.response = False  # type: ignore[misc]
+  for sequence in (result.session.administered_item_ids, result.session.responses, result.session.theta_history):
+    with pytest.raises(AttributeError, match="object has no attribute 'append'"):
+      sequence.append(sequence[0])  # type: ignore[attr-defined]
+  assert (result.session.administered_item_ids, result.session.responses) == ((3,), (True,))
+
+
+def test_snapshots_of_the_same_session_state_are_equal_and_hash_alike(item_bank) -> None:
+  """A snapshot is hashable: two snapshots of one state collapse into one set member, and a later state does not.
+
+  Fails if a snapshot field is a list or a dict, which made ``hash(snapshot)`` raise TypeError.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  first = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  same_state = session.snapshot()
+  engine.apply_response(session, item_bank, item_id=4, response=False, context=context)
+
+  assert hash(first.session) == hash(same_state)
+  assert len({first.session, same_state, session.snapshot()}) == 2
 
 
 def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> None:
@@ -474,7 +527,6 @@ def test_run_session_stops_at_fixed_length(
 
   final_session = engine.run_session(session, item_bank, FixedResponseProvider(True), context)
 
-  assert final_session.status == SessionStatus.STOPPED
   assert final_session.stop_reason is StopReason.STOPPER
   assert len(final_session.administered_item_ids) == 3
 
@@ -506,9 +558,9 @@ def test_select_next_passes_response_history(
   selector = RecordingSelector(item_id=2)
   engine = CatEngine(fixed_initializer, selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42), total_sessions=10)
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  session.administered_item_ids.extend([0, 1])
-  session.responses.extend([True, False])
+  session = CatSessionState(
+    session_id=0, theta_history=[0.0, 0.5, 0.2], administered_item_ids=[0, 1], responses=[True, False]
+  )
 
   selected = engine.select_next(session, item_bank, context)
 
@@ -520,7 +572,7 @@ def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
   """Simulated responses require a true theta on the session."""
   provider = SimulatedResponseProvider()
   context = RunContext(rng=np.random.default_rng(42))
-  state = CatSessionState(session_id=0, current_theta=0.0)
+  state = CatSessionState(session_id=0, theta_history=[0.0])
 
   with pytest.raises(ValueError, match="true_theta is required") as exc_info:
     provider.answer(state, item_bank, 0, context)
@@ -551,7 +603,7 @@ def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_pro
   item_bank = ItemBank(
     np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
   )
-  state = CatSessionState(session_id=0, current_theta=-1.5, true_theta=1.5)
+  state = CatSessionState(session_id=0, theta_history=[-1.5], true_theta=1.5)
   context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
 
   assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
@@ -604,9 +656,7 @@ def test_apply_response_rejects_duplicate_items(
   """A session cannot administer the same item twice."""
   engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  session.administered_item_ids.append(0)
-  session.responses.append(True)
+  session = CatSessionState(session_id=0, theta_history=[0.0, 0.5], administered_item_ids=[0], responses=[True])
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
     engine.apply_response(session, item_bank, 0, False, context)
@@ -629,9 +679,7 @@ def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank
   assert (result.stopped, result.selected_item_id, result.response) == (True, None, None)
   assert result.updated_theta == pytest.approx(0.4)
   assert result.stop_reason is StopReason.STOPPER
-  assert result.session.status == SessionStatus.STOPPED
   assert result.session.stop_reason is StopReason.STOPPER
-  assert session.status == SessionStatus.STOPPED
   assert session.stop_reason is StopReason.STOPPER
 
 
@@ -647,5 +695,4 @@ def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank, s
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
   assert engine.select_next(session, item_bank, context) is None
-  assert session.status == SessionStatus.STOPPED
   assert session.stop_reason is StopReason.NO_ITEMS

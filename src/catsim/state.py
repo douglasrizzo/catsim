@@ -4,23 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy
 
 from . import cat
 
 if TYPE_CHECKING:
+  from collections.abc import Hashable
+
   from ._typing import FloatArray, IntArray
   from .item_bank import ItemBank
-
-
-class SessionStatus(StrEnum):
-  """Lifecycle state for a CAT session."""
-
-  NOT_STARTED = "not_started"
-  IN_PROGRESS = "in_progress"
-  STOPPED = "stopped"
 
 
 class StopReason(StrEnum):
@@ -37,73 +31,126 @@ class StopReason(StrEnum):
 
 @dataclass(slots=True)
 class CatSessionState:
-  """Mutable runtime state for a single examinee CAT session."""
+  """Mutable runtime state for a single examinee CAT session.
 
-  session_id: int
-  current_theta: float
+  ``session_id`` is whatever hashable value the application identifies the session by, such as an
+  int, a str or a UUID. ``theta_history`` starts with the initial estimate and gains one estimate
+  per response; its last entry is the current estimate. A session runs while ``stop_reason`` is
+  None.
+
+  Raises
+  ------
+  ValueError
+      If the session does not have one response per administered item and one more estimate than
+      responses, or if ``stop_reason`` is not a :class:`StopReason` value.
+  """
+
+  session_id: Hashable
+  theta_history: list[float]
   true_theta: float | None = None
   administered_item_ids: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
-  theta_history: list[float] = field(default_factory=list)
-  status: SessionStatus = SessionStatus.NOT_STARTED
   stop_reason: StopReason | None = None
-  metadata: dict[str, Any] = field(default_factory=dict)
 
   def __post_init__(self) -> None:
-    """Seed theta history with the initial theta when no history is provided."""
-    if not self.theta_history:
-      self.theta_history.append(self.current_theta)
+    """Take its own copy of the histories and reject a session whose entries do not line up."""
+    # The engine appends to these lists, so they must be lists the session owns: a snapshot's tuples
+    # would fail half-way through a step, and a caller's lists would change under the caller.
+    self.administered_item_ids = list(self.administered_item_ids)
+    self.responses = list(self.responses)
+    self.theta_history = list(self.theta_history)
+    if self.stop_reason is not None:
+      # A stop reason restored from storage comes back as its string value.
+      self.stop_reason = StopReason(self.stop_reason)
+    n_responses = len(self.responses)
+    if len(self.administered_item_ids) != n_responses:
+      msg = (
+        f"Session {self.session_id} needs one response per administered item, got "
+        f"len(administered_item_ids)={len(self.administered_item_ids)} and len(responses)={n_responses}"
+      )
+      raise ValueError(msg)
+    if len(self.theta_history) != n_responses + 1:
+      msg = (
+        f"Session {self.session_id} needs the initial estimate and one estimate per response in "
+        f"theta_history, got len(theta_history)={len(self.theta_history)} and len(responses)={n_responses}"
+      )
+      raise ValueError(msg)
+
+  @property
+  def current_theta(self) -> float:
+    """Return the current ability estimate, the last entry of ``theta_history``."""
+    return self.theta_history[-1]
+
+  @property
+  def is_stopped(self) -> bool:
+    """Return whether the session has ended."""
+    return self.stop_reason is not None
 
   @property
   def administered_count(self) -> int:
     """Return the number of administered items."""
     return len(self.administered_item_ids)
 
-  @property
-  def latest_theta(self) -> float:
-    """Return the latest theta estimate."""
-    return self.theta_history[-1]
-
   def snapshot(self) -> CatSessionSnapshot:
-    """Return an immutable snapshot of the current session state."""
+    """Return an immutable copy of the current session state."""
     return CatSessionSnapshot(
       session_id=self.session_id,
-      current_theta=self.current_theta,
+      theta_history=tuple(self.theta_history),
       true_theta=self.true_theta,
-      administered_item_ids=self.administered_item_ids.copy(),
-      responses=self.responses.copy(),
-      theta_history=self.theta_history.copy(),
-      status=self.status,
+      administered_item_ids=tuple(self.administered_item_ids),
+      responses=tuple(self.responses),
       stop_reason=self.stop_reason,
-      metadata=self.metadata.copy(),
     )
 
 
 @dataclass(slots=True, frozen=True)
 class CatSessionSnapshot:
-  """Immutable snapshot of a session at a specific point in time."""
+  """Immutable, hashable copy of a session at a specific point in time."""
 
-  session_id: int
-  current_theta: float
+  session_id: Hashable
+  theta_history: tuple[float, ...]
   true_theta: float | None
-  administered_item_ids: list[int]
-  responses: list[bool]
-  theta_history: list[float]
-  status: SessionStatus
+  administered_item_ids: tuple[int, ...]
+  responses: tuple[bool, ...]
   stop_reason: StopReason | None
-  metadata: dict[str, Any]
+
+  @property
+  def current_theta(self) -> float:
+    """Return the ability estimate at the time of the snapshot."""
+    return self.theta_history[-1]
+
+  @property
+  def is_stopped(self) -> bool:
+    """Return whether the session had ended at the time of the snapshot."""
+    return self.stop_reason is not None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatStepResult:
-  """Result of applying one CAT step."""
+  """Result of one CAT step: the item administered, its response and the session as the step left it.
+
+  ``selected_item_id`` and ``response`` are None for a step that administered nothing because the
+  session had ended.
+  """
 
   session: CatSessionSnapshot
   selected_item_id: int | None
   response: bool | None
-  updated_theta: float
-  stopped: bool
-  stop_reason: StopReason | None = None
+
+  @property
+  def updated_theta(self) -> float:
+    """Return the ability estimate after the step."""
+    return self.session.current_theta
+
+  @property
+  def stopped(self) -> bool:
+    """Return whether the session had ended by the end of the step."""
+    return self.session.is_stopped
+
+  @property
+  def stop_reason(self) -> StopReason | None:
+    """Return why the session ended, or None if it is still running."""
+    return self.session.stop_reason
 
 
 @dataclass(slots=True)
@@ -163,7 +210,7 @@ class SimulationResult:
   @property
   def latest_estimations(self) -> list[float]:
     """Return final theta estimates for each session."""
-    return [session.latest_theta for session in self.sessions]
+    return [session.current_theta for session in self.sessions]
 
   @property
   def examinees(self) -> FloatArray:

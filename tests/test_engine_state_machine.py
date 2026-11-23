@@ -22,7 +22,7 @@ from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
-from catsim.state import CatSessionState, SessionStatus, StopReason
+from catsim.state import CatSessionState, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -118,7 +118,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
       context=self.context,
       true_theta=0.0,
     )
-    assert self.session.status == SessionStatus.IN_PROGRESS
+    assert self.session.stop_reason is None
     assert self.session.current_theta == 0.0
     assert len(self.session.theta_history) == 1
 
@@ -126,7 +126,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
   def step(self) -> None:
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_item_ids)
-    was_stopped = self.session.status == SessionStatus.STOPPED
+    was_stopped = self.session.is_stopped
     prev_reason = self.session.stop_reason
     result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
     if was_stopped:
@@ -135,7 +135,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
       assert result.selected_item_id is None
       assert len(self.session.administered_item_ids) == prev_admin
       assert self.session.stop_reason == prev_reason
-    elif self.session.status == SessionStatus.IN_PROGRESS:
+    elif not self.session.is_stopped:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
         assert len(self.session.administered_item_ids) == prev_admin + 1
@@ -154,8 +154,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     assert len(s.responses) == len(s.administered_item_ids)
     assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
     assert len(s.theta_history) == 1 + len(s.administered_item_ids)
-    if s.status == SessionStatus.STOPPED:
-      assert s.stop_reason is StopReason.STOPPER
+    assert s.stop_reason in {None, StopReason.STOPPER}
 
 
 class CatEngineIntegrationMachine(RuleBasedStateMachine):
@@ -183,13 +182,13 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
       context=self.context,
       true_theta=0.25,
     )
-    assert self.session.status == SessionStatus.IN_PROGRESS
+    assert self.session.stop_reason is None
 
   @rule()
   def step(self) -> None:
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_item_ids)
-    was_stopped = self.session.status == SessionStatus.STOPPED
+    was_stopped = self.session.is_stopped
     prev_reason = self.session.stop_reason
     result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
     if was_stopped:
@@ -197,7 +196,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
       assert result.selected_item_id is None
       assert len(self.session.administered_item_ids) == prev_admin
       assert self.session.stop_reason == prev_reason
-    elif self.session.status == SessionStatus.IN_PROGRESS:
+    elif not self.session.is_stopped:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
         assert len(self.session.administered_item_ids) == prev_admin + 1
@@ -216,8 +215,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     assert len(s.responses) == len(s.administered_item_ids)
     assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
     assert len(s.theta_history) == 1 + len(s.administered_item_ids)
-    if s.status == SessionStatus.STOPPED:
-      assert s.stop_reason is StopReason.STOPPER
+    assert s.stop_reason in {None, StopReason.STOPPER}
 
 
 def test_cat_engine_orchestration_state_machine() -> None:
