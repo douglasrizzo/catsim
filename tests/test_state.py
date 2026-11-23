@@ -57,14 +57,50 @@ def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> Non
     CatSessionState(session_id=0, theta_history=[0.0], stop_reason=persisted["unknown"])
 
 
-def test_exposure_tracker_returns_zero_rates_for_non_positive_session_counts() -> None:
-  """Exposure rates should stay zero when no sessions have been completed."""
+def test_exposure_tracker_gives_each_session_the_rates_of_the_sessions_before_it() -> None:
+  """A session sees each item's share of the sessions started before it, as catR does, from start to end.
+
+  Three sessions administer [0, 1], [0, 2] and [0, 3] on a 4-item bank, and a fourth starts. Fails if the first
+  session sees anything but zeros, if the rates divide by a count that includes the session in progress (the
+  second session would see 0.5 for items 0 and 1), or if a session's own administrations change the rates of the
+  items it can still be offered.
+  """
   tracker = ExposureTracker(4)
-  tracker.record(1)
+  assert tracker.rates().tolist() == [0.0, 0.0, 0.0, 0.0]
+
+  at_start, offered_at_end = [], []
+  for items in ([0, 1], [0, 2], [0, 3], []):
+    tracker.start_session()
+    at_start.append(tracker.rates())
+    for item_id in items:
+      tracker.record(item_id)
+    offered_at_end.append(np.delete(tracker.rates(), items))
+
+  expected = [[0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 0.0, 0.0], [1.0, 0.5, 0.5, 0.0], [1.0, 1 / 3, 1 / 3, 1 / 3]]
+  assert np.allclose(at_start, expected)
+  for rates, offered, items in zip(expected, offered_at_end, ([0, 1], [0, 2], [0, 3], []), strict=True):
+    assert np.allclose(offered, np.delete(rates, items))
+  assert tracker.n_sessions == 4
+  assert tracker.counts.tolist() == [3, 1, 1, 1]
+
+
+def test_exposure_tracker_gives_sessions_side_by_side_each_others_administrations_over_the_others() -> None:
+  """Sessions that run side by side see each other's administrations as they happen, never counting themselves.
+
+  Session P gives item 0, then A starts, then B starts and gives item 1, all on one tracker. A is selected
+  against item 0 from P and item 1 from B, each over the two other sessions. Fails if the rates stay as they
+  were when the latest session started ([0.5, 0, 0], item 1 missing), or if A is in its own denominator.
+  """
+  tracker = ExposureTracker(3)
+  tracker.start_session()
+  tracker.record(0)
+  tracker.start_session()
+  assert tracker.rates().tolist() == [1.0, 0.0, 0.0]
+
+  tracker.start_session()
   tracker.record(1)
 
-  assert np.array_equal(tracker.rates(0), np.zeros(4))
-  assert np.array_equal(tracker.rates(-1), np.zeros(4))
+  assert tracker.rates().tolist() == [0.5, 0.5, 0.0]
 
 
 def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
@@ -88,7 +124,11 @@ def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
 
 
 def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
-  """Empty simulation results should expose safe default aggregates."""
+  """A result with no sessions has zero exposure rates and no overlap rate.
+
+  Fails if exposure_rates divides the counts by zero sessions (NaN, with a warning that the test settings turn into
+  an error), or if overlap_rate computes a number for a run without tests.
+  """
   result = SimulationResult(
     item_bank=item_bank,
     sessions=[],

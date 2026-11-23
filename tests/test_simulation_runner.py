@@ -161,10 +161,12 @@ class TestSimulationRunnerRun:
     assert verbose.latest_estimations == pytest.approx(quiet.latest_estimations)
 
   def test_each_session_sees_the_exposure_of_the_sessions_before_it(self, item_bank: ItemBank) -> None:
-    """Selectors see the share of examinees in the whole run who were already given each item.
+    """The runner shares one tracker across its sessions, so each sees the exposure of the examinees before it.
 
-    Exposure control (``r_max``) works only if the tracker is shared across sessions and divided by the
-    number of examinees in the run.
+    Every session administers items 0 and 1, so from the second session on both have gone to every earlier
+    examinee: rate 1 whenever the session can still be offered them. Fails if each session gets a fresh tracker
+    (rates stay 0), or if the rates divide by the planned number of examinees (0.25, 0.5, 0.75) or count the
+    session in progress (0.5, 0.67, 0.75).
     """
     selector = FirstRemainingSelector()
     runner = SimulationRunner(
@@ -173,10 +175,12 @@ class TestSimulationRunnerRun:
 
     result = runner.run(np.zeros(4))
 
-    # every session administers items 0 and 1, so the selector runs twice per session
-    first_calls = selector.seen_exposure_rates[::2]
-    assert [rates[:2].tolist() for rates in first_calls] == [[0.0, 0.0], [0.25, 0.25], [0.5, 0.5], [0.75, 0.75]]
-    assert not any(rates[2:].any() for rates in first_calls)
+    # The selector runs twice per session; at its second run the session has given item 0, which it is not
+    # offered again, so only item 1's rate counts there.
+    first_runs, second_runs = selector.seen_exposure_rates[0::2], selector.seen_exposure_rates[1::2]
+    assert [rates[:2].tolist() for rates in first_runs] == [[0.0, 0.0]] + [[1.0, 1.0]] * 3
+    assert [float(rates[1]) for rates in second_runs] == [0.0, 1.0, 1.0, 1.0]
+    assert not any(rates[2:].any() for rates in selector.seen_exposure_rates)
     assert result.exposure_rates[:2].tolist() == [1.0, 1.0]
 
 

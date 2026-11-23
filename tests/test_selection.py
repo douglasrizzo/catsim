@@ -240,6 +240,20 @@ class TestMaxInfoSelector:
 
     assert selected == 2
 
+  def test_the_default_cap_of_1_holds_back_no_item(self) -> None:
+    """r_max = 1 applies no cap, as in catR, even to an item every earlier examinee received.
+
+    Such an item has a rate of exactly 1. Fails if the strict ``rate < r_max`` test passes it over, which made the
+    default selector give the second examinee none of the first examinee's items.
+    """
+    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
+
+    selected = MaxInfoSelector().select(
+      item_bank=item_bank, administered_items=[], est_theta=0.0, exposure_rates=np.array([0.0, 1.0, 0.0, 0.0])
+    )
+
+    assert selected == 1
+
   def test_select_ignores_the_cap_when_every_item_is_over_it(self) -> None:
     """With every remaining item at or over r_max, the most informative one is still administered."""
     item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
@@ -1131,6 +1145,16 @@ class TestClusterSelector:
     exposure_rates[13] = 0.9
 
     assert self._select([], exposure_rates, method="weighted_info", r_max=0.5) == 12
+
+  def test_the_default_cap_of_1_holds_back_no_item(self) -> None:
+    """r_max = 1 applies no cap inside the cluster, even to an item every earlier examinee received (rate 1).
+
+    Fails if the strict ``rate < r_max`` test passes item 13 over for the less informative item 12.
+    """
+    exposure_rates = np.zeros(len(self.CLUSTERS))
+    exposure_rates[13] = 1.0
+
+    assert self._select([], exposure_rates, method="weighted_info") == 13
 
   @pytest.mark.parametrize(
     ("rates", "r_control", "expected"),

@@ -57,15 +57,18 @@ def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: fl
   exposure_rates : numpy.ndarray or None
       Run-level exposure rate of every item in the bank. ``None`` treats every item as unexposed.
   r_max : float
-      Maximum exposure rate. Candidates at or above it are kept only when every candidate is.
+      Maximum exposure rate. Candidates at or above it are kept only when every candidate is. 1
+      applies no cap.
 
   Returns
   -------
   numpy.ndarray
       The candidates whose exposure rate is below ``r_max``, in their order in ``candidates``, or
-      ``candidates`` itself if none is below it.
+      ``candidates`` itself if none is below it or ``r_max`` is 1.
   """
-  if exposure_rates is None:
+  # As in catR, a cap of 1 is no cap: an item that every earlier examinee received has a rate of
+  # exactly 1, which the strict comparison below would pass over.
+  if exposure_rates is None or r_max >= 1:
     return candidates
   allowed = candidates[exposure_rates[candidates] < r_max]
   return allowed if allowed.size > 0 else candidates

@@ -75,7 +75,7 @@ class SimulationRunner:
     """Run a CAT simulation for the given examinees."""
     thetas = self._to_distribution(examinees)
     tracker = ExposureTracker(self._item_bank.n_items)
-    context = RunContext(rng=self._rng, exposure_tracker=tracker, total_sessions=len(thetas))
+    context = RunContext(rng=self._rng, exposure_tracker=tracker)
     response_provider = SimulatedResponseProvider()
     sessions = []
 

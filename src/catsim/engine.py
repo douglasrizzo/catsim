@@ -24,11 +24,15 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class RunContext:
-  """Runtime services shared by CAT sessions in one run."""
+  """Runtime services shared by CAT sessions in one run.
+
+  ``exposure_tracker`` counts sessions and item administrations across the run and gives selectors
+  the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and
+  apply no cap.
+  """
 
   rng: numpy.random.Generator
   exposure_tracker: ExposureTracker | None = None
-  total_sessions: int | None = None
 
 
 class ResponseProvider(Protocol):
@@ -76,8 +80,30 @@ class CatEngine:
     context: RunContext,
     true_theta: float | None = None,
   ) -> CatSessionState:
-    """Create a new CAT session with an initial theta estimate."""
+    """Create a new CAT session with an initial theta estimate.
+
+    The session is counted in the context's exposure tracker, if it has one, once the initializer
+    has succeeded.
+
+    Parameters
+    ----------
+    session_id : Hashable
+        Identifier of the session, such as an int, a str or a UUID.
+    item_bank : ItemBank
+        Item bank used by the session.
+    context : RunContext
+        Runtime services of the run.
+    true_theta : float or None, optional
+        True ability of a simulated examinee. Default is None.
+
+    Returns
+    -------
+    CatSessionState
+        A running session whose theta history holds the initial estimate.
+    """
     initial_theta = float(self._initializer.initialize(item_bank=item_bank, rng=context.rng))
+    if context.exposure_tracker is not None:
+      context.exposure_tracker.start_session()
     return CatSessionState(session_id=session_id, theta_history=[initial_theta], true_theta=true_theta)
 
   def should_stop(self, state: CatSessionState, item_bank: ItemBank) -> bool:
@@ -122,9 +148,7 @@ class CatEngine:
       state.stop_reason = StopReason.STOPPER
       return None
 
-    exposure_rates = None
-    if context.exposure_tracker is not None and context.total_sessions is not None:
-      exposure_rates = context.exposure_tracker.rates(context.total_sessions)
+    exposure_rates = None if context.exposure_tracker is None else context.exposure_tracker.rates()
     try:
       item_id = self._selector.select(
         item_bank=item_bank,
