@@ -84,7 +84,7 @@ class MLWISelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,  # noqa: ARG002
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
@@ -99,7 +99,8 @@ class MLWISelector(BaseSelector):
     est_theta : float
         Unused; MLWI weights by the whole likelihood rather than a point estimate.
     rng : numpy.random.Generator or None, optional
-        Unused; MLWI is deterministic.
+        Random number generator, used only to break ties between candidates with equal scores
+        (ADR-0008).
     exposure_rates : numpy.ndarray or None, optional
         Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
     response_vector : list[bool] or None, optional
@@ -113,7 +114,7 @@ class MLWISelector(BaseSelector):
     Raises
     ------
     ValueError
-        If ``response_vector`` is None.
+        If ``response_vector`` is None, or if candidates tie for the best score and ``rng`` is None.
     NoItemsAvailableError
         If every item has already been administered.
     """
@@ -131,4 +132,4 @@ class MLWISelector(BaseSelector):
     # information of every candidate at every node, one row per node
     info = irt.inf_hpc(self._nodes[:, None], item_bank.items[candidates, :4])
     scores = (weights @ info) * self._delta
-    return int(candidates[int(scores.argmax())])
+    return self._pick_best(candidates, scores, rng)

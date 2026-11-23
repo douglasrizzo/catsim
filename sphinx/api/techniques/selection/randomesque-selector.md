@@ -7,7 +7,9 @@
 
 `RandomesqueSelector` ranks non-administered items by Fisher information at
 the current ability estimate, keeps the top `bin_size` candidates, and then
-selects uniformly at random from that candidate set.
+selects uniformly at random from that candidate set. Items tied in information
+with the last of those candidates also join the set, as in catR
+({doc}`/adr/0008-random-tie-breaking`).
 
 The technique relaxes maximum-information selection by adding controlled
 randomness among the most informative items. Unlike the

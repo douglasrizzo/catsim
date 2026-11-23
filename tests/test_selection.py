@@ -1,5 +1,8 @@
 """Tests for catsim.selection module."""
 
+import importlib
+import inspect
+from collections.abc import Callable
 from itertools import pairwise
 
 import numpy as np
@@ -14,14 +17,18 @@ from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
+  BaseSelector,
   ClusterSelector,
   IntervalInfoSelector,
+  KLSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
   MaxInfoSelector,
   MaxInfoStratSelector,
   MEISelector,
   MLWISelector,
+  ProgressiveSelector,
+  ProportionalSelector,
   RandomesqueSelector,
   RandomSelector,
   The54321Selector,
@@ -66,6 +73,54 @@ def _two_pl_bank(discriminations: list[float], difficulties: list[float]) -> Ite
   """Build a 2PL bank, whose item information at theta is a^2 P (1 - P)."""
   n_items = len(discriminations)
   return ItemBank(np.column_stack([discriminations, difficulties, np.zeros(n_items), np.ones(n_items)]))
+
+
+class _DeterministicRNG:
+  """Deterministic stand-in for numpy's Generator in selector tests."""
+
+  def __init__(self, uniform_values: list[float] | np.ndarray) -> None:
+    self._uniform_values = np.asarray(uniform_values, dtype=float)
+    self.choice_calls: list[tuple[np.ndarray, np.ndarray | None]] = []
+
+  def uniform(
+    self,
+    low: float = 0.0,  # noqa: ARG002
+    high: float = 1.0,  # noqa: ARG002
+    size: int | tuple[int, ...] | None = None,
+  ) -> float | np.ndarray:
+    if size is None:
+      return float(self._uniform_values[0])
+    expected_size = int(np.prod(size)) if isinstance(size, tuple) else int(size)
+    if expected_size != self._uniform_values.size:
+      msg = f"expected {expected_size} uniform values, got {self._uniform_values.size}"
+      raise ValueError(msg)
+    return self._uniform_values.copy()
+
+  def choice(self, a: np.ndarray | list[int], p: np.ndarray | None = None) -> int:
+    candidate_indices = np.asarray(a, dtype=int)
+    probabilities = None if p is None else np.asarray(p, dtype=float)
+    self.choice_calls.append((
+      candidate_indices.copy(),
+      probabilities.copy() if probabilities is not None else None,
+    ))
+    if probabilities is None:
+      return int(candidate_indices[0])
+    return int(candidate_indices[int(probabilities.argmax())])
+
+
+def _progressive_item_bank() -> ItemBank:
+  """Create a small bank with a clear information ranking at theta=0."""
+  return ItemBank(
+    np.array(
+      [
+        [1.0, -3.0, 0.0, 1.0],
+        [1.0, -1.0, 0.0, 1.0],
+        [1.0, 1.0, 0.0, 1.0],
+        [2.0, 0.0, 0.0, 1.0],
+      ],
+      dtype=float,
+    )
+  )
 
 
 class TestMaxInfoSelector:
@@ -816,6 +871,119 @@ class TestMLWISelector:
     assert mlwi_choice == max_info_choice
 
 
+class TestKLSelector:
+  """Tests for KLSelector."""
+
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"c": 0.0}, "c must be positive", id="zero_c"),
+      pytest.param({"c": -1.0}, "c must be positive", id="negative_c"),
+      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
+    ],
+  )
+  def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
+    """A window of zero width would make every item's KL integral 0 and the pick a random tie."""
+    with pytest.raises(ValueError, match=match):
+      KLSelector(**kwargs)
+
+  def test_kl_integrand_is_exact_where_the_probability_rounds_to_one(self) -> None:
+    """Test the KL integrand for an item whose correct-response probability rounds to 1.
+
+    At theta_hat = b, P = 1/2, and at a logit of z = 40 the divergence is
+    -log 2 + z/2 + log(1 + e^-z). Computing log(1 - P) after P rounds to 1 caps the
+    second term, so this guards the logit-based log-probabilities.
+    """
+    kl_module = importlib.import_module("catsim.selection.kl")
+    z = 40.0
+    value = kl_module.__dict__["_kl_integrand"](4.0, 0.0, 10.0, 0.0, 0.0, 1.0)
+    assert value == pytest.approx(-np.log(2.0) + z / 2 + np.log1p(np.exp(-z)), rel=1e-12)
+
+  @pytest.mark.parametrize(
+    "item",
+    [
+      pytest.param((1.0, 0.0, 0.0, 1.0), id="2pl"),
+      pytest.param((1.5, 0.3, 0.2, 1.0), id="3pl"),
+      pytest.param((1.2, -0.5, 0.0, 0.9), id="4pl_without_guessing"),
+      pytest.param((1.8, 0.4, 0.15, 0.85), id="4pl"),
+    ],
+  )
+  @pytest.mark.parametrize(("theta", "theta_hat"), [(-2.0, 1.0), (0.5, -0.5), (3.0, 2.5)])
+  def test_kl_integrand_matches_the_bernoulli_divergence(
+    self, item: tuple[float, float, float, float], theta: float, theta_hat: float
+  ) -> None:
+    """Test the logit-based integrand against P-hat log(P-hat/P) + Q-hat log(Q-hat/Q).
+
+    The c = 0 and d = 1 cases reach the logaddexp branches with an infinite term, the
+    others with two finite ones, so this covers every path of the log-probabilities.
+    """
+    kl_module = importlib.import_module("catsim.selection.kl")
+    p_hat, p = irt.icc(theta_hat, *item), irt.icc(theta, *item)
+    expected = p_hat * np.log(p_hat / p) + (1 - p_hat) * np.log((1 - p_hat) / (1 - p))
+
+    value = kl_module.__dict__["_kl_integrand"](theta, theta_hat, *item)
+
+    assert value == pytest.approx(expected, rel=1e-10, abs=1e-14)
+
+  @pytest.mark.parametrize("n_administered", [0, 1, 4, 9])
+  def test_select_maximizes_kl_over_a_window_shrinking_with_the_test(self, n_administered: int) -> None:
+    """The pick has the largest KL integral over theta_hat +- c / sqrt(max(1, n)) among the remaining items.
+
+    The reference integrates the Bernoulli divergence, written out in the test, with the trapezoid rule.
+    It fails if the window ignores the number of administered items, shrinks it by n instead of sqrt(n),
+    or integrates over the wrong interval.
+    """
+    rng = np.random.default_rng(n_administered)
+    for _ in range(10):
+      item_bank = ItemBank.generate_item_bank(25, itemtype="3PL", seed=int(rng.integers(1_000_000)))
+      administered = [int(idx) for idx in rng.choice(25, n_administered, replace=False)]
+      theta_hat = float(rng.uniform(-1.5, 1.5))
+      half_width = 2.0 / np.sqrt(max(1, n_administered))
+      grid = np.linspace(theta_hat - half_width, theta_hat + half_width, 4001)
+      a, b, c, d = (item_bank.items[:, [k]] for k in range(4))
+      p = c + (d - c) / (1.0 + np.exp(-a * (grid - b)))
+      p_hat = c + (d - c) / (1.0 + np.exp(-a * (theta_hat - b)))
+      divergence = p_hat * np.log(p_hat / p) + (1.0 - p_hat) * np.log((1.0 - p_hat) / (1.0 - p))
+      reference = np.trapezoid(divergence, grid, axis=1)
+      reference[administered] = -np.inf
+
+      picked = KLSelector(c=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
+
+      assert reference[picked] == pytest.approx(reference.max(), rel=1e-6)
+
+  @pytest.mark.parametrize(("administered", "expected"), [([2], 1), ([2, 3, 4, 5], 0)])
+  def test_window_shrinks_with_the_square_root_of_the_test_length(self, administered: list[int], expected: int) -> None:
+    """With c = 2 the window is theta_hat +- 2 after one item and +- 1 after four.
+
+    At theta_hat = 0, item 0 (a = 1, b = 0) and item 1 (a = 4, b = 1.5) trade places as the window narrows:
+    their KL integrals are 0.610 and 0.869 over +- 2, 0.225 and 0.146 over +- 1.41, and 0.081 and 0.028
+    over +- 1. A window of c / sqrt(n + 1) would already prefer item 0 after one item.
+    """
+    filler = [1.0, 3.0, 0.0, 1.0]
+    item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [4.0, 1.5, 0.0, 1.0], filler, filler, filler, filler]))
+
+    assert KLSelector(c=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
+
+  def test_select_skips_items_at_the_exposure_cap(self) -> None:
+    """The item with the most KL information is passed over while its exposure rate is at r_max."""
+    item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0]]))
+    selector = KLSelector(c=0.5, r_max=0.5)
+
+    uncapped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0))
+    capped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0), exposure_rates=np.array([0.0, 0.5, 0.0]))
+
+    assert (uncapped, capped) == (1, 2)
+
+  def test_select_raises_when_exhausted(self) -> None:
+    """Test that select raises NoItemsAvailableError when all items are administered."""
+    item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
+
+    with pytest.raises(NoItemsAvailableError, match="no more items"):
+      KLSelector().select(
+        item_bank=item_bank, administered_items=[0, 1, 2], est_theta=0.0, rng=np.random.default_rng(42)
+      )
+
+
 class TestClusterSelector:
   """Tests for ClusterSelector."""
 
@@ -878,16 +1046,255 @@ class TestClusterSelector:
 
     assert self._select([], exposure_rates, method="weighted_info", r_max=0.5, r_control=r_control) == expected
 
+  def test_aggressive_control_breaks_exposure_ties_at_random(self) -> None:
+    """Items tied for the smallest exposure rate are drawn uniformly (ADR-0008)."""
+    item_bank = ItemBank.generate_item_bank(12, seed=4)
+    rates = np.full(12, 0.5)
+    rates[[3, 7, 9]] = 0.2
+    selector = ClusterSelector(clusters=[0] * 12, r_max=0.1, r_control="aggressive")
+
+    picks = {
+      selector.select(
+        item_bank=item_bank,
+        administered_items=[],
+        est_theta=0.0,
+        exposure_rates=rates,
+        rng=np.random.default_rng(seed),
+      )
+      for seed in range(40)
+    }
+
+    assert picks == {3, 7, 9}
+
+
+class TestProgressiveSelector:
+  """Tests for ProgressiveSelector."""
+
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"acceleration": 0.0}, "acceleration must be positive", id="zero_acceleration"),
+      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
+    ],
+  )
+  def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
+    """An acceleration of 0 would make the weight 1 from the first item, removing the random phase."""
+    with pytest.raises(ValueError, match=match):
+      ProgressiveSelector(test_size=10, **kwargs)
+
+  @pytest.mark.parametrize(
+    ("test_size", "acceleration", "position", "expected"),
+    [
+      pytest.param(10, 1.0, 1, 0.0, id="first_position"),
+      pytest.param(10, 1.0, 10, 1.0, id="last_position"),
+      pytest.param(9, 1.0, 5, 0.5, id="linear_midpoint"),
+      pytest.param(9, 2.0, 5, 0.25, id="acceleration_delays"),
+      pytest.param(9, 0.5, 5, 0.5**0.5, id="acceleration_hastens"),
+      pytest.param(5, 1.0, 6, 1.0, id="clamped_past_test_size"),
+      pytest.param(5, 1.0, 8, 1.0, id="clamped_well_past_test_size"),
+    ],
+  )
+  def test_weight_follows_the_position_schedule(
+    self, test_size: int, acceleration: float, position: int, expected: float
+  ) -> None:
+    """The weight on information is ((position - 1) / (test_size - 1)) ** acceleration, capped at 1.
+
+    FiniteSelector does not enforce test_size, and a weight above 1 past it would give the random
+    component a negative coefficient and penalize high random draws.
+    """
+    assert ProgressiveSelector(test_size=test_size, acceleration=acceleration)._weight(position) == pytest.approx(
+      expected
+    )
+
+  @pytest.mark.parametrize(
+    ("administered", "draws", "expected"),
+    [
+      pytest.param([], [0.1, 0.9, 0.2, 0.3], 1, id="first_position_follows_the_draws"),
+      pytest.param([0, 2], [0.1, 0.99, 0.2, 0.0], 3, id="last_position_follows_the_information"),
+    ],
+  )
+  def test_select_moves_from_the_draws_to_the_information(
+    self, administered: list[int], draws: list[float], expected: int
+  ) -> None:
+    """The largest random draw wins at the first position, the most informative item at the last.
+
+    Item 3 (a = 2, b = 0) is the most informative at theta = 0, with scaled information 1, against
+    0.197 for item 1. A weight of 0.5 at either end would flip the pick: 0.548 for item 1 against 0.65
+    for item 3 with the first draws, and 0.594 against 0.5 with the last ones.
+    """
+    selector = ProgressiveSelector(test_size=3)
+
+    selected = selector.select(_progressive_item_bank(), administered, 0.0, rng=_DeterministicRNG(draws))
+
+    assert selected == expected
+
+  def test_select_respects_exposure_cap(self) -> None:
+    """Test that the exposure cap is applied when possible."""
+    item_bank = _progressive_item_bank()
+    selector = ProgressiveSelector(test_size=3, acceleration=1.0, r_max=0.5)
+    exposure_rates = np.array([0.0, 0.0, 0.0, 1.0], dtype=float)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0, 1],
+      est_theta=0.0,
+      rng=_DeterministicRNG([0.1, 0.2, 0.3, 0.4]),
+      exposure_rates=exposure_rates,
+    )
+
+    assert selected == 2
+
+  def test_random_component_is_scaled_to_available_items(self) -> None:
+    """Both score components share the scale of the most informative available item.
+
+    Item 0 dominates the bank's information at theta=0 but is already administered. Normalizing
+    by the bank-wide maximum would shrink the remaining items' information toward 0 and let the
+    random draw decide (item 2); normalizing by the available maximum keeps the halfway blend
+    balanced, so the far more informative item 1 wins.
+    """
+    item_bank = ItemBank(
+      np.array(
+        [
+          [3.0, 0.0, 0.0, 1.0],
+          [1.0, 0.0, 0.0, 1.0],
+          [0.5, 0.0, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    selector = ProgressiveSelector(test_size=3, acceleration=1.0)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0],
+      est_theta=0.0,
+      rng=_DeterministicRNG([0.9, 0.1, 0.4]),
+    )
+
+    assert selected == 1
+
+
+class TestProportionalSelector:
+  """Tests for ProportionalSelector."""
+
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"acceleration": 0.0}, "acceleration must be positive", id="zero_acceleration"),
+      pytest.param({"sharpness": -1.0}, "sharpness must be non-negative", id="negative_sharpness"),
+      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
+    ],
+  )
+  def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
+    """A negative sharpness would favor the least informative items late in the test."""
+    with pytest.raises(ValueError, match=match):
+      ProportionalSelector(test_size=10, **kwargs)
+
+  def test_first_position_is_uniform_regardless_of_sharpness(self) -> None:
+    """Test that the first position is uniform for any sharpness.
+
+    Because the exponent is zero at the first step, the sampling distribution
+    must ignore item information even when sharpness is large.
+    """
+    item_bank = _progressive_item_bank()
+
+    for sharpness in (0.0, 12.0):
+      selector = ProportionalSelector(test_size=3, sharpness=sharpness)
+      rng = _DeterministicRNG([0.9, 0.8, 0.7, 0.6])
+
+      selected = selector.select(
+        item_bank=item_bank,
+        administered_items=[],
+        est_theta=0.0,
+        rng=rng,
+      )
+
+      assert selected == 0
+      _, probs = rng.choice_calls[0]
+      assert probs is not None
+      np.testing.assert_allclose(probs, np.full(4, 0.25))
+
+  def test_select_uses_weighted_information(self) -> None:
+    """Test that selection probabilities follow the weighted information formula."""
+    item_bank = _progressive_item_bank()
+    selector = ProportionalSelector(test_size=3, acceleration=1.0, sharpness=2.0)
+    rng = _DeterministicRNG([0.4, 0.3, 0.2, 0.1])
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0, 1],
+      est_theta=0.0,
+      rng=rng,
+    )
+
+    assert selected == 3
+    assert len(rng.choice_calls) == 1
+    candidates, probs = rng.choice_calls[0]
+    assert np.array_equal(candidates, np.array([2, 3]))
+    assert probs is not None
+
+    info = item_bank.information(0.0)[candidates]
+    position = len([0, 1]) + 1
+    exponent = 2.0 * ((position - 1) / (selector.test_size - 1))
+    expected = np.power(np.maximum(info, 0.0), exponent)
+    expected /= expected.sum()
+    np.testing.assert_allclose(probs, expected)
+
+  def test_exponent_is_clamped_past_test_size(self) -> None:
+    """Past test_size the exponent stays at the sharpness instead of growing without bound."""
+    selector = ProportionalSelector(test_size=5, acceleration=1.0, sharpness=6.0)
+
+    assert [selector._exponent(position) for position in range(5, 9)] == [6.0, 6.0, 6.0, 6.0]
+
+  def test_large_exponent_does_not_underflow_to_uniform_sampling(self) -> None:
+    """Test that a large exponent on low information still favors the best item.
+
+    Far from every item the information is small (0.028 at most here), and raised to
+    the power 230 it underflows to 0 for every item, which used to trigger the
+    uniform fallback at a position that should be close to maximum information.
+    """
+    item_bank = ItemBank(np.column_stack([np.ones(10), np.linspace(-1.0, 1.0, 10), np.zeros(10), np.ones(10)]))
+    selector = ProportionalSelector(test_size=2, sharpness=230.0)
+    rng = np.random.default_rng(7)
+
+    selections = [selector.select(item_bank, [9], -4.5, rng=rng) for _ in range(100)]
+
+    assert selections.count(0) == 100
+
+
+@pytest.mark.parametrize(
+  "make_selector",
+  [
+    pytest.param(lambda: ProgressiveSelector(test_size=8), id="progressive"),
+    pytest.param(lambda: ProportionalSelector(test_size=8), id="proportional"),
+  ],
+)
+def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[[], BaseSelector]) -> None:
+  """Two runs seeded alike choose the same items at every position, as contract 5 promises."""
+  item_bank = ItemBank.generate_item_bank(40, seed=5)
+
+  def run(seed: int) -> list[int | None]:
+    selector, rng, administered = make_selector(), np.random.default_rng(seed), []
+    for _ in range(8):
+      administered.append(selector.select(item_bank, administered, 0.3, rng=rng))
+    return administered
+
+  assert run(11) == run(11)
+  assert run(11) != run(12)
+
 
 _N_ITEMS = 30
 SELECTOR_FACTORIES = {
   "MaxInfoSelector": MaxInfoSelector,
   "UrrySelector": UrrySelector,
+  "KLSelector": KLSelector,
   "IntervalInfoSelector": IntervalInfoSelector,
   "RandomSelector": RandomSelector,
   "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=5),
   "The54321Selector": The54321Selector,
   "LinearSelector": lambda: LinearSelector(list(range(_N_ITEMS))),
+  "ProgressiveSelector": lambda: ProgressiveSelector(test_size=10),
+  "ProportionalSelector": lambda: ProportionalSelector(test_size=10),
   "ClusterSelector": lambda: ClusterSelector(clusters=[i % 3 for i in range(_N_ITEMS)]),
   "AStratSelector": lambda: AStratSelector(test_size=10),
   "AStratBBlockSelector": lambda: AStratBBlockSelector(test_size=10),
@@ -900,7 +1307,11 @@ SELECTOR_FACTORIES = {
 
 @pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())
 def test_select_returns_builtin_int(make_selector) -> None:
-  """select() promises ``int | None``; numpy integers must not leak into session state."""
+  """Called with every input CatEngine passes, select() returns a builtin int.
+
+  A selector that does not accept response_vector fails inside the engine, and numpy integers must
+  not leak into session state.
+  """
   item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
 
   item_id = make_selector().select(
@@ -912,3 +1323,17 @@ def test_select_returns_builtin_int(make_selector) -> None:
   )
 
   assert type(item_id) is int
+
+
+def test_selector_factories_cover_every_concrete_selector() -> None:
+  """Every concrete selector exported by catsim.selection runs through the engine-input test above.
+
+  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs without any test noticing.
+  """
+  exported = {
+    name
+    for name, cls in vars(importlib.import_module("catsim.selection")).items()
+    if isinstance(cls, type) and issubclass(cls, BaseSelector) and not inspect.isabstract(cls)
+  }
+
+  assert exported == set(SELECTOR_FACTORIES)

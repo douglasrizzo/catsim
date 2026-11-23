@@ -3,7 +3,9 @@
 from .base import BaseSelector, FiniteSelector
 from .cluster import ClusterSelector
 from .expected_info import MEISelector
+from .kl import KLSelector
 from .linear import LinearSelector
+from .progressive import ProgressiveSelector, ProportionalSelector
 from .random import RandomesqueSelector, RandomSelector, The54321Selector
 from .selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
 from .stratified import (
@@ -22,12 +24,15 @@ __all__ = [
   "ClusterSelector",
   "FiniteSelector",
   "IntervalInfoSelector",
+  "KLSelector",
   "LinearSelector",
   "MEISelector",
   "MLWISelector",
   "MaxInfoBBlockSelector",
   "MaxInfoSelector",
   "MaxInfoStratSelector",
+  "ProgressiveSelector",
+  "ProportionalSelector",
   "RandomSelector",
   "RandomesqueSelector",
   "StratifiedSelector",

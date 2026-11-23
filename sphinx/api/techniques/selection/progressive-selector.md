@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.progressive.ProgressiveSelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.ProgressiveSelector`
 **Reference:** Revuelta & Ponsoda (1998); Barrada et al. (2008, 2010)
 
 # Progressive Selector
@@ -24,19 +24,36 @@ S_i^{(n)}
 =
 (1-w_n)\,R_i
 +
-w_n\,\frac{I_i(\hat{\theta})}{\max_j I_j(\hat{\theta})},
+w_n\,\frac{I_i(\hat{\theta})}{\max_{j \in \mathcal{A}} I_j(\hat{\theta})},
 $$
 
-where $R_i$ is a fresh uniform random draw on $[0,1]$ and
+where $\mathcal{A}$ is the set of available items (the non-administered items
+under the exposure cap, or every non-administered item when the cap excludes
+them all), $R_i$ is a fresh uniform random draw on $[0,1]$, and
 
 $$
 w_n
 =
-\left(\frac{n-1}{N-1}\right)^s,
+\min\!\left(1, \frac{n-1}{N-1}\right)^s,
 $$
 
-with acceleration parameter $s > 0$. The selector chooses the
-non-administered item with the largest score.
+with acceleration parameter $s > 0$. Dividing by the largest available
+information is equivalent to Revuelta and Ponsoda's (1998) random component
+drawn on $[0, \max_{j \in \mathcal{A}} I_j]$, as Barrada et al. (2008, p. 496,
+Equation 6) describe it. The weight is clamped at 1 so
+that a session running past $N$ stays fully information-based. The selector
+chooses the available item with the largest score.
+
+Barrada et al. (2008, p. 498, Equation 12; Figure 1, p. 499) parameterize the
+schedule as a cumulative power sum with an acceleration parameter $t$,
+$w = \sum_{k=1}^{n-1} k^{t} / \sum_{k=1}^{N-1} k^{t}$, which is also what `catR`
+implements in
+[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R). It agrees with the power schedule above at $t = 0$, $s = 1$ (linear),
+and for long tests approaches the power schedule with $s = t + 1$, since
+$\sum_{k=1}^{m} k^{t} \approx m^{t+1}/(t+1)$; for short tests the two differ, so
+`acceleration` is not interchangeable with their $t$. Revuelta and Ponsoda's original schedule,
+$w = (n - 1)/N$, stops just short of 1 at the last item (Barrada et al., 2008,
+p. 496, Equation 7).
 
 ## Parameters
 
@@ -50,13 +67,13 @@ non-administered item with the largest score.
      - Description
    * - ``test_size``
      - required
-     - Planned total number of administered items :math:`N`; required because the schedule depends on test position.
+     - Total number of administered items :math:`N`; required because the schedule depends on test position.
    * - ``acceleration``
      - ``1.0``
      - Positive exponent :math:`s`. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied after scoring candidates.
+     - Exposure cap applied before scoring; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.
 ```
 
 ## Behavioral Contracts
@@ -71,12 +88,20 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Revuelta, J., & Ponsoda, V. (1998). A comparison of item exposure control methods in computerized adaptive testing. *Journal of Educational Measurement*, 35(4), 311-327.
+Revuelta, J., & Ponsoda, V. (1998). A comparison of item exposure control methods in computerized adaptive testing. *Journal of Educational Measurement*, 35(4), 311-327. <https://doi.org/10.1111/j.1745-3984.1998.tb00541.x>. Not openly available; Barrada et al. (2008) describe the method.
 
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information function for item exposure control. *Methodology*, 4(2), 51-59.
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
 
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A method for the comparison of item selection rules in computerized adaptive testing. *Applied Psychological Measurement*, 34(6), 438-452.
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2010). A method for the comparison of item selection rules in computerized adaptive testing. *Applied Psychological Measurement*, 34(6), 438-452. <https://doi.org/10.1177/0146621610370152>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/10_APM_Barrada.pdf).
 
 :::{seealso}
-Companion planned spec: {doc}`/api/techniques/selection/proportional-selector`
+Companion spec: {doc}`/api/techniques/selection/proportional-selector`
 :::
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.ProgressiveSelector
+   :members:
+   :show-inheritance:
+```

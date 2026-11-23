@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.progressive.ProportionalSelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.ProportionalSelector`
 **Reference:** Segall (2004); Barrada et al. (2008)
 
 # Proportional Selector
@@ -30,11 +30,27 @@ where the exponent schedule is
 $$
 h(w_n) = k\,w_n,
 \qquad
-w_n = \left(\frac{n-1}{N-1}\right)^s.
+w_n = \min\!\left(1, \frac{n-1}{N-1}\right)^s.
 $$
 
-Here $k > 0$ is a sharpness parameter and $s > 0$ is the same
-acceleration parameter used by the progressive selector.
+Here $k \ge 0$ is a sharpness parameter ($k = 0$ keeps selection uniformly
+random throughout) and $s > 0$ is the same
+acceleration parameter used by the progressive selector; the sums run over
+the available items, and the weight is clamped at 1 past position $N$. The
+implementation divides the information by its maximum over the available items
+before raising it to the power, which leaves the probabilities unchanged and
+keeps a large exponent from underflowing every weight to zero.
+
+Segall (2004) selects each item with probability proportional to $V_i$; in
+his paper $V_i$ was an expected variance, and with Fisher information
+$V_i = I_i(\hat{\theta})$ (Barrada et al., 2008, p. 497, Equations 8–10).
+Barrada et al. raise the information to a power that grows during the test
+(p. 497, Equation 11): a power of 0 gives random selection, and a large power
+approaches maximum information (pp. 497–498). In their version, which `catR`
+also implements, the exponent grows to the test length, $h = N\,w$ (p. 498,
+Equation 13), with the cumulative power-sum schedule described for the
+progressive selector. Setting `sharpness` to the test length reproduces
+that end point; the default $k = 6$ keeps more randomness late in longer tests.
 
 ## Parameters
 
@@ -48,13 +64,13 @@ acceleration parameter used by the progressive selector.
      - Description
    * - ``test_size``
      - required
-     - Planned fixed test length :math:`N`.
+     - Fixed test length :math:`N`.
    * - ``acceleration``
      - ``1.0``
      - Positive schedule exponent :math:`s`.
    * - ``sharpness``
      - ``6.0``
-     - Positive constant :math:`k` controlling how quickly the sampling distribution concentrates on high-information items.
+     - Non-negative constant :math:`k` controlling how quickly the sampling distribution concentrates on high-information items; 0 keeps sampling uniform.
    * - ``r_max``
      - ``1.0``
      - Exposure cap applied before sampling; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.
@@ -72,10 +88,18 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Segall, D. O. (2004). Computerized adaptive testing. In K. Kempf-Leonard (Ed.), *Encyclopedia of Social Measurement*. Academic Press.
+Segall, D. O. (2004). A sharing item response theory model for computerized adaptive testing. *Journal of Educational and Behavioral Statistics*, 29(4), 439-460. <https://doi.org/10.3102/10769986029004439>. Not openly available; Barrada et al. (2008) describe the method.
 
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information function for item exposure control. *Methodology*, 4(2), 51-59.
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
 
 :::{seealso}
-Companion planned spec: {doc}`/api/techniques/selection/progressive-selector`
+Companion spec: {doc}`/api/techniques/selection/progressive-selector`
 :::
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.ProportionalSelector
+   :members:
+   :show-inheritance:
+```

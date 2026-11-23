@@ -1,5 +1,5 @@
-**Status:** Planned
-**Module:** `catsim.selection.kl.KLSelector` (planned)
+**Status:** Implemented
+**Module:** {py:class}`catsim.selection.KLSelector`
 **Reference:** Chang & Ying (1996)
 
 # Kullback-Leibler Selector
@@ -17,7 +17,8 @@ so the method behaves more globally early in the test and more locally later on.
 ## Definition
 
 For candidate item $i$, current estimate $\hat{\theta}$, and a
-comparison point $\theta$, the item-level divergence is
+comparison point $\theta$, the item-level divergence (Chang & Ying, 1996,
+p. 217, Definition 2.1) is
 
 $$
 K_i(\theta \,\|\, \hat{\theta})
@@ -28,7 +29,9 @@ P_i(\hat{\theta}) \log \frac{P_i(\hat{\theta})}{P_i(\theta)}
 \log \frac{1-P_i(\hat{\theta})}{1-P_i(\theta)}.
 $$
 
-The global criterion integrates this divergence over a symmetric window:
+It is nonnegative, zero when the two abilities coincide, and its curvature
+there is the Fisher information (p. 219, Equation 16). The global criterion
+integrates this divergence over a symmetric window (pp. 219–220, Equation 17):
 
 $$
 K_i(\hat{\theta})
@@ -40,7 +43,13 @@ K_i(\theta \,\|\, \hat{\theta})\,d\theta,
 $$
 
 where $n$ is the number of administered items and $c$ is a positive
-schedule constant. The selector chooses the non-administered item with the
+schedule constant. For a small window the criterion is governed by the
+curvature, that is, by the Fisher information; for a large one, by the tails of
+the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
+window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
+that weights the divergence by the posterior (p. 222), the planned
+{doc}`/api/techniques/selection/klp-selector`. Each integral is computed with SciPy's adaptive
+quadrature. The selector chooses the non-administered item with the
 largest value of $K_i(\hat{\theta})$.
 
 ## Parameters
@@ -56,7 +65,9 @@ largest value of $K_i(\hat{\theta})$.
    * - ``c``
      - ``3.0``
      - Positive constant controlling the half-width :math:`\delta_n = c/\sqrt{n}`.
-       The feature card follows Chang and Ying's recommended range of roughly 3 to 5.
+       Chang and Ying (1996) chose :math:`c` from the coverage probability of a
+       confidence interval for :math:`\theta` (p. 221) and used :math:`c = 3` in
+       their simulation (p. 223).
    * - ``r_max``
      - ``1.0``
      - Exposure cap applied after ordering candidate items by KL score.
@@ -74,8 +85,16 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized adaptive testing. *Applied Psychological Measurement*, 20(3), 213-229. <https://doi.org/10.1177/014662169602000303>
+Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized adaptive testing. *Applied Psychological Measurement*, 20(3), 213-229. <https://doi.org/10.1177/014662169602000303>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/119092).
 
 :::{seealso}
-Posterior-weighted variant planned in card 15: KLP selector.
+Posterior-weighted variant: {doc}`/api/techniques/selection/klp-selector`.
 :::
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.selection.KLSelector
+   :members:
+   :show-inheritance:
+```
