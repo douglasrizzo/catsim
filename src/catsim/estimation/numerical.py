@@ -3,90 +3,67 @@
 from scipy.optimize import minimize_scalar
 
 from .. import cat, irt
-from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
 from .base import BaseEstimator
-
-# Mathematical constants
-GOLDEN_RATIO = (1 + 5**0.5) / 2
 
 
 class NumericalSearchEstimator(BaseEstimator):
   """Estimate ability by numerically maximizing the IRT log-likelihood.
 
+  The maximum is searched for with SciPy's bounded scalar minimizer on
+  ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]``.
+
   Parameters
   ----------
   tol : float, optional
-      Tolerance for convergence in the optimization algorithm. Default is 1e-6.
+      Absolute tolerance of the bounded search, in the ability scale. Default is 1e-6.
   dodd : bool, optional
       Whether to employ Dodd's estimation heuristic :cite:p:`Dod90` when the response vector
       only has one kind of response (all correct or all incorrect, see
       :py:func:`catsim.cat.dodd`). Default is True.
   verbose : bool, optional
       Whether to print detailed information during optimization. Default is False.
-  method : str, optional
-      The search method to employ. Must be one of: 'ternary', 'dichotomous', 'fibonacci',
-      'golden', 'brent', 'bounded', or 'golden2'. Default is 'bounded'.
 
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/estimation/numerical-search-estimator`.
   """
 
-  __methods = frozenset(["ternary", "dichotomous", "fibonacci", "golden", "brent", "bounded", "golden2"])
-
-  @staticmethod
-  def available_methods() -> frozenset[str]:
-    """Get a set of available estimation methods.
-
-    Returns
-    -------
-    frozenset[str]
-        Set of available estimation methods: {'ternary', 'dichotomous', 'fibonacci',
-        'golden', 'brent', 'bounded', 'golden2'}.
-    """
-    return NumericalSearchEstimator.__methods
-
   def __str__(self) -> str:
     """Return a string representation of the estimator."""
-    return f"Numerical Search Estimator ({self.__search_method})"
+    return "Numerical Search Estimator"
 
   def __init__(
     self,
     tol: float = 1e-6,
     dodd: bool = True,
     verbose: bool = False,
-    method: str = "bounded",
   ) -> None:
     """Initialize the estimator.
 
     Parameters
     ----------
     tol : float, optional
-        Tolerance for convergence in the optimization algorithm. Default is 1e-6.
+        Absolute tolerance of the bounded search, in the ability scale. Default is 1e-6.
     dodd : bool, optional
         Whether to use Dodd's estimation heuristic for edge cases (all correct or
         all incorrect responses). Default is True.
     verbose : bool, optional
         Whether to print detailed information during optimization. Default is False.
-    method : str, optional
-        The numerical search method to use for optimization. Default is "bounded".
 
     Raises
     ------
     ValueError
-        If the parameter `method` is not one of the available methods.
+        If ``tol`` is not positive.
     """
+    if not tol > 0:
+      msg = f"tol must be positive, got {tol}"
+      raise ValueError(msg)
     super().__init__(verbose)
 
-    if method not in NumericalSearchEstimator.__methods:
-      msg = f"Parameter 'method' must be one of {NumericalSearchEstimator.__methods}."
-      raise ValueError(msg)
-
-    self._tol = tol
+    self._tol = float(tol)
     self._dodd = dodd
-    self.__search_method = method
 
   def estimate(
     self,
@@ -106,7 +83,7 @@ class NumericalSearchEstimator(BaseEstimator):
     response_vector : list[bool]
         A boolean list containing the examinee's answers to the administered items.
     est_theta : float
-        The current estimated ability.
+        The current estimated ability, returned unchanged when no item has been administered.
 
     Returns
     -------
@@ -123,6 +100,9 @@ class NumericalSearchEstimator(BaseEstimator):
 
     self._calls += 1
     self._last_evaluations = 0
+
+    if len(administered_items) == 0:
+      return float(est_theta)
 
     summarized_answers = set(response_vector)
 
@@ -144,232 +124,21 @@ class NumericalSearchEstimator(BaseEstimator):
 
       return candidate_theta
 
-    if self.__search_method in {"ternary", "dichotomous"}:
-      candidate_theta = self._solve_ternary_dichotomous(
-        THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
-      )
-    elif self.__search_method == "fibonacci":
-      candidate_theta = self._solve_fibonacci(
-        THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
-      )
-    elif self.__search_method == "golden2":
-      candidate_theta = self._solve_golden_section(
-        THETA_MAX_EXTENDED, THETA_MIN_EXTENDED, response_vector, item_bank.get_items(administered_items)
-      )
-    elif self.__search_method in {"brent", "bounded", "golden"}:
-      bounded = self.__search_method == "bounded"
-      res = minimize_scalar(
-        irt.negative_log_likelihood,
-        bracket=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
-        bounds=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED) if bounded else None,
-        method=self.__search_method,
-        args=(response_vector, item_bank.get_items(administered_items)),
-        # SciPy only takes an absolute tolerance for the bounded method, through its options
-        tol=None if bounded else self._tol,
-        options={"xatol": self._tol} if bounded else None,
-      )
-      self._last_evaluations = res.nfev
-      candidate_theta = res.x
-
+    res = minimize_scalar(
+      irt.negative_log_likelihood,
+      bounds=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
+      method="bounded",
+      args=(response_vector, item_bank.get_items(administered_items)),
+      # SciPy's bounded method takes its absolute tolerance only through options
+      options={"xatol": self._tol},
+    )
+    self._last_evaluations = res.nfev
     self._total_evaluations += self._last_evaluations
 
     if self._verbose:
       print(f"{self._last_evaluations} evaluations")
 
-    return candidate_theta
-
-  def _solve_ternary_dichotomous(
-    self,
-    b: float,
-    a: float,
-    response_vector: list[bool],
-    item_params: FloatArray,
-  ) -> float:
-    """Find the most likely ability using ternary or dichotomous search methods.
-
-    Parameters
-    ----------
-    b : float
-        The upper bound to search for the ability, in the ability/difficulty scale.
-    a : float
-        The lower bound to search for the ability, in the ability/difficulty scale.
-    response_vector : list[bool]
-        The responses given to the answered items.
-    item_params : numpy.ndarray
-        The parameter matrix of the answered items.
-
-    Returns
-    -------
-    float
-        The estimated ability.
-
-    Raises
-    ------
-    ValueError
-        If the search interval becomes invalid during iteration.
-    """
-    error = float("inf")
-    while error >= self._tol:
-      self._last_evaluations += 2
-
-      if self.__search_method == "ternary":
-        c = (b + 2 * a) / 3
-        d = (2 * b + a) / 3
-      elif self.__search_method == "dichotomous":
-        m = (a + b) / 2
-        c = m - (self._tol / 2)
-        d = m + (self._tol / 2)
-
-      left_side_ll = irt.log_likelihood(c, response_vector, item_params)
-      right_side_ll = irt.log_likelihood(d, response_vector, item_params)
-
-      if left_side_ll >= right_side_ll:
-        b = d
-      else:
-        a = c
-
-      if not (a <= c <= d <= b):
-        msg = f"Invalid interval: a={a}, c={c}, d={d}, b={b}"
-        raise ValueError(msg)
-
-      candidate_theta = (b + a) / 2
-
-      error = abs(b - a)
-      if self.__search_method == "dichotomous":
-        error /= 2
-
-      if self._verbose:
-        print(f"\t\tTheta: {candidate_theta}, LL: {max(left_side_ll, right_side_ll)}")
-    return candidate_theta
-
-  def _solve_fibonacci(
-    self,
-    b: float,
-    a: float,
-    response_vector: list[bool],
-    item_params: FloatArray,
-  ) -> float:
-    """Find the most likely ability using the Fibonacci search method.
-
-    Parameters
-    ----------
-    b : float
-        The upper bound to search for the ability, in the ability/difficulty scale.
-    a : float
-        The lower bound to search for the ability, in the ability/difficulty scale.
-    response_vector : list[bool]
-        The responses given to the answered items.
-    item_params : numpy.ndarray
-        The parameter matrix of the answered items.
-
-    Returns
-    -------
-    float
-        The estimated ability.
-    """
-    fib = [1, 1]
-    n = 1
-
-    # while (upper_bound - lower_bound) / fib[-1] > .001:
-    while (b - a) / fib[-1] > self._tol:
-      n += 1
-      fib.append(fib[-1] + fib[-2])
-
-    c = a + (fib[n - 2] / fib[n]) * (b - a)
-    d = a + (fib[n - 1] / fib[n]) * (b - a)
-
-    left_side_ll = irt.log_likelihood(c, response_vector, item_params)
-    right_side_ll = irt.log_likelihood(d, response_vector, item_params)
-    self._last_evaluations += 2
-
-    while n != 2:  # noqa: PLR2004
-      self._last_evaluations += 1
-
-      n -= 1
-
-      if left_side_ll >= right_side_ll:
-        b = d
-        d = c
-        c = a + (fib[n - 2] / fib[n]) * (b - a)
-
-        right_side_ll = left_side_ll
-        left_side_ll = irt.log_likelihood(c, response_vector, item_params)
-      else:
-        a = c
-        c = d
-        d = a + (fib[n - 1] / fib[n]) * (b - a)
-
-        left_side_ll = right_side_ll
-        right_side_ll = irt.log_likelihood(d, response_vector, item_params)
-
-      # assert a <= c <= d <= b
-
-      if self._verbose:
-        print(f"\t\tTheta: {(b + a) / 2}, LL: {max(left_side_ll, right_side_ll)}")
-    return (b + a) / 2
-
-  def _solve_golden_section(
-    self,
-    b: float,
-    a: float,
-    response_vector: list[bool],
-    item_params: FloatArray,
-  ) -> float:
-    """Find the most likely ability using the golden-section search method.
-
-    Parameters
-    ----------
-    b : float
-        The upper bound to search for the ability, in the ability/difficulty scale.
-    a : float
-        The lower bound to search for the ability, in the ability/difficulty scale.
-    response_vector : list[bool]
-        The responses given to the answered items.
-    item_params : numpy.ndarray
-        The parameter matrix of the answered items.
-
-    Returns
-    -------
-    float
-        The estimated ability.
-
-    Raises
-    ------
-    ValueError
-        If the golden section interval becomes invalid during iteration.
-    """
-    c = b + (a - b) / GOLDEN_RATIO
-    d = a + (b - a) / GOLDEN_RATIO
-
-    left_side_ll = irt.log_likelihood(c, response_vector, item_params)
-    right_side_ll = irt.log_likelihood(d, response_vector, item_params)
-    self._last_evaluations += 2
-
-    while abs(b - a) > self._tol:
-      self._last_evaluations += 1
-
-      if left_side_ll >= right_side_ll:
-        b = d
-        d = c
-        c = b + (a - b) / GOLDEN_RATIO
-
-        right_side_ll = left_side_ll
-        left_side_ll = irt.log_likelihood(c, response_vector, item_params)
-      else:
-        a = c
-        c = d
-        d = a + (b - a) / GOLDEN_RATIO
-
-        left_side_ll = right_side_ll
-        right_side_ll = irt.log_likelihood(d, response_vector, item_params)
-
-      if not (a < c <= d < b):
-        msg = f"Invalid golden section interval: a={a}, c={c}, d={d}, b={b}"
-        raise ValueError(msg)
-
-      if self._verbose:
-        print(f"\t\tTheta: {(b + a) / 2}, LL: {max(left_side_ll, right_side_ll)}")
-    return (b + a) / 2
+    return res.x
 
   @property
   def dodd(self) -> bool:
@@ -389,15 +158,3 @@ class NumericalSearchEstimator(BaseEstimator):
     catsim.cat.dodd : Implementation of Dodd's estimation heuristic.
     """
     return self._dodd
-
-  @property
-  def method(self) -> str:
-    """Get the estimator search method selected during instantiation.
-
-    Returns
-    -------
-    str
-        The search method ('ternary', 'dichotomous', 'fibonacci', 'golden',
-        'brent', 'bounded', or 'golden2').
-    """
-    return self.__search_method
