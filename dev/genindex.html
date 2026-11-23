@@ -759,6 +759,7 @@ window.runMermaid = runMermaid;</script>
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -898,12 +899,22 @@ window.runMermaid = runMermaid;</script>
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.estimate">estimate() (catsim.estimation.NumericalSearchEstimator method)</a>
+      <li><a href="api/techniques/estimation/eap-estimator.html#catsim.estimation.EAPEstimator">EAPEstimator (class in catsim.estimation)</a>
 </li>
-      <li><a href="api/state.html#catsim.state.SimulationResult.estimations">estimations (catsim.state.SimulationResult property)</a>
+      <li><a href="api/techniques/estimation/eap-estimator.html#catsim.estimation.EAPEstimator.estimate">estimate() (catsim.estimation.EAPEstimator method)</a>
+
+      <ul>
+        <li><a href="api/techniques/estimation/map-estimator.html#catsim.estimation.MAPEstimator.estimate">(catsim.estimation.MAPEstimator method)</a>
 </li>
+        <li><a href="api/techniques/estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator.estimate">(catsim.estimation.NumericalSearchEstimator method)</a>
+</li>
+        <li><a href="api/techniques/estimation/warm-wle.html#catsim.estimation.WarmLikelihoodEstimator.estimate">(catsim.estimation.WarmLikelihoodEstimator method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/state.html#catsim.state.SimulationResult.estimations">estimations (catsim.state.SimulationResult property)</a>
+</li>
       <li><a href="api/state.html#catsim.state.SimulationResult.examinees">examinees (catsim.state.SimulationResult property)</a>
 </li>
       <li><a href="api/state.html#catsim.state.SimulationResult.exposure_rates">exposure_rates (catsim.state.SimulationResult property)</a>
@@ -925,6 +936,10 @@ window.runMermaid = runMermaid;</script>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/plot.html#catsim.plot.gen3d_dataset_scatter">gen3d_dataset_scatter() (in module catsim.plot)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/eap-estimator.html#catsim.estimation.EAPEstimator.grid">grid (catsim.estimation.EAPEstimator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -992,6 +1007,8 @@ window.runMermaid = runMermaid;</script>
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/map-estimator.html#catsim.estimation.MAPEstimator">MAPEstimator (class in catsim.estimation)</a>
+</li>
       <li><a href="api/irt.html#catsim.irt.max_info">max_info() (in module catsim.irt)</a>
 </li>
       <li><a href="api/irt.html#catsim.irt.max_info_hpc">max_info_hpc() (in module catsim.irt)</a>
@@ -1012,10 +1029,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="api/techniques/stopping/min-error-stopper.html#catsim.stopping.MinErrorStopper.min_error">min_error (catsim.stopping.MinErrorStopper property)</a>
 </li>
-      <li><a href="api/techniques/stopping/test-length-stopper.html#catsim.stopping.TestLengthStopper.min_items">min_items (catsim.stopping.TestLengthStopper property)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/stopping/test-length-stopper.html#catsim.stopping.TestLengthStopper.min_items">min_items (catsim.stopping.TestLengthStopper property)</a>
+</li>
       <li><a href="api/techniques/stopping/min-error-stopper.html#catsim.stopping.MinErrorStopper">MinErrorStopper (class in catsim.stopping)</a>
 </li>
       <li>
@@ -1049,6 +1066,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="api/irt.html#catsim.irt.negative_log_likelihood">negative_log_likelihood() (in module catsim.irt)</a>
 </li>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.normal_log_prior">normal_log_prior() (in module catsim.estimation)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/irt.html#catsim.irt.normalize_item_bank">normalize_item_bank() (in module catsim.irt)</a>
@@ -1076,6 +1095,22 @@ window.runMermaid = runMermaid;</script>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/plot.html#catsim.plot.PlotType">PlotType (class in catsim.plot)</a>
+</li>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior">posterior() (in module catsim.estimation)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior_mean">posterior_mean() (in module catsim.estimation)</a>
+</li>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.posterior_variance">posterior_variance() (in module catsim.estimation)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.QuadratureGrid">QuadratureGrid (class in catsim.estimation)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1215,6 +1250,12 @@ window.runMermaid = runMermaid;</script>
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.QuadratureGrid.uniform">uniform() (catsim.estimation.QuadratureGrid class method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.uniform_log_prior">uniform_log_prior() (in module catsim.estimation)</a>
+</li>
       <li><a href="api/techniques/selection/urry-selector.html#catsim.selection.UrrySelector">UrrySelector (class in catsim.selection)</a>
 </li>
   </ul></td>
@@ -1227,6 +1268,8 @@ window.runMermaid = runMermaid;</script>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/irt.html#catsim.irt.validate_response_vector">validate_response_vector() (in module catsim.irt)</a>
+</li>
       <li><a href="api/irt.html#catsim.irt.var">var() (in module catsim.irt)</a>
 </li>
   </ul></td>
@@ -1234,6 +1277,10 @@ window.runMermaid = runMermaid;</script>
 
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/techniques/estimation/warm-wle.html#catsim.estimation.WarmLikelihoodEstimator">WarmLikelihoodEstimator (class in catsim.estimation)</a>
+</li>
+  </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/techniques/selection/cluster-selector.html#catsim.selection.ClusterSelector.weighted_cluster_infos">weighted_cluster_infos() (catsim.selection.ClusterSelector static method)</a>
 </li>

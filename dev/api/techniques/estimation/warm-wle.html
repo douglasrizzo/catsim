@@ -49,8 +49,8 @@
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Expected A Posteriori Estimator" href="eap-estimator.html" />
-    <link rel="prev" title="Bayesian Estimation Infrastructure" href="bayesian-infrastructure.html" />
+    <link rel="next" title="Owen Sequential Bayesian Estimator" href="owen-estimator.html" />
+    <link rel="prev" title="Maximum A Posteriori Estimator" href="map-estimator.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -456,8 +456,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.estimation.wle.WarmLikelihoodEstimator</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <a class="reference internal" href="#catsim.estimation.WarmLikelihoodEstimator" title="catsim.estimation.WarmLikelihoodEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.WarmLikelihoodEstimator</span></code></a>
 <strong>Reference:</strong> Warm (1989)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="warm-weighted-likelihood-estimator">
 <h1>Warm Weighted Likelihood Estimator<a class="headerlink" href="#warm-weighted-likelihood-estimator" title="Link to this heading">#</a></h1>
@@ -473,26 +473,56 @@ short-test behavior that matters most in adaptive testing.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
-<p>Warm’s estimator maximizes a weighted likelihood proportional to the square root
-of Fisher information times the ordinary likelihood. In the closed-form
-approximation planned here, the estimate is expressed as an MLE plus a bias
-correction:</p>
+<p>Warm’s estimator maximizes the likelihood multiplied by a weight function
+<span class="math notranslate nohighlight">\(w(\theta)\)</span> chosen so that the first-order (<span class="math notranslate nohighlight">\(O(n^{-1})\)</span>) bias of the MLE cancels.
+The weight is defined through its log-derivative,
+<span class="math notranslate nohighlight">\(\frac{d}{d\theta}\ln w(\theta) = J(\theta) / [2 I(\theta)]\)</span> (Warm, 1985, p. 8,
+Equations 9 and 10), so the estimate is the root of the modified score equation</p>
 <div class="math notranslate nohighlight">
-\[\hat{\theta}_{\mathrm{WLE}}
-=
-\hat{\theta}_{\mathrm{MLE}}
+\[\sum_i \frac{\bigl[u_i - P_i(\theta)\bigr] P_i'(\theta)}{P_i(\theta)\,[1-P_i(\theta)]}
 +
-\frac{J(\hat{\theta}_{\mathrm{MLE}})}
-     {2\,I(\hat{\theta}_{\mathrm{MLE}})^2},\]</div>
-<p>where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is test information and</p>
+\frac{J(\theta)}{2\,I(\theta)}
+= 0,\]</div>
+<p>(Warm, 1985, p. 8, Equation 11; Magis &amp; Raîche, 2012, p. 6, Equations 12 and
+13), where <span class="math notranslate nohighlight">\(I(\theta)\)</span> is test information and</p>
 <div class="math notranslate nohighlight">
 \[J(\theta)
 =
 \sum_i
 \frac{P_i'(\theta)\,P_i''(\theta)}
      {P_i(\theta)\,[1-P_i(\theta)]}.\]</div>
-<p>The planned implementation computes <span class="math notranslate nohighlight">\(\hat{\theta}_{\mathrm{MLE}}\)</span> with the
-existing numerical optimizer and then applies the analytic correction term.</p>
+<p>For models without guessing or slipping (<span class="math notranslate nohighlight">\(c = 0\)</span>, <span class="math notranslate nohighlight">\(d = 1\)</span>), <span class="math notranslate nohighlight">\(J = I'\)</span> and the
+weight is <span class="math notranslate nohighlight">\(w(\theta) = \sqrt{I(\theta)}\)</span>: the WLE then maximizes
+<span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>, the likelihood under a Jeffreys prior (Warm, 1985,
+p. 9; Magis &amp; Raîche, 2012, p. 6). With guessing
+or slipping, <span class="math notranslate nohighlight">\(J \neq I'\)</span>, so the WLE is defined by the equation above and not by
+the <span class="math notranslate nohighlight">\(\sqrt{I}\)</span>-weighted likelihood.</p>
+<p>Expanding the equation around the MLE gives the familiar approximation
+<span class="math notranslate nohighlight">\(\hat{\theta}_{\mathrm{WLE}} \approx \hat{\theta}_{\mathrm{MLE}} + J/(2I^2)\)</span>, which
+is why <span class="math notranslate nohighlight">\(-J/(2I^2)\)</span> is the MLE’s first-order bias (Lord, 1983, as given by Warm,
+1985, p. 7, Equation 6). The implementation
+does not use this approximation: it fails exactly where WLE matters most, because
+the MLE is infinite for all-correct and all-incorrect patterns, and with guessing it
+can sit on the search bound, where <span class="math notranslate nohighlight">\(I \approx 0\)</span> makes the correction explode.</p>
+<section id="computation">
+<h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
+<p>The modified score is evaluated at 121 equally spaced points over the fixed
+search range <span class="math notranslate nohighlight">\([\theta_{\min}, \theta_{\max}] = [-6, 6]\)</span> (<code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code>,
+<code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code>; unlike MAP, the range is not a parameter) to bracket its
+roots. The points are 0.1 apart, so two roots closer than that can fall in one
+interval and go unseen. Each sign change from positive to negative brackets a maximum
+of the weighted likelihood and is refined with Brent’s method. If several maxima
+exist, which can happen with guessing, the one with the largest weighted
+likelihood is returned; candidates are ranked by integrating the modified score,
+the derivative of the weighted log-likelihood. If the modified score never changes
+sign, the estimate is the bound it points to. This mirrors <code class="docutils literal notranslate"><span class="pre">catR</span></code> (Magis and
+Raîche, 2012), whose
+<a class="reference external" href="https://github.com/cran/catR/blob/master/R/thetaEst.R"><code class="docutils literal notranslate"><span class="pre">thetaEst.R</span></code></a> solves the
+same equation with <code class="docutils literal notranslate"><span class="pre">uniroot</span></code>; catsim adds the explicit handling of multiple
+roots. Magis
+and Raîche (2012, p. 6, Equation 14) also give the WLE’s standard error, which
+catsim does not compute.</p>
+</section>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -511,11 +541,11 @@ existing numerical optimizer and then applies the analytic correction term.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tol</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1e-6</span></code></p></td>
-<td><p>Tolerance passed to the underlying numerical MLE routine.</p></td>
+<td><p>Absolute tolerance of the Brent root refinement.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verbose</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
-<td><p>Planned diagnostics flag inherited from the estimator base class.</p></td>
+<td><p>Diagnostics flag inherited from the estimator base class.</p></td>
 </tr>
 </tbody>
 </table>
@@ -526,16 +556,90 @@ existing numerical optimizer and then applies the analytic correction term.</p>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
 <li><p>With no administered items, the estimator returns the input starting value unchanged.</p></li>
-<li><p>For nondegenerate response patterns, the estimate equals the underlying MLE plus the analytic correction <span class="math notranslate nohighlight">\(J/(2I^2)\)</span>.</p></li>
-<li><p>When the MLE lies away from the population center, the WLE correction moves the estimate back toward the center rather than farther outward.</p></li>
-<li><p>On short tests, WLE should reduce average absolute bias relative to plain MLE under the same response data.</p></li>
-<li><p>If the computed information is nonpositive, the correction term degenerates safely instead of dividing by zero.</p></li>
+<li><p>Every interior estimate is a root of the modified score equation, including for items with guessing.</p></li>
+<li><p>For items without guessing or slipping, the estimate maximizes <span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>.</p></li>
+<li><p>The estimate is finite and inside the search interval for every response pattern, including
+all-correct and all-incorrect patterns where the MLE diverges.</p></li>
+<li><p>Relative to a finite MLE, the WLE is pulled toward the abilities at which the administered items are most informative.</p></li>
+<li><p>On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
+is small, and smaller than the MLE’s first-order bias <span class="math notranslate nohighlight">\(-J/(2I^2)\)</span> wherever that bias is
+non-negligible. With guessing and few items, the WLE at low ability is pulled upward, toward
+the items, so no unconditional bias guarantee is made for that case.</p></li>
 </ol>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. <em>Psychometrika</em>, 54(3), 427-450. <a class="reference external" href="https://doi.org/10.1007/BF02294627">https://doi.org/10.1007/BF02294627</a></p>
-<p>Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel forms reliability. <em>Psychometrika</em>, 48(2), 233-245.</p>
+<p>Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. <em>Psychometrika</em>, 54(3), 427-450. <a class="reference external" href="https://doi.org/10.1007/BF02294627">https://doi.org/10.1007/BF02294627</a>. Not openly available; Warm (1985) derives the same estimator.</p>
+<p>Warm, T. A. (1985). <em>Weighted likelihood estimation of ability in item response theory with tests of finite length</em> (Doctoral dissertation). University of Oklahoma. <a class="reference external" href="https://shareok.org/handle/11244/5356">https://shareok.org/handle/11244/5356</a> (open access).</p>
+<p>Lord, F. M. (1983). Unbiased estimators of ability parameters, of their variance, and of their parallel-forms reliability. <em>Psychometrika</em>, 48(2), 233-245. <a class="reference external" href="https://doi.org/10.1007/BF02294018">https://doi.org/10.1007/BF02294018</a>. Not openly available; Warm (1985, p. 7) gives its bias formula.</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.estimation.WarmLikelihoodEstimator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">WarmLikelihoodEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></p>
+<p>Warm’s (1989) weighted likelihood estimator (WLE).</p>
+<p>The estimate is the root of Warm’s modified score equation</p>
+<div class="math notranslate nohighlight">
+\[\sum_i \frac{(u_i - P_i) P_i'}{P_i Q_i} + \frac{J(\theta)}{2 I(\theta)} = 0,
+\qquad J(\theta) = \sum_i \frac{P_i' P_i''}{P_i Q_i},\]</div>
+<p>which removes the first-order (<span class="math notranslate nohighlight">\(O(n^{-1})\)</span>) bias of the MLE and stays finite for
+all-correct and all-incorrect response patterns. For models without guessing or slipping
+(<span class="math notranslate nohighlight">\(c = 0\)</span>, <span class="math notranslate nohighlight">\(d = 1\)</span>), <span class="math notranslate nohighlight">\(J = I'\)</span> and the estimate maximizes
+<span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>.</p>
+<p>The modified score is scanned at 121 points, 0.1 apart, over the fixed search interval
+<code class="docutils literal notranslate"><span class="pre">[THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED]</span></code> to bracket its roots, which are then refined
+with Brent’s method. If several roots exist, the one with the largest weighted
+likelihood is returned; if none does, the estimate is the search bound the modified score
+points to.</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Warm Weighted Likelihood Estimator</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Absolute tolerance of the root refinement. Default is 1e-6.</p>
+</dd>
+<dt><strong>verbose</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to be verbose during execution. Default is False.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.estimation.WarmLikelihoodEstimator.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator.estimate" title="Link to this definition">#</a></dt>
+<dd><p>Return the root of Warm’s modified score equation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>Indices of the administered items.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>The examinee’s responses to the administered items.</p>
+</dd>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current ability estimate, returned unchanged when no item has been administered.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The weighted likelihood estimate, within <code class="docutils literal notranslate"><span class="pre">[THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED]</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If any argument is None, if <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> and <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> have different
+lengths, or if <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> contains non-Boolean elements.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -550,20 +654,20 @@ existing numerical optimizer and then applies the analytic correction term.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="bayesian-infrastructure.html"
+       href="map-estimator.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Bayesian Estimation Infrastructure</p>
+        <p class="prev-next-title">Maximum A Posteriori Estimator</p>
       </div>
     </a>
     <a class="right-next"
-       href="eap-estimator.html"
+       href="owen-estimator.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Expected A Posteriori Estimator</p>
+        <p class="prev-next-title">Owen Sequential Bayesian Estimator</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -587,10 +691,20 @@ existing numerical optimizer and then applies the analytic correction term.</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computation">Computation</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.WarmLikelihoodEstimator"><code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.WarmLikelihoodEstimator.estimate"><code class="docutils literal notranslate"><span class="pre">WarmLikelihoodEstimator.estimate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

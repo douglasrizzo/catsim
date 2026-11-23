@@ -895,17 +895,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If required parameters are missing.</span>
+<span class="sd">        If required parameters are missing, if ``response_vector`` and ``administered_items`` have</span>
+<span class="sd">        different lengths, or if ``response_vector`` contains non-Boolean elements.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">item_bank</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"administered_items parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"response_vector parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_require_inputs</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="mi">0</span>

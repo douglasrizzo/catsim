@@ -517,11 +517,7 @@ samples (p. 12).</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">normal_log_prior(0,</span> <span class="pre">1)</span></code></p></td>
 <td><p>Prior used when the selector computes the posterior itself.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>Optional EAP estimator whose cached posterior is reused.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
 <td><p>Soft exposure cap.</p></td>
 </tr>
@@ -584,9 +580,6 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <span class="sd">      Quadrature grid. Defaults to ``QuadratureGrid.uniform()``.</span>
 <span class="sd">  log_prior : callable or None</span>
 <span class="sd">      Prior log-density. Defaults to N(0, 1).</span>
-<span class="sd">  estimator : EAPEstimator or None</span>
-<span class="sd">      If provided, the selector reuses the estimator's ``last_posterior`` instead</span>
-<span class="sd">      of recomputing the quadrature.</span>
 <span class="sd">  r_max : float</span>
 <span class="sd">      Exposure cap.</span>
 <span class="sd">  """</span>
@@ -595,7 +588,6 @@ It is removed when the spec is promoted to “Implemented” status.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">grid</span><span class="p">:</span> <span class="n">QuadratureGrid</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: EAPEstimator | None</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">r_max</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
@@ -603,7 +595,6 @@ It is removed when the spec is promoted to “Implemented” status.</p>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span> <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">QuadratureGrid</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -630,8 +621,6 @@ It is removed when the spec is promoted to “Implemented” status.</p>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">last_posterior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span><span class="o">.</span><span class="n">last_posterior</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">administered_items</span><span class="p">:</span>
       <span class="n">lp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>
       <span class="n">lp</span> <span class="o">-=</span> <span class="n">lp</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
@@ -706,13 +695,12 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <p><strong>Dependencies:</strong></p>
 <ul class="simple">
 <li><p>Planned card 01 (<code class="docutils literal notranslate"><span class="pre">Bayesian</span> <span class="pre">Estimation</span> <span class="pre">Infrastructure</span></code>)</p></li>
-<li><p>Recommended reuse of planned card 06 (<code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code>)</p></li>
 </ul>
 <p><strong>Testing notes:</strong></p>
 <ul class="simple">
 <li><p>Identical items should yield equal expected posterior variances.</p></li>
 <li><p>Banks with a clear posterior-precision winner should produce a stable argmin.</p></li>
-<li><p>Validate posterior reuse and exposure-cap fallback behavior.</p></li>
+<li><p>Validate exposure-cap fallback behavior.</p></li>
 </ul>
 </section>
 </section>

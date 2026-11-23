@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Maximum A Posteriori Estimator" href="map-estimator.html" />
-    <link rel="prev" title="Warm Weighted Likelihood Estimator" href="warm-wle.html" />
+    <link rel="prev" title="Bayesian Estimation Infrastructure" href="bayesian-infrastructure.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -456,8 +456,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.estimation.bayesian.EAPEstimator</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <a class="reference internal" href="#catsim.estimation.EAPEstimator" title="catsim.estimation.EAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.EAPEstimator</span></code></a>
 <strong>Reference:</strong> Bock &amp; Mislevy (1982)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="expected-a-posteriori-estimator">
 <h1>Expected A Posteriori Estimator<a class="headerlink" href="#expected-a-posteriori-estimator" title="Link to this heading">#</a></h1>
@@ -466,11 +466,18 @@
 <p>EAP estimates ability by taking the mean of the posterior distribution rather
 than the maximizer of a likelihood. In CAT practice this is attractive because
 it always returns a finite value, even for all-correct or all-incorrect patterns
-where MLE becomes unstable or undefined.</p>
-<p>EAP also exposes a posterior variance naturally, which makes it useful beyond
-estimation itself: the same posterior can drive stopping rules and
-posterior-weighted selectors. That makes it a foundational Bayesian estimator
-for the planned feature set.</p>
+where the MLE does not exist, so no heuristic such as Dodd’s is needed early in
+the test; Bock and Mislevy (1982, p. 443) conclude that it is stable at all
+adaptive test lengths, including the first few items.</p>
+<p>EAP’s posterior also yields the posterior variance at no extra cost, and that
+variance serves as the error variance of the estimate (Bock &amp; Mislevy, 1982,
+p. 432); in their simulations the posterior standard deviation behaved like the
+standard error of measurement (p. 431). The same posterior can drive stopping
+rules and posterior-weighted selectors. The estimator itself keeps no posterior
+between calls, since one instance serves every session and look-ahead selectors
+call it with hypothetical responses; consumers compute a session’s posterior
+with <code class="docutils literal notranslate"><span class="pre">posterior()</span></code> from the Bayesian infrastructure, and its variance with
+<code class="docutils literal notranslate"><span class="pre">posterior_variance()</span></code>.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -482,21 +489,27 @@ for the planned feature set.</p>
 =
 \frac{\int \theta\,p(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta}
      {\int p(\theta)\,L(\mathbf{u}\mid\theta)\,d\theta}.\]</div>
-<p>Using the shared quadrature grid from the Bayesian infrastructure, the planned
-implementation approximates this as</p>
+<p>Using the shared quadrature grid from the
+<a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian infrastructure</span></a>,
+the implementation approximates this as</p>
 <div class="math notranslate nohighlight">
 \[\hat{\theta}_{\mathrm{EAP}}
 \approx
 \sum_{q=1}^{Q}\theta_q\,\tilde{p}(\theta_q \mid \mathbf{u}),\]</div>
-<p>with posterior variance</p>
+<p>with posterior variance, computed by <code class="docutils literal notranslate"><span class="pre">posterior_variance()</span></code>,</p>
 <div class="math notranslate nohighlight">
 \[\operatorname{Var}(\theta \mid \mathbf{u})
 \approx
 \sum_{q=1}^{Q}
 (\theta_q-\hat{\theta}_{\mathrm{EAP}})^2
 \tilde{p}(\theta_q \mid \mathbf{u}).\]</div>
-<p>The estimator therefore depends on the prior and the quadrature grid, but it
-avoids the divergence issues that motivate Dodd-style MLE fallbacks.</p>
+<p>These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433); catsim returns
+the variance, the square of their Equation 5, without Sheppard’s correction (see
+<a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>).</p>
+<p>The estimate depends on the prior and on the grid. The default grid (121 nodes
+on <span class="math notranslate nohighlight">\([-6, 6]\)</span>) is accurate while the posterior standard deviation is at least
+about 0.065; longer tests need a finer grid (see
+<a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -523,7 +536,7 @@ avoids the divergence issues that motivate Dodd-style MLE fallbacks.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">verbose</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
-<td><p>Planned diagnostics flag inherited from the estimator base class.</p></td>
+<td><p>Diagnostics flag inherited from the estimator base class.</p></td>
 </tr>
 </tbody>
 </table>
@@ -535,19 +548,86 @@ avoids the divergence issues that motivate Dodd-style MLE fallbacks.</p>
 <ol class="arabic simple">
 <li><p>With no administered items, the estimate equals the mean of the prior induced by the configured grid and prior.</p></li>
 <li><p>The estimator returns a finite value for extreme response patterns such as all-correct or all-incorrect strings.</p></li>
-<li><p>The exposed posterior from the most recent estimate is normalized and aligned with the configured quadrature grid.</p></li>
-<li><p>Posterior variance should generally decrease as additional informative items are administered.</p></li>
+<li><p>The estimate depends only on the arguments of the call, never on earlier calls: the estimator keeps no per-session state (<a class="reference internal" href="../../../adr/0003-runtime-state-ownership.html"><span class="doc">ADR-0003</span></a>).</p></li>
 <li><p>Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.</p></li>
 </ol>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a></p>
-<p>Wang, T., &amp; Vispoel, W. P. (1998). Properties of ability estimation methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(2), 109-135.</p>
+<p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">University of Minnesota Digital Conservancy</a>.</p>
+<p>Wang, T., &amp; Vispoel, W. P. (1998). Properties of ability estimation methods in computerized adaptive testing. <em>Journal of Educational Measurement</em>, 35(2), 109-135. <a class="reference external" href="https://doi.org/10.1111/j.1745-3984.1998.tb00530.x">https://doi.org/10.1111/j.1745-3984.1998.tb00530.x</a>. Not openly available.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Depends on <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a></p>
 </div>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.estimation.EAPEstimator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">EAPEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bayesian-infrastructure.html#catsim.estimation.QuadratureGrid" title="catsim.estimation.bayesian.QuadratureGrid"><span class="pre">QuadratureGrid</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#EAPEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.EAPEstimator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></p>
+<p>Expected a Posteriori ability estimator.</p>
+<p>The estimator keeps no posterior between calls: one instance serves every session of a
+simulation, and look-ahead selectors such as MEI call it with hypothetical responses. Compute
+a session’s posterior with <a class="reference internal" href="bayesian-infrastructure.html#catsim.estimation.posterior" title="catsim.estimation.posterior"><code class="xref py py-func docutils literal notranslate"><span class="pre">posterior()</span></code></a> when it is needed.</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Expected A Posteriori Estimator</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>grid</strong><span class="classifier">QuadratureGrid or None, optional</span></dt><dd><p>Quadrature grid over which the posterior is evaluated. Default is
+<code class="docutils literal notranslate"><span class="pre">QuadratureGrid.uniform()</span></code>.</p>
+</dd>
+<dt><strong>log_prior</strong><span class="classifier">LogPrior or None, optional</span></dt><dd><p>Vectorized log-density of the prior. Default is <code class="docutils literal notranslate"><span class="pre">normal_log_prior()</span></code>, the standard normal.</p>
+</dd>
+<dt><strong>verbose</strong><span class="classifier">bool, optional</span></dt><dd><p>Diagnostics flag inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>. Default is False.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.estimation.EAPEstimator.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#EAPEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.EAPEstimator.estimate" title="Link to this definition">#</a></dt>
+<dd><p>Return the posterior mean for the administered response pattern.</p>
+<p>Each call evaluates the likelihood once per grid node, which the <code class="docutils literal notranslate"><span class="pre">evaluations</span></code> counters
+report.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>Indices of the items administered so far. With none, the estimate is the prior mean.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>The examinee’s answers to the administered items, in the same order.</p>
+</dd>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Unused; the posterior mean does not depend on a previous estimate.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The posterior mean of <span class="math notranslate nohighlight">\(\theta\)</span>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If any argument is None, if <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> and <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> have different
+lengths, or if <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> contains non-Boolean elements.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.estimation.EAPEstimator.grid">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">grid</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="bayesian-infrastructure.html#catsim.estimation.QuadratureGrid" title="catsim.estimation.bayesian.QuadratureGrid"><span class="pre">QuadratureGrid</span></a></span><a class="headerlink" href="#catsim.estimation.EAPEstimator.grid" title="Link to this definition">#</a></dt>
+<dd><p>Return the quadrature grid used by the estimator.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -562,12 +642,12 @@ avoids the divergence issues that motivate Dodd-style MLE fallbacks.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="warm-wle.html"
+       href="bayesian-infrastructure.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Warm Weighted Likelihood Estimator</p>
+        <p class="prev-next-title">Bayesian Estimation Infrastructure</p>
       </div>
     </a>
     <a class="right-next"
@@ -603,6 +683,14 @@ avoids the divergence issues that motivate Dodd-style MLE fallbacks.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.EAPEstimator"><code class="docutils literal notranslate"><span class="pre">EAPEstimator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.EAPEstimator.estimate"><code class="docutils literal notranslate"><span class="pre">EAPEstimator.estimate()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.EAPEstimator.grid"><code class="docutils literal notranslate"><span class="pre">EAPEstimator.grid</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

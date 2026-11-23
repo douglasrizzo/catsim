@@ -49,7 +49,7 @@
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Owen Sequential Bayesian Estimator" href="owen-estimator.html" />
+    <link rel="next" title="Warm Weighted Likelihood Estimator" href="warm-wle.html" />
     <link rel="prev" title="Expected A Posteriori Estimator" href="eap-estimator.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -456,19 +456,25 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.estimation.bayesian.MAPEstimator</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <a class="reference internal" href="#catsim.estimation.MAPEstimator" title="catsim.estimation.MAPEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.MAPEstimator</span></code></a>
 <strong>Reference:</strong> Samejima (1969); Bock &amp; Aitkin (1981)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="maximum-a-posteriori-estimator">
 <h1>Maximum A Posteriori Estimator<a class="headerlink" href="#maximum-a-posteriori-estimator" title="Link to this heading">#</a></h1>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
-<p>MAP is the mode-based Bayesian counterpart to MLE. It adds prior information to
-the likelihood objective but keeps the optimization workflow familiar, making it
-cheaper than quadrature-based EAP while still regularizing extreme short-test
-patterns.</p>
-<p>This makes MAP the natural option for users who want Bayesian shrinkage without
-the overhead of computing posterior moments on every call.</p>
+<p>MAP, also called the Bayes modal estimator, is the posterior mode: the
+maximum-likelihood estimate with a prior added to the objective. Samejima
+(1969, p. 7, Equations 2-5 and 2-6) defines the Bayes modal estimator as the
+value that maximizes the prior density times the likelihood; Bock and Mislevy
+(1982, p. 432) credit Bock and Aitkin (1981) with the name MAP, and Magis and
+Raîche (2012, p. 4) attribute the estimator to Birnbaum (1969). The prior keeps
+the estimate finite for all-correct and all-incorrect patterns, where the MLE
+does not exist, while the computation stays a one-dimensional optimization like
+the MLE’s, with no quadrature grid.</p>
+<p>It is not necessarily cheaper than EAP: Bock and Mislevy (1982, p. 432) argue
+the opposite for adaptive testing, since EAP’s quadrature sums accumulate item by
+item while MAP needs a new optimization after every response.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -481,11 +487,30 @@ p(\theta)\,L(\mathbf{u}\mid\theta)
 =
 \arg\max_{\theta}\,
 \left[\log p(\theta)+\log L(\mathbf{u}\mid\theta)\right].\]</div>
-<p>Equivalently, the planned estimator minimizes the penalized negative log-posterior</p>
+<p>The implementation minimizes the negative log-posterior</p>
 <div class="math notranslate nohighlight">
 \[-\log p(\theta) - \log L(\mathbf{u}\mid\theta)\]</div>
-<p>over the configured theta bounds. Unlike EAP, this requires no quadrature grid;
-it only requires a prior function and a scalar optimizer.</p>
+<p>over the configured theta bounds. The estimator first evaluates the
+log-posterior at 201 equally spaced points across the bounds (0.06 apart on the
+default <span class="math notranslate nohighlight">\([-6, 6]\)</span>), in one vectorized call, and takes the best point. A bounded
+scalar optimizer (SciPy’s bounded Brent method) then refines the mode between
+that point’s two neighbors, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>.</p>
+<p>The grid search matters for two reasons. A prior that is zero on part of the
+bounds, such as <code class="docutils literal notranslate"><span class="pre">uniform_log_prior(-1,</span> <span class="pre">1)</span></code> searched over <span class="math notranslate nohighlight">\([-6, 6]\)</span>, makes the
+objective <span class="math notranslate nohighlight">\(+\infty\)</span> there, and a bounded scalar search cannot cross that flat
+region; it would drift to a bound outside the prior’s support. And a multimodal
+posterior, from a multimodal prior or a 3PL likelihood, has local modes a local
+search can stop at; the grid finds the highest one, provided the posterior does
+not change sharply between grid points. If three or more grid points tie for
+the maximum, as with a uniform prior and no responses, the posterior has no
+unique mode and the middle of the tied points is returned. The prior’s support
+must contain at least one grid point, which any interval wider than the grid
+spacing does.</p>
+<p>Under the 1PL and 2PL models the log-likelihood is concave, so with a normal
+prior the derivative of the log-posterior points toward the prior mean at the
+MLE and toward the MLE at the prior mean, and its single root lies between them
+(contract 2). With a uniform prior over a wide enough interval, MAP coincides
+with the MLE (Magis &amp; Raîche, 2012, p. 5).</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -508,7 +533,7 @@ it only requires a prior function and a scalar optimizer.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">tol</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1e-6</span></code></p></td>
-<td><p>Tolerance passed to the bounded scalar optimizer.</p></td>
+<td><p>Absolute tolerance of the refinement step, passed to the bounded scalar optimizer.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bounds</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code></p></td>
@@ -516,7 +541,7 @@ it only requires a prior function and a scalar optimizer.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verbose</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
-<td><p>Planned diagnostics flag inherited from the estimator base class.</p></td>
+<td><p>Diagnostics flag inherited from the estimator base class.</p></td>
 </tr>
 </tbody>
 </table>
@@ -526,22 +551,94 @@ it only requires a prior function and a scalar optimizer.</p>
 <h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
 <p>Any correct implementation must satisfy the following properties:</p>
 <ol class="arabic simple">
-<li><p>With no administered items, the estimate defaults to the mode of the configured prior over the search range.</p></li>
-<li><p>For short tests with a centered prior, the MAP estimate is closer to the prior mean than the corresponding plain MLE on the same data.</p></li>
+<li><p>With no administered items, the estimate is the mode of the configured prior over the search range, to within <code class="docutils literal notranslate"><span class="pre">tol</span></code>.</p></li>
+<li><p>Under the 1PL and 2PL models with a normal prior, the MAP estimate lies between the prior mean and the MLE, so it is closer to the prior mean than the MLE.</p></li>
 <li><p>Shifting the prior mean while holding the response data fixed shifts the MAP estimate in the same direction.</p></li>
 <li><p>On long, information-rich tests, MAP and EAP should converge toward similar values because the posterior becomes sharply concentrated.</p></li>
 <li><p>The estimator returns finite values on extreme response patterns because the prior keeps the objective bounded.</p></li>
+<li><p>The estimate lies inside the prior’s support. A prior whose support contains none of the grid points, such as one outside the search bounds, raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p></li>
 </ol>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. <em>Psychometrika Monograph Supplement</em>, No. 17.</p>
-<p>Bock, R. D., &amp; Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters. <em>Psychometrika</em>, 46, 443-459.</p>
+<p>Samejima, F. (1969). Estimation of latent ability using a response pattern of graded scores. <em>Psychometrika Monograph Supplement</em>, No. 17. <a class="reference external" href="https://doi.org/10.1007/BF03372160">https://doi.org/10.1007/BF03372160</a>. Open copy: <a class="reference external" href="https://psychometricsociety.org/sites/main/files/file-attachments/mn17.pdf">Psychometric Society</a>.</p>
+<p>Bock, R. D., &amp; Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. <em>Psychometrika</em>, 46(4), 443-459. <a class="reference external" href="https://doi.org/10.1007/BF02293801">https://doi.org/10.1007/BF02293801</a>. Not openly available.</p>
+<p>Bock, R. D., &amp; Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. <em>Applied Psychological Measurement</em>, 6(4), 431-444. <a class="reference external" href="https://doi.org/10.1177/014662168200600405">https://doi.org/10.1177/014662168200600405</a>. Open copy: <a class="reference external" href="https://hdl.handle.net/11299/101546">University of Minnesota Digital Conservancy</a>.</p>
+<p>Birnbaum, A. (1969). Statistical theory for logistic mental test models with a prior distribution of ability. <em>Journal of Mathematical Psychology</em>, 6(2), 258-276. <a class="reference external" href="https://doi.org/10.1016/0022-2496(69)90005-4">https://doi.org/10.1016/0022-2496(69)90005-4</a>. Not openly available.</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Related planned specs: <a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>,
+<p><a class="reference internal" href="bayesian-infrastructure.html"><span class="doc">Bayesian Estimation Infrastructure</span></a>,
 <a class="reference internal" href="eap-estimator.html"><span class="doc">Expected A Posteriori Estimator</span></a></p>
 </div>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.estimation.MAPEstimator">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">MAPEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-6.0,</span> <span class="pre">6.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#MAPEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.MAPEstimator" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></p>
+<p>Maximum a Posteriori ability estimator.</p>
+<p>The posterior mode is located on 201 equally spaced points over the search bounds, then
+refined with a bounded scalar search between the best point’s neighbors. The grid keeps the
+estimate inside the prior’s support and finds the global mode of a multimodal posterior.</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Maximum A Posteriori Estimator</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>log_prior</strong><span class="classifier">LogPrior or None, optional</span></dt><dd><p>Vectorized log-density of the prior. Default is <code class="docutils literal notranslate"><span class="pre">normal_log_prior()</span></code>, the standard normal.</p>
+</dd>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Absolute tolerance of the refinement step. Default is 1e-6.</p>
+</dd>
+<dt><strong>bounds</strong><span class="classifier">tuple[float, float], optional</span></dt><dd><p>Search range for the mode. Default is <code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code>.</p>
+</dd>
+<dt><strong>verbose</strong><span class="classifier">bool, optional</span></dt><dd><p>Diagnostics flag inherited from <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code>. Default is False.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">tol</span></code> is not positive, or if <code class="docutils literal notranslate"><span class="pre">bounds</span></code> is not a finite interval with low &lt; high.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.estimation.MAPEstimator.estimate">
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#MAPEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.MAPEstimator.estimate" title="Link to this definition">#</a></dt>
+<dd><p>Estimate ability by maximizing the posterior density.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>Indices of the items administered so far. With none, the estimate is the prior mode.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>The examinee’s answers to the administered items, in the same order.</p>
+</dd>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>Unused; the search covers the whole bounds on every call.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The posterior mode of <span class="math notranslate nohighlight">\(\theta\)</span> within the search bounds.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If any argument is None, if <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> and <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> have different
+lengths or <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> contains non-Boolean elements, or if the log-posterior has
+no finite maximum within the search bounds.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -565,11 +662,11 @@ it only requires a prior function and a scalar optimizer.</p>
       </div>
     </a>
     <a class="right-next"
-       href="owen-estimator.html"
+       href="warm-wle.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Owen Sequential Bayesian Estimator</p>
+        <p class="prev-next-title">Warm Weighted Likelihood Estimator</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -597,6 +694,13 @@ it only requires a prior function and a scalar optimizer.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.MAPEstimator"><code class="docutils literal notranslate"><span class="pre">MAPEstimator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.MAPEstimator.estimate"><code class="docutils literal notranslate"><span class="pre">MAPEstimator.estimate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

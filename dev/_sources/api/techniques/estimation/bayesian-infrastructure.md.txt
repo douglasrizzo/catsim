@@ -6,14 +6,14 @@
 
 ## Motivation
 
-Several estimators and selectors need the same Bayesian substrate: a
-prior on $\theta$, a fixed quadrature grid, and a numerically stable way
-to turn responses into a discrete posterior. This page specifies that shared
-subsystem so later features do not duplicate incompatible posterior code.
+Bayesian estimators and selectors need the same substrate: a prior on
+$\theta$, a fixed quadrature grid, and a numerically stable way to turn
+responses into a discrete posterior. This page specifies that shared subsystem
+so that later features do not duplicate incompatible posterior code.
 
-The infrastructure is intentionally not an estimator by itself. Its job is to
-provide common posterior primitives for EAP, MAP-adjacent utilities, and
-posterior-weighted selectors such as MPWI, KLP, and MEPV.
+The infrastructure is not an estimator by itself. The EAP estimator is built on
+it, the MAP estimator reuses its prior factories, and the planned
+posterior-weighted selectors (MPWI, KLP, MEPV) would reuse its posterior.
 
 ## Definition
 
@@ -38,7 +38,10 @@ w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q),
 \sum_{q=1}^{Q}\tilde{p}(\theta_q \mid \mathbf{u}) = 1.
 $$
 
-Downstream techniques then reuse the same posterior moments:
+The log-likelihoods are summed at each node, as Bock and Mislevy (1982, p. 432)
+recommend for adaptive testing, and the posterior is normalized after
+subtracting the largest log-posterior value, so long response vectors do not
+underflow. Downstream techniques reuse the same posterior moments:
 
 $$
 \hat{\theta}_{\mathrm{EAP}}
@@ -51,8 +54,35 @@ $$
 \tilde{p}(\theta_q \mid \mathbf{u}).
 $$
 
+These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433), without the
+square root on the variance; they credit the quadrature formulas to Bock and
+Aitkin (1981) (p. 432). Like Bock and Mislevy, catsim uses evenly spaced nodes
+rather than Gauss–Hermite points, which offer little advantage here because the
+likelihood is not a polynomial (p. 433).
+
 By default the grid has 121 equally spaced nodes on $[-6, 6]$ (spacing 0.1) and
 the prior is $\mathcal{N}(0, 1)$.
+
+### Grid resolution
+
+The grid is accurate while it resolves the posterior. Compared with a
+2,401-node reference, the default grid reproduces the posterior mean and
+standard deviation to within about 0.25% while the posterior standard deviation
+is at least 0.065, which takes a test information of about 240. Below that it
+degrades: errors reach about 6% at a posterior standard deviation of 0.05 and
+about 44% at 0.035. The default follows the advice of Bock and Mislevy (1982,
+p. 433), who suggested about 80 points between $\pm 4$ standard deviations, also
+a spacing of 0.1, to keep precision down to a posterior standard deviation of
+0.2.
+A coarser grid degrades sooner: with 41 nodes (spacing 0.3), errors reach about
+7% at a posterior standard deviation of 0.15 and about 44% at 0.11.
+
+Bock and Mislevy also applied Sheppard's correction to the posterior variance
+(p. 433).
+catsim does not: the nodes are evaluated rather than grouped, so the
+uncorrected moments already match the reference above, and the correction would
+shrink the standard deviation by about 1% at a posterior standard deviation of
+0.2 and by about 9% at 0.07.
 
 ## Parameters
 
@@ -93,13 +123,29 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters. *Psychometrika*, 46, 443-459.
+Bock, R. D., & Aitkin, M. (1981). Marginal maximum likelihood estimation of item parameters: Application of an EM algorithm. *Psychometrika*, 46(4), 443-459. <https://doi.org/10.1007/BF02293801>. Not openly available; Bock and Mislevy (1982, p. 432) describe its quadrature formulas.
 
-Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431-444. <https://doi.org/10.1177/014662168200600405>
-
-Standard fixed-grid and Gauss-Hermite quadrature references apply to the numerical integration scheme.
+Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a microcomputer environment. *Applied Psychological Measurement*, 6(4), 431-444. <https://doi.org/10.1177/014662168200600405>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/101546).
 
 :::{seealso}
-Related planned specs: {doc}`/api/techniques/estimation/eap-estimator`,
+{doc}`/api/techniques/estimation/eap-estimator`,
 {doc}`/api/techniques/estimation/map-estimator`
 :::
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.estimation.QuadratureGrid
+   :members:
+   :show-inheritance:
+
+.. autofunction:: catsim.estimation.normal_log_prior
+
+.. autofunction:: catsim.estimation.uniform_log_prior
+
+.. autofunction:: catsim.estimation.posterior
+
+.. autofunction:: catsim.estimation.posterior_mean
+
+.. autofunction:: catsim.estimation.posterior_variance
+```

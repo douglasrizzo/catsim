@@ -822,6 +822,9 @@ accuracy, bias, and the availability of uncertainty quantification.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="numerical-search-estimator.html">Numerical Search Estimator (MLE)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="bayesian-infrastructure.html">Bayesian Estimation Infrastructure</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eap-estimator.html">Expected A Posteriori Estimator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map-estimator.html">Maximum A Posteriori Estimator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="warm-wle.html">Warm Weighted Likelihood Estimator</a></li>
 </ul>
 </div>
 </section>
@@ -829,7 +832,10 @@ accuracy, bias, and the availability of uncertainty quantification.</p>
 <h2>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Link to this heading">#</a></h2>
 <pre  class="mermaid">
         classDiagram
+  BaseEstimator &lt;|-- EAPEstimator
+  BaseEstimator &lt;|-- MAPEstimator
   BaseEstimator &lt;|-- NumericalSearchEstimator
+  BaseEstimator &lt;|-- WarmLikelihoodEstimator
     </pre></section>
 <section id="planned">
 <h2>Planned<a class="headerlink" href="#planned" title="Link to this heading">#</a></h2>
@@ -840,9 +846,6 @@ They describe planned additions to <code class="xref py py-mod docutils literal 
 </div>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="warm-wle.html">Warm Weighted Likelihood Estimator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="eap-estimator.html">Expected A Posteriori Estimator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="map-estimator.html">Maximum A Posteriori Estimator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="owen-estimator.html">Owen Sequential Bayesian Estimator</a></li>
 </ul>
 </div>
