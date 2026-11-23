@@ -226,6 +226,21 @@ exclude_also = ["if TYPE_CHECKING:", "if __name__ == .__main__.:", "raise NotImp
 fail_under = 88
 show_missing = true
 
+[tool.vulture]
+# src and tests together: on its own, src's public API reads as unused.
+paths = ["src/catsim", "tests"]
+min_confidence = 60
+ignore_decorators = ["@initialize", "@invariant"]  # Hypothesis runs the state machines' rules
+ignore_names = [
+  "THETA_MIN_TYPICAL",  # M25 makes the two THETA_*_TYPICAL bounds the scale functions' defaults
+  "THETA_MAX_TYPICAL",
+  "WEIGHTED_INFO",  # ClusterMethod member, chosen by its value "weighted_info"
+  "_selector_cache",  # empty until the planned MPWI and MEPV selectors cache their tables in it
+  "writeable",  # numpy's ndarray.flags.writeable, set to make arrays read-only
+  "pytest_plugins",  # read by pytest
+  "close_matplotlib_figures",  # autouse fixture
+]
+
 [tool.ty.src]
 include = ["src/catsim"]
 

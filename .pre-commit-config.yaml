@@ -97,6 +97,13 @@ repos:
         types: [file]
         require_serial: true
 
+  # Dead code in src and tests; [tool.vulture] in pyproject.toml holds the paths and the whitelist.
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.16
+    hooks:
+      - id: vulture
+        types_or: [python, toml]
+
   # 5. Other formatters
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
