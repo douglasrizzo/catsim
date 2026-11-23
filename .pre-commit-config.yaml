@@ -62,7 +62,7 @@ repos:
         types: [file]
       - id: ty-check
         name: ty check
-        entry: uv run --only-group dev ty check
+        entry: uv run --group dev ty check
         language: system
         pass_filenames: false
         types_or: [python, pyi]
