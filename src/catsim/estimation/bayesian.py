@@ -356,7 +356,7 @@ class EAPEstimator(BaseEstimator):
         lengths, or if ``response_vector`` contains non-Boolean elements.
     """
     self._require_inputs(item_bank, administered_items, response_vector)
-    post = posterior(response_vector, item_bank.items[administered_items, :4], self._grid, self._log_prior)
+    post = posterior(response_vector, item_bank.get_items(administered_items), self._grid, self._log_prior)
     self._calls += 1
     self._last_evaluations = self._grid.nodes.size
     self._total_evaluations += self._last_evaluations
@@ -465,7 +465,7 @@ class MAPEstimator(BaseEstimator):
 
     self._calls += 1
 
-    items = item_bank.items[administered_items, :4]
+    items = item_bank.get_items(administered_items)
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
     log_post = irt.log_likelihood_hpc(nodes, response_vector, items) + self._log_prior(nodes)
     self._last_evaluations = nodes.size

@@ -125,11 +125,11 @@ class MLWISelector(BaseSelector):
     candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
 
     if administered_items:
-      weights = self._likelihood_weights(response_vector, item_bank.items[administered_items, :4])
+      weights = self._likelihood_weights(response_vector, item_bank.get_items(administered_items))
     else:
       weights = numpy.ones_like(self._nodes, dtype=float)
 
     # information of every candidate at every node, one row per node
-    info = irt.inf_hpc(self._nodes[:, None], item_bank.items[candidates, :4])
+    info = irt.inf_hpc(self._nodes[:, None], item_bank.get_items(candidates))
     scores = (weights @ info) * self._delta
     return self._pick_best(candidates, scores, rng)

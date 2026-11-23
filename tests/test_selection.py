@@ -429,7 +429,7 @@ class TestIntervalInfoSelector:
     half_width = 1.959963984540054 / np.sqrt(irt.test_info(theta, item_bank.items[administered]))
     remaining = [i for i in range(item_bank.n_items) if i not in administered]
     integrals = [
-      quad(irt.inf, theta - half_width, theta + half_width, args=tuple(item_bank.items[i, :4]))[0] for i in remaining
+      quad(irt.inf, theta - half_width, theta + half_width, args=tuple(item_bank.items[i]))[0] for i in remaining
     ]
 
     selected = IntervalInfoSelector().select(item_bank=item_bank, administered_items=administered, est_theta=theta)
@@ -459,7 +459,7 @@ class TestIntervalInfoSelector:
   def test_fixed_interval_matches_numerical_integration(self) -> None:
     """A fixed half-width integrates information over theta_hat +/- interval."""
     item_bank = ItemBank.generate_item_bank(40, seed=8)
-    integrals = [quad(irt.inf, -1.3, -0.3, args=tuple(item[:4]))[0] for item in item_bank.items]
+    integrals = [quad(irt.inf, -1.3, -0.3, args=tuple(item))[0] for item in item_bank.items]
 
     selected = IntervalInfoSelector(interval=0.5).select(item_bank=item_bank, administered_items=[], est_theta=-0.8)
 
@@ -604,7 +604,7 @@ class TestMEISelector:
       [
         float(
           (
-            irt.icc(est_theta, *item_bank.items[int(idx), :4])
+            irt.icc(est_theta, *item_bank.items[int(idx)])
             * item_bank.test_information(
               estimator.estimate(
                 item_bank=item_bank,
@@ -616,7 +616,7 @@ class TestMEISelector:
             )
           )
           + (
-            (1.0 - irt.icc(est_theta, *item_bank.items[int(idx), :4]))
+            (1.0 - irt.icc(est_theta, *item_bank.items[int(idx)]))
             * item_bank.test_information(
               estimator.estimate(
                 item_bank=item_bank,
@@ -719,7 +719,7 @@ class TestMLWISelector:
     nodes = np.linspace(-6.0, 6.0, 11)
     delta = (6.0 - (-6.0)) / (11 - 1)
     log_likelihood = np.array(
-      [irt.log_likelihood(float(theta), response_vector, item_bank.items[administered_items, :4]) for theta in nodes],
+      [irt.log_likelihood(float(theta), response_vector, item_bank.get_items(administered_items)) for theta in nodes],
       dtype=float,
     )
     log_likelihood -= float(log_likelihood.max())
@@ -727,7 +727,7 @@ class TestMLWISelector:
     manual_scores = np.array(
       [
         float(
-          np.sum(np.array([irt.inf(float(theta), *item_bank.items[int(idx), :4]) for theta in nodes]) * weights) * delta
+          np.sum(np.array([irt.inf(float(theta), *item_bank.items[int(idx)]) for theta in nodes]) * weights) * delta
         )
         for idx in candidates
       ],
@@ -768,7 +768,7 @@ class TestMLWISelector:
 
     manual_scores = np.array(
       [
-        float(np.sum(np.array([irt.inf(float(theta), *item_bank.items[idx, :4]) for theta in nodes])) * delta)
+        float(np.sum(np.array([irt.inf(float(theta), *item_bank.items[idx]) for theta in nodes])) * delta)
         for idx in range(item_bank.n_items)
       ],
       dtype=float,
@@ -801,10 +801,10 @@ class TestMLWISelector:
     item_bank = ItemBank.generate_item_bank(320, seed=7)
     rng = np.random.default_rng(7)
     administered_items = list(range(300))
-    response_vector = [bool(rng.random() < irt.icc(0.4, *item_bank.items[idx, :4])) for idx in administered_items]
+    response_vector = [bool(rng.random() < irt.icc(0.4, *item_bank.items[idx])) for idx in administered_items]
     selector = MLWISelector()
 
-    weights = selector._likelihood_weights(response_vector, item_bank.items[administered_items, :4])
+    weights = selector._likelihood_weights(response_vector, item_bank.get_items(administered_items))
     selected = selector.select(
       item_bank=item_bank, administered_items=administered_items, est_theta=0.0, response_vector=response_vector
     )
@@ -843,9 +843,7 @@ class TestMLWISelector:
     theta_true = 0.7
     rng = np.random.default_rng(5)
     administered_items = list(range(20))
-    response_vector = [
-      bool(rng.random() < irt.icc(theta_true, *item_bank.items[idx, :4])) for idx in administered_items
-    ]
+    response_vector = [bool(rng.random() < irt.icc(theta_true, *item_bank.items[idx])) for idx in administered_items]
     mle_theta = NumericalSearchEstimator().estimate(
       item_bank=item_bank,
       administered_items=administered_items,

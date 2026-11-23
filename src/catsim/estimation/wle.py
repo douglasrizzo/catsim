@@ -138,7 +138,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     if len(administered_items) == 0:
       return float(est_theta)
 
-    items = item_bank.items[administered_items, :4]
+    items = item_bank.get_items(administered_items)
 
     def score(theta: float) -> float:
       return float(self._modified_score(theta, response_vector, items)[0])
