@@ -661,6 +661,7 @@ def max_info(a: float = 1, b: float = 0, c: float = 0, d: float = 1) -> float:
       fig, axes = plt.subplots(n_items, 1)
       for idx, item in enumerate(item_bank.items):
         item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])
+      plt.tight_layout()
       plt.show()
 
   Parameters

@@ -48,6 +48,14 @@ mermaid_init_config = {
   "state": {"useMaxWidth": False},
 }
 
+# The plot directive embeds the first format in the page, so plots are vector SVG, sharp on any
+# screen. The tight bounding box keeps labels that sit outside the axes, such as a twin y axis
+# label, inside the image. The links to other formats and to the plot's source are left out.
+plot_formats = [("svg", 100)]
+plot_rcparams = {"savefig.bbox": "tight"}
+plot_html_show_formats = False
+plot_html_show_source_link = False
+
 bibtex_bibfiles = ["references.bib"]
 bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
