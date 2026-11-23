@@ -53,6 +53,8 @@ hidden runtime coupling.
   `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
 - When changing architecture-level behavior, update or add an ADR in `sphinx/adr/`.
 - Follow existing naming and module boundaries unless there is a strong reason to change them.
+- A new top-level module in `src/catsim/` must be placed in the import-linter `layers` contract in
+  `pyproject.toml`. The contract is exhaustive, so `lint-imports` fails until the module is placed.
 
 ## Documentation Rules
 
@@ -65,6 +67,8 @@ hidden runtime coupling.
   - relevant Sphinx pages
   - tutorial notebooks
   - README/Sphinx readme content when appropriate
+- No test runs the code in the docs: the `pycon` blocks and code in `sphinx/introduction.md` and
+  `sphinx/reproducibility.md`, and the README snippets. After an API change, run them by hand.
 
 ## Tutorial Notebook Rules
 
