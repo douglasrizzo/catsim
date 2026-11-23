@@ -116,6 +116,19 @@ Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized a
 
 Choi, S. W., Grady, M. W., & Dodd, B. G. (2011). A new stopping rule for computerized adaptive testing. *Educational and Psychological Measurement*, 71(1), 37-53. <https://doi.org/10.1177/0013164410387338>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC3028267/) (author manuscript without the journal's page numbers; cited here by section).
 
+## Open Questions
+
+To be answered before the stopper is implemented, and removed from the spec when it is promoted.
+
+1. **Whether the threshold should follow the window.** As shown above, every item's index shrinks
+   roughly as $c^3 I_i(\hat{\theta}) / (3 n^{3/2})$, so a fixed $\kappa$ (this spec) is reached
+   partly because the test got longer, on any bank. The options are:
+   - a fixed $\kappa$;
+   - a threshold that shrinks with the window, $\kappa_0 \delta_n^3$, which compares roughly the
+     same quantity as the minimum-information rule's Fisher threshold and so differs from that
+     rule mainly for wide windows, early in the test;
+   - not implementing this stopper, since no source proposes it.
+
 ## Implementation Guidance
 
 :::{note}

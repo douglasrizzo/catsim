@@ -151,6 +151,20 @@ Huebner, A. R., & Finkelman, M. D. (2016). On computing the key probability in t
 
 Sie, H., Finkelman, M. D., Bartroff, J., & Thompson, N. A. (2015). Stochastic curtailment in adaptive mastery testing: Improving the efficiency of confidence interval-based stopping rules. *Applied Psychological Measurement*, 39(4), 278-292. <https://doi.org/10.1177/0146621614561314>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC5978543/) (full text without page numbers; cited here by section).
 
+## Open Questions
+
+To be answered before the stopper is implemented, and removed from the spec when it is promoted.
+
+1. **Where to evaluate the agreement probability.** This spec uses the standard form above: the
+   probability is evaluated at the boundary point least favorable to the interim decision. The
+   alternative is a plug-in variant that evaluates it at the current estimate $\hat{\theta}_k$,
+   which is the rule this spec described before its revalidation. The plug-in variant does not
+   take the worse of the two boundary points, so it lacks the standard form's conservatism; the
+   standard form is the one the sources above state. Decide whether catsim offers the standard form
+   only, the plug-in variant only, or both behind a parameter. Finkelman (2010) studies variations
+   of stochastic curtailment; it is not openly available, so read it before choosing a variant from
+   it.
+
 ## Implementation Guidance
 
 :::{note}

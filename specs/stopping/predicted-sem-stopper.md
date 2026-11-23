@@ -128,6 +128,20 @@ Any correct implementation must satisfy the following properties:
 
 Choi, S. W., Grady, M. W., & Dodd, B. G. (2011). A new stopping rule for computerized adaptive testing. *Educational and Psychological Measurement*, 71(1), 37-53. <https://doi.org/10.1177/0013164410387338>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC3028267/) (author manuscript without the journal's page numbers; cited here by section).
 
+## Open Questions
+
+To be answered before the stopper is implemented, and removed from the spec when it is promoted.
+
+1. **How to predict the next standard error.** This spec predicts it from Fisher information, as
+   stated above; Choi et al. predict it from the predictive posterior variance, the MEPV kernel.
+   The choice interacts with the 1.0 strategy contract, under which stoppers read the standard
+   error the estimator reports (the step context's `se`). With EAP or MAP that is a posterior
+   standard deviation, so the posterior-variance prediction would be the consistent one; with the
+   likelihood estimators it would be the Fisher-information one. The options are:
+   - Fisher information always (this spec);
+   - the predictive posterior variance always, which needs a posterior on a grid, as MEPV does;
+   - whichever matches the estimator's own standard error.
+
 ## Implementation Guidance
 
 :::{note}

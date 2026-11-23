@@ -60,6 +60,14 @@ published version is not open, add a link to an open copy ("Open copy: ...") or,
 if there is none, say so and name the open source that describes the method
 ("Not openly available; X (Year) describes the method.").>
 
+% OPEN QUESTIONS — optional, for Planned specs only. List the design choices that are still open,
+% each with its options, its trade-off and the option the spec assumes for now. Answer them
+% before implementing, and remove the section when promoting to "Implemented".
+
+## Open Questions
+
+1. \<Question: the options, their trade-off, and which one the spec assumes.>
+
 % -----------------------------------------------------------------------
 
 % IMPLEMENTATION GUIDANCE — remove this entire section when promoting to
