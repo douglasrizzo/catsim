@@ -67,7 +67,7 @@ p. 496, Equation 7).
      - Description
    * - ``test_size``
      - required
-     - Total number of administered items :math:`N`; required because the schedule depends on test position.
+     - Planned test length :math:`N`, at least 1; required because the schedule depends on test position.
    * - ``acceleration``
      - ``1.0``
      - Positive exponent :math:`s`. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.

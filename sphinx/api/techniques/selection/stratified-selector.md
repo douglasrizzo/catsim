@@ -76,7 +76,7 @@ The strata depend only on item parameters and are computed once per item bank.
      - Description
    * - ``test_size``
      - required
-     - Intended test length :math:`L`.
+     - Intended test length :math:`L`, at least 1.
    * - ``n_strata``
      - ``None``
      - Number of strata :math:`S`, between 1 and ``test_size``. ``None`` uses

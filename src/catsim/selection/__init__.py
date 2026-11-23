@@ -1,6 +1,6 @@
 """Selection components for CAT."""
 
-from .base import BaseSelector, FiniteSelector
+from .base import BaseSelector
 from .cluster import ClusterMethod, ClusterSelector, ExposureControl
 from .expected_info import MEISelector
 from .kl import KLSelector
@@ -24,7 +24,6 @@ __all__ = [
   "ClusterMethod",
   "ClusterSelector",
   "ExposureControl",
-  "FiniteSelector",
   "IntervalInfoSelector",
   "KLSelector",
   "LinearSelector",

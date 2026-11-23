@@ -5,10 +5,10 @@ import numpy
 from .._typing import FloatArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import FiniteSelector
+from .base import BaseSelector
 
 
-class LinearSelector(FiniteSelector):
+class LinearSelector(BaseSelector):
   """Selector that returns item indexes in a linear order, simulating a standard (non-adaptive) test.
 
   This selector is useful for baseline comparisons or for administering a fixed set
@@ -44,7 +44,7 @@ class LinearSelector(FiniteSelector):
       msg = "All indexes must be non-negative integers"
       raise ValueError(msg)
 
-    super().__init__(len(indexes))
+    super().__init__()
     self._indexes = indexes
 
   @property

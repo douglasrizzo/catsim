@@ -64,7 +64,7 @@ that end point; the default $k = 6$ keeps more randomness late in longer tests.
      - Description
    * - ``test_size``
      - required
-     - Fixed test length :math:`N`.
+     - Planned test length :math:`N`, at least 1.
    * - ``acceleration``
      - ``1.0``
      - Positive schedule exponent :math:`s`.

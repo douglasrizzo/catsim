@@ -188,6 +188,28 @@ def test_capped_selectors_cover_every_selector_with_r_max() -> None:
   assert takes_r_max == set(CAPPED_SELECTORS)
 
 
+@pytest.mark.parametrize("test_size", [0, -5])
+@pytest.mark.parametrize(
+  "selector_class",
+  [
+    AStratSelector,
+    AStratBBlockSelector,
+    MaxInfoStratSelector,
+    MaxInfoBBlockSelector,
+    ProgressiveSelector,
+    ProportionalSelector,
+  ],
+)
+def test_selectors_reject_test_size_below_one(selector_class: Callable[..., BaseSelector], test_size: int) -> None:
+  """ProgressiveSelector(test_size=-5) used to construct and select by maximum information from the first item.
+
+  ProportionalSelector(test_size=0) constructed too, and the stratified selectors rejected it only through a message
+  about n_strata.
+  """
+  with pytest.raises(ValueError, match="test_size must be at least 1"):
+    selector_class(test_size=test_size)
+
+
 class TestMaxInfoSelector:
   """Tests for MaxInfoSelector."""
 
@@ -1180,8 +1202,8 @@ class TestProgressiveSelector:
   ) -> None:
     """The weight on information is ((position - 1) / (test_size - 1)) ** acceleration, capped at 1.
 
-    FiniteSelector does not enforce test_size, and a weight above 1 past it would give the random
-    component a negative coefficient and penalize high random draws.
+    The stopper, not the selector, ends the test, and a weight above 1 past test_size would give the
+    random component a negative coefficient and penalize high random draws.
     """
     assert ProgressiveSelector(test_size=test_size, acceleration=acceleration)._weight(position) == pytest.approx(
       expected

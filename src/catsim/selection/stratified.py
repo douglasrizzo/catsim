@@ -7,10 +7,10 @@ import numpy
 from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import FiniteSelector, pick_best
+from .base import BaseSelector, check_test_size, pick_best
 
 
-class StratifiedSelector(FiniteSelector):
+class StratifiedSelector(BaseSelector):
   """Abstract base class for selectors that divide the item bank into stage-aligned strata.
 
   The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking
@@ -22,7 +22,7 @@ class StratifiedSelector(FiniteSelector):
   Parameters
   ----------
   test_size : int
-      Number of items in the test.
+      Number of items in the test, at least 1.
   n_strata : int or None, optional
       Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which
       uses one stratum per test item.
@@ -49,9 +49,10 @@ class StratifiedSelector(FiniteSelector):
     Raises
     ------
     ValueError
-        If ``n_strata`` is not between 1 and ``test_size``.
+        If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.
     """
-    super().__init__(test_size)
+    super().__init__()
+    self._test_size = check_test_size(test_size)
     n_strata = test_size if n_strata is None else n_strata
     if not 1 <= n_strata <= test_size:
       msg = f"n_strata must be between 1 and test_size ({test_size}), got {n_strata}"
@@ -59,6 +60,11 @@ class StratifiedSelector(FiniteSelector):
     self._n_strata = n_strata
     self._strata: list[IntArray] | None = None
     self._strata_item_bank: ItemBank | None = None
+
+  @property
+  def test_size(self) -> int:
+    """Get the number of items in the test."""
+    return self._test_size
 
   @property
   def n_strata(self) -> int:
