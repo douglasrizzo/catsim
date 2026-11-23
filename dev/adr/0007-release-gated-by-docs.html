@@ -467,6 +467,14 @@ available online, not merely when the package builds and tests pass.</p>
 <ul class="simple">
 <li><p>CI models documentation availability as part of release readiness.</p></li>
 <li><p>Publishing is intentionally coupled to the docs deployment DAG.</p></li>
+<li><p>The docs deployment and the publish it gates run in the same workflow run, because a job
+cannot wait for a job in another run: the GitHub release event deploys the production docs and
+then publishes to PyPI, and the <code class="docutils literal notranslate"><span class="pre">dev</span></code> → <code class="docutils literal notranslate"><span class="pre">main</span></code> pull request deploys the dev docs and then
+publishes a release candidate to TestPyPI. These are the only two publishing paths; there is no
+manual publish.</p></li>
+<li><p>The production docs go live before the PyPI upload waits for the maintainer’s approval in the
+<code class="docutils literal notranslate"><span class="pre">pypi</span></code> environment, so a rejected upload leaves docs online for a version that is not on PyPI
+until the next deploy.</p></li>
 <li><p>Release automation stays aligned with the project’s documentation policy.</p></li>
 </ul>
 </section>
