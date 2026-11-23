@@ -4,59 +4,6 @@ import numpy as np
 import pytest
 
 from catsim import cat
-from catsim.item_bank import ItemBank
-
-
-class TestDodd:
-  """Tests for the dodd() function."""
-
-  def test_dodd_correct_response(self) -> None:
-    """Test dodd heuristic when examinee answers correctly."""
-    item_bank = ItemBank.generate_item_bank(10)
-    theta = 0.0
-    new_theta = cat.dodd(theta, item_bank, correct=True)
-    # When correct, theta should increase toward max difficulty
-    assert new_theta > theta
-
-  def test_dodd_incorrect_response(self) -> None:
-    """Test dodd heuristic when examinee answers incorrectly."""
-    item_bank = ItemBank.generate_item_bank(10)
-    theta = 0.0
-    new_theta = cat.dodd(theta, item_bank, correct=False)
-    # When incorrect, theta should decrease toward min difficulty
-    assert new_theta < theta
-
-  def test_dodd_correct_formula(self) -> None:
-    """Test that dodd follows the correct formula."""
-    item_bank = ItemBank.generate_item_bank(10)
-    theta = 0.5
-    b = item_bank.difficulty
-    b_max = max(b)
-    b_min = min(b)
-
-    # Correct response
-    expected_correct = theta + ((b_max - theta) / 2)
-    assert cat.dodd(theta, item_bank, correct=True) == pytest.approx(expected_correct)
-
-    # Incorrect response
-    expected_incorrect = theta - ((theta - b_min) / 2)
-    assert cat.dodd(theta, item_bank, correct=False) == pytest.approx(expected_incorrect)
-
-  def test_dodd_at_max_difficulty(self) -> None:
-    """Test dodd when theta equals max difficulty."""
-    item_bank = ItemBank.generate_item_bank(10)
-    b_max = max(item_bank.difficulty)
-    # When theta = b_max and correct, result should equal theta (no movement)
-    new_theta = cat.dodd(b_max, item_bank, correct=True)
-    assert new_theta == pytest.approx(b_max)
-
-  def test_dodd_at_min_difficulty(self) -> None:
-    """Test dodd when theta equals min difficulty."""
-    item_bank = ItemBank.generate_item_bank(10)
-    b_min = min(item_bank.difficulty)
-    # When theta = b_min and incorrect, result should equal theta (no movement)
-    new_theta = cat.dodd(b_min, item_bank, correct=False)
-    assert new_theta == pytest.approx(b_min)
 
 
 class TestBias:

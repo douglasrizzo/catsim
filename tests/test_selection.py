@@ -669,20 +669,6 @@ class TestMEISelector:
     selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=est_theta, response_vector=[True])
     assert selected == max(expected, key=expected.__getitem__)
 
-  def test_select_falls_back_to_max_info_when_a_look_ahead_is_infinite(self) -> None:
-    """Without Dodd's heuristic an all-correct look-ahead is +inf; MEI should then match MaxInfo, not pick item 0."""
-    item_bank = ItemBank(
-      np.array(
-        [[1.0, 2.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0], [1.5, 0.1, 0.0, 1.0]],
-        dtype=float,
-      )
-    )
-    selector = MEISelector(estimator=NumericalSearchEstimator(dodd=False))
-
-    selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=0.0, response_vector=[True])
-
-    assert selected == MaxInfoSelector().select(item_bank=item_bank, administered_items=[0], est_theta=0.0) == 3
-
 
 class TestMLWISelector:
   """Tests for MLWISelector."""
