@@ -19,7 +19,7 @@ class TestItemBankCreation:
     bank = ItemBank(items)
 
     assert bank.n_items == 3
-    assert bank.items.shape == (3, 5)
+    assert bank.items.shape == (3, 4)
     assert bank.model == 4  # 4PL due to d parameter != 1 in third item
 
   def test_create_from_3pl_params(self) -> None:
@@ -31,7 +31,7 @@ class TestItemBankCreation:
     bank = ItemBank(items)
 
     assert bank.n_items == 2
-    assert bank.items.shape == (2, 5)
+    assert bank.items.shape == (2, 4)
     # d should be added as 1.0
     assert np.allclose(bank.upper_asymptote, 1.0)
 
@@ -61,12 +61,13 @@ class TestItemBankCreation:
     assert np.allclose(bank.pseudo_guessing, 0.0)
     assert np.allclose(bank.upper_asymptote, 1.0)
 
-  def test_exposure_rates_initialized_to_zero(self) -> None:
-    """Test that exposure rates are initialized to zero."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
+  @pytest.mark.parametrize("validate", [True, False])
+  def test_rejects_a_matrix_with_more_than_four_columns(self, validate: bool) -> None:
+    """A bank saved with the old fifth exposure-rate column raises and says how to drop it, instead of being misread."""
+    items = np.array([[1.0, 0.0, 0.1, 0.95, 0.3]])
 
-    assert np.allclose(bank.exposure_rates, 0.0)
+    with pytest.raises(ValueError, match=r"5 columns.*items\[:, :4\]"):
+      ItemBank(items, validate=validate)
 
   def test_validation_enabled_by_default(self) -> None:
     """Test that validation is enabled by default and catches invalid params."""
@@ -201,14 +202,6 @@ class TestItemBankProperties:
 
     assert np.array_equal(bank.upper_asymptote, np.array([0.95, 1.0]))
 
-  def test_exposure_rates_property(self) -> None:
-    """Test exposure_rates property returns column 4."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-    bank.items[0, 4] = 0.5
-
-    assert bank.exposure_rates[0] == pytest.approx(0.5)
-
   def test_model_property(self) -> None:
     """Test model property returns correct IRT model."""
     items_1pl = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]])
@@ -257,7 +250,7 @@ class TestItemBankMethods:
     bank = ItemBank(items)
 
     item = bank.get_item(1)
-    assert len(item) == 5
+    assert len(item) == 4
     assert item[0] == pytest.approx(1.5)  # discrimination
     assert item[1] == pytest.approx(1.0)  # difficulty
 
@@ -282,49 +275,9 @@ class TestItemBankMethods:
     bank = ItemBank(items)
 
     selected = bank.get_items([0, 2])
-    assert selected.shape == (2, 5)
+    assert selected.shape == (2, 4)
     assert selected[0, 0] == pytest.approx(1.0)
     assert selected[1, 0] == pytest.approx(0.8)
-
-  def test_update_exposure_rate(self) -> None:
-    """Test updating exposure rate for a specific item."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    bank.update_exposure_rate(0, 0.75)
-    assert bank.exposure_rates[0] == pytest.approx(0.75)
-
-  def test_update_exposure_rate_invalid_index_raises(self) -> None:
-    """Test that invalid index raises IndexError."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    with pytest.raises(IndexError):
-      bank.update_exposure_rate(5, 0.5)
-
-  def test_update_exposure_rate_invalid_value_raises(self) -> None:
-    """Test that invalid exposure rate raises ValueError."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      bank.update_exposure_rate(0, 1.5)
-
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      bank.update_exposure_rate(0, -0.1)
-
-  def test_reset_exposure_rates(self) -> None:
-    """Test resetting all exposure rates to zero."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    # Set some exposure rates
-    bank.update_exposure_rate(0, 0.5)
-    bank.update_exposure_rate(1, 0.3)
-
-    # Reset
-    bank.reset_exposure_rates()
-    assert np.allclose(bank.exposure_rates, 0.0)
 
   def test_icc_scalar_theta(self) -> None:
     """Test computing ICC for a scalar theta."""
@@ -380,74 +333,6 @@ class TestItemBankMethods:
     assert abs(test_info - expected) < 0.001
 
 
-class TestItemBankReset:
-  """Tests for ItemBank reset functionality."""
-
-  def test_reset_clears_exposure_rates(self) -> None:
-    """Test that reset() clears all exposure rates."""
-    bank = ItemBank.generate_item_bank(10)
-
-    # Simulate some usage
-    for i in range(10):
-      bank.update_exposure_rate(i, 0.1 * (i + 1))
-
-    # Verify exposure rates were set
-    assert np.any(bank.exposure_rates > 0)
-
-    # Reset
-    bank.reset()
-
-    # Verify all exposure rates are zero
-    assert np.all(bank.exposure_rates == 0)
-
-  def test_reset_preserves_parameters(self) -> None:
-    """Test that reset() preserves item parameters."""
-    bank = ItemBank.generate_item_bank(5, itemtype="3PL", seed=42)
-
-    # Store original parameters
-    original_params = bank.items[:, :4].copy()
-
-    # Set exposure rates
-    for i in range(5):
-      bank.update_exposure_rate(i, 0.2)
-
-    # Reset
-    bank.reset()
-
-    # Verify parameters unchanged
-    np.testing.assert_array_equal(bank.items[:, :4], original_params)
-
-  def test_reset_preserves_cached_properties(self) -> None:
-    """Test that reset() preserves precomputed cached properties."""
-    bank = ItemBank.generate_item_bank(10, seed=42)
-
-    # Access cached properties to ensure they're computed
-    max_info_thetas_before = bank.max_info_thetas.copy()
-    max_info_values_before = bank.max_info_values.copy()
-
-    # Reset
-    bank.reset()
-
-    # Verify cached properties are still available and unchanged
-    np.testing.assert_array_equal(bank.max_info_thetas, max_info_thetas_before)
-    np.testing.assert_array_equal(bank.max_info_values, max_info_values_before)
-
-  def test_reset_multiple_times(self) -> None:
-    """Test that reset() can be called multiple times."""
-    bank = ItemBank.generate_item_bank(5)
-
-    for _ in range(3):
-      # Set exposure rates
-      for i in range(5):
-        bank.update_exposure_rate(i, 0.3)
-
-      # Reset
-      bank.reset()
-
-      # Verify reset worked
-      assert np.allclose(bank.exposure_rates, 0.0)
-
-
 class TestItemBankDunderMethods:
   """Tests for ItemBank dunder methods."""
 
@@ -465,7 +350,7 @@ class TestItemBankDunderMethods:
     bank = ItemBank(items)
 
     subset = bank[0:2]
-    assert subset.shape == (2, 5)
+    assert subset.shape == (2, 4)
 
   def test_getitem_list(self) -> None:
     """Test __getitem__ with list of indices."""
@@ -473,6 +358,6 @@ class TestItemBankDunderMethods:
     bank = ItemBank(items)
 
     subset = bank[[0, 2]]
-    assert subset.shape == (2, 5)
+    assert subset.shape == (2, 4)
     assert subset[0, 0] == pytest.approx(1.0)
     assert subset[1, 0] == pytest.approx(0.8)

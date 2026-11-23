@@ -33,11 +33,9 @@ def test_max_info_cache_matches_direct_irt(params: np.ndarray) -> None:
 
 @given(params=item_params_matrix())
 @BANK_SETTINGS
-def test_item_bank_shape_and_exposure_column(params: np.ndarray) -> None:
+def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None:
   bank = ItemBank(params, validate=True)
-  assert bank.items.shape == (params.shape[0], 5)
-  assert np.allclose(bank.items[:, :4], params)
-  assert np.allclose(bank.exposure_rates, 0.0)
+  assert np.array_equal(bank.items, params)
 
 
 @given(
@@ -49,7 +47,7 @@ def test_item_bank_shape_and_exposure_column(params: np.ndarray) -> None:
 def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, itemtype: str) -> None:
   bank = ItemBank.generate_item_bank(n, itemtype=itemtype, seed=seed, validate=True)
   assert bank.n_items == n
-  irt.validate_item_bank(bank.items[:, :4], raise_err=True)
+  irt.validate_item_bank(bank.items, raise_err=True)
 
 
 @given(
@@ -70,6 +68,6 @@ def test_get_items_preserves_row_order(params: np.ndarray, data) -> None:
   indices = list(range(k))
   bank = ItemBank(params, validate=True)
   subset = bank.get_items(indices)
-  assert subset.shape == (len(indices), 5)
+  assert subset.shape == (len(indices), 4)
   for row, idx in enumerate(indices):
-    assert np.allclose(subset[row, :4], params[idx])
+    assert np.allclose(subset[row], params[idx])

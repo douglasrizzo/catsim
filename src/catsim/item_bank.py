@@ -33,10 +33,9 @@ class ItemBank:
   Attributes
   ----------
   items : numpy.ndarray
-      The normalized item parameter matrix (n_items x 5) with columns
-      [discrimination, difficulty, pseudo-guessing, upper_asymptote, exposure_rate].
-      The exposure-rate column is retained for transition compatibility and is
-      not the primary source of run-time exposure data in the new architecture.
+      The normalized item parameter matrix (n_items x 4) with columns
+      [discrimination, difficulty, pseudo-guessing, upper_asymptote]. Exposure
+      is a property of a run, kept in :py:class:`catsim.state.SimulationResult`.
   n_items : int
       Number of items in the bank.
   max_info_thetas : numpy.ndarray
@@ -47,7 +46,8 @@ class ItemBank:
   Raises
   ------
   ValueError
-      If validate=True and item parameters are invalid.
+      If the matrix has more than 4 columns, or if validate=True and item
+      parameters are invalid.
   TypeError
       If items is not a numpy.ndarray.
 
@@ -78,26 +78,22 @@ class ItemBank:
     """
     # Normalize to 4PL format
     self._items = irt.normalize_item_bank(items)
-
-    # Add exposure rate column if not present
-    if self._items.shape[1] < 5:  # noqa: PLR2004
-      self._items = numpy.append(
-        self._items,
-        numpy.zeros([self._items.shape[0], 1]),
-        axis=1,
+    if self._items.shape[1] > irt.NumParams.PL4.value:
+      msg = (
+        f"Item matrix has {self._items.shape[1]} columns; ItemBank takes at most 4, [a, b, c, d]. "
+        "Earlier versions of catsim kept exposure rates in a fifth column of ItemBank.items; drop it with "
+        "items[:, :4]."
       )
+      raise ValueError(msg)
 
     # Validate if requested
     if validate:
-      irt.validate_item_bank(self._items[:, :4], raise_err=True)
+      irt.validate_item_bank(self._items, raise_err=True)
 
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None
     self._max_info_values: FloatArray | None = None
     self._model: int | None = None
-
-    # Cache for selector-specific data derived from this item bank.
-    self._selector_cache: dict[str, Any] = {}
 
   @property
   def items(self) -> FloatArray:
@@ -106,8 +102,8 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        The item matrix with shape (n_items, 5) containing
-        [a, b, c, d, exposure_rate] for each item.
+        The item matrix with shape (n_items, 4) containing
+        [a, b, c, d] for each item.
     """
     return self._items
 
@@ -132,7 +128,7 @@ class ItemBank:
         Array of theta values, one per item.
     """
     if self._max_info_thetas is None:
-      self._max_info_thetas = irt.max_info_hpc(self._items[:, :4])
+      self._max_info_thetas = irt.max_info_hpc(self._items)
     return self._max_info_thetas
 
   @property
@@ -146,7 +142,7 @@ class ItemBank:
     """
     if self._max_info_values is None:
       # Ensure max_info_thetas is computed first
-      self._max_info_values = irt.inf_hpc(self.max_info_thetas, self._items[:, :4])
+      self._max_info_values = irt.inf_hpc(self.max_info_thetas, self._items)
     return self._max_info_values
 
   @property
@@ -160,7 +156,7 @@ class ItemBank:
         1 for 1PL (Rasch), 2 for 2PL, 3 for 3PL, 4 for 4PL.
     """
     if self._model is None:
-      self._model = irt.detect_model(self._items[:, :4])
+      self._model = irt.detect_model(self._items)
     return self._model
 
   @property
@@ -207,51 +203,6 @@ class ItemBank:
     """
     return self._items[:, 3]
 
-  @property
-  def exposure_rates(self) -> FloatArray:
-    """Get item exposure rates.
-
-    Returns
-    -------
-    numpy.ndarray
-        Array of exposure rates. This column is retained for transition
-        compatibility; new simulation code should prefer explicit run artifacts
-        such as ``SimulationResult.exposure_rates``.
-    """
-    return self._items[:, 4]
-
-  def reset_exposure_rates(self) -> None:
-    """Reset all item exposure rates to zero.
-
-    This method is retained for transition compatibility. New simulation code
-    should track exposure outside of the item bank.
-    """
-    self._items[:, 4] = 0
-
-  def reset(self) -> None:
-    """Reset compatibility state stored on the ItemBank.
-
-    This method:
-    - Resets all exposure rates to zero
-    - Clears any dynamically cached values computed during simulations
-    - Preserves precomputed static values (max_info_thetas, max_info_values)
-
-    New simulation code should not rely on this method for run-time state
-    management.
-
-    Examples
-    --------
-    >>> bank = ItemBank.generate_item_bank(100)
-    >>> # ... run simulation ...
-    >>> bank.reset()  # Prepare for next simulation
-    """
-    # Reset exposure rates
-    self.reset_exposure_rates()
-
-    # Clear any dynamic caches that selectors might have added
-    # (while preserving built-in cached properties like max_info_thetas)
-    self._selector_cache.clear()
-
   def get_item(self, index: int) -> FloatArray:
     """Get parameters for a specific item.
 
@@ -263,7 +214,7 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array containing [a, b, c, d, exposure_rate] for the item.
+        Array containing [a, b, c, d] for the item.
 
     Raises
     ------
@@ -286,39 +237,9 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array of item parameters with shape (len(indices), 5).
+        Array of item parameters with shape (len(indices), 4).
     """
     return self._items[numpy.asarray(indices, dtype=int)]
-
-  def update_exposure_rate(self, item_index: int, new_rate: float) -> None:
-    """Update the compatibility exposure-rate column for a specific item.
-
-    Parameters
-    ----------
-    item_index : int
-        Index of the item to update.
-    new_rate : float
-        New exposure rate value (should be between 0 and 1).
-
-    Raises
-    ------
-    IndexError
-        If item_index is out of bounds.
-    ValueError
-        If new_rate is not between 0 and 1.
-
-    Notes
-    -----
-    New simulation code should prefer explicit run-level exposure tracking over
-    mutating ``ItemBank``.
-    """
-    if item_index < 0 or item_index >= self.n_items:
-      msg = f"Item index {item_index} out of bounds for bank with {self.n_items} items"
-      raise IndexError(msg)
-    if not 0 <= new_rate <= 1:
-      msg = f"Exposure rate must be between 0 and 1, got {new_rate}"
-      raise ValueError(msg)
-    self._items[item_index, 4] = new_rate
 
   def icc(self, theta: float | FloatArray) -> FloatArray:
     """Compute item characteristic curves for all items.
@@ -336,12 +257,12 @@ class ItemBank:
         array of shape (len(theta), n_items).
     """
     if isinstance(theta, (int, float)):
-      return irt.icc_hpc(theta, self._items[:, :4])
+      return irt.icc_hpc(theta, self._items)
 
     # Handle array of thetas
     result = numpy.zeros((len(theta), self.n_items))
     for i, t in enumerate(theta):
-      result[i, :] = irt.icc_hpc(t, self._items[:, :4])
+      result[i, :] = irt.icc_hpc(t, self._items)
     return result
 
   def information(self, theta: float | FloatArray) -> FloatArray:
@@ -360,12 +281,12 @@ class ItemBank:
         (len(theta), n_items).
     """
     if isinstance(theta, (int, float)):
-      return irt.inf_hpc(theta, self._items[:, :4])
+      return irt.inf_hpc(theta, self._items)
 
     # Handle array of thetas
     result = numpy.zeros((len(theta), self.n_items))
     for i, t in enumerate(theta):
-      result[i, :] = irt.inf_hpc(t, self._items[:, :4])
+      result[i, :] = irt.inf_hpc(t, self._items)
     return result
 
   def test_information(self, theta: float, item_indices: npt.ArrayLike | None = None) -> float:
@@ -384,9 +305,7 @@ class ItemBank:
     float
         Test information (sum of item information values).
     """
-    items_to_use = (
-      self._items[:, :4] if item_indices is None else self._items[numpy.asarray(item_indices, dtype=int), :4]
-    )
+    items_to_use = self._items if item_indices is None else self._items[numpy.asarray(item_indices, dtype=int)]
     return irt.test_info(theta, items_to_use)
 
   @classmethod
@@ -486,7 +405,7 @@ class ItemBank:
     d = rng.uniform(0.94, 1, n) if itemtype == irt.NumParams.PL4 else numpy.ones(n)
 
     # Create ItemBank with normalized parameters
-    return cls(irt.normalize_item_bank(numpy.array([a, b, c, d, numpy.zeros(n)]).T), validate=validate)
+    return cls(irt.normalize_item_bank(numpy.array([a, b, c, d]).T), validate=validate)
 
   @classmethod
   def generate(cls, *args: Any, **kwargs: Any) -> Self:
