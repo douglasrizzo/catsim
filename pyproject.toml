@@ -4,7 +4,6 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-urls = { homepage = "https://douglasrizzo.com.br/catsim" }
 authors = [
     { name = "Douglas De Rizzo Meneghetti", email = "douglasrizzo@gmail.com" },
 ]
@@ -13,15 +12,26 @@ classifiers = [
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Education :: Testing",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+keywords = [
+    "computerized adaptive testing",
+    "CAT",
+    "item response theory",
+    "IRT",
+    "psychometrics",
+    "simulation",
 ]
 name = "catsim"
 version = "0.21.0"
-description = "Computerized Adaptive Testing Simulator"
+description = "Computerized adaptive testing toolkit"
 dependencies = [
     "scipy",
     "numexpr",
@@ -32,6 +42,12 @@ dependencies = [
 requires-python = ">=3.11"
 readme = "README.md"
 license = "BSD-3-Clause"
+
+[project.urls]
+Documentation = "https://douglasrizzo.com.br/catsim"
+Source = "https://github.com/douglasrizzo/catsim"
+Issues = "https://github.com/douglasrizzo/catsim/issues"
+Changelog = "https://github.com/douglasrizzo/catsim/releases"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
