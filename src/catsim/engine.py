@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
@@ -155,8 +156,9 @@ class CatEngine:
   ) -> CatStepResult:
     """Record the examinee's response to an item, update the estimate and check the stopper.
 
-    The step is atomic: the inputs are validated and the new estimate is computed before the
-    session or the exposure tracker change, so a step that raises leaves both as they were.
+    The step is atomic: the inputs are validated, and the new estimate and the stopper's decision
+    are computed, before the session or the exposure tracker change, so a step that raises leaves
+    both as they were.
 
     Parameters
     ----------
@@ -183,7 +185,7 @@ class CatEngine:
         If the session has stopped, the item index is outside the bank or the item was already
         administered in this session.
     TypeError
-        If the response is not a ``bool`` or ``numpy.bool_``.
+        If the item index is not an integer, or the response is not a ``bool`` or ``numpy.bool_``.
     """
     if state.status == SessionStatus.STOPPED:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
@@ -192,6 +194,11 @@ class CatEngine:
     if not isinstance(response, (bool, numpy.bool_)):
       msg = f"response must be a bool, got {type(response).__name__} {response!r}"
       raise TypeError(msg)
+    try:
+      item_id = operator.index(item_id)
+    except TypeError:
+      msg = f"item_id must be an integer, got {type(item_id).__name__} {item_id!r}"
+      raise TypeError(msg) from None
     if item_id < 0 or item_id >= item_bank.n_items:
       msg = f"Invalid item index {item_id}. Must be between 0 and {item_bank.n_items - 1}"
       raise ValueError(msg)
@@ -200,14 +207,16 @@ class CatEngine:
       raise ValueError(msg)
 
     response = bool(response)
+    items = [*state.administered_item_ids, item_id]
     updated_theta = float(
       self._estimator.estimate(
         item_bank=item_bank,
-        administered_items=[*state.administered_item_ids, item_id],
+        administered_items=items,
         response_vector=[*state.responses, response],
         est_theta=state.current_theta,
       )
     )
+    stopped = bool(self._stopper.stop(item_bank=item_bank, administered_items=items, theta=updated_theta))
 
     state.administered_item_ids.append(item_id)
     state.responses.append(response)
@@ -215,8 +224,6 @@ class CatEngine:
       context.exposure_tracker.record(item_id)
     state.current_theta = updated_theta
     state.theta_history.append(updated_theta)
-
-    stopped = self.should_stop(state, item_bank)
     if stopped:
       _end(state, StopReason.STOPPER)
 

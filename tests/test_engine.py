@@ -122,6 +122,15 @@ class FailingEstimator:
     raise ValueError(msg)
 
 
+class FailingStopper(BaseStopper):
+  """Stopper stub that fails on every call."""
+
+  def stop(self, item_bank, administered_items, theta) -> bool:
+    del item_bank, administered_items, theta
+    msg = "stopping failed"
+    raise ValueError(msg)
+
+
 class CountingLengthStopper(BaseStopper):
   """Stopper that ends the test at a fixed length and counts how often it is asked."""
 
@@ -289,20 +298,30 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   assert result.session.stop_reason is StopReason.STOPPER
 
 
-def test_apply_response_leaves_the_session_unchanged_when_estimation_fails(item_bank) -> None:
-  """A response whose estimate fails is not applied at all.
+@pytest.mark.parametrize(
+  ("estimator", "stopper", "error"),
+  [
+    (FailingEstimator(), RecordingStopper(False), "estimation failed"),
+    (RecordingEstimator(0.5), FailingStopper(), "stopping failed"),
+  ],
+  ids=["estimator", "stopper"],
+)
+def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
+  item_bank, estimator, stopper, error
+) -> None:
+  """A response whose estimate or stop decision fails is not applied at all.
 
-  Fails if the item, the response or its exposure is recorded before the estimator runs: the
-  half-applied step left the session with one more response than estimates, and every later
-  estimate on it failed.
+  Fails if the item, the response or its exposure is recorded before the estimator and the
+  stopper run: the half-applied step left the session with one more response than estimates, and
+  retrying the item was rejected as already administered.
   """
   tracker = ExposureTracker(item_bank.n_items)
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), FailingEstimator(), RecordingStopper(False))
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, stopper)
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
   before = copy.deepcopy(session)
 
-  with pytest.raises(ValueError, match="estimation failed"):
+  with pytest.raises(ValueError, match=error):
     engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
 
   assert session == before
@@ -352,27 +371,52 @@ def test_session_state_holds_builtin_python_values(item_bank) -> None:
   """The engine stores Python scalars whatever numeric types the strategies and the examinee return.
 
   Fails if an int initial theta, a ``numpy.float64`` estimate (as NumericalSearchEstimator
-  returns), a ``numpy.int64`` item index or a ``numpy.bool_`` response is stored as given.
+  returns), a ``numpy.int64`` item index (from the selector, or passed to apply_response by the
+  caller), a ``numpy.bool_`` response or a ``numpy.bool_`` stop decision is stored as given.
   """
   engine = CatEngine(
     RecordingInitializer(theta=0),
     RecordingSelector(item_id=np.int64(3)),
     RecordingEstimator(theta=np.float64(0.25)),
-    RecordingStopper(False),
+    RecordingStopper(np.False_),
   )
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
   result = engine.step(session, item_bank, FixedResponseProvider(np.True_), context)
+  engine.apply_response(session, item_bank, item_id=np.int64(5), response=np.False_, context=context)
 
-  assert session.theta_history == [0.0, 0.25]
-  assert [type(theta) for theta in session.theta_history] == [float, float]
+  assert session.theta_history == [0.0, 0.25, 0.25]
+  assert [type(theta) for theta in session.theta_history] == [float, float, float]
   assert type(session.current_theta) is float
-  assert session.administered_item_ids == [3]
-  assert type(session.administered_item_ids[0]) is int
-  assert session.responses == [True]
-  assert type(session.responses[0]) is bool
-  assert (type(result.selected_item_id), type(result.response), type(result.updated_theta)) == (int, bool, float)
+  assert session.administered_item_ids == [3, 5]
+  assert [type(item) for item in session.administered_item_ids] == [int, int]
+  assert session.responses == [True, False]
+  assert [type(response) for response in session.responses] == [bool, bool]
+  assert (type(result.selected_item_id), type(result.response), type(result.updated_theta), type(result.stopped)) == (
+    int,
+    bool,
+    float,
+    bool,
+  )
+
+
+@pytest.mark.parametrize("item_id", [2.0, "3", None])
+def test_apply_response_rejects_an_item_index_that_is_not_an_integer(item_bank, item_id) -> None:
+  """An item index that is not an integer is rejected, and changes nothing.
+
+  Fails if 2.0 passes the range check and is stored as a float, or if a string or None reaches the
+  comparisons.
+  """
+  context = RunContext(rng=np.random.default_rng(42))
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  before = copy.deepcopy(session)
+
+  with pytest.raises(TypeError, match="item_id must be an integer"):
+    engine.apply_response(session, item_bank, item_id=item_id, response=True, context=context)
+
+  assert session == before
 
 
 def test_apply_response_returns_immutable_session_snapshot(

@@ -50,9 +50,10 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   A stopper that checks bank exhaustion itself and says stop reports `STOPPER`, because all the
   engine knows is that its stopper said stop.
 - `apply_response` applies a response atomically, and only to a running session. It raises
-  `ValueError` for a stopped session and `TypeError` for a response that is not a `bool` or
-  `numpy.bool_`. It estimates on copies of the session's lists and commits the item, the response,
-  the estimate and the exposure count only once the estimate has succeeded.
+  `ValueError` for a stopped session and `TypeError` for an item index that is not an integer or a
+  response that is not a `bool` or `numpy.bool_`. It estimates and asks the stopper on copies of the
+  session's lists, and commits the item, the response, the estimate, the exposure count and the
+  stop decision only once both have succeeded.
 
 ## Consequences
 
