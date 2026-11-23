@@ -465,6 +465,8 @@ class MAPEstimator(BaseEstimator):
     items = item_bank.items[administered_items, :4]
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
     log_post = irt.log_likelihood_hpc(nodes, response_vector, items) + self._log_prior(nodes)
+    self._last_evaluations = nodes.size
+    self._total_evaluations += nodes.size
     peak = log_post.max()
     if not numpy.isfinite(peak):
       msg = f"the log-posterior has no finite maximum within the search bounds {self._bounds}"
@@ -472,19 +474,19 @@ class MAPEstimator(BaseEstimator):
 
     ties = numpy.flatnonzero(log_post == peak)
     best = int(ties[ties.size // 2])
-    self._last_evaluations = nodes.size
     if ties.size > 1:
       # A flat maximum, such as a uniform prior with no responses, has no unique mode
-      theta = float(nodes[best])
-    else:
-      result = minimize_scalar(
-        self._negative_log_posterior,
-        args=(response_vector, items),
-        bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
-        method="bounded",
-        options={"xatol": self._tol},
-      )
-      self._last_evaluations += int(result.nfev)
-      theta = float(result.x)
-    self._total_evaluations += self._last_evaluations
-    return theta
+      return float(nodes[best])
+
+    result = minimize_scalar(
+      self._negative_log_posterior,
+      args=(response_vector, items),
+      bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
+      method="bounded",
+      options={"xatol": self._tol},
+    )
+    self._last_evaluations += int(result.nfev)
+    self._total_evaluations += int(result.nfev)
+    # A neighbour can lie outside a narrow prior's support, so keep the refinement only if it
+    # did at least as well as the best node; the estimate then always lies inside the support
+    return float(result.x) if result.fun <= -peak else float(nodes[best])

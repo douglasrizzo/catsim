@@ -879,6 +879,18 @@ class TestMAPEstimator:
 
     assert theta == pytest.approx(expected, abs=1e-5)
 
+  def test_estimate_stays_inside_a_prior_narrower_than_a_grid_step(self) -> None:
+    """Both neighbours of the only grid point in the support lie outside it.
+
+    The refinement then searches where the objective is mostly +inf; the estimate must
+    still lie inside the support rather than wherever that search stops.
+    """
+    estimator = MAPEstimator(log_prior=uniform_log_prior(-0.01, 0.01))
+
+    theta = estimator.estimate(self._hard_items(), [0, 1, 2], [True, False, True], 0.0)
+
+    assert -0.01 <= theta <= 0.01
+
   def test_estimate_raises_when_the_prior_excludes_the_bounds(self) -> None:
     """A prior with no support inside the search bounds leaves no mode to find."""
     estimator = MAPEstimator(log_prior=uniform_log_prior(7.0, 8.0))
