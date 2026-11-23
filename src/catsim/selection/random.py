@@ -3,9 +3,8 @@
 from numpy.random import Generator
 
 from .._typing import FloatArray
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, best_pool, remaining
 
 
 class RandomSelector(BaseSelector):
@@ -19,7 +18,7 @@ class RandomSelector(BaseSelector):
     """Return the name of the selector."""
     return "Random Selector"
 
-  def select(
+  def select(  # noqa: PLR6301
     self,
     item_bank: ItemBank,
     administered_items: list[int],
@@ -58,12 +57,7 @@ class RandomSelector(BaseSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    if len(administered_items) >= item_bank.n_items:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    valid_indexes = self._get_non_administered(list(range(item_bank.n_items)), administered_items)
-    return int(rng.choice(valid_indexes))
+    return int(rng.choice(remaining(item_bank.n_items, administered_items)))
 
 
 class The54321Selector(BaseSelector):
@@ -154,10 +148,10 @@ class The54321Selector(BaseSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
+    candidates = remaining(item_bank.n_items, administered_items)
     bin_size = max(1, self._initial_bin_size - len(administered_items))
     # items tied with the bin's least informative item join the bin (ADR-0008)
-    pool = self._best_pool(candidates, item_bank.information(est_theta)[candidates], bin_size)
+    pool = best_pool(candidates, item_bank.information(est_theta)[candidates], bin_size)
     return int(rng.choice(pool))
 
 
@@ -229,7 +223,7 @@ class RandomesqueSelector(BaseSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
+    candidates = remaining(item_bank.n_items, administered_items)
     # items tied with the bin's least informative item join the bin (ADR-0008)
-    pool = self._best_pool(candidates, item_bank.information(est_theta)[candidates], self._bin_size)
+    pool = best_pool(candidates, item_bank.information(est_theta)[candidates], self._bin_size)
     return int(rng.choice(pool))

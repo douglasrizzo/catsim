@@ -4,9 +4,8 @@ import numpy
 
 from .. import irt
 from .._typing import FloatArray
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, pick_best, remaining
 
 
 class MaxInfoSelector(BaseSelector):
@@ -98,8 +97,8 @@ class MaxInfoSelector(BaseSelector):
     ValueError
         If items tie for the most information and ``rng`` is None.
     """
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
-    return self._pick_best(candidates, item_bank.information(est_theta)[candidates], rng)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
+    return pick_best(candidates, item_bank.information(est_theta)[candidates], rng)
 
 
 class UrrySelector(BaseSelector):
@@ -114,7 +113,7 @@ class UrrySelector(BaseSelector):
     """Return the name of the selector."""
     return "Urry Selector"
 
-  def select(
+  def select(  # noqa: PLR6301
     self,
     item_bank: ItemBank,
     administered_items: list[int],
@@ -151,8 +150,8 @@ class UrrySelector(BaseSelector):
     ValueError
         If items tie for the closest difficulty and ``rng`` is None.
     """
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
-    return self._pick_best(candidates, -numpy.abs(item_bank.difficulty[candidates] - est_theta), rng)
+    candidates = remaining(item_bank.n_items, administered_items)
+    return pick_best(candidates, -numpy.abs(item_bank.difficulty[candidates] - est_theta), rng)
 
 
 class IntervalInfoSelector(BaseSelector):
@@ -260,10 +259,7 @@ class IntervalInfoSelector(BaseSelector):
     ValueError
         If items tie for the largest integrated information and ``rng`` is None.
     """
-    candidates = numpy.setdiff1d(numpy.arange(item_bank.n_items), administered_items)
-    if candidates.size == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
+    candidates = remaining(item_bank.n_items, administered_items)
 
     if self._interval is None:
       # infinite before any item is administered, since there is no information yet
@@ -272,4 +268,4 @@ class IntervalInfoSelector(BaseSelector):
       lower, upper = est_theta - self._interval, est_theta + self._interval
 
     information_integral = irt.inf_integral(lower, upper, item_bank.items[candidates])
-    return self._pick_best(candidates, information_integral, rng)
+    return pick_best(candidates, information_integral, rng)

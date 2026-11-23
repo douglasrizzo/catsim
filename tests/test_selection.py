@@ -34,6 +34,7 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
+from catsim.selection.base import below_cap, remaining
 
 
 class RecordingEstimator(BaseEstimator):
@@ -121,6 +122,35 @@ def _progressive_item_bank() -> ItemBank:
       dtype=float,
     )
   )
+
+
+class TestRemaining:
+  """Tests for remaining, the items a selector may still administer."""
+
+  def test_returns_the_items_not_administered_in_ascending_order(self) -> None:
+    """An administered item left in would be administered twice; a dropped one could never be chosen."""
+    assert remaining(6, [4, 1]).tolist() == [0, 2, 3, 5]
+    assert remaining(3, []).tolist() == [0, 1, 2]
+
+  def test_raises_when_every_item_is_administered(self) -> None:
+    """An empty candidate array would reach the scorer instead of ending the session as an exhausted bank."""
+    with pytest.raises(NoItemsAvailableError, match="no more items"):
+      remaining(3, [2, 0, 1])
+
+
+class TestBelowCap:
+  """Tests for below_cap, the exposure filter of the capped selectors."""
+
+  RATES = np.array([0.1, 0.9, 0.5, 0.2, 0.0, 0.6])
+
+  def test_keeps_the_candidates_below_the_cap(self) -> None:
+    """Item 2 sits exactly at the cap and is passed over; item 4 is below it but not a candidate."""
+    assert below_cap(np.array([0, 2, 3, 5]), self.RATES, 0.5).tolist() == [0, 3]
+
+  @pytest.mark.parametrize("rates", [RATES, None], ids=["every_candidate_at_or_over_the_cap", "no_rates"])
+  def test_falls_back_to_every_candidate(self, rates: np.ndarray | None) -> None:
+    """With no candidate below the cap, or no rates to compare, an empty result would leave no item to administer."""
+    assert below_cap(np.array([1, 2, 5]), rates, 0.5).tolist() == [1, 2, 5]
 
 
 class TestMaxInfoSelector:

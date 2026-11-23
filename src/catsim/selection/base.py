@@ -1,4 +1,10 @@
-"""Base class for CAT selectors."""
+"""Base classes for CAT selectors, and the rules the built-in selectors share.
+
+The module functions are what makes the built-in selectors behave alike, and custom selectors can
+use them too: :func:`remaining` and :func:`below_cap` give the items a selector may choose from,
+:func:`pick_best` and :func:`best_pool` choose among them under the package's tie-breaking rule
+(ADR-0008).
+"""
 
 from abc import ABC, abstractmethod
 
@@ -10,182 +16,143 @@ from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 
 
+def remaining(n_items: int, administered_items: list[int]) -> IntArray:
+  """Return the indices of the items not yet administered, in ascending order.
+
+  Parameters
+  ----------
+  n_items : int
+      Number of items in the bank.
+  administered_items : list[int]
+      Indices of the items already administered in the session.
+
+  Returns
+  -------
+  numpy.ndarray
+      Indices of the items of the bank that are not in ``administered_items``, in ascending order.
+
+  Raises
+  ------
+  NoItemsAvailableError
+      If every item has already been administered.
+  """
+  mask = numpy.ones(n_items, dtype=bool)
+  mask[administered_items] = False
+  candidates = numpy.flatnonzero(mask)
+  if candidates.size == 0:
+    msg = "There are no more items to administer: every item in the bank has been administered."
+    raise NoItemsAvailableError(msg)
+  return candidates
+
+
+def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: float) -> IntArray:
+  """Return the candidates whose exposure rate is below ``r_max``, or all of them if none is.
+
+  Parameters
+  ----------
+  candidates : numpy.ndarray
+      Item indices to choose from.
+  exposure_rates : numpy.ndarray or None
+      Run-level exposure rate of every item in the bank. ``None`` treats every item as unexposed.
+  r_max : float
+      Maximum exposure rate. Candidates at or above it are kept only when every candidate is.
+
+  Returns
+  -------
+  numpy.ndarray
+      The candidates whose exposure rate is below ``r_max``, in their order in ``candidates``, or
+      ``candidates`` itself if none is below it.
+  """
+  if exposure_rates is None:
+    return candidates
+  allowed = candidates[exposure_rates[candidates] < r_max]
+  return allowed if allowed.size > 0 else candidates
+
+
+def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -> int:
+  """Return the candidate with the highest score, breaking exact ties uniformly at random.
+
+  This is the package's single tie-breaking rule (ADR-0008), the one catR uses: the candidates
+  whose score equals the best score exactly are tied, and one of them is drawn uniformly with
+  ``rng``. With a single best candidate, ``rng`` is not used, so untied selections consume no
+  random numbers.
+
+  Parameters
+  ----------
+  candidates : numpy.ndarray
+      Item indices to choose from.
+  scores : numpy.ndarray
+      One score per candidate; higher is better. Selectors that minimize a quantity, such as the
+      distance to the ability estimate, pass its negation.
+  rng : numpy.random.Generator or None
+      Random number generator used to break ties.
+
+  Returns
+  -------
+  int
+      Index of the selected item.
+
+  Raises
+  ------
+  ValueError
+      If any score is NaN, or if several candidates tie for the best score and ``rng`` is None.
+  """
+  if numpy.isnan(scores).any():
+    msg = "item scores contain NaN"
+    raise ValueError(msg)
+  best = candidates[scores == scores.max()]
+  if best.size == 1:
+    return int(best[0])
+  if rng is None:
+    msg = "rng parameter cannot be None: it is needed to break a tie between equally good items"
+    raise ValueError(msg)
+  return int(rng.choice(best))
+
+
+def best_pool(candidates: IntArray, scores: FloatArray, size: int) -> IntArray:
+  """Return the candidates scoring at least the ``size``-th best score, best first.
+
+  As in catR (ADR-0008), every candidate tied with the ``size``-th best score joins the pool, so
+  the pool holds more than ``size`` items only when items tie at the cutoff. Tied candidates keep
+  their order in ``candidates``.
+
+  Parameters
+  ----------
+  candidates : numpy.ndarray
+      Item indices to choose from.
+  scores : numpy.ndarray
+      One score per candidate; higher is better.
+  size : int
+      Number of best candidates the pool should hold, before ties at the cutoff are added.
+
+  Returns
+  -------
+  numpy.ndarray
+      Item indices of the pool, in descending order of score.
+
+  Raises
+  ------
+  ValueError
+      If ``size`` is smaller than 1 or any score is NaN.
+  """
+  if size < 1:
+    msg = f"the pool size must be at least 1, got {size}"
+    raise ValueError(msg)
+  if numpy.isnan(scores).any():
+    msg = "item scores contain NaN"
+    raise ValueError(msg)
+  order = numpy.argsort(-scores, kind="stable")
+  ranked_scores = scores[order]
+  cutoff = ranked_scores[min(size, ranked_scores.size) - 1]
+  return candidates[order[ranked_scores >= cutoff]]
+
+
 class BaseSelector(ABC):
   """Base class representing a CAT item selector.
 
   Selectors are responsible for choosing which item to administer next to an
   examinee based on their current estimated ability and test progress.
   """
-
-  @staticmethod
-  def _get_non_administered(item_indices: list[int], administered_item_indices: list[int]) -> list[int]:
-    """Get a list of items that were not administered from a list of indices.
-
-    Parameters
-    ----------
-    item_indices : list[int]
-        A list of integers corresponding to item indices.
-    administered_item_indices : list[int]
-        A list of integers corresponding to the indices of items that were already
-        administered to a given examinee.
-
-    Returns
-    -------
-    list[int]
-        A list of items corresponding to the indices that are in `item_indices` but
-        not in `administered_item_indices`, in the same order they were passed in
-        `item_indices`.
-    """
-    return [x for x in item_indices if x not in administered_item_indices]
-
-  @staticmethod
-  def _exposure_filtered_candidates(
-    n_items: int,
-    administered_items: list[int],
-    exposure_rates: FloatArray | None,
-    r_max: float,
-  ) -> IntArray:
-    """Return non-administered item indices, preferring items below the exposure cap.
-
-    Parameters
-    ----------
-    n_items : int
-        Number of items in the bank.
-    administered_items : list[int]
-        Indices of items already administered in the session.
-    exposure_rates : numpy.ndarray or None
-        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
-    r_max : float
-        Maximum exposure rate; items at or above it are only used when no other item remains.
-
-    Returns
-    -------
-    numpy.ndarray
-        Indices of the non-administered items below ``r_max``, or of all non-administered
-        items if every one of them is at or above ``r_max``.
-
-    Raises
-    ------
-    NoItemsAvailableError
-        If every item has already been administered.
-    """
-    candidate_mask = numpy.ones(n_items, dtype=bool)
-    candidate_mask[administered_items] = False
-    all_candidates = numpy.flatnonzero(candidate_mask)
-    if all_candidates.size == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-    if exposure_rates is None:
-      return all_candidates
-    low_exposure = numpy.flatnonzero(candidate_mask & (exposure_rates < r_max))
-    return low_exposure if low_exposure.size > 0 else all_candidates
-
-  @staticmethod
-  def _pick_best(
-    candidates: IntArray,
-    scores: FloatArray,
-    rng: Generator | None,
-  ) -> int:
-    """Return the candidate with the highest score, breaking exact ties uniformly at random.
-
-    This is the package's single tie-breaking rule (ADR-0008), the one catR uses: the candidates
-    whose score equals the best score exactly are tied, and one of them is drawn uniformly with
-    ``rng``. With a single best candidate, ``rng`` is not used, so untied selections consume no
-    random numbers.
-
-    Parameters
-    ----------
-    candidates : numpy.ndarray
-        Item indices to choose from.
-    scores : numpy.ndarray
-        One score per candidate; higher is better. Selectors that minimize a quantity, such as the
-        distance to the ability estimate, pass its negation.
-    rng : numpy.random.Generator or None
-        Random number generator used to break ties.
-
-    Returns
-    -------
-    int
-        Index of the selected item.
-
-    Raises
-    ------
-    ValueError
-        If any score is NaN, or if several candidates tie for the best score and ``rng`` is None.
-    """
-    if numpy.isnan(scores).any():
-      msg = "item scores contain NaN"
-      raise ValueError(msg)
-    best = candidates[scores == scores.max()]
-    if best.size == 1:
-      return int(best[0])
-    if rng is None:
-      msg = "rng parameter cannot be None: it is needed to break a tie between equally good items"
-      raise ValueError(msg)
-    return int(rng.choice(best))
-
-  @staticmethod
-  def _best_pool(
-    candidates: IntArray,
-    scores: FloatArray,
-    size: int,
-  ) -> IntArray:
-    """Return the candidates scoring at least the ``size``-th best score, best first.
-
-    As in catR (ADR-0008), every candidate tied with the ``size``-th best score joins the pool, so
-    the pool holds more than ``size`` items only when items tie at the cutoff. Tied candidates keep
-    their order in ``candidates``.
-
-    Parameters
-    ----------
-    candidates : numpy.ndarray
-        Item indices to choose from.
-    scores : numpy.ndarray
-        One score per candidate; higher is better.
-    size : int
-        Number of best candidates the pool should hold, before ties at the cutoff are added.
-
-    Returns
-    -------
-    numpy.ndarray
-        Item indices of the pool, in descending order of score.
-
-    Raises
-    ------
-    ValueError
-        If ``size`` is smaller than 1 or any score is NaN.
-    """
-    if size < 1:
-      msg = f"the pool size must be at least 1, got {size}"
-      raise ValueError(msg)
-    if numpy.isnan(scores).any():
-      msg = "item scores contain NaN"
-      raise ValueError(msg)
-    order = numpy.argsort(-scores, kind="stable")
-    ranked_scores = scores[order]
-    cutoff = ranked_scores[min(size, ranked_scores.size) - 1]
-    return candidates[order[ranked_scores >= cutoff]]
-
-  @staticmethod
-  def _require_item_bank(item_bank: ItemBank | None) -> ItemBank:
-    if item_bank is None:
-      msg = "item_bank parameter cannot be None"
-      raise ValueError(msg)
-    return item_bank
-
-  @staticmethod
-  def _require_administered_items(administered_items: list[int] | None) -> list[int]:
-    if administered_items is None:
-      msg = "administered_items parameter cannot be None"
-      raise ValueError(msg)
-    return administered_items
-
-  @staticmethod
-  def _require_est_theta(est_theta: float | None) -> float:
-    if est_theta is None:
-      msg = "est_theta parameter cannot be None"
-      raise ValueError(msg)
-    return est_theta
 
   @abstractmethod
   def select(

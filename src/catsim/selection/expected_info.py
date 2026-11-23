@@ -7,7 +7,7 @@ from .._typing import FloatArray
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, pick_best, remaining
 
 
 class MEISelector(BaseSelector):
@@ -135,7 +135,7 @@ class MEISelector(BaseSelector):
       msg = "MEISelector requires the response_vector to compute one-step-ahead estimates."
       raise ValueError(msg)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
 
     scores = numpy.array(
       [
@@ -144,4 +144,4 @@ class MEISelector(BaseSelector):
       ],
       dtype=float,
     )
-    return self._pick_best(candidates, scores, rng)
+    return pick_best(candidates, scores, rng)

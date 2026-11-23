@@ -30,7 +30,7 @@ cutoff joins the pool.
 Every selector that picks the best item by a score uses one rule, catR's: the candidates whose
 score equals the best score exactly are tied, and one of them is drawn uniformly with the session's
 random generator. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin's least
-informative item. `BaseSelector._pick_best` and `BaseSelector._best_pool` implement the rule.
+informative item. `pick_best` and `best_pool` in `catsim.selection.base` implement the rule.
 
 The rule is fixed. There is no parameter, enum or package setting to change it.
 

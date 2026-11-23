@@ -7,7 +7,7 @@ import numpy
 from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import FiniteSelector
+from .base import FiniteSelector, pick_best
 
 
 class StratifiedSelector(FiniteSelector):
@@ -162,7 +162,7 @@ class StratifiedSelector(FiniteSelector):
       msg = f"There are no more items to be selected from stratum {stage}"
       raise NoItemsAvailableError(msg)
 
-    return self._pick_best(candidates, -numpy.abs(self._location(item_bank)[candidates] - est_theta), rng)
+    return pick_best(candidates, -numpy.abs(self._location(item_bank)[candidates] - est_theta), rng)
 
 
 class AStratSelector(StratifiedSelector):

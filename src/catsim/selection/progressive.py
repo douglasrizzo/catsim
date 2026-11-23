@@ -4,7 +4,7 @@ import numpy
 
 from .._typing import FloatArray
 from ..item_bank import ItemBank
-from .base import FiniteSelector
+from .base import FiniteSelector, below_cap, pick_best, remaining
 
 
 def _position_weight(position: int, test_size: int, acceleration: float) -> float:
@@ -115,7 +115,7 @@ class ProgressiveSelector(FiniteSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
     position = len(administered_items) + 1
     weight = self._weight(position)
 
@@ -127,7 +127,7 @@ class ProgressiveSelector(FiniteSelector):
 
     random_component = rng.uniform(0.0, 1.0, size=item_bank.n_items)
     scores = (1.0 - weight) * random_component + weight * info_norm
-    return self._pick_best(candidates, scores[candidates], rng)
+    return pick_best(candidates, scores[candidates], rng)
 
 
 class ProportionalSelector(FiniteSelector):
@@ -235,7 +235,7 @@ class ProportionalSelector(FiniteSelector):
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
     position = len(administered_items) + 1
     exponent = self._exponent(position)
 

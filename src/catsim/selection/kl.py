@@ -8,7 +8,7 @@ from scipy.special import log_expit
 
 from .._typing import FloatArray
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, pick_best, remaining
 
 
 def _log_probabilities(theta: float, a: float, b: float, c_param: float, d: float) -> tuple[float, float]:
@@ -147,8 +147,8 @@ class KLSelector(BaseSelector):
     NoItemsAvailableError
         If every item has been administered.
     """
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
     half_width = self._c / numpy.sqrt(max(1, len(administered_items)))
 
     kl_values = numpy.array([self._kl_global(est_theta, item_bank.items[int(idx)], half_width) for idx in candidates])
-    return self._pick_best(candidates, kl_values, rng)
+    return pick_best(candidates, kl_values, rng)
