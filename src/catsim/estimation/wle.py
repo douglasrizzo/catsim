@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING
 
 import numpy
 import numpy.typing as npt
-from scipy.integrate import quad
+from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq
 from scipy.special import expit
 
@@ -166,9 +167,12 @@ class WarmLikelihoodEstimator(BaseEstimator):
       # from the lower bound ranks the candidates by weighted likelihood.
       heights = []
       for candidate in candidates:
-        integral = quad(score, THETA_MIN_EXTENDED, candidate, limit=200, full_output=1)
-        heights.append(integral[0])
-        evaluations += integral[2]["neval"]
+        # With full_output, quad returns its convergence warning instead of raising it
+        height, _, info, *message = quad(score, THETA_MIN_EXTENDED, candidate, limit=200, full_output=1)
+        heights.append(height)
+        evaluations += info["neval"]
+        if message:
+          warnings.warn(message[0], IntegrationWarning, stacklevel=2)
       theta_hat = candidates[int(numpy.argmax(heights))]
 
     self._last_evaluations = evaluations

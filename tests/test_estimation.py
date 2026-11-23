@@ -1,11 +1,13 @@
 """Tests for catsim.estimation module."""
 
+import importlib
 from collections.abc import Callable
 from itertools import pairwise, product
 from typing import Any
 
 import numpy as np
 import pytest
+from scipy.integrate import IntegrationWarning
 from scipy.optimize import minimize_scalar
 from scipy.special import expit
 
@@ -1025,6 +1027,19 @@ class TestWarmLikelihoodEstimator:
     assert 121 < single < 121 + 50
     assert ranked >= 121 + 2 * 21
     assert estimator.total_evaluations == single + ranked
+
+  def test_ranking_integral_warnings_reach_the_caller(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A ranking integral that does not converge still warns, although quad returns the message."""
+    wle_module = importlib.import_module("catsim.estimation.wle")
+    real_quad = wle_module.quad
+
+    def quad_with_warning(*args: Any, **kwargs: Any) -> tuple[Any, ...]:
+      return (*real_quad(*args, **kwargs)[:3], "the maximum number of subdivisions has been achieved")
+
+    monkeypatch.setattr(wle_module, "quad", quad_with_warning)
+
+    with pytest.warns(IntegrationWarning, match="subdivisions"):
+      WarmLikelihoodEstimator().estimate(self._two_candidate_bank(), [0, 1], [True, True], 0.0)
 
   @pytest.mark.parametrize(
     ("b", "correct", "expected"),
