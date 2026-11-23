@@ -146,7 +146,7 @@ ignore-one-line-docstrings = true
 "tests/*" = [
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
-  "D",        # Test names already communicate intent; per-test docstring churn is low value
+  "D",        # Test docstrings name what the test checks (AGENTS.md), with no numpydoc sections
   "DOC",      # Test and fixture docstrings have no Returns or Raises sections
   "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self

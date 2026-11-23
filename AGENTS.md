@@ -94,6 +94,8 @@ hidden runtime coupling.
   - `uv run lint-imports` (the layer contracts in `pyproject.toml`)
 - Notebook validation command:
   - `uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb`
+- Every test has a docstring naming what it tests for: the behaviour, or the bug that would make it
+  fail. Test docstrings have no argument sections.
 
 ### When To Run What
 
