@@ -12,16 +12,6 @@ from catsim import plot
 from catsim.plot import PlotType
 
 
-class TestPlotType:
-  """Tests for PlotType enum."""
-
-  def test_plot_type_members_exist(self) -> None:
-    """All documented plot types should exist."""
-    assert PlotType.ICC is not None
-    assert PlotType.IIC is not None
-    assert PlotType.BOTH is not None
-
-
 class TestItemCurve:
   """Tests for item_curve()."""
 

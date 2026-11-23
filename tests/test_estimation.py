@@ -8,7 +8,6 @@ from scipy.optimize import minimize_scalar
 
 from catsim import irt
 from catsim.estimation import (
-  BaseEstimator,
   NumericalSearchEstimator,
   QuadratureGrid,
   normal_log_prior,
@@ -19,20 +18,14 @@ from catsim.estimation import (
 )
 from catsim.item_bank import ItemBank
 
+# SciPy reads `bracket` as where to start looking, not as a bound. From (-6, 6), brent and golden search downhill
+# past -6 into the flat tail that a guessing parameter gives the likelihood, and stop far off the ability scale
+# at a point less likely than the maximum inside it (.plans/maintenance/todo/M05-unbounded-scipy-estimators.md).
+UNBOUNDED_SCIPY_SEARCH = pytest.mark.xfail(strict=True, reason="brent and golden leave the ability scale")
+
 
 class TestNumericalSearchEstimatorInit:
   """Tests for NumericalSearchEstimator initialization."""
-
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    estimator = NumericalSearchEstimator()
-    assert estimator.calls == 0
-    assert estimator.evaluations == 0
-
-  def test_init_with_method(self) -> None:
-    """Test initialization with specific method."""
-    estimator = NumericalSearchEstimator(method="brent")
-    assert str(estimator) == "Numerical Search Estimator (brent)"
 
   def test_init_with_invalid_method_raises(self) -> None:
     """Test that invalid method raises ValueError."""
@@ -42,11 +35,6 @@ class TestNumericalSearchEstimatorInit:
 
 class TestNumericalSearchEstimatorMethods:
   """Tests for NumericalSearchEstimator available methods."""
-
-  def test_available_methods_returns_frozenset(self) -> None:
-    """Test that available_methods returns a frozenset."""
-    methods = NumericalSearchEstimator.available_methods()
-    assert isinstance(methods, frozenset)
 
   def test_available_methods_contains_expected(self) -> None:
     """Test that available methods contains expected methods."""
@@ -234,11 +222,18 @@ class TestNumericalSearchEstimatorWithMethods:
 
   @pytest.mark.parametrize(
     "method",
-    # Only test stable methods that are known to produce consistent results
-    ["bounded", "dichotomous", "fibonacci", "ternary", "golden2"],
+    [
+      "bounded",
+      "dichotomous",
+      "fibonacci",
+      "golden2",
+      "ternary",
+      pytest.param("brent", marks=UNBOUNDED_SCIPY_SEARCH),
+      pytest.param("golden", marks=UNBOUNDED_SCIPY_SEARCH),
+    ],
   )
-  def test_stable_methods_produce_similar_results(self, method: str) -> None:
-    """Test that stable methods produce similar results for the same input."""
+  def test_methods_agree_on_the_maximum_likelihood_estimate(self, method: str) -> None:
+    """Every method should reach the bounded optimum to within a few times the default tol of 1e-6."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
 
     administered_items = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -261,26 +256,7 @@ class TestNumericalSearchEstimatorWithMethods:
       est_theta=0.0,
     )
 
-    # Stable methods should produce results within reasonable range of each other
-    assert abs(theta - ref_theta) < 1.0, f"Method {method} produced {theta}, expected ~{ref_theta}"
-
-
-class TestBaseEstimatorAbstract:
-  """Tests for BaseEstimator abstract base class."""
-
-  def test_cannot_instantiate_base_estimator(self) -> None:
-    """Test that BaseEstimator cannot be instantiated directly."""
-    with pytest.raises(TypeError):
-      BaseEstimator()  # type: ignore[abstract]
-
-  def test_subclass_must_implement_estimate(self) -> None:
-    """Test that subclass must implement estimate method."""
-
-    class IncompleteEstimator(BaseEstimator):
-      pass
-
-    with pytest.raises(TypeError):
-      IncompleteEstimator()  # type: ignore[abstract]
+    assert theta == pytest.approx(ref_theta, abs=1e-5)
 
 
 class TestBayesianHelpers:

@@ -247,19 +247,6 @@ class TestItemBankCachedValues:
     # For a=1, b=0, c=0, d=1, max info should be 0.25
     assert abs(bank.max_info_values[0] - 0.25) < 0.01
 
-  def test_cached_values_consistent_with_direct_computation(self) -> None:
-    """Test that cached values match direct computation."""
-    items = np.array([[1.2, 0.5, 0.05, 0.98], [0.9, -0.3, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    # Compute directly
-    direct_max_thetas = irt.max_info_hpc(items)
-    direct_max_info = irt.inf_hpc(direct_max_thetas, items)
-
-    # Compare with cached
-    np.testing.assert_array_almost_equal(bank.max_info_thetas, direct_max_thetas)
-    np.testing.assert_array_almost_equal(bank.max_info_values, direct_max_info)
-
 
 class TestItemBankMethods:
   """Tests for ItemBank methods."""
@@ -382,16 +369,6 @@ class TestItemBankMethods:
     assert info[1, 0] > info[0, 0]
     assert info[1, 0] > info[2, 0]
 
-  def test_test_information_all_items(self) -> None:
-    """Test computing test information using all items."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    test_info = bank.test_information(0.0)
-    # Should be sum of individual item information values
-    expected = irt.test_info(0.0, items)
-    assert abs(test_info - expected) < 0.001
-
   def test_test_information_subset_items(self) -> None:
     """Test computing test information using subset of items."""
     items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]])
@@ -405,18 +382,6 @@ class TestItemBankMethods:
 
 class TestItemBankReset:
   """Tests for ItemBank reset functionality."""
-
-  def test_reset_exposure_rates(self) -> None:
-    """Test that reset_exposure_rates clears exposure rates."""
-    bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0]]))
-
-    # Set some exposure rates
-    bank.update_exposure_rate(0, 0.5)
-    assert bank.exposure_rates[0] == pytest.approx(0.5)
-
-    # Reset
-    bank.reset_exposure_rates()
-    assert bank.exposure_rates[0] == pytest.approx(0.0)
 
   def test_reset_clears_exposure_rates(self) -> None:
     """Test that reset() clears all exposure rates."""

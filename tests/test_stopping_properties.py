@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import numpy as np
-from hypothesis import assume, given, settings
+from hypothesis import assume, example, given, settings
 from hypothesis import strategies as st
 
 from catsim import irt
@@ -135,27 +134,30 @@ CI_SETTINGS = settings(max_examples=25, deadline=None)
     max_size=5,
   ).map(sorted),
 )
+# random draws rarely give an interval that fits a middle band; this one is (-0.56, 0.56), inside [-3, 3)
+@example(
+  params=ItemBank.generate_item_bank(12, seed=0), administered_count=10, theta=0.0, confidence=0.5, bounds=[-3.0, 3.0]
+)
 @CI_SETTINGS
-def test_confidence_interval_stopper_ci_symmetric_and_finite(
+def test_confidence_interval_stopper_stops_when_no_bound_splits_the_interval(
   params: ItemBank,
   administered_count: int,
   theta: float,
   confidence: float,
   bounds: list[float],
 ) -> None:
+  """The confidence interval lies inside one ability band exactly when no band boundary falls strictly inside it."""
   bank = params
-  assume(administered_count <= bank.n_items)
+  # administering the whole bank is a hard stop that bypasses the interval check
+  assume(administered_count < bank.n_items)
   assume(len(set(bounds)) == len(bounds))
   stopper = ConfidenceIntervalStopper(interval_bounds=bounds, confidence=confidence)
   administered = list(range(administered_count))
-  admin_items = bank.get_items(administered)
-  lower, upper = irt.confidence_interval(theta, admin_items, confidence)
-  if np.isfinite(lower) and np.isfinite(upper):
-    assert lower <= theta <= upper
-    assert upper - lower >= 0.0
-    # stopper decision must be consistent: only stops when CI fits in one interval
-    stopped = stopper.stop(item_bank=bank, administered_items=administered, theta=theta)
-    assert isinstance(stopped, bool)
+  lower, upper = irt.confidence_interval(theta, bank.get_items(administered), confidence)
+
+  fits_in_one_band = not any(lower < bound < upper for bound in bounds)
+
+  assert stopper.stop(item_bank=bank, administered_items=administered, theta=theta) is fits_in_one_band
 
 
 @given(

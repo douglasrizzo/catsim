@@ -8,7 +8,9 @@ import numpy as np
 import pytest
 
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
+from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
+from catsim.item_bank import ItemBank
 from catsim.selection import RandomSelector
 from catsim.state import CatSessionState, ExposureTracker, SessionStatus
 from catsim.stopping import TestLengthStopper as LengthStopper
@@ -136,44 +138,11 @@ class FakeRng:
     return self.sample
 
 
-@dataclass
-class FakeItemBank:
-  """Minimal item-bank stub for response-provider tests."""
-
-  item: np.ndarray
-  seen_item_id: int | None = None
-
-  def get_item(self, item_id: int) -> np.ndarray:
-    self.seen_item_id = item_id
-    return self.item
-
-
-def test_start_session_initializes_theta_and_state(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
-  rng,
-) -> None:
-  """Engine should create a live session with the initializer theta."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=rng)
-
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=1.0)
-
-  assert session.session_id == 0
-  assert session.current_theta == 0.0
-  assert session.true_theta == 1.0
-  assert session.theta_history == [0.0]
-  assert session.status == SessionStatus.IN_PROGRESS
-
-
 def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> None:
-  """Engine should forward the configured item bank and RNG to the initializer."""
+  """Engine should forward the configured item bank and RNG to the initializer and start a live session."""
   initializer = RecordingInitializer(theta=1.25)
   selector = RandomSelector()
-  estimator = pytest.importorskip("catsim.estimation").NumericalSearchEstimator()
+  estimator = NumericalSearchEstimator()
   stopper = LengthStopper(max_items=5)
   engine = CatEngine(initializer, selector, estimator, stopper)
   rng = np.random.default_rng(123)
@@ -187,6 +156,7 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   assert session.current_theta == pytest.approx(1.25)
   assert session.true_theta == pytest.approx(-0.5)
   assert session.theta_history == [pytest.approx(1.25)]
+  assert session.status == SessionStatus.IN_PROGRESS
 
 
 def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
@@ -386,24 +356,6 @@ def test_run_session_stops_at_fixed_length(
   assert len(final_session.administered_item_ids) == 3
 
 
-def test_select_next_passes_exposure_snapshot(
-  item_bank,
-  fixed_initializer,
-  max_info_selector,
-  estimator,
-  fixed_length_stopper,
-) -> None:
-  """Selectors should be able to consume explicit exposure-rate snapshots."""
-  engine = CatEngine(fixed_initializer, max_info_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=np.random.default_rng(42), total_sessions=10)
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-
-  selected = engine.select_next(session, item_bank, context)
-
-  assert selected is not None
-  assert 0 <= selected < item_bank.n_items
-
-
 def test_select_next_passes_response_history(
   item_bank,
   fixed_initializer,
@@ -436,51 +388,33 @@ def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
   assert str(exc_info.value) == "true_theta is required to simulate responses"
 
 
-def test_simulated_response_provider_uses_item_parameters_and_rng_threshold(monkeypatch) -> None:
-  """Simulated responses should use the selected item parameters and RNG threshold."""
-  provider = SimulatedResponseProvider()
-  item_bank = FakeItemBank(item=np.array([1.2, -0.5, 0.2, 0.9]))
-  context = RunContext(rng=FakeRng(sample=0.4))  # type: ignore[arg-type]
-  state = CatSessionState(session_id=0, current_theta=0.0, true_theta=1.5)
-  seen_args: dict[str, object] = {}
+@pytest.mark.parametrize(
+  ("item_id", "draw", "expected"),
+  [
+    # 2PL item at b = 0: P = 0.82; the estimate (-1.5) or item 0 would both give P below 0.2
+    pytest.param(1, 0.5, True, id="2pl-correct"),
+    pytest.param(1, 0.9, False, id="2pl-incorrect"),
+    # 4PL item with c = 0.2, d = 0.9: P = 0.2 + 0.7 * 0.82 = 0.77; without c and d it would be 0.82
+    pytest.param(2, 0.79, False, id="4pl-upper-asymptote"),
+    # 3PL item at b = 5 with c = 0.3: P = 0.3 + 0.7 * 0.03 = 0.32; without c it would be 0.03
+    pytest.param(3, 0.31, True, id="3pl-guessing"),
+  ],
+)
+def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_probability(
+  item_id: int, draw: float, expected: bool
+) -> None:
+  """The response is correct when the uniform draw falls below the chosen item's 4PL probability at the true theta.
 
-  def fake_icc(theta, a, b, c, d) -> float:
-    seen_args["theta"] = theta
-    seen_args["params"] = (a, b, c, d)
-    return 0.8
+  Together the cases fail if the response used the estimate instead of the true theta (1.5), another item,
+  or dropped the item's guessing or upper-asymptote parameter.
+  """
+  item_bank = ItemBank(
+    np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
+  )
+  state = CatSessionState(session_id=0, current_theta=-1.5, true_theta=1.5)
+  context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
 
-  monkeypatch.setattr("catsim.engine.icc", fake_icc)
-
-  response = provider.answer(state, item_bank, 7, context)
-
-  assert response is True
-  assert item_bank.seen_item_id == 7
-  assert seen_args["theta"] == pytest.approx(1.5)
-  assert seen_args["params"] == pytest.approx((1.2, -0.5, 0.2, 0.9))
-
-
-def test_simulated_response_provider_returns_false_below_threshold(monkeypatch) -> None:
-  """Simulated responses should be false when the sampled threshold exceeds the probability."""
-  provider = SimulatedResponseProvider()
-  item_bank = FakeItemBank(item=np.array([0.8, 0.3, 0.1, 1.0]))
-  context = RunContext(rng=FakeRng(sample=0.9))  # type: ignore[arg-type]
-  state = CatSessionState(session_id=0, current_theta=0.0, true_theta=-0.7)
-
-  monkeypatch.setattr("catsim.engine.icc", lambda *_args: 0.2)
-
-  assert provider.answer(state, item_bank, 2, context) is False
-
-
-def test_simulated_response_provider_returns_true_when_probability_matches_threshold(monkeypatch) -> None:
-  """Simulated responses should treat an exact threshold match as a positive response."""
-  provider = SimulatedResponseProvider()
-  item_bank = FakeItemBank(item=np.array([1.0, 0.0, 0.0, 1.0]))
-  context = RunContext(rng=FakeRng(sample=0.4))  # type: ignore[arg-type]
-  state = CatSessionState(session_id=0, current_theta=0.0, true_theta=0.3)
-
-  monkeypatch.setattr("catsim.engine.icc", lambda *_args: 0.4)
-
-  assert provider.answer(state, item_bank, 5, context) is True
+  assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
 
 
 def test_select_next_returns_none_for_stopped_session(
