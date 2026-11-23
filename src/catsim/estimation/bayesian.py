@@ -17,10 +17,9 @@ from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 
 LogPrior = Callable[[FloatArray], FloatArray]
-MIN_QUADRATURE_NODES = 2
+_MIN_QUADRATURE_NODES = 2
 
 __all__ = [
-  "FloatArray",
   "LogPrior",
   "QuadratureGrid",
   "normal_log_prior",
@@ -128,7 +127,7 @@ class QuadratureGrid:
   ------
   ValueError
       If the arrays are not one-dimensional, differ in length, have fewer than
-      ``MIN_QUADRATURE_NODES`` entries, or hold non-finite nodes or non-positive weights.
+      two entries, or hold non-finite nodes or non-positive weights.
   """
 
   nodes: FloatArray
@@ -142,8 +141,8 @@ class QuadratureGrid:
     if self.nodes.shape != self.weights.shape:
       msg = f"nodes and weights must have the same length, got {self.nodes.size} and {self.weights.size}"
       raise ValueError(msg)
-    if self.nodes.size < MIN_QUADRATURE_NODES:
-      msg = f"a grid needs at least {MIN_QUADRATURE_NODES} nodes, got {self.nodes.size}"
+    if self.nodes.size < _MIN_QUADRATURE_NODES:
+      msg = f"a grid needs at least {_MIN_QUADRATURE_NODES} nodes, got {self.nodes.size}"
       raise ValueError(msg)
     if not numpy.isfinite(self.nodes).all():
       msg = "nodes must be finite"
@@ -179,10 +178,10 @@ class QuadratureGrid:
     Raises
     ------
     ValueError
-        If ``n_nodes < MIN_QUADRATURE_NODES`` or ``high <= low``.
+        If ``n_nodes < 2`` or ``high <= low``.
     """
-    if n_nodes < MIN_QUADRATURE_NODES:
-      msg = f"n_nodes must be at least {MIN_QUADRATURE_NODES}, got {n_nodes}"
+    if n_nodes < _MIN_QUADRATURE_NODES:
+      msg = f"n_nodes must be at least {_MIN_QUADRATURE_NODES}, got {n_nodes}"
       raise ValueError(msg)
     if high <= low:
       msg = f"high must be greater than low, got low={low}, high={high}"
@@ -193,7 +192,7 @@ class QuadratureGrid:
     return cls(nodes=nodes, weights=weights)
 
 
-def log_likelihood_grid(
+def _log_likelihood_grid(
   response_vector: list[bool],
   administered_items: FloatArray,
   nodes: FloatArray,
@@ -267,7 +266,7 @@ def posterior(
       If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has
       zero posterior mass, or if ``response_vector`` and ``administered_items`` differ in length.
   """
-  log_lik = log_likelihood_grid(response_vector, administered_items, grid.nodes)
+  log_lik = _log_likelihood_grid(response_vector, administered_items, grid.nodes)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
   if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
     msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"
