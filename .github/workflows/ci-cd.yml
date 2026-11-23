@@ -6,15 +6,6 @@ on:
     branches: [dev, main]
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      target:
-        description: "Publish target"
-        required: true
-        type: choice
-        options:
-          - testpypi
-          - pypi
 
 permissions:
   contents: read
@@ -45,12 +36,11 @@ jobs:
 
   test:
     name: Run tests
-    # Run tests for every PR (stacked PRs too), pushes to dev/main, releases, and manual publish validation.
+    # Run tests for every PR (stacked PRs too), pushes to dev/main, and releases.
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
-      github.event_name == 'release' ||
-      github.event_name == 'workflow_dispatch'
+      github.event_name == 'release'
     runs-on: ${{ matrix.os }}
     env:
       # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
@@ -100,12 +90,11 @@ jobs:
 
   build:
     name: Build package
-    # Run builds for every PR (stacked PRs too), pushes to dev/main, releases, and manual publish validation.
+    # Run builds for every PR (stacked PRs too), pushes to dev/main, and releases.
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
-      github.event_name == 'release' ||
-      github.event_name == 'workflow_dispatch'
+      github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -119,7 +108,9 @@ jobs:
           python-version: "3.13"
 
       - name: Add pre-release suffix for TestPyPI
-        if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev'
+        if: |
+          github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
+          github.event.pull_request.head.repo.full_name == github.repository
         run: |
           # Get current version from pyproject.toml
           CURRENT_VERSION=$(grep -E '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
@@ -146,7 +137,7 @@ jobs:
 
   publish-to-pypi:
     name: Publish to PyPI
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
+    if: github.event_name == 'release'
     needs: [pre-commit, test, build, deploy-docs-production] # Wait for quality gates, package build, and live docs
     runs-on: ubuntu-latest
     environment:
@@ -167,11 +158,10 @@ jobs:
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    # Publish to TestPyPI on PRs from dev to main (final checkpoint before release)
-    # or manual workflow dispatch for testing
+    # Publish to TestPyPI on the same-repository PR from dev to main (final checkpoint before release)
     if: |
-      (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
+      github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
+      github.event.pull_request.head.repo.full_name == github.repository
     needs: [pre-commit, test, build, deploy-docs-dev] # Wait for quality gates, package build, and live docs
     runs-on: ubuntu-latest
     environment:
@@ -251,12 +241,20 @@ jobs:
 
   deploy-docs-dev:
     name: Deploy documentation (dev preview)
-    # Deploy preview docs on pushes to dev branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    # Deploy preview docs on pushes to dev, and on the same-repository PR from dev to main,
+    # whose TestPyPI upload waits for this job in the same run (ADR-0007)
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      # One gh-pages push at a time: a queued deploy waits for the running one instead of cancelling it
+      group: gh-pages
+      cancel-in-progress: false
 
     steps:
       - name: Download documentation artifacts
@@ -297,12 +295,19 @@ jobs:
 
   deploy-docs-production:
     name: Deploy documentation (production)
-    # Deploy production docs on pushes to main (after PR validation)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build-docs] # Only need docs, not tests (already validated in PR)
+    # Deploy production docs on pushes to main, and on releases, whose PyPI upload waits for this
+    # job in the same run (ADR-0007)
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'release'
+    needs: [pre-commit, test, build, build-docs] # Docs go live only for a commit that passes every check
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      # One gh-pages push at a time: a queued deploy waits for the running one instead of cancelling it
+      group: gh-pages
+      cancel-in-progress: false
 
     steps:
       - name: Download documentation artifacts
