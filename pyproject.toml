@@ -139,6 +139,7 @@ ignore-one-line-docstrings = true
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy.typing.NDArray".msg = "Use FloatArray or IntArray from catsim._typing; add an alias there for other dtypes."
+"random".msg = "Take a numpy.random.Generator from the caller (ADR-0008); the global random module cannot be seeded per session."
 
 [tool.ruff.lint.per-file-ignores]
 "src/catsim/_typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
