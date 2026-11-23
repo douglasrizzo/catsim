@@ -155,34 +155,30 @@ class CatStepResult:
 
 @dataclass(slots=True)
 class ExposureTracker:
-  """Count item administrations and sessions across a run, and give each session its exposure rates.
+  """Count item administrations and sessions across a run, and give sessions their exposure rates.
 
   One tracker is shared by every session of a run or of a live deployment, through
   :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts and
   :meth:`record` for every administered item. ``counts`` holds each item's administrations so far,
   those of sessions still in progress included, and ``n_sessions`` the number of sessions started.
 
-  The rates a session sees divide by the examinees tested before it, as catR's
-  ``simulateRespondents`` does (ADR-0003): when a session starts, each item's rate becomes its
-  administrations divided by the number of sessions that started earlier, and stays so until the
-  next session starts. The first session therefore sees every rate at 0, and a session's own items
-  count from the next session on.
+  A session is selected against each item's administrations divided by the number of other sessions
+  started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that
+  is the share of the examinees tested before the current one, as in catR's
+  ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,
+  as in a live deployment, see each other's administrations as they happen.
   """
 
   n_items: int
   counts: IntArray = field(init=False)
   n_sessions: int = field(init=False, default=0)
-  _rates: FloatArray = field(init=False, repr=False)
 
   def __post_init__(self) -> None:
-    """Allocate the item counts and the rates the first session sees, all zero."""
+    """Allocate the item counts, all zero."""
     self.counts = numpy.zeros(self.n_items, dtype=int)
-    self._rates = numpy.zeros(self.n_items, dtype=float)
 
   def start_session(self) -> None:
-    """Count a new session and fix the rates it sees: over the sessions that started before it."""
-    if self.n_sessions > 0:
-      self._rates = self.counts / self.n_sessions
+    """Count a session that has started."""
     self.n_sessions += 1
 
   def record(self, item_id: int) -> None:
@@ -190,16 +186,23 @@ class ExposureTracker:
     self.counts[item_id] += 1
 
   def rates(self) -> FloatArray:
-    """Return the exposure rates the latest session sees.
+    """Return the exposure rates a session in progress is selected against.
+
+    Each item's administrations are divided by the sessions started so far other than the one
+    asking, so a session never counts itself. Its own administrations stay in the counts, but only
+    for items it has already administered and will not be offered again; for those the rate can
+    exceed 1.
 
     Returns
     -------
     numpy.ndarray
-        A new array holding, for each item, the share of the sessions started before the latest one
-        that administered it; all zero until a second session starts. This is not the run's final
-        exposure, which :attr:`SimulationResult.exposure_rates` gives.
+        A new array with one rate per item; all zero while at most one session has started. This is
+        not the run's final exposure, which :attr:`SimulationResult.exposure_rates` gives.
     """
-    return self._rates.copy()
+    others = self.n_sessions - 1
+    if others < 1:
+      return numpy.zeros(self.n_items)
+    return self.counts / others
 
 
 @dataclass(slots=True)

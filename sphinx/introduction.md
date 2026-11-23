@@ -150,7 +150,7 @@ $$
 
 Where $q_i$ represents the number of tests item $i$ has been used on and $N$ is the total number of tests applied.
 
-During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.state.ExposureTracker` in the run context gives each session $q_i$ and $N$ as they stood when it started, as catR does ({doc}`/adr/0003-runtime-state-ownership`).
+During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.state.ExposureTracker` in the run context gives each session $q_i$ and $N$ over the other sessions started so far, which for sessions run one after another is catR's rate over the examinees tested before the current one ({doc}`/adr/0003-runtime-state-ownership`).
 
 ## Computerized adaptive tests
 
