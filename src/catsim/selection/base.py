@@ -7,6 +7,7 @@ use them too: :func:`remaining` and :func:`below_cap` give the items a selector 
 :func:`require_responses` check arguments.
 """
 
+import operator
 from abc import ABC, abstractmethod
 
 import numpy
@@ -174,23 +175,27 @@ def check_r_max(r_max: float) -> float:
 
 
 def check_test_size(test_size: int) -> int:
-  """Return ``test_size``, after checking that it is a usable planned test length.
+  """Return ``test_size`` as a Python int, after checking that it is a usable planned test length.
 
   Parameters
   ----------
   test_size : int
-      Planned number of items in the test, given to a selector whose schedule depends on it.
+      Planned number of items in the test, given to a selector whose schedule depends on it. A NumPy
+      integer is accepted.
 
   Returns
   -------
   int
-      ``test_size``.
+      ``test_size``, as a Python int.
 
   Raises
   ------
+  TypeError
+      If ``test_size`` is not an integer.
   ValueError
       If ``test_size`` is smaller than 1.
   """
+  test_size = operator.index(test_size)
   if test_size < 1:
     msg = f"test_size must be at least 1, got {test_size}"
     raise ValueError(msg)

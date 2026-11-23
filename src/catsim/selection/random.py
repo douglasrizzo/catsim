@@ -1,5 +1,7 @@
 """Random selector implementations."""
 
+import operator
+
 from numpy.random import Generator
 
 from .._typing import FloatArray
@@ -96,9 +98,12 @@ class The54321Selector(BaseSelector):
 
     Raises
     ------
+    TypeError
+        If ``initial_bin_size`` is not an integer.
     ValueError
         If ``initial_bin_size`` is smaller than 1.
     """
+    initial_bin_size = operator.index(initial_bin_size)
     if initial_bin_size < 1:
       msg = f"initial_bin_size must be at least 1, got {initial_bin_size}"
       raise ValueError(msg)
@@ -186,9 +191,12 @@ class RandomesqueSelector(BaseSelector):
 
     Raises
     ------
+    TypeError
+        If ``bin_size`` is not an integer.
     ValueError
         If ``bin_size`` is smaller than 1.
     """
+    bin_size = operator.index(bin_size)
     if bin_size < 1:
       msg = f"bin_size must be at least 1, got {bin_size}"
       raise ValueError(msg)

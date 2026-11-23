@@ -1461,6 +1461,44 @@ def test_repr_is_the_constructor_call(source: str) -> None:
   assert repr(eval(source, namespace)) == source
 
 
+@pytest.mark.parametrize(
+  ("numpy_source", "source"),
+  [
+    ("RandomesqueSelector(bin_size=np.int64(4))", "RandomesqueSelector(bin_size=4)"),
+    ("The54321Selector(initial_bin_size=np.int64(3))", "The54321Selector(initial_bin_size=3)"),
+    ("AStratSelector(test_size=np.int64(12), n_strata=np.int64(4))", "AStratSelector(test_size=12, n_strata=4)"),
+    (
+      "ProgressiveSelector(test_size=np.int64(12), acceleration=2.0, r_max=0.5)",
+      "ProgressiveSelector(test_size=12, acceleration=2.0, r_max=0.5)",
+    ),
+  ],
+)
+def test_numpy_integer_arguments_are_stored_as_python_ints(numpy_source: str, source: str) -> None:
+  """Integer arguments taken from a NumPy array are stored as Python ints, so the repr still evaluates.
+
+  Fails if np.int64(4) is kept as given: the repr then reads bin_size=np.int64(4), naming a module that the
+  catsim.selection namespace does not have.
+  """
+  namespace = {**vars(importlib.import_module("catsim.selection")), "np": np}
+
+  assert repr(eval(numpy_source, namespace)) == source
+
+
+@pytest.mark.parametrize(
+  "build",
+  [
+    lambda: RandomesqueSelector(bin_size=2.5),
+    lambda: AStratSelector(test_size=12.5),
+    lambda: AStratSelector(test_size=12, n_strata=4.5),
+  ],
+  ids=["bin_size", "test_size", "n_strata"],
+)
+def test_integer_arguments_reject_fractions(build: Callable[[], BaseSelector]) -> None:
+  """A fractional size is rejected at construction instead of being stored and used to slice or count items."""
+  with pytest.raises(TypeError, match="cannot be interpreted as an integer"):
+    build()
+
+
 def test_selector_tables_cover_every_concrete_selector() -> None:
   """Every concrete selector exported by catsim.selection runs through the engine-input and repr tests above.
 

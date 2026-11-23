@@ -1,5 +1,6 @@
 """Stratified selector implementations."""
 
+import operator
 from abc import abstractmethod
 
 import numpy
@@ -49,13 +50,15 @@ class StratifiedSelector(BaseSelector):
 
     Raises
     ------
+    TypeError
+        If ``test_size`` or ``n_strata`` is not an integer.
     ValueError
         If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.
     """
     super().__init__()
     self._test_size = check_test_size(test_size)
-    n_strata = test_size if n_strata is None else n_strata
-    if not 1 <= n_strata <= test_size:
+    n_strata = self._test_size if n_strata is None else operator.index(n_strata)
+    if not 1 <= n_strata <= self._test_size:
       msg = f"n_strata must be between 1 and test_size ({test_size}), got {n_strata}"
       raise ValueError(msg)
     self._n_strata = n_strata
