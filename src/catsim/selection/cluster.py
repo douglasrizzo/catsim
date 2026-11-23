@@ -25,9 +25,13 @@ class ClusterSelector(BaseSelector):
       - 'weighted_info': selects the cluster whose average item information is
         maximum (its sum of information divided by its number of items)
 
-      Default is 'item_info'.
+      Every score counts all the items in a cluster, including those already
+      administered, as long as the cluster still has an item left. Default is
+      'item_info'.
   r_max : float, optional
-      Maximum exposure rate for items. Default is 1.
+      Exposure-rate cap for choosing an item inside the selected cluster: items at
+      or above it are passed over unless no other item in the cluster remains. It
+      does not affect which cluster is chosen. Default is 1 (no cap).
   r_control : str, optional
       Item exposure control method, used when every remaining item in the selected
       cluster has an exposure rate at or above r_max. 'passive' applies the most
@@ -80,7 +84,7 @@ class ClusterSelector(BaseSelector):
         Cluster selection method, one of ['item_info', 'cluster_info', 'weighted_info'].
         Default is 'item_info'.
     r_max : float, optional
-        Maximum item exposure rate. Default is 1.
+        Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.
     r_control : str, optional
         Item exposure control method, one of ['passive', 'aggressive']. Default is 'passive'.
 
@@ -170,7 +174,7 @@ class ClusterSelector(BaseSelector):
         if set(items_in_cluster) <= set(administered_items):
           evaluated_clusters.add(self._clusters[max_info_item])
 
-          # if all clusters have been evaluated, the loop ends and the method returns None somewhere below
+          # if all clusters have been evaluated, the loop ends and the method raises NoItemsAvailableError below
           if evaluated_clusters == existent_clusters:
             break
 
@@ -218,15 +222,13 @@ class ClusterSelector(BaseSelector):
     # in this part, an item is chosen from the cluster that was
     # selected above
 
-    # gets the indexes and information values from the items in the
-    # selected cluster that have not been administered
+    # gets the indexes of the items in the selected cluster that have not been administered
     valid_indexes = self._get_non_administered(
       numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0],
       administered_items,
     )
 
-    # gets the indexes and information values from the items in the
-    # selected cluster with r < rmax that have not been administered
+    # of those, gets the indexes of the items whose exposure rate is below r_max
     if exposure_rates is None:
       exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
     valid_indexes_low_r = [
