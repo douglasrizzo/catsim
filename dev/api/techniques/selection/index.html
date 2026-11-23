@@ -825,6 +825,9 @@ and practical properties such as item exposure and content coverage.</p>
 <li class="toctree-l1"><a class="reference internal" href="max-info-selector.html">Maximum Fisher Information Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="urry-selector.html">Urry Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interval-info-selector.html">Interval Information Selector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kl-selector.html">Kullback-Leibler Selector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="progressive-selector.html">Progressive Selector</a></li>
+<li class="toctree-l1"><a class="reference internal" href="proportional-selector.html">Proportional Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster-selector.html">Cluster Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stratified-selector.html">Stratified Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="a-strat-selector.html">A-Stratified Selector</a></li>
@@ -836,6 +839,17 @@ and practical properties such as item exposure and content coverage.</p>
 </ul>
 </div>
 </section>
+<section id="ties">
+<h2>Ties<a class="headerlink" href="#ties" title="Link to this heading">#</a></h2>
+<p>When several candidate items share the best score exactly, every selector breaks the tie the same
+way: it draws one of them uniformly at random with the session’s random generator, as catR does.
+Ties are exact equality of the selector’s own score, so items that are equally good in exact
+arithmetic tie only if their scores also round to the same value.
+The Randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
+No random number is drawn when nothing ties, so seeded results on banks without ties do not depend
+on this rule. Selectors called without a generator raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> when items tie. See
+<a class="reference internal" href="../../../adr/0008-random-tie-breaking.html"><span class="doc">ADR-0008: Break Ties Between Items Uniformly at Random</span></a>.</p>
+</section>
 <section id="class-hierarchy">
 <h2>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Link to this heading">#</a></h2>
 <pre  class="mermaid">
@@ -844,6 +858,7 @@ and practical properties such as item exposure and content coverage.</p>
   BaseSelector &lt;|-- ClusterSelector
   BaseSelector &lt;|-- FiniteSelector
   BaseSelector &lt;|-- IntervalInfoSelector
+  BaseSelector &lt;|-- KLSelector
   BaseSelector &lt;|-- MEISelector
   BaseSelector &lt;|-- MLWISelector
   BaseSelector &lt;|-- MaxInfoSelector
@@ -852,6 +867,8 @@ and practical properties such as item exposure and content coverage.</p>
   BaseSelector &lt;|-- The54321Selector
   BaseSelector &lt;|-- UrrySelector
   FiniteSelector &lt;|-- LinearSelector
+  FiniteSelector &lt;|-- ProgressiveSelector
+  FiniteSelector &lt;|-- ProportionalSelector
   FiniteSelector &lt;|-- StratifiedSelector
   MaxInfoStratSelector &lt;|-- MaxInfoBBlockSelector
   StratifiedSelector &lt;|-- AStratSelector
@@ -867,9 +884,6 @@ They describe planned additions to <code class="xref py py-mod docutils literal 
 </div>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="kl-selector.html">Kullback-Leibler Selector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="progressive-selector.html">Progressive Selector</a></li>
-<li class="toctree-l1"><a class="reference internal" href="proportional-selector.html">Proportional Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sympson-hetter-exposure.html">Sympson-Hetter Exposure Control</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mpwi-selector.html">Maximum Posterior Weighted Information Selector</a></li>
 <li class="toctree-l1"><a class="reference internal" href="klp-selector.html">Posterior Kullback-Leibler Selector</a></li>
@@ -927,6 +941,7 @@ They describe planned additions to <code class="xref py py-mod docutils literal 
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented">Implemented</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ties">Ties</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-hierarchy">Class Hierarchy</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#planned">Planned</a></li>
 </ul>

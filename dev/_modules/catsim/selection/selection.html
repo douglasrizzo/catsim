@@ -839,11 +839,15 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+
+<span class="sd">    Among the non-administered items below ``r_max`` (or all non-administered items, if every one</span>
+<span class="sd">    is at or above it), returns the most informative at ``est_theta``. Ties are broken uniformly at</span>
+<span class="sd">    random (ADR-0008).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -853,26 +857,25 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
+<span class="sd">    rng : numpy.random.Generator or None, optional</span>
+<span class="sd">        Random number generator, used only to break ties between equally informative items.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item has already been administered.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If items tie for the most information and ``rng`` is None.</span>
 <span class="sd">    """</span>
-    <span class="c1"># sort items by their information value</span>
-    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
-    <span class="c1"># remove administered ones</span>
-    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
-      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">exposure_rates</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="n">valid_indexes_low_r</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">valid_indexes</span> <span class="k">if</span> <span class="n">exposure_rates</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">]</span>
-    <span class="c1"># return the item with maximum information from the ones available</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_filtered_candidates</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 
@@ -902,11 +905,14 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+
+<span class="sd">    Returns the non-administered item whose difficulty is closest to ``est_theta``. Ties are broken</span>
+<span class="sd">    uniformly at random (ADR-0008).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -916,20 +922,23 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
+<span class="sd">    rng : numpy.random.Generator or None, optional</span>
+<span class="sd">        Random number generator, used only to break ties between equally close items.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item has already been administered.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If items tie for the closest difficulty and ``rng`` is None.</span>
 <span class="sd">    """</span>
-    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_b</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
-    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
-      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_filtered_candidates</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 
@@ -1012,11 +1021,13 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the index of the next item to be administered.</span>
+
+<span class="sd">    Ties in the integrated information are broken uniformly at random (ADR-0008).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1026,11 +1037,20 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
+<span class="sd">    rng : numpy.random.Generator or None, optional</span>
+<span class="sd">        Random number generator, used only to break ties between equally good items.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item has already been administered.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If items tie for the largest integrated information and ``rng`` is None.</span>
 <span class="sd">    """</span>
     <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">),</span> <span class="n">administered_items</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">candidates</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1044,7 +1064,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">est_theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span> <span class="n">est_theta</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
 
     <span class="n">information_integral</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_integral</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidates</span><span class="p">])</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">information_integral</span><span class="p">)])</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">information_integral</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

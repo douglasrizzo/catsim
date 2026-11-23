@@ -904,7 +904,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -918,17 +918,21 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
+<span class="sd">    rng : numpy.random.Generator or None, optional</span>
+<span class="sd">        Random number generator, used only to break ties between equally close items.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
+<span class="sd">    int</span>
 <span class="sd">        Index of the non-administered item in the current stratum whose location is closest to</span>
-<span class="sd">        ``est_theta``.</span>
+<span class="sd">        ``est_theta``. Ties are broken uniformly at random (ADR-0008).</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    NoItemsAvailableError</span>
 <span class="sd">        If every item in the current stratum has been administered.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If items tie for the closest location and ``rng`` is None.</span>
 <span class="sd">    """</span>
     <span class="n">stage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span>
     <span class="n">stratum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strata</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">stage</span><span class="p">]</span>
@@ -937,8 +941,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="n">distances</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_location</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">distances</span><span class="p">)])</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_location</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 

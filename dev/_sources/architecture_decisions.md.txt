@@ -13,4 +13,5 @@ adr/0004-explicit-strategy-contracts
 adr/0005-immutable-step-results
 adr/0006-versioned-tutorial-notebooks
 adr/0007-release-gated-by-docs
+adr/0008-random-tie-breaking
 ```

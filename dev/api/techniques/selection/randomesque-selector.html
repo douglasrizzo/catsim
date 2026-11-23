@@ -464,7 +464,9 @@
 <h2>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">RandomesqueSelector</span></code> ranks non-administered items by Fisher information at
 the current ability estimate, keeps the top <code class="docutils literal notranslate"><span class="pre">bin_size</span></code> candidates, and then
-selects uniformly at random from that candidate set.</p>
+selects uniformly at random from that candidate set. Items tied in information
+with the last of those candidates also join the set, as in catR
+(<a class="reference internal" href="../../../adr/0008-random-tie-breaking.html"><span class="doc">ADR-0008: Break Ties Between Items Uniformly at Random</span></a>).</p>
 <p>The technique relaxes maximum-information selection by adding controlled
 randomness among the most informative items. Unlike the
 <a class="reference internal" href="the-54321-selector.html"><span class="doc">5-4-3-2-1 technique</span></a>, it keeps drawing from the same
@@ -497,7 +499,8 @@ optimal items near the current estimate.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
 <p>Implementation of the randomesque selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id6" title="G. G. Kingsbury and A. R. Zara. Procedures for selecting items for computerized adaptive tests. Applied Measurement in Education, 2(4):359–375, 1989. doi:10.1207/s15324818ame0204_6.">Kingsbury and Zara, 1989</a>]</span>.</p>
 <p>In this selector, at each step of the test, an item is randomly chosen from the <span class="math notranslate nohighlight">\(n\)</span> most informative items in
-the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a user-defined value.</p>
+the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a user-defined value. Items tied with the least informative of those <span class="math notranslate nohighlight">\(n\)</span> also
+join the bin (ADR-0008).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector.bin_size">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bin_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.RandomesqueSelector.bin_size" title="Link to this definition">#</a></dt>
@@ -517,13 +520,22 @@ the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a u
 </dd>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
-<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator used by the object.</p>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator the item is drawn from the bin with. Required.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>int or None</dt><dd><p>Index of the next item to be applied or <cite>None</cite> if there are no more items in the item bank.</p>
+<dt>int</dt><dd><p>Index of the next item to be applied, drawn uniformly from the bin, which also holds every
+item tied with its least informative item (ADR-0008).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
+</dd>
+<dt>NoItemsAvailableError</dt><dd><p>If every item has already been administered.</p>
 </dd>
 </dl>
 </dd>

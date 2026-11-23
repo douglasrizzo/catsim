@@ -626,18 +626,22 @@ uses one stratum per test item.</p>
 </dd>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator, used only to break ties between equally close items.</p>
+</dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>int or None</dt><dd><p>Index of the non-administered item in the current stratum whose location is closest to
-<code class="docutils literal notranslate"><span class="pre">est_theta</span></code>.</p>
+<dt>int</dt><dd><p>Index of the non-administered item in the current stratum whose location is closest to
+<code class="docutils literal notranslate"><span class="pre">est_theta</span></code>. Ties are broken uniformly at random (ADR-0008).</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt>NoItemsAvailableError</dt><dd><p>If every item in the current stratum has been administered.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If items tie for the closest location and <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
 </dd>
 </dl>
 </dd>

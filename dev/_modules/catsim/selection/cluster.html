@@ -902,7 +902,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -916,11 +916,24 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        A list containing the indexes of items that were already administered.</span>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
+<span class="sd">    rng : numpy.random.Generator or None, optional</span>
+<span class="sd">        Random number generator, used only to break ties between equally good items in the chosen</span>
+<span class="sd">        cluster.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied. Ties within the chosen cluster are broken uniformly at</span>
+<span class="sd">        random (ADR-0008).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item has already been administered.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If items in the chosen cluster tie and ``rng`` is None.</span>
 <span class="sd">    """</span>
     <span class="n">selected_cluster</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">existent_clusters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">)</span>
@@ -1011,23 +1024,19 @@ window.runMermaid = runMermaid;</script>
       <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">valid_indexes</span> <span class="k">if</span> <span class="n">exposure_rates</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="ow">and</span> <span class="n">idx</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">administered_items</span>
     <span class="p">]</span>
 
+    <span class="c1"># each of the picks below breaks ties uniformly at random (ADR-0008)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="c1"># return the item with maximum information from the ones available</span>
-      <span class="n">inf_values</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">))</span>
-      <span class="n">selected_item</span> <span class="o">=</span> <span class="n">valid_indexes_low_r</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">inf_values</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">inf_values</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+      <span class="c1"># the most informative of the items below r_max</span>
+      <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">valid_indexes_low_r</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">candidates</span><span class="p">)),</span> <span class="n">rng</span><span class="p">)</span>
 
-    <span class="c1"># every remaining item in the selected cluster is at or above r_max;</span>
-    <span class="c1"># passive control ignores the cap and takes the most informative one</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="o">==</span> <span class="s2">"passive"</span><span class="p">:</span>
-      <span class="n">inf_values</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">))</span>
-      <span class="n">selected_item</span> <span class="o">=</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">inf_values</span> <span class="o">==</span> <span class="nb">max</span><span class="p">(</span><span class="n">inf_values</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># Find the item with minimum exposure rate</span>
-      <span class="n">cluster_exposure_rates</span> <span class="o">=</span> <span class="p">[</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">valid_indexes</span><span class="p">]</span>
-      <span class="n">min_rate_idx</span> <span class="o">=</span> <span class="n">cluster_exposure_rates</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">cluster_exposure_rates</span><span class="p">))</span>
-      <span class="n">selected_item</span> <span class="o">=</span> <span class="n">valid_indexes</span><span class="p">[</span><span class="n">min_rate_idx</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">selected_item</span><span class="p">)</span></div>
+    <span class="c1"># every remaining item in the selected cluster is at or above r_max</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">intp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="o">==</span> <span class="s2">"passive"</span><span class="p">:</span>
+      <span class="c1"># passive control ignores the cap: the most informative item in the cluster</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_hpc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">candidates</span><span class="p">)),</span> <span class="n">rng</span><span class="p">)</span>
+    <span class="c1"># aggressive control: the item with the smallest exposure rate, regardless of information</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="o">-</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">rng</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ClusterSelector.sum_cluster_infos">

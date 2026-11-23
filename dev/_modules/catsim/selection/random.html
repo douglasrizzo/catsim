@@ -865,7 +865,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  the second from the 4 most informative remaining items, and so on, so that from the fifth item on the</span>
 <span class="sd">  most informative item is administered. Randomizing the opening items, which every examinee would</span>
 <span class="sd">  otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in</span>
-<span class="sd">  precision.</span>
+<span class="sd">  precision. Items tied with the least informative item of a bin also join it, so from the fifth</span>
+<span class="sd">  item on, ties for the most information are broken uniformly at random (ADR-0008).</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -928,27 +929,30 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
 <span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator used by the object.</span>
+<span class="sd">        Random number generator the item is drawn from the bin with. Required.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied, drawn uniformly from the bin, which also holds every</span>
+<span class="sd">        item tied with its least informative item (ADR-0008).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``rng`` is None.</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item has already been administered.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"rng parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="c1"># sort item indexes by their information value descending and remove indexes of administered items</span>
-    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
-    <span class="n">organized_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
-      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_filtered_candidates</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
     <span class="n">bin_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">organized_items</span><span class="p">[:</span><span class="n">bin_size</span><span class="p">]))</span></div>
+    <span class="c1"># items tied with the bin's least informative item join the bin (ADR-0008)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">bin_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
 </div>
 
 
@@ -959,7 +963,8 @@ window.runMermaid = runMermaid;</script>
 <span class="w">  </span><span class="sd">"""Implementation of the randomesque selector proposed by :cite:p:`Kingsbury89`.</span>
 
 <span class="sd">  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in</span>
-<span class="sd">  the item bank, :math:`n` being a user-defined value.</span>
+<span class="sd">  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also</span>
+<span class="sd">  join the bin (ADR-0008).</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1005,26 +1010,29 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        The current estimated ability.</span>
 <span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator used by the object.</span>
+<span class="sd">        Random number generator the item is drawn from the bin with. Required.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    int or None</span>
-<span class="sd">        Index of the next item to be applied or `None` if there are no more items in the item bank.</span>
+<span class="sd">    int</span>
+<span class="sd">        Index of the next item to be applied, drawn uniformly from the bin, which also holds every</span>
+<span class="sd">        item tied with its least informative item (ADR-0008).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``rng`` is None.</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If every item has already been administered.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"rng parameter cannot be None"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="c1"># sort item indexes by their information value descending and remove indexes of administered items</span>
-    <span class="n">ordered_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sort_by_info</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">est_theta</span><span class="p">)</span>
-    <span class="n">organized_items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="n">ordered_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
-      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">organized_items</span><span class="p">)[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">]))</span></div>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_filtered_candidates</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="c1"># items tied with the bin's least informative item join the bin (ADR-0008)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
 </div>
 
 </pre></div>

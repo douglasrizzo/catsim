@@ -49,7 +49,7 @@
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Sympson-Hetter Exposure Control" href="sympson-hetter-exposure.html" />
+    <link rel="next" title="Cluster Selector" href="cluster-selector.html" />
     <link rel="prev" title="Progressive Selector" href="progressive-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -456,8 +456,8 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.selection.progressive.ProportionalSelector</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <a class="reference internal" href="#catsim.selection.ProportionalSelector" title="catsim.selection.ProportionalSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.ProportionalSelector</span></code></a>
 <strong>Reference:</strong> Segall (2004); Barrada et al. (2008)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="proportional-selector">
 <h1>Proportional Selector<a class="headerlink" href="#proportional-selector" title="Link to this heading">#</a></h1>
@@ -482,9 +482,24 @@ test progresses, and asymptotically close to deterministic Fisher selection.</p>
 <div class="math notranslate nohighlight">
 \[h(w_n) = k\,w_n,
 \qquad
-w_n = \left(\frac{n-1}{N-1}\right)^s.\]</div>
-<p>Here <span class="math notranslate nohighlight">\(k &gt; 0\)</span> is a sharpness parameter and <span class="math notranslate nohighlight">\(s &gt; 0\)</span> is the same
-acceleration parameter used by the progressive selector.</p>
+w_n = \min\!\left(1, \frac{n-1}{N-1}\right)^s.\]</div>
+<p>Here <span class="math notranslate nohighlight">\(k \ge 0\)</span> is a sharpness parameter (<span class="math notranslate nohighlight">\(k = 0\)</span> keeps selection uniformly
+random throughout) and <span class="math notranslate nohighlight">\(s &gt; 0\)</span> is the same
+acceleration parameter used by the progressive selector; the sums run over
+the available items, and the weight is clamped at 1 past position <span class="math notranslate nohighlight">\(N\)</span>. The
+implementation divides the information by its maximum over the available items
+before raising it to the power, which leaves the probabilities unchanged and
+keeps a large exponent from underflowing every weight to zero.</p>
+<p>Segall (2004) selects each item with probability proportional to <span class="math notranslate nohighlight">\(V_i\)</span>; in
+his paper <span class="math notranslate nohighlight">\(V_i\)</span> was an expected variance, and with Fisher information
+<span class="math notranslate nohighlight">\(V_i = I_i(\hat{\theta})\)</span> (Barrada et al., 2008, p. 497, Equations 8–10).
+Barrada et al. raise the information to a power that grows during the test
+(p. 497, Equation 11): a power of 0 gives random selection, and a large power
+approaches maximum information (pp. 497–498). In their version, which <code class="docutils literal notranslate"><span class="pre">catR</span></code>
+also implements, the exponent grows to the test length, <span class="math notranslate nohighlight">\(h = N\,w\)</span> (p. 498,
+Equation 13), with the cumulative power-sum schedule described for the
+progressive selector. Setting <code class="docutils literal notranslate"><span class="pre">sharpness</span></code> to the test length reproduces
+that end point; the default <span class="math notranslate nohighlight">\(k = 6\)</span> keeps more randomness late in longer tests.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -503,7 +518,7 @@ acceleration parameter used by the progressive selector.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test_size</span></code></p></td>
 <td><p>required</p></td>
-<td><p>Planned fixed test length <span class="math notranslate nohighlight">\(N\)</span>.</p></td>
+<td><p>Fixed test length <span class="math notranslate nohighlight">\(N\)</span>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">acceleration</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
@@ -511,7 +526,7 @@ acceleration parameter used by the progressive selector.</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sharpness</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">6.0</span></code></p></td>
-<td><p>Positive constant <span class="math notranslate nohighlight">\(k\)</span> controlling how quickly the sampling distribution concentrates on high-information items.</p></td>
+<td><p>Non-negative constant <span class="math notranslate nohighlight">\(k\)</span> controlling how quickly the sampling distribution concentrates on high-information items; 0 keeps sampling uniform.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
@@ -534,12 +549,82 @@ acceleration parameter used by the progressive selector.</p>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>Segall, D. O. (2004). Computerized adaptive testing. In K. Kempf-Leonard (Ed.), <em>Encyclopedia of Social Measurement</em>. Academic Press.</p>
-<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2008). Incorporating randomness in the Fisher information function for item exposure control. <em>Methodology</em>, 4(2), 51-59.</p>
+<p>Segall, D. O. (2004). A sharing item response theory model for computerized adaptive testing. <em>Journal of Educational and Behavioral Statistics</em>, 29(4), 439-460. <a class="reference external" href="https://doi.org/10.3102/10769986029004439">https://doi.org/10.3102/10769986029004439</a>. Not openly available; Barrada et al. (2008) describe the method.</p>
+<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2), 493-513. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">https://doi.org/10.1348/000711007X230937</a>. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">first author’s page</a>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>Companion planned spec: <a class="reference internal" href="progressive-selector.html"><span class="doc">Progressive Selector</span></a></p>
+<p>Companion spec: <a class="reference internal" href="progressive-selector.html"><span class="doc">Progressive Selector</span></a></p>
 </div>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.selection.ProportionalSelector">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ProportionalSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">acceleration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/progressive.html#ProportionalSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ProportionalSelector" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">FiniteSelector</span></code></p>
+<p>Proportional selector that samples items with probability proportional to weighted information.</p>
+<p>Each available item is drawn with probability proportional to its information raised to
+<code class="docutils literal notranslate"><span class="pre">sharpness</span></code> times the position weight, which grows from 0 at the first position (uniform
+sampling) to 1 at <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>Planned number of items in the test, at which the exponent reaches <code class="docutils literal notranslate"><span class="pre">sharpness</span></code>.</p>
+</dd>
+<dt><strong>acceleration</strong><span class="classifier">float, optional</span></dt><dd><p>Exponent of the position schedule, as in <a class="reference internal" href="progressive-selector.html#catsim.selection.ProgressiveSelector" title="catsim.selection.ProgressiveSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code></a>. Default is 1.</p>
+</dd>
+<dt><strong>sharpness</strong><span class="classifier">float, optional</span></dt><dd><p>Largest exponent applied to the information. 0 keeps sampling uniform; the test length
+reproduces Barrada et al.’s end point. Default is 6.</p>
+</dd>
+<dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected
+unless no other items are available. Default is 1 (no restriction).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Proportional Selector</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.selection.ProportionalSelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/progressive.html#ProportionalSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ProportionalSelector.select" title="Link to this definition">#</a></dt>
+<dd><p>Return the next item using information-weighted sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing the indexes of items that were already administered; their count sets
+the test position.</p>
+</dd>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator used to draw the item. Required.</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Current exposure rate of every item, compared against <code class="docutils literal notranslate"><span class="pre">r_max</span></code>.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Unused; accepted for the engine’s selector contract.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>int</dt><dd><p>Index of the selected item.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
+</dd>
+<dt>NoItemsAvailableError</dt><dd><p>If every item has been administered.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -563,11 +648,11 @@ acceleration parameter used by the progressive selector.</p>
       </div>
     </a>
     <a class="right-next"
-       href="sympson-hetter-exposure.html"
+       href="cluster-selector.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Sympson-Hetter Exposure Control</p>
+        <p class="prev-next-title">Cluster Selector</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -595,6 +680,13 @@ acceleration parameter used by the progressive selector.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProportionalSelector"><code class="docutils literal notranslate"><span class="pre">ProportionalSelector</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProportionalSelector.select"><code class="docutils literal notranslate"><span class="pre">ProportionalSelector.select()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

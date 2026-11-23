@@ -23,7 +23,9 @@ technique among the methods that choose at random among several near-optimal
 items, without defining it.
 
 With `initial_bin_size` $n$, the item at 0-indexed test position $k$ is drawn
-from the $\max(1, n - k)$ most informative non-administered items. Unlike the
+from the $\max(1, n - k)$ most informative non-administered items, plus any
+item tied in information with the last of them
+({doc}`/adr/0008-random-tie-breaking`). Unlike the
 randomesque selector, which keeps drawing from a fixed number of items for the
 whole test (Georgiadou et al., 2007, p. 9), the late items, which matter most
 for precision, are chosen by maximum information.

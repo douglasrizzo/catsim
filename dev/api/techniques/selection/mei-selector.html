@@ -457,7 +457,7 @@
                 <article class="bd-article">
                   
   <p><strong>Status:</strong> Implemented
-<strong>Module:</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MEISelector</span></code>
+<strong>Module:</strong> <a class="reference internal" href="#catsim.selection.MEISelector" title="catsim.selection.MEISelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MEISelector</span></code></a>
 <strong>Reference:</strong> van der Linden (1998)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="maximum-expected-information-selector">
 <h1>Maximum Expected Information Selector<a class="headerlink" href="#maximum-expected-information-selector" title="Link to this heading">#</a></h1>
@@ -486,6 +486,28 @@ P_i(\hat{\theta})\,I(\hat{\theta}_i^{(1)})
 <p>where <span class="math notranslate nohighlight">\(I(\cdot)\)</span> is the information of the administered test extended by
 the candidate item. The selector chooses the non-administered item with the
 largest expected information value.</p>
+<p>van der Linden’s 1996 report, which preceded the 1998 article, defines MEI
+with the observed information of the <strong>whole response pattern</strong>, the
+administered items plus the candidate’s predicted response, each evaluated at
+its updated estimate, and weights the two branches by the response
+probabilities at the current estimate (p. 11, Equation 13). He notes that the
+criterion therefore re-evaluates the information of the items already
+administered. Choi and Swartz (2009, Equation 3, extended to polytomous items)
+use the same whole-pattern measure. catsim follows this definition with Fisher
+instead of observed information; the two are equal under the 2PL model the
+report assumes (p. 10) and differ with guessing or slipping.</p>
+<p><code class="docutils literal notranslate"><span class="pre">catR</span></code> departs from it: its
+<a class="reference external" href="https://github.com/cran/catR/blob/master/R/MEI.R"><code class="docutils literal notranslate"><span class="pre">MEI.R</span></code></a> uses only the
+<strong>candidate item’s</strong> information at each updated estimate (Magis &amp; Raîche,
+2012, p. 9, Table 1), observed information by default (p. 17). The two forms
+can rank items differently.</p>
+<p>With the default estimator (maximum likelihood with Dodd’s heuristic), while the
+responses so far are all correct, the hypothetical correct branch is still an
+all-correct pattern, so Dodd’s heuristic returns the same updated estimate for
+every candidate; the same happens on the incorrect branch while all responses
+are incorrect. On that branch the look-ahead is a fixed jump rather than an
+estimate. Bayesian estimators and WLE give a genuine updated estimate on both
+branches from the first item.</p>
 <p>If an updated estimate is not finite, as with maximum likelihood without Dodd’s
 heuristic after an all-correct or all-incorrect pattern, the candidate is scored
 by the information at the current estimate instead, so that step reduces to
@@ -508,9 +530,10 @@ maximum-information selection.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">estimator</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">NumericalSearchEstimator()</span></code></p></td>
-<td><p>Estimator used to compute the hypothetical one-step-ahead ability updates. Give the selector
-its own instance: it calls <code class="docutils literal notranslate"><span class="pre">estimate</span></code> twice per candidate, which would inflate the counters
-of an estimator shared with the engine.</p></td>
+<td><p>Estimator used to compute the hypothetical one-step-ahead ability updates. Any estimator can be
+passed; EAP, MAP or WLE avoid the limitation described above. Give the selector its own
+instance: it calls <code class="docutils literal notranslate"><span class="pre">estimate</span></code> twice per candidate, which would inflate the counters of an
+estimator shared with the engine.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
@@ -533,12 +556,99 @@ of an estimator shared with the engine.</p></td>
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
-<p>van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. <em>Psychometrika</em>, 63(2), 201-216. <a class="reference external" href="https://doi.org/10.1007/BF02294772">https://doi.org/10.1007/BF02294772</a></p>
-<p>Choi, S. W., &amp; Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. <em>Applied Psychological Measurement</em>, 33(6), 419-440.</p>
+<p>van der Linden, W. J. (1998). Bayesian item selection criteria for adaptive testing. <em>Psychometrika</em>, 63(2), 201-216. <a class="reference external" href="https://doi.org/10.1007/BF02294775">https://doi.org/10.1007/BF02294775</a>. Not openly available; the 1996 report below preceded it.</p>
+<p>van der Linden, W. J. (1996). <em>Bayesian item selection criteria for adaptive testing</em> (Research Report 96-01). Enschede: University of Twente. Open copy: <a class="reference external" href="https://research.utwente.nl/files/247173933/Research_Report_96_01.pdf">University of Twente</a>.</p>
+<p>Choi, S. W., &amp; Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. <em>Applied Psychological Measurement</em>, 33(6), 419-440. <a class="reference external" href="https://doi.org/10.1177/0146621608327801">https://doi.org/10.1177/0146621608327801</a>. Open copy: <a class="reference external" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2791416/">PubMed Central</a>.</p>
+<p>Magis, D., &amp; Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. <em>Journal of Statistical Software</em>, 48(8), 1-31. <a class="reference external" href="https://doi.org/10.18637/jss.v048.i08">https://doi.org/10.18637/jss.v048.i08</a> (open access).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Sister spec: <a class="reference internal" href="mlwi-selector.html"><span class="doc">Maximum Likelihood Weighted Information Selector</span></a></p>
 </div>
+</section>
+<section id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.selection.MEISelector">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">MEISelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseEstimator</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/expected_info.html#MEISelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MEISelector" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
+<p>Maximum Expected Information selector.</p>
+<p>For each candidate item, the selector re-estimates ability as if the candidate were answered
+correctly and as if it were answered incorrectly. It scores the candidate by the information of
+the administered test plus the candidate at each updated estimate, weighted by the probability
+of each response at the current estimate, and selects the highest score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>estimator</strong><span class="classifier">BaseEstimator or None, optional</span></dt><dd><p>Estimator used for the one-step-ahead ability updates. Default is a new
+<a class="reference internal" href="../estimation/numerical-search-estimator.html#catsim.estimation.NumericalSearchEstimator" title="catsim.estimation.NumericalSearchEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.NumericalSearchEstimator</span></code></a>. Give the selector its own instance:
+it calls <code class="docutils literal notranslate"><span class="pre">estimate</span></code> twice per candidate item, which would inflate the call and evaluation
+counters of an estimator shared with the engine.</p>
+</dd>
+<dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum exposure rate for items. Items with exposure rates &gt;= r_max are only selected when no
+other item remains. Default is 1 (no restriction).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>When an updated estimate is not finite, as with maximum likelihood without Dodd’s heuristic
+after an all-correct or all-incorrect pattern, the candidate is scored by the information at the
+current estimate instead, so that step reduces to maximum-information selection.</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Maximum Expected Information Selector</span></a>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.MEISelector.estimator">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimator</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BaseEstimator</span></span><a class="headerlink" href="#catsim.selection.MEISelector.estimator" title="Link to this definition">#</a></dt>
+<dd><p>Return the estimator used for one-step-ahead scoring.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.selection.MEISelector.r_max">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">r_max</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.selection.MEISelector.r_max" title="Link to this definition">#</a></dt>
+<dd><p>Return the maximum exposure rate accepted by the selector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.selection.MEISelector.select">
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">est_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/expected_info.html#MEISelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.MEISelector.select" title="Link to this definition">#</a></dt>
+<dd><p>Return the index of the item with the highest expected post-response information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing the indexes of items that were already administered.</p>
+</dd>
+<dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability, used for the response probabilities and as the starting
+point of the one-step-ahead estimates.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator, used only to break ties between candidates with equal scores
+(ADR-0008).</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Run-level exposure-rate snapshot. <code class="docutils literal notranslate"><span class="pre">None</span></code> treats every item as unexposed.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Responses to the administered items. Required.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>int</dt><dd><p>Index of the next item to be applied.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">response_vector</span></code> is None, or if candidates tie for the best score and <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
+</dd>
+<dt>NoItemsAvailableError</dt><dd><p>If every item has already been administered.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -594,6 +704,15 @@ of an estimator shared with the engine.</p></td>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.MEISelector"><code class="docutils literal notranslate"><span class="pre">MEISelector</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.MEISelector.estimator"><code class="docutils literal notranslate"><span class="pre">MEISelector.estimator</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.MEISelector.r_max"><code class="docutils literal notranslate"><span class="pre">MEISelector.r_max</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.MEISelector.select"><code class="docutils literal notranslate"><span class="pre">MEISelector.select()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
