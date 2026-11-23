@@ -9,6 +9,21 @@ Accepted
 Exposure tracking and per-session execution details were previously entangled with long-lived
 objects in ways that made repeated runs and object reuse harder to reason about.
 
+The exposure rates a selector checks its `r_max` cap against were the tracker's counts divided by a
+number of sessions the caller passed in `RunContext.total_sessions`, the planned size of the run.
+That caused two problems:
+
+- Without `total_sessions`, the engine passed no rates at all, so an `r_max` cap did nothing and
+  nothing said so. That is the natural setup for a live deployment, which does not know in advance
+  how many examinees it will test.
+- With it, early examinees saw every rate near zero and the cap bore only on late ones, so the
+  precision of an examinee's test depended on their place in the run: the later the examinee, the
+  less informative the items left below the cap.
+
+catR's `simulateRespondents` divides by the examinees tested so far instead: after respondent `i`
+it sets the rates to the counts divided by `i`, and respondent `i + 1` is tested against them, with
+no restriction for the first respondent and none at all when `rmax` is 1.
+
 ## Decision
 
 Treat calibrated item data as domain data and keep runtime state in dedicated execution models:
@@ -16,6 +31,24 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
 - `ItemBank` holds item parameters and related derived data
 - `CatSessionState` holds per-examinee runtime state
 - `ExposureTracker` and `SimulationResult` hold run-level exposure information
+
+`ExposureTracker` owns the denominator of the exposure rates, which follow catR:
+
+- The tracker counts sessions as well as administrations. `CatEngine.start_session` calls
+  `tracker.start_session()` when the run context has a tracker, after the initializer has
+  succeeded, and `apply_response` records each administered item. `RunContext` has no
+  `total_sessions`, and `ExposureTracker.rates()` takes no argument.
+- When a session starts, the tracker fixes the rates that session sees: each item's administrations
+  divided by the number of sessions that started before it. The session being tested is not in the
+  denominator, and its own items count from the next session on, as in catR. Counting it would
+  divide the administrations of an item it can still receive by one examinee more than could have
+  received it, which lowers the rates most for the early sessions: the second session would see
+  every item of the first at 1/2 instead of 1.
+- The first session sees every rate at 0: no examinee has been tested before it.
+- An `r_max` of 1 applies no cap, as in catR. An item that every earlier examinee received has a
+  rate of exactly 1, and the selectors' strict `rate < r_max` test would otherwise pass it over.
+- `SimulationResult.exposure_rates` divides the run's counts by all its sessions: the exposure at
+  the end of the run, not the rates any session saw.
 
 ## Consequences
 
@@ -29,3 +62,13 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
   earlier versions kept for compatibility is gone, together with `ItemBank.exposure_rates`,
   `update_exposure_rate`, `reset_exposure_rates` and `reset`. An item matrix with more than four
   columns raises `ValueError` instead of having its extra column read as exposure rates.
+- A context with a tracker is all exposure control needs, so a live deployment gets it without
+  knowing how many examinees it will test. `ExposureTracker` is exported from `catsim` for that
+  use. A context without a tracker gives selectors no rates, and they apply no cap.
+- The cap holds from the second examinee on: that examinee sees every item of the first at a rate
+  of 1. A capped run's results differ from earlier versions; runs with `r_max = 1` do not change.
+- Rates change only when a session starts. Sessions that run at the same time, as in a live
+  deployment, all see the rates fixed when the latest of them started, which count the items
+  administered so far by sessions still in progress.
+- `ExposureTracker.rates()` after a run gives the rates its last session saw, which leave that
+  session out; the run's own exposure is `SimulationResult.exposure_rates`.

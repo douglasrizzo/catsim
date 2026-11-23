@@ -150,6 +150,8 @@ $$
 
 Where $q_i$ represents the number of tests item $i$ has been used on and $N$ is the total number of tests applied.
 
+During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.state.ExposureTracker` in the run context gives each session $q_i$ and $N$ as they stood when it started, as catR does ({doc}`/adr/0003-runtime-state-ownership`).
+
 ## Computerized adaptive tests
 
 Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee's ability is updated after the response of each item. The updated knowledge of an examinee's ability at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.
