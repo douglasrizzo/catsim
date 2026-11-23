@@ -222,14 +222,7 @@ class CatEngine:
     if stopped:
       state.stop_reason = StopReason.STOPPER
 
-    return CatStepResult(
-      session=state.snapshot(),
-      selected_item_id=item_id,
-      response=response,
-      updated_theta=updated_theta,
-      stopped=stopped,
-      stop_reason=state.stop_reason,
-    )
+    return CatStepResult(session=state.snapshot(), selected_item_id=item_id, response=response)
 
   def step(
     self,
@@ -260,7 +253,7 @@ class CatEngine:
     """
     item_id = self.select_next(state, item_bank, context)
     if item_id is None:
-      return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
+      return CatStepResult(session=state.snapshot(), selected_item_id=None, response=None)
     response = response_provider.answer(state, item_bank, item_id, context)
     return self.apply_response(state, item_bank, item_id, response, context)
 

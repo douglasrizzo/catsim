@@ -84,26 +84,26 @@ class CatSessionState:
     return len(self.administered_item_ids)
 
   def snapshot(self) -> CatSessionSnapshot:
-    """Return an immutable snapshot of the current session state."""
+    """Return an immutable copy of the current session state."""
     return CatSessionSnapshot(
       session_id=self.session_id,
-      theta_history=self.theta_history.copy(),
+      theta_history=tuple(self.theta_history),
       true_theta=self.true_theta,
-      administered_item_ids=self.administered_item_ids.copy(),
-      responses=self.responses.copy(),
+      administered_item_ids=tuple(self.administered_item_ids),
+      responses=tuple(self.responses),
       stop_reason=self.stop_reason,
     )
 
 
 @dataclass(slots=True, frozen=True)
 class CatSessionSnapshot:
-  """Immutable snapshot of a session at a specific point in time."""
+  """Immutable, hashable copy of a session at a specific point in time."""
 
   session_id: Hashable
-  theta_history: list[float]
+  theta_history: tuple[float, ...]
   true_theta: float | None
-  administered_item_ids: list[int]
-  responses: list[bool]
+  administered_item_ids: tuple[int, ...]
+  responses: tuple[bool, ...]
   stop_reason: StopReason | None
 
   @property
@@ -117,16 +117,32 @@ class CatSessionSnapshot:
     return self.stop_reason is not None
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class CatStepResult:
-  """Result of applying one CAT step."""
+  """Result of one CAT step: the item administered, its response and the session as the step left it.
+
+  ``selected_item_id`` and ``response`` are None for a step that administered nothing because the
+  session had ended.
+  """
 
   session: CatSessionSnapshot
   selected_item_id: int | None
   response: bool | None
-  updated_theta: float
-  stopped: bool
-  stop_reason: StopReason | None = None
+
+  @property
+  def updated_theta(self) -> float:
+    """Return the ability estimate after the step."""
+    return self.session.current_theta
+
+  @property
+  def stopped(self) -> bool:
+    """Return whether the session had ended by the end of the step."""
+    return self.session.is_stopped
+
+  @property
+  def stop_reason(self) -> StopReason | None:
+    """Return why the session ended, or None if it is still running."""
+    return self.session.stop_reason
 
 
 @dataclass(slots=True)

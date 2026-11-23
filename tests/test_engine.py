@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
+from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
 import pytest
@@ -271,9 +271,9 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert result.stopped is False
   assert result.stop_reason is None
   assert result.session.stop_reason is None
-  assert result.session.administered_item_ids == [3]
-  assert result.session.responses == [True]
-  assert result.session.theta_history == [0.0, pytest.approx(1.1)]
+  assert result.session.administered_item_ids == (3,)
+  assert result.session.responses == (True,)
+  assert result.session.theta_history == pytest.approx((0.0, 1.1))
 
 
 def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
@@ -417,26 +417,59 @@ def test_apply_response_rejects_an_item_index_that_is_not_an_integer(item_bank, 
   assert session == before
 
 
-def test_apply_response_returns_immutable_session_snapshot(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
-) -> None:
-  """Step results should preserve the session state observed at that step."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
+def test_a_step_result_keeps_the_session_as_the_step_left_it(item_bank) -> None:
+  """A step result's snapshot does not change when the session takes further steps.
+
+  Fails if the snapshot shares the session's lists, so the next response also shows up in the
+  earlier result.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
 
   first = engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
   second = engine.apply_response(session, item_bank, item_id=1, response=False, context=context)
 
-  assert first.session.administered_item_ids == [0]
-  assert first.session.responses == [True]
-  assert len(first.session.theta_history) == 2
-  assert second.session.administered_item_ids == [0, 1]
-  assert second.session.responses == [True, False]
+  assert (first.session.administered_item_ids, first.session.responses) == ((0,), (True,))
+  assert first.session.theta_history == (0.0, 0.5)
+  assert (second.session.administered_item_ids, second.session.responses) == ((0, 1), (True, False))
+  assert second.session.theta_history == (0.0, 0.5, 0.5)
+
+
+def test_a_step_result_cannot_be_changed(item_bank) -> None:
+  """Neither a step result's fields nor the sequences in its session snapshot can be changed.
+
+  Fails if CatStepResult is not frozen, or if the snapshot holds lists: ADR-0005 promises immutable
+  step results, but ``result.response = False`` and ``result.session.responses.append(True)`` both
+  worked.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  result = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+
+  with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
+    result.response = False  # type: ignore[misc]
+  for sequence in (result.session.administered_item_ids, result.session.responses, result.session.theta_history):
+    with pytest.raises(AttributeError, match="object has no attribute 'append'"):
+      sequence.append(sequence[0])  # type: ignore[attr-defined]
+  assert (result.session.administered_item_ids, result.session.responses) == ((3,), (True,))
+
+
+def test_snapshots_of_the_same_session_state_are_equal_and_hash_alike(item_bank) -> None:
+  """A snapshot is hashable: two snapshots of one state collapse into one set member, and a later state does not.
+
+  Fails if a snapshot field is a list or a dict, which made ``hash(snapshot)`` raise TypeError.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  first = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  same_state = session.snapshot()
+  engine.apply_response(session, item_bank, item_id=4, response=False, context=context)
+
+  assert hash(first.session) == hash(same_state)
+  assert len({first.session, same_state, session.snapshot()}) == 2
 
 
 def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> None:
