@@ -28,59 +28,42 @@ from catsim.estimation import (
 from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
 
-# SciPy reads `bracket` as where to start looking, not as a bound. From (-6, 6), brent and golden search downhill
-# past -6 into the flat tail that a guessing parameter gives the likelihood, and stop far off the ability scale
-# at a point less likely than the maximum inside it (.plans/maintenance/todo/M05-unbounded-scipy-estimators.md).
-UNBOUNDED_SCIPY_SEARCH = pytest.mark.xfail(strict=True, reason="brent and golden leave the ability scale")
-
 
 class TestNumericalSearchEstimatorInit:
   """Tests for NumericalSearchEstimator initialization."""
 
-  def test_init_with_invalid_method_raises(self) -> None:
-    """Test that invalid method raises ValueError."""
-    with pytest.raises(ValueError, match="must be one of"):
-      NumericalSearchEstimator(method="invalid_method")
-
-
-class TestNumericalSearchEstimatorMethods:
-  """Tests for NumericalSearchEstimator available methods."""
-
-  def test_available_methods_contains_expected(self) -> None:
-    """Test that available methods contains expected methods."""
-    methods = NumericalSearchEstimator.available_methods()
-    expected = {"ternary", "dichotomous", "fibonacci", "golden", "brent", "bounded", "golden2"}
-    assert methods == expected
-
-  def test_all_methods_can_be_instantiated(self) -> None:
-    """Test that all available methods can be instantiated."""
-    for method in NumericalSearchEstimator.available_methods():
-      estimator = NumericalSearchEstimator(method=method)
-      assert str(estimator) == f"Numerical Search Estimator ({method})"
+  @pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
+  def test_init_rejects_a_tolerance_that_is_not_positive(self, tol: float) -> None:
+    """A tol that is not positive fails at construction instead of reaching SciPy unchecked."""
+    with pytest.raises(ValueError, match="tol must be positive"):
+      NumericalSearchEstimator(tol=tol)
 
 
 class TestNumericalSearchEstimatorEstimate:
   """Tests for NumericalSearchEstimator.estimate() method."""
 
-  def test_estimate_basic(self) -> None:
-    """Test basic estimation with mixed responses."""
-    item_bank = ItemBank.generate_item_bank(50)
-    estimator = NumericalSearchEstimator()
+  def test_estimate_is_the_maximum_of_the_likelihood_on_the_ability_scale(self) -> None:
+    """A 4PL pattern is estimated at its likelihood's maximum, 0.5816, inside [-6, 6].
 
-    # Mixed responses
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [True, True, False, True, False]
+    The guessing parameters make this likelihood rise again below -6, towards a limit still below
+    its maximum. SciPy's brent and golden methods read (-6, 6) as a starting bracket rather than
+    as bounds, followed that slope and returned -107.7 and -41.7. The reference is the argmax of
+    the log-likelihood, written out here, on a grid 1e-4 apart over the ability scale.
+    """
+    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    administered_items = list(range(10))
+    response_vector = [True, True, False, True, False, True, True, False, True, False]
+    items = item_bank.get_items(administered_items)
+    grid = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 120001)
+    a, b, c, d = (items[:, [k]] for k in range(4))
+    p = c + (d - c) / (1.0 + np.exp(-a * (grid - b)))
+    log_lik = np.sum(np.where(np.array(response_vector)[:, None], np.log(p), np.log1p(-p)), axis=0)
+    reference = grid[np.argmax(log_lik)]
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    theta = NumericalSearchEstimator().estimate(item_bank, administered_items, response_vector, 0.0)
 
-    assert isinstance(theta, float)
-    # Theta should be finite
-    assert np.isfinite(theta)
+    assert reference == pytest.approx(0.5816, abs=1e-4)
+    assert theta == pytest.approx(reference, abs=1e-4)
 
   def test_estimate_all_correct(self) -> None:
     """Test estimation with all correct responses."""
@@ -206,67 +189,6 @@ class TestNumericalSearchEstimatorEstimate:
 
     assert estimates[1] == pytest.approx(reference, abs=1e-7)
     assert coarse.evaluations < fine.evaluations
-
-
-class TestNumericalSearchEstimatorWithMethods:
-  """Test estimation with different methods."""
-
-  @pytest.mark.parametrize("method", sorted(NumericalSearchEstimator.available_methods()))
-  def test_estimate_with_all_methods(self, method: str) -> None:
-    """Test that all methods produce valid estimates."""
-    item_bank = ItemBank.generate_item_bank(50)
-    estimator = NumericalSearchEstimator(method=method)
-
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [True, True, False, True, False]
-
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert isinstance(theta, float)
-    assert np.isfinite(theta)
-
-  @pytest.mark.parametrize(
-    "method",
-    [
-      "bounded",
-      "dichotomous",
-      "fibonacci",
-      "golden2",
-      "ternary",
-      pytest.param("brent", marks=UNBOUNDED_SCIPY_SEARCH),
-      pytest.param("golden", marks=UNBOUNDED_SCIPY_SEARCH),
-    ],
-  )
-  def test_methods_agree_on_the_maximum_likelihood_estimate(self, method: str) -> None:
-    """Every method should reach the bounded optimum to within a few times the default tol of 1e-6."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-
-    administered_items = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    response_vector = [True, True, False, True, False, True, True, False, True, False]
-
-    # Use bounded as reference
-    ref_estimator = NumericalSearchEstimator(method="bounded")
-    ref_theta = ref_estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    estimator = NumericalSearchEstimator(method=method)
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert theta == pytest.approx(ref_theta, abs=1e-5)
 
 
 ESTIMATORS = [

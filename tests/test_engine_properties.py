@@ -35,7 +35,7 @@ def test_select_next_returns_unseen_item_within_bank(
   engine = CatEngine(
     FixedPointInitializer(0.0),
     MaxInfoSelector(),
-    NumericalSearchEstimator(method="bounded"),
+    NumericalSearchEstimator(),
     MaxLengthStopper(500),
   )
   administered = list(range(administered_prefix))

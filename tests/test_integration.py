@@ -57,21 +57,6 @@ def run_simulation(
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("method", sorted(NumericalSearchEstimator.available_methods()))
-def test_estimation_methods_complete_simulation(method: str) -> None:
-  """All supported estimator methods should complete an end-to-end run."""
-  item_bank = ItemBank.generate_item_bank(80, seed=42)
-  result = run_simulation(
-    item_bank,
-    MaxInfoSelector(),
-    MaxLengthStopper(6),
-    estimator=NumericalSearchEstimator(method=method),
-  )
-
-  assert all(len(session.administered_item_ids) == 6 for session in result.sessions)
-
-
-@pytest.mark.integration
 @pytest.mark.parametrize("factory", [pytest.param(EAPEstimator, id="eap"), pytest.param(MAPEstimator, id="map")])
 def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstimator]) -> None:
   """Bayesian estimators should complete end-to-end runs, also as MEI's look-ahead estimator.

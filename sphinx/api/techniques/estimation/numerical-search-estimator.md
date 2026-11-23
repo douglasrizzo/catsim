@@ -10,10 +10,9 @@ The numerical-search estimator is the package's frequentist maximum-likelihood
 ability estimator. Given administered items and observed binary responses, it
 finds the ability value that maximizes the item-response-theory log-likelihood.
 
-The class exposes several one-dimensional optimization methods under a single
-contract, which makes it useful both as a practical estimator and as a reference
-implementation for comparing search strategies. It also includes Dodd's
-heuristic to handle degenerate all-correct and all-incorrect response patterns.
+It searches the ability scale with a single bounded one-dimensional optimizer
+and includes Dodd's heuristic to handle degenerate all-correct and all-incorrect
+response patterns.
 
 ## Definition
 
@@ -40,12 +39,13 @@ $$
 $$
 
 with search bounds given by the package's extended theta range. For mixed
-response patterns, the implementation solves this optimization numerically using
-either internal search procedures or SciPy's scalar minimization routines. The
-internal procedures and `bounded` stay within the bounds; `brent` and `golden`
-only start from them as a bracket and can return a value outside. With guessing,
-the likelihood can have several local maxima (Chang & Ying, 1996, p. 223;
-Veerkamp & Berger, 1994, p. 4), and every method returns one of them.
+response patterns, the implementation minimizes $-\ell(\theta)$ with SciPy's
+bounded Brent method (Brent, 2002), which never evaluates outside the bounds and
+takes `tol` as its absolute tolerance on $\theta$ (SciPy's `xatol`). With
+guessing, the likelihood can have several local maxima (Chang & Ying, 1996,
+p. 223; Veerkamp & Berger, 1994, p. 4), and the search returns one of them. With
+guessing or slipping parameters, the likelihood of a mixed pattern can also
+still be rising at a bound, and the estimate is then within `tol` of that bound.
 
 When every response is identical, the unconstrained MLE is not finite. In that
 case the implementation returns Dodd's heuristic estimate if `dodd=True` and
@@ -70,28 +70,24 @@ studied fixed steps of 0.4 and 0.7, which catsim does not implement.
      - Description
    * - ``tol``
      - ``1e-6``
-     - Numerical tolerance used by the search routine.
+     - Absolute tolerance of the search, in the ability scale. Must be positive.
    * - ``dodd``
      - ``True``
      - Whether to use Dodd's heuristic when the response vector contains only one response type.
    * - ``verbose``
      - ``False``
      - Whether to print evaluation counts during optimization.
-   * - ``method``
-     - ``"bounded"``
-     - Search method. Supported values are ``ternary``, ``dichotomous``,
-       ``fibonacci``, ``golden``, ``golden2``, ``brent``, and ``bounded``.
 ```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
-1. For mixed response patterns, it returns the theta value that numerically maximizes the log-likelihood under the configured search routine.
+1. For mixed response patterns, it returns a local maximum of the log-likelihood inside the search bounds, to within `tol`.
 2. For all-correct and all-incorrect patterns, it uses Dodd's heuristic when `dodd=True` and signed infinity otherwise.
 3. The estimator increments its call counter on every estimation request.
-4. For SciPy-backed methods, evaluation counts reflect the optimizer's reported function evaluations.
-5. The public set of available methods matches the estimator methods that can be selected at construction time.
+4. Evaluation counts are the optimizer's reported function evaluations.
+5. A `tol` that is not positive is rejected at construction.
 
 ## References
 
