@@ -71,7 +71,7 @@ generalizes this to several boundaries; with one boundary the two rules agree.
 
 Any correct implementation must satisfy the following properties:
 
-1. `interval_bounds` must be nonempty and sorted in ascending order, and `confidence` must lie strictly between 0 and 1; otherwise the constructor raises `ValueError`.
+1. `interval_bounds` must be nonempty and strictly increasing, and `confidence` must lie strictly between 0 and 1; otherwise the constructor raises `ValueError`.
 2. The stopper returns `True` exactly when the full confidence interval lies within a single induced classification interval.
 3. If the confidence interval crosses any configured boundary, the stopper returns `False`.
 4. If no items have been administered, the stopper returns `False`.

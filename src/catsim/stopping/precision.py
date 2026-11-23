@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -79,7 +80,7 @@ class ConfidenceIntervalStopper(BaseStopper):
   Parameters
   ----------
   interval_bounds : Sequence[float]
-      Band boundaries on the ability scale, in ascending order. Must contain at least one
+      Band boundaries on the ability scale, in strictly increasing order. Must contain at least one
       value. Stored as a tuple.
   confidence : float, optional
       Confidence level of the interval, between 0 and 1. Default is 0.95.
@@ -87,7 +88,7 @@ class ConfidenceIntervalStopper(BaseStopper):
   Raises
   ------
   ValueError
-      If `interval_bounds` is empty or not in ascending order, or if `confidence` is not
+      If `interval_bounds` is empty or not strictly increasing, or if `confidence` is not
       between 0 and 1.
 
   Notes
@@ -104,8 +105,8 @@ class ConfidenceIntervalStopper(BaseStopper):
     if not bounds:
       msg = "interval_bounds must contain at least one value"
       raise ValueError(msg)
-    if list(bounds) != sorted(bounds):
-      msg = "interval_bounds must be sorted in ascending order"
+    if any(low >= high for low, high in itertools.pairwise(bounds)):
+      msg = "interval_bounds must be strictly increasing"
       raise ValueError(msg)
     if not 0 < self.confidence < 1:
       msg = f"confidence must be between 0 and 1, got {self.confidence}"

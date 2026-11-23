@@ -57,10 +57,11 @@ class TestConfidenceIntervalStopper:
     with pytest.raises(ValueError, match="between 0 and 1"):
       ConfidenceIntervalStopper([-2.0, 0.0, 2.0], confidence=confidence)
 
-  def test_rejects_unsorted_bounds(self) -> None:
-    """Unsorted bounds, which do not describe consecutive bands, are accepted instead of raising."""
-    with pytest.raises(ValueError, match="sorted"):
-      ConfidenceIntervalStopper([2.0, 0.0, -2.0])
+  @pytest.mark.parametrize("bounds", [[2.0, 0.0, -2.0], [-1.0, 0.0, 0.0, 1.0]], ids=["unsorted", "repeated"])
+  def test_rejects_bounds_that_are_not_strictly_increasing(self, bounds: list[float]) -> None:
+    """Unsorted or repeated bounds, which do not describe consecutive bands, are accepted instead of raising."""
+    with pytest.raises(ValueError, match="strictly increasing"):
+      ConfidenceIntervalStopper(bounds)
 
   def test_rejects_empty_bounds(self) -> None:
     """An empty list of bounds, which leaves a single band and so stops every test at once, is accepted."""
