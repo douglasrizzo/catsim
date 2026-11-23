@@ -1046,6 +1046,26 @@ class TestClusterSelector:
 
     assert self._select([], exposure_rates, method="weighted_info", r_max=0.5, r_control=r_control) == expected
 
+  def test_aggressive_control_breaks_exposure_ties_at_random(self) -> None:
+    """Items tied for the smallest exposure rate are drawn uniformly (ADR-0008)."""
+    item_bank = ItemBank.generate_item_bank(12, seed=4)
+    rates = np.full(12, 0.5)
+    rates[[3, 7, 9]] = 0.2
+    selector = ClusterSelector(clusters=[0] * 12, r_max=0.1, r_control="aggressive")
+
+    picks = {
+      selector.select(
+        item_bank=item_bank,
+        administered_items=[],
+        est_theta=0.0,
+        exposure_rates=rates,
+        rng=np.random.default_rng(seed),
+      )
+      for seed in range(40)
+    }
+
+    assert picks == {3, 7, 9}
+
 
 class TestProgressiveSelector:
   """Tests for ProgressiveSelector."""
