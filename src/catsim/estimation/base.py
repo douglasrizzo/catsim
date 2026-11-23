@@ -1,3 +1,5 @@
+"""Base class for ability estimators."""
+
 import math
 from abc import ABC, abstractmethod
 
@@ -26,7 +28,10 @@ class BaseEstimator(ABC):
     response_vector: list[bool],
     est_theta: float,
   ) -> float:
-    r"""Compute the theta value that maximizes the log-likelihood function for the given examinee.
+    r"""Return the updated ability estimate given the responses so far.
+
+    Once an item has been administered, the estimate is finite and lies within the estimator's
+    bounds, whatever the response pattern, all correct and all incorrect included.
 
     Parameters
     ----------
@@ -42,7 +47,7 @@ class BaseEstimator(ABC):
     Returns
     -------
     float
-        The current estimated ability :math:`\hat\theta`.
+        The updated ability estimate :math:`\hat\theta`.
     """
 
   @staticmethod
