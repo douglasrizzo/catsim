@@ -22,16 +22,21 @@ class ClusterSelector(BaseSelector):
 
       - 'item_info': selects the cluster which has the item with maximum information
       - 'cluster_info': selects the cluster whose items' sum of information is maximum
-      - 'weighted_info': selects the cluster whose weighted sum of information is
-        maximum (weighted by the number of items in the cluster)
+      - 'weighted_info': selects the cluster whose average item information is
+        maximum (its sum of information divided by its number of items)
 
-      Default is 'item_info'.
+      Every score counts all the items in a cluster, including those already
+      administered, as long as the cluster still has an item left. Default is
+      'item_info'.
   r_max : float, optional
-      Maximum exposure rate for items. Default is 1.
+      Exposure-rate cap for choosing an item inside the selected cluster: items at
+      or above it are passed over unless no other item in the cluster remains. It
+      does not affect which cluster is chosen. Default is 1 (no cap).
   r_control : str, optional
-      Item exposure control method. If 'passive' and all items in the selected
-      cluster have exposure rates > r_max, applies the item with maximum information.
-      If 'aggressive', applies the item with smallest exposure rate. Default is 'passive'.
+      Item exposure control method, used when every remaining item in the selected
+      cluster has an exposure rate at or above r_max. 'passive' applies the most
+      informative of them; 'aggressive' applies the one with the smallest exposure
+      rate. Default is 'passive'.
 
   Notes
   -----
@@ -79,7 +84,7 @@ class ClusterSelector(BaseSelector):
         Cluster selection method, one of ['item_info', 'cluster_info', 'weighted_info'].
         Default is 'item_info'.
     r_max : float, optional
-        Maximum item exposure rate. Default is 1.
+        Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.
     r_control : str, optional
         Item exposure control method, one of ['passive', 'aggressive']. Default is 'passive'.
 
@@ -169,7 +174,7 @@ class ClusterSelector(BaseSelector):
         if set(items_in_cluster) <= set(administered_items):
           evaluated_clusters.add(self._clusters[max_info_item])
 
-          # if all clusters have been evaluated, the loop ends and the method returns None somewhere below
+          # if all clusters have been evaluated, the loop ends and the method raises NoItemsAvailableError below
           if evaluated_clusters == existent_clusters:
             break
 
@@ -217,15 +222,13 @@ class ClusterSelector(BaseSelector):
     # in this part, an item is chosen from the cluster that was
     # selected above
 
-    # gets the indexes and information values from the items in the
-    # selected cluster that have not been administered
+    # gets the indexes of the items in the selected cluster that have not been administered
     valid_indexes = self._get_non_administered(
       numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0],
       administered_items,
     )
 
-    # gets the indexes and information values from the items in the
-    # selected cluster with r < rmax that have not been administered
+    # of those, gets the indexes of the items whose exposure rate is below r_max
     if exposure_rates is None:
       exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
     valid_indexes_low_r = [
@@ -237,8 +240,8 @@ class ClusterSelector(BaseSelector):
       inf_values = irt.inf_hpc(est_theta, item_bank.get_items(valid_indexes_low_r))
       selected_item = valid_indexes_low_r[numpy.nonzero(inf_values == max(inf_values))[0][0]]
 
-    # if all items in the selected cluster have exceed their r values,
-    # select the one with smallest r, regardless of information
+    # every remaining item in the selected cluster is at or above r_max;
+    # passive control ignores the cap and takes the most informative one
     elif self._r_control == "passive":
       inf_values = irt.inf_hpc(est_theta, item_bank.get_items(valid_indexes))
       selected_item = valid_indexes[numpy.nonzero(inf_values == max(inf_values))[0][0]]
@@ -265,8 +268,8 @@ class ClusterSelector(BaseSelector):
 
     Returns
     -------
-    numpy.ndarray
-        Array containing the sum of item information values for each cluster.
+    dict[int, float]
+        The sum of item information values in each cluster, keyed by cluster ID.
     """
     cluster_infos: dict[int, float] = {}
     for cluster in sorted(set(clusters)):
@@ -277,10 +280,10 @@ class ClusterSelector(BaseSelector):
 
   @staticmethod
   def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:
-    r"""Return the weighted sum of item information values, separated by cluster.
+    r"""Return the average item information in each cluster.
 
-    The weight is the number of items in each cluster, providing an average information
-    value per cluster that accounts for cluster size.
+    Each cluster's sum of item information is divided by its number of items, so a
+    cluster does not score higher only because it holds more items.
 
     Parameters
     ----------
@@ -293,9 +296,9 @@ class ClusterSelector(BaseSelector):
 
     Returns
     -------
-    numpy.ndarray
-        Array containing the average information values for each cluster (sum of
-        item information divided by the number of items in each cluster).
+    dict[int, float]
+        The average item information in each cluster (the sum of item information
+        divided by the number of items in the cluster), keyed by cluster ID.
     """
     cluster_infos = ClusterSelector.sum_cluster_infos(theta, item_bank, clusters)
     count = numpy.bincount(clusters)
