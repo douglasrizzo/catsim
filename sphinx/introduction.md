@@ -148,24 +148,15 @@ Unlike linear tests, in which items are sequentially presented to examinees and 
 
 In general, a computerized adaptive test has a very well-defined lifecycle:
 
-```{eval-rst}
-.. graphviz::
-
-    digraph cat_simple {
-        bgcolor="transparent";
-        rankdir=TB;
-        a[label=<START>, shape=box];
-        b[label=<Initial ability<br/>estimation>];
-        c[label=<Item selection and <br/>administration>];
-        d[label=<Capture answer>];
-        e[label=<Proficiency estimation>];
-        rank=same;
-        f[label=<Stopping criterion<br/>reached?>, shape=diamond];
-        g[label=<END>, shape=box];
-        a -> b -> c -> d -> e -> f;
-        f -> g[label=<YES>];
-        f -> c[label=<NO>];
-    }
+```{mermaid}
+flowchart TD
+    start([Start]) --> init[Initial ability estimation]
+    init --> select[Item selection and administration]
+    select --> answer[Capture answer]
+    answer --> estimate[Proficiency estimation]
+    estimate --> stop{Stopping criterion<br>reached?}
+    stop -- No --> select
+    stop -- Yes --> finish([End])
 ```
 
 1. The examinee's initial ability is estimated;

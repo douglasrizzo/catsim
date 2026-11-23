@@ -1,0 +1,14 @@
+/* sphinxcontrib-mermaid stretches every diagram to the page width and a 500px height. Fall back
+   to the natural size Mermaid writes into the SVG's width and height attributes (revert-layer
+   rolls back to those attributes, CSS Cascade 5 section 6.5, unlike revert); the extension's
+   max-width: 100% still shrinks, in proportion, a diagram wider than the page. */
+.bd-content pre.mermaid > svg {
+  width: revert-layer;
+  height: auto;
+}
+
+/* pydata-sphinx-theme inverts Mermaid diagrams in dark mode, but sphinxcontrib-mermaid already
+   redraws them with Mermaid's dark theme, so the filter would turn them light again. */
+html[data-theme="dark"] pre.mermaid > svg {
+  filter: none;
+}

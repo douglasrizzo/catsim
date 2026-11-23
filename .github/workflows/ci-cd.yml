@@ -217,10 +217,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install dependencies
-        run: |
-          # Install graphviz for inheritance diagrams
-          sudo apt-get update && sudo apt-get install -y graphviz
-          uv sync --group docs
+        run: uv sync --group docs
 
       - name: Build Sphinx documentation
         run: |

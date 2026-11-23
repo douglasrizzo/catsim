@@ -16,10 +16,10 @@ confidence-interval-stopper
 
 ## Class Hierarchy
 
-```{eval-rst}
-.. inheritance-diagram:: catsim.stopping.BaseStopper catsim.stopping.TestLengthStopper catsim.stopping.MinErrorStopper catsim.stopping.ConfidenceIntervalStopper
-   :parts: 1
-   :top-classes: catsim.stopping.BaseStopper
+```{autoclasstree} catsim.stopping
+:full:
+:strict:
+:namespace: catsim
 ```
 
 ## Planned
