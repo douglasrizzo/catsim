@@ -27,7 +27,7 @@ from catsim.selection import (
 )
 from catsim.selection.base import BaseSelector
 from catsim.simulation import SimulationRunner
-from catsim.state import ExposureTracker, SessionStatus, SimulationResult
+from catsim.state import ExposureTracker, SessionStatus, SimulationResult, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
@@ -192,4 +192,4 @@ def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() ->
   assert manual.administered_item_ids == batched.administered_item_ids
   assert manual.responses == batched.responses
   assert manual.theta_history == pytest.approx(batched.theta_history)
-  assert manual.stop_reason == batched.stop_reason == "stop_rule"
+  assert manual.stop_reason == batched.stop_reason == StopReason.STOPPER

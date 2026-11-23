@@ -12,7 +12,7 @@ from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import RandomSelector
-from catsim.state import CatSessionState, ExposureTracker, SessionStatus
+from catsim.state import CatSessionState, ExposureTracker, SessionStatus, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -281,12 +281,12 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
 
   assert session.status == SessionStatus.STOPPED
-  assert session.stop_reason == "stop_rule"
+  assert session.stop_reason is StopReason.STOPPER
   assert result.stopped is True
-  assert result.stop_reason == "stop_rule"
+  assert result.stop_reason is StopReason.STOPPER
   assert result.updated_theta == pytest.approx(0.3)
   assert result.session.status == SessionStatus.STOPPED
-  assert result.session.stop_reason == "stop_rule"
+  assert result.session.stop_reason is StopReason.STOPPER
 
 
 def test_apply_response_returns_immutable_session_snapshot(
@@ -350,7 +350,7 @@ def test_run_session_stops_at_fixed_length(
   final_session = engine.run_session(session, item_bank, FixedResponseProvider(True), context)
 
   assert final_session.status == SessionStatus.STOPPED
-  assert final_session.stop_reason == "stop_rule"
+  assert final_session.stop_reason is StopReason.STOPPER
   assert len(final_session.administered_item_ids) == 3
 
 
@@ -486,15 +486,15 @@ def test_step_stops_immediately_when_stop_rule_is_already_met(
   assert result.selected_item_id is None
   assert result.response is None
   assert result.updated_theta == pytest.approx(session.current_theta)
-  assert result.stop_reason == "stop_rule"
+  assert result.stop_reason is StopReason.STOPPER
   assert result.session.status == SessionStatus.STOPPED
-  assert result.session.stop_reason == "stop_rule"
+  assert result.session.stop_reason is StopReason.STOPPER
   assert session.status == SessionStatus.STOPPED
-  assert session.stop_reason == "stop_rule"
+  assert session.stop_reason is StopReason.STOPPER
 
 
 def test_step_stops_when_selector_returns_none(item_bank, fixed_initializer, estimator) -> None:
-  """Selectors can explicitly signal that the session should stop."""
+  """A selector that returns None ends the session as one that has no item to offer."""
   engine = CatEngine(fixed_initializer, NullSelector(), estimator, MaxLengthStopper(10))
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
@@ -505,14 +505,14 @@ def test_step_stops_when_selector_returns_none(item_bank, fixed_initializer, est
   assert result.selected_item_id is None
   assert result.response is None
   assert result.updated_theta == pytest.approx(session.current_theta)
-  assert result.stop_reason == "selector_stopped"
+  assert result.stop_reason is StopReason.NO_ITEMS
   assert result.session.status == SessionStatus.STOPPED
-  assert result.session.stop_reason == "selector_stopped"
+  assert result.session.stop_reason is StopReason.NO_ITEMS
   assert session.status == SessionStatus.STOPPED
 
 
 def test_step_stops_when_selector_raises_no_items(item_bank, fixed_initializer, estimator) -> None:
-  """Exhausted selectors should map to an item-bank-exhausted stop reason."""
+  """A selector that raises NoItemsAvailableError ends the session with the no-items reason."""
   engine = CatEngine(fixed_initializer, ExhaustedSelector(), estimator, MaxLengthStopper(10))
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
@@ -523,7 +523,7 @@ def test_step_stops_when_selector_raises_no_items(item_bank, fixed_initializer, 
   assert result.selected_item_id is None
   assert result.response is None
   assert result.updated_theta == pytest.approx(session.current_theta)
-  assert result.stop_reason == "item_bank_exhausted"
+  assert result.stop_reason is StopReason.NO_ITEMS
   assert result.session.status == SessionStatus.STOPPED
-  assert result.session.stop_reason == "item_bank_exhausted"
+  assert result.session.stop_reason is StopReason.NO_ITEMS
   assert session.status == SessionStatus.STOPPED

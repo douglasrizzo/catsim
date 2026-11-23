@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from .exceptions import NoItemsAvailableError
 from .irt import icc
-from .state import CatSessionState, CatStepResult, ExposureTracker, SessionStatus
+from .state import CatSessionState, CatStepResult, ExposureTracker, SessionStatus, StopReason
 
 if TYPE_CHECKING:
   import numpy
@@ -141,7 +141,7 @@ class CatEngine:
     stopped = self.should_stop(state, item_bank)
     if stopped:
       state.status = SessionStatus.STOPPED
-      state.stop_reason = "stop_rule"
+      state.stop_reason = StopReason.STOPPER
 
     return CatStepResult(
       session=state.snapshot(),
@@ -164,19 +164,19 @@ class CatEngine:
     # before item selection begins.
     if self.should_stop(state, item_bank):
       state.status = SessionStatus.STOPPED
-      state.stop_reason = "stop_rule"
+      state.stop_reason = StopReason.STOPPER
       return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
 
     try:
       item_id = self.select_next(state, item_bank, context)
     except NoItemsAvailableError:
       state.status = SessionStatus.STOPPED
-      state.stop_reason = "item_bank_exhausted"
+      state.stop_reason = StopReason.NO_ITEMS
       return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
 
     if item_id is None:
       state.status = SessionStatus.STOPPED
-      state.stop_reason = "selector_stopped"
+      state.stop_reason = StopReason.NO_ITEMS
       return CatStepResult(state.snapshot(), None, None, state.current_theta, True, state.stop_reason)
 
     response = response_provider.answer(state, item_bank, item_id, context)

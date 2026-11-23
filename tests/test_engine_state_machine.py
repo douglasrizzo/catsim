@@ -22,7 +22,7 @@ from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
-from catsim.state import CatSessionState, SessionStatus
+from catsim.state import CatSessionState, SessionStatus, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -138,7 +138,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
         assert result.response is True
     else:
       assert result.stopped is True
-      assert self.session.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert self.session.stop_reason in set(StopReason)
 
   @invariant()
   def session_lists_consistent(self) -> None:
@@ -150,7 +150,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
     assert len(s.theta_history) == 1 + len(s.administered_item_ids)
     if s.status == SessionStatus.STOPPED:
-      assert s.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert s.stop_reason in set(StopReason)
 
 
 class CatEngineIntegrationMachine(RuleBasedStateMachine):
@@ -195,7 +195,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
         assert np.isfinite(self.session.current_theta)
     else:
       assert result.stopped is True
-      assert self.session.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert self.session.stop_reason in set(StopReason)
 
   @invariant()
   def session_lists_consistent(self) -> None:
@@ -207,7 +207,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
     assert len(s.theta_history) == 1 + len(s.administered_item_ids)
     if s.status == SessionStatus.STOPPED:
-      assert s.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert s.stop_reason in set(StopReason)
 
 
 def test_cat_engine_orchestration_state_machine() -> None:
