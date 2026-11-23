@@ -1000,6 +1000,15 @@ class TestClusterSelector:
     """With cluster 0 used up, item_info turns to the cluster of the next most informative item."""
     assert self._select([0, 1, 2, 3]) == 13
 
+  def test_item_info_scores_a_cluster_by_its_administered_items_too(self) -> None:
+    """Item 0 is given, yet its cluster keeps its score, so item 1 (0.037) is picked over item 2 (1.0).
+
+    This is the published method (see the technique page). Scoring only the remaining items would pick item 2.
+    """
+    item_bank = ItemBank(np.array([[2.5, 0.0, 0.0, 1.0], [0.5, 3.0, 0.0, 1.0], [2.0, 0.0, 0.0, 1.0]]))
+
+    assert ClusterSelector(clusters=[0, 0, 1]).select(item_bank=item_bank, administered_items=[0], est_theta=0.0) == 1
+
   def test_select_raises_when_every_cluster_is_exhausted(self) -> None:
     """An exhausted bank raises NoItemsAvailableError, which the engine turns into a stop."""
     with pytest.raises(NoItemsAvailableError, match="no more items"):
@@ -1014,6 +1023,35 @@ class TestClusterSelector:
 
     with pytest.raises(ValueError, match=f"clusters holds {n_labels} labels, but the item bank has 14 items"):
       selector.select(item_bank=item_bank, administered_items=[], est_theta=0.0)
+
+  def test_cluster_sums_and_means_match_the_hand_computed_values(self) -> None:
+    """Each cluster's information sum and mean must be a^2 / 4 summed or averaged over its items, gaps in labels too.
+
+    The three clusters are relabelled 0, 3 and 5, so labels 1, 2 and 4 hold no item and must not appear.
+    """
+    item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
+    clusters = [{0: 0, 1: 3, 2: 5}[label] for label in self.CLUSTERS]
+    sums = {0: (3 * 0.2**2 + 2.0**2) / 4, 3: (7 * 1.0**2 + 1.05**2) / 4, 5: (1.7**2 + 1.8**2) / 4}
+
+    assert ClusterSelector.sum_cluster_infos(0.0, item_bank, clusters) == pytest.approx(sums, rel=1e-12)
+    assert ClusterSelector.weighted_cluster_infos(0.0, item_bank, clusters) == pytest.approx(
+      {0: sums[0] / 4, 3: sums[3] / 8, 5: sums[5] / 2}, rel=1e-12
+    )
+
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      ({"clusters": []}, "cannot be empty"),
+      ({"clusters": [0, -1]}, "non-negative integers"),
+      ({"clusters": [0.0, 1.5]}, "non-negative integers"),
+      ({"clusters": [0, 1], "method": "max_info"}, "not a valid cluster selection method"),
+      ({"clusters": [0, 1], "r_control": "strict"}, "not a valid item exposure control method"),
+    ],
+  )
+  def test_constructor_rejects_invalid_arguments(self, kwargs: dict[str, object], match: str) -> None:
+    """A bad label, method or fallback must fail at construction; float labels used to be accepted."""
+    with pytest.raises(ValueError, match=match):
+      ClusterSelector(**kwargs)
 
   def test_select_prefers_items_below_the_exposure_cap(self) -> None:
     """Inside the chosen cluster, an item at the cap is passed over for a less informative one below it."""

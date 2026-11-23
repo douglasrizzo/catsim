@@ -1,9 +1,6 @@
-import operator
-
 import numpy
 
-from .. import irt
-from .._typing import FloatArray
+from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from .base import BaseSelector
@@ -15,7 +12,8 @@ class ClusterSelector(BaseSelector):
   Parameters
   ----------
   clusters : list[int]
-      A list containing item cluster memberships (integers representing cluster IDs).
+      One non-negative integer cluster label per item of the bank the selector is used with. The labels
+      are checked against the bank's size at every selection.
   method : str, optional
       One of the available methods for cluster selection. Given the estimated theta
       value at each step:
@@ -26,7 +24,8 @@ class ClusterSelector(BaseSelector):
         maximum (its sum of information divided by its number of items)
 
       Every score counts all the items in a cluster, including those already
-      administered, as long as the cluster still has an item left. Default is
+      administered, as long as the cluster still has an item left. Clusters whose
+      scores tie exactly are chosen between uniformly at random (ADR-0008). Default is
       'item_info'.
   r_max : float, optional
       Exposure-rate cap for choosing an item inside the selected cluster: items at
@@ -54,8 +53,8 @@ class ClusterSelector(BaseSelector):
 
   @property
   def clusters(self) -> list[int]:
-    """Return the clusters each item belongs to."""
-    return self._clusters
+    """Return the cluster label of each item."""
+    return self._clusters.tolist()
 
   @property
   def method(self) -> str:
@@ -79,7 +78,7 @@ class ClusterSelector(BaseSelector):
     Parameters
     ----------
     clusters : list[int]
-        List of integers defining item cluster associations.
+        One non-negative integer cluster label per item.
     method : str, optional
         Cluster selection method, one of ['item_info', 'cluster_info', 'weighted_info'].
         Default is 'item_info'.
@@ -91,13 +90,14 @@ class ClusterSelector(BaseSelector):
     Raises
     ------
     ValueError
-        If parameters are invalid (empty clusters list, negative cluster values, invalid
+        If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
         method or r_control, or r_max not between 0 and 1).
     """
-    if len(clusters) == 0:
+    labels = numpy.array(clusters)
+    if labels.size == 0:
       msg = "clusters list cannot be empty"
       raise ValueError(msg)
-    if not all(c >= 0 for c in clusters):
+    if not numpy.issubdtype(labels.dtype, numpy.integer) or (labels < 0).any():
       msg = "All cluster values must be non-negative integers"
       raise ValueError(msg)
 
@@ -116,7 +116,7 @@ class ClusterSelector(BaseSelector):
       raise ValueError(msg)
 
     super().__init__()
-    self._clusters = clusters
+    self._clusters: IntArray = labels
     self._method = method
     self._r_max = float(r_max)
     self._r_control = r_control
@@ -135,140 +135,86 @@ class ClusterSelector(BaseSelector):
     Parameters
     ----------
     item_bank : ItemBank
-        An ItemBank containing item parameters.
+        An ItemBank containing item parameters, one per cluster label.
     administered_items : list[int]
         A list containing the indexes of items that were already administered.
     est_theta : float
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
-        Random number generator, used only to break ties between equally good items in the chosen
-        cluster.
+        Random number generator, used only to break exact ties between clusters and between items in the
+        chosen cluster.
     exposure_rates : numpy.ndarray or None, optional
         Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
+    response_vector : list[bool] or None, optional
+        Responses observed so far. Not used by this selector.
 
     Returns
     -------
     int
-        Index of the next item to be applied. Ties within the chosen cluster are broken uniformly at
-        random (ADR-0008).
+        Index of the next item to be applied.
 
     Raises
     ------
+    ValueError
+        If ``clusters`` does not hold one label per item of ``item_bank``, or if clusters or items in the
+        chosen cluster tie and ``rng`` is None.
     NoItemsAvailableError
         If every item has already been administered.
-    ValueError
-        If ``clusters`` does not hold one label per item of ``item_bank``, or if items in the chosen
-        cluster tie and ``rng`` is None.
     """
-    if len(self._clusters) != item_bank.n_items:
-      msg = f"clusters holds {len(self._clusters)} labels, but the item bank has {item_bank.n_items} items"
+    if self._clusters.size != item_bank.n_items:
+      msg = f"clusters holds {self._clusters.size} labels, but the item bank has {item_bank.n_items} items"
       raise ValueError(msg)
 
-    selected_cluster = None
-    existent_clusters = set(self._clusters)
-
-    # this part of the code selects the cluster from which the item at
-    # the current point of the test will be chosen
-    if self._method == "item_info":
-      # get the item indexes sorted by their information value
-      infos = self._sort_by_info(item_bank, est_theta)
-
-      evaluated_clusters: set[int] = set()
-
-      # iterate over every item in order of information value
-      for i in range(item_bank.n_items):
-        # get the current non-examined item
-        max_info_item = infos[i]
-
-        # if the cluster of the current item has already been fully examined, go to the next item
-        if self._clusters[max_info_item] in evaluated_clusters:
-          continue
-
-        # get the indexes of all items in the same cluster as the current item
-        items_in_cluster = numpy.nonzero([x == self._clusters[max_info_item] for x in self._clusters])[0]
-
-        # if all the items in the current cluster have already been administered (it happens, theoretically),
-        # add this cluster to the list of fully evaluated clusters
-        if set(items_in_cluster) <= set(administered_items):
-          evaluated_clusters.add(self._clusters[max_info_item])
-
-          # if all clusters have been evaluated, the loop ends and the method raises NoItemsAvailableError below
-          if evaluated_clusters == existent_clusters:
-            break
-
-          # else, if there are still items and clusters to be explored, keep going
-          continue
-
-        # if the algorithm gets here, it means this cluster can be used
-        selected_cluster = self._clusters[max_info_item]
-        break
-
-    elif self._method in {"cluster_info", "weighted_info"}:
-      # calculates the cluster information, depending on the method
-      # selected
-      if self._method == "cluster_info":
-        cluster_infos = ClusterSelector.sum_cluster_infos(est_theta, item_bank, self._clusters)
-      else:
-        cluster_infos = ClusterSelector.weighted_cluster_infos(est_theta, item_bank, self._clusters)
-
-      sorted_clusters = [
-        cluster for cluster, _info in sorted(cluster_infos.items(), key=operator.itemgetter(1), reverse=True)
-      ]
-
-      # walks through the sorted clusters in order
-      for cluster in sorted_clusters:
-        valid_indexes = [
-          idx
-          for idx, item_cluster in enumerate(self._clusters)
-          if item_cluster == cluster and idx not in administered_items
-        ]
-
-        # checks if at least one item from this cluster has not
-        # been administered to this examinee yet
-        if valid_indexes:
-          selected_cluster = cluster
-          break
-          # the for loop ends with the cluster that has a) the maximum
-          # information possible and b) at least one item that has not
-          # yet been administered
-
-    # if the test size gets larger than the item bank size, end the test
-    if selected_cluster is None:
+    remaining = numpy.ones(item_bank.n_items, dtype=bool)
+    remaining[administered_items] = False
+    open_clusters = numpy.unique(self._clusters[remaining])
+    if open_clusters.size == 0:
       msg = "There are no more items to be applied."
       raise NoItemsAvailableError(msg)
 
-    # in this part, an item is chosen from the cluster that was
-    # selected above
+    cluster = self._pick_best(open_clusters, self._score(est_theta, item_bank, open_clusters), rng)
 
-    # gets the indexes of the items in the selected cluster that have not been administered
-    valid_indexes = self._get_non_administered(
-      numpy.nonzero([cluster == selected_cluster for cluster in self._clusters])[0],
-      administered_items,
-    )
-
-    # of those, gets the indexes of the items whose exposure rate is below r_max
+    in_cluster = numpy.flatnonzero(remaining & (self._clusters == cluster))
+    information = item_bank.information(est_theta)
     if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    valid_indexes_low_r = [
-      idx for idx in valid_indexes if exposure_rates[idx] < self._r_max and idx not in administered_items
-    ]
-
-    # each of the picks below breaks ties uniformly at random (ADR-0008)
-    if len(valid_indexes_low_r) > 0:
-      # the most informative of the items below r_max
-      candidates = numpy.asarray(valid_indexes_low_r, dtype=numpy.intp)
-      return self._pick_best(candidates, irt.inf_hpc(est_theta, item_bank.get_items(candidates)), rng)
-
-    # every remaining item in the selected cluster is at or above r_max
-    candidates = numpy.asarray(valid_indexes, dtype=numpy.intp)
+      exposure_rates = numpy.zeros(item_bank.n_items)
+    below_cap = in_cluster[exposure_rates[in_cluster] < self._r_max]
+    if below_cap.size > 0:
+      return self._pick_best(below_cap, information[below_cap], rng)
     if self._r_control == "passive":
-      # passive control ignores the cap: the most informative item in the cluster
-      return self._pick_best(candidates, irt.inf_hpc(est_theta, item_bank.get_items(candidates)), rng)
-    # aggressive control: the item with the smallest exposure rate, regardless of information
-    return self._pick_best(candidates, -exposure_rates[candidates], rng)
+      return self._pick_best(in_cluster, information[in_cluster], rng)
+    return self._pick_best(in_cluster, -exposure_rates[in_cluster], rng)
+
+  def _score(self, theta: float, item_bank: ItemBank, open_clusters: IntArray) -> FloatArray:
+    """Return the score of each cluster in ``open_clusters`` under the selector's method.
+
+    Parameters
+    ----------
+    theta : float
+        The current estimated ability.
+    item_bank : ItemBank
+        The bank the cluster labels describe.
+    open_clusters : numpy.ndarray
+        Labels of the clusters to score.
+
+    Returns
+    -------
+    numpy.ndarray
+        One score per cluster in ``open_clusters``.
+    """
+    if self._method == "item_info":
+      best = numpy.full(self._clusters.max() + 1, -numpy.inf)
+      numpy.maximum.at(best, self._clusters, item_bank.information(theta))
+      return best[open_clusters]
+    scores = (
+      self.sum_cluster_infos(theta, item_bank, self._clusters)
+      if self._method == "cluster_info"
+      else self.weighted_cluster_infos(theta, item_bank, self._clusters)
+    )
+    return numpy.array([scores[label] for label in open_clusters.tolist()])
 
   @staticmethod
-  def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:
+  def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int] | IntArray) -> dict[int, float]:
     r"""Return the sum of item information values, separated by cluster.
 
     Parameters
@@ -277,23 +223,19 @@ class ClusterSelector(BaseSelector):
         An examinee's :math:`\theta` value.
     item_bank : ItemBank
         An ItemBank containing item parameters.
-    clusters : list[int]
-        A list containing item cluster memberships, represented by integers.
+    clusters : list[int] or numpy.ndarray
+        One non-negative integer cluster label per item of ``item_bank``.
 
     Returns
     -------
     dict[int, float]
-        The sum of item information values in each cluster, keyed by cluster ID.
+        The sum of item information values in each cluster, keyed by cluster label.
     """
-    cluster_infos: dict[int, float] = {}
-    for cluster in sorted(set(clusters)):
-      cluster_indexes = numpy.nonzero([c == cluster for c in clusters])[0]
-      cluster_infos[cluster] = float(sum(irt.inf(theta, *item[:4]) for item in item_bank.get_items(cluster_indexes)))
-
-    return cluster_infos
+    sums = numpy.bincount(clusters, weights=item_bank.information(theta))
+    return {label: float(sums[label]) for label in numpy.unique(clusters).tolist()}
 
   @staticmethod
-  def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:
+  def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int] | IntArray) -> dict[int, float]:
     r"""Return the average item information in each cluster.
 
     Each cluster's sum of item information is divided by its number of items, so a
@@ -305,19 +247,17 @@ class ClusterSelector(BaseSelector):
         An examinee's :math:`\theta` value.
     item_bank : ItemBank
         An ItemBank containing item parameters.
-    clusters : list[int]
-        A list containing item cluster memberships, represented by integers.
+    clusters : list[int] or numpy.ndarray
+        One non-negative integer cluster label per item of ``item_bank``.
 
     Returns
     -------
     dict[int, float]
         The average item information in each cluster (the sum of item information
-        divided by the number of items in the cluster), keyed by cluster ID.
+        divided by the number of items in the cluster), keyed by cluster label.
     """
-    cluster_infos = ClusterSelector.sum_cluster_infos(theta, item_bank, clusters)
-    count = numpy.bincount(clusters)
-
-    for cluster in list(cluster_infos):
-      cluster_infos[cluster] /= count[cluster]
-
-    return cluster_infos
+    sizes = numpy.bincount(clusters)
+    return {
+      label: total / int(sizes[label])
+      for label, total in ClusterSelector.sum_cluster_infos(theta, item_bank, clusters).items()
+    }

@@ -46,8 +46,9 @@ item, as catR's `bOpt` does. On 1PL banks, `MaxInfoSelector` and the bins now ra
 as catR's `MFI` does, instead of by distance to the estimate. Information is flat near its peak, so
 items whose distances differ only by rounding tie there.
 
-`ClusterSelector` applies the rule to its choice of item within a cluster, but not yet to its
-choice of cluster.
+`ClusterSelector` applies the rule twice: to its choice of cluster, among clusters whose scores tie
+exactly, and to its choice of item within that cluster. Its `item_info` rule scores clusters by
+information on every bank, 1PL included, as `MaxInfoSelector` does.
 
 ## Consequences
 

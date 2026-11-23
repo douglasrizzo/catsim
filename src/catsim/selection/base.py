@@ -167,52 +167,6 @@ class BaseSelector(ABC):
     return candidates[order[ranked_scores >= cutoff]]
 
   @staticmethod
-  def _sort_by_info(item_bank: ItemBank, est_theta: float) -> list[int]:
-    """Sort items by their information value for a given ability value.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    est_theta : float
-        An examinee's ability.
-
-    Returns
-    -------
-    list[int]
-        List containing the indices of items, sorted in descending order by their
-        information values at the given ability level (much like the return of
-        `numpy.argsort`).
-    """
-    if item_bank.model == 1:
-      # when the logistic model has the number of parameters <= 2,
-      # all items have highest information where theta = b
-      ordered_items = BaseSelector._sort_by_b(item_bank, est_theta)
-    else:
-      # else, sort item indexes by their information value descending and remove indexes of administered items
-      ordered_items = list((-item_bank.information(est_theta)).argsort())
-    return ordered_items
-
-  @staticmethod
-  def _sort_by_b(item_bank: ItemBank, est_theta: float) -> list[int]:
-    """Sort items by how close their difficulty parameter is to an examinee's ability.
-
-    Parameters
-    ----------
-    item_bank : ItemBank
-        An ItemBank containing item parameters.
-    est_theta : float
-        An examinee's ability.
-
-    Returns
-    -------
-    list[int]
-        List containing the indices of items, sorted by how close their difficulty
-        parameter is in relation to `est_theta` (much like the return of `numpy.argsort`).
-    """
-    return list(numpy.abs(item_bank.difficulty - est_theta).argsort())
-
-  @staticmethod
   def _require_item_bank(item_bank: ItemBank | None) -> ItemBank:
     if item_bank is None:
       msg = "item_bank parameter cannot be None"
