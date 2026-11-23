@@ -1027,6 +1027,47 @@ class TestWarmLikelihoodEstimator:
     assert estimator.total_evaluations == single + ranked
 
   @pytest.mark.parametrize(
+    ("b", "correct", "expected"),
+    [
+      pytest.param(10.0, True, irt.THETA_MAX_EXTENDED, id="correct_beyond_the_upper_bound"),
+      pytest.param(-10.0, False, irt.THETA_MIN_EXTENDED, id="incorrect_beyond_the_lower_bound"),
+    ],
+  )
+  def test_estimate_falls_back_to_the_bound_the_score_points_to(self, b: float, correct: bool, expected: float) -> None:
+    """With no root in the search range the estimate is the bound the modified score points to.
+
+    For one 2PL item the weighted likelihood P^1.5 Q^0.5 peaks where P = 3/4 after a correct
+    answer (P = 1/4 after an incorrect one), at b +- ln 3 / a, beyond [-6, 6] for b = +-10.
+    """
+    estimator = WarmLikelihoodEstimator()
+
+    theta = estimator.estimate(ItemBank(np.array([[1.0, b, 0.0, 1.0]])), [0], [correct], 0.0)
+
+    assert theta == expected
+
+  def test_estimate_picks_the_candidate_with_the_largest_weighted_likelihood(self) -> None:
+    """Among several maxima candidates the estimate is the global maximum of the weighted likelihood.
+
+    The weighted log-likelihood is the integral of the modified score, so its maximum is found
+    here by integrating the independent reference score on a fine grid.
+    """
+    items = self._two_candidate_bank().items[:, :4]
+    response_vector = [True, True]
+    scan = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 121)
+    scan_scores = np.array([_warm_modified_score(theta, response_vector, items) for theta in scan])
+    sign_changes = int(np.sum((scan_scores[:-1] > 0) & (scan_scores[1:] <= 0)))
+    assert sign_changes + int(scan_scores[0] <= 0) + int(scan_scores[-1] > 0) >= 2
+
+    fine = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 24_001)
+    fine_scores = np.array([_warm_modified_score(theta, response_vector, items) for theta in fine])
+    steps = (fine_scores[1:] + fine_scores[:-1]) / 2 * np.diff(fine)
+    weighted_log_likelihood = np.concatenate([[0.0], np.cumsum(steps)])
+
+    theta = WarmLikelihoodEstimator().estimate(self._two_candidate_bank(), [0, 1], response_vector, 0.0)
+
+    assert theta == pytest.approx(fine[int(np.argmax(weighted_log_likelihood))], abs=1e-3)
+
+  @pytest.mark.parametrize(
     ("b", "theta", "correct"),
     [
       pytest.param(5.0, -2.0, True, id="correct_on_a_far_too_hard_item"),
