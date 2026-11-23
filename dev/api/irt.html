@@ -31,7 +31,7 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mermaid.css?v=3d2a72d1" />
   
   <!-- So that users can add custom icons -->
   <script defer src="../_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
@@ -772,7 +772,9 @@ product of probabilities into a sum of log probabilities:</p>
 \[\log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I \left\lbrace x_{ij} \log P_{ij}(\theta)+
     (1 - x_{ij}) \log Q_{ij}(\theta) \right\rbrace\]</div>
 </div></blockquote>
-<p>where <span class="math notranslate nohighlight">\(Q_{ij}(\theta) = 1 - P_{ij}(\theta)\)</span>.</p>
+<p>where <span class="math notranslate nohighlight">\(Q_{ij}(\theta) = 1 - P_{ij}(\theta)\)</span>. The terms are computed by
+<a class="reference internal" href="#catsim.irt.log_likelihood_hpc" title="catsim.irt.log_likelihood_hpc"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood_hpc()</span></code></a> from the logit rather than from <span class="math notranslate nohighlight">\(P_{ij}\)</span>, so
+<span class="math notranslate nohighlight">\(\log Q_{ij}\)</span> stays exact where <span class="math notranslate nohighlight">\(P_{ij}\)</span> rounds to 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -796,6 +798,52 @@ administered items. Higher values indicate better fit.</p>
 <dd class="field-odd"><dl class="simple">
 <dt>ValueError</dt><dd><p>If response vector and administered items have different lengths or if the
 response vector contains non-Boolean elements.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="catsim.irt.log_likelihood_hpc">
+<span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">log_likelihood_hpc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_vector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/irt.html#log_likelihood_hpc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.log_likelihood_hpc" title="Link to this definition">#</a></dt>
+<dd><p>Compute the log-likelihood of many ability values at once.</p>
+<p>This is the vectorized version of <a class="reference internal" href="#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a>, which calls it: given a response
+vector and the parameters of the answered items, every ability value and item is evaluated at
+once, and one log-likelihood is returned per ability value.</p>
+<p>The log-probabilities are computed from the logit <span class="math notranslate nohighlight">\(z_i = a_i(\theta - b_i)\)</span> instead of from
+<span class="math notranslate nohighlight">\(P_i(\theta)\)</span>, so <span class="math notranslate nohighlight">\(\log Q_i\)</span> stays exact where <span class="math notranslate nohighlight">\(P_i\)</span> rounds to 1:</p>
+<div class="math notranslate nohighlight">
+\[\log P_i = \log\left[c_i + (d_i - c_i)\,\sigma(z_i)\right], \qquad
+\log Q_i = \log\left[(1 - d_i) + (d_i - c_i)\,\sigma(-z_i)\right]\]</div>
+<p>where <span class="math notranslate nohighlight">\(\sigma(z) = 1 / (1 + e^{-z})\)</span>. Each sum is evaluated as a <code class="docutils literal notranslate"><span class="pre">logaddexp</span></code> of
+<span class="math notranslate nohighlight">\(\log c_i\)</span> (or <span class="math notranslate nohighlight">\(\log(1 - d_i)\)</span>) and <span class="math notranslate nohighlight">\(\log(d_i - c_i) + \log\sigma(\pm z_i)\)</span>,
+which is exact when <span class="math notranslate nohighlight">\(c_i = 0\)</span> or <span class="math notranslate nohighlight">\(d_i = 1\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>theta</strong><span class="classifier">float or numpy.ndarray</span></dt><dd><p>An ability value, or a 1-D array of ability values.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool]</span></dt><dd><p>A boolean list containing the response vector, where True indicates a correct
+response and False indicates an incorrect response.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A numpy array containing the parameters of the answered items, one row per item. Each item
+must satisfy <span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <a class="reference internal" href="#catsim.irt.validate_item_bank" title="catsim.irt.validate_item_bank"><code class="xref py py-func docutils literal notranslate"><span class="pre">validate_item_bank()</span></code></a> requires; an item
+with <span class="math notranslate nohighlight">\(d &lt; c\)</span> gives NaN.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>One log-likelihood per ability value, so a float <code class="docutils literal notranslate"><span class="pre">theta</span></code> gives a one-element array. All
+zeros when no item was administered.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">theta</span></code> has more than one dimension, if the response vector and administered items have
+different lengths, or if the response vector contains non-Boolean elements.</p>
 </dd>
 </dl>
 </dd>
@@ -1280,6 +1328,7 @@ is 0.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.inf_hpc"><code class="docutils literal notranslate"><span class="pre">inf_hpc()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.inf_integral"><code class="docutils literal notranslate"><span class="pre">inf_integral()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.log_likelihood"><code class="docutils literal notranslate"><span class="pre">log_likelihood()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.log_likelihood_hpc"><code class="docutils literal notranslate"><span class="pre">log_likelihood_hpc()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.max_info"><code class="docutils literal notranslate"><span class="pre">max_info()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.max_info_hpc"><code class="docutils literal notranslate"><span class="pre">max_info_hpc()</span></code></a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.irt.negative_log_likelihood"><code class="docutils literal notranslate"><span class="pre">negative_log_likelihood()</span></code></a></li>

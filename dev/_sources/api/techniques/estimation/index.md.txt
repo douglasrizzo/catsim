@@ -15,10 +15,10 @@ bayesian-infrastructure
 
 ## Class Hierarchy
 
-```{eval-rst}
-.. inheritance-diagram:: catsim.estimation.BaseEstimator catsim.estimation.NumericalSearchEstimator
-   :parts: 1
-   :top-classes: catsim.estimation.BaseEstimator
+```{autoclasstree} catsim.estimation
+:full:
+:strict:
+:namespace: catsim
 ```
 
 ## Planned
