@@ -65,30 +65,21 @@ def test_max_info_selector_raises_when_bank_exhausted(params: np.ndarray, seed: 
 
 
 @given(
-  params=item_params_matrix(min_items=4, max_items=18),
-  administered_count=st.integers(min_value=0, max_value=15),
-  est_theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
+  params=item_params_matrix(min_items=2, max_items=18),
+  data=st.data(),
   seed=st.integers(min_value=0, max_value=2**31 - 1),
 )
 @SEL_SETTINGS
-def test_random_selector_returns_valid_unseen_item(
-  params: np.ndarray,
-  administered_count: int,
-  est_theta: float,
-  seed: int,
-) -> None:
+def test_random_selector_returns_valid_unseen_item(params: np.ndarray, data: st.DataObject, seed: int) -> None:
+  """A draw from the whole bank instead of the remaining items would return an administered item for some seed."""
   n = params.shape[0]
-  assume(administered_count < n)
-  administered = list(range(administered_count))
-  bank = ItemBank(params, validate=True)
-  rng = np.random.default_rng(seed)
-  selector = RandomSelector()
-  item_id = selector.select(
-    item_bank=bank,
+  administered = data.draw(st.lists(st.integers(0, n - 1), unique=True, max_size=n - 1))
+  item_id = RandomSelector().select(
+    item_bank=ItemBank(params, validate=True),
     administered_items=administered,
-    est_theta=est_theta,
-    rng=rng,
+    est_theta=0.0,
+    rng=np.random.default_rng(seed),
   )
   assert type(item_id) is int
-  assert 0 <= int(item_id) < n
+  assert 0 <= item_id < n
   assert item_id not in administered

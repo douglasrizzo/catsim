@@ -10,9 +10,8 @@ from enum import StrEnum
 import numpy
 
 from .._typing import FloatArray, IntArray
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
 class ClusterMethod(StrEnum):
@@ -136,7 +135,7 @@ class ClusterSelector(BaseSelector):
     ------
     ValueError
         If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
-        method or r_control, or r_max not between 0 and 1).
+        method or r_control, or r_max not in (0, 1]).
     """
     labels = numpy.array(clusters)
     if labels.size == 0:
@@ -152,10 +151,6 @@ class ClusterSelector(BaseSelector):
       msg = f"{method} is not a valid cluster selection method; choose one from {list(map(str, ClusterMethod))}"
       raise ValueError(msg) from None
 
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
-
     try:
       r_control = ExposureControl(r_control)
     except ValueError:
@@ -170,7 +165,7 @@ class ClusterSelector(BaseSelector):
     # memory does not grow with the largest label (hashed or database IDs).
     self._label_values, self._label_ranks = numpy.unique(labels, return_inverse=True)
     self._method = method
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
     self._r_control = r_control
 
   def select(
@@ -217,25 +212,19 @@ class ClusterSelector(BaseSelector):
       msg = f"clusters holds {self._clusters.size} labels, but the item bank has {item_bank.n_items} items"
       raise ValueError(msg)
 
-    remaining = numpy.ones(item_bank.n_items, dtype=bool)
-    remaining[administered_items] = False
-    open_clusters = numpy.unique(self._clusters[remaining])
-    if open_clusters.size == 0:
-      msg = "There are no more items to be applied."
-      raise NoItemsAvailableError(msg)
+    candidates = remaining(item_bank.n_items, administered_items)
+    open_clusters = numpy.unique(self._clusters[candidates])
+    cluster = pick_best(open_clusters, self._score(est_theta, item_bank, open_clusters), rng)
 
-    cluster = self._pick_best(open_clusters, self._score(est_theta, item_bank, open_clusters), rng)
-
-    in_cluster = numpy.flatnonzero(remaining & (self._clusters == cluster))
-    information = item_bank.information(est_theta)
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items)
-    below_cap = in_cluster[exposure_rates[in_cluster] < self._r_max]
-    if below_cap.size > 0:
-      return self._pick_best(below_cap, information[below_cap], rng)
-    if self._r_control is ExposureControl.PASSIVE:
-      return self._pick_best(in_cluster, information[in_cluster], rng)
-    return self._pick_best(in_cluster, -exposure_rates[in_cluster], rng)
+    in_cluster = candidates[self._clusters[candidates] == cluster]
+    if (
+      self._r_control is ExposureControl.AGGRESSIVE
+      and exposure_rates is not None
+      and (exposure_rates[in_cluster] >= self._r_max).all()
+    ):
+      return pick_best(in_cluster, -exposure_rates[in_cluster], rng)
+    allowed = below_cap(in_cluster, exposure_rates, self._r_max)
+    return pick_best(allowed, item_bank.information(est_theta)[allowed], rng)
 
   def _score(self, theta: float, item_bank: ItemBank, open_clusters: IntArray) -> FloatArray:
     """Return the score of each cluster in ``open_clusters`` under the selector's method.

@@ -80,12 +80,13 @@ class LinearSelector(FiniteSelector):
     NoItemsAvailableError
         If every one of the selector's indexes has already been administered.
     """
-    valid_indexes = self._get_non_administered(self._indexes, administered_items)
-    if len(valid_indexes) == 0:
+    administered = set(administered_items)
+    item = next((index for index in self._indexes if index not in administered), None)
+    if item is None:
       msg = (
         f"A new index was asked for, but there are no more item indexes to present.\n"
         f"Items to be administered:\t{sorted(self._indexes)} (size: {len(self._indexes)})\n"
         f"Administered items:\t\t{sorted(administered_items)} (size: {len(administered_items)})"
       )
       raise NoItemsAvailableError(msg)
-    return int(valid_indexes[0])
+    return int(item)

@@ -34,6 +34,7 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
+from catsim.selection.base import below_cap, remaining
 
 
 class RecordingEstimator(BaseEstimator):
@@ -123,18 +124,75 @@ def _progressive_item_bank() -> ItemBank:
   )
 
 
+class TestRemaining:
+  """Tests for remaining, the items a selector may still administer."""
+
+  def test_returns_the_items_not_administered_in_ascending_order(self) -> None:
+    """An administered item left in would be administered twice; a dropped one could never be chosen."""
+    assert remaining(6, [4, 1]).tolist() == [0, 2, 3, 5]
+    assert remaining(3, []).tolist() == [0, 1, 2]
+
+  def test_raises_when_every_item_is_administered(self) -> None:
+    """An empty candidate array would reach the scorer instead of ending the session as an exhausted bank."""
+    with pytest.raises(NoItemsAvailableError, match="no more items"):
+      remaining(3, [2, 0, 1])
+
+
+class TestBelowCap:
+  """Tests for below_cap, the exposure filter of the capped selectors."""
+
+  RATES = np.array([0.1, 0.9, 0.5, 0.2, 0.0, 0.6])
+
+  def test_keeps_the_candidates_below_the_cap(self) -> None:
+    """Item 2 sits exactly at the cap and is passed over; item 4 is below it but not a candidate."""
+    assert below_cap(np.array([0, 2, 3, 5]), self.RATES, 0.5).tolist() == [0, 3]
+
+  @pytest.mark.parametrize("rates", [RATES, None], ids=["every_candidate_at_or_over_the_cap", "no_rates"])
+  def test_falls_back_to_every_candidate(self, rates: np.ndarray | None) -> None:
+    """With no candidate below the cap, or no rates to compare, an empty result would leave no item to administer."""
+    assert below_cap(np.array([1, 2, 5]), rates, 0.5).tolist() == [1, 2, 5]
+
+
+CAPPED_SELECTORS: dict[str, Callable[[float], BaseSelector]] = {
+  "MaxInfoSelector": lambda r_max: MaxInfoSelector(r_max=r_max),
+  "KLSelector": lambda r_max: KLSelector(r_max=r_max),
+  "MEISelector": lambda r_max: MEISelector(r_max=r_max),
+  "MLWISelector": lambda r_max: MLWISelector(r_max=r_max),
+  "ProgressiveSelector": lambda r_max: ProgressiveSelector(test_size=10, r_max=r_max),
+  "ProportionalSelector": lambda r_max: ProportionalSelector(test_size=10, r_max=r_max),
+  "ClusterSelector": lambda r_max: ClusterSelector(clusters=[0, 1], r_max=r_max),
+}
+
+
+@pytest.mark.parametrize("r_max", [0.0, -0.1, 1.5])
+@pytest.mark.parametrize("make_selector", CAPPED_SELECTORS.values(), ids=CAPPED_SELECTORS.keys())
+def test_capped_selectors_reject_r_max_outside_zero_to_one(
+  make_selector: Callable[[float], BaseSelector], r_max: float
+) -> None:
+  """A cap of 0 used to be accepted: every item is at or above it, so the selector fell back to all items.
+
+  It then capped nothing, exactly like r_max = 1.
+  """
+  with pytest.raises(ValueError, match=r"r_max must be in \(0, 1\]"):
+    make_selector(r_max)
+
+
+def test_capped_selectors_cover_every_selector_with_r_max() -> None:
+  """A selector that takes r_max but is left out of CAPPED_SELECTORS could accept r_max = 0 unnoticed."""
+  takes_r_max = {
+    name
+    for name, cls in vars(importlib.import_module("catsim.selection")).items()
+    if isinstance(cls, type) and issubclass(cls, BaseSelector) and "r_max" in inspect.signature(cls).parameters
+  }
+
+  assert takes_r_max == set(CAPPED_SELECTORS)
+
+
 class TestMaxInfoSelector:
   """Tests for MaxInfoSelector."""
 
   # all difficulties are 0, so at theta = 0 information is a^2 / 4 and ranks items 1, 2, 0, 3
   BANK_A = (1.0, 2.0, 1.5, 0.5)
-
-  def test_init_invalid_r_max_raises(self) -> None:
-    """Test that invalid r_max raises ValueError."""
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      MaxInfoSelector(r_max=1.5)
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      MaxInfoSelector(r_max=-0.1)
 
   def test_select_returns_the_most_informative_remaining_item(self) -> None:
     """The pick is the remaining item with the largest information at the estimate."""
@@ -165,42 +223,24 @@ class TestMaxInfoSelector:
 
     assert selected == 1
 
-  def test_select_raises_when_exhausted(self) -> None:
-    """Test that select raises NoItemsAvailableError when all items administered."""
-    item_bank = ItemBank.generate_item_bank(5, seed=42)
-    selector = MaxInfoSelector()
-
-    administered = list(range(5))  # All items
-    with pytest.raises(NoItemsAvailableError, match="no more items"):
-      selector.select(
-        item_bank=item_bank,
-        administered_items=administered,
-        est_theta=0.0,
-        rng=np.random.default_rng(42),
-      )
-
 
 class TestRandomSelector:
   """Tests for RandomSelector."""
 
-  def test_select_is_random(self) -> None:
-    """Test that selection is random across calls with different RNGs."""
+  def test_select_draws_every_remaining_item(self) -> None:
+    """Over many seeds every remaining item is drawn; a selector that ignored rng or skipped items would miss some."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = RandomSelector()
+    administered = [3, 17, 25]
 
-    selections = set()
-    for seed in range(20):
-      selected = selector.select(
-        item_bank=item_bank,
-        administered_items=[],
-        est_theta=0.0,
-        rng=np.random.default_rng(seed),
+    selections = {
+      RandomSelector().select(
+        item_bank=item_bank, administered_items=administered, est_theta=0.0, rng=np.random.default_rng(seed)
       )
-      if selected is not None:
-        selections.add(selected)
+      for seed in range(1000)
+    }
 
-    # With 20 different seeds, we should get multiple different selections
-    assert len(selections) > 1
+    # each item is missed by all 1000 draws with probability (46/47) ** 1000, about 4e-10
+    assert selections == set(range(50)) - set(administered)
 
 
 class TestLinearSelector:
@@ -512,21 +552,22 @@ class TestMEISelector:
     assert {tuple(call[1]) for call in estimator.records} == {(True, True), (True, False)}
 
   def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
-    """MEI should still choose from non-administered items when every candidate exceeds r_max."""
+    """With every remaining item over r_max, the cap is ignored and the best remaining item is still chosen."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
-    selector = MEISelector(estimator=RecordingEstimator(), r_max=0.0)
+    selector = MEISelector(estimator=RecordingEstimator(), r_max=0.5)
 
     selected = selector.select(
       item_bank=item_bank,
-      administered_items=[0],
+      administered_items=[1],
       est_theta=0.0,
       rng=np.random.default_rng(42),
       exposure_rates=np.ones(item_bank.n_items, dtype=float),
       response_vector=[True],
     )
 
-    assert selected is not None
-    assert selected != 0
+    # RecordingEstimator puts both one-step-ahead estimates at 2.0 (the number of responses), so each score is
+    # the information of item 1 plus the candidate's at 2.0, where item 9 (0.1417) just beats item 5 (0.1410)
+    assert selected == 9
 
   def test_select_diverges_from_max_info_when_one_step_estimates_shift(self) -> None:
     """MEI should not collapse to MaxInfo when the response history changes theta.
@@ -724,9 +765,9 @@ class TestMLWISelector:
     assert selected == expected
 
   def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
-    """MLWI should still choose from non-administered items when every candidate exceeds r_max."""
+    """With every remaining item over r_max, the cap is ignored and the best remaining item is still chosen."""
     item_bank = ItemBank.generate_item_bank(8, seed=42)
-    selector = MLWISelector(n_nodes=11, r_max=0.0)
+    selector = MLWISelector(n_nodes=11, r_max=0.5)
 
     selected = selector.select(
       item_bank=item_bank,
@@ -737,8 +778,8 @@ class TestMLWISelector:
       response_vector=[True, False],
     )
 
-    assert selected is not None
-    assert selected not in {0, 1}
+    # the pick of the manual integration in test_select_matches_manual_weighted_information
+    assert selected == 6
 
   def test_select_with_empty_response_vector_reduces_to_information_integral(self) -> None:
     """With no responses, MLWI should reduce to the integral of item information.
@@ -863,7 +904,6 @@ class TestKLSelector:
     [
       pytest.param({"c": 0.0}, "c must be positive", id="zero_c"),
       pytest.param({"c": -1.0}, "c must be positive", id="negative_c"),
-      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
     ],
   )
   def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
@@ -959,7 +999,7 @@ class TestKLSelector:
     assert (uncapped, capped) == (1, 2)
 
   def test_select_raises_when_exhausted(self) -> None:
-    """Test that select raises NoItemsAvailableError when all items are administered."""
+    """An exhausted bank must raise NoItemsAvailableError, which ends the session, not score an empty array."""
     item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
     with pytest.raises(NoItemsAvailableError, match="no more items"):
@@ -1116,7 +1156,6 @@ class TestProgressiveSelector:
     ("kwargs", "match"),
     [
       pytest.param({"acceleration": 0.0}, "acceleration must be positive", id="zero_acceleration"),
-      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
     ],
   )
   def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
@@ -1224,7 +1263,6 @@ class TestProportionalSelector:
     [
       pytest.param({"acceleration": 0.0}, "acceleration must be positive", id="zero_acceleration"),
       pytest.param({"sharpness": -1.0}, "sharpness must be non-negative", id="negative_sharpness"),
-      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
     ],
   )
   def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:

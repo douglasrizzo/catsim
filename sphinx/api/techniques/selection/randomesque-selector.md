@@ -27,6 +27,7 @@ Any correct implementation must satisfy the following properties:
 2. It builds its random candidate set from the most informative remaining items.
 3. It samples from the candidate set using the configured random number generator.
 4. If no non-administered items remain, it raises `NoItemsAvailableError`.
+5. It applies no exposure cap: it ignores `exposure_rates`. The random draw from the candidate set is its exposure control.
 
 ## References
 

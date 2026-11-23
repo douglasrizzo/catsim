@@ -4,9 +4,8 @@ import numpy
 
 from .. import irt
 from .._typing import FloatArray
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
 class MaxInfoSelector(BaseSelector):
@@ -34,14 +33,10 @@ class MaxInfoSelector(BaseSelector):
     Raises
     ------
     ValueError
-        If r_max is not between 0 and 1.
+        If r_max is not in (0, 1].
     """
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
-
     super().__init__()
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the name of the selector."""
@@ -98,12 +93,14 @@ class MaxInfoSelector(BaseSelector):
     ValueError
         If items tie for the most information and ``rng`` is None.
     """
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
-    return self._pick_best(candidates, item_bank.information(est_theta)[candidates], rng)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
+    return pick_best(candidates, item_bank.information(est_theta)[candidates], rng)
 
 
 class UrrySelector(BaseSelector):
   """Select the remaining item whose difficulty parameter is closest to the current ability estimate.
+
+  It applies no exposure cap: ``exposure_rates`` is ignored.
 
   Notes
   -----
@@ -114,7 +111,7 @@ class UrrySelector(BaseSelector):
     """Return the name of the selector."""
     return "Urry Selector"
 
-  def select(
+  def select(  # noqa: PLR6301
     self,
     item_bank: ItemBank,
     administered_items: list[int],
@@ -138,6 +135,10 @@ class UrrySelector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator, used only to break ties between equally close items.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -151,8 +152,8 @@ class UrrySelector(BaseSelector):
     ValueError
         If items tie for the closest difficulty and ``rng`` is None.
     """
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
-    return self._pick_best(candidates, -numpy.abs(item_bank.difficulty[candidates] - est_theta), rng)
+    candidates = remaining(item_bank.n_items, administered_items)
+    return pick_best(candidates, -numpy.abs(item_bank.difficulty[candidates] - est_theta), rng)
 
 
 class IntervalInfoSelector(BaseSelector):
@@ -168,7 +169,8 @@ class IntervalInfoSelector(BaseSelector):
       \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)
 
   where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the
-  confidence level. A fixed half-width :math:`\delta` can be used instead.
+  confidence level. A fixed half-width :math:`\delta` can be used instead. The selector applies no
+  exposure cap: ``exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -247,6 +249,10 @@ class IntervalInfoSelector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator, used only to break ties between equally good items.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -260,10 +266,7 @@ class IntervalInfoSelector(BaseSelector):
     ValueError
         If items tie for the largest integrated information and ``rng`` is None.
     """
-    candidates = numpy.setdiff1d(numpy.arange(item_bank.n_items), administered_items)
-    if candidates.size == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
+    candidates = remaining(item_bank.n_items, administered_items)
 
     if self._interval is None:
       # infinite before any item is administered, since there is no information yet
@@ -272,4 +275,4 @@ class IntervalInfoSelector(BaseSelector):
       lower, upper = est_theta - self._interval, est_theta + self._interval
 
     information_integral = irt.inf_integral(lower, upper, item_bank.items[candidates])
-    return self._pick_best(candidates, information_integral, rng)
+    return pick_best(candidates, information_integral, rng)

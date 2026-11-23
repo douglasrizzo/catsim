@@ -54,6 +54,7 @@ Any correct implementation must satisfy the following properties:
 2. The item at position $k$ is drawn with the configured random number generator from the $\max(1, n - k)$ most informative non-administered items.
 3. From position $n - 1$ on, it returns the most informative non-administered item.
 4. If no non-administered items remain, it raises `NoItemsAvailableError`.
+5. It applies no exposure cap: it ignores `exposure_rates`.
 
 ## References
 

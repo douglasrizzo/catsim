@@ -7,7 +7,7 @@ from .._typing import FloatArray
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining, require_responses
 
 
 class MEISelector(BaseSelector):
@@ -40,15 +40,11 @@ class MEISelector(BaseSelector):
     Raises
     ------
     ValueError
-        If r_max is not between 0 and 1.
+        If r_max is not in (0, 1].
     """
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
-
     super().__init__()
     self._estimator = estimator if estimator is not None else NumericalSearchEstimator()
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
@@ -131,11 +127,9 @@ class MEISelector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if response_vector is None:
-      msg = "MEISelector requires the response_vector to compute one-step-ahead estimates."
-      raise ValueError(msg)
+    response_vector = require_responses(response_vector)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
 
     scores = numpy.array(
       [
@@ -144,4 +138,4 @@ class MEISelector(BaseSelector):
       ],
       dtype=float,
     )
-    return self._pick_best(candidates, scores, rng)
+    return pick_best(candidates, scores, rng)

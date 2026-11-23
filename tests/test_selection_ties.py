@@ -21,6 +21,7 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
+from catsim.selection.base import best_pool, pick_best
 
 _N_COPIES = 6
 _ITEM = [1.4, 0.3, 0.15, 0.98]
@@ -32,14 +33,14 @@ def _identical_bank(n_items: int = _N_COPIES) -> ItemBank:
 
 
 class TestPickBest:
-  """Tests for BaseSelector._pick_best."""
+  """Tests for pick_best."""
 
   def test_single_best_item_does_not_consume_random_numbers(self) -> None:
     """An untied pick must leave the generator untouched, so untied runs keep their random stream."""
     rng = np.random.default_rng(1)
     state = rng.bit_generator.state
 
-    picked = BaseSelector._pick_best(np.array([3, 7, 9]), np.array([0.2, 0.9, 0.4]), rng)
+    picked = pick_best(np.array([3, 7, 9]), np.array([0.2, 0.9, 0.4]), rng)
 
     assert picked == 7
     assert type(picked) is int
@@ -51,7 +52,7 @@ class TestPickBest:
     candidates = np.array([2, 5, 8, 11, 14])
     scores = np.array([0.7, 0.7, 0.1, 0.7, 0.7])
 
-    counts = Counter(BaseSelector._pick_best(candidates, scores, rng) for _ in range(4000))
+    counts = Counter(pick_best(candidates, scores, rng) for _ in range(4000))
 
     assert set(counts) == {2, 5, 11, 14}
     assert all(abs(count / 4000 - 0.25) < 0.03 for count in counts.values())
@@ -60,59 +61,59 @@ class TestPickBest:
     """Random tie-breaking stays reproducible under a seeded generator."""
     candidates, scores = np.arange(5), np.ones(5)
 
-    picks = [BaseSelector._pick_best(candidates, scores, np.random.default_rng(seed)) for seed in range(20)]
-    again = [BaseSelector._pick_best(candidates, scores, np.random.default_rng(seed)) for seed in range(20)]
+    picks = [pick_best(candidates, scores, np.random.default_rng(seed)) for seed in range(20)]
+    again = [pick_best(candidates, scores, np.random.default_rng(seed)) for seed in range(20)]
 
     assert picks == again
 
   def test_tie_without_rng_raises(self) -> None:
     """A tie cannot be broken without a generator."""
     with pytest.raises(ValueError, match="rng parameter cannot be None"):
-      BaseSelector._pick_best(np.arange(3), np.array([1.0, 1.0, 0.5]), None)
+      pick_best(np.arange(3), np.array([1.0, 1.0, 0.5]), None)
 
   def test_untied_pick_works_without_rng(self) -> None:
     """Deterministic selectors keep working without a generator when nothing ties."""
-    assert BaseSelector._pick_best(np.arange(3), np.array([1.0, 2.0, 0.5]), None) == 1
+    assert pick_best(np.arange(3), np.array([1.0, 2.0, 0.5]), None) == 1
 
   def test_nan_scores_raise(self) -> None:
     """A NaN score would make every comparison false; it should raise instead of picking silently."""
     with pytest.raises(ValueError, match="NaN"):
-      BaseSelector._pick_best(np.arange(3), np.array([1.0, np.nan, 0.5]), np.random.default_rng(0))
+      pick_best(np.arange(3), np.array([1.0, np.nan, 0.5]), np.random.default_rng(0))
 
 
 class TestBestPool:
-  """Tests for BaseSelector._best_pool."""
+  """Tests for best_pool."""
 
   def test_items_tied_at_the_cutoff_join_the_pool(self) -> None:
     """As in catR, a bin of two grows to hold every item tied with its second-best item."""
     candidates = np.array([10, 11, 12, 13, 14])
     scores = np.array([0.5, 0.9, 0.5, 0.2, 0.5])
 
-    pool = BaseSelector._best_pool(candidates, scores, 2)
+    pool = best_pool(candidates, scores, 2)
 
     assert pool.tolist() == [11, 10, 12, 14]
 
   def test_pool_without_ties_is_the_top_items_best_first(self) -> None:
     """Without ties at the cutoff the pool is exactly the requested number of best items."""
-    pool = BaseSelector._best_pool(np.arange(5), np.array([0.1, 0.4, 0.3, 0.9, 0.2]), 3)
+    pool = best_pool(np.arange(5), np.array([0.1, 0.4, 0.3, 0.9, 0.2]), 3)
 
     assert pool.tolist() == [3, 1, 2]
 
   def test_pool_larger_than_the_candidates_holds_them_all(self) -> None:
     """Asking for more items than there are candidates returns every candidate."""
-    pool = BaseSelector._best_pool(np.array([4, 6]), np.array([0.3, 0.8]), 5)
+    pool = best_pool(np.array([4, 6]), np.array([0.3, 0.8]), 5)
 
     assert pool.tolist() == [6, 4]
 
   def test_pool_rejects_a_size_below_one(self) -> None:
     """A bin of zero items would otherwise silently become the whole bank."""
     with pytest.raises(ValueError, match="at least 1"):
-      BaseSelector._best_pool(np.arange(3), np.array([0.1, 0.2, 0.3]), 0)
+      best_pool(np.arange(3), np.array([0.1, 0.2, 0.3]), 0)
 
   def test_pool_rejects_nan_scores(self) -> None:
     """A NaN score would empty the pool; it should raise instead."""
     with pytest.raises(ValueError, match="NaN"):
-      BaseSelector._best_pool(np.arange(3), np.array([0.1, np.nan, 0.3]), 3)
+      best_pool(np.arange(3), np.array([0.1, np.nan, 0.3]), 3)
 
 
 SELECTOR_FACTORIES: dict[str, Callable[[], BaseSelector]] = {

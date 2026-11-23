@@ -3,9 +3,8 @@
 from numpy.random import Generator
 
 from .._typing import FloatArray
-from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, best_pool, remaining, require_rng
 
 
 class RandomSelector(BaseSelector):
@@ -13,31 +12,13 @@ class RandomSelector(BaseSelector):
 
   This selector is useful for baseline comparisons or for studying the impact of
   item selection strategies.
-
-  Parameters
-  ----------
-  replace : bool, optional
-      Whether to select an item that has already been selected before for this examinee.
-      Default is False.
   """
 
   def __str__(self) -> str:
     """Return the name of the selector."""
     return "Random Selector"
 
-  def __init__(self, replace: bool = False) -> None:
-    """Initialize a RandomSelector object.
-
-    Parameters
-    ----------
-    replace : bool, optional
-        Whether to select an item that has already been selected before for this examinee.
-        Default is False.
-    """
-    super().__init__()
-    self._replace = replace
-
-  def select(
+  def select(  # noqa: PLR6301
     self,
     item_bank: ItemBank,
     administered_items: list[int],
@@ -57,33 +38,26 @@ class RandomSelector(BaseSelector):
     est_theta : float
         Current estimated ability. Unused by this selector.
     rng : numpy.random.Generator or None, optional
-        Random number generator used by the object.
+        Random number generator the item is drawn with. Required.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
     int
         Index of the next item to be applied, drawn uniformly at random from the items not yet
-        administered, or from every item when ``replace`` is True.
+        administered.
 
     Raises
     ------
     ValueError
         If ``rng`` is None.
     NoItemsAvailableError
-        If every item has already been administered and ``replace`` is False.
+        If every item has already been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
-
-    if len(administered_items) >= item_bank.n_items and not self._replace:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    if self._replace:
-      return int(rng.choice(item_bank.n_items))
-    valid_indexes = self._get_non_administered(list(range(item_bank.n_items)), administered_items)
-    return int(rng.choice(valid_indexes))
+    return int(require_rng(rng).choice(remaining(item_bank.n_items, administered_items)))
 
 
 class The54321Selector(BaseSelector):
@@ -94,7 +68,8 @@ class The54321Selector(BaseSelector):
   most informative item is administered. Randomizing the opening items, which every examinee would
   otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in
   precision. Items tied with the least informative item of a bin also join it, so from the fifth
-  item on, ties for the most information are broken uniformly at random (ADR-0008).
+  item on, ties for the most information are broken uniformly at random (ADR-0008). The selector
+  applies no exposure cap: ``exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -156,6 +131,10 @@ class The54321Selector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator the item is drawn from the bin with. Required.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -170,14 +149,12 @@ class The54321Selector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
+    rng = require_rng(rng)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
+    candidates = remaining(item_bank.n_items, administered_items)
     bin_size = max(1, self._initial_bin_size - len(administered_items))
     # items tied with the bin's least informative item join the bin (ADR-0008)
-    pool = self._best_pool(candidates, item_bank.information(est_theta)[candidates], bin_size)
+    pool = best_pool(candidates, item_bank.information(est_theta)[candidates], bin_size)
     return int(rng.choice(pool))
 
 
@@ -186,7 +163,7 @@ class RandomesqueSelector(BaseSelector):
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
-  join the bin (ADR-0008).
+  join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.
   """
 
   def __str__(self) -> str:
@@ -231,6 +208,10 @@ class RandomesqueSelector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator the item is drawn from the bin with. Required.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -245,11 +226,9 @@ class RandomesqueSelector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
+    rng = require_rng(rng)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
+    candidates = remaining(item_bank.n_items, administered_items)
     # items tied with the bin's least informative item join the bin (ADR-0008)
-    pool = self._best_pool(candidates, item_bank.information(est_theta)[candidates], self._bin_size)
+    pool = best_pool(candidates, item_bank.information(est_theta)[candidates], self._bin_size)
     return int(rng.choice(pool))

@@ -6,7 +6,7 @@ from .. import irt
 from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining, require_responses
 
 _MIN_NODES = 5
 
@@ -44,7 +44,7 @@ class MLWISelector(BaseSelector):
     Raises
     ------
     ValueError
-        If n_nodes is below 5, the bounds are not increasing, or r_max is not between 0 and 1.
+        If n_nodes is below 5, the bounds are not increasing, or r_max is not in (0, 1].
     """
     if n_nodes < _MIN_NODES:
       msg = f"n_nodes must be >= {_MIN_NODES}, got {n_nodes}"
@@ -52,14 +52,11 @@ class MLWISelector(BaseSelector):
     if not bounds[0] < bounds[1]:
       msg = f"bounds must be increasing, got {bounds}"
       raise ValueError(msg)
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
 
     super().__init__()
     self._nodes = numpy.linspace(bounds[0], bounds[1], n_nodes)
     self._delta = (bounds[1] - bounds[0]) / (n_nodes - 1)
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
@@ -118,11 +115,9 @@ class MLWISelector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if response_vector is None:
-      msg = "MLWISelector requires the response_vector for likelihood weighting."
-      raise ValueError(msg)
+    response_vector = require_responses(response_vector)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
 
     if administered_items:
       weights = self._likelihood_weights(response_vector, item_bank.get_items(administered_items))
@@ -132,4 +127,4 @@ class MLWISelector(BaseSelector):
     # information of every candidate at every node, one row per node
     info = irt.inf_hpc(self._nodes[:, None], item_bank.get_items(candidates))
     scores = (weights @ info) * self._delta
-    return self._pick_best(candidates, scores, rng)
+    return pick_best(candidates, scores, rng)

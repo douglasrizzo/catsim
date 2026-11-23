@@ -4,7 +4,7 @@ import numpy
 
 from .._typing import FloatArray
 from ..item_bank import ItemBank
-from .base import FiniteSelector
+from .base import FiniteSelector, below_cap, check_r_max, pick_best, remaining, require_rng
 
 
 def _position_weight(position: int, test_size: int, acceleration: float) -> float:
@@ -52,21 +52,23 @@ class ProgressiveSelector(FiniteSelector):
     Raises
     ------
     ValueError
-        If ``acceleration`` is not positive or ``r_max`` is not between 0 and 1.
+        If ``acceleration`` is not positive or ``r_max`` is not in (0, 1].
     """
     if acceleration <= 0:
       msg = f"acceleration must be positive, got {acceleration}"
       raise ValueError(msg)
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
     super().__init__(test_size=test_size)
     self._s = float(acceleration)
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
     return f"Progressive Selector (s={self._s})"
+
+  @property
+  def r_max(self) -> float:
+    """Return the maximum exposure rate accepted by the selector."""
+    return self._r_max
 
   def _weight(self, position: int) -> float:
     """Return the progression weight for the given 1-indexed test position."""
@@ -111,11 +113,9 @@ class ProgressiveSelector(FiniteSelector):
     NoItemsAvailableError
         If every item has been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
+    rng = require_rng(rng)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
     position = len(administered_items) + 1
     weight = self._weight(position)
 
@@ -127,7 +127,7 @@ class ProgressiveSelector(FiniteSelector):
 
     random_component = rng.uniform(0.0, 1.0, size=item_bank.n_items)
     scores = (1.0 - weight) * random_component + weight * info_norm
-    return self._pick_best(candidates, scores[candidates], rng)
+    return pick_best(candidates, scores[candidates], rng)
 
 
 class ProportionalSelector(FiniteSelector):
@@ -168,7 +168,7 @@ class ProportionalSelector(FiniteSelector):
     ------
     ValueError
         If ``acceleration`` is not positive, ``sharpness`` is negative, or ``r_max`` is not
-        between 0 and 1.
+        in (0, 1].
     """
     if acceleration <= 0:
       msg = f"acceleration must be positive, got {acceleration}"
@@ -176,17 +176,19 @@ class ProportionalSelector(FiniteSelector):
     if sharpness < 0:
       msg = f"sharpness must be non-negative, got {sharpness}"
       raise ValueError(msg)
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
     super().__init__(test_size=test_size)
     self._s = float(acceleration)
     self._k = float(sharpness)
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the selector name."""
     return f"Proportional Selector (s={self._s}, k={self._k})"
+
+  @property
+  def r_max(self) -> float:
+    """Return the maximum exposure rate accepted by the selector."""
+    return self._r_max
 
   def _exponent(self, position: int) -> float:
     """Return the information exponent for the given 1-indexed test position."""
@@ -231,11 +233,9 @@ class ProportionalSelector(FiniteSelector):
     NoItemsAvailableError
         If every item has been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
+    rng = require_rng(rng)
 
-    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    candidates = below_cap(remaining(item_bank.n_items, administered_items), exposure_rates, self._r_max)
     position = len(administered_items) + 1
     exponent = self._exponent(position)
 
