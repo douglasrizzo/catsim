@@ -27,7 +27,7 @@ class UniformInitializer(BaseInitializer):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.
+  For full algorithmic details, see :doc:`/api/techniques/initialization/index`.
   """
 
   def __init__(self, low: float = -0.5, high: float = 0.5) -> None:
@@ -79,7 +79,7 @@ class NormalInitializer(BaseInitializer):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/initialization/random-initializer`.
+  For full algorithmic details, see :doc:`/api/techniques/initialization/index`.
   """
 
   def __init__(self, mean: float = 0.0, sd: float = 1.0) -> None:
@@ -134,7 +134,7 @@ class FixedPointInitializer(BaseInitializer):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/initialization/fixed-point-initializer`.
+  For full algorithmic details, see :doc:`/api/techniques/initialization/index`.
   """
 
   def __str__(self) -> str:
