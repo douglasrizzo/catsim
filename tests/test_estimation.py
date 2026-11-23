@@ -565,24 +565,27 @@ class TestEAPEstimator:
 
     assert theta > 0.0
 
-  def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self) -> None:
-    """A centered prior should shrink EAP more than a flat prior on all-correct data.
+  @pytest.mark.parametrize("sign", [1.0, -1.0], ids=["all_correct", "all_incorrect"])
+  def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self, sign: float) -> None:
+    """A centered prior should shrink EAP more than a flat prior on an extreme pattern.
 
-    This checks the core Bayesian behavior on sparse data, where prior shrinkage
-    matters most and a purely likelihood-driven implementation would look too extreme.
+    All correct answers to hard items and all incorrect answers to easy items are the
+    patterns where MLE diverges. This checks the core Bayesian behavior on sparse data,
+    where prior shrinkage matters most and a purely likelihood-driven implementation
+    would look too extreme.
     """
     item_bank = ItemBank(
       np.array(
         [
-          [1.5, 2.0, 0.0, 1.0],
-          [1.2, 2.5, 0.0, 1.0],
-          [1.8, 1.5, 0.0, 1.0],
+          [1.5, sign * 2.0, 0.0, 1.0],
+          [1.2, sign * 2.5, 0.0, 1.0],
+          [1.8, sign * 1.5, 0.0, 1.0],
         ],
         dtype=float,
       )
     )
     administered_items = [0, 1, 2]
-    response_vector = [True, True, True]
+    response_vector = [sign > 0] * 3
 
     normal_estimator = EAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=1.0))
     normal_theta = normal_estimator.estimate(
@@ -600,8 +603,7 @@ class TestEAPEstimator:
       est_theta=0.0,
     )
 
-    assert normal_theta > 0.0
-    assert normal_theta < 5.0
+    assert 0.0 < sign * normal_theta < 5.0
     assert abs(normal_theta) < abs(flat_theta)
 
   def test_estimate_uses_custom_grid_and_prior(self) -> None:
