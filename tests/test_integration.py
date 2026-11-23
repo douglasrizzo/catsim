@@ -6,7 +6,6 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
-from sklearn.cluster import KMeans
 
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
@@ -123,7 +122,7 @@ def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseS
   ],
 )
 def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector) -> None:
-  """Infinite selectors should work end to end with variable-length stopping rules."""
+  """An infinite selector that raises, or ends a session outside MinErrorStopper's 3 to 10 items, fails the run."""
   item_bank = ItemBank.generate_item_bank(100, seed=42)
   result = run_simulation(item_bank, selector, MinErrorStopper(0.6, min_items=3, max_items=10))
 
@@ -133,9 +132,13 @@ def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector
 @pytest.mark.integration
 @pytest.mark.parametrize("method", ["item_info", "cluster_info", "weighted_info"])
 def test_cluster_selector_completes_runs(method: str) -> None:
-  """ClusterSelector should operate through SimulationRunner for all supported methods."""
+  """A cluster-selection method that raises or stops before six items under SimulationRunner fails the run.
+
+  The selector treats cluster ids as labels, and this test checks only that each method completes a run, so four
+  fixed groups of 15 items are enough. Four groups for six items also make each session reuse a cluster.
+  """
   item_bank = ItemBank.generate_item_bank(60, seed=42)
-  clusters = list(KMeans(n_clusters=4, n_init="auto", random_state=42).fit_predict(item_bank.items))
+  clusters = (np.arange(item_bank.n_items) % 4).tolist()
   result = run_simulation(
     item_bank,
     ClusterSelector(clusters=clusters, method=method, r_max=0.3),
@@ -160,7 +163,7 @@ def test_cluster_selector_completes_runs(method: str) -> None:
   ],
 )
 def test_stoppers_complete_runs(stopper: BaseStopper, expected_min: int, expected_max: int) -> None:
-  """Supported stoppers should terminate sessions within their configured limits."""
+  """A stopper that ends a session before its minimum or after its maximum number of items fails the run."""
   item_bank = ItemBank.generate_item_bank(100, seed=42)
   result = run_simulation(item_bank, MaxInfoSelector(), stopper)
 
