@@ -103,7 +103,7 @@ repos:
     rev: 1.0.0
     hooks:
       - id: mdformat
-        exclude: ^(sphinx|specs)/
+        exclude: ^(sphinx|specs|\.github)/
         additional_dependencies:
           - mdformat-gfm
           - mdformat-toc
