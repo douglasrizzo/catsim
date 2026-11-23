@@ -1,5 +1,6 @@
 """Concrete initialization implementations."""
 
+import math
 from enum import StrEnum
 
 import numpy
@@ -142,6 +143,13 @@ class FixedPointInitializer(BaseInitializer):
   start : float
       The starting ability value for every examinee.
 
+  Raises
+  ------
+  TypeError
+      If ``start`` is not a real number.
+  ValueError
+      If ``start`` is not finite.
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/initialization/fixed-point-initializer`.
@@ -152,28 +160,20 @@ class FixedPointInitializer(BaseInitializer):
     return "Fixed Point Initializer"
 
   def __init__(self, start: float) -> None:
-    """Initialize a FixedPointInitializer object.
-
-    Parameters
-    ----------
-    start : float
-        The starting ability value for every examinee.
-
-    Raises
-    ------
-    TypeError
-        If start is not a numeric value.
-    """
-    self._start = start
+    # math.isfinite raises the TypeError for a non-number, strings included.
+    if not math.isfinite(start):
+      msg = f"start must be finite, got {start}"
+      raise ValueError(msg)
+    self._start = float(start)
 
   def initialize(self, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     """Return the same ability value that was passed to the constructor.
 
     Parameters
     ----------
-    item_bank : Any
+    item_bank : ItemBank
         Unused by this initializer.
-    rng : Any
+    rng : numpy.random.Generator
         Unused by this initializer.
 
     Returns

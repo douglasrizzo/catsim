@@ -95,16 +95,30 @@ class TestRandomInitializerInitialize:
     assert values1 == values2
 
 
+class TestFixedPointInitializerInit:
+  """Tests for FixedPointInitializer construction."""
+
+  @pytest.mark.parametrize("start", [float("nan"), float("inf"), -float("inf")])
+  def test_init_non_finite_start_raises(self, start: float) -> None:
+    """A NaN or infinite start was accepted and became every session's first estimate."""
+    with pytest.raises(ValueError, match="start must be finite"):
+      FixedPointInitializer(start)
+
+  @pytest.mark.parametrize("start", ["abc", None])
+  def test_init_non_numeric_start_raises(self, start: object) -> None:
+    """A non-numeric start was accepted and returned as the initial estimate, despite the documented TypeError."""
+    with pytest.raises(TypeError, match="must be real number"):
+      FixedPointInitializer(start)  # type: ignore[arg-type]
+
+
 class TestFixedPointInitializerInitialize:
   """Tests for FixedPointInitializer.initialize() method."""
 
-  def test_initialize_returns_fixed_value(self) -> None:
-    """Test that initialize always returns the fixed value."""
-    start = 1.5
+  @pytest.mark.parametrize(("start", "expected"), [(1.5, 1.5), (0, 0.0), (np.float64(-1.25), -1.25)])
+  def test_initialize_returns_start_as_builtin_float(self, start: float, expected: float) -> None:
+    """The start was returned as given, so an int or a NumPy scalar reached the session's theta history."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    initializer = FixedPointInitializer(start)
+    theta = FixedPointInitializer(start).initialize(item_bank=item_bank, rng=np.random.default_rng(42))
 
-    for _ in range(10):
-      theta = initializer.initialize(item_bank=item_bank, rng=rng)
-      assert theta == pytest.approx(start)
+    assert type(theta) is float
+    assert theta == expected

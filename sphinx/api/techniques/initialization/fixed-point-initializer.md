@@ -41,9 +41,10 @@ contract, but they do not affect the returned value.
 
 Any correct implementation must satisfy the following properties:
 
-1. It returns the configured `start` value for every initialization request.
-2. It does not depend on the item bank.
-3. It does not consume random numbers from the provided generator.
+1. It rejects a `start` that is not a finite real number when it is constructed.
+2. It returns the configured `start` value, as a `float`, for every initialization request.
+3. It does not depend on the item bank.
+4. It does not consume random numbers from the provided generator.
 
 ## API Reference
 
