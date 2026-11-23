@@ -241,6 +241,21 @@ ignore_names = [
   "close_matplotlib_figures",  # autouse fixture
 ]
 
+[tool.typos.files]
+extend-exclude = ["*.svg"]  # generated figures; their path data reads as words
+
+[tool.typos.default]
+# The Portuguese title of Meneghetti (2015), cited on the cluster selector's page.
+extend-ignore-re = ["(?i)selecao[ _]de[ _]itens"]
+
+[tool.typos.default.extend-words]
+lik = "lik"  # likelihood, in variable names
+mis = "mis"  # maximum information stratification
+nd = "nd"  # numpy's NDArray
+strat = "strat"  # stratified selectors: a-strat, MaxInfoStratSelector
+thr = "thr"  # catR's nextItem argument for the test length, quoted on the progressive pages
+writeable = "writeable"  # numpy's ndarray.flags.writeable
+
 [tool.ty.src]
 include = ["src/catsim"]
 
