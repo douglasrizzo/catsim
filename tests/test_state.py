@@ -9,13 +9,35 @@ from catsim.item_bank import ItemBank
 from catsim.state import CatSessionState, ExposureTracker, SimulationResult
 
 
-def test_session_state_initializes_theta_history_and_count() -> None:
-  """Sessions should seed theta history from the initial theta."""
-  session = CatSessionState(session_id=7, current_theta=1.25)
+def finished_session(session_id: int, items: list[int]) -> CatSessionState:
+  """Return a session that administered ``items``, all answered correctly, with a constant estimate."""
+  return CatSessionState(
+    session_id=session_id,
+    theta_history=[0.0] * (len(items) + 1),
+    administered_item_ids=items,
+    responses=[True] * len(items),
+  )
 
-  assert session.theta_history == [1.25]
-  assert session.latest_theta == 1.25
-  assert session.administered_count == 0
+
+@pytest.mark.parametrize(
+  ("items", "responses", "theta_history", "match"),
+  [
+    pytest.param([0, 1], [True], [0.0, 0.5], "one response per administered item", id="item-without-response"),
+    pytest.param([0], [True], [0.0], "one estimate per response", id="missing-estimate"),
+    pytest.param([0], [True], [0.0, 0.5, 0.7], "one estimate per response", id="extra-estimate"),
+    pytest.param([], [], [], "the initial estimate", id="no-initial-estimate"),
+  ],
+)
+def test_session_state_rejects_a_history_that_does_not_match_its_responses(
+  items: list[int], responses: list[bool], theta_history: list[float], match: str
+) -> None:
+  """A session holds one response per item and one estimate more than responses.
+
+  Fails if such a session is accepted: its current estimate, the last entry of the history, would not
+  be the estimate after its last response (or, with an empty history, would not exist).
+  """
+  with pytest.raises(ValueError, match=match):
+    CatSessionState(session_id=0, theta_history=theta_history, administered_item_ids=items, responses=responses)
 
 
 def test_exposure_tracker_returns_zero_rates_for_non_positive_session_counts() -> None:
@@ -29,10 +51,14 @@ def test_exposure_tracker_returns_zero_rates_for_non_positive_session_counts() -
 
 
 def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
-  """Manual sessions without true theta should still expose examinee vectors."""
+  """A session without a true theta counts as an examinee at 0.
+
+  Fails if examinees drops such a session or holds None for it, so it no longer lines up with
+  latest_estimations.
+  """
   sessions = [
-    CatSessionState(session_id=0, current_theta=0.2, true_theta=None, theta_history=[0.2]),
-    CatSessionState(session_id=1, current_theta=-0.4, true_theta=1.0, theta_history=[-0.4]),
+    CatSessionState(session_id=0, theta_history=[0.2], true_theta=None),
+    CatSessionState(session_id=1, theta_history=[-0.4], true_theta=1.0),
   ]
   result = SimulationResult(
     item_bank=item_bank,
@@ -64,8 +90,8 @@ def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
   length of 1 would give 0.9.
   """
   sessions = [
-    CatSessionState(session_id=0, current_theta=0.0, administered_item_ids=[0, 1], theta_history=[0.0]),
-    CatSessionState(session_id=1, current_theta=0.0, administered_item_ids=[0, 2], theta_history=[0.0]),
+    finished_session(0, [0, 1]),
+    finished_session(1, [0, 2]),
   ]
   result = SimulationResult(
     item_bank=ItemBank.generate_item_bank(5, seed=0),
@@ -79,10 +105,14 @@ def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
 
 
 def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths(item_bank) -> None:
-  """Overlap is undefined for heterogeneous or zero-length sessions."""
+  """Overlap is None for sessions of different lengths or of no items.
+
+  Fails if overlap_rate computes a number from a test length the sessions do not share, or divides
+  by a test length of zero.
+  """
   heterogeneous_sessions = [
-    CatSessionState(session_id=0, current_theta=0.0, administered_item_ids=[0], theta_history=[0.0]),
-    CatSessionState(session_id=1, current_theta=0.0, administered_item_ids=[0, 1], theta_history=[0.0]),
+    finished_session(0, [0]),
+    finished_session(1, [0, 1]),
   ]
   heterogeneous = SimulationResult(
     item_bank=item_bank,
@@ -92,8 +122,8 @@ def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths(item_b
   )
 
   zero_length_sessions = [
-    CatSessionState(session_id=0, current_theta=0.0, theta_history=[0.0]),
-    CatSessionState(session_id=1, current_theta=0.0, theta_history=[0.0]),
+    finished_session(0, []),
+    finished_session(1, []),
   ]
   zero_length = SimulationResult(
     item_bank=item_bank,

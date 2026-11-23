@@ -195,8 +195,9 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   """Stopping checks should forward the item bank, administered items, and latest theta."""
   stopper = RecordingStopper(should_stop=True)
   engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
-  state = CatSessionState(session_id=3, current_theta=1.75)
-  state.administered_item_ids.extend([2, 4])
+  state = CatSessionState(
+    session_id=3, theta_history=[0.0, 0.5, 1.75], administered_item_ids=[2, 4], responses=[True, True]
+  )
 
   stopped = engine.should_stop(state, item_bank)
 
@@ -216,8 +217,9 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   rng = np.random.default_rng(99)
   context = RunContext(rng=rng, exposure_tracker=tracker, total_sessions=4)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  state = CatSessionState(session_id=0, current_theta=-0.25)
-  state.administered_item_ids.extend([1, 2])
+  state = CatSessionState(
+    session_id=0, theta_history=[0.0, 0.5, -0.25], administered_item_ids=[1, 2], responses=[True, False]
+  )
 
   selected = engine.select_next(state, item_bank, context)
 
@@ -237,7 +239,7 @@ def test_select_next_passes_none_exposure_rates_without_total_sessions(item_bank
   rng = np.random.default_rng(11)
   context = RunContext(rng=rng, exposure_tracker=tracker, total_sessions=None)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
-  state = CatSessionState(session_id=0, current_theta=0.5)
+  state = CatSessionState(session_id=0, theta_history=[0.5])
 
   selected = engine.select_next(state, item_bank, context)
 
@@ -428,13 +430,11 @@ def test_apply_response_returns_immutable_session_snapshot(
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 
   first = engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
-  session.metadata["phase"] = "mutated"
   second = engine.apply_response(session, item_bank, item_id=1, response=False, context=context)
 
   assert first.session.administered_item_ids == [0]
   assert first.session.responses == [True]
   assert len(first.session.theta_history) == 2
-  assert first.session.metadata == {}
   assert second.session.administered_item_ids == [0, 1]
   assert second.session.responses == [True, False]
 
@@ -501,9 +501,9 @@ def test_select_next_passes_response_history(
   selector = RecordingSelector(item_id=2)
   engine = CatEngine(fixed_initializer, selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42), total_sessions=10)
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  session.administered_item_ids.extend([0, 1])
-  session.responses.extend([True, False])
+  session = CatSessionState(
+    session_id=0, theta_history=[0.0, 0.5, 0.2], administered_item_ids=[0, 1], responses=[True, False]
+  )
 
   selected = engine.select_next(session, item_bank, context)
 
@@ -515,7 +515,7 @@ def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
   """Simulated responses require a true theta on the session."""
   provider = SimulatedResponseProvider()
   context = RunContext(rng=np.random.default_rng(42))
-  state = CatSessionState(session_id=0, current_theta=0.0)
+  state = CatSessionState(session_id=0, theta_history=[0.0])
 
   with pytest.raises(ValueError, match="true_theta is required") as exc_info:
     provider.answer(state, item_bank, 0, context)
@@ -546,7 +546,7 @@ def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_pro
   item_bank = ItemBank(
     np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
   )
-  state = CatSessionState(session_id=0, current_theta=-1.5, true_theta=1.5)
+  state = CatSessionState(session_id=0, theta_history=[-1.5], true_theta=1.5)
   context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
 
   assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
@@ -599,9 +599,7 @@ def test_apply_response_rejects_duplicate_items(
   """A session cannot administer the same item twice."""
   engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-  session.administered_item_ids.append(0)
-  session.responses.append(True)
+  session = CatSessionState(session_id=0, theta_history=[0.0, 0.5], administered_item_ids=[0], responses=[True])
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
     engine.apply_response(session, item_bank, 0, False, context)

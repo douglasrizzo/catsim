@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy
 
 from . import cat
 
 if TYPE_CHECKING:
+  from collections.abc import Hashable
+
   from ._typing import FloatArray, IntArray
   from .item_bank import ItemBank
 
@@ -29,21 +31,47 @@ class StopReason(StrEnum):
 
 @dataclass(slots=True)
 class CatSessionState:
-  """Mutable runtime state for a single examinee CAT session."""
+  """Mutable runtime state for a single examinee CAT session.
 
-  session_id: int
-  current_theta: float
+  ``session_id`` is whatever hashable value the application identifies the session by, such as an
+  int, a str or a UUID. ``theta_history`` starts with the initial estimate and gains one estimate
+  per response; its last entry is the current estimate. A session runs while ``stop_reason`` is
+  None.
+
+  Raises
+  ------
+  ValueError
+      If the session does not have one response per administered item and one more estimate than
+      responses.
+  """
+
+  session_id: Hashable
+  theta_history: list[float]
   true_theta: float | None = None
   administered_item_ids: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
-  theta_history: list[float] = field(default_factory=list)
   stop_reason: StopReason | None = None
-  metadata: dict[str, Any] = field(default_factory=dict)
 
   def __post_init__(self) -> None:
-    """Seed theta history with the initial theta when no history is provided."""
-    if not self.theta_history:
-      self.theta_history.append(self.current_theta)
+    """Reject a session whose items, responses and estimates do not line up."""
+    n_responses = len(self.responses)
+    if len(self.administered_item_ids) != n_responses:
+      msg = (
+        f"Session {self.session_id} needs one response per administered item, got "
+        f"len(administered_item_ids)={len(self.administered_item_ids)} and len(responses)={n_responses}"
+      )
+      raise ValueError(msg)
+    if len(self.theta_history) != n_responses + 1:
+      msg = (
+        f"Session {self.session_id} needs the initial estimate and one estimate per response in "
+        f"theta_history, got len(theta_history)={len(self.theta_history)} and len(responses)={n_responses}"
+      )
+      raise ValueError(msg)
+
+  @property
+  def current_theta(self) -> float:
+    """Return the current ability estimate, the last entry of ``theta_history``."""
+    return self.theta_history[-1]
 
   @property
   def is_stopped(self) -> bool:
@@ -55,22 +83,15 @@ class CatSessionState:
     """Return the number of administered items."""
     return len(self.administered_item_ids)
 
-  @property
-  def latest_theta(self) -> float:
-    """Return the latest theta estimate."""
-    return self.theta_history[-1]
-
   def snapshot(self) -> CatSessionSnapshot:
     """Return an immutable snapshot of the current session state."""
     return CatSessionSnapshot(
       session_id=self.session_id,
-      current_theta=self.current_theta,
+      theta_history=self.theta_history.copy(),
       true_theta=self.true_theta,
       administered_item_ids=self.administered_item_ids.copy(),
       responses=self.responses.copy(),
-      theta_history=self.theta_history.copy(),
       stop_reason=self.stop_reason,
-      metadata=self.metadata.copy(),
     )
 
 
@@ -78,14 +99,17 @@ class CatSessionState:
 class CatSessionSnapshot:
   """Immutable snapshot of a session at a specific point in time."""
 
-  session_id: int
-  current_theta: float
+  session_id: Hashable
+  theta_history: list[float]
   true_theta: float | None
   administered_item_ids: list[int]
   responses: list[bool]
-  theta_history: list[float]
   stop_reason: StopReason | None
-  metadata: dict[str, Any]
+
+  @property
+  def current_theta(self) -> float:
+    """Return the ability estimate at the time of the snapshot."""
+    return self.theta_history[-1]
 
   @property
   def is_stopped(self) -> bool:
@@ -162,7 +186,7 @@ class SimulationResult:
   @property
   def latest_estimations(self) -> list[float]:
     """Return final theta estimates for each session."""
-    return [session.latest_theta for session in self.sessions]
+    return [session.current_theta for session in self.sessions]
 
   @property
   def examinees(self) -> FloatArray:

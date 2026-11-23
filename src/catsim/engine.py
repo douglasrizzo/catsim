@@ -13,6 +13,8 @@ from .irt import icc
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
+  from collections.abc import Hashable
+
   from .estimation import BaseEstimator
   from .initialization import BaseInitializer
   from .item_bank import ItemBank
@@ -69,18 +71,14 @@ class CatEngine:
 
   def start_session(
     self,
-    session_id: int,
+    session_id: Hashable,
     item_bank: ItemBank,
     context: RunContext,
     true_theta: float | None = None,
   ) -> CatSessionState:
     """Create a new CAT session with an initial theta estimate."""
     initial_theta = float(self._initializer.initialize(item_bank=item_bank, rng=context.rng))
-    return CatSessionState(
-      session_id=session_id,
-      current_theta=initial_theta,
-      true_theta=true_theta,
-    )
+    return CatSessionState(session_id=session_id, theta_history=[initial_theta], true_theta=true_theta)
 
   def should_stop(self, state: CatSessionState, item_bank: ItemBank) -> bool:
     """Return whether the session satisfies the stopping criterion."""
@@ -220,7 +218,6 @@ class CatEngine:
     state.responses.append(response)
     if context.exposure_tracker is not None:
       context.exposure_tracker.record(item_id)
-    state.current_theta = updated_theta
     state.theta_history.append(updated_theta)
     if stopped:
       state.stop_reason = StopReason.STOPPER
