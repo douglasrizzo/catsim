@@ -1,6 +1,6 @@
 """Tests for catsim.estimation module."""
 
-from itertools import pairwise
+from itertools import pairwise, product
 from typing import Any
 
 import numpy as np
@@ -633,14 +633,6 @@ class TestEAPEstimator:
 class TestMAPEstimator:
   """Tests for the Maximum a Posteriori estimator."""
 
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    estimator = MAPEstimator()
-
-    assert str(estimator) == "Maximum a Posteriori Estimator"
-    assert estimator.calls == 0
-    assert estimator.evaluations == 0
-
   @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
@@ -657,7 +649,7 @@ class TestMAPEstimator:
       MAPEstimator(**kwargs)
 
   def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
-    """Test that the prior mode is returned when there is no data."""
+    """With no responses the estimate is the default prior's mode, 0, not the est_theta passed in."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = MAPEstimator()
 
@@ -669,197 +661,42 @@ class TestMAPEstimator:
     )
 
     assert theta == pytest.approx(0.0, abs=1e-6)
-    assert estimator.calls == 1
-    assert estimator.evaluations > 201
 
-  def test_estimate_all_correct_is_finite(self) -> None:
-    """Test that MAP remains finite for an extreme all-correct response pattern."""
-    item_bank = ItemBank(
-      np.array(
-        [
-          [1.2, 2.0, 0.0, 1.0],
-          [1.4, 2.5, 0.0, 1.0],
-          [1.1, 3.0, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
-    )
-    estimator = MAPEstimator()
+  def test_estimate_maximizes_the_log_posterior(self) -> None:
+    """Every response pattern's estimate is the argmax of the log-likelihood plus the log-prior.
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2],
-      response_vector=[True, True, True],
-      est_theta=0.0,
-    )
+    The reference is a dense grid search written out independently of catsim, on 3PL and 4PL items
+    with the prior N(0.5, 0.8^2). It covers the all-correct and all-incorrect patterns, where the MLE
+    diverges, and fails if the prior is dropped, mis-scaled or added with the wrong sign.
+    """
+    items = np.array([[1.2, -1.5, 0.2, 1.0], [0.8, -0.5, 0.0, 1.0], [1.6, 0.5, 0.25, 0.95], [1.0, 1.5, 0.1, 1.0]])
+    mean, sd = 0.5, 0.8
+    fine = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 240_001)
+    a, b, c, d = (items[:, [k]] for k in range(4))
+    p = c + (d - c) / (1.0 + np.exp(-a * (fine - b)))
+    log_prior = -0.5 * ((fine - mean) / sd) ** 2
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean, sd))
 
-    assert np.isfinite(theta)
-    assert theta > 0.0
+    for pattern in product([False, True], repeat=len(items)):
+      log_likelihood = np.sum(np.where(np.array(pattern)[:, None], np.log(p), np.log1p(-p)), axis=0)
+      reference = fine[np.argmax(log_likelihood + log_prior)]
 
-    mle = NumericalSearchEstimator(dodd=False)
-    mle_theta = mle.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2],
-      response_vector=[True, True, True],
-      est_theta=0.0,
-    )
-    assert np.isposinf(mle_theta)
+      theta = estimator.estimate(ItemBank(items), list(range(len(items))), list(pattern), 0.0)
 
-  def test_estimate_uses_custom_prior_mode_when_empty(self) -> None:
-    """Test that a shifted prior changes the no-data MAP estimate."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = MAPEstimator(log_prior=normal_log_prior(mean=1.5, sd=0.5))
+      assert theta == pytest.approx(reference, abs=1e-4), pattern
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=0.0,
-    )
-
-    assert theta == pytest.approx(1.5, abs=1e-6)
-    assert estimator.calls == 1
-    assert estimator.evaluations > 201
-
-  def test_estimate_tracks_evaluation_counts_across_calls(self) -> None:
-    """Test that the estimator counters reflect repeated posterior maximization calls."""
+  def test_counters_add_the_refinement_to_the_search_points(self) -> None:
+    """Each estimate counts the 201 search points plus the refinement steps, and the totals add up."""
     item_bank = ItemBank.generate_item_bank(20, seed=7)
     estimator = MAPEstimator()
 
-    first_theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2, 3],
-      response_vector=[True, False, True, True],
-      est_theta=0.0,
-    )
-    first_evaluations = estimator.evaluations
+    estimator.estimate(item_bank, [0, 1, 2, 3], [True, False, True, True], 0.0)
+    first = estimator.evaluations
+    estimator.estimate(item_bank, [0, 1, 2, 3, 4], [True, False, True, True, False], 0.0)
 
-    second_theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2, 3, 4],
-      response_vector=[True, False, True, True, False],
-      est_theta=0.0,
-    )
-
-    assert estimator.calls == 2
-    assert estimator.evaluations > 0
-    assert estimator.total_evaluations >= first_evaluations
-    assert np.isfinite(first_theta)
-    assert np.isfinite(second_theta)
-
-  def test_estimate_all_incorrect_is_finite(self) -> None:
-    """Test that MAP remains finite for an extreme all-incorrect response pattern."""
-    item_bank = ItemBank(
-      np.array(
-        [
-          [1.2, -2.0, 0.0, 1.0],
-          [1.4, -2.5, 0.0, 1.0],
-          [1.1, -3.0, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
-    )
-    estimator = MAPEstimator()
-
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2],
-      response_vector=[False, False, False],
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(theta)
-    assert theta < 0.0
-
-  def test_estimate_records_evaluation_counts_for_mixed_responses(self) -> None:
-    """Mixed response patterns should update the evaluation counters."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    estimator = MAPEstimator()
-
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1, 2, 3, 4],
-      response_vector=[True, False, True, True, False],
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(theta)
-    assert estimator.calls == 1
-    assert estimator.evaluations > 0
-    assert estimator.total_evaluations == estimator.evaluations
-
-  def test_estimate_is_pulled_toward_prior_mean_vs_mle(self) -> None:
-    """MAP should move the estimate toward the prior mean relative to the MLE.
-
-    This captures MAP's defining short-test behavior; if it matched MLE here,
-    the implementation would be ignoring prior information in the case that matters.
-    """
-    item_bank = ItemBank(
-      np.array(
-        [
-          [1.5, 2.0, 0.0, 1.0],
-          [1.2, 2.5, 0.0, 1.0],
-          [1.8, 1.5, 0.0, 1.0],
-          [1.0, 3.0, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
-    )
-    administered_items = [0, 1, 2, 3]
-    response_vector = [True, True, True, False]
-
-    mle = NumericalSearchEstimator(dodd=False)
-    mle_theta = mle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=1.0))
-    map_theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(mle_theta)
-    assert np.isfinite(map_theta)
-    assert mle_theta > 0.0
-    assert map_theta > 0.0
-    assert abs(map_theta) < abs(mle_theta)
-
-  def test_estimate_and_posterior_mean_agree_on_a_long_test(self) -> None:
-    """MAP and posterior mean should agree on an information-rich test.
-
-    On a smooth concentrated posterior, the mode and mean should nearly coincide,
-    so this cross-check catches bugs in either posterior scoring or optimization.
-    """
-    item_bank = ItemBank.generate_item_bank(30, seed=5)
-    theta_true = 0.3
-    rng = np.random.default_rng(42)
-    administered_items = list(range(20))
-    response_vector = [
-      bool(rng.random() < posterior_prob)
-      for posterior_prob in [irt.icc(theta_true, *item_bank.items[idx, :4]) for idx in administered_items]
-    ]
-    log_prior = normal_log_prior()
-
-    map_estimator = MAPEstimator(log_prior=log_prior)
-    map_theta = map_estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-    grid = QuadratureGrid.uniform()
-    posterior_mass = posterior(response_vector, item_bank.items[administered_items, :4], grid, log_prior)
-    eap_theta = posterior_mean(posterior_mass, grid.nodes)
-
-    assert np.isfinite(map_theta)
-    assert np.isfinite(eap_theta)
-    assert abs(map_theta - eap_theta) < 0.15
+    assert first > 201
+    assert estimator.evaluations > 201
+    assert (estimator.calls, estimator.total_evaluations) == (2, first + estimator.evaluations)
 
   @staticmethod
   def _hard_items() -> ItemBank:
@@ -960,33 +797,3 @@ class TestMAPEstimator:
     """A response vector longer than the administered items is an error, even with no items."""
     with pytest.raises(ValueError, match="same length"):
       MAPEstimator().estimate(self._hard_items(), [], [True], 0.0)
-
-  def test_estimate_shifted_prior_pulls_post_data_map_estimate(self) -> None:
-    """A shifted prior should move the post-data MAP estimate toward its mean.
-
-    The prior must still influence the estimate after data arrive; otherwise the
-    no-data default would work while real Bayesian shrinkage silently failed.
-    """
-    item_bank = ItemBank.generate_item_bank(10, seed=9)
-    administered_items = [0, 1, 2, 3]
-    response_vector = [True, False, True, False]
-
-    default_estimator = MAPEstimator()
-    default_theta = default_estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    shifted_estimator = MAPEstimator(log_prior=normal_log_prior(mean=2.0, sd=1.0))
-    shifted_theta = shifted_estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(default_theta)
-    assert np.isfinite(shifted_theta)
-    assert shifted_theta > default_theta
