@@ -86,13 +86,11 @@ It is removed when the spec is promoted to "Implemented" status.
 """Sympson-Hetter exposure control (1985)."""
 
 import numpy
-import numpy.typing as npt
 
+from .._typing import FloatArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
 from ..selection.base import BaseSelector
-
-FloatArray = npt.NDArray[numpy.floating]
 
 
 class SympsonHetterControl:

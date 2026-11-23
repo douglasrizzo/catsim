@@ -545,13 +545,11 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <span class="sd">"""Sympson-Hetter exposure control (1985)."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..selection.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
-
-<span class="n">FloatArray</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">SympsonHetterControl</span><span class="p">:</span>

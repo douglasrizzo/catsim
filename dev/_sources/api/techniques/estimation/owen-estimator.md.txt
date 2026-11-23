@@ -112,13 +112,11 @@ It is removed when the spec is promoted to "Implemented" status.
 from collections.abc import Callable
 
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .base import BaseEstimator
-
-FloatArray = npt.NDArray[numpy.floating]
 
 
 class OwenEstimator(BaseEstimator):

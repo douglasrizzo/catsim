@@ -552,8 +552,8 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <span class="sd">"""Posterior Kullback-Leibler selector."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..estimation.bayesian</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
   <span class="n">LogPrior</span><span class="p">,</span>
   <span class="n">QuadratureGrid</span><span class="p">,</span>
@@ -564,8 +564,6 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.kl</span><span class="w"> </span><span class="kn">import</span> <span class="n">_kl_integrand</span>  <span class="c1"># reuse the kernel from card 03</span>
-
-<span class="n">FloatArray</span> <span class="o">=</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span>
 
 
 <span class="k">class</span><span class="w"> </span><span class="nc">KLPSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
@@ -638,7 +636,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
-    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">response_vector</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

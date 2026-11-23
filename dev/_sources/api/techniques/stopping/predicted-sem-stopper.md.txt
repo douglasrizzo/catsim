@@ -95,12 +95,10 @@ It is removed when the spec is promoted to "Implemented" status.
 # src/catsim/stopping/stopping.py  (alongside MinErrorStopper)
 """Predicted-SEM stopping rule (Choi, Grady & Dodd, 2011)."""
 
-from typing import Any
-
 import numpy
-import numpy.typing as npt
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .stopping import TestLengthStopper
 
@@ -168,7 +166,7 @@ class PredictedSEMStopper(TestLengthStopper):
 
   def _check_stopping_criterion(  # noqa: PLR6301
     self,
-    administered_items: npt.NDArray[numpy.floating[Any]],  # noqa: ARG002
+    administered_items: FloatArray,  # noqa: ARG002
     theta: float,  # noqa: ARG002
   ) -> bool:
     # Logic lives in stop() because we need the item bank, not just admin params.

@@ -421,6 +421,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
+
 
 <div class="viewcode-block" id="dodd">
 <a class="viewcode-back" href="../../api/cat.html#catsim.cat.dodd">[docs]</a>
@@ -593,7 +595,7 @@
 
 <div class="viewcode-block" id="overlap_rate">
 <a class="viewcode-back" href="../../api/cat.html#catsim.cat.overlap_rate">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the test overlap rate.</span>
 
 <span class="sd">  An average measure of how much of the test two examinees take is equal :cite:p:`Bar10`.</span>

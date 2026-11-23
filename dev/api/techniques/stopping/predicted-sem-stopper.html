@@ -550,12 +550,10 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># src/catsim/stopping/stopping.py  (alongside MinErrorStopper)</span>
 <span class="sd">"""Predicted-SEM stopping rule (Choi, Grady &amp; Dodd, 2011)."""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestLengthStopper</span>
 
@@ -623,7 +621,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_check_stopping_criterion</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
     <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="c1"># Logic lives in stop() because we need the item bank, not just admin params.</span>

@@ -569,9 +569,9 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <span class="sd">"""Stochastic curtailment for classification CATs (Finkelman 2008)."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.classification</span><span class="w"> </span><span class="kn">import</span> <span class="n">Classification</span><span class="p">,</span> <span class="n">SPRTStopper</span>
 
@@ -632,7 +632,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
   <span class="k">def</span><span class="w"> </span><span class="nf">_curtailment_probability</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">remaining_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
+    <span class="n">remaining_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
     <span class="n">current_llr</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Classification</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Normal-approximation forward projection of the LLR over the horizon.</span>

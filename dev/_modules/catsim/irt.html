@@ -425,9 +425,10 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numexpr</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">expit</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 <span class="n">THETA_MIN_TYPICAL</span> <span class="o">=</span> <span class="o">-</span><span class="mf">4.0</span>
 <span class="sd">"""Typical lower bound for ability (theta) estimation.</span>
@@ -541,7 +542,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_split_params</span><span class="p">(</span>
-  <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+  <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">  </span><span class="sd">"""Split the item matrix parameters into columns.</span>
 
@@ -566,7 +567,7 @@
 
 <div class="viewcode-block" id="detect_model">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.detect_model">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_model</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Detect which logistic model an item matrix fits into.</span>
 
 <span class="sd">  Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,</span>
@@ -600,9 +601,7 @@
 
 <div class="viewcode-block" id="icc_hpc">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.icc_hpc">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">icc_hpc</span><span class="p">(</span>
-  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">icc_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Compute item characteristic functions for all items in a numpy array at once.</span>
 
 <span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
@@ -633,9 +632,7 @@
 
 <div class="viewcode-block" id="inf_hpc">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.inf_hpc">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">inf_hpc</span><span class="p">(</span>
-  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">inf_hpc</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Compute the information values for all items in a numpy array using numpy and numexpr.</span>
 
 <span class="sd">  This is a high-performance computing (HPC) version that uses vectorized operations</span>
@@ -721,7 +718,7 @@
 
 <div class="viewcode-block" id="test_info">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.test_info">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_info</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the test information of a test at a specific :math:`\theta` value :cite:p:`Ayala2009`.</span>
 
 <span class="sd">  Test information is the sum of individual item information values and indicates</span>
@@ -750,7 +747,7 @@
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.var">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span>
   <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">test_inf</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the variance (:math:`Var`) of the ability estimate of a test at a specific :math:`\theta` value.</span>
@@ -797,7 +794,7 @@
 
 <div class="viewcode-block" id="see">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.see">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">see</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">see</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the standard error of estimation (:math:`SEE`) of a test.</span>
 
 <span class="sd">  The estimate is computed at a specific :math:`\theta` value :cite:p:`Ayala2009`.</span>
@@ -814,7 +811,7 @@
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float</span>
 <span class="sd">      An ability value.</span>
-<span class="sd">  items : npt.NDArray[numpy.floating[Any]]</span>
+<span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      A matrix containing item parameters.</span>
 
 <span class="sd">  Returns</span>
@@ -829,9 +826,7 @@
 
 <div class="viewcode-block" id="confidence_interval">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.confidence_interval">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">confidence_interval</span><span class="p">(</span>
-  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">confidence_interval</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the confidence interval for an ability estimate.</span>
 
 <span class="sd">  The confidence interval is computed using the normal approximation:</span>
@@ -846,7 +841,7 @@
 <span class="sd">  ----------</span>
 <span class="sd">  theta : float</span>
 <span class="sd">      The estimated ability value.</span>
-<span class="sd">  items : npt.NDArray[numpy.floating[Any]]</span>
+<span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      A matrix containing item parameters for administered items.</span>
 <span class="sd">  confidence : float, optional</span>
 <span class="sd">      The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).</span>
@@ -899,12 +894,12 @@
 <div class="viewcode-block" id="theta_to_scale">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.theta_to_scale">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">theta_to_scale</span><span class="p">(</span>
-  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span>
   <span class="n">scale_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
   <span class="n">scale_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
   <span class="n">theta_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
   <span class="n">theta_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Convert theta values to a custom score scale using linear transformation.</span>
 
 <span class="sd">  This function transforms ability estimates from the standard IRT theta scale</span>
@@ -979,12 +974,12 @@
 <div class="viewcode-block" id="scale_to_theta">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.scale_to_theta">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">scale_to_theta</span><span class="p">(</span>
-  <span class="n">score</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+  <span class="n">score</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span>
   <span class="n">scale_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
   <span class="n">scale_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
   <span class="n">theta_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
   <span class="n">theta_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Convert scores from a custom scale to theta values using linear transformation.</span>
 
 <span class="sd">  This function transforms scores from any desired scale (e.g., 0-100, 200-800)</span>
@@ -1057,7 +1052,7 @@
 
 <div class="viewcode-block" id="reliability">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.reliability">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">reliability</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">reliability</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute test reliability :cite:p:`Thissen00`.</span>
 
 <span class="sd">  Test reliability is a measure of internal consistency for the test, similar to</span>
@@ -1161,7 +1156,7 @@
 
 <div class="viewcode-block" id="max_info_hpc">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.max_info_hpc">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">max_info_hpc</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">max_info_hpc</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Parallelized version of :py:func:`max_info` using :py:mod:`numpy` and :py:mod:`numexpr`.</span>
 
 <span class="sd">  This high-performance computing version efficiently computes the theta values of</span>
@@ -1201,9 +1196,7 @@
 
 <div class="viewcode-block" id="inf_integral">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.inf_integral">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">inf_integral</span><span class="p">(</span>
-  <span class="n">lower</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">upper</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">inf_integral</span><span class="p">(</span><span class="n">lower</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">upper</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Integrate the information function of each item between two ability values, in closed form.</span>
 
 <span class="sd">  Since :math:`dP/d\theta = a (P - c)(d - P) / (d - c)`, the item information</span>
@@ -1234,7 +1227,7 @@
 <span class="sd">  """</span>
   <span class="n">a</span><span class="p">,</span> <span class="n">_b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">antiderivative</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">antiderivative</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
     <span class="c1"># the logarithms only matter when their coefficients are positive; `where` drops 0 * log(0)</span>
     <span class="k">return</span> <span class="n">numexpr</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span>
       <span class="s2">"a / (d - c) * (p - where(c * d &gt; 0, c * d * log(p), 0)"</span>
@@ -1251,7 +1244,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">log_likelihood</span><span class="p">(</span>
   <span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
   <span class="n">response_vector</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-  <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+  <span class="n">administered_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the log-likelihood of an ability, given a response vector and the parameters of the answered items.</span>
 
@@ -1342,7 +1335,7 @@
 
 <div class="viewcode-block" id="normalize_item_bank">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.normalize_item_bank">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">normalize_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Normalize an item matrix so that it conforms to the standard used by catsim.</span>
 
 <span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>
@@ -1382,7 +1375,7 @@
 
 <div class="viewcode-block" id="validate_item_bank">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.validate_item_bank">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">raise_err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_item_bank</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">raise_err</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.</span>
 
 <span class="sd">  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item</span>

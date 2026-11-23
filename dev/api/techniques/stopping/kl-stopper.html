@@ -554,13 +554,11 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># src/catsim/stopping/stopping.py  (alongside the other Choi 2011 stoppers)</span>
 <span class="sd">"""Kullback-Leibler information stopper."""</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestLengthStopper</span>
 
@@ -607,7 +605,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"KLInfoStopper(min_kl=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_kl</span><span class="si">}</span><span class="s2">, c=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_c</span><span class="si">}</span><span class="s2">)"</span>
 
   <span class="c1"># ---- core kernel ----</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">_kl_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="n">half_width</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_kl_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">half_width</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c_param</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
     <span class="n">val</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span>
       <span class="n">_kl_integrand</span><span class="p">,</span>
@@ -643,7 +641,7 @@ It is removed when the spec is promoted to “Implemented” status.</p>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">_check_stopping_criterion</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">administered_items</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">NDArray</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">floating</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>  <span class="c1"># noqa: ARG002</span>
+    <span class="n">administered_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
     <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>  <span class="c1"># noqa: ARG002</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">False</span>
