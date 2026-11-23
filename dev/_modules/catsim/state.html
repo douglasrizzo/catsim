@@ -776,26 +776,17 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
+
   <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-
-
-<div class="viewcode-block" id="SessionStatus">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.SessionStatus">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SessionStatus</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Lifecycle state for a CAT session."""</span>
-
-  <span class="n">NOT_STARTED</span> <span class="o">=</span> <span class="s2">"not_started"</span>
-  <span class="n">IN_PROGRESS</span> <span class="o">=</span> <span class="s2">"in_progress"</span>
-  <span class="n">STOPPED</span> <span class="o">=</span> <span class="s2">"stopped"</span></div>
-
 
 
 <div class="viewcode-block" id="StopReason">
@@ -817,47 +808,77 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatSessionState</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Mutable runtime state for a single examinee CAT session."""</span>
+<span class="w">  </span><span class="sd">"""Mutable runtime state for a single examinee CAT session.</span>
 
-  <span class="n">session_id</span><span class="p">:</span> <span class="nb">int</span>
-  <span class="n">current_theta</span><span class="p">:</span> <span class="nb">float</span>
+<span class="sd">  ``session_id`` is whatever hashable value the application identifies the session by, such as an</span>
+<span class="sd">  int, a str or a UUID. ``theta_history`` starts with the initial estimate and gains one estimate</span>
+<span class="sd">  per response; its last entry is the current estimate. A session runs while ``stop_reason`` is</span>
+<span class="sd">  None.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If the session does not have one response per administered item and one more estimate than</span>
+<span class="sd">      responses, or if ``stop_reason`` is not a :class:`StopReason` value.</span>
+<span class="sd">  """</span>
+
+  <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span>
+  <span class="n">theta_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
   <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="n">administered_item_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
   <span class="n">responses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-  <span class="n">theta_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-  <span class="n">status</span><span class="p">:</span> <span class="n">SessionStatus</span> <span class="o">=</span> <span class="n">SessionStatus</span><span class="o">.</span><span class="n">NOT_STARTED</span>
   <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-  <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Seed theta history with the initial theta when no history is provided."""</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_theta</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Take its own copy of the histories and reject a session whose entries do not line up."""</span>
+    <span class="c1"># The engine appends to these lists, so they must be lists the session owns: a snapshot's tuples</span>
+    <span class="c1"># would fail half-way through a step, and a caller's lists would change under the caller.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">responses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="c1"># A stop reason restored from storage comes back as its string value.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">)</span>
+    <span class="n">n_responses</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_responses</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> needs one response per administered item, got "</span>
+        <span class="sa">f</span><span class="s2">"len(administered_item_ids)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> and len(responses)=</span><span class="si">{</span><span class="n">n_responses</span><span class="si">}</span><span class="s2">"</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_responses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> needs the initial estimate and one estimate per response in "</span>
+        <span class="sa">f</span><span class="s2">"theta_history, got len(theta_history)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span><span class="si">}</span><span class="s2"> and len(responses)=</span><span class="si">{</span><span class="n">n_responses</span><span class="si">}</span><span class="s2">"</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">current_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the current ability estimate, the last entry of ``theta_history``."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the session has ended."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">administered_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the number of administered items."""</span>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">latest_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the latest theta estimate."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
 <div class="viewcode-block" id="CatSessionState.snapshot">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState.snapshot">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionSnapshot</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return an immutable snapshot of the current session state."""</span>
+<span class="w">    </span><span class="sd">"""Return an immutable copy of the current session state."""</span>
     <span class="k">return</span> <span class="n">CatSessionSnapshot</span><span class="p">(</span>
       <span class="n">session_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="p">,</span>
-      <span class="n">current_theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
+      <span class="n">theta_history</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">),</span>
       <span class="n">true_theta</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span>
-      <span class="n">administered_item_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-      <span class="n">responses</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-      <span class="n">theta_history</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-      <span class="n">status</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">,</span>
+      <span class="n">administered_item_ids</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">),</span>
+      <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
       <span class="n">stop_reason</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">,</span>
-      <span class="n">metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
     <span class="p">)</span></div>
 </div>
 
@@ -867,32 +888,55 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionSnapshot">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatSessionSnapshot</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Immutable snapshot of a session at a specific point in time."""</span>
+<span class="w">  </span><span class="sd">"""Immutable, hashable copy of a session at a specific point in time."""</span>
 
-  <span class="n">session_id</span><span class="p">:</span> <span class="nb">int</span>
-  <span class="n">current_theta</span><span class="p">:</span> <span class="nb">float</span>
+  <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span>
+  <span class="n">theta_history</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
   <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
-  <span class="n">administered_item_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
-  <span class="n">responses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
-  <span class="n">theta_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
-  <span class="n">status</span><span class="p">:</span> <span class="n">SessionStatus</span>
+  <span class="n">administered_item_ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+  <span class="n">responses</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
   <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span>
-  <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">current_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the ability estimate at the time of the snapshot."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">is_stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the session had ended at the time of the snapshot."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
 
 
 <div class="viewcode-block" id="CatStepResult">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatStepResult">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatStepResult</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Result of applying one CAT step."""</span>
+<span class="w">  </span><span class="sd">"""Result of one CAT step: the item administered, its response and the session as the step left it.</span>
+
+<span class="sd">  ``selected_item_id`` and ``response`` are None for a step that administered nothing because the</span>
+<span class="sd">  session had ended.</span>
+<span class="sd">  """</span>
 
   <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span>
   <span class="n">selected_item_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>
   <span class="n">response</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
-  <span class="n">updated_theta</span><span class="p">:</span> <span class="nb">float</span>
-  <span class="n">stopped</span><span class="p">:</span> <span class="nb">bool</span>
-  <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">updated_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the ability estimate after the step."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stopped</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return whether the session had ended by the end of the step."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">is_stopped</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">stop_reason</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return why the session ended, or None if it is still running."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">stop_reason</span></div>
 
 
 
@@ -964,7 +1008,7 @@ window.runMermaid = runMermaid;</script>
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">latest_estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return final theta estimates for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">latest_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>

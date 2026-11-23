@@ -475,7 +475,9 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 <li><p><code class="docutils literal notranslate"><span class="pre">STOPPER</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;stopper&quot;</span></code>): the engine’s stopper is satisfied by the session’s current state;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>): the selector has no item to offer.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> while the session runs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> while the session runs, and it is the only record of whether the
+session has ended: <code class="docutils literal notranslate"><span class="pre">is_stopped</span></code> reads it, and there is no separate status field. Lifecycle
+states such as paused or abandoned belong to the application.</p>
 </li>
 <li><p>A selector says that it has no item by raising <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>. That is the single “no
 item” signal. Until the selectors’ return type is narrowed to <code class="docutils literal notranslate"><span class="pre">int</span></code>, the engine treats a <code class="docutils literal notranslate"><span class="pre">None</span></code>
@@ -491,8 +493,8 @@ therefore one loop with no other stop check:</p>
 <p><code class="docutils literal notranslate"><span class="pre">step()</span></code> is the same three moves: select, get the response, apply it.</p>
 </li>
 <li><p>The stopper is evaluated once per session state: by <code class="docutils literal notranslate"><span class="pre">select_next</span></code> for the initial state, before
-any response, and by <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> after each new estimate. The status <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>
-records is final; <code class="docutils literal notranslate"><span class="pre">select_next</span></code> does not ask again.</p></li>
+any response, and by <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> after each new estimate. What <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> records is
+final; <code class="docutils literal notranslate"><span class="pre">select_next</span></code> does not ask again.</p></li>
 <li><p>Stoppers are pure: the same inputs give the same answer, and asking has no side effects. Asking
 once per state therefore loses nothing.</p></li>
 <li><p>Running out of items is the engine’s to detect, through the selector, and it reports <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>.
@@ -516,7 +518,7 @@ number of administered items with the bank size does.</p></li>
 <li><p>A session of n items makes n + 1 stopper calls instead of 2n, which matters for stoppers that are
 costly to evaluate.</p></li>
 <li><p>A state whose items were appended by hand, outside <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>, is not re-evaluated by the
-stopper. An application that persists sessions restores their status and stop reason with them.</p></li>
+stopper. An application that persists sessions restores their stop reason with them.</p></li>
 <li><p>Custom selectors that return <code class="docutils literal notranslate"><span class="pre">None</span></code>, and code comparing the old strings (<code class="docutils literal notranslate"><span class="pre">&quot;stop_rule&quot;</span></code>,
 <code class="docutils literal notranslate"><span class="pre">&quot;item_bank_exhausted&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;selector_stopped&quot;</span></code>), must change.</p></li>
 </ul>

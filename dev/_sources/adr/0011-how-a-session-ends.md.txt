@@ -26,7 +26,9 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   - `STOPPER` (`"stopper"`): the engine's stopper is satisfied by the session's current state;
   - `NO_ITEMS` (`"no_items"`): the selector has no item to offer.
 
-  `stop_reason` is `None` while the session runs.
+  `stop_reason` is `None` while the session runs, and it is the only record of whether the
+  session has ended: `is_stopped` reads it, and there is no separate status field. Lifecycle
+  states such as paused or abandoned belong to the application.
 - A selector says that it has no item by raising `NoItemsAvailableError`. That is the single "no
   item" signal. Until the selectors' return type is narrowed to `int`, the engine treats a `None`
   from `select` the same way.
@@ -42,8 +44,8 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 
   `step()` is the same three moves: select, get the response, apply it.
 - The stopper is evaluated once per session state: by `select_next` for the initial state, before
-  any response, and by `apply_response` after each new estimate. The status `apply_response`
-  records is final; `select_next` does not ask again.
+  any response, and by `apply_response` after each new estimate. What `apply_response` records is
+  final; `select_next` does not ask again.
 - Stoppers are pure: the same inputs give the same answer, and asking has no side effects. Asking
   once per state therefore loses nothing.
 - Running out of items is the engine's to detect, through the selector, and it reports `NO_ITEMS`.
@@ -65,6 +67,6 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 - A session of n items makes n + 1 stopper calls instead of 2n, which matters for stoppers that are
   costly to evaluate.
 - A state whose items were appended by hand, outside `apply_response`, is not re-evaluated by the
-  stopper. An application that persists sessions restores their status and stop reason with them.
+  stopper. An application that persists sessions restores their stop reason with them.
 - Custom selectors that return `None`, and code comparing the old strings (`"stop_rule"`,
   `"item_bank_exhausted"`, `"selector_stopped"`), must change.

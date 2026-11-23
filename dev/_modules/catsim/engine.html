@@ -782,9 +782,11 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">icc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">CatStepResult</span><span class="p">,</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">SessionStatus</span><span class="p">,</span> <span class="n">StopReason</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">CatStepResult</span><span class="p">,</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">StopReason</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
+
   <span class="kn">from</span><span class="w"> </span><span class="nn">.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
@@ -860,19 +862,14 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.start_session">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">start_session</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">session_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">,</span>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
     <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionState</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Create a new CAT session with an initial theta estimate."""</span>
     <span class="n">initial_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">CatSessionState</span><span class="p">(</span>
-      <span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span>
-      <span class="n">current_theta</span><span class="o">=</span><span class="n">initial_theta</span><span class="p">,</span>
-      <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">,</span>
-      <span class="n">status</span><span class="o">=</span><span class="n">SessionStatus</span><span class="o">.</span><span class="n">IN_PROGRESS</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">CatSessionState</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">theta_history</span><span class="o">=</span><span class="p">[</span><span class="n">initial_theta</span><span class="p">],</span> <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CatEngine.should_stop">
@@ -898,8 +895,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        engine.apply_response(state, item_bank, item_id, ask_examinee(item_id), context)</span>
 
 <span class="sd">    The stopper is consulted here only for a session that has no responses yet. After that,</span>
-<span class="sd">    :meth:`apply_response` evaluates it once for every new state, and the status it records is</span>
-<span class="sd">    final.</span>
+<span class="sd">    :meth:`apply_response` evaluates it once for every new state, and what it records is final.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -917,10 +913,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        stopped (and is left untouched), its stopper is satisfied (reason ``StopReason.STOPPER``),</span>
 <span class="sd">        or the selector has no item to offer (reason ``StopReason.NO_ITEMS``).</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">SessionStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_stop</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">):</span>
-      <span class="n">_end</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span><span class="p">)</span>
+      <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
       <span class="k">return</span> <span class="kc">None</span>
 
     <span class="n">exposure_rates</span> <span class="o">=</span> <span class="kc">None</span>
@@ -939,7 +935,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">item_id</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># BaseSelector.select is typed int | None, so a custom selector may say "no item" with None.</span>
     <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">_end</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">NO_ITEMS</span><span class="p">)</span>
+      <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">NO_ITEMS</span>
       <span class="k">return</span> <span class="kc">None</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span></div>
 
@@ -987,7 +983,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    TypeError</span>
 <span class="sd">        If the item index is not an integer, or the response is not a ``bool`` or ``numpy.bool_``.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">SessionStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> has stopped (reason: </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="si">}</span><span class="s2">) and accepts no more responses"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="c1"># Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.</span>
@@ -1022,19 +1018,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="n">state</span><span class="o">.</span><span class="n">current_theta</span> <span class="o">=</span> <span class="n">updated_theta</span>
     <span class="n">state</span><span class="o">.</span><span class="n">theta_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">updated_theta</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">stopped</span><span class="p">:</span>
-      <span class="n">_end</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span><span class="p">)</span>
+      <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
 
-    <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span>
-      <span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span>
-      <span class="n">selected_item_id</span><span class="o">=</span><span class="n">item_id</span><span class="p">,</span>
-      <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span>
-      <span class="n">updated_theta</span><span class="o">=</span><span class="n">updated_theta</span><span class="p">,</span>
-      <span class="n">stopped</span><span class="o">=</span><span class="n">stopped</span><span class="p">,</span>
-      <span class="n">stop_reason</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">selected_item_id</span><span class="o">=</span><span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CatEngine.step">
@@ -1068,7 +1056,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    """</span>
     <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">selected_item_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">response_provider</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
 
@@ -1083,16 +1071,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionState</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Run a session until a stop condition is reached."""</span>
-    <span class="k">while</span> <span class="n">state</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">SessionStatus</span><span class="o">.</span><span class="n">STOPPED</span><span class="p">:</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">response_provider</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">state</span></div>
 </div>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_end</span><span class="p">(</span><span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="n">StopReason</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-  <span class="n">state</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">SessionStatus</span><span class="o">.</span><span class="n">STOPPED</span>
-  <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">reason</span>
 </pre></div>
 
                 </article>
