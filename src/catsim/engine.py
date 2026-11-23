@@ -74,7 +74,7 @@ class CatEngine:
     true_theta: float | None = None,
   ) -> CatSessionState:
     """Create a new CAT session with an initial theta estimate."""
-    initial_theta = self._initializer.initialize(item_bank=item_bank, rng=context.rng)
+    initial_theta = float(self._initializer.initialize(item_bank=item_bank, rng=context.rng))
     return CatSessionState(
       session_id=session_id,
       current_theta=initial_theta,
@@ -143,7 +143,7 @@ class CatEngine:
     if item_id is None:
       _end(state, StopReason.NO_ITEMS)
       return None
-    return item_id
+    return int(item_id)
 
   def apply_response(
     self,
@@ -200,11 +200,13 @@ class CatEngine:
       raise ValueError(msg)
 
     response = bool(response)
-    updated_theta = self._estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[*state.administered_item_ids, item_id],
-      response_vector=[*state.responses, response],
-      est_theta=state.current_theta,
+    updated_theta = float(
+      self._estimator.estimate(
+        item_bank=item_bank,
+        administered_items=[*state.administered_item_ids, item_id],
+        response_vector=[*state.responses, response],
+        est_theta=state.current_theta,
+      )
     )
 
     state.administered_item_ids.append(item_id)

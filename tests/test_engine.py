@@ -348,6 +348,33 @@ def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
   assert session == before
 
 
+def test_session_state_holds_builtin_python_values(item_bank) -> None:
+  """The engine stores Python scalars whatever numeric types the strategies and the examinee return.
+
+  Fails if an int initial theta, a ``numpy.float64`` estimate (as NumericalSearchEstimator
+  returns), a ``numpy.int64`` item index or a ``numpy.bool_`` response is stored as given.
+  """
+  engine = CatEngine(
+    RecordingInitializer(theta=0),
+    RecordingSelector(item_id=np.int64(3)),
+    RecordingEstimator(theta=np.float64(0.25)),
+    RecordingStopper(False),
+  )
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+
+  result = engine.step(session, item_bank, FixedResponseProvider(np.True_), context)
+
+  assert session.theta_history == [0.0, 0.25]
+  assert [type(theta) for theta in session.theta_history] == [float, float]
+  assert type(session.current_theta) is float
+  assert session.administered_item_ids == [3]
+  assert type(session.administered_item_ids[0]) is int
+  assert session.responses == [True]
+  assert type(session.responses[0]) is bool
+  assert (type(result.selected_item_id), type(result.response), type(result.updated_theta)) == (int, bool, float)
+
+
 def test_apply_response_returns_immutable_session_snapshot(
   item_bank,
   fixed_initializer,
