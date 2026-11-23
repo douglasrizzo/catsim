@@ -1,12 +1,31 @@
 """Kullback-Leibler item selector."""
 
+import math
+
 import numpy
 from scipy.integrate import quad
+from scipy.special import log_expit
 
-from .. import irt
 from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .base import BaseSelector
+
+
+def _log_probabilities(theta: float, a: float, b: float, c_param: float, d: float) -> tuple[float, float]:
+  """Return the log-probabilities of a correct and an incorrect response at ``theta``.
+
+  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood_hpc`, so
+  the log-probability of an incorrect response stays exact where the probability of a correct one
+  rounds to 1.
+  """
+  z = a * (theta - b)
+  log_dmc = math.log(d - c_param)
+  log_c = math.log(c_param) if c_param > 0 else -math.inf
+  log_1md = math.log1p(-d) if d < 1 else -math.inf
+  return (
+    float(numpy.logaddexp(log_c, log_dmc + log_expit(z))),
+    float(numpy.logaddexp(log_1md, log_dmc + log_expit(-z))),
+  )
 
 
 def _kl_integrand(
@@ -18,14 +37,9 @@ def _kl_integrand(
   d: float,
 ) -> float:
   """Return the KL divergence between response distributions at two ability values."""
-  p_hat = irt.icc(theta_hat, a, b, c_param, d)
-  p = irt.icc(theta, a, b, c_param, d)
-
-  eps = 1e-12
-  p_hat = numpy.clip(p_hat, eps, 1.0 - eps)
-  p = numpy.clip(p, eps, 1.0 - eps)
-
-  return float(p_hat * numpy.log(p_hat / p) + (1.0 - p_hat) * numpy.log((1.0 - p_hat) / (1.0 - p)))
+  log_p_hat, log_q_hat = _log_probabilities(theta_hat, a, b, c_param, d)
+  log_p, log_q = _log_probabilities(theta, a, b, c_param, d)
+  return math.exp(log_p_hat) * (log_p_hat - log_p) + math.exp(log_q_hat) * (log_q_hat - log_q)
 
 
 class KLSelector(BaseSelector):

@@ -851,6 +851,18 @@ class TestKLSelector:
     value = kl_module.__dict__["_kl_integrand"](0.0, 0.0, 1.0, 0.0, 0.0, 1.0)
     assert value == pytest.approx(0.0, abs=1e-12)
 
+  def test_kl_integrand_is_exact_where_the_probability_rounds_to_one(self) -> None:
+    """Test the KL integrand for an item whose correct-response probability rounds to 1.
+
+    At theta_hat = b, P = 1/2, and at a logit of z = 40 the divergence is
+    -log 2 + z/2 + log(1 + e^-z). Computing log(1 - P) after P rounds to 1 caps the
+    second term, so this guards the logit-based log-probabilities.
+    """
+    kl_module = importlib.import_module("catsim.selection.kl")
+    z = 40.0
+    value = kl_module.__dict__["_kl_integrand"](4.0, 0.0, 10.0, 0.0, 0.0, 1.0)
+    assert value == pytest.approx(-np.log(2.0) + z / 2 + np.log1p(np.exp(-z)), rel=1e-12)
+
   def test_wider_integration_window_accumulates_more_kl_mass(self) -> None:
     """Test that a wider integration window yields more KL mass.
 
