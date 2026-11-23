@@ -335,7 +335,9 @@ jobs:
     permissions:
       contents: write
     concurrency:
-      # One gh-pages push at a time: a queued deploy waits for the running one instead of cancelling it
+      # One gh-pages push at a time. A queued deploy waits for the running one, but GitHub keeps only
+      # one pending job per group: a third deploy cancels the pending one, which then skips the
+      # publish that needs it. Recover with "Re-run failed jobs" on the cancelled run.
       group: gh-pages
       cancel-in-progress: false
 
@@ -379,7 +381,9 @@ jobs:
     permissions:
       contents: write
     concurrency:
-      # One gh-pages push at a time: a queued deploy waits for the running one instead of cancelling it
+      # One gh-pages push at a time. A queued deploy waits for the running one, but GitHub keeps only
+      # one pending job per group: a third deploy cancels the pending one, which then skips the
+      # publish that needs it. Recover with "Re-run failed jobs" on the cancelled run.
       group: gh-pages
       cancel-in-progress: false
 
