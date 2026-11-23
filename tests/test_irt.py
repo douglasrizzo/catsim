@@ -1,6 +1,7 @@
 """Tests for catsim.irt module."""
 
 import math
+from collections.abc import Callable
 
 import numpy as np
 import pytest
@@ -455,6 +456,60 @@ class TestLogLikelihood:
     # Log likelihood should be highest near the middle
     assert ll_near > ll_far_low
     assert ll_near > ll_far_high
+
+  @pytest.mark.parametrize("z", [-700.0, -100.0, -37.0, -30.0, -25.0, 0.0, 25.0, 30.0, 37.0, 100.0, 700.0])
+  def test_log_likelihood_hpc_is_exact_far_from_the_difficulty(self, z: float) -> None:
+    """A 2PL item's log P and log Q should equal -log(1 + e^-z) and -log(1 + e^z) at any logit.
+
+    Computing log(1 - P) after P rounded toward 1 lost precision past z = 25 and gave -inf past z = 37.
+    """
+    item = np.array([[1.0, 0.0, 0.0, 1.0]])
+
+    assert irt.log_likelihood_hpc(z, [True], item)[0] == pytest.approx(-np.logaddexp(0.0, -z), rel=1e-12)
+    assert irt.log_likelihood_hpc(z, [False], item)[0] == pytest.approx(-np.logaddexp(0.0, z), rel=1e-12)
+
+  def test_log_likelihood_hpc_reaches_the_asymptotes(self) -> None:
+    """Far from the difficulty, a guessed correct answer costs log c and a slipped incorrect one log(1 - d)."""
+    guessing = np.array([[1.5, 0.0, 0.2, 1.0]])
+    slipping = np.array([[1.5, 0.0, 0.0, 0.9]])
+
+    assert irt.log_likelihood_hpc(-500.0, [True], guessing)[0] == pytest.approx(math.log(0.2), rel=1e-12)
+    assert irt.log_likelihood_hpc(500.0, [False], slipping)[0] == pytest.approx(math.log(0.1), rel=1e-12)
+
+  def test_log_likelihood_hpc_returns_one_value_per_theta(self) -> None:
+    """An array of abilities gives one log-likelihood each, and a float gives a one-element array."""
+    items = np.array([[1.0, -1.0, 0.0, 1.0], [1.2, 0.5, 0.1, 0.95]])
+    responses = [True, False]
+    thetas = np.linspace(-3.0, 3.0, 7)
+
+    values = irt.log_likelihood_hpc(thetas, responses, items)
+
+    assert values.shape == (7,)
+    assert values == pytest.approx([irt.log_likelihood(float(theta), responses, items) for theta in thetas])
+    assert irt.log_likelihood_hpc(0.5, responses, items).shape == (1,)
+
+  def test_log_likelihood_hpc_is_zero_without_items(self) -> None:
+    """With no administered items, every ability has log-likelihood 0."""
+    values = irt.log_likelihood_hpc(np.linspace(-1.0, 1.0, 5), [], np.empty((0, 4)))
+
+    assert values == pytest.approx(np.zeros(5))
+
+  @pytest.mark.parametrize("function", [irt.log_likelihood, irt.log_likelihood_hpc])
+  def test_log_likelihood_rejects_mismatched_lengths(self, function: Callable[..., object]) -> None:
+    """Both entry points should refuse a response vector that does not match the items."""
+    with pytest.raises(ValueError, match="same length, got 2 and 1"):
+      function(0.0, [True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
+
+  @pytest.mark.parametrize("function", [irt.log_likelihood, irt.log_likelihood_hpc])
+  def test_log_likelihood_rejects_non_boolean_responses(self, function: Callable[..., object]) -> None:
+    """Both entry points should refuse responses other than True and False."""
+    with pytest.raises(ValueError, match="only Boolean elements"):
+      function(0.0, [True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
+
+  def test_log_likelihood_hpc_rejects_two_dimensional_theta(self) -> None:
+    """A 2-D array of abilities should raise instead of broadcasting into the wrong shape."""
+    with pytest.raises(ValueError, match="1-D array"):
+      irt.log_likelihood_hpc(np.zeros((2, 2)), [True], np.array([[1.0, 0.0, 0.0, 1.0]]))
 
 
 class TestThetaToScale:

@@ -92,6 +92,55 @@ def test_log_likelihood_finite_when_probabilities_interior(
   assert irt.negative_log_likelihood(est_theta, response_vector, administered) == pytest.approx(-ll)
 
 
+def _probability_formula(theta: float, response_vector: list[bool], items: np.ndarray) -> tuple[float, float]:
+  """Return the old sum(log P or log(1 - P)) log-likelihood and a bound on its rounding error."""
+  correct = np.asarray(response_vector, dtype=bool)
+  ps = irt.icc_hpc(theta, items)
+  reference = float(np.sum(np.where(correct, np.log(ps), np.log(1 - ps))))
+  # rounding P by a few eps moves the reference's log P or log(1 - P) by about eps / P or eps / (1 - P)
+  tolerance = 1e-12 + 8 * np.finfo(float).eps * float(np.sum(1 / np.where(correct, ps, 1 - ps)))
+  return reference, tolerance
+
+
+@given(
+  est_theta=st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False),
+  items=item_params_matrix(min_items=1, max_items=10),
+  responses=st.lists(st.booleans(), min_size=10, max_size=10),
+)
+@IRT_SETTINGS
+def test_log_likelihood_matches_the_probability_formula(
+  est_theta: float,
+  items: np.ndarray,
+  responses: list[bool],
+) -> None:
+  """The logit-based log-likelihood equals sum(log P or log(1 - P)) wherever that formula is accurate."""
+  response_vector = responses[: items.shape[0]]
+  reference, tolerance = _probability_formula(est_theta, response_vector, items)
+
+  assert irt.log_likelihood(est_theta, response_vector, items) == pytest.approx(reference, abs=tolerance)
+
+
+@given(
+  thetas=st.lists(st.floats(-6.0, 6.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=8),
+  items=item_params_matrix(min_items=1, max_items=10),
+  responses=st.lists(st.booleans(), min_size=10, max_size=10),
+)
+@IRT_SETTINGS
+def test_log_likelihood_hpc_matches_the_probability_formula_at_each_theta(
+  thetas: list[float],
+  items: np.ndarray,
+  responses: list[bool],
+) -> None:
+  """Each value returned for an array of abilities matches the reference formula at that ability."""
+  response_vector = responses[: items.shape[0]]
+  values = irt.log_likelihood_hpc(np.array(thetas), response_vector, items)
+
+  assert values.shape == (len(thetas),)
+  for theta, value in zip(thetas, values, strict=True):
+    reference, tolerance = _probability_formula(theta, response_vector, items)
+    assert value == pytest.approx(reference, abs=tolerance)
+
+
 @given(m=scale_mapping())
 @IRT_SETTINGS
 def test_theta_scale_round_trip_identity(m: tuple[float, float, float, float]) -> None:

@@ -192,46 +192,6 @@ class QuadratureGrid:
     return cls(nodes=nodes, weights=weights)
 
 
-def _log_likelihood_grid(
-  response_vector: list[bool],
-  administered_items: FloatArray,
-  nodes: FloatArray,
-) -> FloatArray:
-  """Evaluate the log-likelihood of the responses at each node of a grid.
-
-  Parameters
-  ----------
-  response_vector : list[bool]
-      Responses to the administered items, in the same order as ``administered_items``.
-  administered_items : numpy.ndarray
-      Parameter matrix of the administered items, one row per item.
-  nodes : numpy.ndarray
-      Ability values at which to evaluate the log-likelihood.
-
-  Returns
-  -------
-  numpy.ndarray
-      One log-likelihood per node. All zeros when no item was administered.
-
-  Raises
-  ------
-  ValueError
-      If ``response_vector`` and ``administered_items`` differ in length.
-  """
-  if len(response_vector) != administered_items.shape[0]:
-    msg = (
-      f"response_vector and administered_items must have the same length, "
-      f"got {len(response_vector)} and {administered_items.shape[0]}"
-    )
-    raise ValueError(msg)
-  if administered_items.size == 0:
-    return numpy.zeros_like(nodes, dtype=float)
-  return numpy.array(
-    [irt.log_likelihood(float(theta), response_vector, administered_items) for theta in nodes],
-    dtype=float,
-  )
-
-
 def posterior(
   response_vector: list[bool],
   administered_items: FloatArray,
@@ -264,9 +224,10 @@ def posterior(
   ------
   ValueError
       If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has
-      zero posterior mass, or if ``response_vector`` and ``administered_items`` differ in length.
+      zero posterior mass, if ``response_vector`` and ``administered_items`` differ in length, or
+      if ``response_vector`` contains non-Boolean elements.
   """
-  log_lik = _log_likelihood_grid(response_vector, administered_items, grid.nodes)
+  log_lik = irt.log_likelihood_hpc(grid.nodes, response_vector, administered_items)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
   if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
     msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"

@@ -75,10 +75,7 @@ class MLWISelector(BaseSelector):
     response_vector: list[bool],
     administered_items: FloatArray,
   ) -> FloatArray:
-    log_likelihood = numpy.array(
-      [irt.log_likelihood(float(theta), response_vector, administered_items) for theta in self._nodes],
-      dtype=float,
-    )
+    log_likelihood = irt.log_likelihood_hpc(self._nodes, response_vector, administered_items)
     log_likelihood -= float(log_likelihood.max())
     return numpy.exp(log_likelihood)
 

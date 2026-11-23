@@ -12,7 +12,7 @@ from typing import Any
 import numexpr
 import numpy
 from scipy import stats
-from scipy.special import expit
+from scipy.special import expit, log_expit
 
 from ._typing import FloatArray
 
@@ -777,6 +777,77 @@ def inf_integral(lower: float, upper: float, items: FloatArray) -> FloatArray:
   return antiderivative(upper) - antiderivative(lower)
 
 
+def log_likelihood_hpc(
+  theta: float | FloatArray,
+  response_vector: list[bool],
+  administered_items: FloatArray,
+) -> FloatArray:
+  r"""Compute the log-likelihood of many ability values at once.
+
+  This is the vectorized version of :py:func:`log_likelihood`, which calls it: given a response
+  vector and the parameters of the answered items, every ability value and item is evaluated at
+  once, and one log-likelihood is returned per ability value.
+
+  The log-probabilities are computed from the logit :math:`z_i = a_i(\theta - b_i)` instead of from
+  :math:`P_i(\theta)`, so :math:`\log Q_i` stays exact where :math:`P_i` rounds to 1:
+
+  .. math::
+
+      \log P_i = \log\left[c_i + (d_i - c_i)\,\sigma(z_i)\right], \qquad
+      \log Q_i = \log\left[(1 - d_i) + (d_i - c_i)\,\sigma(-z_i)\right]
+
+  where :math:`\sigma(z) = 1 / (1 + e^{-z})`. Each sum is evaluated as a ``logaddexp`` of
+  :math:`\log c_i` (or :math:`\log(1 - d_i)`) and :math:`\log(d_i - c_i) + \log\sigma(\pm z_i)`,
+  which is exact when :math:`c_i = 0` or :math:`d_i = 1`.
+
+  Parameters
+  ----------
+  theta : float or numpy.ndarray
+      An ability value, or a 1-D array of ability values.
+  response_vector : list[bool]
+      A boolean list containing the response vector, where True indicates a correct
+      response and False indicates an incorrect response.
+  administered_items : numpy.ndarray
+      A numpy array containing the parameters of the answered items, one row per item. Each item
+      must satisfy :math:`0 \leq c < d \leq 1`, as :py:func:`validate_item_bank` requires; an item
+      with :math:`d < c` gives NaN.
+
+  Returns
+  -------
+  numpy.ndarray
+      One log-likelihood per ability value, so a float ``theta`` gives a one-element array. All
+      zeros when no item was administered.
+
+  Raises
+  ------
+  ValueError
+      If ``theta`` has more than one dimension, if the response vector and administered items have
+      different lengths, or if the response vector contains non-Boolean elements.
+  """
+  thetas = numpy.atleast_1d(numpy.asarray(theta, dtype=float))
+  if thetas.ndim > 1:
+    msg = f"theta must be a float or a 1-D array, got shape {thetas.shape}"
+    raise ValueError(msg)
+  if len(response_vector) != administered_items.shape[0]:
+    msg = (
+      "response_vector and administered_items must have the same length, "
+      f"got {len(response_vector)} and {administered_items.shape[0]}"
+    )
+    raise ValueError(msg)
+  if len(set(response_vector) - {True, False}) > 0:
+    msg = "response_vector must contain only Boolean elements"
+    raise ValueError(msg)
+
+  a, b, c, d = _split_params(administered_items)
+  z = a * (thetas[:, None] - b)
+  # c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly
+  with numpy.errstate(divide="ignore"):
+    log_c, log_1md, log_dmc = numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
+  log_p = numpy.logaddexp(log_c, log_dmc + log_expit(z))
+  log_q = numpy.logaddexp(log_1md, log_dmc + log_expit(-z))
+  return numpy.where(numpy.asarray(response_vector, dtype=bool), log_p, log_q).sum(axis=1)
+
+
 def log_likelihood(
   est_theta: float,
   response_vector: list[bool],
@@ -799,7 +870,9 @@ def log_likelihood(
       \log L(X_{Ij} | \theta_j, a_I, b_I, c_I, d_I) = \sum_{i=1} ^ I \left\lbrace x_{ij} \log P_{ij}(\theta)+
           (1 - x_{ij}) \log Q_{ij}(\theta) \right\rbrace
 
-  where :math:`Q_{ij}(\theta) = 1 - P_{ij}(\theta)`.
+  where :math:`Q_{ij}(\theta) = 1 - P_{ij}(\theta)`. The terms are computed by
+  :py:func:`log_likelihood_hpc` from the logit rather than from :math:`P_{ij}`, so
+  :math:`\log Q_{ij}` stays exact where :math:`P_{ij}` rounds to 1.
 
   Parameters
   ----------
@@ -823,18 +896,7 @@ def log_likelihood(
       If response vector and administered items have different lengths or if the
       response vector contains non-Boolean elements.
   """
-  if len(response_vector) != administered_items.shape[0]:
-    msg = "Response vector and administered items must have the same number of items"
-    raise ValueError(msg)
-  if len(set(response_vector) - {True, False}) > 0:
-    msg = "Response vector must contain only Boolean elements"
-    raise ValueError(msg)
-  ps = icc_hpc(est_theta, administered_items)
-  result = numexpr.evaluate(
-    "sum(where(response_vector, log(ps), log(1 - ps)))",
-    local_dict={"response_vector": response_vector, "ps": ps},
-  )
-  return float(result)
+  return float(log_likelihood_hpc(est_theta, response_vector, administered_items)[0])
 
 
 def negative_log_likelihood(est_theta: float, *args: Any) -> float:
