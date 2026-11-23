@@ -1,14 +1,12 @@
 """Kullback-Leibler item selector."""
 
 import numpy
-import numpy.typing as npt
 from scipy.integrate import quad
 
 from .. import irt
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .base import BaseSelector
-
-FloatArray = npt.NDArray[numpy.floating]
 
 
 def _kl_integrand(
@@ -78,7 +76,7 @@ class KLSelector(BaseSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered."""
