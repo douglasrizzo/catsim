@@ -13,29 +13,11 @@ class RandomSelector(BaseSelector):
 
   This selector is useful for baseline comparisons or for studying the impact of
   item selection strategies.
-
-  Parameters
-  ----------
-  replace : bool, optional
-      Whether to select an item that has already been selected before for this examinee.
-      Default is False.
   """
 
   def __str__(self) -> str:
     """Return the name of the selector."""
     return "Random Selector"
-
-  def __init__(self, replace: bool = False) -> None:
-    """Initialize a RandomSelector object.
-
-    Parameters
-    ----------
-    replace : bool, optional
-        Whether to select an item that has already been selected before for this examinee.
-        Default is False.
-    """
-    super().__init__()
-    self._replace = replace
 
   def select(
     self,
@@ -63,25 +45,23 @@ class RandomSelector(BaseSelector):
     -------
     int
         Index of the next item to be applied, drawn uniformly at random from the items not yet
-        administered, or from every item when ``replace`` is True.
+        administered.
 
     Raises
     ------
     ValueError
         If ``rng`` is None.
     NoItemsAvailableError
-        If every item has already been administered and ``replace`` is False.
+        If every item has already been administered.
     """
     if rng is None:
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    if len(administered_items) >= item_bank.n_items and not self._replace:
+    if len(administered_items) >= item_bank.n_items:
       msg = "There are no more items to apply."
       raise NoItemsAvailableError(msg)
 
-    if self._replace:
-      return int(rng.choice(item_bank.n_items))
     valid_indexes = self._get_non_administered(list(range(item_bank.n_items)), administered_items)
     return int(rng.choice(valid_indexes))
 
