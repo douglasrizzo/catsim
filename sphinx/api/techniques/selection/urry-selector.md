@@ -32,9 +32,9 @@ i^*
 \arg\min_{i \in R_k} \left| b_i - \hat{\theta} \right|,
 $$
 
-where $R_k$ is the set of non-administered items. The current package
-implementation sorts all items by absolute distance from $\hat{\theta}$ to
-their $b$ values and returns the first remaining item.
+where $R_k$ is the set of non-administered items. Items at exactly the same
+distance tie, and one of them is drawn at random
+({doc}`/adr/0008-random-tie-breaking`).
 
 ## Parameters
 
