@@ -712,14 +712,15 @@ def max_info_hpc(items: FloatArray) -> FloatArray:
   Returns
   -------
   numpy.ndarray
-      An array of theta values, one for each item, indicating where each item's
+      A new array of theta values, one for each item, indicating where each item's
       information function reaches its maximum.
   """
   a, b, c, d = _split_params(items)
 
   if all(d == 1):
     if all(c == 0):
-      return b
+      # a copy, so writing into the result cannot change the caller's item matrix
+      return numpy.array(b)
     return numexpr.evaluate("b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)", local_dict={"a": a, "b": b, "c": c})
 
   u = numexpr.evaluate("-(3 / 4) + ((c + d - 2 * c * d) / 2)", local_dict={"c": c, "d": d})

@@ -308,20 +308,27 @@ class TestReliability:
 
 
 class TestMaxInfo:
-  """Tests for the max_info() function."""
+  """Tests for the max_info() and max_info_hpc() functions."""
 
   def test_max_info_at_difficulty(self) -> None:
-    """Test that max info returns difficulty for 2PL."""
-    # For 2PL model (c=0, d=1), max info is at theta = b
+    """A 2PL item is most informative at theta = b; any other value means the 2PL branch is wrong."""
     theta_max = irt.max_info(a=1.0, b=0.5, c=0.0, d=1.0)
     assert theta_max == pytest.approx(0.5)
 
   def test_max_info_shifts_with_guessing(self) -> None:
-    """Test that pseudo-guessing shifts max info location."""
-    # With guessing parameter, max info shifts above b
-    theta_no_guess = irt.max_info(a=1.0, b=0.0, c=0.0, d=1.0)
+    """A 3PL item is most informative at b + log((1 + sqrt(1 + 8c)) / 2) / a (Birnbaum): 0.2671 for c = 0.2, not b."""
     theta_with_guess = irt.max_info(a=1.0, b=0.0, c=0.2, d=1.0)
-    assert theta_with_guess > theta_no_guess
+    assert theta_with_guess == pytest.approx(0.26714189097421254, rel=1e-12)
+
+  def test_max_info_hpc_result_is_not_a_view_of_the_items(self) -> None:
+    """Writing into the result leaves the item matrix alone; for 2PL items it used to be the difficulty column."""
+    items = np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]])
+    thetas = irt.max_info_hpc(items)
+    np.testing.assert_array_equal(thetas, [0.5, -0.2])
+
+    thetas[0] = 99.0
+
+    np.testing.assert_array_equal(items[:, 1], [0.5, -0.2])
 
 
 class TestNormalizeItemBank:
