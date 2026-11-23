@@ -125,10 +125,12 @@ def test_cluster_selector_returns_valid_unseen_item(
   assume(administered_count < n)
   administered = list(range(administered_count))
   selector = ClusterSelector(clusters=clusters, method=method)
+  # generated banks can hold tied items, which are broken at random (ADR-0008)
   item_id = selector.select(
     item_bank=bank,
     administered_items=administered,
     est_theta=est_theta,
+    rng=np.random.default_rng(0),
   )
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
@@ -183,9 +185,11 @@ def _strat_simulate_steps(selector_cls, bank: ItemBank, test_size: int, steps: i
   """
   n = bank.n_items
   selector = selector_cls(test_size=test_size)
+  # generated banks can hold tied items, which are broken at random (ADR-0008)
+  rng = np.random.default_rng(0)
   administered: list[int] = []
   for _ in range(steps):
-    item_id = selector.select(item_bank=bank, administered_items=administered, est_theta=theta)
+    item_id = selector.select(item_bank=bank, administered_items=administered, est_theta=theta, rng=rng)
     assert item_id is not None
     assert type(item_id) is int
     assert 0 <= int(item_id) < n

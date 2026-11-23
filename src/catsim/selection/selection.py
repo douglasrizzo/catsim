@@ -63,11 +63,15 @@ class MaxInfoSelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
+
+    Among the non-administered items below ``r_max`` (or all non-administered items, if every one
+    is at or above it), returns the most informative at ``est_theta``. Ties are broken uniformly at
+    random (ADR-0008).
 
     Parameters
     ----------
@@ -77,26 +81,25 @@ class MaxInfoSelector(BaseSelector):
         A list containing the indexes of items that were already administered.
     est_theta : float
         The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator, used only to break ties between equally informative items.
+    exposure_rates : numpy.ndarray or None, optional
+        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item has already been administered.
+    ValueError
+        If items tie for the most information and ``rng`` is None.
     """
-    # sort items by their information value
-    ordered_items = self._sort_by_info(item_bank, est_theta)
-    # remove administered ones
-    valid_indexes = self._get_non_administered(ordered_items, administered_items)
-
-    if len(valid_indexes) == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    valid_indexes_low_r = [idx for idx in valid_indexes if exposure_rates[idx] < self._r_max]
-    # return the item with maximum information from the ones available
-    return int(valid_indexes_low_r[0] if len(valid_indexes_low_r) > 0 else valid_indexes[0])
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
+    return self._pick_best(candidates, item_bank.information(est_theta)[candidates], rng)
 
 
 class UrrySelector(BaseSelector):
@@ -120,11 +123,14 @@ class UrrySelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,  # noqa: ARG002
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
+
+    Returns the non-administered item whose difficulty is closest to ``est_theta``. Ties are broken
+    uniformly at random (ADR-0008).
 
     Parameters
     ----------
@@ -134,20 +140,23 @@ class UrrySelector(BaseSelector):
         A list containing the indexes of items that were already administered.
     est_theta : float
         The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator, used only to break ties between equally close items.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item has already been administered.
+    ValueError
+        If items tie for the closest difficulty and ``rng`` is None.
     """
-    ordered_items = self._sort_by_b(item_bank, est_theta)
-    valid_indexes = self._get_non_administered(ordered_items, administered_items)
-
-    if len(valid_indexes) == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    return int(valid_indexes[0])
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
+    return self._pick_best(candidates, -numpy.abs(item_bank.difficulty[candidates] - est_theta), rng)
 
 
 class IntervalInfoSelector(BaseSelector):
@@ -224,11 +233,13 @@ class IntervalInfoSelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,  # noqa: ARG002
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
+
+    Ties in the integrated information are broken uniformly at random (ADR-0008).
 
     Parameters
     ----------
@@ -238,11 +249,20 @@ class IntervalInfoSelector(BaseSelector):
         A list containing the indexes of items that were already administered.
     est_theta : float
         The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator, used only to break ties between equally good items.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item has already been administered.
+    ValueError
+        If items tie for the largest integrated information and ``rng`` is None.
     """
     candidates = numpy.setdiff1d(numpy.arange(item_bank.n_items), administered_items)
     if candidates.size == 0:
@@ -256,4 +276,4 @@ class IntervalInfoSelector(BaseSelector):
       lower, upper = est_theta - self._interval, est_theta + self._interval
 
     information_integral = irt.inf_integral(lower, upper, item_bank.items[candidates])
-    return int(candidates[numpy.argmax(information_integral)])
+    return self._pick_best(candidates, information_integral, rng)

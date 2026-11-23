@@ -85,7 +85,8 @@ class The54321Selector(BaseSelector):
   the second from the 4 most informative remaining items, and so on, so that from the fifth item on the
   most informative item is administered. Randomizing the opening items, which every examinee would
   otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in
-  precision.
+  precision. Items tied with the least informative item of a bin also join it, so from the fifth
+  item on, ties for the most information are broken uniformly at random (ADR-0008).
 
   Parameters
   ----------
@@ -146,34 +147,38 @@ class The54321Selector(BaseSelector):
     est_theta : float
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
-        Random number generator used by the object.
+        Random number generator the item is drawn from the bin with. Required.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied, drawn uniformly from the bin, which also holds every
+        item tied with its least informative item (ADR-0008).
+
+    Raises
+    ------
+    ValueError
+        If ``rng`` is None.
+    NoItemsAvailableError
+        If every item has already been administered.
     """
     if rng is None:
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    # sort item indexes by their information value descending and remove indexes of administered items
-    ordered_items = self._sort_by_info(item_bank, est_theta)
-    organized_items = self._get_non_administered(ordered_items, administered_items)
-
-    if len(organized_items) == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
     bin_size = max(1, self._initial_bin_size - len(administered_items))
-    return int(rng.choice(organized_items[:bin_size]))
+    # items tied with the bin's least informative item join the bin (ADR-0008)
+    pool = self._best_pool(candidates, item_bank.information(est_theta)[candidates], bin_size)
+    return int(rng.choice(pool))
 
 
 class RandomesqueSelector(BaseSelector):
   """Implementation of the randomesque selector proposed by :cite:p:`Kingsbury89`.
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
-  the item bank, :math:`n` being a user-defined value.
+  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
+  join the bin (ADR-0008).
   """
 
   def __str__(self) -> str:
@@ -217,23 +222,26 @@ class RandomesqueSelector(BaseSelector):
     est_theta : float
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
-        Random number generator used by the object.
+        Random number generator the item is drawn from the bin with. Required.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied or `None` if there are no more items in the item bank.
+    int
+        Index of the next item to be applied, drawn uniformly from the bin, which also holds every
+        item tied with its least informative item (ADR-0008).
+
+    Raises
+    ------
+    ValueError
+        If ``rng`` is None.
+    NoItemsAvailableError
+        If every item has already been administered.
     """
     if rng is None:
       msg = "rng parameter cannot be None"
       raise ValueError(msg)
 
-    # sort item indexes by their information value descending and remove indexes of administered items
-    ordered_items = self._sort_by_info(item_bank, est_theta)
-    organized_items = self._get_non_administered(ordered_items, administered_items)
-
-    if len(organized_items) == 0:
-      msg = "There are no more items to apply."
-      raise NoItemsAvailableError(msg)
-
-    return int(rng.choice(list(organized_items)[: self._bin_size]))
+    candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, None, 1.0)
+    # items tied with the bin's least informative item join the bin (ADR-0008)
+    pool = self._best_pool(candidates, item_bank.information(est_theta)[candidates], self._bin_size)
+    return int(rng.choice(pool))

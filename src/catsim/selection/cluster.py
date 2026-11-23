@@ -126,7 +126,7 @@ class ClusterSelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
@@ -140,11 +140,24 @@ class ClusterSelector(BaseSelector):
         A list containing the indexes of items that were already administered.
     est_theta : float
         The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator, used only to break ties between equally good items in the chosen
+        cluster.
+    exposure_rates : numpy.ndarray or None, optional
+        Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
 
     Returns
     -------
-    int or None
-        Index of the next item to be applied.
+    int
+        Index of the next item to be applied. Ties within the chosen cluster are broken uniformly at
+        random (ADR-0008).
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item has already been administered.
+    ValueError
+        If items in the chosen cluster tie and ``rng`` is None.
     """
     selected_cluster = None
     existent_clusters = set(self._clusters)
@@ -235,23 +248,19 @@ class ClusterSelector(BaseSelector):
       idx for idx in valid_indexes if exposure_rates[idx] < self._r_max and idx not in administered_items
     ]
 
+    # each of the picks below breaks ties uniformly at random (ADR-0008)
     if len(valid_indexes_low_r) > 0:
-      # return the item with maximum information from the ones available
-      inf_values = irt.inf_hpc(est_theta, item_bank.get_items(valid_indexes_low_r))
-      selected_item = valid_indexes_low_r[numpy.nonzero(inf_values == max(inf_values))[0][0]]
+      # the most informative of the items below r_max
+      candidates = numpy.asarray(valid_indexes_low_r, dtype=numpy.intp)
+      return self._pick_best(candidates, irt.inf_hpc(est_theta, item_bank.get_items(candidates)), rng)
 
-    # every remaining item in the selected cluster is at or above r_max;
-    # passive control ignores the cap and takes the most informative one
-    elif self._r_control == "passive":
-      inf_values = irt.inf_hpc(est_theta, item_bank.get_items(valid_indexes))
-      selected_item = valid_indexes[numpy.nonzero(inf_values == max(inf_values))[0][0]]
-    else:
-      # Find the item with minimum exposure rate
-      cluster_exposure_rates = [exposure_rates[idx] for idx in valid_indexes]
-      min_rate_idx = cluster_exposure_rates.index(min(cluster_exposure_rates))
-      selected_item = valid_indexes[min_rate_idx]
-
-    return int(selected_item)
+    # every remaining item in the selected cluster is at or above r_max
+    candidates = numpy.asarray(valid_indexes, dtype=numpy.intp)
+    if self._r_control == "passive":
+      # passive control ignores the cap: the most informative item in the cluster
+      return self._pick_best(candidates, irt.inf_hpc(est_theta, item_bank.get_items(candidates)), rng)
+    # aggressive control: the item with the smallest exposure rate, regardless of information
+    return self._pick_best(candidates, -exposure_rates[candidates], rng)
 
   @staticmethod
   def sum_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int]) -> dict[int, float]:

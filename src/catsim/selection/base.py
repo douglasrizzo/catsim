@@ -81,6 +81,92 @@ class BaseSelector(ABC):
     return low_exposure if low_exposure.size > 0 else all_candidates
 
   @staticmethod
+  def _pick_best(
+    candidates: IntArray,
+    scores: FloatArray,
+    rng: Generator | None,
+  ) -> int:
+    """Return the candidate with the highest score, breaking exact ties uniformly at random.
+
+    This is the package's single tie-breaking rule (ADR-0008), the one catR uses: the candidates
+    whose score equals the best score exactly are tied, and one of them is drawn uniformly with
+    ``rng``. With a single best candidate, ``rng`` is not used, so untied selections consume no
+    random numbers.
+
+    Parameters
+    ----------
+    candidates : numpy.ndarray
+        Item indices to choose from.
+    scores : numpy.ndarray
+        One score per candidate; higher is better. Selectors that minimize a quantity, such as the
+        distance to the ability estimate, pass its negation.
+    rng : numpy.random.Generator or None
+        Random number generator used to break ties.
+
+    Returns
+    -------
+    int
+        Index of the selected item.
+
+    Raises
+    ------
+    ValueError
+        If any score is NaN, or if several candidates tie for the best score and ``rng`` is None.
+    """
+    if numpy.isnan(scores).any():
+      msg = "item scores contain NaN"
+      raise ValueError(msg)
+    best = candidates[scores == scores.max()]
+    if best.size == 1:
+      return int(best[0])
+    if rng is None:
+      msg = "rng parameter cannot be None: it is needed to break a tie between equally good items"
+      raise ValueError(msg)
+    return int(rng.choice(best))
+
+  @staticmethod
+  def _best_pool(
+    candidates: IntArray,
+    scores: FloatArray,
+    size: int,
+  ) -> IntArray:
+    """Return the candidates scoring at least the ``size``-th best score, best first.
+
+    As in catR (ADR-0008), every candidate tied with the ``size``-th best score joins the pool, so
+    the pool holds more than ``size`` items only when items tie at the cutoff. Tied candidates keep
+    their order in ``candidates``.
+
+    Parameters
+    ----------
+    candidates : numpy.ndarray
+        Item indices to choose from.
+    scores : numpy.ndarray
+        One score per candidate; higher is better.
+    size : int
+        Number of best candidates the pool should hold, before ties at the cutoff are added.
+
+    Returns
+    -------
+    numpy.ndarray
+        Item indices of the pool, in descending order of score.
+
+    Raises
+    ------
+    ValueError
+        If ``size`` is smaller than 1 or any score is NaN.
+    """
+    if size < 1:
+      msg = f"the pool size must be at least 1, got {size}"
+      raise ValueError(msg)
+    if numpy.isnan(scores).any():
+      msg = "item scores contain NaN"
+      raise ValueError(msg)
+    order = numpy.argsort(-scores, kind="stable")
+    ranked_scores = scores[order]
+    cutoff = ranked_scores[min(size, ranked_scores.size) - 1]
+    return candidates[order[ranked_scores >= cutoff]]
+
+  @staticmethod
   def _sort_by_info(item_bank: ItemBank, est_theta: float) -> list[int]:
     """Sort items by their information value for a given ability value.
 

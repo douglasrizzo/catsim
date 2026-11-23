@@ -112,7 +112,7 @@ class KLSelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
@@ -127,7 +127,8 @@ class KLSelector(BaseSelector):
     est_theta : float
         The current estimated ability, the center of the integration window.
     rng : numpy.random.Generator or None, optional
-        Unused; KL selection is deterministic.
+        Random number generator, used only to break ties between candidates with equal KL
+        divergence (ADR-0008).
     exposure_rates : numpy.ndarray or None, optional
         Current exposure rate of every item, compared against ``r_max``.
     response_vector : list[bool] or None, optional
@@ -136,10 +137,13 @@ class KLSelector(BaseSelector):
     Returns
     -------
     int
-        Index of the item with the largest integrated KL divergence.
+        Index of the item with the largest integrated KL divergence; ties are broken uniformly at
+        random (ADR-0008).
 
     Raises
     ------
+    ValueError
+        If candidates tie for the largest divergence and ``rng`` is None.
     NoItemsAvailableError
         If every item has been administered.
     """
@@ -147,4 +151,4 @@ class KLSelector(BaseSelector):
     half_width = self._c / numpy.sqrt(max(1, len(administered_items)))
 
     kl_values = numpy.array([self._kl_global(est_theta, item_bank.items[int(idx)], half_width) for idx in candidates])
-    return int(candidates[int(kl_values.argmax())])
+    return self._pick_best(candidates, kl_values, rng)

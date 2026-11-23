@@ -102,7 +102,7 @@ class ProgressiveSelector(FiniteSelector):
     Returns
     -------
     int
-        Index of the selected item.
+        Index of the selected item; ties are broken uniformly at random (ADR-0008).
 
     Raises
     ------
@@ -127,7 +127,7 @@ class ProgressiveSelector(FiniteSelector):
 
     random_component = rng.uniform(0.0, 1.0, size=item_bank.n_items)
     scores = (1.0 - weight) * random_component + weight * info_norm
-    return int(candidates[numpy.argmax(scores[candidates])])
+    return self._pick_best(candidates, scores[candidates], rng)
 
 
 class ProportionalSelector(FiniteSelector):

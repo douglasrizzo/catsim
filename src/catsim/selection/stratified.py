@@ -125,7 +125,7 @@ class StratifiedSelector(FiniteSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,  # noqa: ARG002
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
@@ -139,17 +139,21 @@ class StratifiedSelector(FiniteSelector):
         A list containing the indexes of items that were already administered.
     est_theta : float
         The current estimated ability.
+    rng : numpy.random.Generator or None, optional
+        Random number generator, used only to break ties between equally close items.
 
     Returns
     -------
-    int or None
+    int
         Index of the non-administered item in the current stratum whose location is closest to
-        ``est_theta``.
+        ``est_theta``. Ties are broken uniformly at random (ADR-0008).
 
     Raises
     ------
     NoItemsAvailableError
         If every item in the current stratum has been administered.
+    ValueError
+        If items tie for the closest location and ``rng`` is None.
     """
     stage = self._stage(len(administered_items))
     stratum = self.strata(item_bank)[stage]
@@ -158,8 +162,7 @@ class StratifiedSelector(FiniteSelector):
       msg = f"There are no more items to be selected from stratum {stage}"
       raise NoItemsAvailableError(msg)
 
-    distances = numpy.abs(self._location(item_bank)[candidates] - est_theta)
-    return int(candidates[numpy.argmin(distances)])
+    return self._pick_best(candidates, -numpy.abs(self._location(item_bank)[candidates] - est_theta), rng)
 
 
 class AStratSelector(StratifiedSelector):

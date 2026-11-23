@@ -107,7 +107,7 @@ class MEISelector(BaseSelector):
     item_bank: ItemBank,
     administered_items: list[int],
     est_theta: float,
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
+    rng: numpy.random.Generator | None = None,
     exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,
   ) -> int | None:
@@ -123,7 +123,8 @@ class MEISelector(BaseSelector):
         The current estimated ability, used for the response probabilities and as the starting
         point of the one-step-ahead estimates.
     rng : numpy.random.Generator or None, optional
-        Unused; MEI is deterministic.
+        Random number generator, used only to break ties between candidates with equal scores
+        (ADR-0008).
     exposure_rates : numpy.ndarray or None, optional
         Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
     response_vector : list[bool] or None, optional
@@ -137,7 +138,7 @@ class MEISelector(BaseSelector):
     Raises
     ------
     ValueError
-        If ``response_vector`` is None.
+        If ``response_vector`` is None, or if candidates tie for the best score and ``rng`` is None.
     NoItemsAvailableError
         If every item has already been administered.
     """
@@ -154,4 +155,4 @@ class MEISelector(BaseSelector):
       ],
       dtype=float,
     )
-    return int(candidates[int(scores.argmax())])
+    return self._pick_best(candidates, scores, rng)
