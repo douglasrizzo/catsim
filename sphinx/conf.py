@@ -20,6 +20,7 @@ from importlib.metadata import version as get_version
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, pathlib.Path("..").resolve())
+sys.path.insert(0, str(pathlib.Path("_ext").resolve()))
 
 filenames = ["readme_head.md", "readme_body.md"]
 with pathlib.Path("../README.md").open("w", encoding="utf-8") as outfile:
@@ -38,7 +39,6 @@ extensions = [
   "sphinx.ext.autodoc",
   "sphinx.ext.doctest",
   "sphinx.ext.githubpages",
-  "sphinx.ext.inheritance_diagram",
   "sphinx.ext.intersphinx",
   "sphinx.ext.mathjax",
   "sphinx.ext.todo",
@@ -47,6 +47,7 @@ extensions = [
   "myst_parser",
   "sphinxcontrib.bibtex",
   "sphinxcontrib.mermaid",
+  "class_tree",
 ]
 
 myst_enable_extensions = [

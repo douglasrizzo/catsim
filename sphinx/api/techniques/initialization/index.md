@@ -16,8 +16,8 @@ random-initializer
 
 ## Class Hierarchy
 
-```{eval-rst}
-.. inheritance-diagram:: catsim.initialization.BaseInitializer catsim.initialization.FixedPointInitializer catsim.initialization.RandomInitializer
-   :parts: 1
-   :top-classes: catsim.initialization.BaseInitializer
+```{autoclasstree} catsim.initialization
+:full:
+:strict:
+:namespace: catsim
 ```
