@@ -1,6 +1,7 @@
 """Tests for catsim.estimation module."""
 
 from itertools import pairwise
+from typing import Any
 
 import numpy as np
 import pytest
@@ -630,6 +631,21 @@ class TestMAPEstimator:
     assert str(estimator) == "Maximum a Posteriori Estimator"
     assert estimator.calls == 0
     assert estimator.evaluations == 0
+
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"tol": 0.0}, "tol must be positive", id="zero_tol"),
+      pytest.param({"tol": -1e-6}, "tol must be positive", id="negative_tol"),
+      pytest.param({"bounds": (3.0, -3.0)}, "low < high", id="reversed_bounds"),
+      pytest.param({"bounds": (1.0, 1.0)}, "low < high", id="empty_bounds"),
+      pytest.param({"bounds": (-np.inf, 6.0)}, "finite", id="infinite_bound"),
+    ],
+  )
+  def test_init_rejects_invalid_search_settings(self, kwargs: dict[str, Any], match: str) -> None:
+    """Invalid bounds or tolerances fail at construction, not inside SciPy."""
+    with pytest.raises(ValueError, match=match):
+      MAPEstimator(**kwargs)
 
   def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
     """Test that the prior mode is returned when there is no data."""

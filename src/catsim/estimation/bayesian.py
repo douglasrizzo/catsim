@@ -388,10 +388,17 @@ class MAPEstimator(BaseEstimator):
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
     verbose: bool = False,
   ) -> None:
+    if not tol > 0:
+      msg = f"tol must be positive, got {tol}"
+      raise ValueError(msg)
+    low, high = bounds
+    if not (math.isfinite(low) and math.isfinite(high) and low < high):
+      msg = f"bounds must be finite with low < high, got {bounds}"
+      raise ValueError(msg)
     super().__init__(verbose=verbose)
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._tol = float(tol)
-    self._bounds = bounds
+    self._bounds = (float(low), float(high))
 
   def __str__(self) -> str:
     """Return a human-readable estimator name."""
