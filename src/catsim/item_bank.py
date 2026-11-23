@@ -96,6 +96,10 @@ class ItemBank:
     self._max_info_values: FloatArray | None = None
     self._model: int | None = None
 
+    # Cache for selector-specific data derived from this item bank. Nothing in catsim fills it
+    # yet; the planned MPWI and MEPV selectors cache their per-node tables here.
+    self._selector_cache: dict[str, Any] = {}
+
   @property
   def items(self) -> FloatArray:
     """Get the item parameter matrix.
