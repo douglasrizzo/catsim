@@ -101,7 +101,8 @@ class ItemBank:
     self._model: int | None = None
 
     # Cache for selector-specific data derived from this item bank. Nothing in catsim fills it
-    # yet; the planned MPWI and MEPV selectors cache their per-node tables here.
+    # yet; the planned MPWI and MEPV selectors cache their per-node tables here (see
+    # specs/selection/mpwi-selector.md and specs/selection/mepv-selector.md).
     self._selector_cache: dict[str, Any] = {}
 
   @property
