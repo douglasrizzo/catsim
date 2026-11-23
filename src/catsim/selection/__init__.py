@@ -2,6 +2,7 @@
 
 from .base import BaseSelector, FiniteSelector
 from .cluster import ClusterSelector
+from .expected_info import MEISelector
 from .linear import LinearSelector
 from .random import RandomesqueSelector, RandomSelector, The54321Selector
 from .selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
@@ -12,6 +13,7 @@ from .stratified import (
   MaxInfoStratSelector,
   StratifiedSelector,
 )
+from .weighted_info import MLWISelector
 
 __all__ = [
   "AStratBBlockSelector",
@@ -21,6 +23,8 @@ __all__ = [
   "FiniteSelector",
   "IntervalInfoSelector",
   "LinearSelector",
+  "MEISelector",
+  "MLWISelector",
   "MaxInfoBBlockSelector",
   "MaxInfoSelector",
   "MaxInfoStratSelector",

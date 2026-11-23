@@ -44,6 +44,7 @@ class RandomSelector(BaseSelector):
     est_theta: float,  # noqa: ARG002
     rng: Generator | None = None,
     exposure_rates: npt.NDArray | None = None,  # noqa: ARG002
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -132,6 +133,7 @@ class The54321Selector(BaseSelector):
     est_theta: float,
     rng: Generator | None = None,
     exposure_rates: npt.NDArray | None = None,  # noqa: ARG002
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 
@@ -202,6 +204,7 @@ class RandomesqueSelector(BaseSelector):
     est_theta: float,
     rng: Generator | None = None,
     exposure_rates: npt.NDArray | None = None,  # noqa: ARG002
+    response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the index of the next item to be administered.
 

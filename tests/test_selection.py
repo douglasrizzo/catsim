@@ -7,6 +7,8 @@ import pytest
 from scipy.integrate import quad
 
 from catsim import irt
+from catsim.estimation import BaseEstimator
+from catsim.estimation.numerical import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import (
@@ -20,11 +22,46 @@ from catsim.selection import (
   MaxInfoBBlockSelector,
   MaxInfoSelector,
   MaxInfoStratSelector,
+  MEISelector,
+  MLWISelector,
   RandomesqueSelector,
   RandomSelector,
   The54321Selector,
   UrrySelector,
 )
+
+
+class RecordingEstimator(BaseEstimator):
+  """Estimator stub that records the history it receives."""
+
+  def __init__(self) -> None:
+    super().__init__()
+    self.records: list[tuple[list[int], list[bool], float]] = []
+
+  def estimate(
+    self,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,
+  ) -> float:
+    del item_bank
+    self.records.append((list(administered_items), list(response_vector), est_theta))
+    return float(len(response_vector))
+
+
+class ShiftEstimator(BaseEstimator):
+  """Estimator stub that moves the estimate 0.5 toward the last response."""
+
+  def estimate(
+    self,
+    item_bank: ItemBank,
+    administered_items: list[int],
+    response_vector: list[bool],
+    est_theta: float,
+  ) -> float:
+    del item_bank, administered_items
+    return est_theta + (0.5 if response_vector[-1] else -0.5)
 
 
 class TestMaxInfoSelector:
@@ -537,6 +574,389 @@ class TestIntervalInfoSelector:
       selector.select(item_bank=item_bank, administered_items=[0, 1, 2], est_theta=0.0)
 
 
+class TestMEISelector:
+  """Tests for MEISelector."""
+
+  def test_select_requires_response_vector(self) -> None:
+    """The selector needs the current response history."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    selector = MEISelector()
+
+    with pytest.raises(ValueError, match="response_vector"):
+      selector.select(
+        item_bank=item_bank,
+        administered_items=[],
+        est_theta=0.0,
+        rng=np.random.default_rng(42),
+      )
+
+  def test_select_forwards_response_history_to_estimator(self) -> None:
+    """One-step-ahead scoring should append both hypothetical responses."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = RecordingEstimator()
+    selector = MEISelector(estimator=estimator)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+      response_vector=[True],
+    )
+
+    assert selected is not None
+    assert selected != 0
+    assert estimator.records
+    assert all(call[0][:1] == [0] for call in estimator.records)
+    assert {tuple(call[1]) for call in estimator.records} == {(True, True), (True, False)}
+
+  def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
+    """MEI should still choose from non-administered items when every candidate exceeds r_max."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    selector = MEISelector(estimator=RecordingEstimator(), r_max=0.0)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+      exposure_rates=np.ones(item_bank.n_items, dtype=float),
+      response_vector=[True],
+    )
+
+    assert selected is not None
+    assert selected != 0
+
+  def test_select_diverges_from_max_info_when_one_step_estimates_shift(self) -> None:
+    """MEI should not collapse to MaxInfo when the response history changes theta.
+
+    This is the key behavioral check for a one-step-ahead selector: if MEI
+    always agreed with MaxInfo here, it would be ignoring the estimated post-response shift.
+    """
+    # Frozen bank parameters captured from a verified divergence scenario.
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.16697378, 0.12573022, 0.23911482, 0.97692311],
+          [1.22622503, 0.64042265, 0.243674, 0.96302065],
+          [1.29039876, -0.53566937, 0.25823261, 0.9998326],
+          [1.43677024, 1.30400005, 0.27085027, 0.99885012],
+          [0.88364463, -0.70373524, 0.24742931, 0.98113252],
+          [1.21033149, -0.62327446, 0.27732927, 0.97902756],
+          [1.14530208, -2.32503077, 0.23669611, 0.9813068],
+          [1.01693316, -1.24591095, 0.2570302, 0.96333529],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0]
+    response_vector = [True]
+    est_theta = 0.0
+
+    mei = MEISelector(estimator=NumericalSearchEstimator())
+    max_info = MaxInfoSelector()
+
+    mei_choice = mei.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=est_theta,
+      rng=np.random.default_rng(0),
+      response_vector=response_vector,
+    )
+    max_info_choice = max_info.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=est_theta,
+      rng=np.random.default_rng(0),
+    )
+
+    assert mei_choice == 1
+    assert max_info_choice == 2
+    assert mei_choice != max_info_choice
+
+  def test_select_matches_manual_expected_information(self) -> None:
+    """MEI scores should match the manual P*I_correct + (1-P)*I_incorrect calculation.
+
+    The manual score comparison makes sure both response branches are weighted
+    correctly instead of merely exercising the estimator wiring.
+    """
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.5, 0.0, 0.0, 1.0],
+          [1.2, 0.5, 0.0, 1.0],
+          [0.8, -0.5, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0]
+    response_vector = [True]
+    est_theta = 0.4
+    estimator = NumericalSearchEstimator()
+    selector = MEISelector(estimator=estimator)
+
+    candidate_mask = np.ones(item_bank.n_items, dtype=bool)
+    candidate_mask[administered_items] = False
+    candidates = np.flatnonzero(candidate_mask)
+    manual_scores = np.array(
+      [
+        float(
+          (
+            irt.icc(est_theta, *item_bank.items[int(idx), :4])
+            * item_bank.test_information(
+              estimator.estimate(
+                item_bank=item_bank,
+                administered_items=[*administered_items, int(idx)],
+                response_vector=[*response_vector, True],
+                est_theta=est_theta,
+              ),
+              [*administered_items, int(idx)],
+            )
+          )
+          + (
+            (1.0 - irt.icc(est_theta, *item_bank.items[int(idx), :4]))
+            * item_bank.test_information(
+              estimator.estimate(
+                item_bank=item_bank,
+                administered_items=[*administered_items, int(idx)],
+                response_vector=[*response_vector, False],
+                est_theta=est_theta,
+              ),
+              [*administered_items, int(idx)],
+            )
+          )
+        )
+        for idx in candidates
+      ],
+      dtype=float,
+    )
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=est_theta,
+      rng=np.random.default_rng(0),
+      response_vector=response_vector,
+    )
+
+    assert selected == 1
+    assert selected == int(candidates[int(manual_scores.argmax())])
+
+  def test_expected_information_matches_the_closed_form_on_1pl_items(self) -> None:
+    """Under the 1PL model an item's information is P(1 - P), so each MEI score has a closed form."""
+    difficulties = np.array([0.0, 0.8, -0.6, 1.5])
+    item_bank = ItemBank(np.column_stack([np.ones(4), difficulties, np.zeros(4), np.ones(4)]))
+    selector = MEISelector(estimator=ShiftEstimator())
+    est_theta = 0.2
+
+    def probability(theta: float, b: float) -> float:
+      return 1.0 / (1.0 + np.exp(-(theta - b)))
+
+    def test_information(theta: float, items: list[int]) -> float:
+      return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in items)
+
+    expected = {}
+    for candidate in (1, 2, 3):
+      p_correct = probability(est_theta, difficulties[candidate])
+      expected[candidate] = p_correct * test_information(est_theta + 0.5, [0, candidate]) + (
+        1.0 - p_correct
+      ) * test_information(est_theta - 0.5, [0, candidate])
+      score = selector._expected_information(item_bank, [0], [True], candidate, est_theta)
+      assert score == pytest.approx(expected[candidate], rel=1e-12)
+
+    selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=est_theta, response_vector=[True])
+    assert selected == max(expected, key=expected.__getitem__)
+
+  def test_select_falls_back_to_max_info_when_a_look_ahead_is_infinite(self) -> None:
+    """Without Dodd's heuristic an all-correct look-ahead is +inf; MEI should then match MaxInfo, not pick item 0."""
+    item_bank = ItemBank(
+      np.array(
+        [[1.0, 2.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0], [1.5, 0.1, 0.0, 1.0]],
+        dtype=float,
+      )
+    )
+    selector = MEISelector(estimator=NumericalSearchEstimator(dodd=False))
+
+    selected = selector.select(item_bank=item_bank, administered_items=[0], est_theta=0.0, response_vector=[True])
+
+    assert selected == MaxInfoSelector().select(item_bank=item_bank, administered_items=[0], est_theta=0.0) == 3
+
+
+class TestMLWISelector:
+  """Tests for MLWISelector."""
+
+  def test_select_requires_response_vector(self) -> None:
+    """The selector needs the current response history."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    selector = MLWISelector()
+
+    with pytest.raises(ValueError, match="response_vector"):
+      selector.select(
+        item_bank=item_bank,
+        administered_items=[],
+        est_theta=0.0,
+        rng=np.random.default_rng(42),
+      )
+
+  def test_select_matches_manual_weighted_information(self) -> None:
+    """Likelihood-weighted scores should match the manual integration."""
+    item_bank = ItemBank.generate_item_bank(8, seed=42)
+    selector = MLWISelector(n_nodes=11)
+    administered_items = [0, 1]
+    response_vector = [True, False]
+    candidates = np.array([idx for idx in range(item_bank.n_items) if idx not in administered_items])
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+      response_vector=response_vector,
+    )
+
+    nodes = np.linspace(-6.0, 6.0, 11)
+    delta = (6.0 - (-6.0)) / (11 - 1)
+    log_likelihood = np.array(
+      [irt.log_likelihood(float(theta), response_vector, item_bank.items[administered_items, :4]) for theta in nodes],
+      dtype=float,
+    )
+    log_likelihood -= float(log_likelihood.max())
+    weights = np.exp(log_likelihood)
+    manual_scores = np.array(
+      [
+        float(
+          np.sum(np.array([irt.inf(float(theta), *item_bank.items[int(idx), :4]) for theta in nodes]) * weights) * delta
+        )
+        for idx in candidates
+      ],
+      dtype=float,
+    )
+    expected = int(candidates[int(manual_scores.argmax())])
+
+    assert selected == expected
+
+  def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
+    """MLWI should still choose from non-administered items when every candidate exceeds r_max."""
+    item_bank = ItemBank.generate_item_bank(8, seed=42)
+    selector = MLWISelector(n_nodes=11, r_max=0.0)
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[0, 1],
+      est_theta=0.0,
+      rng=np.random.default_rng(42),
+      exposure_rates=np.ones(item_bank.n_items, dtype=float),
+      response_vector=[True, False],
+    )
+
+    assert selected is not None
+    assert selected not in {0, 1}
+
+  def test_select_with_empty_response_vector_reduces_to_information_integral(self) -> None:
+    """With no responses, MLWI should reduce to the integral of item information.
+
+    This verifies the no-data degeneracy case where likelihood weights become
+    uniform; if that fallback changed, MLWI would stop matching its mathematical definition.
+    """
+    item_bank = ItemBank.generate_item_bank(8, seed=0)
+    n_nodes = 21
+    selector = MLWISelector(n_nodes=n_nodes)
+    nodes = np.linspace(-6.0, 6.0, n_nodes)
+    delta = (6.0 - (-6.0)) / (n_nodes - 1)
+
+    manual_scores = np.array(
+      [
+        float(np.sum(np.array([irt.inf(float(theta), *item_bank.items[idx, :4]) for theta in nodes])) * delta)
+        for idx in range(item_bank.n_items)
+      ],
+      dtype=float,
+    )
+
+    selected = selector.select(
+      item_bank=item_bank,
+      administered_items=[],
+      est_theta=0.0,
+      response_vector=[],
+    )
+
+    assert selected == int(manual_scores.argmax())
+
+  def test_select_with_no_data_prefers_the_most_discriminating_item(self) -> None:
+    """With flat weights a 2PL item's integrated information is its discrimination a, whatever its difficulty."""
+    item_bank = ItemBank(
+      np.array(
+        [[0.8, 2.0, 0.0, 1.0], [1.9, -2.5, 0.0, 1.0], [1.2, 0.0, 0.0, 1.0], [1.5, 1.0, 0.0, 1.0]],
+        dtype=float,
+      )
+    )
+
+    selected = MLWISelector().select(item_bank=item_bank, administered_items=[], est_theta=0.0, response_vector=[])
+
+    assert selected == 1
+
+  def test_select_stays_finite_on_a_long_test(self) -> None:
+    """Normalizing the log-likelihood keeps 300-item likelihood weights from underflowing."""
+    item_bank = ItemBank.generate_item_bank(320, seed=7)
+    rng = np.random.default_rng(7)
+    administered_items = list(range(300))
+    response_vector = [bool(rng.random() < irt.icc(0.4, *item_bank.items[idx, :4])) for idx in administered_items]
+    selector = MLWISelector()
+
+    weights = selector._likelihood_weights(response_vector, item_bank.items[administered_items, :4])
+    selected = selector.select(
+      item_bank=item_bank, administered_items=administered_items, est_theta=0.0, response_vector=response_vector
+    )
+
+    assert np.isfinite(weights).all()
+    assert weights.max() == pytest.approx(1.0)
+    assert selected in range(300, 320)
+
+  def test_init_rejects_non_increasing_bounds(self) -> None:
+    """Reversed bounds would flip the sign of every score and select the least informative item."""
+    with pytest.raises(ValueError, match="bounds must be increasing"):
+      MLWISelector(bounds=(4.0, -4.0))
+    with pytest.raises(ValueError, match="bounds must be increasing"):
+      MLWISelector(bounds=(1.0, 1.0))
+
+  def test_select_converges_to_max_info_on_long_test(self) -> None:
+    """On a long test, MLWI should agree with MaxInfo near the MLE.
+
+    As the likelihood sharpens, MLWI should concentrate on the MLE neighborhood,
+    so disagreement here would signal broken weighting or integration.
+    """
+    item_bank = ItemBank.generate_item_bank(30, seed=1)
+    theta_true = 0.7
+    rng = np.random.default_rng(5)
+    administered_items = list(range(20))
+    response_vector = [
+      bool(rng.random() < irt.icc(theta_true, *item_bank.items[idx, :4])) for idx in administered_items
+    ]
+    mle_theta = NumericalSearchEstimator().estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=theta_true,
+    )
+
+    mlwi = MLWISelector(n_nodes=81)
+    max_info = MaxInfoSelector()
+
+    mlwi_choice = mlwi.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=mle_theta,
+      response_vector=response_vector,
+    )
+    max_info_choice = max_info.select(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      est_theta=mle_theta,
+    )
+
+    assert mlwi_choice == max_info_choice
+
+
 class TestClusterSelector:
   """Tests for ClusterSelector."""
 
@@ -590,6 +1010,8 @@ SELECTOR_FACTORIES = {
   "AStratBBlockSelector": lambda: AStratBBlockSelector(test_size=10),
   "MaxInfoStratSelector": lambda: MaxInfoStratSelector(test_size=10),
   "MaxInfoBBlockSelector": lambda: MaxInfoBBlockSelector(test_size=10),
+  "MEISelector": MEISelector,
+  "MLWISelector": MLWISelector,
 }
 
 
@@ -603,6 +1025,7 @@ def test_select_returns_builtin_int(make_selector) -> None:
     administered_items=[0, 1],
     est_theta=0.3,
     rng=np.random.default_rng(0),
+    response_vector=[True, False],
   )
 
   assert type(item_id) is int
