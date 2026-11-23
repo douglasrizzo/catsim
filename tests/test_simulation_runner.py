@@ -11,7 +11,7 @@ from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, RandomSelector
 from catsim.simulation import SimulationRunner
 from catsim.state import SessionStatus, SimulationResult
-from catsim.stopping import TestLengthStopper as LengthStopper
+from catsim.stopping import MaxLengthStopper
 
 
 class FirstRemainingSelector(BaseSelector):
@@ -46,7 +46,7 @@ class TestSimulationRunnerInit:
       FixedPointInitializer(0.0),
       RandomSelector(),
       estimator=NumericalSearchEstimator(),
-      stopper=LengthStopper(max_items=5),
+      stopper=MaxLengthStopper(5),
       seed=42,
     )
     assert runner.item_bank is item_bank
@@ -59,7 +59,7 @@ class TestSimulationRunnerInit:
       FixedPointInitializer(0.0),
       RandomSelector(),
       estimator=NumericalSearchEstimator(),
-      stopper=LengthStopper(max_items=5),
+      stopper=MaxLengthStopper(5),
       seed=42,
     )
     assert isinstance(runner.item_bank, ItemBank)
@@ -73,7 +73,7 @@ class TestSimulationRunnerInit:
         FixedPointInitializer(0.0),
         RandomSelector(),
         estimator=NumericalSearchEstimator(),
-        stopper=LengthStopper(max_items=5),
+        stopper=MaxLengthStopper(5),
       )
 
     assert str(exc_info.value) == "item_bank must be an ItemBank or numpy.ndarray"
@@ -118,7 +118,7 @@ class TestSimulationRunnerRun:
       FixedPointInitializer(0.0),
       RandomSelector(),
       NumericalSearchEstimator(),
-      LengthStopper(max_items=5),
+      MaxLengthStopper(5),
       seed=42,
     )
     runner2 = SimulationRunner(
@@ -126,7 +126,7 @@ class TestSimulationRunnerRun:
       FixedPointInitializer(0.0),
       RandomSelector(),
       NumericalSearchEstimator(),
-      LengthStopper(max_items=5),
+      MaxLengthStopper(5),
       seed=42,
     )
 
@@ -148,7 +148,7 @@ class TestSimulationRunnerRun:
 
     def run(verbose: bool) -> SimulationResult:
       runner = SimulationRunner(
-        item_bank, FixedPointInitializer(0.0), RandomSelector(), NumericalSearchEstimator(), LengthStopper(max_items=3)
+        item_bank, FixedPointInitializer(0.0), RandomSelector(), NumericalSearchEstimator(), MaxLengthStopper(3)
       )
       return runner.run(3, verbose=verbose)
 
@@ -165,7 +165,7 @@ class TestSimulationRunnerRun:
     """
     selector = FirstRemainingSelector()
     runner = SimulationRunner(
-      item_bank, FixedPointInitializer(0.0), selector, NumericalSearchEstimator(), LengthStopper(max_items=2)
+      item_bank, FixedPointInitializer(0.0), selector, NumericalSearchEstimator(), MaxLengthStopper(2)
     )
 
     result = runner.run(np.zeros(4))
