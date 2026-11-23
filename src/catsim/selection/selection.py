@@ -100,6 +100,8 @@ class MaxInfoSelector(BaseSelector):
 class UrrySelector(BaseSelector):
   """Select the remaining item whose difficulty parameter is closest to the current ability estimate.
 
+  It applies no exposure cap: ``exposure_rates`` is ignored.
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/urry-selector`.
@@ -133,6 +135,10 @@ class UrrySelector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator, used only to break ties between equally close items.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -163,7 +169,8 @@ class IntervalInfoSelector(BaseSelector):
       \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)
 
   where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the
-  confidence level. A fixed half-width :math:`\delta` can be used instead.
+  confidence level. A fixed half-width :math:`\delta` can be used instead. The selector applies no
+  exposure cap: ``exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -242,6 +249,10 @@ class IntervalInfoSelector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator, used only to break ties between equally good items.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------

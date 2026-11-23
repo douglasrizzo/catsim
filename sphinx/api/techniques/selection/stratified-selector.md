@@ -95,6 +95,7 @@ Any correct implementation must satisfy the following properties:
 3. The returned item is the non-administered item of the active stratum whose location is closest to `est_theta`.
 4. If the active stratum has no non-administered items left, the selector raises `NoItemsAvailableError`.
 5. The class itself is abstract; subclasses only choose the key, the location and the blocking variable.
+6. It applies no exposure cap: it ignores `exposure_rates`. The strata are its exposure control.
 
 ## References
 

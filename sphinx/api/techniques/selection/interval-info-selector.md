@@ -90,6 +90,7 @@ Any correct implementation must satisfy the following properties:
 3. With a fixed `interval`, the interval is $\hat{\theta} \pm \delta$.
 4. It never returns an already administered item.
 5. If no non-administered items remain, it raises `NoItemsAvailableError`.
+6. It applies no exposure cap: it ignores `exposure_rates`.
 
 ## References
 

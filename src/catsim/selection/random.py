@@ -38,7 +38,11 @@ class RandomSelector(BaseSelector):
     est_theta : float
         Current estimated ability. Unused by this selector.
     rng : numpy.random.Generator or None, optional
-        Random number generator used by the object.
+        Random number generator the item is drawn with. Required.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -64,7 +68,8 @@ class The54321Selector(BaseSelector):
   most informative item is administered. Randomizing the opening items, which every examinee would
   otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in
   precision. Items tied with the least informative item of a bin also join it, so from the fifth
-  item on, ties for the most information are broken uniformly at random (ADR-0008).
+  item on, ties for the most information are broken uniformly at random (ADR-0008). The selector
+  applies no exposure cap: ``exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -126,6 +131,10 @@ class The54321Selector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator the item is drawn from the bin with. Required.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
@@ -154,7 +163,7 @@ class RandomesqueSelector(BaseSelector):
 
   In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
   the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
-  join the bin (ADR-0008).
+  join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.
   """
 
   def __str__(self) -> str:
@@ -199,6 +208,10 @@ class RandomesqueSelector(BaseSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator the item is drawn from the bin with. Required.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------

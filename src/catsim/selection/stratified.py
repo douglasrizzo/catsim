@@ -16,7 +16,8 @@ class StratifiedSelector(FiniteSelector):
   The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking
   on a location key so that every stratum covers the whole ability range. The test is split into
   ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item
-  whose location is closest to the current ability estimate.
+  whose location is closest to the current ability estimate. The strata are the selector's exposure
+  control: it applies no exposure cap, and ``exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -141,6 +142,10 @@ class StratifiedSelector(FiniteSelector):
         The current estimated ability.
     rng : numpy.random.Generator or None, optional
         Random number generator, used only to break ties between equally close items.
+    exposure_rates : numpy.ndarray or None, optional
+        Ignored: this selector applies no exposure cap.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
