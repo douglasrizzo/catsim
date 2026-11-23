@@ -73,7 +73,8 @@ that end point; the default $k = 6$ keeps more randomness late in longer tests.
      - Non-negative constant :math:`k` controlling how quickly the sampling distribution concentrates on high-information items; 0 keeps sampling uniform.
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied before sampling; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.
+     - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
+       out before sampling, unless every remaining item is.
 ```
 
 ## Behavioral Contracts

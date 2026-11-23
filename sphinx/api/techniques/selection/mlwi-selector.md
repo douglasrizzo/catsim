@@ -65,7 +65,9 @@ before exponentiation; the constant factor cancels under $\arg\max$.
      - Theta range covered by the fixed integration grid.
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied before the final maximization.
+     - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
+       out before the weighted information is computed, unless every remaining
+       item is.
 ```
 
 ## Behavioral Contracts

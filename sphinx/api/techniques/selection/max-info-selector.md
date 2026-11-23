@@ -46,8 +46,8 @@ $$
 where $R_k$ is the set of non-administered items at step $k$. In the
 package implementation, items are first ordered by descending information; any
 item whose exposure rate is below `r_max` is preferred, but if every remaining
-item exceeds the cap the selector falls back to the highest-information item
-anyway.
+item is at or above the cap the selector falls back to the highest-information
+item anyway.
 
 ## Parameters
 
