@@ -369,6 +369,8 @@ class EAPEstimator(BaseEstimator):
 
 # Points on which MAPEstimator locates the posterior mode before refining it (0.06 apart on [-6, 6]).
 _MODE_SEARCH_POINTS = 201
+# Equal maxima on this many search points mean a flat posterior; two can flank a symmetric peak.
+_FLAT_MAXIMUM_POINTS = 3
 
 
 class MAPEstimator(BaseEstimator):
@@ -469,22 +471,28 @@ class MAPEstimator(BaseEstimator):
     self._total_evaluations += nodes.size
     peak = log_post.max()
     if not numpy.isfinite(peak):
-      msg = f"the log-posterior has no finite maximum within the search bounds {self._bounds}"
+      msg = (
+        f"the log-posterior is not finite at any of the {nodes.size} search points in {self._bounds}; "
+        "the prior's support must contain at least one of them"
+      )
       raise ValueError(msg)
 
     ties = numpy.flatnonzero(log_post == peak)
     best = int(ties[ties.size // 2])
-    if ties.size > 1:
-      # A flat maximum, such as a uniform prior with no responses, has no unique mode
+    # A flat maximum, such as a uniform prior with no responses, has no unique mode
+    if ties.size >= _FLAT_MAXIMUM_POINTS:
       return float(nodes[best])
 
-    result = minimize_scalar(
-      self._negative_log_posterior,
-      args=(response_vector, items),
-      bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
-      method="bounded",
-      options={"xatol": self._tol},
-    )
+    # Past a narrow prior's support the objective is +inf, and SciPy's parabolic step then
+    # subtracts infinities; the result is checked against the best point below
+    with numpy.errstate(invalid="ignore"):
+      result = minimize_scalar(
+        self._negative_log_posterior,
+        args=(response_vector, items),
+        bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
+        method="bounded",
+        options={"xatol": self._tol},
+      )
     self._last_evaluations += int(result.nfev)
     self._total_evaluations += int(result.nfev)
     # A neighbour can lie outside a narrow prior's support, so keep the refinement only if it

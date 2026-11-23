@@ -46,9 +46,11 @@ objective $+\infty$ there, and a bounded scalar search cannot cross that flat
 region; it would drift to a bound outside the prior's support. And a multimodal
 posterior, from a multimodal prior or a 3PL likelihood, has local modes a local
 search can stop at; the grid finds the highest one, provided the posterior does
-not change sharply between grid points. If several grid points tie for the
-maximum, as with a uniform prior and no responses, the posterior has no unique
-mode and the middle of the tied points is returned.
+not change sharply between grid points. If three or more grid points tie for
+the maximum, as with a uniform prior and no responses, the posterior has no
+unique mode and the middle of the tied points is returned. The prior's support
+must contain at least one grid point, which any interval wider than the grid
+spacing does.
 
 ## Parameters
 
@@ -83,7 +85,7 @@ Any correct implementation must satisfy the following properties:
 3. Shifting the prior mean while holding the response data fixed shifts the MAP estimate in the same direction.
 4. On long, information-rich tests, MAP and EAP should converge toward similar values because the posterior becomes sharply concentrated.
 5. The estimator returns finite values on extreme response patterns because the prior keeps the objective bounded.
-6. The estimate lies inside the prior's support. A prior with no support inside the search bounds raises `ValueError`.
+6. The estimate lies inside the prior's support. A prior whose support contains none of the grid points, such as one outside the search bounds, raises `ValueError`.
 
 ## References
 

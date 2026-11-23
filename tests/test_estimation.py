@@ -895,7 +895,7 @@ class TestMAPEstimator:
     """A prior with no support inside the search bounds leaves no mode to find."""
     estimator = MAPEstimator(log_prior=uniform_log_prior(7.0, 8.0))
 
-    with pytest.raises(ValueError, match="no finite maximum"):
+    with pytest.raises(ValueError, match="not finite at any"):
       estimator.estimate(self._hard_items(), [0], [True], 0.0)
 
   def test_estimate_locates_an_off_grid_prior_mode_within_tol(self) -> None:
@@ -905,6 +905,25 @@ class TestMAPEstimator:
     theta = estimator.estimate(self._hard_items(), [], [], 0.0)
 
     assert theta == pytest.approx(0.5, abs=1e-6)
+
+  def test_estimate_refines_a_mode_between_two_tied_points(self) -> None:
+    """A peak halfway between two grid points makes them tie, which is not a flat posterior.
+
+    The prior mode 0.03 sits midway between the points 0.0 and 0.06, which tie exactly;
+    the estimate must still be refined to the mode instead of returning one of them.
+    """
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.03, sd=1.0), tol=1e-8)
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(0.03, abs=1e-6)
+
+  def test_estimate_raises_when_the_support_falls_between_grid_points(self) -> None:
+    """A support narrower than the grid spacing that holds no grid point cannot be searched."""
+    estimator = MAPEstimator(log_prior=uniform_log_prior(0.01, 0.05))
+
+    with pytest.raises(ValueError, match="must contain at least one"):
+      estimator.estimate(self._hard_items(), [0], [True], 0.0)
 
   def test_estimate_finds_the_global_mode_of_a_bimodal_prior(self) -> None:
     """The grid search picks the taller of two separated modes, wherever a local search would stop."""
