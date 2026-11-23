@@ -70,7 +70,8 @@ largest value of $K_i(\hat{\theta})$.
        their simulation (p. 223).
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied after ordering candidate items by KL score.
+     - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
+       out before the KL scores are computed, unless every remaining item is.
 ```
 
 ## Behavioral Contracts

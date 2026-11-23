@@ -475,7 +475,7 @@ cutoff joins the pool.</p>
 <p>Every selector that picks the best item by a score uses one rule, catR’s: the candidates whose
 score equals the best score exactly are tied, and one of them is drawn uniformly with the session’s
 random generator. Randomesque and 5-4-3-2-1 bins hold every candidate tied with the bin’s least
-informative item. <code class="docutils literal notranslate"><span class="pre">BaseSelector._pick_best</span></code> and <code class="docutils literal notranslate"><span class="pre">BaseSelector._best_pool</span></code> implement the rule.</p>
+informative item. <code class="docutils literal notranslate"><span class="pre">pick_best</span></code> and <code class="docutils literal notranslate"><span class="pre">best_pool</span></code> in <code class="docutils literal notranslate"><span class="pre">catsim.selection.base</span></code> implement the rule.</p>
 <p>The rule is fixed. There is no parameter, enum or package setting to change it.</p>
 <p>When there is no tie, no random number is drawn. When items tie and no generator was passed, the
 selector raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, as the random selectors already do without a generator.
@@ -487,8 +487,9 @@ not always in distance: in floating point, |0.3 - 0.1| is 0.19999999999999998 an
 item, as catR’s <code class="docutils literal notranslate"><span class="pre">bOpt</span></code> does. On 1PL banks, <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> and the bins now rank by information,
 as catR’s <code class="docutils literal notranslate"><span class="pre">MFI</span></code> does, instead of by distance to the estimate. Information is flat near its peak, so
 items whose distances differ only by rounding tie there.</p>
-<p><code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code> applies the rule to its choice of item within a cluster, but not yet to its
-choice of cluster.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code> applies the rule twice: to its choice of cluster, among clusters whose scores tie
+exactly, and to its choice of item within that cluster. Its <code class="docutils literal notranslate"><span class="pre">item_info</span></code> rule scores clusters by
+information on every bank, 1PL included, as <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> does.</p>
 </section>
 <section id="consequences">
 <h2>Consequences<a class="headerlink" href="#consequences" title="Link to this heading">#</a></h2>

@@ -575,6 +575,7 @@ items from each in a 30-item test.</p></td>
 <li><p>The returned item is the non-administered item of the active stratum whose location is closest to <code class="docutils literal notranslate"><span class="pre">est_theta</span></code>.</p></li>
 <li><p>If the active stratum has no non-administered items left, the selector raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 <li><p>The class itself is abstract; subclasses only choose the key, the location and the blocking variable.</p></li>
+<li><p>It applies no exposure cap: it ignores <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. The strata are its exposure control.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -593,7 +594,8 @@ items from each in a 30-item test.</p></td>
 <p>The bank is sorted by a stratification key and split into <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> strata, optionally after blocking
 on a location key so that every stratum covers the whole ability range. The test is split into
 <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> consecutive stages, and each stage draws from its own stratum the non-administered item
-whose location is closest to the current ability estimate.</p>
+whose location is closest to the current ability estimate. The strata are the selector’s exposure
+control: it applies no exposure cap, and <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -627,6 +629,10 @@ uses one stratum per test item.</p>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
 <dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator, used only to break ties between equally close items.</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Ignored: this selector applies no exposure cap.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Unused; accepted for the engine’s selector contract.</p>
 </dd>
 </dl>
 </dd>

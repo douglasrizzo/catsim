@@ -483,6 +483,7 @@ optimal items near the current estimate.</p>
 <li><p>It builds its random candidate set from the most informative remaining items.</p></li>
 <li><p>It samples from the candidate set using the configured random number generator.</p></li>
 <li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
+<li><p>It applies no exposure cap: it ignores <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. The random draw from the candidate set is its exposure control.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -500,7 +501,7 @@ optimal items near the current estimate.</p>
 <p>Implementation of the randomesque selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id6" title="G. G. Kingsbury and A. R. Zara. Procedures for selecting items for computerized adaptive tests. Applied Measurement in Education, 2(4):359–375, 1989. doi:10.1207/s15324818ame0204_6.">Kingsbury and Zara, 1989</a>]</span>.</p>
 <p>In this selector, at each step of the test, an item is randomly chosen from the <span class="math notranslate nohighlight">\(n\)</span> most informative items in
 the item bank, <span class="math notranslate nohighlight">\(n\)</span> being a user-defined value. Items tied with the least informative of those <span class="math notranslate nohighlight">\(n\)</span> also
-join the bin (ADR-0008).</p>
+join the bin (ADR-0008). The selector applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is ignored.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.RandomesqueSelector.bin_size">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bin_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.selection.RandomesqueSelector.bin_size" title="Link to this definition">#</a></dt>
@@ -521,6 +522,10 @@ join the bin (ADR-0008).</p>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
 <dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator the item is drawn from the bin with. Required.</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Ignored: this selector applies no exposure cap.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Unused; accepted for the engine’s selector contract.</p>
 </dd>
 </dl>
 </dd>

@@ -775,9 +775,8 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">best_pool</span><span class="p">,</span> <span class="n">remaining</span><span class="p">,</span> <span class="n">require_rng</span>
 
 
 <div class="viewcode-block" id="RandomSelector">
@@ -787,33 +786,15 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  This selector is useful for baseline comparisons or for studying the impact of</span>
 <span class="sd">  item selection strategies.</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  replace : bool, optional</span>
-<span class="sd">      Whether to select an item that has already been selected before for this examinee.</span>
-<span class="sd">      Default is False.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the name of the selector."""</span>
     <span class="k">return</span> <span class="s2">"Random Selector"</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a RandomSelector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    replace : bool, optional</span>
-<span class="sd">        Whether to select an item that has already been selected before for this examinee.</span>
-<span class="sd">        Default is False.</span>
-<span class="sd">    """</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span> <span class="o">=</span> <span class="n">replace</span>
-
 <div class="viewcode-block" id="RandomSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/random-selector.html#catsim.selection.RandomSelector.select">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span>
     <span class="n">administered_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -833,33 +814,26 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    est_theta : float</span>
 <span class="sd">        Current estimated ability. Unused by this selector.</span>
 <span class="sd">    rng : numpy.random.Generator or None, optional</span>
-<span class="sd">        Random number generator used by the object.</span>
+<span class="sd">        Random number generator the item is drawn with. Required.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Ignored: this selector applies no exposure cap.</span>
+<span class="sd">    response_vector : list[bool] or None, optional</span>
+<span class="sd">        Unused; accepted for the engine's selector contract.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    int</span>
 <span class="sd">        Index of the next item to be applied, drawn uniformly at random from the items not yet</span>
-<span class="sd">        administered, or from every item when ``replace`` is True.</span>
+<span class="sd">        administered.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If ``rng`` is None.</span>
 <span class="sd">    NoItemsAvailableError</span>
-<span class="sd">        If every item has already been administered and ``replace`` is False.</span>
+<span class="sd">        If every item has already been administered.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"rng parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"There are no more items to apply."</span>
-      <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span><span class="p">:</span>
-      <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">))</span>
-    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)),</span> <span class="n">administered_items</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)))</span></div>
 </div>
 
 
@@ -874,7 +848,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  most informative item is administered. Randomizing the opening items, which every examinee would</span>
 <span class="sd">  otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in</span>
 <span class="sd">  precision. Items tied with the least informative item of a bin also join it, so from the fifth</span>
-<span class="sd">  item on, ties for the most information are broken uniformly at random (ADR-0008).</span>
+<span class="sd">  item on, ties for the most information are broken uniformly at random (ADR-0008). The selector</span>
+<span class="sd">  applies no exposure cap: ``exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -938,6 +913,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        The current estimated ability.</span>
 <span class="sd">    rng : numpy.random.Generator or None, optional</span>
 <span class="sd">        Random number generator the item is drawn from the bin with. Required.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Ignored: this selector applies no exposure cap.</span>
+<span class="sd">    response_vector : list[bool] or None, optional</span>
+<span class="sd">        Unused; accepted for the engine's selector contract.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -952,14 +931,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    NoItemsAvailableError</span>
 <span class="sd">        If every item has already been administered.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"rng parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
 
-    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_filtered_candidates</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
     <span class="n">bin_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">))</span>
     <span class="c1"># items tied with the bin's least informative item join the bin (ADR-0008)</span>
-    <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">bin_size</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">bin_size</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
 </div>
 
@@ -972,7 +949,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in</span>
 <span class="sd">  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also</span>
-<span class="sd">  join the bin (ADR-0008).</span>
+<span class="sd">  join the bin (ADR-0008). The selector applies no exposure cap: ``exposure_rates`` is ignored.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -1019,6 +996,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        The current estimated ability.</span>
 <span class="sd">    rng : numpy.random.Generator or None, optional</span>
 <span class="sd">        Random number generator the item is drawn from the bin with. Required.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Ignored: this selector applies no exposure cap.</span>
+<span class="sd">    response_vector : list[bool] or None, optional</span>
+<span class="sd">        Unused; accepted for the engine's selector contract.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1033,13 +1014,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    NoItemsAvailableError</span>
 <span class="sd">        If every item has already been administered.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">rng</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"rng parameter cannot be None"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">require_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
 
-    <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_filtered_candidates</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
     <span class="c1"># items tied with the bin's least informative item join the bin (ADR-0008)</span>
-    <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">)</span>
+    <span class="n">pool</span> <span class="o">=</span> <span class="n">best_pool</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)[</span><span class="n">candidates</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">pool</span><span class="p">))</span></div>
 </div>
 

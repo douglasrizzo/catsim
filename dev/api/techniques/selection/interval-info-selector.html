@@ -545,6 +545,7 @@ confidence interval above is used.</p></td>
 <li><p>With a fixed <code class="docutils literal notranslate"><span class="pre">interval</span></code>, the interval is <span class="math notranslate nohighlight">\(\hat{\theta} \pm \delta\)</span>.</p></li>
 <li><p>It never returns an already administered item.</p></li>
 <li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
+<li><p>It applies no exposure cap: it ignores <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -566,7 +567,8 @@ confidence interval above is used.</p></td>
 \theta_{L, U} = \hat\theta \mp \frac{\lambda}{\sqrt{I(\hat\theta)}}, \qquad
 \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)\]</div>
 <p>where <span class="math notranslate nohighlight">\(I(\hat\theta)\)</span> is the information of the administered items and <span class="math notranslate nohighlight">\(\gamma\)</span> the
-confidence level. A fixed half-width <span class="math notranslate nohighlight">\(\delta\)</span> can be used instead.</p>
+confidence level. A fixed half-width <span class="math notranslate nohighlight">\(\delta\)</span> can be used instead. The selector applies no
+exposure cap: <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -607,6 +609,10 @@ interval above.</p>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
 <dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator, used only to break ties between equally good items.</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Ignored: this selector applies no exposure cap.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Unused; accepted for the engine’s selector contract.</p>
 </dd>
 </dl>
 </dd>

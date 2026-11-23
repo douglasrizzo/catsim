@@ -856,15 +856,16 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    NoItemsAvailableError</span>
 <span class="sd">        If every one of the selector's indexes has already been administered.</span>
 <span class="sd">    """</span>
-    <span class="n">valid_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_non_administered</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">administered</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span> <span class="k">if</span> <span class="n">index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">administered</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">"A new index was asked for, but there are no more item indexes to present.</span><span class="se">\n</span><span class="s2">"</span>
         <span class="sa">f</span><span class="s2">"Items to be administered:</span><span class="se">\t</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">)</span><span class="si">}</span><span class="s2"> (size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_indexes</span><span class="p">)</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">"</span>
         <span class="sa">f</span><span class="s2">"Administered items:</span><span class="se">\t\t</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> (size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
       <span class="p">)</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">valid_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

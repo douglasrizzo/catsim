@@ -463,11 +463,13 @@
 <h1>Cluster Selector<a class="headerlink" href="#cluster-selector" title="Link to this heading">#</a></h1>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
-<p>Cluster-based selection is an exposure-management strategy that organizes items
-into externally supplied groups and chooses from those groups instead of from the
-entire bank at once. This makes it possible to distribute usage across groups of
-similar items while still preserving an information-based rule inside the chosen
-cluster.</p>
+<p>The method comes from Meneghetti (2015). Cluster-based selection is an
+exposure-management strategy that organizes items into externally supplied
+groups and chooses from those groups instead of from the entire bank at once.
+The aim is to distribute usage across groups of similar items while still
+preserving an information-based rule inside the chosen cluster. In the
+simulations reported below under “How It Compares”, it did not improve on
+simpler selectors.</p>
 <p>In this package the selector is explicitly operational rather than purely
 theoretical: users supply the cluster memberships, choose how cluster quality is
 scored, and choose how to behave when all items in the chosen cluster exceed the
@@ -492,7 +494,9 @@ remaining items. The package supports three cluster-scoring rules:</p>
 <p>All three scores use every item of the cluster, including items already
 administered. The selector first picks the best cluster according to the
 configured scoring rule among clusters that still contain non-administered
-items. It then chooses an item inside that cluster:</p>
+items; clusters whose scores tie exactly are chosen between uniformly at random,
+as tied items are (see <a class="reference internal" href="../../../adr/0008-random-tie-breaking.html"><span class="doc">ADR-0008: Break Ties Between Items Uniformly at Random</span></a>). It then chooses an
+item inside that cluster:</p>
 <div class="math notranslate nohighlight">
 \[i^*
 =
@@ -511,6 +515,32 @@ cluster that contains either the most informative item or the highest average
 information”. They do not say whether administered items count toward a
 cluster’s score; this page describes what the code does.</p>
 </section>
+<section id="how-it-compares">
+<h2>How It Compares<a class="headerlink" href="#how-it-compares" title="Link to this heading">#</a></h2>
+<p>Simulations run while preparing catsim 1.0 measured those consequences. They
+used two 500-item 3PL banks, clusters from k-means on the standardized item
+parameters, 1,000 examinees drawn from N(0, 1) and 20-item tests, and compared
+the selector with <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code> and <code class="docutils literal notranslate"><span class="pre">RandomesqueSelector</span></code>. Test information
+was measured at the true ability. The first bank was clustered with k = 10, 25
+and 50, the second with k = 25.</p>
+<ul class="simple">
+<li><p>Without an exposure cap, <code class="docutils literal notranslate"><span class="pre">item_info</span></code> gave less test information and more test
+overlap than <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code>: 5.21 to 5.59 against 5.82, with overlap 0.408
+to 0.422 against 0.369, on the first bank, and 4.98 against 5.77, with overlap
+0.404 against 0.359, on the second.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cluster_info</span></code> lost the most information on the first bank (4.30 to 5.42),
+because a sum grows with the size of the cluster: 23% to 47% of its picks had
+less than half the information of the best remaining item.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weighted_info</span></code> lowered overlap a little, but <code class="docutils literal notranslate"><span class="pre">RandomesqueSelector(bin_size=5)</span></code>
+kept more information at lower overlap on both banks: on the first,
+<code class="docutils literal notranslate"><span class="pre">weighted_info</span></code> reached 5.42 to 5.64 at an overlap of 0.331 to 0.366, and
+<code class="docutils literal notranslate"><span class="pre">RandomesqueSelector</span></code> 5.66 at 0.320.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">r_max</span> <span class="pre">=</span> <span class="pre">0.2</span></code> and k = 25, and exposure rates computed over the examinees
+tested so far, 35 to 65 items ended above the cap for <code class="docutils literal notranslate"><span class="pre">item_info</span></code> and
+<code class="docutils literal notranslate"><span class="pre">weighted_info</span></code> under both <code class="docutils literal notranslate"><span class="pre">r_control</span></code> values, with peak rates from 0.28 to
+0.90. <code class="docutils literal notranslate"><span class="pre">MaxInfoSelector(r_max=0.2)</span></code> left no item above it.</p></li>
+</ul>
+</section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="table">
@@ -528,21 +558,24 @@ cluster’s score; this page describes what the code does.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">clusters</span></code></p></td>
 <td><p>required</p></td>
-<td><p>Cluster membership label for each item in the bank.</p></td>
+<td><p>One non-negative integer cluster label for each item in the bank. The
+number of labels is checked against the bank at every selection.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">method</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">&quot;item_info&quot;</span></code></p></td>
-<td><p>Cluster-scoring rule: maximum item information, sum of cluster
-information, or average cluster information.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ClusterMethod.ITEM_INFO</span></code></p></td>
+<td><p>Cluster-scoring rule, a <code class="docutils literal notranslate"><span class="pre">ClusterMethod</span></code> or its string value:
+<code class="docutils literal notranslate"><span class="pre">&quot;item_info&quot;</span></code> (maximum item information), <code class="docutils literal notranslate"><span class="pre">&quot;cluster_info&quot;</span></code> (sum of
+cluster information) or <code class="docutils literal notranslate"><span class="pre">&quot;weighted_info&quot;</span></code> (average cluster information).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">r_max</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
 <td><p>Soft maximum exposure rate for choosing an item inside the selected cluster.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">r_control</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">&quot;passive&quot;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ExposureControl.PASSIVE</span></code></p></td>
 <td><p>Fallback rule when every remaining item in the chosen cluster violates
-the exposure cap.</p></td>
+the exposure cap, an <code class="docutils literal notranslate"><span class="pre">ExposureControl</span></code> or its string value
+(<code class="docutils literal notranslate"><span class="pre">&quot;passive&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;aggressive&quot;</span></code>).</p></td>
 </tr>
 </tbody>
 </table>
@@ -557,6 +590,8 @@ the exposure cap.</p></td>
 <li><p>If at least one eligible item in the selected cluster has exposure rate below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>, the returned item is the highest-information such item.</p></li>
 <li><p>Under passive control, exposure-cap failure inside the chosen cluster falls back to the highest-information remaining item in that cluster.</p></li>
 <li><p>Under aggressive control, exposure-cap failure inside the chosen cluster falls back to the lowest-exposure remaining item in that cluster.</p></li>
+<li><p>Clusters whose scores tie exactly, and items tied inside the chosen cluster, are drawn uniformly at random.</p></li>
+<li><p>It raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> if <code class="docutils literal notranslate"><span class="pre">clusters</span></code> does not hold one label per item of the bank.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -568,78 +603,57 @@ the exposure cap.</p></td>
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ClusterSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'item_info'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'passive'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ClusterSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.selection.ClusterMethod" title="catsim.selection.cluster.ClusterMethod"><span class="pre">ClusterMethod</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ClusterMethod.ITEM_INFO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.selection.ExposureControl" title="catsim.selection.cluster.ExposureControl"><span class="pre">ExposureControl</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">ExposureControl.PASSIVE</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
-<p>Cluster-based Item Selection Method.</p>
-<dl class="field-list">
+<p>Choose the best-scoring cluster of items, then the most informative remaining item in it.</p>
+<p>This is the cluster-based selection method of Meneghetti (2015). The caller labels each item with
+a cluster, for example by clustering the item parameters. At each step the selector scores every
+cluster that still has an item left, takes the best one, and administers that cluster’s most
+informative remaining item whose exposure rate is below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>. Exact ties between clusters and
+between items are broken uniformly at random (ADR-0008).</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl>
-<dt><strong>clusters</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing item cluster memberships (integers representing cluster IDs).</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>clusters</strong><span class="classifier">list[int]</span></dt><dd><p>One non-negative integer cluster label per item of the bank the selector is used with. The labels
+are checked against the bank’s size at every selection.</p>
 </dd>
-<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>One of the available methods for cluster selection. Given the estimated theta
-value at each step:</p>
-<ul class="simple">
-<li><p>‘item_info’: selects the cluster which has the item with maximum information</p></li>
-<li><p>‘cluster_info’: selects the cluster whose items’ sum of information is maximum</p></li>
-<li><p>‘weighted_info’: selects the cluster whose average item information is
-maximum (its sum of information divided by its number of items)</p></li>
-</ul>
-<p>Every score counts all the items in a cluster, including those already
-administered, as long as the cluster still has an item left. Default is
-‘item_info’.</p>
+<dt><strong>method</strong><span class="classifier">ClusterMethod or str, optional</span></dt><dd><p>How clusters are scored; see <a class="reference internal" href="#catsim.selection.ClusterMethod" title="catsim.selection.ClusterMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClusterMethod</span></code></a>. Every score counts all the items in a cluster,
+including those already administered. Default is <code class="docutils literal notranslate"><span class="pre">ClusterMethod.ITEM_INFO</span></code>.</p>
 </dd>
-<dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Exposure-rate cap for choosing an item inside the selected cluster: items at
-or above it are passed over unless no other item in the cluster remains. It
-does not affect which cluster is chosen. Default is 1 (no cap).</p>
+<dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Exposure-rate cap for choosing an item inside the selected cluster: items at or above it are
+passed over unless no other item in the cluster remains. It does not affect which cluster is
+chosen. Default is 1 (no cap).</p>
 </dd>
-<dt><strong>r_control</strong><span class="classifier">str, optional</span></dt><dd><p>Item exposure control method, used when every remaining item in the selected
-cluster has an exposure rate at or above r_max. ‘passive’ applies the most
-informative of them; ‘aggressive’ applies the one with the smallest exposure
-rate. Default is ‘passive’.</p>
+<dt><strong>r_control</strong><span class="classifier">ExposureControl or str, optional</span></dt><dd><p>What to administer when every remaining item in the selected cluster is at or above <code class="docutils literal notranslate"><span class="pre">r_max</span></code>; see
+<a class="reference internal" href="#catsim.selection.ExposureControl" title="catsim.selection.ExposureControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExposureControl</span></code></a>. Default is <code class="docutils literal notranslate"><span class="pre">ExposureControl.PASSIVE</span></code>.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Cluster Selector</span></a>.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.avg_cluster_params">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">avg_cluster_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.avg_cluster_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.avg_cluster_params" title="Link to this definition">#</a></dt>
-<dd><p>Return the average values of item parameters by cluster.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
-</dd>
-<dt><strong>c</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing clustering memberships (cluster IDs for each item).</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>A matrix containing the average values of each parameter by cluster. Rows are
-clusters, columns are parameters (a, b, c, d).</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
+<p>The method has known limits. A cluster keeps the score of items already administered, so
+<code class="docutils literal notranslate"><span class="pre">item_info</span></code> can return to a cluster whose remaining items are much less informative than items
+elsewhere in the bank; in simulations it gave less test information and more test overlap than
+<a class="reference internal" href="max-info-selector.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code></a>, and no scoring rule improved on
+<a class="reference internal" href="max-info-selector.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxInfoSelector</span></code></a> or <a class="reference internal" href="randomesque-selector.html#catsim.selection.RandomesqueSelector" title="catsim.selection.RandomesqueSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomesqueSelector</span></code></a>.
+Because <code class="docutils literal notranslate"><span class="pre">r_max</span></code> applies only inside the chosen cluster, items can end above the cap.</p>
+<p>For full algorithmic details and the simulation results, see
+<a class="reference internal" href="#"><span class="doc">Cluster Selector</span></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector.clusters">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">clusters</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.selection.ClusterSelector.clusters" title="Link to this definition">#</a></dt>
-<dd><p>Return the clusters each item belongs to.</p>
+<dd><p>Return the cluster label of each item.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector.method">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#catsim.selection.ClusterSelector.method" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">method</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#catsim.selection.ClusterMethod" title="catsim.selection.cluster.ClusterMethod"><span class="pre">ClusterMethod</span></a></span><a class="headerlink" href="#catsim.selection.ClusterSelector.method" title="Link to this definition">#</a></dt>
 <dd><p>Return the method used for cluster selection.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector.r_control">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">r_control</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#catsim.selection.ClusterSelector.r_control" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">r_control</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#catsim.selection.ExposureControl" title="catsim.selection.cluster.ExposureControl"><span class="pre">ExposureControl</span></a></span><a class="headerlink" href="#catsim.selection.ClusterSelector.r_control" title="Link to this definition">#</a></dt>
 <dd><p>Return the item exposure control method.</p>
 </dd></dl>
 
@@ -656,31 +670,33 @@ clusters, columns are parameters (a, b, c, d).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters, one per cluster label.</p>
 </dd>
 <dt><strong>administered_items</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing the indexes of items that were already administered.</p>
 </dd>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
-<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator, used only to break ties between equally good items in the chosen
-cluster.</p>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator, used only to break exact ties between clusters and between items in the
+chosen cluster.</p>
 </dd>
 <dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Run-level exposure-rate snapshot. <code class="docutils literal notranslate"><span class="pre">None</span></code> treats every item as unexposed.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Responses observed so far. Not used by this selector.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>int</dt><dd><p>Index of the next item to be applied. Ties within the chosen cluster are broken uniformly at
-random (ADR-0008).</p>
+<dt>int</dt><dd><p>Index of the next item to be applied.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>NoItemsAvailableError</dt><dd><p>If every item has already been administered.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">clusters</span></code> does not hold one label per item of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>, or if clusters or items in the
+chosen cluster tie and <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
 </dd>
-<dt>ValueError</dt><dd><p>If items in the chosen cluster tie and <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None.</p>
+<dt>NoItemsAvailableError</dt><dd><p>If every item has already been administered.</p>
 </dd>
 </dl>
 </dd>
@@ -689,7 +705,7 @@ random (ADR-0008).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector.sum_cluster_infos">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sum_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sum_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.sum_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_infos" title="Link to this definition">#</a></dt>
 <dd><p>Return the sum of item information values, separated by cluster.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -698,36 +714,13 @@ random (ADR-0008).</p>
 </dd>
 <dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
 </dd>
-<dt><strong>clusters</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing item cluster memberships, represented by integers.</p>
+<dt><strong>clusters</strong><span class="classifier">list[int] or numpy.ndarray</span></dt><dd><p>One non-negative integer cluster label per item of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>dict[int, float]</dt><dd><p>The sum of item information values in each cluster, keyed by cluster ID.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="catsim.selection.ClusterSelector.sum_cluster_params">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">sum_cluster_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.sum_cluster_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.sum_cluster_params" title="Link to this definition">#</a></dt>
-<dd><p>Return the sum of item parameter values for each cluster.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
-</dd>
-<dt><strong>c</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing clustering memberships (cluster IDs for each item).</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>A matrix containing the sum of each parameter by cluster. Rows are clusters,
-columns are parameters (a, b, c, d).</p>
+<dt>dict[int, float]</dt><dd><p>The sum of item information values in each cluster, keyed by cluster label.</p>
 </dd>
 </dl>
 </dd>
@@ -736,7 +729,7 @@ columns are parameters (a, b, c, d).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector.weighted_cluster_infos">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">weighted_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">weighted_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Link to this definition">#</a></dt>
 <dd><p>Return the average item information in each cluster.</p>
 <p>Each cluster’s sum of item information is divided by its number of items, so a
 cluster does not score higher only because it holds more items.</p>
@@ -747,20 +740,55 @@ cluster does not score higher only because it holds more items.</p>
 </dd>
 <dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>An ItemBank containing item parameters.</p>
 </dd>
-<dt><strong>clusters</strong><span class="classifier">list[int]</span></dt><dd><p>A list containing item cluster memberships, represented by integers.</p>
+<dt><strong>clusters</strong><span class="classifier">list[int] or numpy.ndarray</span></dt><dd><p>One non-negative integer cluster label per item of <code class="docutils literal notranslate"><span class="pre">item_bank</span></code>.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>dict[int, float]</dt><dd><p>The average item information in each cluster (the sum of item information
-divided by the number of items in the cluster), keyed by cluster ID.</p>
+divided by the number of items in the cluster), keyed by cluster label.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.selection.ClusterMethod">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ClusterMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterMethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterMethod" title="Link to this definition">#</a></dt>
+<dd><p>How <a class="reference internal" href="#catsim.selection.ClusterSelector" title="catsim.selection.ClusterSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClusterSelector</span></code></a> scores a cluster at the current ability estimate.</p>
+<p>Every score counts all the items of a cluster, including those already administered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ITEM_INFO</strong><span class="classifier">str</span></dt><dd><p>The information of the cluster’s most informative item.</p>
+</dd>
+<dt><strong>CLUSTER_INFO</strong><span class="classifier">str</span></dt><dd><p>The sum of the information of the cluster’s items.</p>
+</dd>
+<dt><strong>WEIGHTED_INFO</strong><span class="classifier">str</span></dt><dd><p>The mean information of the cluster’s items: their sum divided by the cluster’s size.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.selection.ExposureControl">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">ExposureControl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ExposureControl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ExposureControl" title="Link to this definition">#</a></dt>
+<dd><p>What <a class="reference internal" href="#catsim.selection.ClusterSelector" title="catsim.selection.ClusterSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClusterSelector</span></code></a> administers when no remaining item of the chosen cluster is below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>PASSIVE</strong><span class="classifier">str</span></dt><dd><p>The most informative remaining item of the cluster, as if there were no cap.</p>
+</dd>
+<dt><strong>AGGRESSIVE</strong><span class="classifier">str</span></dt><dd><p>The remaining item of the cluster with the smallest exposure rate, regardless of information.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -815,22 +843,23 @@ divided by the number of items in the cluster), keyed by cluster ID.</p>
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-it-compares">How It Compares</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector"><code class="docutils literal notranslate"><span class="pre">ClusterSelector</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.avg_cluster_params"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.avg_cluster_params()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.clusters"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.clusters</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.method"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.method</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.r_control"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.r_control</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.r_max"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.r_max</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.select"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.select()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.sum_cluster_infos"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.sum_cluster_infos()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.sum_cluster_params"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.sum_cluster_params()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterSelector.weighted_cluster_infos"><code class="docutils literal notranslate"><span class="pre">ClusterSelector.weighted_cluster_infos()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ClusterMethod"><code class="docutils literal notranslate"><span class="pre">ClusterMethod</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ExposureControl"><code class="docutils literal notranslate"><span class="pre">ExposureControl</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -779,7 +779,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiniteSelector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiniteSelector</span><span class="p">,</span> <span class="n">pick_best</span>
 
 
 <div class="viewcode-block" id="StratifiedSelector">
@@ -790,7 +790,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking</span>
 <span class="sd">  on a location key so that every stratum covers the whole ability range. The test is split into</span>
 <span class="sd">  ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item</span>
-<span class="sd">  whose location is closest to the current ability estimate.</span>
+<span class="sd">  whose location is closest to the current ability estimate. The strata are the selector's exposure</span>
+<span class="sd">  control: it applies no exposure cap, and ``exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -920,6 +921,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        The current estimated ability.</span>
 <span class="sd">    rng : numpy.random.Generator or None, optional</span>
 <span class="sd">        Random number generator, used only to break ties between equally close items.</span>
+<span class="sd">    exposure_rates : numpy.ndarray or None, optional</span>
+<span class="sd">        Ignored: this selector applies no exposure cap.</span>
+<span class="sd">    response_vector : list[bool] or None, optional</span>
+<span class="sd">        Unused; accepted for the engine's selector contract.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -941,7 +946,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"There are no more items to be selected from stratum </span><span class="si">{</span><span class="n">stage</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="n">NoItemsAvailableError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_location</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_location</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">-</span> <span class="n">est_theta</span><span class="p">),</span> <span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 

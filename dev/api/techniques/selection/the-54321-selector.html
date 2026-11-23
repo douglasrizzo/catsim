@@ -518,6 +518,7 @@ following item draws from one fewer, down to 1.</p></td>
 <li><p>The item at position <span class="math notranslate nohighlight">\(k\)</span> is drawn with the configured random number generator from the <span class="math notranslate nohighlight">\(\max(1, n - k)\)</span> most informative non-administered items.</p></li>
 <li><p>From position <span class="math notranslate nohighlight">\(n - 1\)</span> on, it returns the most informative non-administered item.</p></li>
 <li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
+<li><p>It applies no exposure cap: it ignores <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -538,7 +539,8 @@ the second from the 4 most informative remaining items, and so on, so that from 
 most informative item is administered. Randomizing the opening items, which every examinee would
 otherwise share while <span class="math notranslate nohighlight">\(\hat\theta\)</span> is still rough, reduces their exposure at little cost in
 precision. Items tied with the least informative item of a bin also join it, so from the fifth
-item on, ties for the most information are broken uniformly at random (ADR-0008).</p>
+item on, ties for the most information are broken uniformly at random (ADR-0008). The selector
+applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -570,6 +572,10 @@ one fewer. Default is 5.</p>
 <dt><strong>est_theta</strong><span class="classifier">float</span></dt><dd><p>The current estimated ability.</p>
 </dd>
 <dt><strong>rng</strong><span class="classifier">numpy.random.Generator or None, optional</span></dt><dd><p>Random number generator the item is drawn from the bin with. Required.</p>
+</dd>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray or None, optional</span></dt><dd><p>Ignored: this selector applies no exposure cap.</p>
+</dd>
+<dt><strong>response_vector</strong><span class="classifier">list[bool] or None, optional</span></dt><dd><p>Unused; accepted for the engine’s selector contract.</p>
 </dd>
 </dl>
 </dd>
