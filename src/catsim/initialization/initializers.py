@@ -22,6 +22,8 @@ class UniformInitializer(BaseInitializer):
 
   Raises
   ------
+  TypeError
+      If a bound is not a real number.
   ValueError
       If either bound is not finite or ``high <= low``.
 
@@ -68,12 +70,14 @@ class NormalInitializer(BaseInitializer):
   Parameters
   ----------
   mean : float, optional
-      Mean of the distribution. Default is 0.
+      Mean of the distribution. Default is 0.0.
   sd : float, optional
-      Standard deviation of the distribution. Default is 1.
+      Standard deviation of the distribution. Default is 1.0.
 
   Raises
   ------
+  TypeError
+      If ``mean`` or ``sd`` is not a real number.
   ValueError
       If ``mean`` is not finite, or ``sd`` is not finite and positive.
 

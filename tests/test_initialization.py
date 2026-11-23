@@ -64,10 +64,7 @@ class TestRandomInitializersInitialize:
     ids=["default", "custom"],
   )
   def test_uniform_draws_cover_the_interval(self, initializer: UniformInitializer, low: float, high: float) -> None:
-    """Draws left the interval or did not spread uniformly over it, or the default is no longer U(-0.5, 0.5).
-
-    The default is the starting rule of Barrada et al. (2006); it used to be U(-5, 5).
-    """
+    """Draws left the interval or did not spread uniformly over it, or the default is not Barrada's U(-0.5, 0.5)."""
     draws = sample(initializer)
     width = high - low
     # U(low, high) has mean (low + high) / 2 and sd width / sqrt(12). Over n draws the sample mean's
