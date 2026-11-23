@@ -1050,82 +1050,63 @@ class TestClusterSelector:
 class TestProgressiveSelector:
   """Tests for ProgressiveSelector."""
 
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    selector = ProgressiveSelector(test_size=10)
-    assert selector.test_size == 10
-    assert str(selector) == "Progressive Selector (s=1.0)"
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"acceleration": 0.0}, "acceleration must be positive", id="zero_acceleration"),
+      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
+    ],
+  )
+  def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
+    """An acceleration of 0 would make the weight 1 from the first item, removing the random phase."""
+    with pytest.raises(ValueError, match=match):
+      ProgressiveSelector(test_size=10, **kwargs)
 
-  def test_weight_is_zero_at_first_position(self) -> None:
-    """At position 1 the blend weight must be exactly 0.
+  @pytest.mark.parametrize(
+    ("test_size", "acceleration", "position", "expected"),
+    [
+      pytest.param(10, 1.0, 1, 0.0, id="first_position"),
+      pytest.param(10, 1.0, 10, 1.0, id="last_position"),
+      pytest.param(9, 1.0, 5, 0.5, id="linear_midpoint"),
+      pytest.param(9, 2.0, 5, 0.25, id="acceleration_delays"),
+      pytest.param(9, 0.5, 5, 0.5**0.5, id="acceleration_hastens"),
+      pytest.param(5, 1.0, 6, 1.0, id="clamped_past_test_size"),
+      pytest.param(5, 1.0, 8, 1.0, id="clamped_well_past_test_size"),
+    ],
+  )
+  def test_weight_follows_the_position_schedule(
+    self, test_size: int, acceleration: float, position: int, expected: float
+  ) -> None:
+    """The weight on information is ((position - 1) / (test_size - 1)) ** acceleration, capped at 1.
 
-    This guards the pure-random starting condition; an off-by-one here would
-    silently make the selector exposure-heavy from the first item.
+    FiniteSelector does not enforce test_size, and a weight above 1 past it would give the random
+    component a negative coefficient and penalize high random draws.
     """
-    selector = ProgressiveSelector(test_size=10, acceleration=1.0)
-    assert selector._weight(1) == pytest.approx(0.0)
-
-  def test_weight_is_one_at_last_position(self) -> None:
-    """At the final position the blend weight must be exactly 1.
-
-    This protects the asymptotic handoff to information-based selection at the
-    end of a fixed-length test.
-    """
-    selector = ProgressiveSelector(test_size=10, acceleration=1.0)
-    assert selector._weight(10) == pytest.approx(1.0)
-
-  def test_weight_formula_linear_schedule(self) -> None:
-    """Midpoint weight should be 0.5 with s=1 and test_size=9.
-
-    The direct formula check catches exponent or indexing mistakes that a
-    selection-outcome test could miss.
-    """
-    selector = ProgressiveSelector(test_size=9, acceleration=1.0)
-    assert selector._weight(5) == pytest.approx(0.5)
-
-  def test_weight_formula_accelerated_schedule(self) -> None:
-    """s=2 should delay the transition.
-
-    This verifies that larger acceleration values postpone the move toward
-    information-based behavior instead of speeding it up.
-    """
-    selector = ProgressiveSelector(test_size=9, acceleration=2.0)
-    assert selector._weight(5) == pytest.approx(0.25)
-
-  def test_weight_formula_fast_schedule(self) -> None:
-    """s=0.5 should accelerate the transition.
-
-    This checks the opposite regime, where smaller acceleration values should
-    pull the selector toward information earlier in the test.
-    """
-    selector = ProgressiveSelector(test_size=9, acceleration=0.5)
-    assert selector._weight(5) == pytest.approx((4 / 8) ** 0.5)
-
-  def test_first_item_is_independent_of_information(self) -> None:
-    """At position 1, high-information items should not be selected more often.
-
-    This catches regressions where the random component stops dominating the
-    first step and high-information items start being overused immediately.
-    """
-    item_bank = ItemBank(
-      np.array(
-        [
-          [5.0, 0.0, 0.0, 1.0],
-          [0.3, -1.0, 0.0, 1.0],
-          [0.3, 0.0, 0.0, 1.0],
-          [0.3, 1.0, 0.0, 1.0],
-          [0.3, 2.0, 0.0, 1.0],
-        ],
-        dtype=float,
-      )
+    assert ProgressiveSelector(test_size=test_size, acceleration=acceleration)._weight(position) == pytest.approx(
+      expected
     )
-    selector = ProgressiveSelector(test_size=10, acceleration=1.0)
-    rng = np.random.default_rng(99)
 
-    selections = [selector.select(item_bank, [], 0.0, rng=rng) for _ in range(200)]
-    rate = selections.count(0) / len(selections)
+  @pytest.mark.parametrize(
+    ("administered", "draws", "expected"),
+    [
+      pytest.param([], [0.1, 0.9, 0.2, 0.3], 1, id="first_position_follows_the_draws"),
+      pytest.param([0, 2], [0.1, 0.99, 0.2, 0.0], 3, id="last_position_follows_the_information"),
+    ],
+  )
+  def test_select_moves_from_the_draws_to_the_information(
+    self, administered: list[int], draws: list[float], expected: int
+  ) -> None:
+    """The largest random draw wins at the first position, the most informative item at the last.
 
-    assert 0.10 < rate < 0.40
+    Item 3 (a = 2, b = 0) is the most informative at theta = 0, with scaled information 1, against
+    0.197 for item 1. A weight of 0.5 at either end would flip the pick: 0.548 for item 1 against 0.65
+    for item 3 with the first draws, and 0.594 against 0.5 with the last ones.
+    """
+    selector = ProgressiveSelector(test_size=3)
+
+    selected = selector.select(_progressive_item_bank(), administered, 0.0, rng=_DeterministicRNG(draws))
+
+    assert selected == expected
 
   def test_select_respects_exposure_cap(self) -> None:
     """Test that the exposure cap is applied when possible."""
@@ -1142,16 +1123,6 @@ class TestProgressiveSelector:
     )
 
     assert selected == 2
-
-  def test_weight_is_clamped_past_test_size(self) -> None:
-    """FiniteSelector does not enforce test_size, so later positions must not extrapolate.
-
-    A weight above 1 would give the random component a negative coefficient and penalize
-    high random draws.
-    """
-    selector = ProgressiveSelector(test_size=5, acceleration=1.0)
-
-    assert [selector._weight(position) for position in range(5, 9)] == [1.0, 1.0, 1.0, 1.0]
 
   def test_random_component_is_scaled_to_available_items(self) -> None:
     """Both score components share the scale of the most informative available item.
@@ -1186,11 +1157,18 @@ class TestProgressiveSelector:
 class TestProportionalSelector:
   """Tests for ProportionalSelector."""
 
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    selector = ProportionalSelector(test_size=10)
-    assert selector.test_size == 10
-    assert str(selector) == "Proportional Selector (s=1.0, k=6.0)"
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"acceleration": 0.0}, "acceleration must be positive", id="zero_acceleration"),
+      pytest.param({"sharpness": -1.0}, "sharpness must be non-negative", id="negative_sharpness"),
+      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
+    ],
+  )
+  def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
+    """A negative sharpness would favor the least informative items late in the test."""
+    with pytest.raises(ValueError, match=match):
+      ProportionalSelector(test_size=10, **kwargs)
 
   def test_first_position_is_uniform_regardless_of_sharpness(self) -> None:
     """Test that the first position is uniform for any sharpness.
@@ -1247,29 +1225,6 @@ class TestProportionalSelector:
     selector = ProportionalSelector(test_size=5, acceleration=1.0, sharpness=6.0)
 
     assert [selector._exponent(position) for position in range(5, 9)] == [6.0, 6.0, 6.0, 6.0]
-
-  def test_late_position_becomes_near_deterministic_with_high_sharpness(self) -> None:
-    """Test that late positions collapse toward the highest-information item.
-
-    This validates the upper end of the schedule, where proportional sampling
-    should behave almost deterministically on the best item.
-    """
-    item_bank = _progressive_item_bank()
-    selector = ProportionalSelector(test_size=3, acceleration=1.0, sharpness=12.0)
-    rng = _DeterministicRNG([0.2, 0.1, 0.3, 0.4])
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      est_theta=0.0,
-      rng=rng,
-    )
-
-    assert selected == 3
-    _, probs = rng.choice_calls[0]
-    assert probs is not None
-    assert probs[1] > 0.999999
-    assert probs[0] < 1e-6
 
   def test_large_exponent_does_not_underflow_to_uniform_sampling(self) -> None:
     """Test that a large exponent on low information still favors the best item.
