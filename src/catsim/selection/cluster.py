@@ -157,8 +157,13 @@ class ClusterSelector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     ValueError
-        If items in the chosen cluster tie and ``rng`` is None.
+        If ``clusters`` does not hold one label per item of ``item_bank``, or if items in the chosen
+        cluster tie and ``rng`` is None.
     """
+    if len(self._clusters) != item_bank.n_items:
+      msg = f"clusters holds {len(self._clusters)} labels, but the item bank has {item_bank.n_items} items"
+      raise ValueError(msg)
+
     selected_cluster = None
     existent_clusters = set(self._clusters)
 

@@ -1002,8 +1002,18 @@ class TestClusterSelector:
 
   def test_select_raises_when_every_cluster_is_exhausted(self) -> None:
     """An exhausted bank raises NoItemsAvailableError, which the engine turns into a stop."""
-    with pytest.raises(NoItemsAvailableError):
+    with pytest.raises(NoItemsAvailableError, match="no more items"):
       self._select(list(range(len(self.CLUSTERS))))
+
+  @pytest.mark.parametrize("method", ["item_info", "cluster_info", "weighted_info"])
+  @pytest.mark.parametrize("n_labels", [len(CLUSTERS) - 1, len(CLUSTERS) + 1])
+  def test_select_rejects_labels_that_do_not_match_the_bank(self, method: str, n_labels: int) -> None:
+    """Labels for another bank size raised IndexError, or with cluster_info silently skipped the unlabelled items."""
+    item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
+    selector = ClusterSelector(clusters=[*self.CLUSTERS, 2][:n_labels], method=method)
+
+    with pytest.raises(ValueError, match=f"clusters holds {n_labels} labels, but the item bank has 14 items"):
+      selector.select(item_bank=item_bank, administered_items=[], est_theta=0.0)
 
   def test_select_prefers_items_below_the_exposure_cap(self) -> None:
     """Inside the chosen cluster, an item at the cap is passed over for a less informative one below it."""
