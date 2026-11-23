@@ -634,6 +634,16 @@ class TestEAPEstimator:
     assert estimator.evaluations == 31
     assert estimator.total_evaluations == 62
 
+  def test_rejected_estimate_leaves_the_counters_alone(self) -> None:
+    """A call that fails validation is not counted as an estimate."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator()
+
+    with pytest.raises(ValueError, match="same length"):
+      estimator.estimate(item_bank=item_bank, administered_items=[0, 1], response_vector=[True], est_theta=0.0)
+
+    assert (estimator.calls, estimator.evaluations, estimator.total_evaluations) == (0, 0, 0)
+
   def test_estimate_accepts_numpy_item_indices(self) -> None:
     """A NumPy index array gives the same estimate as the equivalent list."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)

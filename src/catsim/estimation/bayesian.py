@@ -353,11 +353,10 @@ class EAPEstimator(BaseEstimator):
         If ``response_vector`` and ``administered_items`` have different lengths, or if
         ``response_vector`` contains non-Boolean elements.
     """
+    post = posterior(response_vector, item_bank.items[administered_items, :4], self._grid, self._log_prior)
     self._calls += 1
     self._last_evaluations = self._grid.nodes.size
     self._total_evaluations += self._last_evaluations
-
-    post = posterior(response_vector, item_bank.items[administered_items, :4], self._grid, self._log_prior)
     return posterior_mean(post, self._grid.nodes)
 
   @property
