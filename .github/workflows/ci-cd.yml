@@ -45,9 +45,9 @@ jobs:
 
   test:
     name: Run tests
-    # Run tests for main development events and manual publish validation.
+    # Run tests for every PR (stacked PRs too), pushes to dev/main, releases, and manual publish validation.
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch'
@@ -100,9 +100,9 @@ jobs:
 
   build:
     name: Build package
-    # Run builds for main development events, releases, and manual publish validation.
+    # Run builds for every PR (stacked PRs too), pushes to dev/main, releases, and manual publish validation.
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release' ||
       github.event_name == 'workflow_dispatch'
@@ -194,9 +194,9 @@ jobs:
 
   build-docs:
     name: Build documentation
-    # Build docs for PRs to dev/main, pushes to dev/main, and releases
+    # Build docs for every PR (stacked PRs too), pushes to dev/main, and releases
     if: |
-      (github.event_name == 'pull_request' && (github.base_ref == 'dev' || github.base_ref == 'main')) ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ubuntu-latest
