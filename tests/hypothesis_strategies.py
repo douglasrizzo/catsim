@@ -35,11 +35,3 @@ def scale_mapping(draw: DrawFn) -> tuple[float, float, float, float]:
   scale_min = draw(st.floats(min_value=-200.0, max_value=400.0, allow_nan=False, allow_infinity=False))
   scale_max = draw(st.floats(min_value=scale_min + 1.0, max_value=900.0, allow_nan=False, allow_infinity=False))
   return (theta_min, theta_max, scale_min, scale_max)
-
-
-@composite
-def uniform_initializer_bounds(draw: DrawFn) -> tuple[float, float]:
-  """Ordered ``(lo, hi)`` for :class:`catsim.initialization.RandomInitializer` uniform draws."""
-  lo = draw(st.floats(min_value=-6.0, max_value=4.0, allow_nan=False, allow_infinity=False))
-  hi = draw(st.floats(min_value=lo + 0.25, max_value=6.0, allow_nan=False, allow_infinity=False))
-  return (lo, hi)

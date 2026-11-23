@@ -9,7 +9,7 @@ import pytest
 
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
+from catsim.initialization import FixedPointInitializer, UniformInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
@@ -43,7 +43,7 @@ def run_simulation(
   """Run a small deterministic simulation and return its aggregate result."""
   runner = SimulationRunner(
     item_bank,
-    RandomInitializer(InitializationDistribution.UNIFORM, (-2, 2)),
+    UniformInitializer(low=-2.0, high=2.0),
     selector,
     estimator or NumericalSearchEstimator(),
     stopper,

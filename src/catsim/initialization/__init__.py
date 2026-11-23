@@ -1,11 +1,11 @@
 """Initialization components for CAT."""
 
 from .base import BaseInitializer
-from .initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
+from .initializers import FixedPointInitializer, NormalInitializer, UniformInitializer
 
 __all__ = [
   "BaseInitializer",
   "FixedPointInitializer",
-  "InitializationDistribution",
-  "RandomInitializer",
+  "NormalInitializer",
+  "UniformInitializer",
 ]

@@ -1,119 +1,131 @@
 """Tests for catsim.initialization module."""
 
+import math
+
 import numpy as np
 import pytest
 
-from catsim.initialization import (
-  FixedPointInitializer,
-  InitializationDistribution,
-  RandomInitializer,
-)
+from catsim.initialization import FixedPointInitializer, NormalInitializer, UniformInitializer
+from catsim.initialization.base import BaseInitializer
 from catsim.item_bank import ItemBank
 
-
-class TestRandomInitializerInit:
-  """Tests for RandomInitializer initialization."""
-
-  def test_init_invalid_dist_type_raises(self) -> None:
-    """Test that invalid dist_type raises TypeError."""
-    with pytest.raises(TypeError, match="must be of type InitializationDistribution"):
-      RandomInitializer(dist_type="uniform")  # type: ignore[arg-type]
-
-  def test_init_invalid_dist_params_not_tuple_raises(self) -> None:
-    """Test that non-tuple dist_params raises ValueError."""
-    with pytest.raises(ValueError, match="tuple of exactly 2 values"):
-      RandomInitializer(dist_params=[-4, 4])  # type: ignore[arg-type]
-
-  def test_init_invalid_dist_params_wrong_length_raises(self) -> None:
-    """Test that wrong length dist_params raises ValueError."""
-    with pytest.raises(ValueError, match="tuple of exactly 2 values"):
-      RandomInitializer(dist_params=(-4, 0, 4))
-
-  def test_init_uniform_equal_bounds_raises(self) -> None:
-    """Test that uniform with equal bounds raises ValueError."""
-    with pytest.raises(ValueError, match="different min and max values"):
-      RandomInitializer(
-        dist_type=InitializationDistribution.UNIFORM,
-        dist_params=(0, 0),
-      )
-
-  def test_init_normal_nonpositive_std_raises(self) -> None:
-    """Test that normal with non-positive std raises ValueError."""
-    with pytest.raises(ValueError, match="standard deviation must be positive"):
-      RandomInitializer(
-        dist_type=InitializationDistribution.NORMAL,
-        dist_params=(0, 0),
-      )
-
-    with pytest.raises(ValueError, match="standard deviation must be positive"):
-      RandomInitializer(
-        dist_type=InitializationDistribution.NORMAL,
-        dist_params=(0, -1),
-      )
+NAN = float("nan")
+INF = float("inf")
+# Enough draws for the sample mean and sd to land within 4 standard errors of their closed forms;
+# each statistic misses by chance with probability below 1e-4.
+N_DRAWS = 10_000
 
 
-class TestRandomInitializerInitialize:
-  """Tests for RandomInitializer.initialize() method."""
+def sample(initializer: BaseInitializer, seed: int = 42, n: int = N_DRAWS) -> np.ndarray:
+  """Draw ``n`` initial abilities from one generator seeded with ``seed``."""
+  item_bank = ItemBank.generate_item_bank(10, seed=42)
+  rng = np.random.default_rng(seed)
+  return np.array([initializer.initialize(item_bank=item_bank, rng=rng) for _ in range(n)])
 
-  def test_initialize_defaults_start_near_the_center(self) -> None:
-    """Defaults draw from U(-0.5, 0.5), as in Barrada et al. (2006), or N(0, 1); they used to be U(-5, 5)."""
-    rng = np.random.default_rng(42)
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
 
-    uniform = [RandomInitializer().initialize(item_bank=item_bank, rng=rng) for _ in range(1000)]
-    normal_initializer = RandomInitializer(dist_type=InitializationDistribution.NORMAL)
-    normal = [normal_initializer.initialize(item_bank=item_bank, rng=rng) for _ in range(5000)]
+class TestUniformInitializerInit:
+  """Tests for UniformInitializer construction."""
 
-    assert -0.5 <= min(uniform) < max(uniform) <= 0.5
-    assert np.mean(normal) == pytest.approx(0.0, abs=0.05)
-    assert np.std(normal) == pytest.approx(1.0, abs=0.05)
+  @pytest.mark.parametrize(("low", "high"), [(0.0, 0.0), (1.0, -1.0)])
+  def test_init_empty_or_reversed_interval_raises(self, low: float, high: float) -> None:
+    """An empty interval was accepted, or reversed bounds were silently swapped instead of rejected."""
+    with pytest.raises(ValueError, match="high must be greater than low"):
+      UniformInitializer(low=low, high=high)
 
-  def test_initialize_uniform_reversed_params(self) -> None:
-    """Test that uniform handles reversed params correctly."""
-    rng = np.random.default_rng(42)
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    initializer = RandomInitializer(
-      dist_type=InitializationDistribution.UNIFORM,
-      dist_params=(3, -3),  # Reversed order
-    )
+  @pytest.mark.parametrize(("low", "high"), [(NAN, 1.0), (0.0, NAN), (-INF, 0.0), (0.0, INF)])
+  def test_init_non_finite_bound_raises(self, low: float, high: float) -> None:
+    """A NaN or infinite bound was accepted and failed only at draw time, with NumPy's OverflowError."""
+    with pytest.raises(ValueError, match="low and high must be finite"):
+      UniformInitializer(low=low, high=high)
 
-    for _ in range(100):
-      theta = initializer.initialize(item_bank=item_bank, rng=rng)
-      assert -3 <= theta <= 3
 
-  def test_initialize_reproducibility_with_rng(self) -> None:
-    """Test that same RNG produces same results."""
-    initializer = RandomInitializer()
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+class TestNormalInitializerInit:
+  """Tests for NormalInitializer construction."""
 
-    rng1 = np.random.default_rng(42)
-    values1 = [initializer.initialize(item_bank=item_bank, rng=rng1) for _ in range(10)]
+  @pytest.mark.parametrize("mean", [NAN, INF, -INF])
+  def test_init_non_finite_mean_raises(self, mean: float) -> None:
+    """A NaN or infinite mean was accepted, and every draw was NaN or infinite."""
+    with pytest.raises(ValueError, match="mean must be finite"):
+      NormalInitializer(mean=mean)
 
-    rng2 = np.random.default_rng(42)
-    values2 = [initializer.initialize(item_bank=item_bank, rng=rng2) for _ in range(10)]
+  @pytest.mark.parametrize("sd", [0.0, -1.0, NAN, INF])
+  def test_init_invalid_sd_raises(self, sd: float) -> None:
+    """A zero, negative, NaN or infinite sd was accepted; NaN and infinity then drew NaN or infinite abilities."""
+    with pytest.raises(ValueError, match="sd must be positive and finite"):
+      NormalInitializer(sd=sd)
 
-    assert values1 == values2
+
+class TestRandomInitializersInitialize:
+  """Tests for the draws of UniformInitializer and NormalInitializer."""
+
+  @pytest.mark.parametrize(
+    ("initializer", "low", "high"),
+    [(UniformInitializer(), -0.5, 0.5), (UniformInitializer(low=-3.0, high=1.0), -3.0, 1.0)],
+    ids=["default", "custom"],
+  )
+  def test_uniform_draws_cover_the_interval(self, initializer: UniformInitializer, low: float, high: float) -> None:
+    """Draws left the interval or did not spread uniformly over it, or the default is not Barrada's U(-0.5, 0.5)."""
+    draws = sample(initializer)
+    width = high - low
+    # U(low, high) has mean (low + high) / 2 and sd width / sqrt(12). Over n draws the sample mean's
+    # standard error is width / sqrt(12 n) and the sample sd's is width / sqrt(60 n).
+    mean_se = width / math.sqrt(12 * N_DRAWS)
+    sd_se = width / math.sqrt(60 * N_DRAWS)
+
+    assert low <= draws.min() < draws.max() <= high
+    assert draws.mean() == pytest.approx((low + high) / 2, abs=4 * mean_se)
+    assert draws.std() == pytest.approx(width / math.sqrt(12), abs=4 * sd_se)
+
+  @pytest.mark.parametrize(
+    ("initializer", "mean", "sd"),
+    [(NormalInitializer(), 0.0, 1.0), (NormalInitializer(mean=2.0, sd=0.5), 2.0, 0.5)],
+    ids=["default", "custom"],
+  )
+  def test_normal_draws_have_the_configured_mean_and_sd(
+    self, initializer: NormalInitializer, mean: float, sd: float
+  ) -> None:
+    """Draws had the wrong centre or spread (mean and sd swapped, variance used as sd), or the default isn't N(0, 1)."""
+    draws = sample(initializer)
+    # Over n draws the sample mean's standard error is sd / sqrt(n) and the sample sd's about sd / sqrt(2 n).
+    mean_se = sd / math.sqrt(N_DRAWS)
+    sd_se = sd / math.sqrt(2 * N_DRAWS)
+
+    assert draws.mean() == pytest.approx(mean, abs=4 * mean_se)
+    assert draws.std() == pytest.approx(sd, abs=4 * sd_se)
+
+  @pytest.mark.parametrize("initializer", [UniformInitializer(), NormalInitializer()], ids=["uniform", "normal"])
+  def test_initialize_draws_from_the_given_rng(self, initializer: BaseInitializer) -> None:
+    """The initializer drew from another source (NumPy's global state, a generator of its own) instead of ``rng``."""
+    first = sample(initializer, seed=7, n=10)
+
+    assert np.array_equal(first, sample(initializer, seed=7, n=10))
+    assert not np.array_equal(first, sample(initializer, seed=8, n=10))
+
+
+class TestFixedPointInitializerInit:
+  """Tests for FixedPointInitializer construction."""
+
+  @pytest.mark.parametrize("start", [float("nan"), float("inf"), -float("inf")])
+  def test_init_non_finite_start_raises(self, start: float) -> None:
+    """A NaN or infinite start was accepted and became every session's first estimate."""
+    with pytest.raises(ValueError, match="start must be finite"):
+      FixedPointInitializer(start)
+
+  @pytest.mark.parametrize("start", ["abc", None])
+  def test_init_non_numeric_start_raises(self, start: object) -> None:
+    """A non-numeric start was accepted and returned as the initial estimate, despite the documented TypeError."""
+    with pytest.raises(TypeError, match="must be real number"):
+      FixedPointInitializer(start)  # type: ignore[arg-type]
 
 
 class TestFixedPointInitializerInitialize:
   """Tests for FixedPointInitializer.initialize() method."""
 
-  def test_initialize_returns_fixed_value(self) -> None:
-    """Test that initialize always returns the fixed value."""
-    start = 1.5
+  @pytest.mark.parametrize(("start", "expected"), [(1.5, 1.5), (0, 0.0), (np.float64(-1.25), -1.25)])
+  def test_initialize_returns_start_as_builtin_float(self, start: float, expected: float) -> None:
+    """The start was returned as given, so an int or a NumPy scalar reached the session's theta history."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    initializer = FixedPointInitializer(start)
+    theta = FixedPointInitializer(start).initialize(item_bank=item_bank, rng=np.random.default_rng(42))
 
-    for _ in range(10):
-      theta = initializer.initialize(item_bank=item_bank, rng=rng)
-      assert theta == pytest.approx(start)
-
-  def test_initialize_rejects_unexpected_kwargs(self) -> None:
-    """Initializers should expose an explicit runtime contract."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    initializer = FixedPointInitializer(0.0)
-
-    with pytest.raises(TypeError, match="unexpected keyword argument"):
-      initializer.initialize(item_bank=item_bank, rng=rng, examinee_index=1)  # type: ignore[call-arg]
+    assert type(theta) is float
+    assert theta == expected

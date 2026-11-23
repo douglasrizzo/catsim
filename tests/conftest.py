@@ -11,7 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from catsim.estimation import NumericalSearchEstimator
-from catsim.initialization import FixedPointInitializer, RandomInitializer
+from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector, RandomSelector
 from catsim.simulation import SimulationRunner
@@ -37,12 +37,6 @@ def item_bank() -> ItemBank:
 def fixed_initializer() -> FixedPointInitializer:
   """Provide a deterministic initializer."""
   return FixedPointInitializer(0.0)
-
-
-@pytest.fixture
-def random_initializer() -> RandomInitializer:
-  """Provide a random initializer with deterministic range."""
-  return RandomInitializer()
 
 
 @pytest.fixture
