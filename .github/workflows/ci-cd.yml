@@ -124,6 +124,19 @@ jobs:
       - name: Build package
         run: uv build
 
+      - name: Check the release tag matches the package version
+        if: github.event_name == 'release'
+        run: |
+          PROJECT_VERSION=$(uv version --short)
+          WHEEL_VERSION=$(uv run --isolated --no-project --with dist/*.whl python -I -c 'import catsim; print(catsim.__version__)')
+          echo "Release tag: $GITHUB_REF_NAME"
+          echo "Project version (pyproject.toml): $PROJECT_VERSION"
+          echo "catsim.__version__ in the built wheel: $WHEEL_VERSION"
+          if [ "$GITHUB_REF_NAME" != "$PROJECT_VERSION" ] || [ "$GITHUB_REF_NAME" != "$WHEEL_VERSION" ]; then
+            echo "::error::The release tag must equal both the project version and catsim.__version__"
+            exit 1
+          fi
+
       - name: Check package metadata
         run: |
           uv run pip install twine
