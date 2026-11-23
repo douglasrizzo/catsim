@@ -1003,24 +1003,28 @@ class TestWarmLikelihoodEstimator:
     assert np.isfinite(first_theta)
     assert np.isfinite(second_theta)
 
-  def test_estimate_records_evaluation_counts_for_mixed_responses(self) -> None:
-    """The estimator should track the underlying MLE evaluations on ordinary inputs."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
-    administered_items = [0, 1, 2, 3, 4]
-    response_vector = [True, False, True, True, False]
+  @staticmethod
+  def _two_candidate_bank() -> ItemBank:
+    """Two 3PL/4PL items whose modified score yields two maxima candidates after two correct answers."""
+    return ItemBank(np.array([[2.13, -2.78, 0.13, 0.95], [1.11, 2.02, 0.3, 0.9]]))
 
+  def test_evaluations_count_the_scan_the_root_search_and_the_ranking(self) -> None:
+    """The counters include every modified-score evaluation, including the ranking integrals.
+
+    A single root costs the 121-point scan plus a few Brent steps; ranking two candidates adds
+    two integrals of at least 21 evaluations each.
+    """
     estimator = WarmLikelihoodEstimator()
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    single_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, 0.5, 0.0, 1.0]]))
 
-    assert np.isfinite(theta)
-    assert estimator.calls == 1
-    assert estimator.evaluations > 0
-    assert estimator.total_evaluations == estimator.evaluations
+    estimator.estimate(single_bank, [0, 1], [True, False], 0.0)
+    single = estimator.evaluations
+    estimator.estimate(self._two_candidate_bank(), [0, 1], [True, True], 0.0)
+    ranked = estimator.evaluations
+
+    assert 121 < single < 121 + 50
+    assert ranked >= 121 + 2 * 21
+    assert estimator.total_evaluations == single + ranked
 
   @pytest.mark.parametrize(
     ("b", "theta", "correct"),

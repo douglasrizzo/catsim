@@ -163,7 +163,11 @@ class WarmLikelihoodEstimator(BaseEstimator):
     else:
       # The modified score is the derivative of the weighted log-likelihood, so integrating it
       # from the lower bound ranks the candidates by weighted likelihood.
-      heights = [quad(score, THETA_MIN_EXTENDED, candidate, limit=200)[0] for candidate in candidates]
+      heights = []
+      for candidate in candidates:
+        integral = quad(score, THETA_MIN_EXTENDED, candidate, limit=200, full_output=1)
+        heights.append(integral[0])
+        evaluations += integral[2]["neval"]
       theta_hat = candidates[int(numpy.argmax(heights))]
 
     self._last_evaluations = evaluations
