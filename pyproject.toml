@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+# setuptools 77 is the first release that reads the SPDX `license` string below.
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
