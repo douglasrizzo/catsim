@@ -37,29 +37,21 @@ repos:
         files: \.ipynb$
 
   # 4. Linting and formatting
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.0
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-        types_or: [python, pyi]
-      - id: ruff-format
-        types_or: [python, pyi]
-
   - repo: local
     hooks:
-      - id: ruff-check-notebooks
-        name: ruff check notebooks
-        entry: uv run --only-group dev ruff check --fix
+      # Ruff runs from uv.lock, so these hooks and `uv run ruff` never disagree.
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --only-group dev ruff check --force-exclude --fix
         language: system
-        files: \.ipynb$
-        types: [file]
-      - id: ruff-format-notebooks
-        name: ruff format notebooks
-        entry: uv run --only-group dev ruff format
+        types_or: [python, pyi, jupyter]
+        require_serial: true
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --only-group dev ruff format --force-exclude
         language: system
-        files: \.ipynb$
-        types: [file]
+        types_or: [python, pyi, jupyter]
+        require_serial: true
       - id: ty-check
         name: ty check
         entry: uv run --group dev ty check
