@@ -220,9 +220,11 @@ class ClusterSelector(BaseSelector):
     cluster = pick_best(open_clusters, self._score(est_theta, item_bank, open_clusters), rng)
 
     in_cluster = candidates[self._clusters[candidates] == cluster]
+    # A cap of 1 is no cap (see below_cap), so the aggressive fallback never applies to it.
     if (
       self._r_control is ExposureControl.AGGRESSIVE
       and exposure_rates is not None
+      and self._r_max < 1
       and (exposure_rates[in_cluster] >= self._r_max).all()
     ):
       return pick_best(in_cluster, -exposure_rates[in_cluster], rng)
