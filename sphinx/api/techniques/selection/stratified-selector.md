@@ -45,14 +45,15 @@ stratum therefore spans the whole range of locations, while the strata still
 ascend in $k_i$. A trailing block with $r < S$ items sends its $j$-th item
 to stratum $\lfloor jS/r \rfloor$.
 
-**Stages.** The item at 0-indexed test position $t$ is drawn from stratum
+**Stages.** The item at 0-indexed test position $t < L$ is drawn from stratum
 
 $$
-s(t) = \min\left(\left\lfloor \frac{tS}{L} \right\rfloor,\; S - 1\right),
+s(t) = \left\lfloor \frac{tS}{L} \right\rfloor,
 $$
 
-so each stratum serves about $L/S$ consecutive positions, and a session that
-runs past $L$ items stays in the last stratum.
+so each stratum serves about $L/S$ consecutive positions. There is no stage
+for position $L$ or later: asked for an item there, the selector raises
+`ValueError`.
 
 **Selection.** Within the active stratum, the selector takes the item whose
 location is closest to the estimate (Barrada et al., 2006, p. 157). With $R_t$
@@ -76,7 +77,9 @@ The strata depend only on item parameters and are computed once per item bank.
      - Description
    * - ``test_size``
      - required
-     - Intended test length :math:`L`, at least 1.
+     - Intended test length :math:`L`, at least 1. The stopper must end the
+       test by then: the selector raises ``ValueError`` when asked for an item
+       past it.
    * - ``n_strata``
      - ``None``
      - Number of strata :math:`S`, between 1 and ``test_size``. ``None`` uses
@@ -91,7 +94,7 @@ The strata depend only on item parameters and are computed once per item bank.
 Any correct implementation must satisfy the following properties:
 
 1. The strata partition the bank and ascend in the stratification key; with blocking, every block of `n_strata` items ordered by location contributes its `j`-th item by key to stratum `j`.
-2. The active stratum is determined solely by the number of administered items, `test_size` and `n_strata`, and stays at the last stratum past `test_size`.
+2. The active stratum is determined solely by the number of administered items, `test_size` and `n_strata`. Asked for an item once `test_size` items have been administered, the selector raises `ValueError` naming both numbers, so a stopper that allows longer tests than `test_size` fails loudly instead of ending sessions as if the bank were exhausted.
 3. The returned item is the non-administered item of the active stratum whose location is closest to `est_theta`.
 4. If the active stratum has no non-administered items left, the selector raises `NoItemsAvailableError`.
 5. The class itself is abstract; subclasses only choose the key, the location and the blocking variable.

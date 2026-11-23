@@ -22,7 +22,8 @@ class StratifiedSelector(BaseSelector):
   Parameters
   ----------
   test_size : int
-      Number of items in the test, at least 1.
+      Number of items in the test, at least 1. The selector raises ``ValueError`` when asked for an
+      item past it, so the stopper must end the test by then.
   n_strata : int or None, optional
       Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which
       uses one stratum per test item.
@@ -124,8 +125,8 @@ class StratifiedSelector(BaseSelector):
     return [numpy.array(stratum, dtype=numpy.intp) for stratum in members]
 
   def _stage(self, position: int) -> int:
-    """Return the 0-indexed stage of a 0-indexed test position, staying in the last stage past ``test_size``."""
-    return min(position * self._n_strata // self._test_size, self._n_strata - 1)
+    """Return the 0-indexed stage of a 0-indexed test position below ``test_size``."""
+    return position * self._n_strata // self._test_size
 
   def select(
     self,
@@ -164,9 +165,18 @@ class StratifiedSelector(BaseSelector):
     NoItemsAvailableError
         If every item in the current stratum has been administered.
     ValueError
-        If items tie for the closest location and ``rng`` is None.
+        If ``test_size`` items have already been administered, or if items tie for the closest
+        location and ``rng`` is None.
     """
-    stage = self._stage(len(administered_items))
+    position = len(administered_items)
+    if position >= self._test_size:
+      msg = (
+        f"{type(self).__name__} has test_size={self._test_size}, but {position} items have already been "
+        "administered: the test ran past the length its strata were planned for. Give the selector the "
+        "stopper's maximum test length as test_size."
+      )
+      raise ValueError(msg)
+    stage = self._stage(position)
     stratum = self.strata(item_bank)[stage]
     candidates = stratum[~numpy.isin(stratum, administered_items)]
     if candidates.size == 0:

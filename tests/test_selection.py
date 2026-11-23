@@ -446,15 +446,20 @@ class TestStratifiedSelectors:
       assert item in strata[position // 6]
       administered.append(item)
 
-  def test_stays_in_the_last_stratum_past_test_size(self) -> None:
-    """Sessions longer than test_size keep drawing from the last stratum instead of raising RuntimeError."""
+  def test_raises_when_run_past_test_size(self) -> None:
+    """A test longer than test_size used to stay in the last stratum and, once it emptied, end as an exhausted bank.
+
+    AStratSelector(test_size=4) under a 20-item stopper stopped every session at 13 items of a 40-item bank with
+    stop reason "item_bank_exhausted".
+    """
     item_bank = ItemBank.generate_item_bank(60, seed=5)
     selector = MaxInfoStratSelector(5)
     administered: list[int] = []
-    for _ in range(8):
+    for _ in range(5):
       administered.append(selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0))
 
-    assert set(administered[4:]) <= set(selector.strata(item_bank)[-1].tolist())
+    with pytest.raises(ValueError, match="MaxInfoStratSelector has test_size=5, but 5 items have already been"):
+      selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0)
 
   def test_raises_when_the_current_stratum_is_exhausted(self) -> None:
     """A stage whose stratum has no items left raises NoItemsAvailableError."""
