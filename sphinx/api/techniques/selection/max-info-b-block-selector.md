@@ -22,6 +22,15 @@ With $\theta_i^{\max}$ and $I_i^{\max}$ as in {doc}`max-info-strat-selector`:
 2. Within each block, sort the items by increasing $I_i^{\max}$.
 3. The $j$-th item of every block joins stratum $j$.
 
+```{figure} /mis-b.svg
+:alt: Blocks 1 to k under an arrow labelled theta max, each block sorted along its own arrow labelled maximum information. The first items of blocks 1 to k are gathered into the first cell of a new row of strata.
+:width: 400px
+
+Items sorted by $\theta_i^{\max}$ into $k$ blocks of `n_strata` items, each block sorted by
+$I_i^{\max}$. The first item of every block, $\{1_1, 2_1, \dots, k_1\}$, forms the first
+stratum, the second items the second stratum, and so on.
+```
+
 At test position $t$ the selector returns the non-administered item of stratum
 $s(t)$ whose point of maximum information is closest to the current estimate,
 

@@ -25,7 +25,16 @@ I_i^{\max} = I_i(\theta_i^{\max}).
 $$
 
 Items are sorted by increasing $I_i^{\max}$ and split into `n_strata`
-contiguous strata. At test position $t$ the selector returns the
+contiguous strata.
+
+```{figure} /mis.svg
+:alt: A row of strata numbered 1 to k under an arrow labelled maximum information, shading darker from stratum 1 to stratum k.
+:width: 400px
+
+The item bank sorted by increasing $I_i^{\max}$ and split into strata $1, \dots, k$.
+```
+
+At test position $t$ the selector returns the
 non-administered item of stratum $s(t)$ (see {doc}`stratified-selector`) whose
 point of maximum information is closest to the current estimate:
 
