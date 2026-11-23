@@ -22,8 +22,6 @@ class NumericalSearchEstimator(BaseEstimator):
       Whether to employ Dodd's estimation heuristic :cite:p:`Dod90` when the response vector
       only has one kind of response (all correct or all incorrect, see
       :py:func:`catsim.cat.dodd`). Default is True.
-  verbose : bool, optional
-      Whether to print detailed information during optimization. Default is False.
 
   Notes
   -----
@@ -38,7 +36,6 @@ class NumericalSearchEstimator(BaseEstimator):
     self,
     tol: float = 1e-6,
     dodd: bool = True,
-    verbose: bool = False,
   ) -> None:
     """Initialize the estimator.
 
@@ -49,8 +46,6 @@ class NumericalSearchEstimator(BaseEstimator):
     dodd : bool, optional
         Whether to use Dodd's estimation heuristic for edge cases (all correct or
         all incorrect responses). Default is True.
-    verbose : bool, optional
-        Whether to print detailed information during optimization. Default is False.
 
     Raises
     ------
@@ -60,7 +55,7 @@ class NumericalSearchEstimator(BaseEstimator):
     if not tol > 0:
       msg = f"tol must be positive, got {tol}"
       raise ValueError(msg)
-    super().__init__(verbose)
+    super().__init__()
 
     self._tol = float(tol)
     self._dodd = dodd
@@ -134,9 +129,6 @@ class NumericalSearchEstimator(BaseEstimator):
     )
     self._last_evaluations = res.nfev
     self._total_evaluations += self._last_evaluations
-
-    if self._verbose:
-      print(f"{self._last_evaluations} evaluations")
 
     return res.x
 

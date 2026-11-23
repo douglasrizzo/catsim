@@ -74,9 +74,6 @@ studied fixed steps of 0.4 and 0.7, which catsim does not implement.
    * - ``dodd``
      - ``True``
      - Whether to use Dodd's heuristic when the response vector contains only one response type.
-   * - ``verbose``
-     - ``False``
-     - Whether to print evaluation counts during optimization.
 ```
 
 ## Behavioral Contracts

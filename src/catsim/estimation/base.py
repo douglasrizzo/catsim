@@ -9,25 +9,13 @@ class BaseEstimator(ABC):
 
   Estimators are responsible for computing ability estimates based on examinees'
   responses to administered items.
-
-  Parameters
-  ----------
-  verbose : bool, optional
-      Whether to be verbose during execution. Default is False.
   """
 
-  def __init__(self, verbose: bool = False) -> None:
-    """Initialize an Estimator object.
-
-    Parameters
-    ----------
-    verbose : bool, optional
-        Whether to be verbose during execution. Default is False.
-    """
+  def __init__(self) -> None:
+    """Initialize the evaluation counters."""
     self._calls = 0
     self._last_evaluations = 0
     self._total_evaluations = 0
-    self._verbose = verbose
 
   @abstractmethod
   def estimate(

@@ -49,12 +49,10 @@ class WarmLikelihoodEstimator(BaseEstimator):
   ----------
   tol : float, optional
       Absolute tolerance of the root refinement. Default is 1e-6.
-  verbose : bool, optional
-      Whether to be verbose during execution. Default is False.
   """
 
-  def __init__(self, tol: float = 1e-6, verbose: bool = False) -> None:
-    super().__init__(verbose=verbose)
+  def __init__(self, tol: float = 1e-6) -> None:
+    super().__init__()
     self._tol = float(tol)
 
   def __str__(self) -> str:

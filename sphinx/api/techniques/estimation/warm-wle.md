@@ -88,9 +88,6 @@ catsim does not compute.
    * - ``tol``
      - ``1e-6``
      - Absolute tolerance of the Brent root refinement.
-   * - ``verbose``
-     - ``False``
-     - Diagnostics flag inherited from the estimator base class.
 ```
 
 ## Behavioral Contracts

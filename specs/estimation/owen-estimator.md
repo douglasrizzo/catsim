@@ -72,9 +72,6 @@ $[\mu_n - h\sigma_n, \mu_n + h\sigma_n]$ to compute these moments.
    * - ``reset_each_call``
      - ``False``
      - Whether to replay the whole history on every call instead of using incremental state.
-   * - ``verbose``
-     - ``False``
-     - Optional diagnostics flag.
 ```
 
 ## Behavioral Contracts
@@ -151,7 +148,6 @@ class OwenEstimator(BaseEstimator):
     n_nodes: int = 21,
     half_width: float = 5.0,
     reset_each_call: bool = False,
-    verbose: bool = False,
   ) -> None:
     if prior_sd <= 0:
       raise ValueError(f"prior_sd must be positive, got {prior_sd}")
@@ -159,7 +155,7 @@ class OwenEstimator(BaseEstimator):
       raise ValueError(f"n_nodes must be >= 5, got {n_nodes}")
     if half_width <= 0:
       raise ValueError(f"half_width must be positive, got {half_width}")
-    super().__init__(verbose=verbose)
+    super().__init__()
     self._prior_mean = float(prior_mean)
     self._prior_sd = float(prior_sd)
     self._n_nodes = int(n_nodes)
