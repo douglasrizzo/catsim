@@ -535,17 +535,45 @@ session had ended.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.state.ExposureTracker">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">ExposureTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker" title="Link to this definition">#</a></dt>
-<dd><p>Track item usage counts during a simulation run.</p>
+<dd><p>Count item administrations and sessions across a run, and give sessions their exposure rates.</p>
+<p>One tracker is shared by every session of a run or of a live deployment, through
+<a class="reference internal" href="engine.html#catsim.engine.RunContext" title="catsim.engine.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>. The engine calls <a class="reference internal" href="#catsim.state.ExposureTracker.start_session" title="catsim.state.ExposureTracker.start_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_session()</span></code></a> when a session starts and
+<a class="reference internal" href="#catsim.state.ExposureTracker.record" title="catsim.state.ExposureTracker.record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record()</span></code></a> for every administered item. <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds each item’s administrations so far,
+those of sessions still in progress included, and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> the number of sessions started.</p>
+<p>A session is selected against each item’s administrations divided by the number of other sessions
+started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that
+is the share of the examinees tested before the current one, as in catR’s
+<code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code>; the first session sees every rate at 0. Sessions that run side by side,
+as in a live deployment, see each other’s administrations as they happen.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.state.ExposureTracker.rates">
-<span class="sig-name descname"><span class="pre">rates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatArray</span></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.rates" title="Link to this definition">#</a></dt>
-<dd><p>Return exposure rates for the tracked counts.</p>
+<span class="sig-name descname"><span class="pre">rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FloatArray</span></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.rates" title="Link to this definition">#</a></dt>
+<dd><p>Return the exposure rates a session in progress is selected against.</p>
+<p>Each item’s administrations are divided by the sessions started so far other than the one
+asking, so a session never counts itself. Its own administrations stay in the counts, but only
+for items it has already administered and will not be offered again; for those the rate can
+exceed 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>A new array with one rate per item; all zero while at most one session has started. This is
+not the run’s final exposure, which <a class="reference internal" href="#catsim.state.SimulationResult.exposure_rates" title="catsim.state.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code></a> gives.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.state.ExposureTracker.record">
 <span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.record" title="Link to this definition">#</a></dt>
 <dd><p>Record one administration for an item.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.state.ExposureTracker.start_session">
+<span class="sig-name descname"><span class="pre">start_session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.start_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.start_session" title="Link to this definition">#</a></dt>
+<dd><p>Count a session that has started.</p>
 </dd></dl>
 
 </dd></dl>
@@ -695,6 +723,7 @@ selector that follows a fixed list or works through strata can run out first.</p
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker"><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.rates"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.record"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.record()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.start_session"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.start_session()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult"><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">

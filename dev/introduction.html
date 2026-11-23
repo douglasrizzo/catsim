@@ -911,6 +911,7 @@ require it <span class="bibtex-citation" id="id9">[<a class="reference internal"
 <div class="math notranslate nohighlight">
 \[r_i = \frac{q_i}{N}\]</div>
 <p>Where <span class="math notranslate nohighlight">\(q_i\)</span> represents the number of tests item <span class="math notranslate nohighlight">\(i\)</span> has been used on and <span class="math notranslate nohighlight">\(N\)</span> is the total number of tests applied.</p>
+<p>During a run, a selector’s exposure cap (<code class="docutils literal notranslate"><span class="pre">r_max</span></code>) is checked against the same rate over the examinees tested so far: an <a class="reference internal" href="api/state.html#catsim.state.ExposureTracker" title="catsim.state.ExposureTracker"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a> in the run context gives each session <span class="math notranslate nohighlight">\(q_i\)</span> and <span class="math notranslate nohighlight">\(N\)</span> over the other sessions started so far, which for sessions run one after another is catR’s rate over the examinees tested before the current one (<a class="reference internal" href="adr/0003-runtime-state-ownership.html"><span class="doc">ADR-0003: Keep Runtime State Outside Domain Objects</span></a>).</p>
 </section>
 </section>
 <section id="computerized-adaptive-tests">

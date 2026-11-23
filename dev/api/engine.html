@@ -540,6 +540,28 @@ or the selector has no item to offer (reason <code class="docutils literal notra
 <dt class="sig sig-object py" id="catsim.engine.CatEngine.start_session">
 <span class="sig-name descname"><span class="pre">start_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Hashable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.engine.RunContext" title="catsim.engine.RunContext"><span class="pre">RunContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="state.html#catsim.state.CatSessionState" title="catsim.state.CatSessionState"><span class="pre">CatSessionState</span></a></span></span><a class="reference internal" href="../_modules/catsim/engine.html#CatEngine.start_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.engine.CatEngine.start_session" title="Link to this definition">#</a></dt>
 <dd><p>Create a new CAT session with an initial theta estimate.</p>
+<p>The session is counted in the context’s exposure tracker, if it has one, once the initializer
+has succeeded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>session_id</strong><span class="classifier">Hashable</span></dt><dd><p>Identifier of the session, such as an int, a str or a UUID.</p>
+</dd>
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Item bank used by the session.</p>
+</dd>
+<dt><strong>context</strong><span class="classifier">RunContext</span></dt><dd><p>Runtime services of the run.</p>
+</dd>
+<dt><strong>true_theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>True ability of a simulated examinee. Default is None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>CatSessionState</dt><dd><p>A running session whose theta history holds the initial estimate.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -586,8 +608,11 @@ reason it has (an already stopped session keeps its earlier one).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.engine.RunContext">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.engine.</span></span><span class="sig-name descname"><span class="pre">RunContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.state.ExposureTracker" title="catsim.state.ExposureTracker"><span class="pre">ExposureTracker</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#RunContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.engine.RunContext" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.engine.</span></span><span class="sig-name descname"><span class="pre">RunContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.state.ExposureTracker" title="catsim.state.ExposureTracker"><span class="pre">ExposureTracker</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#RunContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.engine.RunContext" title="Link to this definition">#</a></dt>
 <dd><p>Runtime services shared by CAT sessions in one run.</p>
+<p><code class="docutils literal notranslate"><span class="pre">exposure_tracker</span></code> counts sessions and item administrations across the run and gives selectors
+the exposure rates their <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap is checked against. Without one, selectors get no rates and
+apply no cap.</p>
 </dd></dl>
 
 <dl class="py class">

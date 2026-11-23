@@ -798,11 +798,15 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/engine.html#catsim.engine.RunContext">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RunContext</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Runtime services shared by CAT sessions in one run."""</span>
+<span class="w">  </span><span class="sd">"""Runtime services shared by CAT sessions in one run.</span>
+
+<span class="sd">  ``exposure_tracker`` counts sessions and item administrations across the run and gives selectors</span>
+<span class="sd">  the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and</span>
+<span class="sd">  apply no cap.</span>
+<span class="sd">  """</span>
 
   <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span>
-  <span class="n">exposure_tracker</span><span class="p">:</span> <span class="n">ExposureTracker</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-  <span class="n">total_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+  <span class="n">exposure_tracker</span><span class="p">:</span> <span class="n">ExposureTracker</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
@@ -867,8 +871,30 @@ window.runMermaid = runMermaid;</script>
     <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
     <span class="n">true_theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionState</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Create a new CAT session with an initial theta estimate."""</span>
+<span class="w">    </span><span class="sd">"""Create a new CAT session with an initial theta estimate.</span>
+
+<span class="sd">    The session is counted in the context's exposure tracker, if it has one, once the initializer</span>
+<span class="sd">    has succeeded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    session_id : Hashable</span>
+<span class="sd">        Identifier of the session, such as an int, a str or a UUID.</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        Item bank used by the session.</span>
+<span class="sd">    context : RunContext</span>
+<span class="sd">        Runtime services of the run.</span>
+<span class="sd">    true_theta : float or None, optional</span>
+<span class="sd">        True ability of a simulated examinee. Default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    CatSessionState</span>
+<span class="sd">        A running session whose theta history holds the initial estimate.</span>
+<span class="sd">    """</span>
     <span class="n">initial_theta</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initializer</span><span class="o">.</span><span class="n">initialize</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">start_session</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">CatSessionState</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">theta_history</span><span class="o">=</span><span class="p">[</span><span class="n">initial_theta</span><span class="p">],</span> <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">)</span></div>
 
 
@@ -919,9 +945,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
       <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">exposure_rates</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">context</span><span class="o">.</span><span class="n">total_sessions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">exposure_rates</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">total_sessions</span><span class="p">)</span>
+    <span class="n">exposure_rates</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
         <span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span>

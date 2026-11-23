@@ -63,7 +63,8 @@ item anyway.
      - ``1.0``
      - Soft maximum exposure rate. Remaining items with exposure rate
        :math:`< r_{\max}` are preferred; if none exist, the selector falls back
-       to the unrestricted maximum-information choice.
+       to the unrestricted maximum-information choice. The default of 1 applies
+       no cap.
 ```
 
 ## Behavioral Contracts
@@ -72,7 +73,7 @@ Any correct implementation must satisfy the following properties:
 
 1. It orders candidate items by decreasing Fisher information at the current `est_theta`.
 2. It never returns an already administered item.
-3. If at least one non-administered item has exposure rate below `r_max`, the returned item comes from that subset.
+3. If `r_max` is below 1 and at least one non-administered item has exposure rate below `r_max`, the returned item comes from that subset.
 4. If all remaining items violate the exposure cap, it still returns the highest-information remaining item.
 5. If no non-administered items remain, it raises `NoItemsAvailableError`.
 

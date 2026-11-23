@@ -944,14 +944,34 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExposureTracker</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Track item usage counts during a simulation run."""</span>
+<span class="w">  </span><span class="sd">"""Count item administrations and sessions across a run, and give sessions their exposure rates.</span>
+
+<span class="sd">  One tracker is shared by every session of a run or of a live deployment, through</span>
+<span class="sd">  :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts and</span>
+<span class="sd">  :meth:`record` for every administered item. ``counts`` holds each item's administrations so far,</span>
+<span class="sd">  those of sessions still in progress included, and ``n_sessions`` the number of sessions started.</span>
+
+<span class="sd">  A session is selected against each item's administrations divided by the number of other sessions</span>
+<span class="sd">  started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that</span>
+<span class="sd">  is the share of the examinees tested before the current one, as in catR's</span>
+<span class="sd">  ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,</span>
+<span class="sd">  as in a live deployment, see each other's administrations as they happen.</span>
+<span class="sd">  """</span>
 
   <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span>
   <span class="n">counts</span><span class="p">:</span> <span class="n">IntArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+  <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Allocate the item exposure counter array."""</span>
+<span class="w">    </span><span class="sd">"""Allocate the item counts, all zero."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExposureTracker.start_session">
+<a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.start_session">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">start_session</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Count a session that has started."""</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
 
 <div class="viewcode-block" id="ExposureTracker.record">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.record">[docs]</a>
@@ -962,11 +982,24 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ExposureTracker.rates">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.rates">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">rates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return exposure rates for the tracked counts."""</span>
-    <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_sessions</span></div>
+  <span class="k">def</span><span class="w"> </span><span class="nf">rates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the exposure rates a session in progress is selected against.</span>
+
+<span class="sd">    Each item's administrations are divided by the sessions started so far other than the one</span>
+<span class="sd">    asking, so a session never counts itself. Its own administrations stay in the counts, but only</span>
+<span class="sd">    for items it has already administered and will not be offered again; for those the rate can</span>
+<span class="sd">    exceed 1.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        A new array with one rate per item; all zero while at most one session has started. This is</span>
+<span class="sd">        not the run's final exposure, which :attr:`SimulationResult.exposure_rates` gives.</span>
+<span class="sd">    """</span>
+    <span class="n">others</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">others</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">/</span> <span class="n">others</span></div>
 </div>
 
 

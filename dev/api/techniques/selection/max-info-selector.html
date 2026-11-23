@@ -517,7 +517,8 @@ item anyway.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
 <td><p>Soft maximum exposure rate. Remaining items with exposure rate
 <span class="math notranslate nohighlight">\(&lt; r_{\max}\)</span> are preferred; if none exist, the selector falls back
-to the unrestricted maximum-information choice.</p></td>
+to the unrestricted maximum-information choice. The default of 1 applies
+no cap.</p></td>
 </tr>
 </tbody>
 </table>
@@ -529,7 +530,7 @@ to the unrestricted maximum-information choice.</p></td>
 <ol class="arabic simple">
 <li><p>It orders candidate items by decreasing Fisher information at the current <code class="docutils literal notranslate"><span class="pre">est_theta</span></code>.</p></li>
 <li><p>It never returns an already administered item.</p></li>
-<li><p>If at least one non-administered item has exposure rate below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>, the returned item comes from that subset.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">r_max</span></code> is below 1 and at least one non-administered item has exposure rate below <code class="docutils literal notranslate"><span class="pre">r_max</span></code>, the returned item comes from that subset.</p></li>
 <li><p>If all remaining items violate the exposure cap, it still returns the highest-information remaining item.</p></li>
 <li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 </ol>

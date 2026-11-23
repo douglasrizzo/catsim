@@ -456,6 +456,20 @@
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
 <p>Exposure tracking and per-session execution details were previously entangled with long-lived
 objects in ways that made repeated runs and object reuse harder to reason about.</p>
+<p>The exposure rates a selector checks its <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap against were the tracker’s counts divided by a
+number of sessions the caller passed in <code class="docutils literal notranslate"><span class="pre">RunContext.total_sessions</span></code>, the planned size of the run.
+That caused two problems:</p>
+<ul class="simple">
+<li><p>Without <code class="docutils literal notranslate"><span class="pre">total_sessions</span></code>, the engine passed no rates at all, so an <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap did nothing and
+nothing said so. That is the natural setup for a live deployment, which does not know in advance
+how many examinees it will test.</p></li>
+<li><p>With it, early examinees saw every rate near zero and the cap bore only on late ones, so the
+precision of an examinee’s test depended on their place in the run: the later the examinee, the
+less informative the items left below the cap.</p></li>
+</ul>
+<p>catR’s <code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code> divides by the examinees tested so far instead: after respondent <code class="docutils literal notranslate"><span class="pre">i</span></code>
+it sets the rates to the counts divided by <code class="docutils literal notranslate"><span class="pre">i</span></code>, and respondent <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">+</span> <span class="pre">1</span></code> is tested against them, with
+no restriction for the first respondent and none at all when <code class="docutils literal notranslate"><span class="pre">rmax</span></code> is 1.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
@@ -464,6 +478,29 @@ objects in ways that made repeated runs and object reuse harder to reason about.
 <li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> holds item parameters and related derived data</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds per-examinee runtime state</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> and <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> hold run-level exposure information</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> owns the denominator of the exposure rates, which follow catR:</p>
+<ul class="simple">
+<li><p>The tracker counts sessions as well as administrations. <code class="docutils literal notranslate"><span class="pre">CatEngine.start_session</span></code> calls
+<code class="docutils literal notranslate"><span class="pre">tracker.start_session()</span></code> when the run context has a tracker, after the initializer has
+succeeded, and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> records each administered item. <code class="docutils literal notranslate"><span class="pre">RunContext</span></code> has no
+<code class="docutils literal notranslate"><span class="pre">total_sessions</span></code>, and <code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> takes no argument.</p></li>
+<li><p>A session is selected against each item’s administrations divided by the number of other
+sessions started so far. With sessions run one after another, as <code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> runs them,
+that is catR’s rate: the share of the examinees tested before the current one. The session being
+tested is not in the denominator. Counting it would divide the administrations of an item it can
+still receive by one examinee more than could have received it, which lowers the rates most for
+the early sessions: the second session would see every item of the first at 1/2 instead of 1. Its
+own administrations stay in the counts, but only for items it has already administered, which it
+is never offered again.</p></li>
+<li><p>The rates are computed when a session asks, not fixed when it starts, so a single tracker serves
+sessions that run side by side without keeping anything per session: each sees the others’
+administrations as they happen, over the other sessions started so far.</p></li>
+<li><p>The first session sees every rate at 0: no examinee has been tested before it.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">r_max</span></code> of 1 applies no cap, as in catR. An item that every earlier examinee received has a
+rate of exactly 1, and the selectors’ strict <code class="docutils literal notranslate"><span class="pre">rate</span> <span class="pre">&lt;</span> <span class="pre">r_max</span></code> test would otherwise pass it over.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code> divides the run’s counts by all its sessions: the exposure at
+the end of the run, not the rates any session saw.</p></li>
 </ul>
 </section>
 <section id="consequences">
@@ -479,6 +516,18 @@ views its properties return, so the values derived and cached from them (<code c
 earlier versions kept for compatibility is gone, together with <code class="docutils literal notranslate"><span class="pre">ItemBank.exposure_rates</span></code>,
 <code class="docutils literal notranslate"><span class="pre">update_exposure_rate</span></code>, <code class="docutils literal notranslate"><span class="pre">reset_exposure_rates</span></code> and <code class="docutils literal notranslate"><span class="pre">reset</span></code>. An item matrix with more than four
 columns raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of having its extra column read as exposure rates.</p></li>
+<li><p>A context with a tracker is all exposure control needs, so a live deployment gets it without
+knowing how many examinees it will test. <code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> is exported from <code class="docutils literal notranslate"><span class="pre">catsim</span></code> for that
+use. A context without a tracker gives selectors no rates, and they apply no cap.</p></li>
+<li><p>The cap holds from the second examinee on: that examinee sees every item of the first at a rate
+of 1. A capped run’s results differ from earlier versions; runs with <code class="docutils literal notranslate"><span class="pre">r_max</span> <span class="pre">=</span> <span class="pre">1</span></code> do not change.</p></li>
+<li><p>In a live deployment, a session that starts and is abandoned before its first item still counts
+in the denominator, which lowers every later rate a little; so does starting a session twice for
+one examinee.</p></li>
+<li><p>The tracker’s counts are not part of any session snapshot. A deployment that restarts with a new
+tracker applies no cap until new sessions have run, unless it persists the tracker itself.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> gives the rates a session in progress is selected against, which leave
+that session out; the run’s own exposure is <code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code>.</p></li>
 </ul>
 </section>
 </section>
