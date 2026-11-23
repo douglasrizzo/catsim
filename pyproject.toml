@@ -191,7 +191,13 @@ testpaths = ["tests", "src/catsim"]
 # installed package and failed with "import file mismatch".
 addopts = "--strict-markers --strict-config --doctest-modules --import-mode=importlib"
 xfail_strict = true
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    # Python 3.14 deprecates asyncio's event loop policies. nbmake 1.5.5 (the latest) sets one on
+    # Windows while pytest loads plugins, so these warnings stopped every Windows test run before
+    # collection. catsim never uses asyncio itself.
+    "ignore:'asyncio.([A-Za-z]+EventLoopPolicy|[gs]et_event_loop_policy)' is deprecated:DeprecationWarning",
+]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
