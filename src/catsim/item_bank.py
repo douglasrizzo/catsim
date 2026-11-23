@@ -47,7 +47,7 @@ class ItemBank:
   ------
   ValueError
       If the matrix does not have 1 to 4 columns, or if validate=True and item
-      parameters are invalid.
+      parameters are invalid (see :py:func:`catsim.irt.validate_item_bank`).
   TypeError
       If items is not a numpy.ndarray.
 
@@ -89,7 +89,7 @@ class ItemBank:
 
     # Validate if requested
     if validate:
-      irt.validate_item_bank(self._items, raise_err=True)
+      irt.validate_item_bank(self._items)
 
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None

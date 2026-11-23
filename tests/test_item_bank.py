@@ -91,16 +91,14 @@ class TestItemBankCreation:
     np.testing.assert_array_equal(bank.max_info_thetas, max_info_thetas)
 
   def test_validation_enabled_by_default(self) -> None:
-    """Test that validation is enabled by default and catches invalid params."""
-    # Invalid: discrimination < 0
+    """A bank is validated unless told otherwise, so a = -1 raises instead of being accepted."""
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
 
     with pytest.raises(ValueError, match="discrimination <= 0"):
       ItemBank(items)
 
   def test_validation_can_be_disabled(self) -> None:
-    """Test that validation can be disabled."""
-    # Invalid but should not raise when validate=False
+    """With validate=False the parameter checks are skipped, so a bank with a = -1 is built instead of raising."""
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
 
     bank = ItemBank(items, validate=False)
