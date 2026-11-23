@@ -5,7 +5,6 @@ from enum import Enum, auto
 import matplotlib.pyplot as plt
 import numpy
 from matplotlib.axes import Axes
-from mpl_toolkits.mplot3d import Axes3D
 
 from . import irt
 from ._typing import FloatArray
@@ -195,7 +194,6 @@ def gen3d_dataset_scatter(
   matplotlib.axes.Axes
       The matplotlib 3D axes object containing the plot.
   """
-  assert Axes3D
   if isinstance(item_bank, numpy.ndarray):
     item_bank = ItemBank(item_bank)
 

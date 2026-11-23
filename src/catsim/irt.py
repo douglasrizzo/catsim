@@ -905,7 +905,7 @@ def log_likelihood(
   return float(log_likelihood_hpc(est_theta, response_vector, administered_items)[0])
 
 
-def negative_log_likelihood(est_theta: float, *args: Any) -> float:
+def negative_log_likelihood(est_theta: float, *args: Any) -> float:  # noqa: ANN401 (scipy.optimize's args= tuple)
   """Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.
 
   This function is used by :py:mod:`scipy.optimize` optimization functions that tend to

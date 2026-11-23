@@ -432,7 +432,7 @@ class ItemBank:
     return cls(irt.normalize_item_bank(numpy.array([a, b, c, d]).T), validate=validate)
 
   @classmethod
-  def generate(cls, *args: Any, **kwargs: Any) -> Self:
+  def generate(cls, *args: Any, **kwargs: Any) -> Self:  # noqa: ANN401 (forwards to generate_item_bank)
     """Alias for generate_item_bank for convenience.
 
     Accepts both 'item_type' and 'itemtype' for backward compatibility.
