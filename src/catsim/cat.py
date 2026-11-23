@@ -5,45 +5,7 @@ import random
 import numpy
 import numpy.typing as npt
 
-from catsim.item_bank import ItemBank
-
 from ._typing import FloatArray
-
-
-def dodd(theta: float, item_bank: ItemBank, correct: bool) -> float:
-  r"""Estimate :math:`\hat{\theta}` when the response vector is composed entirely of 1s or 0s.
-
-  Method proposed by :cite:p:`Dod90`. This heuristic prevents the maximum likelihood
-  estimator from returning infinity when all responses are correct or negative
-  infinity when all responses are incorrect.
-
-  .. math::
-
-      \hat{\theta}_{t+1} = \left\lbrace \begin{array}{ll}
-      \hat{\theta}_t+\frac{b_{max}-\hat{\theta_t}}{2} & \text{if } X_t = 1 \\
-        \hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} & \text{if }  X_t = 0
-      \end{array} \right\rbrace
-
-  Parameters
-  ----------
-  theta : float
-      The initial ability level estimate.
-  item_bank : ItemBank
-      An ItemBank containing all items in the bank.
-      This is necessary to capture the maximum and minimum difficulty levels
-      required by the method.
-  correct : bool
-      Boolean value indicating if the examinee has answered only correctly
-      (True) or only incorrectly (False) up until now.
-
-  Returns
-  -------
-  float
-      A new estimation for :math:`\theta` that avoids infinite values.
-  """
-  b = item_bank.difficulty
-
-  return theta + ((max(b) - theta) / 2) if correct else theta - ((theta - min(b)) / 2)
 
 
 def bias(

@@ -1,7 +1,5 @@
 """Expected information selector implementations."""
 
-import math
-
 import numpy
 
 from .. import irt
@@ -33,10 +31,6 @@ class MEISelector(BaseSelector):
 
   Notes
   -----
-  When an updated estimate is not finite, as with maximum likelihood without Dodd's heuristic
-  after an all-correct or all-incorrect pattern, the candidate is scored by the information at the
-  current estimate instead, so that step reduces to maximum-information selection.
-
   For full algorithmic details, see :doc:`/api/techniques/selection/mei-selector`.
   """
 
@@ -91,11 +85,6 @@ class MEISelector(BaseSelector):
       response_vector=[*response_vector, False],
       est_theta=est_theta,
     )
-    if not (math.isfinite(theta_correct) and math.isfinite(theta_incorrect)):
-      # information at an infinite estimate is 0 for every candidate, which would make every score
-      # equal; fall back to the information at the current estimate
-      return float(item_bank.test_information(est_theta, next_administered))
-
     item = item_bank.items[candidate_idx]
     p_correct = irt.icc(est_theta, item[0], item[1], item[2], item[3])
     info_correct = item_bank.test_information(theta_correct, next_administered)

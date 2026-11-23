@@ -1,3 +1,6 @@
+"""Base class for ability estimators."""
+
+import math
 from abc import ABC, abstractmethod
 
 from .. import irt
@@ -9,25 +12,13 @@ class BaseEstimator(ABC):
 
   Estimators are responsible for computing ability estimates based on examinees'
   responses to administered items.
-
-  Parameters
-  ----------
-  verbose : bool, optional
-      Whether to be verbose during execution. Default is False.
   """
 
-  def __init__(self, verbose: bool = False) -> None:
-    """Initialize an Estimator object.
-
-    Parameters
-    ----------
-    verbose : bool, optional
-        Whether to be verbose during execution. Default is False.
-    """
+  def __init__(self) -> None:
+    """Initialize the evaluation counters."""
     self._calls = 0
     self._last_evaluations = 0
     self._total_evaluations = 0
-    self._verbose = verbose
 
   @abstractmethod
   def estimate(
@@ -37,7 +28,10 @@ class BaseEstimator(ABC):
     response_vector: list[bool],
     est_theta: float,
   ) -> float:
-    r"""Compute the theta value that maximizes the log-likelihood function for the given examinee.
+    r"""Return the updated ability estimate given the responses so far.
+
+    Once an item has been administered, the estimate is finite and lies within the estimator's
+    bounds, whatever the response pattern, all correct and all incorrect included.
 
     Parameters
     ----------
@@ -53,8 +47,57 @@ class BaseEstimator(ABC):
     Returns
     -------
     float
-        The current estimated ability :math:`\hat\theta`.
+        The updated ability estimate :math:`\hat\theta`.
     """
+
+  @staticmethod
+  def _check_tol(tol: float) -> float:
+    """Return ``tol`` as a float, after checking that it is positive.
+
+    Parameters
+    ----------
+    tol : float
+        The tolerance of the estimator's numerical search.
+
+    Returns
+    -------
+    float
+        The tolerance, as a float.
+
+    Raises
+    ------
+    ValueError
+        If ``tol`` is not positive (NaN included).
+    """
+    if not tol > 0:
+      msg = f"tol must be positive, got {tol}"
+      raise ValueError(msg)
+    return float(tol)
+
+  @staticmethod
+  def _check_bounds(bounds: tuple[float, float]) -> tuple[float, float]:
+    """Return ``bounds`` as floats, after checking that they are finite with low < high.
+
+    Parameters
+    ----------
+    bounds : tuple[float, float]
+        The lower and upper bound of the estimate.
+
+    Returns
+    -------
+    tuple[float, float]
+        The bounds, as floats.
+
+    Raises
+    ------
+    ValueError
+        If either bound is not finite, or if the lower bound is not below the upper one.
+    """
+    low, high = bounds
+    if not (math.isfinite(low) and math.isfinite(high) and low < high):
+      msg = f"bounds must be finite with low < high, got {bounds}"
+      raise ValueError(msg)
+    return float(low), float(high)
 
   @staticmethod
   def _require_inputs(

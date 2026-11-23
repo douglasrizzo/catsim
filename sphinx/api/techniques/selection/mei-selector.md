@@ -59,11 +59,6 @@ are incorrect. On that branch the look-ahead is a fixed jump rather than an
 estimate. Bayesian estimators and WLE give a genuine updated estimate on both
 branches from the first item.
 
-If an updated estimate is not finite, as with maximum likelihood without Dodd's
-heuristic after an all-correct or all-incorrect pattern, the candidate is scored
-by the information at the current estimate instead, so that step reduces to
-maximum-information selection.
-
 ## Parameters
 
 ```{eval-rst}

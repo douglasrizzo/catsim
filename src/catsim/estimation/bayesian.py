@@ -303,17 +303,14 @@ class EAPEstimator(BaseEstimator):
       ``QuadratureGrid.uniform()``.
   log_prior : LogPrior or None, optional
       Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
-  verbose : bool, optional
-      Diagnostics flag inherited from :py:class:`BaseEstimator`. Default is False.
   """
 
   def __init__(
     self,
     grid: QuadratureGrid | None = None,
     log_prior: LogPrior | None = None,
-    verbose: bool = False,
   ) -> None:
-    super().__init__(verbose=verbose)
+    super().__init__()
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
 
@@ -391,8 +388,6 @@ class MAPEstimator(BaseEstimator):
       Absolute tolerance of the refinement step. Default is 1e-6.
   bounds : tuple[float, float], optional
       Search range for the mode. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
-  verbose : bool, optional
-      Diagnostics flag inherited from :py:class:`BaseEstimator`. Default is False.
 
   Raises
   ------
@@ -405,19 +400,11 @@ class MAPEstimator(BaseEstimator):
     log_prior: LogPrior | None = None,
     tol: float = 1e-6,
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
-    verbose: bool = False,
   ) -> None:
-    if not tol > 0:
-      msg = f"tol must be positive, got {tol}"
-      raise ValueError(msg)
-    low, high = bounds
-    if not (math.isfinite(low) and math.isfinite(high) and low < high):
-      msg = f"bounds must be finite with low < high, got {bounds}"
-      raise ValueError(msg)
-    super().__init__(verbose=verbose)
+    super().__init__()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._tol = float(tol)
-    self._bounds = (float(low), float(high))
+    self._tol = self._check_tol(tol)
+    self._bounds = self._check_bounds(bounds)
 
   def __str__(self) -> str:
     """Return a human-readable estimator name."""

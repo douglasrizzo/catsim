@@ -2,13 +2,14 @@
 
 import importlib
 from collections.abc import Callable
+from functools import partial
 from itertools import pairwise, product
 from typing import Any
 
 import numpy as np
 import pytest
 from scipy.integrate import IntegrationWarning
-from scipy.optimize import minimize_scalar
+from scipy.optimize import brentq, minimize_scalar
 from scipy.special import expit
 
 from catsim import irt
@@ -27,16 +28,6 @@ from catsim.estimation import (
 )
 from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
-
-
-class TestNumericalSearchEstimatorInit:
-  """Tests for NumericalSearchEstimator initialization."""
-
-  @pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
-  def test_init_rejects_a_tolerance_that_is_not_positive(self, tol: float) -> None:
-    """A tol that is not positive fails at construction instead of reaching SciPy unchecked."""
-    with pytest.raises(ValueError, match="tol must be positive"):
-      NumericalSearchEstimator(tol=tol)
 
 
 class TestNumericalSearchEstimatorEstimate:
@@ -76,45 +67,54 @@ class TestNumericalSearchEstimatorEstimate:
 
     assert theta == 1.7
 
-  def test_estimate_all_correct(self) -> None:
-    """Test estimation with all correct responses."""
-    item_bank = ItemBank.generate_item_bank(50)
-    estimator = NumericalSearchEstimator(dodd=True)
+  @pytest.mark.parametrize(
+    ("est_theta", "correct", "expected"),
+    [
+      pytest.param(0.0, True, 1.0, id="correct_halfway_to_the_hardest_item"),
+      pytest.param(0.0, False, -1.5, id="incorrect_halfway_to_the_easiest_item"),
+      pytest.param(4.0, True, 4.0, id="correct_above_the_hardest_item"),
+      pytest.param(-4.0, False, -4.0, id="incorrect_below_the_easiest_item"),
+    ],
+  )
+  def test_estimate_takes_dodds_step_on_a_constant_pattern(
+    self, est_theta: float, correct: bool, expected: float
+  ) -> None:
+    """While every response is the same, the estimate moves half the way to the bank's extreme item, never back.
 
-    administered_items = [0, 1, 2]
-    response_vector = [True, True, True]
+    The bank's difficulties are -3, 0 and 2, and only the item at 0 is administered, so the step
+    targets the bank's extremes, not the administered item. From 0 it reaches 2 / 2 = 1 or -3 / 2 = -1.5.
+    Beyond the extreme, the step used to point back toward it: 4.0 fell to 3.0 after a correct
+    answer and -4.0 rose to -3.5 after an incorrect one.
+    """
+    item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    theta = NumericalSearchEstimator().estimate(item_bank, [1], [correct], est_theta)
 
-    assert isinstance(theta, float)
-    assert np.isfinite(theta)
-    # With all correct, theta should increase from initial
-    assert theta > 0.0
+    assert theta == expected
 
-  def test_estimate_all_incorrect(self) -> None:
-    """Test estimation with all incorrect responses."""
-    item_bank = ItemBank.generate_item_bank(50)
-    estimator = NumericalSearchEstimator(dodd=True)
+  @pytest.mark.parametrize(
+    ("est_theta", "correct", "bounds", "expected"),
+    [
+      pytest.param(1.0, True, (-1.8, 1.2), 1.2, id="step_past_the_upper_bound"),
+      pytest.param(-1.0, False, (-1.8, 1.2), -1.8, id="step_past_the_lower_bound"),
+      pytest.param(8.0, True, (-6.0, 6.0), 6.0, id="correct_from_above_the_bounds"),
+      pytest.param(-8.0, False, (-6.0, 6.0), -6.0, id="incorrect_from_below_the_bounds"),
+    ],
+  )
+  def test_dodds_step_is_clipped_to_the_bounds(
+    self, est_theta: float, correct: bool, bounds: tuple[float, float], expected: float
+  ) -> None:
+    """Dodd's step never leaves the estimator's bounds.
 
-    administered_items = [0, 1, 2]
-    response_vector = [False, False, False]
+    On the bank with difficulties -3, 0 and 2, the step from 1.0 reaches 1.5 and the step from -1.0
+    reaches -2.0, both outside [-1.8, 1.2]. From 8.0 or -8.0 the estimate does not move, and stays
+    outside [-6, 6] unless it is clipped.
+    """
+    item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
+    theta = NumericalSearchEstimator(bounds=bounds).estimate(item_bank, [1], [correct], est_theta)
 
-    assert isinstance(theta, float)
-    assert np.isfinite(theta)
-    # With all incorrect, theta should decrease from initial
-    assert theta < 0.0
+    assert theta == expected
 
   def test_estimate_increases_calls_counter(self) -> None:
     """Test that estimation increases the calls counter."""
@@ -272,6 +272,89 @@ def test_estimators_accept_numpy_item_indices(
   from_array = make_estimator().estimate(item_bank, np.array(administered_items), response_vector, 0.7)
 
   assert from_array == pytest.approx(from_list, abs=1e-15)
+
+
+@pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
+@pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
+def test_estimators_reject_a_tolerance_that_is_not_positive(estimator_class: type[BaseEstimator], tol: float) -> None:
+  """A tol that is not positive fails at construction, not mid-session inside SciPy (WLE's brentq raised there)."""
+  with pytest.raises(ValueError, match="tol must be positive"):
+    estimator_class(tol=tol)
+
+
+@pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
+@pytest.mark.parametrize(
+  "bounds",
+  [
+    pytest.param((3.0, -3.0), id="reversed"),
+    pytest.param((1.0, 1.0), id="empty"),
+    pytest.param((-np.inf, 6.0), id="infinite"),
+    pytest.param((float("nan"), 6.0), id="nan"),
+  ],
+)
+def test_estimators_reject_bounds_that_are_not_a_finite_interval(
+  estimator_class: type[BaseEstimator], bounds: tuple[float, float]
+) -> None:
+  """Bounds that are not a finite interval with low < high fail at construction, not inside SciPy."""
+  with pytest.raises(ValueError, match="bounds must be finite with low < high"):
+    estimator_class(bounds=bounds)
+
+
+@pytest.mark.parametrize(
+  "make_estimator",
+  [
+    pytest.param(partial(NumericalSearchEstimator, bounds=(0.5, 2.0)), id="mle"),
+    pytest.param(partial(MAPEstimator, bounds=(0.5, 2.0)), id="map"),
+    pytest.param(partial(WarmLikelihoodEstimator, bounds=(0.5, 2.0)), id="wle"),
+  ],
+)
+def test_estimators_search_only_inside_their_bounds(make_estimator: Callable[[], BaseEstimator]) -> None:
+  """A pattern whose estimate is 0 on [-6, 6] is estimated at the lower bound of [0.5, 2].
+
+  A correct answer to a 1PL item at b = 1 and an incorrect one to an item at b = -1 make the
+  likelihood, the test information and the standard normal prior symmetric about 0 and decreasing
+  beyond it, so the likelihood, the posterior and the weighted likelihood all peak at 0 and fall
+  across [0.5, 2]. An estimator that ignored its bounds returned 0.
+  """
+  item_bank = ItemBank(np.array([[1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+
+  theta = make_estimator().estimate(item_bank, [0, 1], [True, False], 0.0)
+
+  assert theta == pytest.approx(0.5, abs=1e-5)
+
+
+@pytest.mark.parametrize(
+  ("make_estimator", "expected"),
+  [
+    pytest.param(partial(NumericalSearchEstimator, bounds=(-1.0, 1.0)), 1.0, id="mle"),
+    pytest.param(
+      partial(EAPEstimator, grid=QuadratureGrid.uniform(n_nodes=3, low=-1.0, high=1.0)),
+      np.exp(-0.5) * np.tanh(0.5) / (np.exp(-0.5) + 0.5),
+      id="eap",
+    ),
+    pytest.param(partial(MAPEstimator, bounds=(-1.0, 1.0)), brentq(lambda t: t - expit(-t), 0.0, 1.0), id="map"),
+    pytest.param(partial(WarmLikelihoodEstimator, bounds=(-1.0, 1.0)), 1.0, id="wle"),
+  ],
+)
+@pytest.mark.parametrize("correct", [True, False], ids=["correct", "incorrect"])
+def test_estimators_give_a_constant_pattern_a_finite_estimate_inside_their_bounds(
+  make_estimator: Callable[[], BaseEstimator], expected: float, correct: bool
+) -> None:
+  """One answer to a 1PL item at b = 0 has no finite MLE; every estimator stays inside [-1, 1].
+
+  The bank's difficulties are -4, 0 and 4, and the estimates for an incorrect answer mirror those
+  for a correct one. Dodd's step from 0 reaches +-2, clipped to +-1. The WLE's root, b +- ln 3, is
+  beyond the bounds, so the estimate is the bound. MAP with the standard normal prior solves
+  theta = sigma(-theta). EAP weighs the nodes -1, 0 and 1 by e^(-1/2) sigma(-1), 1/2 and
+  e^(-1/2) sigma(1) after a correct answer, a mean of e^(-1/2) tanh(1/2) / (e^(-1/2) + 1/2).
+  An estimator that ignored its bounds returned +-2 (MLE) or +-1.10 (WLE), and the MLE without
+  Dodd's step +-inf.
+  """
+  item_bank = ItemBank(np.array([[1.0, -4.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 4.0, 0.0, 1.0]]))
+
+  theta = make_estimator().estimate(item_bank, [1], [correct], 0.0)
+
+  assert theta == pytest.approx(expected if correct else -expected, abs=1e-5)
 
 
 class TestBayesianHelpers:
@@ -614,21 +697,6 @@ class TestEAPEstimator:
 
 class TestMAPEstimator:
   """Tests for the Maximum a Posteriori estimator."""
-
-  @pytest.mark.parametrize(
-    ("kwargs", "match"),
-    [
-      pytest.param({"tol": 0.0}, "tol must be positive", id="zero_tol"),
-      pytest.param({"tol": -1e-6}, "tol must be positive", id="negative_tol"),
-      pytest.param({"bounds": (3.0, -3.0)}, "low < high", id="reversed_bounds"),
-      pytest.param({"bounds": (1.0, 1.0)}, "low < high", id="empty_bounds"),
-      pytest.param({"bounds": (-np.inf, 6.0)}, "finite", id="infinite_bound"),
-    ],
-  )
-  def test_init_rejects_invalid_search_settings(self, kwargs: dict[str, Any], match: str) -> None:
-    """Invalid bounds or tolerances fail at construction, not inside SciPy."""
-    with pytest.raises(ValueError, match=match):
-      MAPEstimator(**kwargs)
 
   def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
     """With no responses the estimate is the default prior's mode, 0, not the est_theta passed in."""

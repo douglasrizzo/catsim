@@ -12,7 +12,7 @@ finds the ability value that maximizes the item-response-theory log-likelihood.
 
 It searches the ability scale with a single bounded one-dimensional optimizer
 and includes Dodd's heuristic to handle degenerate all-correct and all-incorrect
-response patterns.
+response patterns, so every estimate is finite and inside the search bounds.
 
 ## Definition
 
@@ -38,7 +38,9 @@ $$
 \arg\max_{\theta \in [\theta_{\min}, \theta_{\max}]} \ell(\theta),
 $$
 
-with search bounds given by the package's extended theta range. For mixed
+with search bounds $[\theta_{\min}, \theta_{\max}]$ given by `bounds`, by default
+the package's extended theta range $[-6, 6]$ (`THETA_MIN_EXTENDED`,
+`THETA_MAX_EXTENDED`). For mixed
 response patterns, the implementation minimizes $-\ell(\theta)$ with SciPy's
 bounded Brent method (Brent, 2002), which never evaluates outside the bounds and
 takes `tol` as its absolute tolerance on $\theta$ (SciPy's `xatol`). With
@@ -48,14 +50,30 @@ guessing or slipping parameters, the likelihood of a mixed pattern can also
 still be rising at a bound, and the estimate is then within `tol` of that bound.
 
 When every response is identical, the unconstrained MLE is not finite. In that
-case the implementation returns Dodd's heuristic estimate if `dodd=True` and
-otherwise returns $+\infty$ for all-correct or $-\infty$ for
-all-incorrect patterns. Dodd's heuristic moves the current estimate half the
-distance to the largest item difficulty in the bank after a correct answer, or
-to the smallest after an incorrect one. Dodd (1990, p. 359) introduced this
-"variable stepsize" for the rating scale model, moving toward the highest or
-lowest scale value in the item pool; the dichotomous form, with the bank's
-largest and smallest $b$, is the one Barrada et al. (2008, p. 499) use. Dodd also
+case the implementation takes Dodd's heuristic step from the current estimate
+$\hat{\theta}_t$: half the distance to the largest item difficulty in the bank
+after correct answers, or to the smallest after incorrect ones,
+
+$$
+\hat{\theta}_{t+1} =
+\begin{cases}
+\max\left(\hat{\theta}_t,\ \hat{\theta}_t + \dfrac{b_{\max} - \hat{\theta}_t}{2}\right)
+  & \text{if every response is correct,} \\[1ex]
+\min\left(\hat{\theta}_t,\ \hat{\theta}_t - \dfrac{\hat{\theta}_t - b_{\min}}{2}\right)
+  & \text{if every response is incorrect,}
+\end{cases}
+$$
+
+clipped to $[\theta_{\min}, \theta_{\max}]$. Dodd (1990, p. 359) introduced this
+"variable stepsize" for the rating scale model: after a response in the upper
+categories the estimate is incremented by half the distance to the highest scale
+value in the item pool, and after one in the lower categories it is decreased by
+half the distance to the lowest. The dichotomous form, with the bank's largest
+and smallest $b$, is the one Barrada et al. (2008, p. 499) use. Dodd's estimates
+start near the middle of the pool (p. 360), so the step always points the way
+the responses do. catsim's estimates can start anywhere: beyond the bank's
+hardest item, half the distance to it would move the estimate down after a
+correct answer, so the $\max$ and $\min$ keep it where it is instead. Dodd also
 studied fixed steps of 0.4 and 0.7, which catsim does not implement.
 
 ## Parameters
@@ -71,12 +89,10 @@ studied fixed steps of 0.4 and 0.7, which catsim does not implement.
    * - ``tol``
      - ``1e-6``
      - Absolute tolerance of the search, in the ability scale. Must be positive.
-   * - ``dodd``
-     - ``True``
-     - Whether to use Dodd's heuristic when the response vector contains only one response type.
-   * - ``verbose``
-     - ``False``
-     - Whether to print evaluation counts during optimization.
+   * - ``bounds``
+     - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
+     - Range of the estimate: the search interval, and the interval Dodd's step is clipped to.
+       Must be finite, with the lower bound below the upper one.
 ```
 
 ## Behavioral Contracts
@@ -84,7 +100,7 @@ studied fixed steps of 0.4 and 0.7, which catsim does not implement.
 Any correct implementation must satisfy the following properties:
 
 1. For mixed response patterns, it returns a local maximum of the log-likelihood inside the search bounds, to within `tol`.
-2. For all-correct and all-incorrect patterns, it uses Dodd's heuristic when `dodd=True` and signed infinity otherwise.
+2. For all-correct and all-incorrect patterns, it returns Dodd's step, which never moves against the responses and lies inside the search bounds.
 3. The estimator increments its call counter on every estimation request.
 4. Evaluation counts are the optimizer's reported function evaluations.
 5. A `tol` that is not positive is rejected at construction.

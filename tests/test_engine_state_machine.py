@@ -165,7 +165,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     self.engine = CatEngine(
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
-      NumericalSearchEstimator(dodd=True),
+      NumericalSearchEstimator(),
       MaxLengthStopper(max_items),
     )
     self.context = RunContext(rng=np.random.default_rng(999))
