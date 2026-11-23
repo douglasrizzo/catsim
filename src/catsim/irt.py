@@ -1008,6 +1008,8 @@ def validate_item_bank(items: FloatArray, raise_err: bool = False) -> None:
       err += "\nItem matrix has no pseudo-guessing or upper asymptote parameter columns"
     elif items.shape[1] == NumParams.PL3.value:
       err += "\nItem matrix has no upper asymptote parameter column"
+    else:
+      err += "\nItem matrix has no columns; it must have exactly 4: a, b, c and d"
   else:
     if any(items[:, 0] <= 0):
       err += "\nThere are items with discrimination <= 0"

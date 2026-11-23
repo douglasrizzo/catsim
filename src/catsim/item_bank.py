@@ -46,7 +46,7 @@ class ItemBank:
   Raises
   ------
   ValueError
-      If the matrix has more than 4 columns, or if validate=True and item
+      If the matrix does not have 1 to 4 columns, or if validate=True and item
       parameters are invalid.
   TypeError
       If items is not a numpy.ndarray.
@@ -76,14 +76,15 @@ class ItemBank:
     validate : bool, optional
         Whether to validate the parameters. Default is True.
     """
-    # Normalize to 4PL format
-    self._items = irt.normalize_item_bank(items)
-    if self._items.shape[1] > irt.NumParams.PL4.value:
+    # Normalize to 4PL format, in a float copy the caller cannot change afterwards
+    self._items = numpy.array(irt.normalize_item_bank(items), dtype=float)
+    n_columns = self._items.shape[1]
+    if n_columns != irt.NumParams.PL4.value:
       msg = (
-        f"Item matrix has {self._items.shape[1]} columns; ItemBank takes at most 4, [a, b, c, d]. "
-        "Earlier versions of catsim kept exposure rates in a fifth column of ItemBank.items; drop it with "
-        "items[:, :4]."
+        f"Item matrix has {n_columns} columns; ItemBank takes 1 to 4, read as [b], [a, b], [a, b, c] or [a, b, c, d]."
       )
+      if n_columns > irt.NumParams.PL4.value:
+        msg += " Earlier versions of catsim kept exposure rates in a fifth column; drop it with items[:, :4]."
       raise ValueError(msg)
 
     # Validate if requested

@@ -69,6 +69,27 @@ class TestItemBankCreation:
     with pytest.raises(ValueError, match=r"5 columns.*items\[:, :4\]"):
       ItemBank(items, validate=validate)
 
+  @pytest.mark.parametrize("validate", [True, False])
+  def test_rejects_a_matrix_without_columns(self, validate: bool) -> None:
+    """An (n, 0) matrix raises at construction instead of failing at first use with an IndexError."""
+    with pytest.raises(ValueError, match="0 columns"):
+      ItemBank(np.empty((3, 0)), validate=validate)
+
+  def test_keeps_its_own_float_copy_of_the_parameters(self) -> None:
+    """Editing the caller's matrix later must not change a validated bank or leave its cached values stale.
+
+    Integer input is stored as floats.
+    """
+    params = np.array([[1, 0, 0, 1], [2, 1, 0, 1]])
+    bank = ItemBank(params)
+    max_info_thetas = bank.max_info_thetas.copy()
+
+    params[0, 0] = -5
+
+    assert bank.items.dtype == np.float64
+    assert bank.discrimination.tolist() == [1.0, 2.0]
+    np.testing.assert_array_equal(bank.max_info_thetas, max_info_thetas)
+
   def test_validation_enabled_by_default(self) -> None:
     """Test that validation is enabled by default and catches invalid params."""
     # Invalid: discrimination < 0

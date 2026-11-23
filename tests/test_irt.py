@@ -387,6 +387,11 @@ class TestValidateItemBank:
     with pytest.raises(ValueError, match="5 columns; it must have exactly 4"):
       irt.validate_item_bank(items, raise_err=True)
 
+  def test_validate_matrix_without_columns_raises(self) -> None:
+    """An (n, 0) matrix has no parameters at all; it used to pass validation silently."""
+    with pytest.raises(ValueError, match="no columns"):
+      irt.validate_item_bank(np.empty((3, 0)), raise_err=True)
+
   def test_validate_negative_discrimination_raises(self) -> None:
     """Test that negative discrimination raises ValueError."""
     items = np.array([[-0.5, 0.0, 0.1, 0.95]])
