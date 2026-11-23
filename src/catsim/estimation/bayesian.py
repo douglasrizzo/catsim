@@ -379,6 +379,22 @@ class MAPEstimator(BaseEstimator):
   estimate inside the prior's support and finds the global mode of a multimodal posterior.
 
   For full algorithmic details, see :doc:`/api/techniques/estimation/map-estimator`.
+
+  Parameters
+  ----------
+  log_prior : LogPrior or None, optional
+      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
+  tol : float, optional
+      Absolute tolerance of the refinement step. Default is 1e-6.
+  bounds : tuple[float, float], optional
+      Search range for the mode. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
+  verbose : bool, optional
+      Diagnostics flag inherited from :py:class:`BaseEstimator`. Default is False.
+
+  Raises
+  ------
+  ValueError
+      If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
   """
 
   def __init__(
@@ -417,7 +433,31 @@ class MAPEstimator(BaseEstimator):
     response_vector: list[bool],
     est_theta: float,  # noqa: ARG002 - required by the estimator contract
   ) -> float:
-    """Estimate ability by maximizing the posterior density."""
+    r"""Estimate ability by maximizing the posterior density.
+
+    Parameters
+    ----------
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        Indices of the items administered so far. With none, the estimate is the prior mode.
+    response_vector : list[bool]
+        The examinee's answers to the administered items, in the same order.
+    est_theta : float
+        Unused; the search covers the whole bounds on every call.
+
+    Returns
+    -------
+    float
+        The posterior mode of :math:`\theta` within the search bounds.
+
+    Raises
+    ------
+    ValueError
+        If any argument is None, if ``response_vector`` and ``administered_items`` have different
+        lengths or ``response_vector`` contains non-Boolean elements, or if the log-posterior has
+        no finite maximum within the search bounds.
+    """
     self._require_inputs(item_bank, administered_items, response_vector)
 
     self._calls += 1
