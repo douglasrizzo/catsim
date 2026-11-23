@@ -116,6 +116,12 @@ class WarmLikelihoodEstimator(BaseEstimator):
     -------
     float
         The weighted likelihood estimate, within ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]``.
+
+    Raises
+    ------
+    ValueError
+        If any argument is None, if ``response_vector`` and ``administered_items`` have different
+        lengths, or if ``response_vector`` contains non-Boolean elements.
     """
     self._require_inputs(item_bank, administered_items, response_vector)
 

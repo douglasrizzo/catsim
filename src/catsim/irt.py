@@ -828,15 +828,7 @@ def log_likelihood_hpc(
   if thetas.ndim > 1:
     msg = f"theta must be a float or a 1-D array, got shape {thetas.shape}"
     raise ValueError(msg)
-  if len(response_vector) != administered_items.shape[0]:
-    msg = (
-      "response_vector and administered_items must have the same length, "
-      f"got {len(response_vector)} and {administered_items.shape[0]}"
-    )
-    raise ValueError(msg)
-  if len(set(response_vector) - {True, False}) > 0:
-    msg = "response_vector must contain only Boolean elements"
-    raise ValueError(msg)
+  validate_response_vector(response_vector, administered_items.shape[0])
 
   a, b, c, d = _split_params(administered_items)
   z = a * (thetas[:, None] - b)
@@ -962,6 +954,30 @@ def normalize_item_bank(items: FloatArray) -> FloatArray:
     items = numpy.append(items, numpy.ones((items.shape[0], 1)), axis=1)
 
   return items
+
+
+def validate_response_vector(response_vector: list[bool], n_items: int) -> None:
+  """Check that a response vector holds one Boolean answer per administered item.
+
+  Parameters
+  ----------
+  response_vector : list[bool]
+      The examinee's answers, where True indicates a correct response.
+  n_items : int
+      Number of administered items the answers belong to.
+
+  Raises
+  ------
+  ValueError
+      If ``response_vector`` does not have ``n_items`` elements, or if it contains non-Boolean
+      elements.
+  """
+  if len(response_vector) != n_items:
+    msg = f"response_vector and administered_items must have the same length, got {len(response_vector)} and {n_items}"
+    raise ValueError(msg)
+  if len(set(response_vector) - {True, False}) > 0:
+    msg = "response_vector must contain only Boolean elements"
+    raise ValueError(msg)
 
 
 def validate_item_bank(items: FloatArray, raise_err: bool = False) -> None:

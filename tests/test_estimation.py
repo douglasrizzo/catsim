@@ -1,5 +1,6 @@
 """Tests for catsim.estimation module."""
 
+from collections.abc import Callable
 from itertools import pairwise, product
 from typing import Any
 
@@ -9,6 +10,7 @@ from scipy.optimize import minimize_scalar
 
 from catsim import irt
 from catsim.estimation import (
+  BaseEstimator,
   EAPEstimator,
   MAPEstimator,
   NumericalSearchEstimator,
@@ -262,6 +264,37 @@ class TestNumericalSearchEstimatorWithMethods:
     )
 
     assert theta == pytest.approx(ref_theta, abs=1e-5)
+
+
+@pytest.mark.parametrize(
+  "make_estimator",
+  [
+    pytest.param(NumericalSearchEstimator, id="mle"),
+    pytest.param(EAPEstimator, id="eap"),
+    pytest.param(MAPEstimator, id="map"),
+    pytest.param(WarmLikelihoodEstimator, id="wle"),
+  ],
+)
+@pytest.mark.parametrize(
+  ("response_vector", "match"),
+  [
+    pytest.param([True], "same length", id="too_short"),
+    pytest.param([True, True, True, False], "same length", id="too_long"),
+    pytest.param([1.0, 0.5, 0.0], "only Boolean", id="not_boolean"),
+  ],
+)
+def test_estimators_reject_responses_that_do_not_fit_the_items(
+  make_estimator: Callable[[], BaseEstimator], response_vector: list[bool], match: str
+) -> None:
+  """Every estimator rejects a response vector that does not hold one Boolean per item.
+
+  WLE used to spread a one-element vector over all three items and MLE took its all-correct
+  shortcut on it, both returning an estimate for answers that were never given.
+  """
+  item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+
+  with pytest.raises(ValueError, match=match):
+    make_estimator().estimate(item_bank, [0, 1, 2], response_vector, 0.0)
 
 
 class TestBayesianHelpers:
