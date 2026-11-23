@@ -18,7 +18,8 @@ if TYPE_CHECKING:
   from .._typing import FloatArray
   from ..item_bank import ItemBank
 
-# Grid used to bracket the roots of the modified score before refining them with Brent's method.
+# Points on which the modified score is scanned to bracket its roots before Brent's method refines
+# them (0.1 apart on [-6, 6]).
 _SCAN_POINTS = 121
 
 
@@ -37,11 +38,10 @@ class WarmLikelihoodEstimator(BaseEstimator):
   (:math:`c = 0`, :math:`d = 1`), :math:`J = I'` and the estimate maximizes
   :math:`L(\theta)\sqrt{I(\theta)}`.
 
-  The modified score is scanned at 121 points, 0.1 apart, over the fixed search interval
-  ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]`` to bracket its roots, which are then refined
-  with Brent's method. If several roots exist, the one with the largest weighted
-  likelihood is returned; if none does, the estimate is the search bound the modified score
-  points to.
+  The modified score is scanned at 121 equally spaced points over ``bounds`` (0.1 apart on the
+  default bounds) to bracket its roots, which are then refined with Brent's method. If several
+  roots exist, the one with the largest weighted likelihood is returned; if none does, the
+  estimate is the bound the modified score points to.
 
   For full algorithmic details, see :doc:`/api/techniques/estimation/warm-wle`.
 
@@ -49,11 +49,23 @@ class WarmLikelihoodEstimator(BaseEstimator):
   ----------
   tol : float, optional
       Absolute tolerance of the root refinement. Default is 1e-6.
+  bounds : tuple[float, float], optional
+      Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
+
+  Raises
+  ------
+  ValueError
+      If ``bounds`` is not a finite interval with low < high.
   """
 
-  def __init__(self, tol: float = 1e-6) -> None:
+  def __init__(
+    self,
+    tol: float = 1e-6,
+    bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
+  ) -> None:
     super().__init__()
     self._tol = float(tol)
+    self._bounds = self._check_bounds(bounds)
 
   def __str__(self) -> str:
     """Return a string representation of the estimator."""
@@ -120,7 +132,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     Returns
     -------
     float
-        The weighted likelihood estimate, within ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]``.
+        The weighted likelihood estimate, within ``bounds``.
 
     Raises
     ------
@@ -141,7 +153,8 @@ class WarmLikelihoodEstimator(BaseEstimator):
     def score(theta: float) -> float:
       return float(self._modified_score(theta, response_vector, items)[0])
 
-    grid = numpy.linspace(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED, _SCAN_POINTS)
+    low, high = self._bounds
+    grid = numpy.linspace(low, high, _SCAN_POINTS)
     values = self._modified_score(grid, response_vector, items)
     evaluations = grid.size
 
@@ -154,9 +167,9 @@ class WarmLikelihoodEstimator(BaseEstimator):
       candidates.append(float(root))
       evaluations += result.function_calls
     if values[0] <= 0.0:
-      candidates.append(THETA_MIN_EXTENDED)
+      candidates.append(low)
     if values[-1] > 0.0:
-      candidates.append(THETA_MAX_EXTENDED)
+      candidates.append(high)
 
     if len(candidates) == 1:
       theta_hat = candidates[0]
@@ -166,7 +179,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
       heights = []
       for candidate in candidates:
         # With full_output, quad returns its convergence warning instead of raising it
-        height, _, info, *message = quad(score, THETA_MIN_EXTENDED, candidate, limit=200, full_output=1)
+        height, _, info, *message = quad(score, low, candidate, limit=200, full_output=1)
         heights.append(height)
         evaluations += info["neval"]
         if message:

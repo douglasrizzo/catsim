@@ -38,7 +38,9 @@ $$
 \arg\max_{\theta \in [\theta_{\min}, \theta_{\max}]} \ell(\theta),
 $$
 
-with search bounds given by the package's extended theta range. For mixed
+with search bounds $[\theta_{\min}, \theta_{\max}]$ given by `bounds`, by default
+the package's extended theta range $[-6, 6]$ (`THETA_MIN_EXTENDED`,
+`THETA_MAX_EXTENDED`). For mixed
 response patterns, the implementation minimizes $-\ell(\theta)$ with SciPy's
 bounded Brent method (Brent, 2002), which never evaluates outside the bounds and
 takes `tol` as its absolute tolerance on $\theta$ (SciPy's `xatol`). With
@@ -74,6 +76,10 @@ studied fixed steps of 0.4 and 0.7, which catsim does not implement.
    * - ``dodd``
      - ``True``
      - Whether to use Dodd's heuristic when the response vector contains only one response type.
+   * - ``bounds``
+     - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
+     - Search range of the estimate.
+       Must be finite, with the lower bound below the upper one.
 ```
 
 ## Behavioral Contracts

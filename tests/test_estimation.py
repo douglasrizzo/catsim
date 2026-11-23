@@ -2,6 +2,7 @@
 
 import importlib
 from collections.abc import Callable
+from functools import partial
 from itertools import pairwise, product
 from typing import Any
 
@@ -272,6 +273,47 @@ def test_estimators_accept_numpy_item_indices(
   from_array = make_estimator().estimate(item_bank, np.array(administered_items), response_vector, 0.7)
 
   assert from_array == pytest.approx(from_list, abs=1e-15)
+
+
+@pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
+@pytest.mark.parametrize(
+  "bounds",
+  [
+    pytest.param((3.0, -3.0), id="reversed"),
+    pytest.param((1.0, 1.0), id="empty"),
+    pytest.param((-np.inf, 6.0), id="infinite"),
+    pytest.param((float("nan"), 6.0), id="nan"),
+  ],
+)
+def test_estimators_reject_bounds_that_are_not_a_finite_interval(
+  estimator_class: type[BaseEstimator], bounds: tuple[float, float]
+) -> None:
+  """Bounds that are not a finite interval with low < high fail at construction, not inside SciPy."""
+  with pytest.raises(ValueError, match="bounds must be finite with low < high"):
+    estimator_class(bounds=bounds)
+
+
+@pytest.mark.parametrize(
+  "make_estimator",
+  [
+    pytest.param(partial(NumericalSearchEstimator, bounds=(0.5, 2.0)), id="mle"),
+    pytest.param(partial(MAPEstimator, bounds=(0.5, 2.0)), id="map"),
+    pytest.param(partial(WarmLikelihoodEstimator, bounds=(0.5, 2.0)), id="wle"),
+  ],
+)
+def test_estimators_search_only_inside_their_bounds(make_estimator: Callable[[], BaseEstimator]) -> None:
+  """A pattern whose estimate is 0 on [-6, 6] is estimated at the lower bound of [0.5, 2].
+
+  A correct answer to a 1PL item at b = 1 and an incorrect one to an item at b = -1 make the
+  likelihood, the test information and the standard normal prior symmetric about 0 and decreasing
+  beyond it, so the likelihood, the posterior and the weighted likelihood all peak at 0 and fall
+  across [0.5, 2]. An estimator that ignored its bounds returned 0.
+  """
+  item_bank = ItemBank(np.array([[1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+
+  theta = make_estimator().estimate(item_bank, [0, 1], [True, False], 0.0)
+
+  assert theta == pytest.approx(0.5, abs=1e-5)
 
 
 class TestBayesianHelpers:
@@ -616,19 +658,16 @@ class TestMAPEstimator:
   """Tests for the Maximum a Posteriori estimator."""
 
   @pytest.mark.parametrize(
-    ("kwargs", "match"),
+    "tol",
     [
-      pytest.param({"tol": 0.0}, "tol must be positive", id="zero_tol"),
-      pytest.param({"tol": -1e-6}, "tol must be positive", id="negative_tol"),
-      pytest.param({"bounds": (3.0, -3.0)}, "low < high", id="reversed_bounds"),
-      pytest.param({"bounds": (1.0, 1.0)}, "low < high", id="empty_bounds"),
-      pytest.param({"bounds": (-np.inf, 6.0)}, "finite", id="infinite_bound"),
+      pytest.param(0.0, id="zero_tol"),
+      pytest.param(-1e-6, id="negative_tol"),
     ],
   )
-  def test_init_rejects_invalid_search_settings(self, kwargs: dict[str, Any], match: str) -> None:
-    """Invalid bounds or tolerances fail at construction, not inside SciPy."""
-    with pytest.raises(ValueError, match=match):
-      MAPEstimator(**kwargs)
+  def test_init_rejects_a_tolerance_that_is_not_positive(self, tol: float) -> None:
+    """A tol that is not positive fails at construction, not inside SciPy."""
+    with pytest.raises(ValueError, match="tol must be positive"):
+      MAPEstimator(tol=tol)
 
   def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
     """With no responses the estimate is the default prior's mode, 0, not the est_theta passed in."""

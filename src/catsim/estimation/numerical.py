@@ -11,8 +11,7 @@ from .base import BaseEstimator
 class NumericalSearchEstimator(BaseEstimator):
   """Estimate ability by numerically maximizing the IRT log-likelihood.
 
-  The maximum is searched for with SciPy's bounded scalar minimizer on
-  ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]``.
+  The maximum is searched for with SciPy's bounded scalar minimizer on ``bounds``.
 
   Parameters
   ----------
@@ -22,6 +21,8 @@ class NumericalSearchEstimator(BaseEstimator):
       Whether to employ Dodd's estimation heuristic :cite:p:`Dod90` when the response vector
       only has one kind of response (all correct or all incorrect, see
       :py:func:`catsim.cat.dodd`). Default is True.
+  bounds : tuple[float, float], optional
+      Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
 
   Notes
   -----
@@ -36,6 +37,7 @@ class NumericalSearchEstimator(BaseEstimator):
     self,
     tol: float = 1e-6,
     dodd: bool = True,
+    bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
     """Initialize the estimator.
 
@@ -46,11 +48,13 @@ class NumericalSearchEstimator(BaseEstimator):
     dodd : bool, optional
         Whether to use Dodd's estimation heuristic for edge cases (all correct or
         all incorrect responses). Default is True.
+    bounds : tuple[float, float], optional
+        Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
 
     Raises
     ------
     ValueError
-        If ``tol`` is not positive.
+        If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
     """
     if not tol > 0:
       msg = f"tol must be positive, got {tol}"
@@ -59,6 +63,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
     self._tol = float(tol)
     self._dodd = dodd
+    self._bounds = self._check_bounds(bounds)
 
   def estimate(
     self,
@@ -121,7 +126,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
     res = minimize_scalar(
       irt.negative_log_likelihood,
-      bounds=(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
+      bounds=self._bounds,
       method="bounded",
       args=(response_vector, item_bank.get_items(administered_items)),
       # SciPy's bounded method takes its absolute tolerance only through options

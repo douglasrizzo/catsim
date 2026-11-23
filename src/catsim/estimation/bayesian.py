@@ -404,14 +404,10 @@ class MAPEstimator(BaseEstimator):
     if not tol > 0:
       msg = f"tol must be positive, got {tol}"
       raise ValueError(msg)
-    low, high = bounds
-    if not (math.isfinite(low) and math.isfinite(high) and low < high):
-      msg = f"bounds must be finite with low < high, got {bounds}"
-      raise ValueError(msg)
     super().__init__()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._tol = float(tol)
-    self._bounds = (float(low), float(high))
+    self._bounds = self._check_bounds(bounds)
 
   def __str__(self) -> str:
     """Return a human-readable estimator name."""

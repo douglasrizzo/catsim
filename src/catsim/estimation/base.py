@@ -1,3 +1,4 @@
+import math
 from abc import ABC, abstractmethod
 
 from .. import irt
@@ -43,6 +44,31 @@ class BaseEstimator(ABC):
     float
         The current estimated ability :math:`\hat\theta`.
     """
+
+  @staticmethod
+  def _check_bounds(bounds: tuple[float, float]) -> tuple[float, float]:
+    """Return ``bounds`` as floats, after checking that they are finite with low < high.
+
+    Parameters
+    ----------
+    bounds : tuple[float, float]
+        The lower and upper bound of the estimate.
+
+    Returns
+    -------
+    tuple[float, float]
+        The bounds, as floats.
+
+    Raises
+    ------
+    ValueError
+        If either bound is not finite, or if the lower bound is not below the upper one.
+    """
+    low, high = bounds
+    if not (math.isfinite(low) and math.isfinite(high) and low < high):
+      msg = f"bounds must be finite with low < high, got {bounds}"
+      raise ValueError(msg)
+    return float(low), float(high)
 
   @staticmethod
   def _require_inputs(
