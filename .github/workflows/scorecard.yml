@@ -14,8 +14,8 @@ on:
   push:
     branches: [ "dev" ]
 
-# Declare default permissions as read only.
-permissions: read-all
+# Grant nothing by default; the job lists the permissions it needs.
+permissions: {}
 
 jobs:
   analysis:
@@ -28,9 +28,9 @@ jobs:
       security-events: write
       # Needed to publish results and get a badge (see publish_results below).
       id-token: write
-      # Uncomment the permissions below if installing in a private repository.
-      # contents: read
-      # actions: read
+      # Needed to check out the code and to read the workflow runs Scorecard checks.
+      contents: read
+      actions: read
 
     steps:
       - name: "Checkout code"
@@ -73,6 +73,6 @@ jobs:
       # Upload the results to GitHub's code scanning dashboard (optional).
       # Commenting out will disable upload of results to your repo's Code Scanning dashboard
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
         with:
           sarif_file: results.sarif

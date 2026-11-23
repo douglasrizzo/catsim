@@ -122,7 +122,7 @@ repos:
         name: Check uv.lock is up to date
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.35.0
+    rev: 0.39.0
     hooks:
       - id: check-github-workflows
         args: ["--verbose"]

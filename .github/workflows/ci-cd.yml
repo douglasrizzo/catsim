@@ -6,15 +6,6 @@ on:
     branches: [dev, main]
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      target:
-        description: "Publish target"
-        required: true
-        type: choice
-        options:
-          - testpypi
-          - pypi
 
 permissions:
   contents: read
@@ -23,35 +14,48 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name != 'release' }}
 
+env:
+  # The uv release every setup-uv step installs. Dependabot does not update it: bump it by hand.
+  UV_VERSION: "0.13.9"
+
 jobs:
   pre-commit:
     name: Pre-commit checks
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v10.3.3
+          persist-credentials: false
+      # setup-uv's default enable-cache (auto) already skips the cache on release events.
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          enable-cache: true
-      - uses: actions/setup-python@v7
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
-      - uses: actions/cache@v6
+      # No pre-commit cache in the release run, which gates the PyPI upload. zizmor does not
+      # evaluate step conditions, so it would still report this step.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name != 'release' # zizmor: ignore[cache-poisoning]
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
       - run: uv run --only-group dev pre-commit run --all-files
+        env:
+          # The test job runs the notebooks; running them here too only doubles the time.
+          SKIP: pytest-nbmake
 
   test:
     name: Run tests
-    # Run tests for every PR (stacked PRs too), pushes to dev/main, releases, and manual publish validation.
+    # Run tests for every PR (stacked PRs too), pushes to dev/main, and releases.
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
-      github.event_name == 'release' ||
-      github.event_name == 'workflow_dispatch'
+      github.event_name == 'release'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     env:
       # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
       MPLBACKEND: Agg
@@ -69,21 +73,23 @@ jobs:
             python-version: "3.14"
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          enable-cache: true
+          version: ${{ env.UV_VERSION }}
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --locked --group dev
 
       - name: Run tests
         run: uv run pytest --verbose --cov-branch --cov-report=xml --cov=catsim
@@ -94,37 +100,43 @@ jobs:
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14'
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: Build package
-    # Run builds for every PR (stacked PRs too), pushes to dev/main, releases, and manual publish validation.
+    # Run builds for every PR (stacked PRs too), pushes to dev/main, and releases.
     if: |
       github.event_name == 'pull_request' ||
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
-      github.event_name == 'release' ||
-      github.event_name == 'workflow_dispatch'
+      github.event_name == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
 
       - name: Add pre-release suffix for TestPyPI
-        if: github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev'
+        if: |
+          github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
+          github.event.pull_request.head.repo.full_name == github.repository
         run: |
           # Get current version from pyproject.toml
           CURRENT_VERSION=$(grep -E '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
           # Create release candidate version with PR number and run number
-          NEW_VERSION="${CURRENT_VERSION}rc${{ github.run_number }}"
+          NEW_VERSION="${CURRENT_VERSION}rc${GITHUB_RUN_NUMBER}"
           # Update pyproject.toml
           sed -i "s/^version = \".*\"/version = \"${NEW_VERSION}\"/" pyproject.toml
           echo "Updated version to ${NEW_VERSION} for TestPyPI"
@@ -133,22 +145,71 @@ jobs:
       - name: Build package
         run: uv build
 
-      - name: Check package metadata
+      - name: Check the release tag matches the package version
+        if: github.event_name == 'release'
         run: |
-          uv run pip install twine
-          uv run twine check dist/*
+          PROJECT_VERSION=$(uv version --short)
+          WHEEL_VERSION=$(uv run --isolated --no-project --with dist/*.whl python -I -c 'import catsim; print(catsim.__version__)')
+          echo "Release tag: $GITHUB_REF_NAME"
+          echo "Project version (pyproject.toml): $PROJECT_VERSION"
+          echo "catsim.__version__ in the built wheel: $WHEEL_VERSION"
+          if [ "$GITHUB_REF_NAME" != "$PROJECT_VERSION" ] || [ "$GITHUB_REF_NAME" != "$WHEEL_VERSION" ]; then
+            echo "::error::The release tag must equal both the project version and catsim.__version__"
+            exit 1
+          fi
+
+      - name: Check package metadata
+        run: uvx twine check --strict dist/*
 
       - name: Store the distribution packages
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: python-package-distributions
           path: dist/
 
+  test-wheel:
+    name: Test the built wheel
+    # Runs the suite against the wheel the publish jobs upload, installed into a clean environment,
+    # so a packaging mistake (a missing module or data file) fails here instead of shipping.
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Download all the dists
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Install the wheel into a clean environment
+        run: |
+          # Without the source tree, the only catsim the tests can import is the installed wheel.
+          rm -rf src
+          uv venv --python 3.11 "$RUNNER_TEMP/wheel-venv"
+          uv pip install --python "$RUNNER_TEMP/wheel-venv" dist/*.whl pytest hypothesis
+
+      - name: Run tests against the installed wheel
+        run: |
+          "$RUNNER_TEMP/wheel-venv/bin/python" -c "import catsim; assert 'site-packages' in catsim.__file__, catsim.__file__"
+          "$RUNNER_TEMP/wheel-venv/bin/python" -m pytest -q -p no:cacheprovider
+
   publish-to-pypi:
     name: Publish to PyPI
-    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'pypi')
-    needs: [pre-commit, test, build, deploy-docs-production] # Wait for quality gates, package build, and live docs
+    if: github.event_name == 'release'
+    needs: [pre-commit, test, build, test-wheel, deploy-docs-production] # Wait for quality gates, the tested package, and live docs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: pypi
       url: https://pypi.org/p/catsim
@@ -157,23 +218,23 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: python-package-distributions
           path: dist/
 
       - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
 
   publish-to-testpypi:
     name: Publish to TestPyPI
-    # Publish to TestPyPI on PRs from dev to main (final checkpoint before release)
-    # or manual workflow dispatch for testing
+    # Publish to TestPyPI on the same-repository PR from dev to main (final checkpoint before release)
     if: |
-      (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev') ||
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'testpypi')
-    needs: [pre-commit, test, build, deploy-docs-dev] # Wait for quality gates, package build, and live docs
+      github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    needs: [pre-commit, test, build, test-wheel, deploy-docs-dev] # Wait for quality gates, the tested package, and live docs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: testpypi
       url: https://test.pypi.org/p/catsim
@@ -182,15 +243,17 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: python-package-distributions
           path: dist/
 
       - name: Publish distribution to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           repository-url: https://test.pypi.org/legacy/
+          # The rc number is the run number, which a re-run keeps: skip what a failed attempt uploaded
+          skip-existing: true
 
   build-docs:
     name: Build documentation
@@ -200,30 +263,37 @@ jobs:
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.3.3
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          enable-cache: true
+          version: ${{ env.UV_VERSION }}
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
 
       - name: Install dependencies
-        run: uv sync --group docs
+        run: uv sync --locked --group docs
 
       - name: Build Sphinx documentation
-        run: |
-          cd sphinx
-          uv run sphinx-build -b html --keep-going . ../docs/build/html
-          # --keep-going shows all warnings at once
+        working-directory: sphinx
+        # -W fails the build on any warning; --keep-going reports all of them before failing
+        run: uv run sphinx-build -b html -W --keep-going . ../docs/build/html
+
+      - name: Check README.md matches sphinx/readme_head.md and sphinx/readme_body.md
+        # sphinx/conf.py rewrites README.md from those two files during the build above,
+        # so any difference means README.md was edited, or its sources were, without the other.
+        run: git diff --exit-code README.md
 
       - name: Check for broken links
         run: |
@@ -232,7 +302,7 @@ jobs:
         continue-on-error: true # Don't fail the build on external link issues
 
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
@@ -240,110 +310,125 @@ jobs:
 
       - name: Add build info
         run: |
-          echo "📚 Documentation built successfully!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Details:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Branch: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download the built documentation from the workflow artifacts." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "📚 Documentation built successfully!"
+            echo ""
+            echo "**Build Details:**"
+            echo "- Event: $GITHUB_EVENT_NAME"
+            echo "- Branch: $GITHUB_REF_NAME"
+            echo "- Commit: $GITHUB_SHA"
+            echo ""
+            echo "Download the built documentation from the workflow artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy-docs-dev:
     name: Deploy documentation (dev preview)
-    # Deploy preview docs on pushes to dev branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
+    # Deploy preview docs on pushes to dev, and on the same-repository PR from dev to main,
+    # whose TestPyPI upload waits for this job in the same run (ADR-0007)
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main' && github.head_ref == 'dev' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    needs: [pre-commit, test, build, test-wheel, build-docs] # Docs go live only for a commit that passes every check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
+    concurrency:
+      # One gh-pages push at a time. A queued deploy waits for the running one, but GitHub keeps only
+      # one pending job per group: a third deploy cancels the pending one, which then skips the
+      # publish that needs it. Recover with "Re-run failed jobs" on the cancelled run.
+      group: gh-pages
+      cancel-in-progress: false
 
     steps:
       - name: Download documentation artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v7
-        with:
-          ref: gh-pages
-          path: gh-pages-checkout
-
-      - name: Clean old dev files
-        run: |
-          cd gh-pages-checkout
-          # Remove everything in dev/ subdirectory if it exists
-          if [ -d "dev" ]; then
-            rm -rf dev/*
-          fi
-          cd ..
-
       - name: Deploy to GitHub Pages (dev subdirectory)
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
           destination_dir: dev # Deploy to /dev subdirectory
           commit_message: "Deploy dev documentation from ${{ github.sha }}"
-          keep_files: true # Preserve production docs at root
+          # With destination_dir set, peaceiris empties only dev/ first, so pages the current
+          # docs no longer build disappear from the preview while the production docs at the
+          # root stay.
+          keep_files: false
 
       - name: Comment deployment URL
         run: |
-          echo "🚀 **Dev documentation deployed!**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Preview at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/dev/" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "🚀 **Dev documentation deployed!**"
+            echo ""
+            echo "Preview at: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/dev/"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy-docs-production:
     name: Deploy documentation (production)
-    # Deploy production docs on pushes to main (after PR validation)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [build-docs] # Only need docs, not tests (already validated in PR)
+    # Deploy production docs on pushes to main, and on releases, whose PyPI upload waits for this
+    # job in the same run (ADR-0007)
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'release'
+    needs: [pre-commit, test, build, test-wheel, build-docs] # Docs go live only for a commit that passes every check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
+    concurrency:
+      # One gh-pages push at a time. A queued deploy waits for the running one, but GitHub keeps only
+      # one pending job per group: a third deploy cancels the pending one, which then skips the
+      # publish that needs it. Recover with "Re-run failed jobs" on the cancelled run.
+      group: gh-pages
+      cancel-in-progress: false
 
     steps:
       - name: Download documentation artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v7
+      - name: Check out the dev preview from gh-pages
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: gh-pages
           path: gh-pages-checkout
+          sparse-checkout: dev
+          persist-credentials: false
 
-      - name: Clean old root files (preserve subdirectories)
-        run: |
-          cd gh-pages-checkout
-          # Remove all files and directories at root level EXCEPT dev/
-          find . -maxdepth 1 -type f ! -name '.nojekyll' ! -name 'CNAME' ! -name '.gitignore' -delete
-          find . -maxdepth 1 -type d ! -name '.' ! -name '.git' ! -name 'dev' -exec rm -rf {} +
-          cd ..
+      - name: Carry the dev preview into the new site
+        # The gh-pages concurrency group keeps a dev deploy from landing between this copy and the push.
+        run: if [ -d gh-pages-checkout/dev ]; then cp -R gh-pages-checkout/dev docs/build/html/dev; fi
 
       - name: Deploy to GitHub Pages (root)
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
           commit_message: "Deploy production documentation from ${{ github.ref_name }}"
-          keep_files: true
-          destination_dir: .
+          # Replace the whole site, so pages the current docs no longer build disappear;
+          # dev/ survives because the previous step copied it into publish_dir.
+          keep_files: false
 
       - name: Comment deployment URL
         run: |
-          echo "🎉 **Production documentation deployed!**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Live at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "🎉 **Production documentation deployed!**"
+            echo ""
+            echo "Live at: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   github-release:
     name: Sign and upload to GitHub Release
     needs: [publish-to-pypi]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'release'
     permissions:
       contents: write # IMPORTANT: mandatory for making GitHub Releases
@@ -351,26 +436,16 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: python-package-distributions
           path: dist/
 
-      - name: Sign the dists with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v3.5.0
+      - name: Sign the dists with Sigstore and attach them to the release
+        # On a published release the action uploads the dists and their .sigstore.json bundles
+        # to it (release-signing-artifacts defaults to true).
+        uses: sigstore/gh-action-sigstore-python@790bc6befb9d733738f18d8f895854b453640ec9 # v3.5.0
         with:
           inputs: >-
             ./dist/*.tar.gz
             ./dist/*.whl
-
-      - name: Upload artifact signatures to GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        # Upload to GitHub Release using the `gh` CLI.
-        # `dist/` contains the built packages, and the
-        # sigstore-produced signatures and certificates.
-        run: >-
-          gh release upload
-          '${{ github.ref_name }}' dist/**
-          --repo '${{ github.repository }}'
-          --clobber
