@@ -168,6 +168,13 @@ docs = [
     "sphinxcontrib-mermaid>=2.1.1",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
 [tool.ty.src]
 include = ["src/catsim"]
 
