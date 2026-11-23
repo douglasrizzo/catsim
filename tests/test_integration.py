@@ -9,7 +9,7 @@ import pytest
 from sklearn.cluster import KMeans
 
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
-from catsim.estimation import BaseEstimator, EAPEstimator, NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
@@ -74,7 +74,7 @@ def test_estimation_methods_complete_simulation(method: str) -> None:
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("factory", [pytest.param(EAPEstimator, id="eap")])
+@pytest.mark.parametrize("factory", [pytest.param(EAPEstimator, id="eap"), pytest.param(MAPEstimator, id="map")])
 def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstimator]) -> None:
   """Bayesian estimators should complete end-to-end runs, also as MEI's look-ahead estimator.
 
