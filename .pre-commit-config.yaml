@@ -10,6 +10,14 @@ repos:
         entry: these paths are local-only (see AGENTS.md)
         language: fail
         files: ^(\.claude|\.plans|\.pre-commit-cache|papers)/
+      # Tests mock only at boundaries (network, files, clocks, random draws), never catsim itself.
+      # --multiline: a long call puts the target string on its own line.
+      - id: no-patching-catsim
+        name: tests patch only boundaries, not catsim internals
+        entry: 'monkeypatch\.setattr\(\s*["'']catsim\.'
+        language: pygrep
+        args: [--multiline]
+        files: ^tests/
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
