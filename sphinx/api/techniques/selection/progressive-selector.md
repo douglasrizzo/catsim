@@ -27,8 +27,9 @@ S_i^{(n)}
 w_n\,\frac{I_i(\hat{\theta})}{\max_{j \in \mathcal{A}} I_j(\hat{\theta})},
 $$
 
-where $\mathcal{A}$ is the set of available (non-administered) items,
-$R_i$ is a fresh uniform random draw on $[0,1]$, and
+where $\mathcal{A}$ is the set of available items (the non-administered items
+under the exposure cap, or every non-administered item when the cap excludes
+them all), $R_i$ is a fresh uniform random draw on $[0,1]$, and
 
 $$
 w_n
@@ -48,8 +49,9 @@ schedule as a cumulative power sum with an acceleration parameter $t$,
 $w = \sum_{k=1}^{n-1} k^{t} / \sum_{k=1}^{N-1} k^{t}$, which is also what `catR`
 implements in
 [`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R). It agrees with the power schedule above at $t = 0$, $s = 1$ (linear),
-and behaves like $s \approx t + 1$ otherwise, so `acceleration` is not
-interchangeable with their $t$. Revuelta and Ponsoda's original schedule,
+and for long tests approaches the power schedule with $s = t + 1$, since
+$\sum_{k=1}^{m} k^{t} \approx m^{t+1}/(t+1)$; for short tests the two differ, so
+`acceleration` is not interchangeable with their $t$. Revuelta and Ponsoda's original schedule,
 $w = (n - 1)/N$, stops just short of 1 at the last item (Barrada et al., 2008,
 p. 496, Equation 7).
 
@@ -71,7 +73,7 @@ p. 496, Equation 7).
      - Positive exponent :math:`s`. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.
    * - ``r_max``
      - ``1.0``
-     - Exposure cap applied after scoring candidates.
+     - Exposure cap applied before scoring; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.
 ```
 
 ## Behavioral Contracts

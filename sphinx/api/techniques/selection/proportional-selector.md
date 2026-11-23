@@ -33,7 +33,8 @@ h(w_n) = k\,w_n,
 w_n = \min\!\left(1, \frac{n-1}{N-1}\right)^s.
 $$
 
-Here $k > 0$ is a sharpness parameter and $s > 0$ is the same
+Here $k \ge 0$ is a sharpness parameter ($k = 0$ keeps selection uniformly
+random throughout) and $s > 0$ is the same
 acceleration parameter used by the progressive selector; the sums run over
 the available items, and the weight is clamped at 1 past position $N$. The
 implementation divides the information by its maximum over the available items
@@ -69,7 +70,7 @@ that end point; the default $k = 6$ keeps more randomness late in longer tests.
      - Positive schedule exponent :math:`s`.
    * - ``sharpness``
      - ``6.0``
-     - Positive constant :math:`k` controlling how quickly the sampling distribution concentrates on high-information items.
+     - Non-negative constant :math:`k` controlling how quickly the sampling distribution concentrates on high-information items; 0 keeps sampling uniform.
    * - ``r_max``
      - ``1.0``
      - Exposure cap applied before sampling; if every remaining candidate exceeds the cap, the selector falls back to ignoring the cap.
