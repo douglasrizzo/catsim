@@ -252,6 +252,7 @@ extend-ignore-re = ["(?i)selecao[ _]de[ _]itens"]
 lik = "lik"  # likelihood, in variable names
 mis = "mis"  # maximum information stratification
 nd = "nd"  # numpy's NDArray
+sie = "sie"  # the surname Sie (Sie, Finkelman, Bartroff & Thompson), cited in the stopping specs
 strat = "strat"  # stratified selectors: a-strat, MaxInfoStratSelector
 thr = "thr"  # catR's nextItem argument for the test length, quoted on the progressive pages
 writeable = "writeable"  # numpy's ndarray.flags.writeable
