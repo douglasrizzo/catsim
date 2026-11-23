@@ -1,8 +1,8 @@
 """Progressive and proportional selector implementations."""
 
 import numpy
-import numpy.typing as npt
 
+from .._typing import FloatArray
 from ..item_bank import ItemBank
 from .base import FiniteSelector
 
@@ -54,7 +54,7 @@ class ProgressiveSelector(FiniteSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the next item using blended random and information-based scoring."""
@@ -118,7 +118,7 @@ class ProportionalSelector(FiniteSelector):
     administered_items: list[int],
     est_theta: float,
     rng: numpy.random.Generator | None = None,
-    exposure_rates: npt.NDArray[numpy.floating] | None = None,
+    exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
     """Return the next item using information-weighted sampling."""
