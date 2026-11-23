@@ -75,6 +75,12 @@ repos:
         language: system
         pass_filenames: false  # cyclic-import and duplicate-code need the whole package
         files: ^(src/.*\.py|pyproject\.toml)$
+      - id: import-linter
+        name: import-linter
+        entry: uv run --group dev lint-imports
+        language: system
+        pass_filenames: false
+        files: ^(src/.*\.py|pyproject\.toml)$
       - id: pytest-nbmake
         name: pytest nbmake
         entry: env MPLBACKEND=Agg uv run --group dev pytest --nbmake --nbmake-timeout=300 -q

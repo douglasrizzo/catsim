@@ -146,6 +146,7 @@ line-ending = "auto"
 [dependency-groups]
 dev = [
     "hypothesis>=6.127.0",
+    "import-linter>=2.17",
     "ipykernel>=7.1.0",
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
@@ -238,3 +239,75 @@ min-similarity-lines = 10
 ignore-imports = true
 ignore-docstrings = true
 ignore-comments = true
+
+# ---------------------------------------------------------------------------
+# import-linter: the layering AGENTS.md describes, checked by `lint-imports`
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "catsim"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+id = "layers"
+name = "catsim layers"
+type = "layers"
+containers = ["catsim"]
+exhaustive = true  # every new top-level module must be placed in a layer
+layers = [
+  "simulation : plot",
+  "engine",
+  "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
+  "state",
+  "cat",
+  "item_bank",
+  "irt",
+  "_typing : exceptions",
+]
+ignore_imports = [
+  # MEISelector runs one-step-ahead ability updates with an estimator.
+  "catsim.selection.expected_info -> catsim.estimation.base",
+  "catsim.selection.expected_info -> catsim.estimation.numerical",
+]
+
+[[tool.importlinter.contracts]]
+id = "no-runtime-in-domain"
+name = "domain and strategies never import runtime objects"
+type = "forbidden"
+source_modules = [
+  "catsim.irt",
+  "catsim.item_bank",
+  "catsim.cat",
+  "catsim.selection",
+  "catsim.estimation",
+  "catsim.initialization",
+  "catsim.stopping",
+]
+forbidden_modules = ["catsim.state", "catsim.engine", "catsim.simulation", "catsim.plot"]
+
+[[tool.importlinter.contracts]]
+id = "plot-only-matplotlib"
+name = "only catsim.plot imports matplotlib"
+type = "forbidden"
+source_modules = [
+  "catsim._typing",
+  "catsim.exceptions",
+  "catsim.irt",
+  "catsim.item_bank",
+  "catsim.cat",
+  "catsim.state",
+  "catsim.engine",
+  "catsim.simulation",
+  "catsim.selection",
+  "catsim.estimation",
+  "catsim.initialization",
+  "catsim.stopping",
+]
+forbidden_modules = ["matplotlib", "mpl_toolkits"]
+
+[[tool.importlinter.contracts]]
+id = "root-without-plot"
+name = "importing catsim does not load catsim.plot or matplotlib"
+type = "forbidden"
+source_modules = ["catsim"]
+forbidden_modules = ["catsim.plot", "matplotlib", "mpl_toolkits"]
+as_packages = false  # the root __init__ alone; catsim.plot itself is a descendant of catsim
