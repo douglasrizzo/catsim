@@ -104,7 +104,7 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -
   if best.size == 1:
     return int(best[0])
   if rng is None:
-    msg = "rng parameter cannot be None: it is needed to break a tie between equally good items"
+    msg = "rng parameter cannot be None: it is needed to break a tie between equally good candidates"
     raise ValueError(msg)
   return int(rng.choice(best))
 
