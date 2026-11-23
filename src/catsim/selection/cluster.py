@@ -166,6 +166,9 @@ class ClusterSelector(BaseSelector):
 
     super().__init__()
     self._clusters: IntArray = labels
+    # Scores are indexed by each label's rank among the distinct labels, not by the label itself, so
+    # memory does not grow with the largest label (hashed or database IDs).
+    self._label_values, self._label_ranks = numpy.unique(labels, return_inverse=True)
     self._method = method
     self._r_max = float(r_max)
     self._r_control = r_control
@@ -252,9 +255,9 @@ class ClusterSelector(BaseSelector):
         One score per cluster in ``open_clusters``.
     """
     if self._method is ClusterMethod.ITEM_INFO:
-      best = numpy.full(self._clusters.max() + 1, -numpy.inf)
-      numpy.maximum.at(best, self._clusters, item_bank.information(theta))
-      return best[open_clusters]
+      best = numpy.full(self._label_values.size, -numpy.inf)
+      numpy.maximum.at(best, self._label_ranks, item_bank.information(theta))
+      return best[numpy.searchsorted(self._label_values, open_clusters)]
     scores = (
       self.sum_cluster_infos(theta, item_bank, self._clusters)
       if self._method is ClusterMethod.CLUSTER_INFO
@@ -280,8 +283,9 @@ class ClusterSelector(BaseSelector):
     dict[int, float]
         The sum of item information values in each cluster, keyed by cluster label.
     """
-    sums = numpy.bincount(clusters, weights=item_bank.information(theta))
-    return {label: float(sums[label]) for label in numpy.unique(clusters).tolist()}
+    labels, ranks = numpy.unique(clusters, return_inverse=True)
+    sums = numpy.bincount(ranks, weights=item_bank.information(theta))
+    return dict(zip(labels.tolist(), sums.tolist(), strict=True))
 
   @staticmethod
   def weighted_cluster_infos(theta: float, item_bank: ItemBank, clusters: list[int] | IntArray) -> dict[int, float]:
@@ -305,8 +309,6 @@ class ClusterSelector(BaseSelector):
         The average item information in each cluster (the sum of item information
         divided by the number of items in the cluster), keyed by cluster label.
     """
-    sizes = numpy.bincount(clusters)
-    return {
-      label: total / int(sizes[label])
-      for label, total in ClusterSelector.sum_cluster_infos(theta, item_bank, clusters).items()
-    }
+    labels, sizes = numpy.unique(clusters, return_counts=True)
+    sums = ClusterSelector.sum_cluster_infos(theta, item_bank, clusters)
+    return {label: sums[label] / size for label, size in zip(labels.tolist(), sizes.tolist(), strict=True)}

@@ -984,17 +984,27 @@ class TestClusterSelector:
     method: str = "item_info",
     r_max: float = 1.0,
     r_control: str = "passive",
+    clusters: tuple[int, ...] = CLUSTERS,
   ) -> int | None:
     item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
-    selector = ClusterSelector(clusters=list(self.CLUSTERS), method=method, r_max=r_max, r_control=r_control)
+    selector = ClusterSelector(clusters=list(clusters), method=method, r_max=r_max, r_control=r_control)
     return selector.select(
       item_bank=item_bank, administered_items=administered, est_theta=0.0, exposure_rates=exposure_rates
     )
 
   @pytest.mark.parametrize(("method", "expected"), [("item_info", 1), ("cluster_info", 7), ("weighted_info", 13)])
-  def test_select_takes_the_best_item_of_the_cluster_each_method_prefers(self, method: str, expected: int) -> None:
-    """Each method ranks clusters differently; the pick is the most informative item of the chosen cluster."""
-    assert self._select([], method=method) == expected
+  @pytest.mark.parametrize(
+    "clusters", [CLUSTERS, tuple({0: 7, 1: 2**40, 2: 2**62}[label] for label in CLUSTERS)], ids=["small", "huge"]
+  )
+  def test_select_takes_the_best_item_of_the_cluster_each_method_prefers(
+    self, method: str, expected: int, clusters: tuple[int, ...]
+  ) -> None:
+    """Each method ranks clusters differently; the pick is the most informative item of the chosen cluster.
+
+    Labels need not be small: hashed or database IDs must pick the same items. Scoring arrays indexed by label value
+    allocated one slot per value up to the largest label, which fails outright for 2**62.
+    """
+    assert self._select([], method=method, clusters=clusters) == expected
 
   def test_select_moves_on_once_a_cluster_is_fully_administered(self) -> None:
     """With cluster 0 used up, item_info turns to the cluster of the next most informative item."""
