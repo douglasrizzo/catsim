@@ -1474,6 +1474,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      fig, axes = plt.subplots(n_items, 1)</span>
 <span class="sd">      for idx, item in enumerate(item_bank.items):</span>
 <span class="sd">        item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])</span>
+<span class="sd">      plt.tight_layout()</span>
 <span class="sd">      plt.show()</span>
 
 <span class="sd">  Parameters</span>

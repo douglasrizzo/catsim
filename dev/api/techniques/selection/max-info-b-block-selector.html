@@ -479,6 +479,15 @@ consecutive blocks of <code class="docutils literal notranslate"><span class="pr
 <li><p>Within each block, sort the items by increasing <span class="math notranslate nohighlight">\(I_i^{\max}\)</span>.</p></li>
 <li><p>The <span class="math notranslate nohighlight">\(j\)</span>-th item of every block joins stratum <span class="math notranslate nohighlight">\(j\)</span>.</p></li>
 </ol>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../../_images/mis-b.svg"><img alt="Blocks 1 to k under an arrow labelled theta max, each block sorted along its own arrow labelled maximum information. The first items of blocks 1 to k are gathered into the first cell of a new row of strata." src="../../../_images/mis-b.svg" style="width: 400px;" />
+</a>
+<figcaption>
+<p><span class="caption-number">Fig. 6 </span><span class="caption-text">Items sorted by <span class="math notranslate nohighlight">\(\theta_i^{\max}\)</span> into <span class="math notranslate nohighlight">\(k\)</span> blocks of <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> items, each block sorted by
+<span class="math notranslate nohighlight">\(I_i^{\max}\)</span>. The first item of every block, <span class="math notranslate nohighlight">\(\{1_1, 2_1, \dots, k_1\}\)</span>, forms the first
+stratum, the second items the second stratum, and so on.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
 <p>At test position <span class="math notranslate nohighlight">\(t\)</span> the selector returns the non-administered item of stratum
 <span class="math notranslate nohighlight">\(s(t)\)</span> whose point of maximum information is closest to the current estimate,</p>
 <div class="math notranslate nohighlight">
