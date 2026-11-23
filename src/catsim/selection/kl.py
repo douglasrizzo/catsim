@@ -8,7 +8,7 @@ from scipy.special import log_expit
 
 from .._typing import FloatArray
 from ..item_bank import ItemBank
-from .base import BaseSelector, below_cap, pick_best, remaining
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
 def _log_probabilities(theta: float, a: float, b: float, c_param: float, d: float) -> tuple[float, float]:
@@ -70,17 +70,14 @@ class KLSelector(BaseSelector):
     Raises
     ------
     ValueError
-        If c is not positive, or if r_max is not between 0 and 1.
+        If c is not positive, or if r_max is not in (0, 1].
     """
     if c <= 0:
       msg = f"c must be positive, got {c}"
       raise ValueError(msg)
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
     super().__init__()
     self._c = float(c)
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
   def __str__(self) -> str:
     """Return the name of the selector."""

@@ -3,7 +3,8 @@
 The module functions are what makes the built-in selectors behave alike, and custom selectors can
 use them too: :func:`remaining` and :func:`below_cap` give the items a selector may choose from,
 :func:`pick_best` and :func:`best_pool` choose among them under the package's tie-breaking rule
-(ADR-0008).
+(ADR-0008), and :func:`check_r_max`, :func:`require_rng` and :func:`require_responses` check
+arguments.
 """
 
 from abc import ABC, abstractmethod
@@ -145,6 +146,79 @@ def best_pool(candidates: IntArray, scores: FloatArray, size: int) -> IntArray:
   ranked_scores = scores[order]
   cutoff = ranked_scores[min(size, ranked_scores.size) - 1]
   return candidates[order[ranked_scores >= cutoff]]
+
+
+def check_r_max(r_max: float) -> float:
+  """Return ``r_max`` as a float, after checking that it is a usable exposure cap.
+
+  Parameters
+  ----------
+  r_max : float
+      Maximum exposure rate given to a selector.
+
+  Returns
+  -------
+  float
+      ``r_max``.
+
+  Raises
+  ------
+  ValueError
+      If ``r_max`` is not in (0, 1]. With a cap of 0, every item would be at or above it, so the
+      selector would fall back to all items and behave as if there were no cap.
+  """
+  if not 0 < r_max <= 1:
+    msg = f"r_max must be in (0, 1], got {r_max}"
+    raise ValueError(msg)
+  return float(r_max)
+
+
+def require_rng(rng: Generator | None) -> Generator:
+  """Return ``rng``, checking that a selector that draws random numbers was given one.
+
+  Parameters
+  ----------
+  rng : numpy.random.Generator or None
+      Random number generator passed to ``select``.
+
+  Returns
+  -------
+  numpy.random.Generator
+      ``rng``.
+
+  Raises
+  ------
+  ValueError
+      If ``rng`` is None.
+  """
+  if rng is None:
+    msg = "rng parameter cannot be None: this selector draws random numbers"
+    raise ValueError(msg)
+  return rng
+
+
+def require_responses(response_vector: list[bool] | None) -> list[bool]:
+  """Return ``response_vector``, checking that a selector that scores items by the responses was given them.
+
+  Parameters
+  ----------
+  response_vector : list[bool] or None
+      Responses passed to ``select``.
+
+  Returns
+  -------
+  list[bool]
+      ``response_vector``.
+
+  Raises
+  ------
+  ValueError
+      If ``response_vector`` is None.
+  """
+  if response_vector is None:
+    msg = "response_vector cannot be None: this selector scores items by the responses observed so far"
+    raise ValueError(msg)
+  return response_vector
 
 
 class BaseSelector(ABC):

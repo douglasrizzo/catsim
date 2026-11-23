@@ -11,7 +11,7 @@ import numpy
 
 from .._typing import FloatArray, IntArray
 from ..item_bank import ItemBank
-from .base import BaseSelector, below_cap, pick_best, remaining
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 
 class ClusterMethod(StrEnum):
@@ -135,7 +135,7 @@ class ClusterSelector(BaseSelector):
     ------
     ValueError
         If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
-        method or r_control, or r_max not between 0 and 1).
+        method or r_control, or r_max not in (0, 1]).
     """
     labels = numpy.array(clusters)
     if labels.size == 0:
@@ -151,10 +151,6 @@ class ClusterSelector(BaseSelector):
       msg = f"{method} is not a valid cluster selection method; choose one from {list(map(str, ClusterMethod))}"
       raise ValueError(msg) from None
 
-    if not 0 <= r_max <= 1:
-      msg = f"r_max must be between 0 and 1, got {r_max}"
-      raise ValueError(msg)
-
     try:
       r_control = ExposureControl(r_control)
     except ValueError:
@@ -169,7 +165,7 @@ class ClusterSelector(BaseSelector):
     # memory does not grow with the largest label (hashed or database IDs).
     self._label_values, self._label_ranks = numpy.unique(labels, return_inverse=True)
     self._method = method
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
     self._r_control = r_control
 
   def select(

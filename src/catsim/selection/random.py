@@ -4,7 +4,7 @@ from numpy.random import Generator
 
 from .._typing import FloatArray
 from ..item_bank import ItemBank
-from .base import BaseSelector, best_pool, remaining
+from .base import BaseSelector, best_pool, remaining, require_rng
 
 
 class RandomSelector(BaseSelector):
@@ -53,11 +53,7 @@ class RandomSelector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
-
-    return int(rng.choice(remaining(item_bank.n_items, administered_items)))
+    return int(require_rng(rng).choice(remaining(item_bank.n_items, administered_items)))
 
 
 class The54321Selector(BaseSelector):
@@ -144,9 +140,7 @@ class The54321Selector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
+    rng = require_rng(rng)
 
     candidates = remaining(item_bank.n_items, administered_items)
     bin_size = max(1, self._initial_bin_size - len(administered_items))
@@ -219,9 +213,7 @@ class RandomesqueSelector(BaseSelector):
     NoItemsAvailableError
         If every item has already been administered.
     """
-    if rng is None:
-      msg = "rng parameter cannot be None"
-      raise ValueError(msg)
+    rng = require_rng(rng)
 
     candidates = remaining(item_bank.n_items, administered_items)
     # items tied with the bin's least informative item join the bin (ADR-0008)
