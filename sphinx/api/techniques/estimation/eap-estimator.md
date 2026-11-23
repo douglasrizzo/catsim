@@ -46,7 +46,7 @@ $$
 \sum_{q=1}^{Q}\theta_q\,\tilde{p}(\theta_q \mid \mathbf{u}),
 $$
 
-with posterior variance, available through `last_posterior_variance()`,
+with posterior variance, computed by `posterior_variance()`,
 
 $$
 \operatorname{Var}(\theta \mid \mathbf{u})
@@ -60,9 +60,9 @@ These are Equations 4 and 5 of Bock and Mislevy (1982, p. 433); catsim returns
 the variance, the square of their Equation 5, without Sheppard's correction (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
-The estimate depends on the prior and on the grid. The default grid (41 nodes
+The estimate depends on the prior and on the grid. The default grid (121 nodes
 on $[-6, 6]$) is accurate while the posterior standard deviation is at least
-about 0.2; longer tests need a finer grid (see
+about 0.065; longer tests need a finer grid (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
 ## Parameters
