@@ -276,21 +276,6 @@ jobs:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: gh-pages
-          path: gh-pages-checkout
-
-      - name: Clean old dev files
-        run: |
-          cd gh-pages-checkout
-          # Remove everything in dev/ subdirectory if it exists
-          if [ -d "dev" ]; then
-            rm -rf dev/*
-          fi
-          cd ..
-
       - name: Deploy to GitHub Pages (dev subdirectory)
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
@@ -298,7 +283,10 @@ jobs:
           publish_dir: ./docs/build/html
           destination_dir: dev # Deploy to /dev subdirectory
           commit_message: "Deploy dev documentation from ${{ github.sha }}"
-          keep_files: true # Preserve production docs at root
+          # With destination_dir set, peaceiris empties only dev/ first, so pages the current
+          # docs no longer build disappear from the preview while the production docs at the
+          # root stay.
+          keep_files: false
 
       - name: Comment deployment URL
         run: |
@@ -329,19 +317,17 @@ jobs:
           name: html-docs-${{ github.sha }}
           path: docs/build/html/
 
-      - name: Checkout gh-pages branch
+      - name: Check out the dev preview from gh-pages
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: gh-pages
           path: gh-pages-checkout
+          sparse-checkout: dev
+          persist-credentials: false
 
-      - name: Clean old root files (preserve subdirectories)
-        run: |
-          cd gh-pages-checkout
-          # Remove all files and directories at root level EXCEPT dev/
-          find . -maxdepth 1 -type f ! -name '.nojekyll' ! -name 'CNAME' ! -name '.gitignore' -delete
-          find . -maxdepth 1 -type d ! -name '.' ! -name '.git' ! -name 'dev' -exec rm -rf {} +
-          cd ..
+      - name: Carry the dev preview into the new site
+        # The gh-pages concurrency group keeps a dev deploy from landing between this copy and the push.
+        run: if [ -d gh-pages-checkout/dev ]; then cp -R gh-pages-checkout/dev docs/build/html/dev; fi
 
       - name: Deploy to GitHub Pages (root)
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
@@ -349,8 +335,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build/html
           commit_message: "Deploy production documentation from ${{ github.ref_name }}"
-          keep_files: true
-          destination_dir: .
+          # Replace the whole site, so pages the current docs no longer build disappear;
+          # dev/ survives because the previous step copied it into publish_dir.
+          keep_files: false
 
       - name: Comment deployment URL
         run: |
