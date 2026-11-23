@@ -823,33 +823,18 @@ class TestMLWISelector:
 class TestKLSelector:
   """Tests for KLSelector."""
 
-  @staticmethod
-  def _bank() -> ItemBank:
-    """Create a small bank with a clear central item."""
-    return ItemBank(
-      np.array([
-        [1.0, -2.0, 0.0, 1.0],
-        [1.0, 0.0, 0.0, 1.0],
-        [1.0, 2.0, 0.0, 1.0],
-      ])
-    )
-
-  def test_init_default(self) -> None:
-    """Test default initialization."""
-    selector = KLSelector()
-    assert selector.c == pytest.approx(3.0)
-    assert selector.r_max == pytest.approx(1.0)
-    assert str(selector) == "Kullback-Leibler Selector (c=3.0)"
-
-  def test_kl_integrand_is_zero_at_theta_hat(self) -> None:
-    """Test that the KL integrand vanishes when theta equals theta_hat.
-
-    Self-divergence must be zero, so this catches sign flips and argument-order
-    mistakes in the KL formula before they distort the global integral.
-    """
-    kl_module = importlib.import_module("catsim.selection.kl")
-    value = kl_module.__dict__["_kl_integrand"](0.0, 0.0, 1.0, 0.0, 0.0, 1.0)
-    assert value == pytest.approx(0.0, abs=1e-12)
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"c": 0.0}, "c must be positive", id="zero_c"),
+      pytest.param({"c": -1.0}, "c must be positive", id="negative_c"),
+      pytest.param({"r_max": 1.5}, "between 0 and 1", id="r_max_above_one"),
+    ],
+  )
+  def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
+    """A window of zero width would make every item's KL integral 0 and the pick a random tie."""
+    with pytest.raises(ValueError, match=match):
+      KLSelector(**kwargs)
 
   def test_kl_integrand_is_exact_where_the_probability_rounds_to_one(self) -> None:
     """Test the KL integrand for an item whose correct-response probability rounds to 1.
@@ -889,102 +874,62 @@ class TestKLSelector:
 
     assert value == pytest.approx(expected, rel=1e-10, abs=1e-14)
 
-  def test_wider_integration_window_accumulates_more_kl_mass(self) -> None:
-    """Test that a wider integration window yields more KL mass.
+  @pytest.mark.parametrize("n_administered", [0, 1, 4, 9])
+  def test_select_maximizes_kl_over_a_window_shrinking_with_the_test(self, n_administered: int) -> None:
+    """The pick has the largest KL integral over theta_hat +- c / sqrt(max(1, n)) among the remaining items.
 
-    This isolates the integration-window effect, which is the mechanism that
-    makes KL behave globally early and more locally as the test progresses.
+    The reference integrates the Bernoulli divergence, written out in the test, with the trapezoid rule.
+    It fails if the window ignores the number of administered items, shrinks it by n instead of sqrt(n),
+    or integrates over the wrong interval.
     """
-    item = self._bank().items[1]
-    kl_global = KLSelector.__dict__["_kl_global"].__func__
-    narrow = kl_global(theta_hat=0.0, item=item, half_width=0.25)
-    wide = kl_global(theta_hat=0.0, item=item, half_width=1.0)
+    rng = np.random.default_rng(n_administered)
+    for _ in range(10):
+      item_bank = ItemBank.generate_item_bank(25, itemtype="3PL", seed=int(rng.integers(1_000_000)))
+      administered = [int(idx) for idx in rng.choice(25, n_administered, replace=False)]
+      theta_hat = float(rng.uniform(-1.5, 1.5))
+      half_width = 2.0 / np.sqrt(max(1, n_administered))
+      grid = np.linspace(theta_hat - half_width, theta_hat + half_width, 4001)
+      a, b, c, d = (item_bank.items[:, [k]] for k in range(4))
+      p = c + (d - c) / (1.0 + np.exp(-a * (grid - b)))
+      p_hat = c + (d - c) / (1.0 + np.exp(-a * (theta_hat - b)))
+      divergence = p_hat * np.log(p_hat / p) + (1.0 - p_hat) * np.log((1.0 - p_hat) / (1.0 - p))
+      reference = np.trapezoid(divergence, grid, axis=1)
+      reference[administered] = -np.inf
 
-    assert narrow >= 0.0
-    assert wide > narrow
+      picked = KLSelector(c=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
 
-  def test_select_uses_half_width_c_over_sqrt_administered(
-    self,
-    monkeypatch: pytest.MonkeyPatch,
-  ) -> None:
-    """Test that select uses c / sqrt(max(1, n_administered)) for the window width.
+      assert reference[picked] == pytest.approx(reference.max(), rel=1e-6)
 
-    This spies on `_kl_global` instead of the local `half_width` variable so the
-    assertion stays tied to the public `select()` contract while remaining stable.
-    If the sqrt schedule or guard changed, KL could stop converging toward a
-    local-information rule late in the test.
+  @pytest.mark.parametrize(("administered", "expected"), [([2], 1), ([2, 3, 4, 5], 0)])
+  def test_window_shrinks_with_the_square_root_of_the_test_length(self, administered: list[int], expected: int) -> None:
+    """With c = 2 the window is theta_hat +- 2 after one item and +- 1 after four.
+
+    At theta_hat = 0, item 0 (a = 1, b = 0) and item 1 (a = 4, b = 1.5) trade places as the window narrows:
+    their KL integrals are 0.610 and 0.869 over +- 2, 0.225 and 0.146 over +- 1.41, and 0.081 and 0.028
+    over +- 1. A window of c / sqrt(n + 1) would already prefer item 0 after one item.
     """
-    item_bank = self._bank()
-    selector = KLSelector(c=2.0)
-    observed_half_widths: list[float] = []
+    filler = [1.0, 3.0, 0.0, 1.0]
+    item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [4.0, 1.5, 0.0, 1.0], filler, filler, filler, filler]))
 
-    def spy(_theta_hat: float, item: np.ndarray, half_width: float) -> float:
-      observed_half_widths.append(half_width)
-      return float(2.0 - abs(float(item[1])))
+    assert KLSelector(c=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
 
-    monkeypatch.setattr(KLSelector, "_kl_global", staticmethod(spy))
+  def test_select_skips_items_at_the_exposure_cap(self) -> None:
+    """The item with the most KL information is passed over while its exposure rate is at r_max."""
+    item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0]]))
+    selector = KLSelector(c=0.5, r_max=0.5)
 
-    selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    selector.select(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
+    uncapped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0))
+    capped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0), exposure_rates=np.array([0.0, 0.5, 0.0]))
 
-    assert all(half_width == pytest.approx(2.0) for half_width in observed_half_widths[: item_bank.n_items])
-    assert all(
-      half_width == pytest.approx(2.0 / np.sqrt(2.0)) for half_width in observed_half_widths[item_bank.n_items :]
-    )
-
-  def test_select_prefers_central_item(self) -> None:
-    """Test that KL selection prefers the item centered on the current theta."""
-    item_bank = self._bank()
-    selector = KLSelector(c=0.5)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-
-    assert selected == 1
-
-  def test_select_excludes_administered_and_honors_exposure_cap(self) -> None:
-    """Test that selection excludes administered items and falls back when cap blocks all candidates."""
-    item_bank = self._bank()
-    selector = KLSelector(c=0.5, r_max=0.0)
-    exposure_rates = np.ones(item_bank.n_items, dtype=float)
-
-    selected = selector.select(
-      item_bank=item_bank,
-      administered_items=[1],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-      exposure_rates=exposure_rates,
-    )
-
-    assert selected is not None
-    assert selected != 1
-    assert selected in {0, 2}
+    assert (uncapped, capped) == (1, 2)
 
   def test_select_raises_when_exhausted(self) -> None:
     """Test that select raises NoItemsAvailableError when all items are administered."""
-    item_bank = self._bank()
-    selector = KLSelector()
+    item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
     with pytest.raises(NoItemsAvailableError, match="no more items"):
-      selector.select(
-        item_bank=item_bank,
-        administered_items=[0, 1, 2],
-        est_theta=0.0,
-        rng=np.random.default_rng(42),
+      KLSelector().select(
+        item_bank=item_bank, administered_items=[0, 1, 2], est_theta=0.0, rng=np.random.default_rng(42)
       )
 
 
@@ -1073,7 +1018,11 @@ SELECTOR_FACTORIES = {
 
 @pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())
 def test_select_returns_builtin_int(make_selector) -> None:
-  """select() promises ``int | None``; numpy integers must not leak into session state."""
+  """Called with every input CatEngine passes, select() returns a builtin int.
+
+  A selector that does not accept response_vector fails inside the engine, and numpy integers must
+  not leak into session state.
+  """
   item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
 
   item_id = make_selector().select(
@@ -1087,15 +1036,15 @@ def test_select_returns_builtin_int(make_selector) -> None:
   assert type(item_id) is int
 
 
-def test_every_selector_accepts_the_engine_selection_inputs() -> None:
-  """CatEngine always passes response_vector, so every concrete selector must accept it."""
-  selectors = [
-    cls
-    for cls in vars(importlib.import_module("catsim.selection")).values()
+def test_selector_factories_cover_every_concrete_selector() -> None:
+  """Every concrete selector exported by catsim.selection runs through the engine-input test above.
+
+  A selector left out of SELECTOR_FACTORIES could reject the engine's inputs without any test noticing.
+  """
+  exported = {
+    name
+    for name, cls in vars(importlib.import_module("catsim.selection")).items()
     if isinstance(cls, type) and issubclass(cls, BaseSelector) and not inspect.isabstract(cls)
-  ]
+  }
 
-  missing = [cls.__name__ for cls in selectors if "response_vector" not in inspect.signature(cls.select).parameters]
-
-  assert len(selectors) > 10
-  assert missing == []
+  assert exported == set(SELECTOR_FACTORIES)
