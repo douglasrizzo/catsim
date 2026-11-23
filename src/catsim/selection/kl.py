@@ -43,12 +43,35 @@ def _kl_integrand(
 
 
 class KLSelector(BaseSelector):
-  """Kullback-Leibler global-information item selector.
+  r"""Kullback-Leibler global-information item selector.
 
+  Each candidate's KL divergence between the response distributions at the current estimate
+  and at nearby abilities is integrated over :math:`\hat\theta \pm c / \sqrt{\max(1, n)}`,
+  where :math:`n` is the number of administered items, and the item with the largest integral
+  is selected.
+
+  Parameters
+  ----------
+  c : float, optional
+      Width constant of the integration window, which narrows as items are administered.
+      Default is 3.
+  r_max : float, optional
+      Maximum exposure rate for items. Items with exposure rates >= r_max will not be selected
+      unless no other items are available. Default is 1 (no restriction).
+
+  Notes
+  -----
   For full algorithmic details, see :doc:`/api/techniques/selection/kl-selector`.
   """
 
   def __init__(self, c: float = 3.0, r_max: float = 1.0) -> None:
+    """Initialize a KLSelector object.
+
+    Raises
+    ------
+    ValueError
+        If c is not positive, or if r_max is not between 0 and 1.
+    """
     if c <= 0:
       msg = f"c must be positive, got {c}"
       raise ValueError(msg)
@@ -93,7 +116,33 @@ class KLSelector(BaseSelector):
     exposure_rates: FloatArray | None = None,
     response_vector: list[bool] | None = None,  # noqa: ARG002
   ) -> int | None:
-    """Return the index of the next item to be administered."""
+    """Return the index of the next item to be administered.
+
+    Parameters
+    ----------
+    item_bank : ItemBank
+        An ItemBank containing item parameters.
+    administered_items : list[int]
+        A list containing the indexes of items that were already administered.
+    est_theta : float
+        The current estimated ability, the center of the integration window.
+    rng : numpy.random.Generator or None, optional
+        Unused; KL selection is deterministic.
+    exposure_rates : numpy.ndarray or None, optional
+        Current exposure rate of every item, compared against ``r_max``.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
+
+    Returns
+    -------
+    int
+        Index of the item with the largest integrated KL divergence.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If every item has been administered.
+    """
     candidates = self._exposure_filtered_candidates(item_bank.n_items, administered_items, exposure_rates, self._r_max)
     half_width = self._c / numpy.sqrt(max(1, len(administered_items)))
 
