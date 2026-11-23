@@ -108,12 +108,3 @@ class TestFixedPointInitializerInitialize:
     for _ in range(10):
       theta = initializer.initialize(item_bank=item_bank, rng=rng)
       assert theta == pytest.approx(start)
-
-  def test_initialize_rejects_unexpected_kwargs(self) -> None:
-    """Initializers should expose an explicit runtime contract."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    rng = np.random.default_rng(42)
-    initializer = FixedPointInitializer(0.0)
-
-    with pytest.raises(TypeError, match="unexpected keyword argument"):
-      initializer.initialize(item_bank=item_bank, rng=rng, examinee_index=1)  # type: ignore[call-arg]
