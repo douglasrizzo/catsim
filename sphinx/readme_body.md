@@ -62,7 +62,7 @@ print(result.rmse)
 
 Runtime dependencies are declared in `pyproject.toml` and are installed automatically with `pip install catsim` or `uv pip install catsim`.
 
-If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage, mutation testing) with:
+If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage) with:
 
 ```bash
 uv sync --group dev
