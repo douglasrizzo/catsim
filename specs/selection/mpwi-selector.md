@@ -1,6 +1,8 @@
 **Status:** Planned
 **Module:** `catsim.selection.weighted_info.MPWISelector` (planned)
-**Reference:** van der Linden (1998); Barrada, Veldkamp, and Olea (2009)
+**Reference:** van der Linden (1998)
+**Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`MWI.R`, `nextItem.R`).
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Maximum Posterior Weighted Information Selector
 
@@ -9,10 +11,18 @@
 MPWI is the Bayesian counterpart to MLWI. Instead of weighting each candidate's
 information curve by the likelihood of ability values, it weights by the current
 posterior, which naturally combines the prior and the observed response history.
+van der Linden (1996, p. 10) presents it as a generalization of
+likelihood-weighted information whose advantage is that the prior can carry
+what is known about the examinee in advance, such as background variables
+related to ability.
 
 Once Bayesian infrastructure exists, this criterion is attractive because it
 builds on the same `posterior()` helper as EAP and the other posterior-based
-selectors.
+selectors. Choi and Swartz (2009, Equation 5 and Appendix) also prove that the
+maximum expected posterior weighted information criterion, which averages
+posterior-weighted information over the possible responses to the candidate,
+always selects the same item as MPWI, so the simpler criterion gives the same
+tests.
 
 ## Definition
 
@@ -36,11 +46,26 @@ $$
 
 The rule selects the non-administered item with the largest MPWI score.
 
-This is Equation 12 of van der Linden's 1996 report (pp. 9–10), which calls it
-the maximum posterior expected information criterion. Choi and Swartz (2009,
-Equation 2) and Magis and Raîche (2012, p. 9, Table 1) give the same criterion;
-Magis and Raîche write the posterior unnormalized, which ranks items the same
-way.
+This is the maximum posterior expected information criterion of van der
+Linden's 1996 report (p. 10, Equation 12), which preceded the 1998 article. The
+sentence introducing it says "minimize"; the equation and the criterion's name
+maximize. The report weights the observed information $J$ (p. 9, Equation 10),
+which equals Fisher information under the two-parameter logistic model it
+assumes (p. 5, Equation 1; p. 10, Equation 11). catsim uses Fisher information,
+as Choi and Swartz (2009, Equation 2) and `catR` do; the two differ for items
+with guessing or slipping. Magis and Raîche (2012, p. 9, Table 1) give the same
+criterion with the posterior unnormalized, which ranks items the same way.
+
+`catR` implements MPWI in
+[`MWI.R`](https://github.com/cran/catR/blob/master/R/MWI.R), called from
+[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R). It
+agrees on the criterion: Fisher information weighted by the prior density times
+the likelihood. It departs in the numerics: the posterior is not normalized,
+and the integral is computed by the trapezoidal rule on 33 equally spaced nodes
+over $[-4, 4]$ (`parInt = c(-4, 4, 33)`). Its default prior is standard
+normal, as is catsim's; catsim's default grid has 121 equally weighted nodes
+over $[-6, 6]$ and normalizes the posterior. The normalizing constant does not
+change the ranking; the grid and its range change the approximation slightly.
 
 ## Parameters
 
@@ -81,8 +106,6 @@ van der Linden, W. J. (1996). *Bayesian item selection criteria for adaptive tes
 Choi, S. W., & Swartz, R. J. (2009). Comparison of CAT item selection criteria for polytomous items. *Applied Psychological Measurement*, 33(6), 419-440. <https://doi.org/10.1177/0146621608327801>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC2791416/).
 
 Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
-
-Barrada, J. R., Veldkamp, B. P., & Olea, J. (2009). Multiple maximum exposure rates in computerized adaptive testing. *Applied Psychological Measurement*, 33(1), 58-73. <https://doi.org/10.1177/0146621608315329>
 
 ## Implementation Guidance
 
