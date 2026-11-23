@@ -1000,10 +1000,7 @@ def validate_item_bank(items: FloatArray, raise_err: bool = False) -> None:
   if len(items.shape) == 1:
     err += "Item matrix has only one dimension."
   elif items.shape[1] > NumParams.PL4.value:
-    print(
-      "\nItem matrix has more than 4 columns. catsim tends to add \
-            columns to the matrix during the simulation, so it's not a good idea to keep them."
-    )
+    err += f"\nItem matrix has {items.shape[1]} columns; it must have exactly 4: a, b, c and d"
   elif items.shape[1] < NumParams.PL4.value:
     if items.shape[1] == NumParams.PL1.value:
       err += "\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"

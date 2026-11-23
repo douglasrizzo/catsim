@@ -380,6 +380,13 @@ class TestValidateItemBank:
     with pytest.raises(TypeError, match=r"not of type numpy\.ndarray"):
       irt.validate_item_bank(items, raise_err=True)  # type: ignore[arg-type]
 
+  def test_validate_extra_columns_raises(self) -> None:
+    """A fifth column is an error; it used to print a warning and skip every parameter check, even of a = -1."""
+    items = np.array([[-1.0, 0.0, 0.1, 0.95, 0.0]])
+
+    with pytest.raises(ValueError, match="5 columns; it must have exactly 4"):
+      irt.validate_item_bank(items, raise_err=True)
+
   def test_validate_negative_discrimination_raises(self) -> None:
     """Test that negative discrimination raises ValueError."""
     items = np.array([[-0.5, 0.0, 0.1, 0.95]])
