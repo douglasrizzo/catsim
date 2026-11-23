@@ -17,8 +17,8 @@ Selectors that pick the best item by a score broke ties in three different ways:
   bin also followed the unstable sort.
 
 Ties are common: duplicated items, 1PL banks with repeated difficulties, and items whose
-difficulties sit symmetrically around the ability estimate. Mathematically tied items are also
-tied bit for bit, so the choice among them is a real behaviour, not a rounding accident. A fixed
+difficulties sit symmetrically around the ability estimate. Duplicates and repeated difficulties
+tie bit for bit, so the choice among them is a real behaviour, not a rounding accident. A fixed
 order also hands all the exposure of a set of duplicates to one copy until it is administered.
 
 catR breaks every tie the same way: it keeps the items whose score equals the best score exactly
@@ -38,13 +38,23 @@ When there is no tie, no random number is drawn. When items tie and no generator
 selector raises `ValueError`, as the random selectors already do without a generator.
 `CatEngine` always passes the session generator.
 
+Ties are exact equality of each selector's own score, as in catR, so they depend on how the score
+rounds. Two items whose difficulties sit symmetrically around the estimate tie in information, but
+not always in distance: in floating point, |0.3 - 0.1| is 0.19999999999999998 and |-0.1 - 0.1| is
+0.2. `UrrySelector` and the stratified selectors, which score by distance, then pick the nearer
+item, as catR's `bOpt` does. On 1PL banks, `MaxInfoSelector` and the bins now rank by information,
+as catR's `MFI` does, instead of by distance to the estimate. Information is flat near its peak, so
+items whose distances differ only by rounding tie there.
+
 `ClusterSelector` applies the rule to its choice of item within a cluster, but not yet to its
 choice of cluster.
 
 ## Consequences
 
-- Seeded results change only on banks with exact ties. On untied banks, picks and the random
-  number stream are the same as before.
+- Seeded results change only where items tie exactly in a selector's score. On banks with
+  continuous parameters, picks and the random number stream are the same as before; on 1PL banks
+  this excludes items whose difficulties differ only by rounding, which now tie for
+  `MaxInfoSelector` and the bins.
 - Exposure is shared evenly among duplicated items.
 - Callers that use a deterministic selector directly, without the engine, must pass `rng` when
   their bank can hold ties.

@@ -33,6 +33,8 @@ mlwi-selector
 
 When several candidate items share the best score exactly, every selector breaks the tie the same
 way: it draws one of them uniformly at random with the session's random generator, as catR does.
+Ties are exact equality of the selector's own score, so items that are equally good in exact
+arithmetic tie only if their scores also round to the same value.
 The Randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
 No random number is drawn when nothing ties, so seeded results on banks without ties do not depend
 on this rule. Selectors called without a generator raise `ValueError` when items tie. See
