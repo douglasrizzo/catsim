@@ -83,9 +83,6 @@ with the MLE (Magis & Raîche, 2012, p. 5).
    * - ``bounds``
      - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
      - Search range for the penalized objective.
-   * - ``verbose``
-     - ``False``
-     - Diagnostics flag inherited from the estimator base class.
 ```
 
 ## Behavioral Contracts

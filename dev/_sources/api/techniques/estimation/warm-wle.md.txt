@@ -58,11 +58,11 @@ can sit on the search bound, where $I \approx 0$ makes the correction explode.
 
 ### Computation
 
-The modified score is evaluated at 121 equally spaced points over the fixed
-search range $[\theta_{\min}, \theta_{\max}] = [-6, 6]$ (`THETA_MIN_EXTENDED`,
-`THETA_MAX_EXTENDED`; unlike MAP, the range is not a parameter) to bracket its
-roots. The points are 0.1 apart, so two roots closer than that can fall in one
-interval and go unseen. Each sign change from positive to negative brackets a maximum
+The modified score is evaluated at 121 equally spaced points over the search
+range $[\theta_{\min}, \theta_{\max}]$ given by `bounds`, by default $[-6, 6]$
+(`THETA_MIN_EXTENDED`, `THETA_MAX_EXTENDED`), to bracket its roots. On the
+default range the points are 0.1 apart, so two roots closer than that can fall
+in one interval and go unseen. Each sign change from positive to negative brackets a maximum
 of the weighted likelihood and is refined with Brent's method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
 likelihood is returned; candidates are ranked by integrating the modified score,
@@ -87,10 +87,10 @@ catsim does not compute.
      - Description
    * - ``tol``
      - ``1e-6``
-     - Absolute tolerance of the Brent root refinement.
-   * - ``verbose``
-     - ``False``
-     - Diagnostics flag inherited from the estimator base class.
+     - Absolute tolerance of the Brent root refinement. Must be positive.
+   * - ``bounds``
+     - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
+     - Search range of the estimate. Must be finite, with the lower bound below the upper one.
 ```
 
 ## Behavioral Contracts

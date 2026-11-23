@@ -777,48 +777,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
-
-
-<div class="viewcode-block" id="dodd">
-<a class="viewcode-back" href="../../api/cat.html#catsim.cat.dodd">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">dodd</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">correct</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Estimate :math:`\hat{\theta}` when the response vector is composed entirely of 1s or 0s.</span>
-
-<span class="sd">  Method proposed by :cite:p:`Dod90`. This heuristic prevents the maximum likelihood</span>
-<span class="sd">  estimator from returning infinity when all responses are correct or negative</span>
-<span class="sd">  infinity when all responses are incorrect.</span>
-
-<span class="sd">  .. math::</span>
-
-<span class="sd">      \hat{\theta}_{t+1} = \left\lbrace \begin{array}{ll}</span>
-<span class="sd">      \hat{\theta}_t+\frac{b_{max}-\hat{\theta_t}}{2} &amp; \text{if } X_t = 1 \\</span>
-<span class="sd">        \hat{\theta}_t-\frac{\hat{\theta}_t-b_{min}}{2} &amp; \text{if }  X_t = 0</span>
-<span class="sd">      \end{array} \right\rbrace</span>
-
-<span class="sd">  Parameters</span>
-<span class="sd">  ----------</span>
-<span class="sd">  theta : float</span>
-<span class="sd">      The initial ability level estimate.</span>
-<span class="sd">  item_bank : ItemBank</span>
-<span class="sd">      An ItemBank containing all items in the bank.</span>
-<span class="sd">      This is necessary to capture the maximum and minimum difficulty levels</span>
-<span class="sd">      required by the method.</span>
-<span class="sd">  correct : bool</span>
-<span class="sd">      Boolean value indicating if the examinee has answered only correctly</span>
-<span class="sd">      (True) or only incorrectly (False) up until now.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  float</span>
-<span class="sd">      A new estimation for :math:`\theta` that avoids infinite values.</span>
-<span class="sd">  """</span>
-  <span class="n">b</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span>
-
-  <span class="k">return</span> <span class="n">theta</span> <span class="o">+</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">theta</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">correct</span> <span class="k">else</span> <span class="n">theta</span> <span class="o">-</span> <span class="p">((</span><span class="n">theta</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
-
 
 
 <div class="viewcode-block" id="bias">

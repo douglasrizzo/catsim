@@ -772,8 +772,6 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for catsim.selection.expected_info</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Expected information selector implementations."""</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
@@ -807,10 +805,6 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  When an updated estimate is not finite, as with maximum likelihood without Dodd's heuristic</span>
-<span class="sd">  after an all-correct or all-incorrect pattern, the candidate is scored by the information at the</span>
-<span class="sd">  current estimate instead, so that step reduces to maximum-information selection.</span>
-
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/mei-selector`.</span>
 <span class="sd">  """</span>
 
@@ -865,11 +859,6 @@ window.runMermaid = runMermaid;</script>
       <span class="n">response_vector</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">response_vector</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
       <span class="n">est_theta</span><span class="o">=</span><span class="n">est_theta</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">theta_correct</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">theta_incorrect</span><span class="p">)):</span>
-      <span class="c1"># information at an infinite estimate is 0 for every candidate, which would make every score</span>
-      <span class="c1"># equal; fall back to the information at the current estimate</span>
-      <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">item_bank</span><span class="o">.</span><span class="n">test_information</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">next_administered</span><span class="p">))</span>
-
     <span class="n">item</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidate_idx</span><span class="p">]</span>
     <span class="n">p_correct</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">icc</span><span class="p">(</span><span class="n">est_theta</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
     <span class="n">info_correct</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">test_information</span><span class="p">(</span><span class="n">theta_correct</span><span class="p">,</span> <span class="n">next_administered</span><span class="p">)</span>

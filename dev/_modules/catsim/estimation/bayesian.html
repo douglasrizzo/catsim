@@ -1098,17 +1098,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      ``QuadratureGrid.uniform()``.</span>
 <span class="sd">  log_prior : LogPrior or None, optional</span>
 <span class="sd">      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.</span>
-<span class="sd">  verbose : bool, optional</span>
-<span class="sd">      Diagnostics flag inherited from :py:class:`BaseEstimator`. Default is False.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">grid</span><span class="p">:</span> <span class="n">QuadratureGrid</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">grid</span> <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">QuadratureGrid</span><span class="o">.</span><span class="n">uniform</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
 
@@ -1153,7 +1150,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        lengths, or if ``response_vector`` contains non-Boolean elements.</span>
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_require_inputs</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">)</span>
-    <span class="n">post</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">)</span>
+    <span class="n">post</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">(</span><span class="n">response_vector</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="o">.</span><span class="n">nodes</span><span class="o">.</span><span class="n">size</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_total_evaluations</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span>
@@ -1192,8 +1189,6 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Absolute tolerance of the refinement step. Default is 1e-6.</span>
 <span class="sd">  bounds : tuple[float, float], optional</span>
 <span class="sd">      Search range for the mode. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.</span>
-<span class="sd">  verbose : bool, optional</span>
-<span class="sd">      Diagnostics flag inherited from :py:class:`BaseEstimator`. Default is False.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
@@ -1206,19 +1201,11 @@ window.runMermaid = runMermaid;</script>
     <span class="n">log_prior</span><span class="p">:</span> <span class="n">LogPrior</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
     <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
-    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">tol</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"tol must be positive, got </span><span class="si">{</span><span class="n">tol</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">bounds</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">low</span><span class="p">)</span> <span class="ow">and</span> <span class="n">math</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">high</span><span class="p">)</span> <span class="ow">and</span> <span class="n">low</span> <span class="o">&lt;</span> <span class="n">high</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bounds must be finite with low &lt; high, got </span><span class="si">{</span><span class="n">bounds</span><span class="si">}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span> <span class="o">=</span> <span class="n">log_prior</span> <span class="k">if</span> <span class="n">log_prior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">normal_log_prior</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return a human-readable estimator name."""</span>
@@ -1268,7 +1255,7 @@ window.runMermaid = runMermaid;</script>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">+=</span> <span class="mi">1</span>
 
-    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
     <span class="n">nodes</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">_MODE_SEARCH_POINTS</span><span class="p">)</span>
     <span class="n">log_post</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood_hpc</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_prior</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_last_evaluations</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">size</span>

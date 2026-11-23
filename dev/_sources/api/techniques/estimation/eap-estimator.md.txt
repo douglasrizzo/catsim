@@ -81,9 +81,6 @@ about 0.065; longer tests need a finer grid (see
    * - ``log_prior``
      - ``normal_log_prior(0, 1)``
      - Prior density on :math:`\theta`; changing it changes both shrinkage and zero-data behavior.
-   * - ``verbose``
-     - ``False``
-     - Diagnostics flag inherited from the estimator base class.
 ```
 
 ## Behavioral Contracts

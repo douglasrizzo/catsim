@@ -1018,20 +1018,20 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
-<span class="sd">      from catsim.initialization import RandomInitializer</span>
+<span class="sd">      from catsim.initialization import UniformInitializer</span>
 <span class="sd">      from catsim.selection import MaxInfoSelector</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
-<span class="sd">      from catsim.stopping import MinErrorStopper</span>
+<span class="sd">      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
 <span class="sd">      from catsim.simulation import SimulationRunner</span>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 
 <span class="sd">      runner = SimulationRunner(</span>
 <span class="sd">          ItemBank.generate_item_bank(100),</span>
-<span class="sd">          RandomInitializer(),</span>
+<span class="sd">          UniformInitializer(),</span>
 <span class="sd">          MaxInfoSelector(),</span>
 <span class="sd">          NumericalSearchEstimator(),</span>
-<span class="sd">          MinErrorStopper(0.4, max_items=20),</span>
+<span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
 <span class="sd">      result = runner.run(10)</span>
 <span class="sd">      plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])</span>
@@ -1171,19 +1171,19 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      import matplotlib.pyplot as plt</span>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
-<span class="sd">      from catsim.initialization import RandomInitializer</span>
+<span class="sd">      from catsim.initialization import UniformInitializer</span>
 <span class="sd">      from catsim.selection import MaxInfoSelector</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
-<span class="sd">      from catsim.stopping import MinErrorStopper</span>
+<span class="sd">      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
 <span class="sd">      from catsim.simulation import SimulationRunner</span>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 <span class="sd">      runner = SimulationRunner(</span>
 <span class="sd">          ItemBank.generate_item_bank(100),</span>
-<span class="sd">          RandomInitializer(),</span>
+<span class="sd">          UniformInitializer(),</span>
 <span class="sd">          MaxInfoSelector(),</span>
 <span class="sd">          NumericalSearchEstimator(),</span>
-<span class="sd">          MinErrorStopper(0.4, max_items=20),</span>
+<span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
 <span class="sd">      result = runner.run(10)</span>
 <span class="sd">      plot.test_progress(simulation=result, index=0, ax=axes[0])</span>

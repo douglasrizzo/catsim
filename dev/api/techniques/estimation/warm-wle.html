@@ -506,11 +506,11 @@ the MLE is infinite for all-correct and all-incorrect patterns, and with guessin
 can sit on the search bound, where <span class="math notranslate nohighlight">\(I \approx 0\)</span> makes the correction explode.</p>
 <section id="computation">
 <h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
-<p>The modified score is evaluated at 121 equally spaced points over the fixed
-search range <span class="math notranslate nohighlight">\([\theta_{\min}, \theta_{\max}] = [-6, 6]\)</span> (<code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code>,
-<code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code>; unlike MAP, the range is not a parameter) to bracket its
-roots. The points are 0.1 apart, so two roots closer than that can fall in one
-interval and go unseen. Each sign change from positive to negative brackets a maximum
+<p>The modified score is evaluated at 121 equally spaced points over the search
+range <span class="math notranslate nohighlight">\([\theta_{\min}, \theta_{\max}]\)</span> given by <code class="docutils literal notranslate"><span class="pre">bounds</span></code>, by default <span class="math notranslate nohighlight">\([-6, 6]\)</span>
+(<code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code>, <code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code>), to bracket its roots. On the
+default range the points are 0.1 apart, so two roots closer than that can fall
+in one interval and go unseen. Each sign change from positive to negative brackets a maximum
 of the weighted likelihood and is refined with Brent’s method. If several maxima
 exist, which can happen with guessing, the one with the largest weighted
 likelihood is returned; candidates are ranked by integrating the modified score,
@@ -541,11 +541,11 @@ catsim does not compute.</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tol</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1e-6</span></code></p></td>
-<td><p>Absolute tolerance of the Brent root refinement.</p></td>
+<td><p>Absolute tolerance of the Brent root refinement. Must be positive.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">verbose</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
-<td><p>Diagnostics flag inherited from the estimator base class.</p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bounds</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code></p></td>
+<td><p>Search range of the estimate. Must be finite, with the lower bound below the upper one.</p></td>
 </tr>
 </tbody>
 </table>
@@ -578,7 +578,7 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 <h2>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.estimation.WarmLikelihoodEstimator">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">WarmLikelihoodEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">WarmLikelihoodEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-6.0,</span> <span class="pre">6.0)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></p>
 <p>Warm’s (1989) weighted likelihood estimator (WLE).</p>
 <p>The estimate is the root of Warm’s modified score equation</p>
@@ -589,18 +589,23 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 all-correct and all-incorrect response patterns. For models without guessing or slipping
 (<span class="math notranslate nohighlight">\(c = 0\)</span>, <span class="math notranslate nohighlight">\(d = 1\)</span>), <span class="math notranslate nohighlight">\(J = I'\)</span> and the estimate maximizes
 <span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>.</p>
-<p>The modified score is scanned at 121 points, 0.1 apart, over the fixed search interval
-<code class="docutils literal notranslate"><span class="pre">[THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED]</span></code> to bracket its roots, which are then refined
-with Brent’s method. If several roots exist, the one with the largest weighted
-likelihood is returned; if none does, the estimate is the search bound the modified score
-points to.</p>
+<p>The modified score is scanned at 121 equally spaced points over <code class="docutils literal notranslate"><span class="pre">bounds</span></code> (0.1 apart on the
+default bounds) to bracket its roots, which are then refined with Brent’s method. If several
+roots exist, the one with the largest weighted likelihood is returned; if none does, the
+estimate is the bound the modified score points to.</p>
 <p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Warm Weighted Likelihood Estimator</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Absolute tolerance of the root refinement. Default is 1e-6.</p>
+<dt><strong>tol</strong><span class="classifier">float, optional</span></dt><dd><p>Absolute tolerance of the root refinement. Must be positive. Default is 1e-6.</p>
 </dd>
-<dt><strong>verbose</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to be verbose during execution. Default is False.</p>
+<dt><strong>bounds</strong><span class="classifier">tuple[float, float], optional</span></dt><dd><p>Range of the estimate. Default is <code class="docutils literal notranslate"><span class="pre">(THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED)</span></code>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">tol</span></code> is not positive, or if <code class="docutils literal notranslate"><span class="pre">bounds</span></code> is not a finite interval with low &lt; high.</p>
 </dd>
 </dl>
 </dd>
@@ -624,7 +629,7 @@ points to.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>The weighted likelihood estimate, within <code class="docutils literal notranslate"><span class="pre">[THETA_MIN_EXTENDED,</span> <span class="pre">THETA_MAX_EXTENDED]</span></code>.</p>
+<dt>float</dt><dd><p>The weighted likelihood estimate, within <code class="docutils literal notranslate"><span class="pre">bounds</span></code>.</p>
 </dd>
 </dl>
 </dd>

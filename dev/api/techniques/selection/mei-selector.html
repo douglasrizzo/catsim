@@ -508,10 +508,6 @@ every candidate; the same happens on the incorrect branch while all responses
 are incorrect. On that branch the look-ahead is a fixed jump rather than an
 estimate. Bayesian estimators and WLE give a genuine updated estimate on both
 branches from the first item.</p>
-<p>If an updated estimate is not finite, as with maximum likelihood without Dodd’s
-heuristic after an all-correct or all-incorrect pattern, the candidate is scored
-by the information at the current estimate instead, so that step reduces to
-maximum-information selection.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -591,9 +587,6 @@ other item remains. Default is 1 (no restriction).</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>When an updated estimate is not finite, as with maximum likelihood without Dodd’s heuristic
-after an all-correct or all-incorrect pattern, the candidate is scored by the information at the
-current estimate instead, so that step reduces to maximum-information selection.</p>
 <p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Maximum Expected Information Selector</span></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.selection.MEISelector.estimator">

@@ -790,7 +790,8 @@ window.runMermaid = runMermaid;</script>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">..item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 
-<span class="c1"># Grid used to bracket the roots of the modified score before refining them with Brent's method.</span>
+<span class="c1"># Points on which the modified score is scanned to bracket its roots before Brent's method refines</span>
+<span class="c1"># them (0.1 apart on [-6, 6]).</span>
 <span class="n">_SCAN_POINTS</span> <span class="o">=</span> <span class="mi">121</span>
 
 
@@ -811,25 +812,34 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  (:math:`c = 0`, :math:`d = 1`), :math:`J = I'` and the estimate maximizes</span>
 <span class="sd">  :math:`L(\theta)\sqrt{I(\theta)}`.</span>
 
-<span class="sd">  The modified score is scanned at 121 points, 0.1 apart, over the fixed search interval</span>
-<span class="sd">  ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]`` to bracket its roots, which are then refined</span>
-<span class="sd">  with Brent's method. If several roots exist, the one with the largest weighted</span>
-<span class="sd">  likelihood is returned; if none does, the estimate is the search bound the modified score</span>
-<span class="sd">  points to.</span>
+<span class="sd">  The modified score is scanned at 121 equally spaced points over ``bounds`` (0.1 apart on the</span>
+<span class="sd">  default bounds) to bracket its roots, which are then refined with Brent's method. If several</span>
+<span class="sd">  roots exist, the one with the largest weighted likelihood is returned; if none does, the</span>
+<span class="sd">  estimate is the bound the modified score points to.</span>
 
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/estimation/warm-wle`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  tol : float, optional</span>
-<span class="sd">      Absolute tolerance of the root refinement. Default is 1e-6.</span>
-<span class="sd">  verbose : bool, optional</span>
-<span class="sd">      Whether to be verbose during execution. Default is False.</span>
+<span class="sd">      Absolute tolerance of the root refinement. Must be positive. Default is 1e-6.</span>
+<span class="sd">  bounds : tuple[float, float], optional</span>
+<span class="sd">      Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low &lt; high.</span>
 <span class="sd">  """</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_tol</span><span class="p">(</span><span class="n">tol</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return a string representation of the estimator."""</span>
@@ -898,7 +908,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
-<span class="sd">        The weighted likelihood estimate, within ``[THETA_MIN_EXTENDED, THETA_MAX_EXTENDED]``.</span>
+<span class="sd">        The weighted likelihood estimate, within ``bounds``.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -914,12 +924,13 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">est_theta</span><span class="p">)</span>
 
-    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">administered_items</span><span class="p">,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">administered_items</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
       <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_modified_score</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="n">grid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">,</span> <span class="n">_SCAN_POINTS</span><span class="p">)</span>
+    <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bounds</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">_SCAN_POINTS</span><span class="p">)</span>
     <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modified_score</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
     <span class="n">evaluations</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">size</span>
 
@@ -932,9 +943,9 @@ window.runMermaid = runMermaid;</script>
       <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
       <span class="n">evaluations</span> <span class="o">+=</span> <span class="n">result</span><span class="o">.</span><span class="n">function_calls</span>
     <span class="k">if</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
-      <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">)</span>
+      <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">low</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-      <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">THETA_MAX_EXTENDED</span><span class="p">)</span>
+      <span class="n">candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">high</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">theta_hat</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -944,7 +955,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">heights</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
         <span class="c1"># With full_output, quad returns its convergence warning instead of raising it</span>
-        <span class="n">height</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="o">*</span><span class="n">message</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">height</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="o">*</span><span class="n">message</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">heights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
         <span class="n">evaluations</span> <span class="o">+=</span> <span class="n">info</span><span class="p">[</span><span class="s2">"neval"</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">message</span><span class="p">:</span>

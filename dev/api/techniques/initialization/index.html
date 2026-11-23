@@ -407,7 +407,7 @@ window.runMermaid = runMermaid;</script>
     <link rel="icon" href="../../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Fixed Point Initializer" href="fixed-point-initializer.html" />
+    <link rel="next" title="CAT Engine – catsim.engine" href="../../engine.html" />
     <link rel="prev" title="Confidence Interval Stopper" href="../stopping/confidence-interval-stopper.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -817,21 +817,290 @@ window.runMermaid = runMermaid;</script>
 <span class="math notranslate nohighlight">\(\hat{\theta}_0\)</span> before an adaptive test has administered any items. The
 choice of initializer affects the first item selection and can be useful for
 controlled simulations, reproducible baselines, or stochastic starting points.</p>
-<section id="implemented">
-<h2>Implemented<a class="headerlink" href="#implemented" title="Link to this heading">#</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="fixed-point-initializer.html">Fixed Point Initializer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="random-initializer.html">Random Initializer</a></li>
-</ul>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code> has three initializers:
+<a class="reference internal" href="#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a> starts every examinee
+at the same value, and <a class="reference internal" href="#catsim.initialization.UniformInitializer" title="catsim.initialization.UniformInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformInitializer</span></code></a>
+and <a class="reference internal" href="#catsim.initialization.NormalInitializer" title="catsim.initialization.NormalInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NormalInitializer</span></code></a> draw the value from a
+distribution. Every initializer receives the item bank to satisfy the
+initializer contract; none of these three reads it.</p>
+<section id="fixed-point-initializer">
+<h2>Fixed Point Initializer<a class="headerlink" href="#fixed-point-initializer" title="Link to this heading">#</a></h2>
+<p>Fixed-point initialization gives every examinee the same initial ability
+estimate. It is useful for deterministic baselines, controlled simulation
+studies, and workflows that should not introduce randomness before the first
+item is selected.</p>
+<section id="definition">
+<h3>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h3>
+<p>For a configured starting value <span class="math notranslate nohighlight">\(\theta_0\)</span>, the initializer returns the
+same value for every examinee:</p>
+<div class="math notranslate nohighlight">
+\[\hat{\theta}_0 = \theta_0.\]</div>
+</section>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 15.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code></p></td>
+<td><p>Required</p></td>
+<td><p>Ability estimate returned for every examinee.</p></td>
+</tr>
+</tbody>
+</table>
 </div>
+</section>
+<section id="behavioral-contracts">
+<h3>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h3>
+<p>Any correct implementation must satisfy the following properties:</p>
+<ol class="arabic simple">
+<li><p>It rejects a <code class="docutils literal notranslate"><span class="pre">start</span></code> that is not a finite real number when it is constructed.</p></li>
+<li><p>It returns the configured <code class="docutils literal notranslate"><span class="pre">start</span></code> value, as a <code class="docutils literal notranslate"><span class="pre">float</span></code>, for every initialization request.</p></li>
+<li><p>It does not consume random numbers from the provided generator.</p></li>
+</ol>
+</section>
+<section id="api-reference">
+<h3>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.initialization.FixedPointInitializer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">FixedPointInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/initialization/initializers.html#FixedPointInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></p>
+<p>Initialize every examinee’s ability at the same fixed point.</p>
+<p>This initializer is useful for controlled experiments where you want all
+examinees to start with the same initial ability estimate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>start</strong><span class="classifier">float</span></dt><dd><p>The starting ability value for every examinee.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">start</span></code> is not a real number.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">start</span></code> is not finite.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Initialization Techniques</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.initialization.FixedPointInitializer.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/initialization/initializers.html#FixedPointInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.FixedPointInitializer.initialize" title="Link to this definition">#</a></dt>
+<dd><p>Return the same ability value that was passed to the constructor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Unused by this initializer.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator</span></dt><dd><p>Unused by this initializer.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>The fixed ability value that was passed to the constructor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="random-initializers">
+<h2>Random Initializers<a class="headerlink" href="#random-initializers" title="Link to this heading">#</a></h2>
+<p>Random initialization samples the initial ability estimate from a configured
+distribution. It is useful when simulations should vary the starting point
+across examinees while remaining reproducible through the engine or runner
+random number generator.</p>
+<section id="id1">
+<h3>Definition<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p><a class="reference internal" href="#catsim.initialization.UniformInitializer" title="catsim.initialization.UniformInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">UniformInitializer</span></code></a> samples</p>
+<div class="math notranslate nohighlight">
+\[\hat{\theta}_0 \sim U(\text{low}, \text{high}).\]</div>
+<p><a class="reference internal" href="#catsim.initialization.NormalInitializer" title="catsim.initialization.NormalInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NormalInitializer</span></code></a> samples</p>
+<div class="math notranslate nohighlight">
+\[\hat{\theta}_0 \sim \mathcal{N}(\text{mean}, \text{sd}^2).\]</div>
+<p>The default uniform range, <span class="math notranslate nohighlight">\((-0.5, 0.5)\)</span>, is the starting rule of Barrada et
+al. (2006, p. 158) and Barrada et al. (2008, p. 499), who drew the first
+estimate from it for examinees simulated from <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>. The normal
+default, <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>, is not taken from a source; it matches the
+ability distribution those studies simulate.</p>
+</section>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="table">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 15.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">UniformInitializer(low)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">-0.5</span></code></p></td>
+<td><p>Lower bound of the interval.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">UniformInitializer(high)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.5</span></code></p></td>
+<td><p>Upper bound of the interval; must be greater than <code class="docutils literal notranslate"><span class="pre">low</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NormalInitializer(mean)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code></p></td>
+<td><p>Mean of the distribution.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">NormalInitializer(sd)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code></p></td>
+<td><p>Standard deviation of the distribution; must be positive.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id3">
+<h3>Behavioral Contracts<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>Any correct implementation must satisfy the following properties:</p>
+<ol class="arabic simple">
+<li><p>It rejects non-finite parameters when it is constructed.</p></li>
+<li><p>A uniform initializer rejects <code class="docutils literal notranslate"><span class="pre">high</span> <span class="pre">&lt;=</span> <span class="pre">low</span></code> and samples between <code class="docutils literal notranslate"><span class="pre">low</span></code> and <code class="docutils literal notranslate"><span class="pre">high</span></code>.</p></li>
+<li><p>A normal initializer rejects a non-positive <code class="docutils literal notranslate"><span class="pre">sd</span></code>.</p></li>
+<li><p>It samples using the random number generator passed to <code class="docutils literal notranslate"><span class="pre">initialize</span></code>.</p></li>
+</ol>
+</section>
+<section id="id4">
+<h3>API Reference<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.initialization.UniformInitializer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">UniformInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">low</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">high</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/initialization/initializers.html#UniformInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.UniformInitializer" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></p>
+<p>Draw each examinee’s initial ability from a uniform distribution.</p>
+<p>The default interval, <span class="math notranslate nohighlight">\((-0.5, 0.5)\)</span>, is the starting rule of Barrada et al. (2006).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>low</strong><span class="classifier">float, optional</span></dt><dd><p>Lower bound of the interval. Default is -0.5.</p>
+</dd>
+<dt><strong>high</strong><span class="classifier">float, optional</span></dt><dd><p>Upper bound of the interval. Default is 0.5.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If a bound is not a real number.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If either bound is not finite or <code class="docutils literal notranslate"><span class="pre">high</span> <span class="pre">&lt;=</span> <span class="pre">low</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Initialization Techniques</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.initialization.UniformInitializer.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/initialization/initializers.html#UniformInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.UniformInitializer.initialize" title="Link to this definition">#</a></dt>
+<dd><p>Draw an initial ability value between <code class="docutils literal notranslate"><span class="pre">low</span></code> and <code class="docutils literal notranslate"><span class="pre">high</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Unused by this initializer.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator</span></dt><dd><p>Generator the value is drawn from.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>An ability value drawn uniformly from the interval.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.initialization.NormalInitializer">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.initialization.</span></span><span class="sig-name descname"><span class="pre">NormalInitializer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sd</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/initialization/initializers.html#NormalInitializer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.NormalInitializer" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseInitializer</span></code></p>
+<p>Draw each examinee’s initial ability from a normal distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>mean</strong><span class="classifier">float, optional</span></dt><dd><p>Mean of the distribution. Default is 0.0.</p>
+</dd>
+<dt><strong>sd</strong><span class="classifier">float, optional</span></dt><dd><p>Standard deviation of the distribution. Default is 1.0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">mean</span></code> or <code class="docutils literal notranslate"><span class="pre">sd</span></code> is not a real number.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">mean</span></code> is not finite, or <code class="docutils literal notranslate"><span class="pre">sd</span></code> is not finite and positive.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Initialization Techniques</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.initialization.NormalInitializer.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/initialization/initializers.html#NormalInitializer.initialize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.initialization.NormalInitializer.initialize" title="Link to this definition">#</a></dt>
+<dd><p>Draw an initial ability value from <span class="math notranslate nohighlight">\(\mathcal{N}(\text{mean}, \text{sd}^2)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_bank</strong><span class="classifier">ItemBank</span></dt><dd><p>Unused by this initializer.</p>
+</dd>
+<dt><strong>rng</strong><span class="classifier">numpy.random.Generator</span></dt><dd><p>Generator the value is drawn from.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>float</dt><dd><p>An ability value drawn from the normal distribution.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<p>Barrada, J. R., Mazuela, P., &amp; Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. <em>Psicothema</em>, 18(1), 156-159. <a class="reference external" href="https://www.psicothema.com/pdf/3191.pdf">https://www.psicothema.com/pdf/3191.pdf</a> (open access).</p>
+<p>Barrada, J. R., Olea, J., Ponsoda, V., &amp; Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. <em>British Journal of Mathematical and Statistical Psychology</em>, 61(2), 493-513. <a class="reference external" href="https://doi.org/10.1348/000711007X230937">https://doi.org/10.1348/000711007X230937</a>. Open copy: <a class="reference external" href="https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf">first author’s page</a>.</p>
 </section>
 <section id="class-hierarchy">
 <h2>Class Hierarchy<a class="headerlink" href="#class-hierarchy" title="Link to this heading">#</a></h2>
 <pre  class="mermaid">
         classDiagram
   BaseInitializer &lt;|-- FixedPointInitializer
-  BaseInitializer &lt;|-- RandomInitializer
+  BaseInitializer &lt;|-- NormalInitializer
+  BaseInitializer &lt;|-- UniformInitializer
     </pre></section>
 </section>
 
@@ -855,11 +1124,11 @@ controlled simulations, reproducible baselines, or stochastic starting points.</
       </div>
     </a>
     <a class="right-next"
-       href="fixed-point-initializer.html"
+       href="../../engine.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Fixed Point Initializer</p>
+        <p class="prev-next-title">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -882,7 +1151,37 @@ controlled simulations, reproducible baselines, or stochastic starting points.</
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implemented">Implemented</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#fixed-point-initializer">Fixed Point Initializer</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.FixedPointInitializer"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.FixedPointInitializer.initialize"><code class="docutils literal notranslate"><span class="pre">FixedPointInitializer.initialize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#random-initializers">Random Initializers</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Definition</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Behavioral Contracts</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">API Reference</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.UniformInitializer"><code class="docutils literal notranslate"><span class="pre">UniformInitializer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.UniformInitializer.initialize"><code class="docutils literal notranslate"><span class="pre">UniformInitializer.initialize()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.NormalInitializer"><code class="docutils literal notranslate"><span class="pre">NormalInitializer</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.initialization.NormalInitializer.initialize"><code class="docutils literal notranslate"><span class="pre">NormalInitializer.initialize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#class-hierarchy">Class Hierarchy</a></li>
 </ul>
   </nav></div>

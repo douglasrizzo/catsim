@@ -433,16 +433,16 @@ with those components.</p></li>
 <li><p>Run the simulation and inspect the returned result object;</p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/plot.html">Plot</a> your results.</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomInitializer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformInitializer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MinErrorStopper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationRunner</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="n">initializer</span> <span class="o">=</span> <span class="n">RandomInitializer</span><span class="p">()</span>
+<span class="n">initializer</span> <span class="o">=</span> <span class="n">UniformInitializer</span><span class="p">()</span>
 <span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
 <span class="n">estimator</span> <span class="o">=</span> <span class="n">NumericalSearchEstimator</span><span class="p">()</span>
-<span class="n">stopper</span> <span class="o">=</span> <span class="n">MinErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">max_items</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
 <span class="n">runner</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">)</span>
