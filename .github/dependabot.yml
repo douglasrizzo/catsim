@@ -32,3 +32,14 @@ updates:
       actions-security:
         applies-to: security-updates
         patterns: ["*"]
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    target-branch: "dev"
+    cooldown:
+      default-days: 7
+    groups:
+      pre-commit-hooks:
+        applies-to: version-updates
+        patterns: ["*"]
