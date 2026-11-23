@@ -47,8 +47,8 @@ schedule constant. For a small window the criterion is governed by the
 curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
 window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
-that weights the divergence by the posterior (p. 222), the planned
-{doc}`/api/techniques/selection/klp-selector`. Each integral is computed with SciPy's adaptive
+that weights the divergence by the posterior (p. 222), a planned extension,
+KLP. Each integral is computed with SciPy's adaptive
 quadrature. The selector chooses the non-administered item with the
 largest value of $K_i(\hat{\theta})$.
 
@@ -88,7 +88,7 @@ Any correct implementation must satisfy the following properties:
 Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized adaptive testing. *Applied Psychological Measurement*, 20(3), 213-229. <https://doi.org/10.1177/014662169602000303>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/119092).
 
 :::{seealso}
-Posterior-weighted variant: {doc}`/api/techniques/selection/klp-selector`.
+Posterior-weighted variant: a planned extension, KLP.
 :::
 
 ## API Reference

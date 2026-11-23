@@ -48,19 +48,3 @@ on this rule. Selectors called without a generator raise `ValueError` when items
 :strict:
 :namespace: catsim
 ```
-
-## Planned
-
-:::{warning}
-The techniques in this section are not yet available in the released package.
-They describe planned additions to {mod}`catsim.selection`.
-:::
-
-```{toctree}
-:maxdepth: 1
-
-sympson-hetter-exposure
-mpwi-selector
-klp-selector
-mepv-selector
-```

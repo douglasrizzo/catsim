@@ -23,16 +23,3 @@ warm-wle
 :strict:
 :namespace: catsim
 ```
-
-## Planned
-
-:::{warning}
-The techniques in this section are not yet available in the released package.
-They describe planned additions to {mod}`catsim.estimation`.
-:::
-
-```{toctree}
-:maxdepth: 1
-
-owen-estimator
-```
