@@ -12,8 +12,10 @@ stop once the uncertainty around $\hat{\theta}$ falls entirely within one
 predefined ability band, because the classification is then stable.
 
 The confidence-interval stopper in {mod}`catsim` implements exactly that
-classification-oriented precision rule on top of the shared length and exhaustion
-constraints.
+classification-oriented precision rule. An examinee whose ability lies close to a
+boundary may never be classified, so the stopper is usually combined with a
+{class}`~catsim.stopping.MaxLengthStopper` cap in a {class}`~catsim.stopping.StopRule`
+(see {ref}`combining-stopping-rules`).
 
 ## Definition
 
@@ -38,9 +40,9 @@ $$
 (-\infty, b_1],\ [b_1, b_2],\ \dots,\ [b_m, \infty).
 $$
 
-Operationally, the implementation checks whether the upper bound lies below the
-first boundary, the lower bound lies above the last boundary, or both endpoints
-lie between the same adjacent pair of boundaries.
+Equivalently, the interval lies within one band exactly when no boundary lies
+strictly inside it, which is what the implementation checks. With no administered
+items the interval is infinite, so the test does not stop.
 
 Magis and Raîche (2012, p. 11) describe the classification criterion with a
 single ability threshold: a confidence interval for ability is built after every
@@ -63,23 +65,16 @@ generalizes this to several boundaries; with one boundary the two rules agree.
    * - ``confidence``
      - ``0.95``
      - Confidence level :math:`\gamma` used to form the normal-approximation interval.
-   * - ``min_items``
-     - ``None``
-     - Minimum number of items required before the classification rule may stop the test.
-   * - ``max_items``
-     - ``None``
-     - Maximum number of items allowed before a hard stop.
 ```
 
 ## Behavioral Contracts
 
 Any correct implementation must satisfy the following properties:
 
-1. `interval_bounds` must be nonempty and sorted in ascending order.
-2. The stopper returns `True` only when the full confidence interval lies within a single induced classification interval, after shared hard-stop and gating checks.
+1. `interval_bounds` must be nonempty and sorted in ascending order, and `confidence` must lie strictly between 0 and 1; otherwise the constructor raises `ValueError`.
+2. The stopper returns `True` exactly when the full confidence interval lies within a single induced classification interval.
 3. If the confidence interval crosses any configured boundary, the stopper returns `False`.
-4. The stopper requires `theta` and raises `ValueError` if it is missing.
-5. Reaching `max_items` or exhausting the item bank still forces termination even if the confidence-interval rule is not met.
+4. If no items have been administered, the stopper returns `False`.
 
 ## References
 

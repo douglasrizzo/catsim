@@ -2,16 +2,60 @@
 
 Stopping criteria determine when an adaptive test should terminate. A stopper
 evaluates the current session state after each item and signals whether testing
-should continue or stop.
+should continue or stop. Each stopper checks one criterion, and a
+{class}`~catsim.stopping.StopRule` combines several.
 
 ## Implemented
 
 ```{toctree}
 :maxdepth: 1
 
-test-length-stopper
-min-error-stopper
+max-length-stopper
+standard-error-stopper
 confidence-interval-stopper
+```
+
+(combining-stopping-rules)=
+
+## Combining stopping rules
+
+A variable-length test usually needs more than one criterion: a precision or
+classification target that ends the test once it is met, a cap on the test length
+for the examinees who never meet it, and often a minimum length, so that no test
+ends after a handful of responses. {class}`~catsim.stopping.StopRule` holds such a
+combination. With $m$ administered items, a minimum length $m_{\min}$ and stoppers
+$S_1, \dots, S_K$, it stops when
+
+$$
+m \ge m_{\min} \quad\text{and}\quad S_k \text{ holds for some } k.
+$$
+
+```python
+from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
+# a standard error of at most 0.3 or 40 items, whichever comes first, and never fewer than 5 items
+rule = StopRule(StandardErrorStopper(0.3), MaxLengthStopper(40), min_items=5)
+```
+
+`min_items` holds back every stopper in the rule, the length cap included. A rule
+is itself a stopper, so it goes wherever a stopper does, another rule included.
+
+catR caps its stopping rule the same way: its `maxItems` meta-argument "imposes a
+maximal test length and forces the test to stop if this length is reached, even
+though the stopping rule is not yet satisfied" (Magis and Raîche, 2012, p. 18).
+
+Stoppers are pure, so a rule can be asked again after a run.
+{meth}`~catsim.stopping.StopRule.satisfied` returns the stoppers that hold for a
+session's final items and estimate, which tells, for example, whether a session
+met its precision target or ran to the cap.
+
+No stopper checks whether the item bank is exhausted: when the selector has no
+item left to give, the engine ends the session itself.
+
+```{eval-rst}
+.. autoclass:: catsim.stopping.StopRule
+   :members:
+   :show-inheritance:
 ```
 
 ## Class Hierarchy
@@ -21,3 +65,7 @@ confidence-interval-stopper
 :strict:
 :namespace: catsim
 ```
+
+## References
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
