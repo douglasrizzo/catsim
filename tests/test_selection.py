@@ -223,42 +223,24 @@ class TestMaxInfoSelector:
 
     assert selected == 1
 
-  def test_select_raises_when_exhausted(self) -> None:
-    """Test that select raises NoItemsAvailableError when all items administered."""
-    item_bank = ItemBank.generate_item_bank(5, seed=42)
-    selector = MaxInfoSelector()
-
-    administered = list(range(5))  # All items
-    with pytest.raises(NoItemsAvailableError, match="no more items"):
-      selector.select(
-        item_bank=item_bank,
-        administered_items=administered,
-        est_theta=0.0,
-        rng=np.random.default_rng(42),
-      )
-
 
 class TestRandomSelector:
   """Tests for RandomSelector."""
 
-  def test_select_is_random(self) -> None:
-    """Test that selection is random across calls with different RNGs."""
+  def test_select_draws_every_remaining_item(self) -> None:
+    """Over many seeds every remaining item is drawn; a selector that ignored rng or skipped items would miss some."""
     item_bank = ItemBank.generate_item_bank(50, seed=42)
-    selector = RandomSelector()
+    administered = [3, 17, 25]
 
-    selections = set()
-    for seed in range(20):
-      selected = selector.select(
-        item_bank=item_bank,
-        administered_items=[],
-        est_theta=0.0,
-        rng=np.random.default_rng(seed),
+    selections = {
+      RandomSelector().select(
+        item_bank=item_bank, administered_items=administered, est_theta=0.0, rng=np.random.default_rng(seed)
       )
-      if selected is not None:
-        selections.add(selected)
+      for seed in range(1000)
+    }
 
-    # With 20 different seeds, we should get multiple different selections
-    assert len(selections) > 1
+    # each item is missed by all 1000 draws with probability (46/47) ** 1000, about 4e-10
+    assert selections == set(range(50)) - set(administered)
 
 
 class TestLinearSelector:
@@ -583,11 +565,9 @@ class TestMEISelector:
       response_vector=[True],
     )
 
-    # RecordingEstimator puts both one-step-ahead estimates at 2.0 (the number of responses), so each
-    # score is the information of item 1 plus the candidate at 2.0: the most informative candidate there wins
-    information = item_bank.information(2.0)
-    information[1] = -np.inf
-    assert selected == int(np.argmax(information)) == 9
+    # RecordingEstimator puts both one-step-ahead estimates at 2.0 (the number of responses), so each score is
+    # the information of item 1 plus the candidate's at 2.0, where item 9 (0.1417) just beats item 5 (0.1410)
+    assert selected == 9
 
   def test_select_diverges_from_max_info_when_one_step_estimates_shift(self) -> None:
     """MEI should not collapse to MaxInfo when the response history changes theta.
@@ -1019,7 +999,7 @@ class TestKLSelector:
     assert (uncapped, capped) == (1, 2)
 
   def test_select_raises_when_exhausted(self) -> None:
-    """Test that select raises NoItemsAvailableError when all items are administered."""
+    """An exhausted bank must raise NoItemsAvailableError, which ends the session, not score an empty array."""
     item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
     with pytest.raises(NoItemsAvailableError, match="no more items"):

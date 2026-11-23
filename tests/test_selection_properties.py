@@ -71,7 +71,7 @@ def test_max_info_selector_raises_when_bank_exhausted(params: np.ndarray, seed: 
 )
 @SEL_SETTINGS
 def test_random_selector_returns_valid_unseen_item(params: np.ndarray, data: st.DataObject, seed: int) -> None:
-  """A draw from the whole bank, as the removed replace=True made, returns an administered item for some seed."""
+  """A draw from the whole bank instead of the remaining items would return an administered item for some seed."""
   n = params.shape[0]
   administered = data.draw(st.lists(st.integers(0, n - 1), unique=True, max_size=n - 1))
   item_id = RandomSelector().select(
