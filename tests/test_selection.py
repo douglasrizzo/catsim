@@ -268,38 +268,24 @@ class TestRandomSelector:
 class TestLinearSelector:
   """Tests for LinearSelector."""
 
-  def test_select_returns_items_in_order(self) -> None:
-    """Test that select returns items in the specified order."""
-    indices = [5, 10, 15]
-    selector = LinearSelector(indices)
+  def test_select_follows_the_order_of_the_list(self) -> None:
+    """A selector that administered its items in bank order would return 5 first instead of 15."""
+    selector = LinearSelector([15, 5, 10])
     item_bank = ItemBank.generate_item_bank(50, seed=42)
 
-    # First selection
-    selected1 = selector.select(
-      item_bank=item_bank,
-      administered_items=[],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    assert selected1 == 5
+    administered: list[int] = []
+    for _ in range(3):
+      administered.append(selector.select(item_bank=item_bank, administered_items=administered, est_theta=0.0))
 
-    # Second selection
-    selected2 = selector.select(
-      item_bank=item_bank,
-      administered_items=[5],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    assert selected2 == 10
+    assert administered == [15, 5, 10]
 
-    # Third selection
-    selected3 = selector.select(
-      item_bank=item_bank,
-      administered_items=[5, 10],
-      est_theta=0.0,
-      rng=np.random.default_rng(42),
-    )
-    assert selected3 == 15
+  def test_select_rejects_items_outside_the_bank(self) -> None:
+    """LinearSelector([0, 99]) on a 20-item bank used to return 99, an index the engine then rejected."""
+    selector = LinearSelector([0, 99])
+    item_bank = ItemBank.generate_item_bank(20, seed=1)
+
+    with pytest.raises(ValueError, match=r"items \[99\] are not in the item bank, whose indices run from 0 to 19"):
+      selector.select(item_bank=item_bank, administered_items=[0], est_theta=0.0)
 
 
 class TestUrrySelector:
