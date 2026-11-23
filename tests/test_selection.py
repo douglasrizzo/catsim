@@ -863,6 +863,32 @@ class TestKLSelector:
     value = kl_module.__dict__["_kl_integrand"](4.0, 0.0, 10.0, 0.0, 0.0, 1.0)
     assert value == pytest.approx(-np.log(2.0) + z / 2 + np.log1p(np.exp(-z)), rel=1e-12)
 
+  @pytest.mark.parametrize(
+    "item",
+    [
+      pytest.param((1.0, 0.0, 0.0, 1.0), id="2pl"),
+      pytest.param((1.5, 0.3, 0.2, 1.0), id="3pl"),
+      pytest.param((1.2, -0.5, 0.0, 0.9), id="4pl_without_guessing"),
+      pytest.param((1.8, 0.4, 0.15, 0.85), id="4pl"),
+    ],
+  )
+  @pytest.mark.parametrize(("theta", "theta_hat"), [(-2.0, 1.0), (0.5, -0.5), (3.0, 2.5)])
+  def test_kl_integrand_matches_the_bernoulli_divergence(
+    self, item: tuple[float, float, float, float], theta: float, theta_hat: float
+  ) -> None:
+    """Test the logit-based integrand against P-hat log(P-hat/P) + Q-hat log(Q-hat/Q).
+
+    The c = 0 and d = 1 cases reach the logaddexp branches with an infinite term, the
+    others with two finite ones, so this covers every path of the log-probabilities.
+    """
+    kl_module = importlib.import_module("catsim.selection.kl")
+    p_hat, p = irt.icc(theta_hat, *item), irt.icc(theta, *item)
+    expected = p_hat * np.log(p_hat / p) + (1 - p_hat) * np.log((1 - p_hat) / (1 - p))
+
+    value = kl_module.__dict__["_kl_integrand"](theta, theta_hat, *item)
+
+    assert value == pytest.approx(expected, rel=1e-10, abs=1e-14)
+
   def test_wider_integration_window_accumulates_more_kl_mass(self) -> None:
     """Test that a wider integration window yields more KL mass.
 
