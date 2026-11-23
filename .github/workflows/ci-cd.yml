@@ -252,6 +252,8 @@ jobs:
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           repository-url: https://test.pypi.org/legacy/
+          # The rc number is the run number, which a re-run keeps: skip what a failed attempt uploaded
+          skip-existing: true
 
   build-docs:
     name: Build documentation
