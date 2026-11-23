@@ -929,8 +929,8 @@ class TestKLSelector:
   @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-      pytest.param({"c": 0.0}, "c must be positive", id="zero_c"),
-      pytest.param({"c": -1.0}, "c must be positive", id="negative_c"),
+      pytest.param({"window": 0.0}, "window must be positive", id="zero_window"),
+      pytest.param({"window": -1.0}, "window must be positive", id="negative_window"),
     ],
   )
   def test_init_rejects_invalid_arguments(self, kwargs: dict[str, float], match: str) -> None:
@@ -998,13 +998,13 @@ class TestKLSelector:
       reference = np.trapezoid(divergence, grid, axis=1)
       reference[administered] = -np.inf
 
-      picked = KLSelector(c=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
+      picked = KLSelector(window=2.0).select(item_bank, administered, theta_hat, rng=np.random.default_rng(0))
 
       assert reference[picked] == pytest.approx(reference.max(), rel=1e-6)
 
   @pytest.mark.parametrize(("administered", "expected"), [([2], 1), ([2, 3, 4, 5], 0)])
   def test_window_shrinks_with_the_square_root_of_the_test_length(self, administered: list[int], expected: int) -> None:
-    """With c = 2 the window is theta_hat +- 2 after one item and +- 1 after four.
+    """With window c = 2 the window is theta_hat +- 2 after one item and +- 1 after four.
 
     At theta_hat = 0, item 0 (a = 1, b = 0) and item 1 (a = 4, b = 1.5) trade places as the window narrows:
     their KL integrals are 0.610 and 0.869 over +- 2, 0.225 and 0.146 over +- 1.41, and 0.081 and 0.028
@@ -1013,12 +1013,12 @@ class TestKLSelector:
     filler = [1.0, 3.0, 0.0, 1.0]
     item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [4.0, 1.5, 0.0, 1.0], filler, filler, filler, filler]))
 
-    assert KLSelector(c=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
+    assert KLSelector(window=2.0).select(item_bank, administered, 0.0, rng=np.random.default_rng(0)) == expected
 
   def test_select_skips_items_at_the_exposure_cap(self) -> None:
     """The item with the most KL information is passed over while its exposure rate is at r_max."""
     item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 1.5, 0.0, 1.0]]))
-    selector = KLSelector(c=0.5, r_max=0.5)
+    selector = KLSelector(window=0.5, r_max=0.5)
 
     uncapped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0))
     capped = selector.select(item_bank, [], 0.0, rng=np.random.default_rng(0), exposure_rates=np.array([0.0, 0.5, 0.0]))
