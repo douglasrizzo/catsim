@@ -97,6 +97,7 @@ ignore = [
   "E111",
   "E114",
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
+  "RUF201",  # Keep rule codes in this config rather than migrating to rule names
   "S101",
 ]
 
