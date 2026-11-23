@@ -5,13 +5,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+import numpy
+
 from .exceptions import NoItemsAvailableError
 from .irt import icc
 from .state import CatSessionState, CatStepResult, ExposureTracker, SessionStatus, StopReason
 
 if TYPE_CHECKING:
-  import numpy
-
   from .estimation import BaseEstimator
   from .initialization import BaseInitializer
   from .item_bank import ItemBank
@@ -153,7 +153,45 @@ class CatEngine:
     response: bool,
     context: RunContext,
   ) -> CatStepResult:
-    """Apply a response and update the session state."""
+    """Record the examinee's response to an item, update the estimate and check the stopper.
+
+    The step is atomic: the inputs are validated and the new estimate is computed before the
+    session or the exposure tracker change, so a step that raises leaves both as they were.
+
+    Parameters
+    ----------
+    state : CatSessionState
+        The session that administered the item. It must not be stopped.
+    item_bank : ItemBank
+        Item bank used by the session.
+    item_id : int
+        Index of the administered item, usually the one :meth:`select_next` returned.
+    response : bool
+        Whether the examinee answered the item correctly; a ``bool`` or ``numpy.bool_``.
+    context : RunContext
+        Runtime services of the run; the item's administration is recorded in its exposure
+        tracker, if it has one.
+
+    Returns
+    -------
+    CatStepResult
+        The administered item, the response, the updated estimate and whether the session stopped.
+
+    Raises
+    ------
+    ValueError
+        If the session has stopped, the item index is outside the bank or the item was already
+        administered in this session.
+    TypeError
+        If the response is not a ``bool`` or ``numpy.bool_``.
+    """
+    if state.status == SessionStatus.STOPPED:
+      msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
+      raise ValueError(msg)
+    # Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.
+    if not isinstance(response, (bool, numpy.bool_)):
+      msg = f"response must be a bool, got {type(response).__name__} {response!r}"
+      raise TypeError(msg)
     if item_id < 0 or item_id >= item_bank.n_items:
       msg = f"Invalid item index {item_id}. Must be between 0 and {item_bank.n_items - 1}"
       raise ValueError(msg)
@@ -161,22 +199,21 @@ class CatEngine:
       msg = f"Item {item_id} has already been administered in this session"
       raise ValueError(msg)
 
-    state.administered_item_ids.append(item_id)
-    state.responses.append(response)
-
-    if context.exposure_tracker is not None:
-      context.exposure_tracker.record(item_id)
-
+    response = bool(response)
     updated_theta = self._estimator.estimate(
       item_bank=item_bank,
-      administered_items=state.administered_item_ids,
-      response_vector=state.responses,
+      administered_items=[*state.administered_item_ids, item_id],
+      response_vector=[*state.responses, response],
       est_theta=state.current_theta,
     )
+
+    state.administered_item_ids.append(item_id)
+    state.responses.append(response)
+    if context.exposure_tracker is not None:
+      context.exposure_tracker.record(item_id)
     state.current_theta = updated_theta
     state.theta_history.append(updated_theta)
 
-    # After updating the estimate, check whether the completed step satisfied the stop rule.
     stopped = self.should_stop(state, item_bank)
     if stopped:
       _end(state, StopReason.STOPPER)

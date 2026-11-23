@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 
 import numpy as np
@@ -110,6 +111,15 @@ class RecordingEstimator:
     self.seen_response_vector = response_vector
     self.seen_theta = est_theta
     return self.theta
+
+
+class FailingEstimator:
+  """Estimator stub that fails on every call."""
+
+  def estimate(self, *, item_bank, administered_items, response_vector, est_theta) -> float:
+    del item_bank, administered_items, response_vector, est_theta
+    msg = "estimation failed"
+    raise ValueError(msg)
 
 
 class CountingLengthStopper(BaseStopper):
@@ -227,29 +237,6 @@ def test_select_next_passes_none_exposure_rates_without_total_sessions(item_bank
   assert selector.seen_exposure_rates is None
 
 
-def test_apply_response_updates_session_histories(
-  item_bank,
-  fixed_initializer,
-  random_selector,
-  estimator,
-  fixed_length_stopper,
-  rng,
-) -> None:
-  """Applying a response should append item, response, and theta history."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
-  context = RunContext(rng=rng)
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
-
-  result = engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
-
-  assert result.selected_item_id == 0
-  assert result.response is True
-  assert session.administered_item_ids == [0]
-  assert session.responses == [True]
-  assert len(session.theta_history) == 2
-  assert session.current_theta == session.theta_history[-1]
-
-
 def test_apply_response_records_exposure_and_returns_complete_step_result(item_bank) -> None:
   """Applying a response should record exposure and return a faithful step result."""
   estimator = RecordingEstimator(theta=1.1)
@@ -263,8 +250,8 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert tracker.counts[3] == 1
   assert tracker.counts.sum() == 1
   assert estimator.seen_item_bank is item_bank
-  assert estimator.seen_administered_items is session.administered_item_ids
-  assert estimator.seen_response_vector is session.responses
+  assert estimator.seen_administered_items == [3]
+  assert estimator.seen_response_vector == [True]
   assert estimator.seen_theta == pytest.approx(0.0)
   assert session.status == SessionStatus.IN_PROGRESS
   assert session.stop_reason is None
@@ -300,6 +287,65 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   assert result.updated_theta == pytest.approx(0.3)
   assert result.session.status == SessionStatus.STOPPED
   assert result.session.stop_reason is StopReason.STOPPER
+
+
+def test_apply_response_leaves_the_session_unchanged_when_estimation_fails(item_bank) -> None:
+  """A response whose estimate fails is not applied at all.
+
+  Fails if the item, the response or its exposure is recorded before the estimator runs: the
+  half-applied step left the session with one more response than estimates, and every later
+  estimate on it failed.
+  """
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), FailingEstimator(), RecordingStopper(False))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  before = copy.deepcopy(session)
+
+  with pytest.raises(ValueError, match="estimation failed"):
+    engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+
+  assert session == before
+  assert tracker.counts.sum() == 0
+
+
+@pytest.mark.parametrize("response", [1, 0, 1.0, "yes", None])
+def test_apply_response_rejects_a_response_that_is_not_a_bool(item_bank, response) -> None:
+  """Only ``bool`` and ``numpy.bool_`` responses are accepted, and a rejected one changes nothing.
+
+  Fails if 1, 0 or 1.0 are stored as given in the session's list of booleans, or if "yes" or None
+  reach the estimator.
+  """
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  before = copy.deepcopy(session)
+
+  with pytest.raises(TypeError, match="response must be a bool"):
+    engine.apply_response(session, item_bank, item_id=3, response=response, context=context)
+
+  assert session == before
+  assert tracker.counts.sum() == 0
+
+
+def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
+  """A session that has stopped accepts no more responses.
+
+  Fails if apply_response appends an item to a session its stopper has already ended.
+  """
+  engine = CatEngine(
+    RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), CountingLengthStopper(max_items=1)
+  )
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
+  before = copy.deepcopy(session)
+
+  with pytest.raises(ValueError, match=r"Session 0 has stopped \(reason: stopper\)"):
+    engine.apply_response(session, item_bank, item_id=1, response=True, context=context)
+
+  assert session == before
 
 
 def test_apply_response_returns_immutable_session_snapshot(
