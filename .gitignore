@@ -160,7 +160,13 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
+# macOS Finder metadata
+.DS_Store
+
+# Local-only: the maintainer's paper shelf and the pre-commit cache
+papers/
+.pre-commit-cache/
+
 /.vscode/
 .plans/
 .claude/
-mutants/

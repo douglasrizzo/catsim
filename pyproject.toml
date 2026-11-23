@@ -1,9 +1,9 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+# setuptools 77 is the first release that reads the SPDX `license` string below.
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-urls = { homepage = "https://douglasrizzo.com.br/catsim" }
 authors = [
     { name = "Douglas De Rizzo Meneghetti", email = "douglasrizzo@gmail.com" },
 ]
@@ -12,15 +12,26 @@ classifiers = [
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Education :: Testing",
+    "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
+]
+keywords = [
+    "computerized adaptive testing",
+    "CAT",
+    "item response theory",
+    "IRT",
+    "psychometrics",
+    "simulation",
 ]
 name = "catsim"
 version = "0.21.0"
-description = "Computerized Adaptive Testing Simulator"
+description = "Computerized adaptive testing toolkit"
 dependencies = [
     "scipy",
     "numexpr",
@@ -31,6 +42,12 @@ dependencies = [
 requires-python = ">=3.11"
 readme = "README.md"
 license = "BSD-3-Clause"
+
+[project.urls]
+Documentation = "https://douglasrizzo.com.br/catsim"
+Source = "https://github.com/douglasrizzo/catsim"
+Issues = "https://github.com/douglasrizzo/catsim/issues"
+Changelog = "https://github.com/douglasrizzo/catsim/releases"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
@@ -50,7 +67,7 @@ select = [
     "I",
     "N",
     "D",
-    "U",
+    "UP",
     "ANN",
     "B",
     "A",
@@ -65,10 +82,10 @@ select = [
     "RET",
     "SLF",
     "SIM",
-    "TCH",
+    "TC",
     "ARG",
     "PTH",
-    "TD",
+    "FIX",  # bans TODO/FIXME/XXX/HACK comments outright, which leaves TD nothing to check
     "TID251",  # banned APIs only; TID252 would ban the package's relative imports
     "PD",
     "PLE",
@@ -81,8 +98,8 @@ select = [
     "PLR2",
     "PLR5",
     "PLR6",
-    "TRY201",
-    "TRY400",
+    "TRY",
+    "PGH",
     "FLY",
     "NPY",
     "PERF",
@@ -97,6 +114,7 @@ ignore = [
   "E111",
   "E114",
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
+  "RUF201",  # Keep rule codes in this config rather than migrating to rule names
   "S101",
 ]
 
@@ -144,44 +162,40 @@ line-ending = "auto"
 
 [dependency-groups]
 dev = [
-    "black>=26.3.1",
     "hypothesis>=6.127.0",
+    "import-linter>=2.17",
     "ipykernel>=7.1.0",
-    "mutmut>=3.5.0",
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
     "pylint>=4.0.5",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.15.9",
-    "scikit-learn>=1.7.2",
     "ty>=0.0.28",
 ]
 docs = [
-    "bibtex-pygments-lexer>=0.0.1",
     "matplotlib>=3.10.6",
     "myst-parser>=4.0.1",
     "numpydoc>=1.9.0",
     "sphinx>=8.1.3",
-    "sphinx-autodoc-annotation>=1.0.post1",
     "sphinxcontrib-bibtex>=2.6.3",
     "pydata-sphinx-theme>=0.16.0",
     "sphinxcontrib-mermaid>=2.1.1",
 ]
 
-[tool.mutmut]
-paths_to_mutate = [
-    "src/catsim/engine.py",
-    "src/catsim/state.py",
-    "src/catsim/simulation.py",
+[tool.pytest.ini_options]
+# The suite and the package's docstring examples.
+testpaths = ["tests", "src/catsim"]
+# importlib: the tests and the docstring examples both import the catsim that is installed. With the
+# default mode, running the suite from an unpacked sdist imported src/catsim a second time beside the
+# installed package and failed with "import file mismatch".
+addopts = "--strict-markers --strict-config --doctest-modules --import-mode=importlib"
+xfail_strict = true
+filterwarnings = ["error"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
 ]
-tests_dir = ["tests/"]
-also_copy = ["src/catsim"]
-do_not_mutate = [
-    "*/__init__.py",
-    "src/catsim/plot.py",
-]
-max_stack_depth = 8
 
 [tool.ty.src]
 include = ["src/catsim"]
@@ -245,3 +259,75 @@ min-similarity-lines = 10
 ignore-imports = true
 ignore-docstrings = true
 ignore-comments = true
+
+# ---------------------------------------------------------------------------
+# import-linter: the layering AGENTS.md describes, checked by `lint-imports`
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "catsim"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+id = "layers"
+name = "catsim layers"
+type = "layers"
+containers = ["catsim"]
+exhaustive = true  # every new top-level module must be placed in a layer
+layers = [
+  "simulation : plot",
+  "engine",
+  "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
+  "state",
+  "cat",
+  "item_bank",
+  "irt",
+  "_typing : exceptions",
+]
+ignore_imports = [
+  # MEISelector runs one-step-ahead ability updates with an estimator.
+  "catsim.selection.expected_info -> catsim.estimation.base",
+  "catsim.selection.expected_info -> catsim.estimation.numerical",
+]
+
+[[tool.importlinter.contracts]]
+id = "no-runtime-in-domain"
+name = "domain and strategies never import runtime objects"
+type = "forbidden"
+source_modules = [
+  "catsim.irt",
+  "catsim.item_bank",
+  "catsim.cat",
+  "catsim.selection",
+  "catsim.estimation",
+  "catsim.initialization",
+  "catsim.stopping",
+]
+forbidden_modules = ["catsim.state", "catsim.engine", "catsim.simulation", "catsim.plot"]
+
+[[tool.importlinter.contracts]]
+id = "plot-only-matplotlib"
+name = "only catsim.plot imports matplotlib"
+type = "forbidden"
+source_modules = [
+  "catsim._typing",
+  "catsim.exceptions",
+  "catsim.irt",
+  "catsim.item_bank",
+  "catsim.cat",
+  "catsim.state",
+  "catsim.engine",
+  "catsim.simulation",
+  "catsim.selection",
+  "catsim.estimation",
+  "catsim.initialization",
+  "catsim.stopping",
+]
+forbidden_modules = ["matplotlib", "mpl_toolkits"]
+
+[[tool.importlinter.contracts]]
+id = "root-without-plot"
+name = "importing catsim does not load catsim.plot or matplotlib"
+type = "forbidden"
+source_modules = ["catsim"]
+forbidden_modules = ["catsim.plot", "matplotlib", "mpl_toolkits"]
+as_packages = false  # the root __init__ alone; catsim.plot itself is a descendant of catsim

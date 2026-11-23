@@ -1,6 +1,7 @@
 """Tests for catsim.irt module."""
 
 import math
+import re
 from collections.abc import Callable
 
 import numpy as np
@@ -307,20 +308,27 @@ class TestReliability:
 
 
 class TestMaxInfo:
-  """Tests for the max_info() function."""
+  """Tests for the max_info() and max_info_hpc() functions."""
 
   def test_max_info_at_difficulty(self) -> None:
-    """Test that max info returns difficulty for 2PL."""
-    # For 2PL model (c=0, d=1), max info is at theta = b
+    """A 2PL item is most informative at theta = b; any other value means the 2PL branch is wrong."""
     theta_max = irt.max_info(a=1.0, b=0.5, c=0.0, d=1.0)
     assert theta_max == pytest.approx(0.5)
 
   def test_max_info_shifts_with_guessing(self) -> None:
-    """Test that pseudo-guessing shifts max info location."""
-    # With guessing parameter, max info shifts above b
-    theta_no_guess = irt.max_info(a=1.0, b=0.0, c=0.0, d=1.0)
+    """A 3PL item is most informative at b + log((1 + sqrt(1 + 8c)) / 2) / a (Birnbaum): 0.2671 for c = 0.2, not b."""
     theta_with_guess = irt.max_info(a=1.0, b=0.0, c=0.2, d=1.0)
-    assert theta_with_guess > theta_no_guess
+    assert theta_with_guess == pytest.approx(0.26714189097421254, rel=1e-12)
+
+  def test_max_info_hpc_result_is_not_a_view_of_the_items(self) -> None:
+    """Writing into the result leaves the item matrix alone; for 2PL items it used to be the difficulty column."""
+    items = np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]])
+    thetas = irt.max_info_hpc(items)
+    np.testing.assert_array_equal(thetas, [0.5, -0.2])
+
+    thetas[0] = 99.0
+
+    np.testing.assert_array_equal(items[:, 1], [0.5, -0.2])
 
 
 class TestNormalizeItemBank:
@@ -367,72 +375,98 @@ class TestNormalizeItemBank:
 class TestValidateItemBank:
   """Tests for the validate_item_bank() function."""
 
-  def test_validate_valid_bank(self, capsys: pytest.CaptureFixture[str]) -> None:
-    """A valid item bank passes validation silently; an empty line used to be printed."""
-    items = np.array([[1.0, 0.0, 0.1, 0.95], [1.2, 0.5, 0.15, 0.98]])
-    irt.validate_item_bank(items, raise_err=True)
-    irt.validate_item_bank(items, raise_err=False)
-    assert not capsys.readouterr().out
+  def test_validate_accepts_parameters_on_the_edges_of_their_ranges(self) -> None:
+    """A small positive a, c = 0 and d = 1 are valid; a strict comparison in the wrong place would reject them."""
+    items = np.array([[1e-3, -5.0, 0.0, 1.0], [1.2, 0.5, 0.15, 0.98]])
+
+    irt.validate_item_bank(items)
 
   def test_validate_not_numpy_array_raises(self) -> None:
-    """Test that non-numpy array raises TypeError."""
+    """A nested list is not an item matrix; without the type check it would fail later with an unrelated error."""
     items = [[1.0, 0.0, 0.1, 0.95]]
     with pytest.raises(TypeError, match=r"not of type numpy\.ndarray"):
-      irt.validate_item_bank(items, raise_err=True)  # type: ignore[arg-type]
+      irt.validate_item_bank(items)  # type: ignore[arg-type]
 
-  def test_validate_extra_columns_raises(self) -> None:
-    """A fifth column is an error; it used to print a warning and skip every parameter check, even of a = -1."""
-    items = np.array([[-1.0, 0.0, 0.1, 0.95, 0.0]])
+  @pytest.mark.parametrize(
+    "shape",
+    [
+      pytest.param((4,), id="one dimension"),
+      pytest.param((3, 0), id="no columns"),
+      pytest.param((2, 3), id="three columns"),
+      pytest.param((1, 5), id="five columns"),
+      pytest.param((2, 4, 1), id="three dimensions"),
+    ],
+  )
+  def test_validate_rejects_a_matrix_that_is_not_n_by_4(self, shape: tuple[int, ...]) -> None:
+    """A matrix that is not n x 4 raises ValueError naming its shape.
 
-    with pytest.raises(ValueError, match="5 columns; it must have exactly 4"):
-      irt.validate_item_bank(items, raise_err=True)
+    Without the shape check, missing columns fail with an IndexError and a fifth column is ignored.
+    """
+    items = np.ones(shape)
 
-  def test_validate_matrix_without_columns_raises(self) -> None:
-    """An (n, 0) matrix has no parameters at all; it used to pass validation silently."""
-    with pytest.raises(ValueError, match="no columns"):
-      irt.validate_item_bank(np.empty((3, 0)), raise_err=True)
+    with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
+      irt.validate_item_bank(items)
 
-  def test_validate_negative_discrimination_raises(self) -> None:
-    """Test that negative discrimination raises ValueError."""
-    items = np.array([[-0.5, 0.0, 0.1, 0.95]])
-    with pytest.raises(ValueError, match="discrimination <= 0"):
-      irt.validate_item_bank(items, raise_err=True)
+  def test_validate_rejects_a_matrix_without_items(self) -> None:
+    """A 0 x 4 matrix raises ValueError: with no rows, every parameter check passes vacuously."""
+    with pytest.raises(ValueError, match="no items"):
+      irt.validate_item_bank(np.empty((0, 4)))
 
-  def test_validate_zero_discrimination_raises(self) -> None:
-    """An item with a = 0 carries no information, and its point of maximum information is undefined."""
-    items = np.array([[0.0, 0.0, 0.1, 0.95]])
-    with pytest.raises(ValueError, match="discrimination <= 0"):
-      irt.validate_item_bank(items, raise_err=True)
+  @pytest.mark.parametrize(
+    ("item", "message"),
+    [
+      pytest.param([-0.5, 0.0, 0.1, 0.95], "discrimination <= 0", id="a < 0"),
+      pytest.param([0.0, 0.0, 0.1, 0.95], "discrimination <= 0", id="a = 0"),
+      pytest.param([1.0, 0.0, -0.1, 0.95], "pseudo-guessing < 0", id="c < 0"),
+      pytest.param([1.0, 0.0, 1.5, 0.95], "pseudo-guessing > 1", id="c > 1"),
+      pytest.param([1.0, 0.0, 0.1, 1.5], "upper asymptote > 1", id="d > 1"),
+      pytest.param([1.0, 0.0, 0.1, -0.1], "upper asymptote < 0", id="d < 0"),
+      pytest.param([1.0, 0.0, 0.3, 0.3], "pseudo-guessing >= upper asymptote", id="c = d"),
+    ],
+  )
+  def test_validate_rejects_a_parameter_out_of_its_range(self, item: list[float], message: str) -> None:
+    """Each range check raises ValueError naming the parameter; it used to print the message and return by default.
 
-  def test_validate_guessing_not_below_asymptote_raises(self) -> None:
-    """With c >= d the ICC is flat or decreasing, and the information formula divides by d - c = 0."""
-    items = np.array([[1.0, 0.0, 0.3, 0.3]])
-    with pytest.raises(ValueError, match="pseudo-guessing >= upper asymptote"):
-      irt.validate_item_bank(items, raise_err=True)
+    a = 0 gives no information and no point of maximum information; c >= d makes the ICC flat or decreasing and the
+    information formula divide by d - c.
+    """
+    items = np.array([[1.0, 0.0, 0.0, 1.0], item])
 
-  def test_validate_negative_guessing_raises(self) -> None:
-    """Test that negative guessing parameter raises ValueError."""
-    items = np.array([[1.0, 0.0, -0.1, 0.95]])
-    with pytest.raises(ValueError, match="pseudo-guessing < 0"):
-      irt.validate_item_bank(items, raise_err=True)
+    with pytest.raises(ValueError, match=message):
+      irt.validate_item_bank(items)
 
-  def test_validate_guessing_greater_than_one_raises(self) -> None:
-    """Test that guessing > 1 raises ValueError."""
-    items = np.array([[1.0, 0.0, 1.5, 0.95]])
-    with pytest.raises(ValueError, match="pseudo-guessing > 1"):
-      irt.validate_item_bank(items, raise_err=True)
+  @pytest.mark.parametrize(
+    "item",
+    [
+      pytest.param([np.nan, 0.0, 0.0, 1.0], id="a = nan"),
+      pytest.param([1.0, np.nan, 0.0, 1.0], id="b = nan"),
+      pytest.param([1.0, 0.0, np.nan, 1.0], id="c = nan"),
+      pytest.param([1.0, 0.0, 0.0, np.nan], id="d = nan"),
+      pytest.param([np.inf, 0.0, 0.0, 1.0], id="a = inf"),
+      pytest.param([-np.inf, 0.0, 0.0, 1.0], id="a = -inf"),
+      pytest.param([1.0, np.inf, 0.0, 1.0], id="b = inf"),
+      pytest.param([1.0, -np.inf, 0.0, 1.0], id="b = -inf"),
+    ],
+  )
+  def test_validate_rejects_nan_and_infinite_parameters(self, item: list[float]) -> None:
+    """NaN and infinite parameters raise ValueError.
 
-  def test_validate_asymptote_greater_than_one_raises(self) -> None:
-    """Test that upper asymptote > 1 raises ValueError."""
-    items = np.array([[1.0, 0.0, 0.1, 1.5]])
-    with pytest.raises(ValueError, match="upper asymptote > 1"):
-      irt.validate_item_bank(items, raise_err=True)
+    Every range check compares, and comparisons with NaN are false; b was never checked and a = inf passed, so such an
+    item was accepted and turned the ICC, likelihoods and information sums it entered into NaN.
+    """
+    items = np.array([[1.0, 0.5, 0.1, 1.0], item])
 
-  def test_validate_negative_asymptote_raises(self) -> None:
-    """Test that negative upper asymptote raises ValueError."""
-    items = np.array([[1.0, 0.0, 0.1, -0.1]])
-    with pytest.raises(ValueError, match="upper asymptote < 0"):
-      irt.validate_item_bank(items, raise_err=True)
+    with pytest.raises(ValueError, match="NaN or infinite parameters"):
+      irt.validate_item_bank(items)
+
+  def test_validate_reports_every_violation_on_one_line(self) -> None:
+    """All violations are listed, separated by "; "; the messages used to start with and be joined by newlines."""
+    items = np.array([[-1.0, 0.0, -0.1, 1.0]])
+
+    with pytest.raises(ValueError) as excinfo:
+      irt.validate_item_bank(items)
+
+    assert str(excinfo.value) == "There are items with discrimination <= 0; There are items with pseudo-guessing < 0"
 
 
 class TestLogLikelihood:

@@ -2,8 +2,8 @@
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="sphinx/logo/stacked-dark.svg" />
-    <img src="sphinx/logo/stacked-light.svg" alt="catsim" width="240" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/douglasrizzo/catsim/dev/sphinx/logo/stacked-dark.svg" />
+    <img src="https://raw.githubusercontent.com/douglasrizzo/catsim/dev/sphinx/logo/stacked-light.svg" alt="catsim" width="240" />
   </picture>
 </p>
 <!-- DO NOT EDIT README.md, edit sphinx/readme_head.md and sphinx/readme_body.md -->
@@ -70,7 +70,7 @@ print(result.rmse)
 
 Runtime dependencies are declared in `pyproject.toml` and are installed automatically with `pip install catsim` or `uv pip install catsim`.
 
-If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage, mutation testing) with:
+If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage) with:
 
 ```bash
 uv sync --group dev

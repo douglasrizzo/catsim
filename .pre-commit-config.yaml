@@ -2,9 +2,20 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   # 1. Fast fail checks first
+  - repo: local
+    hooks:
+      # Catches `git add -f` past .gitignore too.
+      - id: forbid-local-dirs
+        name: local-only directories must not be committed
+        entry: these paths are local-only (see AGENTS.md)
+        language: fail
+        files: ^(\.claude|\.plans|\.pre-commit-cache|papers)/
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024, --enforce-all]  # --enforce-all: CI runs --all-files, where nothing is newly added
       - id: check-merge-conflict
       - id: check-ast
       - id: check-toml
@@ -37,35 +48,39 @@ repos:
         files: \.ipynb$
 
   # 4. Linting and formatting
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.0
-    hooks:
-      - id: ruff-check
-        args: [--fix]
-        types_or: [python, pyi]
-      - id: ruff-format
-        types_or: [python, pyi]
-
   - repo: local
     hooks:
-      - id: ruff-check-notebooks
-        name: ruff check notebooks
-        entry: uv run --only-group dev ruff check --fix
+      # Ruff runs from uv.lock, so these hooks and `uv run ruff` never disagree.
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --only-group dev ruff check --force-exclude --fix
         language: system
-        files: \.ipynb$
-        types: [file]
-      - id: ruff-format-notebooks
-        name: ruff format notebooks
-        entry: uv run --only-group dev ruff format
+        types_or: [python, pyi, jupyter]
+        require_serial: true
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --only-group dev ruff format --force-exclude
         language: system
-        files: \.ipynb$
-        types: [file]
+        types_or: [python, pyi, jupyter]
+        require_serial: true
       - id: ty-check
         name: ty check
-        entry: uv run --only-group dev ty check
+        entry: uv run --group dev ty check
         language: system
         pass_filenames: false
         types_or: [python, pyi]
+      - id: pylint
+        name: pylint
+        entry: uv run --group dev pylint src/catsim
+        language: system
+        pass_filenames: false  # cyclic-import and duplicate-code need the whole package
+        files: ^(src/.*\.py|pyproject\.toml)$
+      - id: import-linter
+        name: import-linter
+        entry: uv run --group dev lint-imports
+        language: system
+        pass_filenames: false
+        files: ^(src/.*\.py|pyproject\.toml)$
       - id: pytest-nbmake
         name: pytest nbmake
         entry: env MPLBACKEND=Agg uv run --group dev pytest --nbmake --nbmake-timeout=300 -q

@@ -45,9 +45,9 @@ def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None
 )
 @BANK_SETTINGS
 def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, itemtype: str) -> None:
+  """Every model and seed gives n items that pass validation; an invalid draw (a <= 0, c >= d) would raise here."""
   bank = ItemBank.generate_item_bank(n, itemtype=itemtype, seed=seed, validate=True)
   assert bank.n_items == n
-  irt.validate_item_bank(bank.items, raise_err=True)
 
 
 @given(

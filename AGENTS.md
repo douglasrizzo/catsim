@@ -80,11 +80,14 @@ hidden runtime coupling.
 ## Testing And Validation
 
 - Use `uv` for project commands.
+- Pre-commit runs ruff, ty, pylint, import-linter and the notebooks; run them all with
+  `uv run pre-commit run --all-files`.
 - Preferred validation commands:
-  - `uv run pytest -q`
-  - `uv run ruff check src/catsim tests`
+  - `uv run pytest -q` (also runs the docstring examples in `src/catsim`; warnings are errors)
+  - `uv run ruff check .`
   - `uv run pylint src/catsim`
   - `uv run ty check`
+  - `uv run lint-imports` (the layer contracts in `pyproject.toml`)
 - Notebook validation command:
   - `uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb`
 
@@ -93,9 +96,7 @@ hidden runtime coupling.
 - For targeted code changes, run the relevant subset of tests first.
 - Before finalizing meaningful code changes, run at least:
   - relevant pytest coverage for touched modules
-  - `ruff check`
-  - `pylint src/catsim`
-  - `ty check`
+  - `uv run pre-commit run --all-files`
 - When notebook content or notebook-related tooling changes, validate the affected notebooks.
 
 ### Environment Caveat
@@ -113,7 +114,7 @@ hidden runtime coupling.
   clear defense-in-depth reason.
 - Preserve the current notebook hook strategy:
   - `nbstripout`
-  - notebook Ruff hooks
+  - the Ruff hooks, which also cover notebooks
   - notebook execution via `pytest --nbmake`
 - Do not route generic JSON formatting hooks through notebooks if they conflict with notebook-
   specific tooling.
@@ -123,6 +124,7 @@ hidden runtime coupling.
 - Documentation availability is part of release readiness.
 - Publishing workflows are intentionally coupled to the documentation deployment path.
 - Do not decouple package publication from docs deployment unless explicitly requested.
+- Bump the version with `uv version` only; `pyproject.toml` is its single source.
 
 ## Commit And Git Hygiene
 
@@ -132,7 +134,10 @@ hidden runtime coupling.
 - Never commit local-only directories such as:
   - `.claude/`
   - `.pre-commit-cache/`
+  - `papers/`
   - other tool caches or scratch directories
+- A pre-commit hook rejects staged paths under `.claude/`, `.plans/`, `.pre-commit-cache/` and
+  `papers/`, even when added with `git add -f`.
 - `.plans/` is local working space and is gitignored.
   - Do not treat `.plans/` as durable project documentation.
 - Preserve user changes in a dirty worktree. Do not revert unrelated modifications.
@@ -151,7 +156,9 @@ hidden runtime coupling.
 - Run targeted tests:
   - `uv run pytest tests/<module>.py -q`
 - Run lint:
-  - `uv run ruff check src/catsim tests`
+  - `uv run ruff check .`
+- Run every pre-commit hook (ruff, ty, pylint, import-linter, notebooks):
+  - `uv run pre-commit run --all-files`
 - Run type checks:
   - `uv run ty check`
 - Run notebook validation:

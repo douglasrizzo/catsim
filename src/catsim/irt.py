@@ -712,14 +712,15 @@ def max_info_hpc(items: FloatArray) -> FloatArray:
   Returns
   -------
   numpy.ndarray
-      An array of theta values, one for each item, indicating where each item's
+      A new array of theta values, one for each item, indicating where each item's
       information function reaches its maximum.
   """
   a, b, c, d = _split_params(items)
 
   if all(d == 1):
     if all(c == 0):
-      return b
+      # a copy, so writing into the result cannot change the caller's item matrix
+      return numpy.array(b)
     return numexpr.evaluate("b + (1 / a) * log((1 + sqrt(1 + 8 * c)) / 2)", local_dict={"a": a, "b": b, "c": c})
 
   u = numexpr.evaluate("-(3 / 4) + ((c + d - 2 * c * d) / 2)", local_dict={"c": c, "d": d})
@@ -980,7 +981,7 @@ def validate_response_vector(response_vector: list[bool], n_items: int) -> None:
     raise ValueError(msg)
 
 
-def validate_item_bank(items: FloatArray, raise_err: bool = False) -> None:
+def validate_item_bank(items: FloatArray) -> None:
   r"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.
 
   The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item
@@ -990,58 +991,49 @@ def validate_item_bank(items: FloatArray, raise_err: bool = False) -> None:
   The item matrix must have at least one line (representing an item) and exactly four columns,
   representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
   (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered
-  valid if, for all items in the matrix, :math:`a > 0 \wedge 0 \leq c < d \leq 1`.
+  valid if every parameter is finite and, for all items in the matrix,
+  :math:`a > 0 \wedge 0 \leq c < d \leq 1`.
 
   Parameters
   ----------
   items : numpy.ndarray
       The item matrix to validate.
-  raise_err : bool, optional
-      Whether to raise an error in case the validation fails (True) or just print
-      the error message to standard output (False). Default is False.
 
   Raises
   ------
   TypeError
       If items is not a numpy.ndarray.
   ValueError
-      If raise_err is True and the item matrix does not meet validation criteria.
+      If the item matrix is not :math:`n \times 4`, has no items, or has a parameter that is NaN,
+      infinite or out of its range. The message lists every parameter violation found, separated by
+      ``"; "``.
   """
   if not isinstance(items, numpy.ndarray):
     msg = "Item matrix is not of type numpy.ndarray"
     raise TypeError(msg)
 
-  err = ""
+  if items.shape[1:] != (NumParams.PL4.value,):
+    msg = f"Item matrix has shape {items.shape}; it must be 2-D with exactly 4 columns: a, b, c and d"
+    raise ValueError(msg)
+  if items.shape[0] == 0:
+    msg = "Item matrix has no items"
+    raise ValueError(msg)
 
-  if len(items.shape) == 1:
-    err += "Item matrix has only one dimension."
-  elif items.shape[1] > NumParams.PL4.value:
-    err += f"\nItem matrix has {items.shape[1]} columns; it must have exactly 4: a, b, c and d"
-  elif items.shape[1] < NumParams.PL4.value:
-    if items.shape[1] == NumParams.PL1.value:
-      err += "\nItem matrix has no discrimination, pseudo-guessing or upper asymptote parameter columns"
-    elif items.shape[1] == NumParams.PL2.value:
-      err += "\nItem matrix has no pseudo-guessing or upper asymptote parameter columns"
-    elif items.shape[1] == NumParams.PL3.value:
-      err += "\nItem matrix has no upper asymptote parameter column"
-    else:
-      err += "\nItem matrix has no columns; it must have exactly 4: a, b, c and d"
-  else:
-    if any(items[:, 0] <= 0):
-      err += "\nThere are items with discrimination <= 0"
-    if any(items[:, 2] < 0):
-      err += "\nThere are items with pseudo-guessing < 0"
-    if any(items[:, 2] > 1):
-      err += "\nThere are items with pseudo-guessing > 1"
-    if any(items[:, 3] > 1):
-      err += "\nThere are items with upper asymptote > 1"
-    if any(items[:, 3] < 0):
-      err += "\nThere are items with upper asymptote < 0"
-    if any(items[:, 2] >= items[:, 3]):
-      err += "\nThere are items with pseudo-guessing >= upper asymptote"
+  errors: list[str] = []
+  if not numpy.isfinite(items).all():
+    errors.append("There are items with NaN or infinite parameters")
+  if any(items[:, 0] <= 0):
+    errors.append("There are items with discrimination <= 0")
+  if any(items[:, 2] < 0):
+    errors.append("There are items with pseudo-guessing < 0")
+  if any(items[:, 2] > 1):
+    errors.append("There are items with pseudo-guessing > 1")
+  if any(items[:, 3] > 1):
+    errors.append("There are items with upper asymptote > 1")
+  if any(items[:, 3] < 0):
+    errors.append("There are items with upper asymptote < 0")
+  if any(items[:, 2] >= items[:, 3]):
+    errors.append("There are items with pseudo-guessing >= upper asymptote")
 
-  if len(err) == 0:
-    return
-  if raise_err:
-    raise ValueError(err)
-  print(err)
+  if errors:
+    raise ValueError("; ".join(errors))

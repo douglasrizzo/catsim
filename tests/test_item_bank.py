@@ -1,5 +1,10 @@
 """Tests for the ItemBank class."""
 
+import copy
+import operator
+import pickle
+from collections.abc import Callable
+
 import numpy as np
 import pytest
 
@@ -90,17 +95,92 @@ class TestItemBankCreation:
     assert bank.discrimination.tolist() == [1.0, 2.0]
     np.testing.assert_array_equal(bank.max_info_thetas, max_info_thetas)
 
+  @pytest.mark.parametrize(
+    ("view", "index"),
+    [
+      pytest.param(lambda bank: bank.items, (0, 1), id="items"),
+      pytest.param(lambda bank: bank.difficulty, 0, id="difficulty"),
+      pytest.param(lambda bank: bank.get_item(0), 1, id="get_item"),
+      pytest.param(operator.itemgetter(0), 1, id="getitem"),
+    ],
+  )
+  @pytest.mark.parametrize("validate", [True, False])
+  def test_parameters_are_read_only(
+    self, view: Callable[[ItemBank], np.ndarray], index: int | tuple[int, int], validate: bool
+  ) -> None:
+    """Writing into the parameters raises and leaves the bank alone, validated or not.
+
+    The arrays used to be writable, so a write changed the difficulty behind the cached max_info_thetas, model and
+    strata.
+    """
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]), validate=validate)
+
+    with pytest.raises(ValueError, match="read-only"):
+      view(bank)[index] = 99.0
+
+    assert bank.difficulty.tolist() == [0.5, -0.2]
+
+  @pytest.mark.parametrize(
+    "cache",
+    [
+      pytest.param(lambda bank: bank.max_info_thetas, id="max_info_thetas"),
+      pytest.param(lambda bank: bank.max_info_values, id="max_info_values"),
+    ],
+  )
+  def test_max_info_caches_are_read_only(self, cache: Callable[[ItemBank], np.ndarray]) -> None:
+    """Writing into a cached max-information array raises and leaves the cache alone.
+
+    The stratified selectors rank items by these caches, so a writable cache let a caller change the ranking
+    without touching the parameters. For 2PL items the maximum is at theta = b, where the information is a**2 / 4.
+    """
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]))
+
+    with pytest.raises(ValueError, match="read-only"):
+      cache(bank)[0] = 99.0
+
+    assert bank.max_info_thetas.tolist() == [0.5, -0.2]
+    assert bank.max_info_values.tolist() == pytest.approx([0.25, 0.4225])
+
+  @pytest.mark.parametrize(
+    "duplicate",
+    [
+      pytest.param(copy.deepcopy, id="deepcopy"),
+      pytest.param(lambda bank: pickle.loads(pickle.dumps(bank)), id="pickle"),
+    ],
+  )
+  @pytest.mark.parametrize(
+    "array",
+    [
+      pytest.param(lambda bank: bank.items, id="items"),
+      pytest.param(lambda bank: bank.max_info_thetas, id="max_info_thetas"),
+      pytest.param(lambda bank: bank.max_info_values, id="max_info_values"),
+    ],
+  )
+  def test_copies_stay_read_only(
+    self, duplicate: Callable[[ItemBank], ItemBank], array: Callable[[ItemBank], np.ndarray]
+  ) -> None:
+    """A deep-copied or unpickled bank, e.g. one sent to a worker process, is as read-only as the original.
+
+    NumPy does not keep the read-only flag through deepcopy or pickle, so without restoring it a copy's parameters
+    and caches became writable again.
+    """
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]))
+    bank.max_info_values  # noqa: B018 - fill both caches before copying, so the copy carries them
+
+    copied = duplicate(bank)
+
+    with pytest.raises(ValueError, match="read-only"):
+      array(copied)[0] = 99.0
+
   def test_validation_enabled_by_default(self) -> None:
-    """Test that validation is enabled by default and catches invalid params."""
-    # Invalid: discrimination < 0
+    """A bank is validated unless told otherwise, so a = -1 raises instead of being accepted."""
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
 
     with pytest.raises(ValueError, match="discrimination <= 0"):
       ItemBank(items)
 
   def test_validation_can_be_disabled(self) -> None:
-    """Test that validation can be disabled."""
-    # Invalid but should not raise when validate=False
+    """With validate=False the parameter checks are skipped, so a bank with a = -1 is built instead of raising."""
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
 
     bank = ItemBank(items, validate=False)

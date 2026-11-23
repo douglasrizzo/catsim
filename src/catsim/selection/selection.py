@@ -110,10 +110,6 @@ class UrrySelector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/urry-selector`.
   """
 
-  def __init__(self) -> None:
-    """Initialize a UrrySelector object."""
-    super().__init__()
-
   def __str__(self) -> str:
     """Return the name of the selector."""
     return "Urry Selector"

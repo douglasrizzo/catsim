@@ -34,20 +34,21 @@ class ItemBank:
   ----------
   items : numpy.ndarray
       The normalized item parameter matrix (n_items x 4) with columns
-      [discrimination, difficulty, pseudo-guessing, upper_asymptote]. Exposure
+      [discrimination, difficulty, pseudo-guessing, upper_asymptote]. It is read-only,
+      like the column views returned by the parameter properties. Exposure
       is a property of a run, kept in :py:class:`catsim.state.SimulationResult`.
   n_items : int
       Number of items in the bank.
   max_info_thetas : numpy.ndarray
-      Cached theta values where each item provides maximum information.
+      Cached, read-only theta values where each item provides maximum information.
   max_info_values : numpy.ndarray
-      Cached maximum information values for each item.
+      Cached, read-only maximum information values for each item.
 
   Raises
   ------
   ValueError
       If the matrix does not have 1 to 4 columns, or if validate=True and item
-      parameters are invalid.
+      parameters are invalid (see :py:func:`catsim.irt.validate_item_bank`).
   TypeError
       If items is not a numpy.ndarray.
 
@@ -89,7 +90,10 @@ class ItemBank:
 
     # Validate if requested
     if validate:
-      irt.validate_item_bank(self._items, raise_err=True)
+      irt.validate_item_bank(self._items)
+    # Read-only, together with the column views below, so the cached values derived from the
+    # parameters cannot go stale
+    self._items.flags.writeable = False
 
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None
@@ -107,7 +111,7 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        The item matrix with shape (n_items, 4) containing
+        The read-only item matrix with shape (n_items, 4) containing
         [a, b, c, d] for each item.
     """
     return self._items
@@ -130,10 +134,12 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array of theta values, one per item.
+        Read-only array of theta values, one per item.
     """
     if self._max_info_thetas is None:
-      self._max_info_thetas = irt.max_info_hpc(self._items)
+      thetas = irt.max_info_hpc(self._items)
+      thetas.flags.writeable = False
+      self._max_info_thetas = thetas
     return self._max_info_thetas
 
   @property
@@ -143,11 +149,13 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array of maximum information values, one per item.
+        Read-only array of maximum information values, one per item.
     """
     if self._max_info_values is None:
       # Ensure max_info_thetas is computed first
-      self._max_info_values = irt.inf_hpc(self.max_info_thetas, self._items)
+      values = irt.inf_hpc(self.max_info_thetas, self._items)
+      values.flags.writeable = False
+      self._max_info_values = values
     return self._max_info_values
 
   @property
@@ -433,12 +441,16 @@ class ItemBank:
     """Get number of items (allows len(bank))."""
     return self.n_items
 
+  def __setstate__(self, state: dict[str, Any]) -> None:
+    """Restore a deep-copied or unpickled bank with its arrays read-only again.
+
+    NumPy does not keep the read-only flag through deepcopy or pickle.
+    """
+    self.__dict__.update(state)
+    for array in (self._items, self._max_info_thetas, self._max_info_values):
+      if array is not None:
+        array.flags.writeable = False
+
   def __getitem__(self, index: int | slice | list | IntArray) -> FloatArray:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]
-
-
-if __name__ == "__main__":
-  import doctest
-
-  doctest.testmod()
