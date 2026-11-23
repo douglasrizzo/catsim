@@ -456,14 +456,14 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Planned
-<strong>Module:</strong> <code class="docutils literal notranslate"><span class="pre">catsim.estimation.bayesian</span></code> (planned)
+  <p><strong>Status:</strong> Implemented
+<strong>Module:</strong> <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation.bayesian</span></code>; <code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.QuadratureGrid</span></code>
 <strong>Reference:</strong> Bock &amp; Mislevy (1982); Bock &amp; Aitkin (1981)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="bayesian-estimation-infrastructure">
 <h1>Bayesian Estimation Infrastructure<a class="headerlink" href="#bayesian-estimation-infrastructure" title="Link to this heading">#</a></h1>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
-<p>Several planned estimators and selectors need the same Bayesian substrate: a
+<p>Several estimators and selectors need the same Bayesian substrate: a
 prior on <span class="math notranslate nohighlight">\(\theta\)</span>, a fixed quadrature grid, and a numerically stable way
 to turn responses into a discrete posterior. This page specifies that shared
 subsystem so later features do not duplicate incompatible posterior code.</p>
@@ -498,9 +498,8 @@ w_q\,p(\theta_q)\,L(\mathbf{u}\mid\theta_q),
 =
 \sum_{q=1}^{Q}(\theta_q-\hat{\theta}_{\mathrm{EAP}})^2
 \tilde{p}(\theta_q \mid \mathbf{u}).\]</div>
-<p>The default planned configuration is a uniform grid over the extended theta
-range with a standard normal prior, matching the conventions already used in the
-feature card.</p>
+<p>By default the grid has 121 equally spaced nodes on <span class="math notranslate nohighlight">\([-6, 6]\)</span> (spacing 0.1) and
+the prior is <span class="math notranslate nohighlight">\(\mathcal{N}(0, 1)\)</span>.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -518,22 +517,23 @@ feature card.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">n_nodes</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">41</span></code></p></td>
-<td><p>Number of quadrature nodes. Exposed on consuming estimators/selectors so
-integration resolution can be tuned without changing the shared kernel.</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">121</span></code></p></td>
+<td><p>Number of quadrature nodes of <code class="docutils literal notranslate"><span class="pre">QuadratureGrid.uniform</span></code>. Consuming
+estimators take a whole grid, so resolution can be tuned without
+changing the shared kernel.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">low</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">THETA_MIN_EXTENDED</span></code></p></td>
-<td><p>Lower bound of the planned uniform grid.</p></td>
+<td><p>Lower bound of the uniform grid.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">high</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">THETA_MAX_EXTENDED</span></code></p></td>
-<td><p>Upper bound of the planned uniform grid.</p></td>
+<td><p>Upper bound of the uniform grid.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">log_prior</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">normal_log_prior(0,</span> <span class="pre">1)</span></code></p></td>
-<td><p>Vectorized log-density used in posterior evaluation. The infrastructure
-also plans to expose a uniform prior factory for flatter weighting.</p></td>
+<td><p>Vectorized log-density used in posterior evaluation.
+<code class="docutils literal notranslate"><span class="pre">uniform_log_prior(low,</span> <span class="pre">high)</span></code> gives a flat prior instead.</p></td>
 </tr>
 </tbody>
 </table>
