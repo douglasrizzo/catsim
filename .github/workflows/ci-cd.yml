@@ -14,10 +14,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name != 'release' }}
 
+env:
+  # The uv release every setup-uv step installs. Dependabot does not update it: bump it by hand.
+  UV_VERSION: "0.13.9"
+
 jobs:
   pre-commit:
     name: Pre-commit checks
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -25,6 +30,8 @@ jobs:
           persist-credentials: false
       # setup-uv's default enable-cache (auto) already skips the cache on release events.
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.13"
@@ -45,6 +52,7 @@ jobs:
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     env:
       # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
       MPLBACKEND: Agg
@@ -69,6 +77,7 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
+          version: ${{ env.UV_VERSION }}
           cache-dependency-glob: "uv.lock"
 
       - name: Set up Python ${{ matrix.python-version }}
@@ -77,7 +86,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --locked --group dev
 
       - name: Run tests
         run: uv run pytest --verbose --cov-branch --cov-report=xml --cov=catsim
@@ -100,6 +109,7 @@ jobs:
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -107,6 +117,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -144,9 +156,7 @@ jobs:
           fi
 
       - name: Check package metadata
-        run: |
-          uv run pip install twine
-          uv run twine check dist/*
+        run: uvx twine check --strict dist/*
 
       - name: Store the distribution packages
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -160,6 +170,7 @@ jobs:
     # so a packaging mistake (a missing module or data file) fails here instead of shipping.
     needs: [build]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       MPLBACKEND: Agg
     steps:
@@ -169,6 +180,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
 
       - name: Download all the dists
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -193,6 +206,7 @@ jobs:
     if: github.event_name == 'release'
     needs: [pre-commit, test, build, test-wheel, deploy-docs-production] # Wait for quality gates, the tested package, and live docs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: pypi
       url: https://pypi.org/p/catsim
@@ -217,6 +231,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     needs: [pre-commit, test, build, test-wheel, deploy-docs-dev] # Wait for quality gates, the tested package, and live docs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: testpypi
       url: https://test.pypi.org/p/catsim
@@ -243,6 +258,7 @@ jobs:
       (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')) ||
       github.event_name == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -253,6 +269,8 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: ${{ env.UV_VERSION }}
 
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
@@ -260,7 +278,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install dependencies
-        run: uv sync --group docs
+        run: uv sync --locked --group docs
 
       - name: Build Sphinx documentation
         working-directory: sphinx
@@ -308,6 +326,7 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     needs: [pre-commit, test, build-docs] # Wait for quality gates + docs build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     concurrency:
@@ -351,6 +370,7 @@ jobs:
       github.event_name == 'release'
     needs: [pre-commit, test, build, test-wheel, build-docs] # Docs go live only for a commit that passes every check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
     concurrency:
@@ -399,6 +419,7 @@ jobs:
     name: Sign and upload to GitHub Release
     needs: [publish-to-pypi]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'release'
     permissions:
       contents: write # IMPORTANT: mandatory for making GitHub Releases
