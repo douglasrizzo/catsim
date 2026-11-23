@@ -16,4 +16,5 @@ adr/0007-release-gated-by-docs
 adr/0008-random-tie-breaking
 adr/0009-ability-scale-and-extreme-patterns
 adr/0010-published-progressive-schedule
+adr/0011-how-a-session-ends
 ```
