@@ -370,7 +370,8 @@ def test_progress(
   information and standard error of estimation), the plot calculates these values using
   the examinee's ability estimated at that given time of the test. This means that a test
   that was thought to be informative at a given point may not be as informative after new
-  estimates are made.
+  estimates are made. The value at :math:`x` items uses the estimate made after those
+  :math:`x` items, so these curves start at the first item.
 
   .. plot::
 
@@ -478,57 +479,26 @@ def test_progress(
     msg = "Number of estimated thetas and administered items is not the same."
     raise ValueError(msg)
 
-  # len(thetas) - 1 because the first item is made by the initializer
-  xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
-
-  if thetas is not None:
-    ax.plot(xs, thetas, label=r"$\hat{\theta}$", marker=marker)
-  if administered_items is not None:
-    difficulties = administered_items[:, 1]
-    ax.plot(xs[1:], difficulties, label="Item difficulty", marker=marker)
+  # x counts the items answered: thetas[0] comes from the initializer and thetas[x] follows the
+  # response to item x, which is plotted at x.
+  xs = list(range(len(thetas)))
+  ax.plot(xs, thetas, label=r"$\hat{\theta}$", marker=marker)
+  ax.plot(xs[1:], administered_items[:, 1], label="Item difficulty", marker=marker)
   if true_theta is not None:
     ax.hlines(true_theta, 0, len(xs) - 1, label=r"$\theta$", colors="black", linestyles="dashed")
-  if thetas is not None and administered_items is not None:
-    # calculate and plot test information, var, standard error and reliability
-    if info:
-      infos = [
-        irt.test_info(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, infos, label=r"$I(\theta)$", marker=marker)
 
-    if var:
-      varss = [
-        irt.var(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, varss, label=r"$Var$", marker=marker)
-
-    if see:
-      sees = [
-        irt.see(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, sees, label=r"$SEE$", marker=marker)
-
-    if reliability:
-      reliabilities = [
-        irt.reliability(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, reliabilities, label="Reliability", marker=marker)
+  # Each quality measure at x uses thetas[x] and the first x items. The curves start at x = 1:
+  # with no items the information is 0 and the variance, SEE and reliability are infinite.
+  quality_xs = xs[1:]
+  for enabled, measure, label in (
+    (info, irt.test_info, r"$I(\theta)$"),
+    (var, irt.var, r"$Var$"),
+    (see, irt.see, r"$SEE$"),
+    (reliability, irt.reliability, "Reliability"),
+  ):
+    if enabled:
+      values = [measure(thetas[x], administered_items[:x]) for x in quality_xs]
+      ax.plot(quality_xs, values, label=label, marker=marker)
   ax.set_xlabel("Items")
   ax.grid()
   ax.legend(loc="best")

@@ -144,71 +144,73 @@ class TestItemExposure:
 class TestTestProgress:
   """Tests for test_progress()."""
 
+  # Two-parameter items (c = 0, d = 1): each item's information is a^2 P (1 - P), with
+  # P = 1 / (1 + exp(-a (theta - b))).
+  ITEMS = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 0.5, 0.0, 1.0], [0.8, -0.5, 0.0, 1.0]])
+  THETAS = (0.0, 0.4, 0.7, 0.9)
+
+  @classmethod
+  def _info_after(cls, k: int) -> float:
+    """Test information of the first k items at the estimate made after them, in closed form."""
+    a, b = cls.ITEMS[:k, 0], cls.ITEMS[:k, 1]
+    p = 1 / (1 + np.exp(-a * (cls.THETAS[k] - b)))
+    return float(np.sum(a**2 * p * (1 - p)))
+
+  @pytest.mark.parametrize(
+    ("flag", "label", "from_info"),
+    [
+      ("info", r"$I(\theta)$", lambda info: info),
+      ("var", "$Var$", lambda info: 1 / info),
+      ("see", "$SEE$", lambda info: np.sqrt(1 / info)),
+      ("reliability", "Reliability", lambda info: 1 - 1 / info),
+    ],
+  )
+  def test_test_progress_pairs_each_estimate_with_the_items_before_it(self, flag: str, label: str, from_info) -> None:
+    """The quality curve at x items uses the estimate after x responses and those x items, from x = 1.
+
+    Fails if point x also counts item x + 1 (which made the plotted information drop at the last
+    item), or if the curve starts at x = 0, where no item has been given.
+    """
+    ax = plot.test_progress(thetas=list(self.THETAS), administered_items=self.ITEMS, **{flag: True})
+    (line,) = [line for line in ax.get_lines() if line.get_label() == label]
+    info = np.array([self._info_after(k) for k in (1, 2, 3)])
+    np.testing.assert_array_equal(line.get_xdata(), [1, 2, 3])
+    np.testing.assert_allclose(line.get_ydata(), from_info(info))
+
   def test_test_progress_from_simulation_result(self, simulation_result) -> None:
-    """SimulationResult plus index should be accepted."""
-    ax = plot.test_progress(simulation=simulation_result, index=0)
-    assert isinstance(ax, Axes)
-    plt.close("all")
+    """The chosen session's estimates, item difficulties and true ability are plotted.
 
-  def test_test_progress_with_quality_curves(self, simulation_result) -> None:
-    """Information, variance, SEE, and reliability options should render."""
-    ax = plot.test_progress(
-      simulation=simulation_result,
-      index=0,
-      info=True,
-      var=True,
-      see=True,
-      reliability=True,
+    Fails if another session is plotted, if the initial estimate is not drawn at x = 0, or if the difficulty of item k
+    is not drawn at x = k.
+    """
+    session = simulation_result.sessions[2]
+    ax = plot.test_progress(simulation=simulation_result, index=2)
+    lines = {line.get_label(): line for line in ax.get_lines()}
+    n_items = len(session.administered_item_ids)
+
+    np.testing.assert_array_equal(lines[r"$\hat{\theta}$"].get_xdata(), np.arange(n_items + 1))
+    np.testing.assert_allclose(lines[r"$\hat{\theta}$"].get_ydata(), session.theta_history)
+    np.testing.assert_array_equal(lines["Item difficulty"].get_xdata(), np.arange(1, n_items + 1))
+    np.testing.assert_allclose(
+      lines["Item difficulty"].get_ydata(), simulation_result.item_bank.items[session.administered_item_ids, 1]
     )
-    assert isinstance(ax, Axes)
-    plt.close("all")
-
-  def test_test_progress_manual_inputs(self, item_bank) -> None:
-    """Manual thetas and administered items should still be supported."""
-    administered_items = item_bank.get_items([0, 1, 2])
-    thetas = [0.0, 0.1, 0.2, 0.3]
-    ax = plot.test_progress(thetas=thetas, administered_items=administered_items, true_theta=0.0)
-    assert isinstance(ax, Axes)
-    plt.close("all")
+    (true_theta_line,) = [collection for collection in ax.collections if collection.get_label() == r"$\theta$"]
+    (true_theta_segment,) = true_theta_line.get_segments()
+    np.testing.assert_allclose(true_theta_segment, [[0, session.true_theta], [n_items, session.true_theta]])
 
   def test_test_progress_requires_index_with_simulation(self, simulation_result) -> None:
-    """SimulationResult calls require an index."""
+    """A SimulationResult holds many sessions, so it needs an index.
+
+    Fails if the call guesses a session instead of raising.
+    """
     with pytest.raises(ValueError, match="index must be provided"):
       plot.test_progress(simulation=simulation_result)
 
   def test_test_progress_rejects_mismatched_lengths(self, item_bank) -> None:
-    """Theta history and administered items must align."""
+    """The theta history holds one more value than there are items (the initial estimate).
+
+    Fails if histories and items that do not line up are plotted anyway.
+    """
     administered_items = item_bank.get_items([0, 1, 2])
     with pytest.raises(ValueError, match="not the same"):
       plot.test_progress(thetas=[0.0, 0.1], administered_items=administered_items, true_theta=0.0)
-
-
-@pytest.mark.slow
-@pytest.mark.integration
-def test_plots_integration(simulation_result) -> None:
-  """Integration test for plotting from a completed simulation result."""
-  for item in simulation_result.item_bank.items[:5]:
-    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=PlotType.ICC, max_info=False)
-    plt.close("all")
-    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=PlotType.IIC, max_info=True)
-    plt.close("all")
-    plot.item_curve(item[0], item[1], item[2], item[3], title="Test plot", ptype=PlotType.BOTH, max_info=True)
-    plt.close("all")
-
-  plot.gen3d_dataset_scatter(simulation_result.item_bank)
-  plt.close("all")
-  plot.test_progress(simulation=simulation_result, index=0, info=True, see=True, reliability=True)
-  plt.close("all")
-  plot.item_exposure(simulation=simulation_result)
-  plt.close("all")
-  plot.item_exposure(simulation=simulation_result, par="a")
-  plt.close("all")
-  plot.item_exposure(simulation=simulation_result, par="b")
-  plt.close("all")
-  plot.item_exposure(simulation=simulation_result, par="c")
-  plt.close("all")
-  plot.item_exposure(simulation=simulation_result, par="d")
-  plt.close("all")
-  plot.item_exposure(simulation=simulation_result, hist=True)
-
-  plt.close("all")
