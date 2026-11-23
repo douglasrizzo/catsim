@@ -279,25 +279,45 @@ ESTIMATORS = [
 
 @pytest.mark.parametrize("make_estimator", ESTIMATORS)
 @pytest.mark.parametrize(
-  ("response_vector", "match"),
+  ("administered_items", "response_vector", "match"),
   [
-    pytest.param([True], "same length", id="too_short"),
-    pytest.param([True, True, True, False], "same length", id="too_long"),
-    pytest.param([1.0, 0.5, 0.0], "only Boolean", id="not_boolean"),
+    pytest.param([0, 1, 2], [True], "same length", id="too_short"),
+    pytest.param([0, 1, 2], [True, True, True, False], "same length", id="too_long"),
+    pytest.param([], [True], "same length", id="responses_without_items"),
+    pytest.param([0, 1, 2], [1.0, 0.5, 0.0], "only Boolean", id="not_boolean"),
   ],
 )
 def test_estimators_reject_responses_that_do_not_fit_the_items(
-  make_estimator: Callable[[], BaseEstimator], response_vector: list[bool], match: str
+  make_estimator: Callable[[], BaseEstimator], administered_items: list[int], response_vector: list[bool], match: str
 ) -> None:
-  """Every estimator rejects a response vector that does not hold one Boolean per item.
+  """Every estimator rejects a response vector that does not hold one Boolean per item, uncounted.
 
   WLE used to spread a one-element vector over all three items and MLE took its all-correct
-  shortcut on it, both returning an estimate for answers that were never given.
+  shortcut on it, both returning an estimate for answers that were never given. With no items,
+  the no-data shortcuts returned the prior or est_theta, and EAP counted calls it then rejected.
   """
   item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+  estimator = make_estimator()
 
   with pytest.raises(ValueError, match=match):
-    make_estimator().estimate(item_bank, [0, 1, 2], response_vector, 0.0)
+    estimator.estimate(item_bank, administered_items, response_vector, 0.0)
+
+  assert (estimator.calls, estimator.evaluations, estimator.total_evaluations) == (0, 0, 0)
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
+@pytest.mark.parametrize("missing", ["item_bank", "administered_items", "response_vector"])
+def test_estimators_reject_missing_inputs(make_estimator: Callable[[], BaseEstimator], missing: str) -> None:
+  """None inputs raise the shared estimator error instead of failing inside NumPy."""
+  kwargs: dict[str, Any] = {
+    "item_bank": ItemBank.generate_item_bank(5, seed=1),
+    "administered_items": [0],
+    "response_vector": [True],
+  }
+  kwargs[missing] = None
+
+  with pytest.raises(ValueError, match=f"{missing} parameter cannot be None"):
+    make_estimator().estimate(**kwargs, est_theta=0.0)
 
 
 @pytest.mark.parametrize("make_estimator", ESTIMATORS)
@@ -658,25 +678,6 @@ class TestEAPEstimator:
     assert estimator.evaluations == 31
     assert estimator.total_evaluations == 62
 
-  def test_rejected_estimate_leaves_the_counters_alone(self) -> None:
-    """A call that fails validation is not counted as an estimate."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = EAPEstimator()
-
-    with pytest.raises(ValueError, match="same length"):
-      estimator.estimate(item_bank=item_bank, administered_items=[0, 1], response_vector=[True], est_theta=0.0)
-
-    assert (estimator.calls, estimator.evaluations, estimator.total_evaluations) == (0, 0, 0)
-
-  @pytest.mark.parametrize("missing", ["item_bank", "administered_items", "response_vector"])
-  def test_estimate_rejects_missing_inputs(self, missing: str) -> None:
-    """None inputs raise the shared estimator error instead of failing inside NumPy."""
-    kwargs = {"item_bank": ItemBank.generate_item_bank(5, seed=1), "administered_items": [0], "response_vector": [True]}
-    kwargs[missing] = None
-
-    with pytest.raises(ValueError, match=f"{missing} parameter cannot be None"):
-      EAPEstimator().estimate(**kwargs, est_theta=0.0)
-
 
 class TestMAPEstimator:
   """Tests for the Maximum a Posteriori estimator."""
@@ -840,11 +841,6 @@ class TestMAPEstimator:
     theta = estimator.estimate(self._hard_items(), [], [], 0.0)
 
     assert theta == pytest.approx(0.0, abs=1e-12)
-
-  def test_estimate_rejects_responses_without_items(self) -> None:
-    """A response vector longer than the administered items is an error, even with no items."""
-    with pytest.raises(ValueError, match="same length"):
-      MAPEstimator().estimate(self._hard_items(), [], [True], 0.0)
 
 
 class TestWarmLikelihoodEstimator:
