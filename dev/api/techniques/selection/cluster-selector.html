@@ -581,16 +581,21 @@ value at each step:</p>
 <ul class="simple">
 <li><p>‘item_info’: selects the cluster which has the item with maximum information</p></li>
 <li><p>‘cluster_info’: selects the cluster whose items’ sum of information is maximum</p></li>
-<li><p>‘weighted_info’: selects the cluster whose weighted sum of information is
-maximum (weighted by the number of items in the cluster)</p></li>
+<li><p>‘weighted_info’: selects the cluster whose average item information is
+maximum (its sum of information divided by its number of items)</p></li>
 </ul>
-<p>Default is ‘item_info’.</p>
+<p>Every score counts all the items in a cluster, including those already
+administered, as long as the cluster still has an item left. Default is
+‘item_info’.</p>
 </dd>
-<dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Maximum exposure rate for items. Default is 1.</p>
+<dt><strong>r_max</strong><span class="classifier">float, optional</span></dt><dd><p>Exposure-rate cap for choosing an item inside the selected cluster: items at
+or above it are passed over unless no other item in the cluster remains. It
+does not affect which cluster is chosen. Default is 1 (no cap).</p>
 </dd>
-<dt><strong>r_control</strong><span class="classifier">str, optional</span></dt><dd><p>Item exposure control method. If ‘passive’ and all items in the selected
-cluster have exposure rates &gt; r_max, applies the item with maximum information.
-If ‘aggressive’, applies the item with smallest exposure rate. Default is ‘passive’.</p>
+<dt><strong>r_control</strong><span class="classifier">str, optional</span></dt><dd><p>Item exposure control method, used when every remaining item in the selected
+cluster has an exposure rate at or above r_max. ‘passive’ applies the most
+informative of them; ‘aggressive’ applies the one with the smallest exposure
+rate. Default is ‘passive’.</p>
 </dd>
 </dl>
 </dd>
@@ -685,7 +690,7 @@ clusters, columns are parameters (a, b, c, d).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>Array containing the sum of item information values for each cluster.</p>
+<dt>dict[int, float]</dt><dd><p>The sum of item information values in each cluster, keyed by cluster ID.</p>
 </dd>
 </dl>
 </dd>
@@ -718,9 +723,9 @@ columns are parameters (a, b, c, d).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.ClusterSelector.weighted_cluster_infos">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">weighted_cluster_infos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clusters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/cluster.html#ClusterSelector.weighted_cluster_infos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.ClusterSelector.weighted_cluster_infos" title="Link to this definition">#</a></dt>
-<dd><p>Return the weighted sum of item information values, separated by cluster.</p>
-<p>The weight is the number of items in each cluster, providing an average information
-value per cluster that accounts for cluster size.</p>
+<dd><p>Return the average item information in each cluster.</p>
+<p>Each cluster’s sum of item information is divided by its number of items, so a
+cluster does not score higher only because it holds more items.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -734,8 +739,8 @@ value per cluster that accounts for cluster size.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>Array containing the average information values for each cluster (sum of
-item information divided by the number of items in each cluster).</p>
+<dt>dict[int, float]</dt><dd><p>The average item information in each cluster (the sum of item information
+divided by the number of items in the cluster), keyed by cluster ID.</p>
 </dd>
 </dl>
 </dd>
