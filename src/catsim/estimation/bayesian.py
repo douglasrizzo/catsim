@@ -367,8 +367,16 @@ class EAPEstimator(BaseEstimator):
     return self._grid
 
 
+# Points on which MAPEstimator locates the posterior mode before refining it (0.06 apart on [-6, 6]).
+_MODE_SEARCH_POINTS = 201
+
+
 class MAPEstimator(BaseEstimator):
   """Maximum a Posteriori ability estimator.
+
+  The posterior mode is located on 201 equally spaced points over the search bounds, then
+  refined with a bounded scalar search between the best point's neighbors. The grid keeps the
+  estimate inside the prior's support and finds the global mode of a multimodal posterior.
 
   For full algorithmic details, see :doc:`/api/techniques/estimation/map-estimator`.
   """
@@ -406,21 +414,30 @@ class MAPEstimator(BaseEstimator):
     self._require_inputs(item_bank, administered_items, response_vector)
 
     self._calls += 1
-    self._last_evaluations = 0
-
-    if not administered_items:
-      grid = numpy.linspace(self._bounds[0], self._bounds[1], 201)
-      idx = int(numpy.argmax(self._log_prior(grid)))
-      return float(grid[idx])
 
     items = item_bank.items[administered_items, :4]
-    result = minimize_scalar(
-      self._negative_log_posterior,
-      args=(response_vector, items),
-      bounds=self._bounds,
-      method="bounded",
-      options={"xatol": self._tol},
-    )
-    self._last_evaluations = int(result.nfev)
+    nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
+    log_post = irt.log_likelihood_hpc(nodes, response_vector, items) + self._log_prior(nodes)
+    peak = log_post.max()
+    if not numpy.isfinite(peak):
+      msg = f"the log-posterior has no finite maximum within the search bounds {self._bounds}"
+      raise ValueError(msg)
+
+    ties = numpy.flatnonzero(log_post == peak)
+    best = int(ties[ties.size // 2])
+    self._last_evaluations = nodes.size
+    if ties.size > 1:
+      # A flat maximum, such as a uniform prior with no responses, has no unique mode
+      theta = float(nodes[best])
+    else:
+      result = minimize_scalar(
+        self._negative_log_posterior,
+        args=(response_vector, items),
+        bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
+        method="bounded",
+        options={"xatol": self._tol},
+      )
+      self._last_evaluations += int(result.nfev)
+      theta = float(result.x)
     self._total_evaluations += self._last_evaluations
-    return float(result.x)
+    return theta

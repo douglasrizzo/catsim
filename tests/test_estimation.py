@@ -643,9 +643,9 @@ class TestMAPEstimator:
       est_theta=1.7,
     )
 
-    assert theta == pytest.approx(0.0)
+    assert theta == pytest.approx(0.0, abs=1e-6)
     assert estimator.calls == 1
-    assert estimator.evaluations == 0
+    assert estimator.evaluations > 201
 
   def test_estimate_all_correct_is_finite(self) -> None:
     """Test that MAP remains finite for an extreme all-correct response pattern."""
@@ -692,9 +692,9 @@ class TestMAPEstimator:
       est_theta=0.0,
     )
 
-    assert theta == pytest.approx(1.5, abs=1e-12)
+    assert theta == pytest.approx(1.5, abs=1e-6)
     assert estimator.calls == 1
-    assert estimator.evaluations == 0
+    assert estimator.evaluations > 201
 
   def test_estimate_tracks_evaluation_counts_across_calls(self) -> None:
     """Test that the estimator counters reflect repeated posterior maximization calls."""
@@ -835,6 +835,75 @@ class TestMAPEstimator:
     assert np.isfinite(map_theta)
     assert np.isfinite(eap_theta)
     assert abs(map_theta - eap_theta) < 0.15
+
+  @staticmethod
+  def _hard_items() -> ItemBank:
+    """Three items too hard for any ability inside a narrow prior."""
+    return ItemBank(np.array([[1.2, 2.0, 0.0, 1.0], [1.4, 2.5, 0.0, 1.0], [1.1, 3.0, 0.0, 1.0]], dtype=float))
+
+  @pytest.mark.parametrize(
+    ("low", "high", "response_vector", "expected"),
+    [
+      pytest.param(-1.0, 1.0, [True, False, True], 1.0, id="mode_at_upper_edge"),
+      pytest.param(-1.0, 1.0, [False, False, False], -1.0, id="mode_at_lower_edge"),
+      pytest.param(-6.0, -5.0, [True, False, True], -5.0, id="support_away_from_the_data"),
+    ],
+  )
+  def test_estimate_stays_inside_a_uniform_prior_narrower_than_the_bounds(
+    self, low: float, high: float, response_vector: list[bool], expected: float
+  ) -> None:
+    """The estimate must lie in the prior's support, at the edge the likelihood points to.
+
+    Outside the support the negative log-posterior is +inf, a flat region a bounded scalar
+    search cannot cross, so searching the whole bounds at once returned 6.0 in every case.
+    """
+    estimator = MAPEstimator(log_prior=uniform_log_prior(low, high))
+
+    theta = estimator.estimate(self._hard_items(), [0, 1, 2], response_vector, 0.0)
+
+    assert theta == pytest.approx(expected, abs=1e-5)
+
+  def test_estimate_raises_when_the_prior_excludes_the_bounds(self) -> None:
+    """A prior with no support inside the search bounds leaves no mode to find."""
+    estimator = MAPEstimator(log_prior=uniform_log_prior(7.0, 8.0))
+
+    with pytest.raises(ValueError, match="no finite maximum"):
+      estimator.estimate(self._hard_items(), [0], [True], 0.0)
+
+  def test_estimate_locates_an_off_grid_prior_mode_within_tol(self) -> None:
+    """With no responses the estimate is the prior mode to within tol, not to the grid's 0.06."""
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.5, sd=1.0), tol=1e-8)
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(0.5, abs=1e-6)
+
+  def test_estimate_finds_the_global_mode_of_a_bimodal_prior(self) -> None:
+    """The grid search picks the taller of two separated modes, wherever a local search would stop."""
+
+    def log_prior(theta: np.ndarray) -> np.ndarray:
+      low_mode = np.log(0.3) - 0.5 * ((theta + 2.0) / 0.3) ** 2
+      high_mode = np.log(0.7) - 0.5 * ((theta - 2.0) / 0.3) ** 2
+      return np.logaddexp(low_mode, high_mode)
+
+    estimator = MAPEstimator(log_prior=log_prior)
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(2.0, abs=1e-5)
+
+  def test_estimate_takes_the_middle_of_a_flat_posterior(self) -> None:
+    """A uniform prior with no responses has no unique mode, so the middle of the bounds is returned."""
+    estimator = MAPEstimator(log_prior=uniform_log_prior())
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(0.0, abs=1e-12)
+
+  def test_estimate_rejects_responses_without_items(self) -> None:
+    """A response vector longer than the administered items is an error, even with no items."""
+    with pytest.raises(ValueError, match="same length"):
+      MAPEstimator().estimate(self._hard_items(), [], [True], 0.0)
 
   def test_estimate_shifted_prior_pulls_post_data_map_estimate(self) -> None:
     """A shifted prior should move the post-data MAP estimate toward its mean.

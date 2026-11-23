@@ -34,8 +34,21 @@ $$
 -\log p(\theta) - \log L(\mathbf{u}\mid\theta)
 $$
 
-over the configured theta bounds. Unlike EAP, this requires no quadrature grid;
-it only requires a prior function and a scalar optimizer.
+over the configured theta bounds. The estimator first evaluates the
+log-posterior at 201 equally spaced points across the bounds (0.06 apart on the
+default $[-6, 6]$), in one vectorized call, and takes the best point. A bounded
+scalar optimizer then refines the mode between that point's two neighbors, to
+within `tol`.
+
+The grid search matters for two reasons. A prior that is zero on part of the
+bounds, such as `uniform_log_prior(-1, 1)` searched over $[-6, 6]$, makes the
+objective $+\infty$ there, and a bounded scalar search cannot cross that flat
+region; it would drift to a bound outside the prior's support. And a multimodal
+posterior, from a multimodal prior or a 3PL likelihood, has local modes a local
+search can stop at; the grid finds the highest one, provided the posterior does
+not change sharply between grid points. If several grid points tie for the
+maximum, as with a uniform prior and no responses, the posterior has no unique
+mode and the middle of the tied points is returned.
 
 ## Parameters
 
@@ -52,7 +65,7 @@ it only requires a prior function and a scalar optimizer.
      - Prior used to regularize the likelihood objective.
    * - ``tol``
      - ``1e-6``
-     - Tolerance passed to the bounded scalar optimizer.
+     - Absolute tolerance of the refinement step, passed to the bounded scalar optimizer.
    * - ``bounds``
      - ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``
      - Search range for the penalized objective.
@@ -65,11 +78,12 @@ it only requires a prior function and a scalar optimizer.
 
 Any correct implementation must satisfy the following properties:
 
-1. With no administered items, the estimate defaults to the mode of the configured prior over the search range.
+1. With no administered items, the estimate is the mode of the configured prior over the search range, to within `tol`.
 2. For short tests with a centered prior, the MAP estimate is closer to the prior mean than the corresponding plain MLE on the same data.
 3. Shifting the prior mean while holding the response data fixed shifts the MAP estimate in the same direction.
 4. On long, information-rich tests, MAP and EAP should converge toward similar values because the posterior becomes sharply concentrated.
 5. The estimator returns finite values on extreme response patterns because the prior keeps the objective bounded.
+6. The estimate lies inside the prior's support. A prior with no support inside the search bounds raises `ValueError`.
 
 ## References
 
