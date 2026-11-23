@@ -54,9 +54,6 @@ product between the KL kernel values and the posterior probabilities.
    * - ``log_prior``
      - ``normal_log_prior(0, 1)``
      - Prior used when the selector computes the posterior itself.
-   * - ``estimator``
-     - ``None``
-     - Optional EAP estimator whose cached posterior is reused.
    * - ``r_max``
      - ``1.0``
      - Soft exposure cap.
@@ -68,7 +65,7 @@ Any correct implementation must satisfy the following properties:
 
 1. KLP uses the posterior over theta, not a uniform window, as its integration weight.
 2. The KL kernel still depends on `est_theta` as the reference point inside the divergence.
-3. The implementation can reuse a cached posterior but cannot precompute the full KL table across steps because it changes with `est_theta`.
+3. The full KL table cannot be precomputed across steps because it changes with `est_theta`.
 4. With a diffuse prior and little response information, the selector behaves more globally; with a concentrated posterior, it becomes increasingly local.
 5. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool.
 
@@ -117,8 +114,6 @@ class KLPSelector(BaseSelector):
       Quadrature grid. Defaults to ``QuadratureGrid.uniform()``.
   log_prior : callable or None
       Vectorized log-density of the prior. Defaults to N(0, 1).
-  estimator : EAPEstimator or None
-      If provided, reuses ``estimator.last_posterior`` to avoid recomputing.
   r_max : float
       Exposure cap.
   """
@@ -127,7 +122,6 @@ class KLPSelector(BaseSelector):
     self,
     grid: QuadratureGrid | None = None,
     log_prior: LogPrior | None = None,
-    estimator=None,  # type: EAPEstimator | None
     r_max: float = 1.0,
   ) -> None:
     if not 0 <= r_max <= 1:
@@ -135,7 +129,6 @@ class KLPSelector(BaseSelector):
     super().__init__()
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._estimator = estimator
     self._r_max = float(r_max)
 
   def __str__(self) -> str:
@@ -162,8 +155,6 @@ class KLPSelector(BaseSelector):
     administered_items: list[int],
     response_vector: list[bool],
   ) -> FloatArray:
-    if self._estimator is not None and self._estimator.last_posterior is not None:
-      return self._estimator.last_posterior
     if not administered_items:
       pp = self._log_prior(self._grid.nodes) + numpy.log(self._grid.weights)
       pp -= pp.max()
@@ -207,16 +198,15 @@ class KLPSelector(BaseSelector):
 
 - Unlike MPWI, the per-step KL table depends on `est_theta` and cannot be cached once per bank.
 - This selector belongs with the KL selector because they share the KL kernel.
-- Posterior reuse from EAP is the intended efficient path.
+- Compute the posterior from the session's responses with `posterior()`. Estimators keep no per-session posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and one vectorized call over the grid is cheap.
 
 **Dependencies:**
 
 - Planned card 01 (`Bayesian Estimation Infrastructure`)
 - Planned card 03 (`KLSelector`) for kernel reuse
-- Recommended reuse of planned card 06 (`EAPEstimator`)
 
 **Testing notes:**
 
 - Compare against broad-window KL selection under diffuse priors.
-- Verify posterior reuse and exposure-cap fallback behavior.
+- Verify exposure-cap fallback behavior.
 - Confirm that the selector still uses `est_theta` as the KL reference point.

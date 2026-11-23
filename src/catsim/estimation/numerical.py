@@ -116,17 +116,10 @@ class NumericalSearchEstimator(BaseEstimator):
     Raises
     ------
     ValueError
-        If required parameters are missing.
+        If required parameters are missing, if ``response_vector`` and ``administered_items`` have
+        different lengths, or if ``response_vector`` contains non-Boolean elements.
     """
-    if item_bank is None:
-      msg = "item_bank parameter cannot be None"
-      raise ValueError(msg)
-    if administered_items is None:
-      msg = "administered_items parameter cannot be None"
-      raise ValueError(msg)
-    if response_vector is None:
-      msg = "response_vector parameter cannot be None"
-      raise ValueError(msg)
+    self._require_inputs(item_bank, administered_items, response_vector)
 
     self._calls += 1
     self._last_evaluations = 0

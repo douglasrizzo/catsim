@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from .. import irt
 from ..item_bank import ItemBank
 
 
@@ -54,6 +55,24 @@ class BaseEstimator(ABC):
     float
         The current estimated ability :math:`\hat\theta`.
     """
+
+  @staticmethod
+  def _require_inputs(
+    item_bank: ItemBank | None,
+    administered_items: list[int] | None,
+    response_vector: list[bool] | None,
+  ) -> None:
+    """Raise ``ValueError`` if an estimation input is missing or the responses do not fit the items.
+
+    Every estimator calls this first, so a response vector that is too short, too long or not
+    Boolean fails the same way everywhere, before any estimator-specific shortcut runs.
+    """
+    inputs = {"item_bank": item_bank, "administered_items": administered_items, "response_vector": response_vector}
+    for name, value in inputs.items():
+      if value is None:
+        msg = f"{name} parameter cannot be None"
+        raise ValueError(msg)
+    irt.validate_response_vector(response_vector, len(administered_items))
 
   @property
   def calls(self) -> int:

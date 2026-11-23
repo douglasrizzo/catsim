@@ -9,7 +9,7 @@ import pytest
 from sklearn.cluster import KMeans
 
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, InitializationDistribution, RandomInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import (
@@ -20,6 +20,7 @@ from catsim.selection import (
   MaxInfoBBlockSelector,
   MaxInfoSelector,
   MaxInfoStratSelector,
+  MEISelector,
   RandomesqueSelector,
   RandomSelector,
   The54321Selector,
@@ -37,7 +38,7 @@ def run_simulation(
   selector: BaseSelector,
   stopper: BaseStopper,
   *,
-  estimator: NumericalSearchEstimator | None = None,
+  estimator: BaseEstimator | None = None,
   examinees: int = 12,
   seed: int = 42,
 ) -> SimulationResult:
@@ -70,6 +71,24 @@ def test_estimation_methods_complete_simulation(method: str) -> None:
   )
 
   assert all(len(session.administered_item_ids) == 6 for session in result.sessions)
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize("factory", [pytest.param(EAPEstimator, id="eap"), pytest.param(MAPEstimator, id="map")])
+def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstimator]) -> None:
+  """Bayesian estimators should complete end-to-end runs, also as MEI's look-ahead estimator.
+
+  One estimator instance serves every examinee, and MEI calls it again with hypothetical
+  responses, so sharing one instance between the engine and MEI must not change any estimate.
+  """
+  item_bank = ItemBank.generate_item_bank(80, seed=42)
+  stopper = LengthStopper(max_items=6)
+  shared = factory()
+  reused = run_simulation(item_bank, MEISelector(estimator=shared), stopper, estimator=shared, examinees=4)
+  fresh = run_simulation(item_bank, MEISelector(estimator=factory()), stopper, estimator=factory(), examinees=4)
+
+  assert all(len(session.administered_item_ids) == 6 for session in reused.sessions)
+  assert [session.theta_history for session in reused.sessions] == [session.theta_history for session in fresh.sessions]
 
 
 @pytest.mark.integration

@@ -1,21 +1,31 @@
 """Tests for catsim.estimation module."""
 
-from itertools import pairwise
+import importlib
+from collections.abc import Callable
+from itertools import pairwise, product
+from typing import Any
 
 import numpy as np
 import pytest
+from scipy.integrate import IntegrationWarning
 from scipy.optimize import minimize_scalar
+from scipy.special import expit
 
 from catsim import irt
 from catsim.estimation import (
+  BaseEstimator,
+  EAPEstimator,
+  MAPEstimator,
   NumericalSearchEstimator,
   QuadratureGrid,
+  WarmLikelihoodEstimator,
   normal_log_prior,
   posterior,
   posterior_mean,
   posterior_variance,
   uniform_log_prior,
 )
+from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
 
 # SciPy reads `bracket` as where to start looking, not as a bound. From (-6, 6), brent and golden search downhill
@@ -257,6 +267,78 @@ class TestNumericalSearchEstimatorWithMethods:
     )
 
     assert theta == pytest.approx(ref_theta, abs=1e-5)
+
+
+ESTIMATORS = [
+  pytest.param(NumericalSearchEstimator, id="mle"),
+  pytest.param(EAPEstimator, id="eap"),
+  pytest.param(MAPEstimator, id="map"),
+  pytest.param(WarmLikelihoodEstimator, id="wle"),
+]
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
+@pytest.mark.parametrize(
+  ("administered_items", "response_vector", "match"),
+  [
+    pytest.param([0, 1, 2], [True], "same length", id="too_short"),
+    pytest.param([0, 1, 2], [True, True, True, False], "same length", id="too_long"),
+    pytest.param([], [True], "same length", id="responses_without_items"),
+    pytest.param([0, 1, 2], [1.0, 0.5, 0.0], "only Boolean", id="not_boolean"),
+  ],
+)
+def test_estimators_reject_responses_that_do_not_fit_the_items(
+  make_estimator: Callable[[], BaseEstimator], administered_items: list[int], response_vector: list[bool], match: str
+) -> None:
+  """Every estimator rejects a response vector that does not hold one Boolean per item, uncounted.
+
+  WLE used to spread a one-element vector over all three items and MLE took its all-correct
+  shortcut on it, both returning an estimate for answers that were never given. With no items,
+  the no-data shortcuts returned the prior or est_theta, and EAP counted calls it then rejected.
+  """
+  item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
+  estimator = make_estimator()
+
+  with pytest.raises(ValueError, match=match):
+    estimator.estimate(item_bank, administered_items, response_vector, 0.0)
+
+  assert (estimator.calls, estimator.evaluations, estimator.total_evaluations) == (0, 0, 0)
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
+@pytest.mark.parametrize("missing", ["item_bank", "administered_items", "response_vector"])
+def test_estimators_reject_missing_inputs(make_estimator: Callable[[], BaseEstimator], missing: str) -> None:
+  """None inputs raise the shared estimator error instead of failing inside NumPy."""
+  kwargs: dict[str, Any] = {
+    "item_bank": ItemBank.generate_item_bank(5, seed=1),
+    "administered_items": [0],
+    "response_vector": [True],
+  }
+  kwargs[missing] = None
+
+  with pytest.raises(ValueError, match=f"{missing} parameter cannot be None"):
+    make_estimator().estimate(**kwargs, est_theta=0.0)
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
+@pytest.mark.parametrize(
+  ("administered_items", "response_vector"),
+  [pytest.param([0], [True], id="one_item"), pytest.param([0, 3], [True, False], id="two_items")],
+)
+def test_estimators_accept_numpy_item_indices(
+  make_estimator: Callable[[], BaseEstimator], administered_items: list[int], response_vector: list[bool]
+) -> None:
+  """A NumPy index array gives the same estimate as the equivalent list.
+
+  Testing the indices for truth raises for an array of two or more, and reads the array [0] as
+  empty, so WLE returned est_theta for it without estimating anything.
+  """
+  item_bank = ItemBank.generate_item_bank(10, seed=42)
+
+  from_list = make_estimator().estimate(item_bank, administered_items, response_vector, 0.7)
+  from_array = make_estimator().estimate(item_bank, np.array(administered_items), response_vector, 0.7)
+
+  assert from_array == pytest.approx(from_list, abs=1e-15)
 
 
 class TestBayesianHelpers:
@@ -505,3 +587,483 @@ class TestBayesianHelpers:
     assert np.isfinite(post).all()
     assert post.sum() == pytest.approx(1.0)
     assert (post > 0).any()
+
+
+class TestEAPEstimator:
+  """Tests for the EAP estimator."""
+
+  @pytest.mark.parametrize(
+    ("log_prior", "expected"),
+    [
+      pytest.param(None, 0.0, id="default_standard_normal"),
+      pytest.param(normal_log_prior(mean=1.2, sd=0.5), 1.2, id="shifted_normal"),
+    ],
+  )
+  def test_estimate_returns_prior_mean_with_no_data(self, log_prior: LogPrior | None, expected: float) -> None:
+    """With no responses the estimate is the prior mean, whatever est_theta says.
+
+    An estimator that fell back to est_theta, or ignored a custom prior, would return 0.7 or 0.0.
+    """
+    estimator = EAPEstimator(log_prior=log_prior)
+
+    theta = estimator.estimate(ItemBank.generate_item_bank(10, seed=42), [], [], 0.7)
+
+    assert theta == pytest.approx(expected, abs=1e-12)
+
+  def test_estimate_is_the_posterior_mean_over_the_given_grid_prior_and_items(self) -> None:
+    """The estimate weighs the given grid's nodes by the given prior and the administered items only.
+
+    On the 3-node grid {-1, 0, 1} with a flat prior, a correct answer to item 1 (a = 1, b = 0) gives
+    the nodes masses proportional to sigma(-1), 1/2 and sigma(1), which sum to 3/2, so the posterior mean
+    is (sigma(1) - sigma(-1)) / (3/2) = tanh(1/2) / 1.5 = 0.3081. Using item 0 instead gives 0.548, the
+    default grid 2.759 and the default normal prior 0.253.
+    """
+    item_bank = ItemBank(np.array([[1.0, 3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]]))
+    estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=3, low=-1.0, high=1.0), log_prior=uniform_log_prior())
+
+    theta = estimator.estimate(item_bank, [1], [True], 0.0)
+
+    assert theta == pytest.approx(np.tanh(0.5) / 1.5, rel=1e-12)
+
+  @pytest.mark.parametrize("sign", [1.0, -1.0], ids=["all_correct", "all_incorrect"])
+  def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self, sign: float) -> None:
+    """A centered prior should shrink EAP more than a flat prior on an extreme pattern.
+
+    All correct answers to hard items and all incorrect answers to easy items are the
+    patterns where MLE diverges. This checks the core Bayesian behavior on sparse data,
+    where prior shrinkage matters most and a purely likelihood-driven implementation
+    would look too extreme.
+    """
+    item_bank = ItemBank(
+      np.array(
+        [
+          [1.5, sign * 2.0, 0.0, 1.0],
+          [1.2, sign * 2.5, 0.0, 1.0],
+          [1.8, sign * 1.5, 0.0, 1.0],
+        ],
+        dtype=float,
+      )
+    )
+    administered_items = [0, 1, 2]
+    response_vector = [sign > 0] * 3
+
+    normal_estimator = EAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=1.0))
+    normal_theta = normal_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    flat_estimator = EAPEstimator(log_prior=uniform_log_prior())
+    flat_theta = flat_estimator.estimate(
+      item_bank=item_bank,
+      administered_items=administered_items,
+      response_vector=response_vector,
+      est_theta=0.0,
+    )
+
+    assert 0.0 < sign * normal_theta < 5.0
+    assert abs(normal_theta) < abs(flat_theta)
+
+  def test_evaluations_count_one_per_grid_node(self) -> None:
+    """Each estimate evaluates the likelihood once per grid node, and the counters say so."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=31))
+
+    estimator.estimate(item_bank=item_bank, administered_items=[0], response_vector=[True], est_theta=0.0)
+    estimator.estimate(item_bank=item_bank, administered_items=[0, 1], response_vector=[True, False], est_theta=0.0)
+
+    assert estimator.calls == 2
+    assert estimator.evaluations == 31
+    assert estimator.total_evaluations == 62
+
+
+class TestMAPEstimator:
+  """Tests for the Maximum a Posteriori estimator."""
+
+  @pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+      pytest.param({"tol": 0.0}, "tol must be positive", id="zero_tol"),
+      pytest.param({"tol": -1e-6}, "tol must be positive", id="negative_tol"),
+      pytest.param({"bounds": (3.0, -3.0)}, "low < high", id="reversed_bounds"),
+      pytest.param({"bounds": (1.0, 1.0)}, "low < high", id="empty_bounds"),
+      pytest.param({"bounds": (-np.inf, 6.0)}, "finite", id="infinite_bound"),
+    ],
+  )
+  def test_init_rejects_invalid_search_settings(self, kwargs: dict[str, Any], match: str) -> None:
+    """Invalid bounds or tolerances fail at construction, not inside SciPy."""
+    with pytest.raises(ValueError, match=match):
+      MAPEstimator(**kwargs)
+
+  def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
+    """With no responses the estimate is the default prior's mode, 0, not the est_theta passed in."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = MAPEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=1.7,
+    )
+
+    assert theta == pytest.approx(0.0, abs=1e-6)
+
+  def test_estimate_maximizes_the_log_posterior(self) -> None:
+    """Every response pattern's estimate is the argmax of the log-likelihood plus the log-prior.
+
+    The reference is a dense grid search written out independently of catsim, on 3PL and 4PL items
+    with the prior N(0.5, 0.8^2). It covers the all-correct and all-incorrect patterns, where the MLE
+    diverges, and fails if the prior is dropped, mis-scaled or added with the wrong sign.
+    """
+    items = np.array([[1.2, -1.5, 0.2, 1.0], [0.8, -0.5, 0.0, 1.0], [1.6, 0.5, 0.25, 0.95], [1.0, 1.5, 0.1, 1.0]])
+    mean, sd = 0.5, 0.8
+    fine = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 240_001)
+    a, b, c, d = (items[:, [k]] for k in range(4))
+    p = c + (d - c) / (1.0 + np.exp(-a * (fine - b)))
+    log_prior = -0.5 * ((fine - mean) / sd) ** 2
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean, sd))
+
+    for pattern in product([False, True], repeat=len(items)):
+      log_likelihood = np.sum(np.where(np.array(pattern)[:, None], np.log(p), np.log1p(-p)), axis=0)
+      reference = fine[np.argmax(log_likelihood + log_prior)]
+
+      theta = estimator.estimate(ItemBank(items), list(range(len(items))), list(pattern), 0.0)
+
+      assert theta == pytest.approx(reference, abs=1e-4), pattern
+
+  def test_counters_add_the_refinement_to_the_search_points(self) -> None:
+    """Each estimate counts the 201 search points plus the refinement steps, and the totals add up."""
+    item_bank = ItemBank.generate_item_bank(20, seed=7)
+    estimator = MAPEstimator()
+
+    estimator.estimate(item_bank, [0, 1, 2, 3], [True, False, True, True], 0.0)
+    first = estimator.evaluations
+    estimator.estimate(item_bank, [0, 1, 2, 3, 4], [True, False, True, True, False], 0.0)
+
+    assert first > 201
+    assert estimator.evaluations > 201
+    assert (estimator.calls, estimator.total_evaluations) == (2, first + estimator.evaluations)
+
+  @staticmethod
+  def _hard_items() -> ItemBank:
+    """Three items too hard for any ability inside a narrow prior."""
+    return ItemBank(np.array([[1.2, 2.0, 0.0, 1.0], [1.4, 2.5, 0.0, 1.0], [1.1, 3.0, 0.0, 1.0]], dtype=float))
+
+  @pytest.mark.parametrize(
+    ("low", "high", "response_vector", "expected"),
+    [
+      pytest.param(-1.0, 1.0, [True, False, True], 1.0, id="mode_at_upper_edge"),
+      pytest.param(-1.0, 1.0, [False, False, False], -1.0, id="mode_at_lower_edge"),
+      pytest.param(-6.0, -5.0, [True, False, True], -5.0, id="support_away_from_the_data"),
+    ],
+  )
+  def test_estimate_stays_inside_a_uniform_prior_narrower_than_the_bounds(
+    self, low: float, high: float, response_vector: list[bool], expected: float
+  ) -> None:
+    """The estimate must lie in the prior's support, at the edge the likelihood points to.
+
+    Outside the support the negative log-posterior is +inf, a flat region a bounded scalar
+    search cannot cross, so searching the whole bounds at once returned 6.0 in every case.
+    """
+    estimator = MAPEstimator(log_prior=uniform_log_prior(low, high))
+
+    theta = estimator.estimate(self._hard_items(), [0, 1, 2], response_vector, 0.0)
+
+    assert theta == pytest.approx(expected, abs=1e-5)
+
+  def test_estimate_stays_inside_a_prior_narrower_than_a_grid_step(self) -> None:
+    """Both neighbours of the only grid point in the support lie outside it.
+
+    The refinement then searches where the objective is mostly +inf; the estimate must
+    still lie inside the support rather than wherever that search stops.
+    """
+    estimator = MAPEstimator(log_prior=uniform_log_prior(-0.01, 0.01))
+
+    theta = estimator.estimate(self._hard_items(), [0, 1, 2], [True, False, True], 0.0)
+
+    assert -0.01 <= theta <= 0.01
+
+  def test_estimate_raises_when_the_prior_excludes_the_bounds(self) -> None:
+    """A prior with no support inside the search bounds leaves no mode to find."""
+    estimator = MAPEstimator(log_prior=uniform_log_prior(7.0, 8.0))
+
+    with pytest.raises(ValueError, match="not finite at any"):
+      estimator.estimate(self._hard_items(), [0], [True], 0.0)
+
+  def test_estimate_locates_an_off_grid_prior_mode_within_tol(self) -> None:
+    """With no responses the estimate is the prior mode to within tol, not to the grid's 0.06."""
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.5, sd=1.0), tol=1e-8)
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(0.5, abs=1e-6)
+
+  def test_estimate_refines_a_mode_between_two_tied_points(self) -> None:
+    """A peak halfway between two grid points makes them tie, which is not a flat posterior.
+
+    The prior mode 0.03 sits midway between the points 0.0 and 0.06, which tie exactly;
+    the estimate must still be refined to the mode instead of returning one of them.
+    """
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.03, sd=1.0), tol=1e-8)
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(0.03, abs=1e-6)
+
+  def test_estimate_raises_when_the_support_falls_between_grid_points(self) -> None:
+    """A support narrower than the grid spacing that holds no grid point cannot be searched."""
+    estimator = MAPEstimator(log_prior=uniform_log_prior(0.01, 0.05))
+
+    with pytest.raises(ValueError, match="must contain at least one"):
+      estimator.estimate(self._hard_items(), [0], [True], 0.0)
+
+  def test_estimate_finds_the_global_mode_of_a_bimodal_prior(self) -> None:
+    """The grid search picks the taller of two separated modes, wherever a local search would stop."""
+
+    def log_prior(theta: np.ndarray) -> np.ndarray:
+      low_mode = np.log(0.3) - 0.5 * ((theta + 2.0) / 0.3) ** 2
+      high_mode = np.log(0.7) - 0.5 * ((theta - 2.0) / 0.3) ** 2
+      return np.logaddexp(low_mode, high_mode)
+
+    estimator = MAPEstimator(log_prior=log_prior)
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(2.0, abs=1e-5)
+
+  def test_estimate_takes_the_middle_of_a_flat_posterior(self) -> None:
+    """A uniform prior with no responses has no unique mode, so the middle of the bounds is returned."""
+    estimator = MAPEstimator(log_prior=uniform_log_prior())
+
+    theta = estimator.estimate(self._hard_items(), [], [], 0.0)
+
+    assert theta == pytest.approx(0.0, abs=1e-12)
+
+
+class TestWarmLikelihoodEstimator:
+  """Tests for WarmLikelihoodEstimator."""
+
+  def test_estimate_empty_response_returns_input_theta(self) -> None:
+    """No administered items should return the input estimate unchanged."""
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    estimator = WarmLikelihoodEstimator()
+
+    theta = estimator.estimate(
+      item_bank=item_bank,
+      administered_items=[],
+      response_vector=[],
+      est_theta=1.25,
+    )
+
+    assert theta == pytest.approx(1.25)
+    assert estimator.calls == 1
+
+  @staticmethod
+  def _two_candidate_bank() -> ItemBank:
+    """Two 3PL/4PL items whose modified score yields two maxima candidates after two correct answers."""
+    return ItemBank(np.array([[2.13, -2.78, 0.13, 0.95], [1.11, 2.02, 0.3, 0.9]]))
+
+  def test_evaluations_count_the_scan_the_root_search_and_the_ranking(self) -> None:
+    """The counters include every modified-score evaluation, including the ranking integrals.
+
+    A single root costs the 121-point scan plus a few Brent steps; ranking two candidates adds
+    two integrals of at least 21 evaluations each.
+    """
+    estimator = WarmLikelihoodEstimator()
+    single_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.2, 0.5, 0.0, 1.0]]))
+
+    estimator.estimate(single_bank, [0, 1], [True, False], 0.0)
+    single = estimator.evaluations
+    estimator.estimate(self._two_candidate_bank(), [0, 1], [True, True], 0.0)
+    ranked = estimator.evaluations
+
+    assert 121 < single < 121 + 50
+    assert ranked >= 121 + 2 * 21
+    assert (estimator.calls, estimator.total_evaluations) == (2, single + ranked)
+
+  def test_ranking_integral_warnings_reach_the_caller(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A ranking integral that does not converge still warns, although quad returns the message."""
+    wle_module = importlib.import_module("catsim.estimation.wle")
+    real_quad = wle_module.quad
+
+    def quad_with_warning(*args: Any, **kwargs: Any) -> tuple[Any, ...]:
+      return (*real_quad(*args, **kwargs)[:3], "the maximum number of subdivisions has been achieved")
+
+    monkeypatch.setattr(wle_module, "quad", quad_with_warning)
+
+    with pytest.warns(IntegrationWarning, match="subdivisions"):
+      WarmLikelihoodEstimator().estimate(self._two_candidate_bank(), [0, 1], [True, True], 0.0)
+
+  @pytest.mark.parametrize(
+    ("b", "correct", "expected"),
+    [
+      pytest.param(10.0, True, irt.THETA_MAX_EXTENDED, id="correct_beyond_the_upper_bound"),
+      pytest.param(-10.0, False, irt.THETA_MIN_EXTENDED, id="incorrect_beyond_the_lower_bound"),
+    ],
+  )
+  def test_estimate_falls_back_to_the_bound_the_score_points_to(self, b: float, correct: bool, expected: float) -> None:
+    """With no root in the search range the estimate is the bound the modified score points to.
+
+    For one 2PL item the weighted likelihood P^1.5 Q^0.5 peaks where P = 3/4 after a correct
+    answer (P = 1/4 after an incorrect one), at b +- ln 3 / a, beyond [-6, 6] for b = +-10.
+    """
+    estimator = WarmLikelihoodEstimator()
+
+    theta = estimator.estimate(ItemBank(np.array([[1.0, b, 0.0, 1.0]])), [0], [correct], 0.0)
+
+    assert theta == expected
+
+  def test_estimate_picks_the_candidate_with_the_largest_weighted_likelihood(self) -> None:
+    """Among several maxima candidates the estimate is the global maximum of the weighted likelihood.
+
+    The weighted log-likelihood is the integral of the modified score, so its maximum is found
+    here by integrating the independent reference score on a fine grid.
+    """
+    items = self._two_candidate_bank().items[:, :4]
+    response_vector = [True, True]
+    scan = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 121)
+    scan_scores = np.array([_warm_modified_score(theta, response_vector, items) for theta in scan])
+    sign_changes = int(np.sum((scan_scores[:-1] > 0) & (scan_scores[1:] <= 0)))
+    assert sign_changes + int(scan_scores[0] <= 0) + int(scan_scores[-1] > 0) >= 2
+
+    fine = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 24_001)
+    fine_scores = np.array([_warm_modified_score(theta, response_vector, items) for theta in fine])
+    steps = (fine_scores[1:] + fine_scores[:-1]) / 2 * np.diff(fine)
+    weighted_log_likelihood = np.concatenate([[0.0], np.cumsum(steps)])
+
+    theta = WarmLikelihoodEstimator().estimate(self._two_candidate_bank(), [0, 1], response_vector, 0.0)
+
+    assert theta == pytest.approx(fine[int(np.argmax(weighted_log_likelihood))], abs=1e-3)
+
+  @pytest.mark.parametrize(
+    ("b", "theta", "correct"),
+    [
+      pytest.param(5.0, -2.0, True, id="correct_on_a_far_too_hard_item"),
+      pytest.param(-5.0, 2.0, False, id="incorrect_on_a_far_too_easy_item"),
+    ],
+  )
+  def test_modified_score_is_exact_where_the_probability_rounds_off(
+    self, b: float, theta: float, correct: bool
+  ) -> None:
+    """At a logit of +-70 one of P and Q is below 1e-30, and the score must keep it.
+
+    For one item without guessing or slipping the modified score is a Q + a (Q - P) / 2 after
+    a correct answer and -a P + a (Q - P) / 2 after an incorrect one. Computing Q as 1 - P and
+    clipping P Q at machine epsilon lost the likelihood term entirely, leaving only the
+    correction: 5 instead of 15 for the far-too-hard item.
+    """
+    a = 10.0
+    items = np.array([[a, b, 0.0, 1.0]])
+    z = a * (theta - b)
+    p, q = expit(z), expit(-z)
+    expected = (a * q if correct else -a * p) + a * (q - p) / 2.0
+
+    modified_score = WarmLikelihoodEstimator.__dict__["_modified_score"].__func__
+    value = modified_score(theta, [correct], items)[0]
+
+    assert value == pytest.approx(expected, rel=1e-12)
+
+  def test_estimate_solves_warm_modified_score_equation(self) -> None:
+    """Every estimate must be an interior root of Warm's modified score equation.
+
+    The bank has guessing parameters, where the WLE is not the maximizer of L * sqrt(I), so this
+    checks Warm's (1989) defining equation directly. It covers every 5-item response pattern,
+    including those whose likelihood is maximized at the search bound: an earlier one-step
+    correction (MLE + J / (2 I^2)) returned about 2670 for the pattern 00010 on this bank.
+    """
+    item_bank = ItemBank.generate_item_bank(100, seed=0)
+    administered_items = list(range(5))
+    items = item_bank.items[administered_items, :4]
+    estimator = WarmLikelihoodEstimator()
+
+    for pattern in product([False, True], repeat=len(administered_items)):
+      response_vector = list(pattern)
+      theta = estimator.estimate(
+        item_bank=item_bank,
+        administered_items=administered_items,
+        response_vector=response_vector,
+        est_theta=0.0,
+      )
+
+      assert irt.THETA_MIN_EXTENDED < theta < irt.THETA_MAX_EXTENDED
+      assert _warm_modified_score(theta, response_vector, items) == pytest.approx(0.0, abs=1e-4)
+
+  def test_estimate_maximizes_jeffreys_weighted_likelihood_without_guessing(self) -> None:
+    """Without guessing or slipping, J = I' and the WLE maximizes L(theta) * sqrt(I(theta)).
+
+    The reference is a dense grid search of log L + 0.5 log I over every response pattern.
+    """
+    items = np.column_stack([np.linspace(0.8, 2.0, 5), np.linspace(-1.5, 1.5, 5), np.zeros(5), np.ones(5)])
+    item_bank = ItemBank(items)
+    grid = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 12001)
+    p = 1.0 / (1.0 + np.exp(-items[:, 0] * (grid[:, None] - items[:, 1])))
+    log_info = np.log(np.sum(items[:, 0] ** 2 * p * (1.0 - p), axis=1))
+    estimator = WarmLikelihoodEstimator()
+
+    for pattern in product([False, True], repeat=len(items)):
+      responses = np.array(pattern)
+      log_lik = np.sum(np.where(responses, np.log(p), np.log1p(-p)), axis=1)
+      reference = grid[np.argmax(log_lik + 0.5 * log_info)]
+
+      theta = estimator.estimate(
+        item_bank=item_bank,
+        administered_items=list(range(len(items))),
+        response_vector=list(pattern),
+        est_theta=0.0,
+      )
+
+      assert theta == pytest.approx(reference, abs=2e-3)
+
+  def test_exact_bias_is_small_and_below_first_order_mle_bias(self) -> None:
+    """WLE removes the first-order bias of the MLE on a short 2PL test (Warm, 1989).
+
+    The expected bias is computed exactly by enumerating all 2^8 response patterns weighted by
+    their probabilities, so the check is deterministic and needs no conditioning on mixed
+    patterns (the MLE diverges on the all-correct and all-incorrect ones). The MLE reference is
+    its first-order bias -J / (2 I^2) (Lord, 1983); wherever that is non-negligible, WLE's exact
+    bias must be less than half its size.
+    """
+    items = np.column_stack([np.linspace(0.8, 2.0, 8), np.linspace(-2.0, 2.0, 8), np.zeros(8), np.ones(8)])
+    item_bank = ItemBank(items)
+    patterns = [list(pattern) for pattern in product([False, True], repeat=len(items))]
+    estimator = WarmLikelihoodEstimator()
+    estimates = np.array([
+      estimator.estimate(
+        item_bank=item_bank,
+        administered_items=list(range(len(items))),
+        response_vector=pattern,
+        est_theta=0.0,
+      )
+      for pattern in patterns
+    ])
+
+    for theta in (-2.0, -1.0, 0.0, 1.0, 2.0):
+      p = 1.0 / (1.0 + np.exp(-items[:, 0] * (theta - items[:, 1])))
+      probabilities = np.array([np.prod(np.where(pattern, p, 1.0 - p)) for pattern in patterns])
+      wle_bias = float(probabilities @ (estimates - theta))
+
+      dp = items[:, 0] * p * (1.0 - p)
+      d2p = items[:, 0] * dp * (1.0 - 2.0 * p)
+      info = np.sum(dp**2 / (p * (1.0 - p)))
+      mle_bias = -np.sum(dp * d2p / (p * (1.0 - p))) / (2.0 * info**2)
+
+      assert abs(wle_bias) < 0.1
+      if abs(mle_bias) > 0.05:
+        assert abs(wle_bias) < 0.5 * abs(mle_bias)
+
+
+def _warm_modified_score(theta: float, response_vector: list[bool], items: np.ndarray) -> float:
+  """Warm's (1989) modified score, written out independently of the estimator under test."""
+  a, b, c, d = items.T
+  logistic = 1.0 / (1.0 + np.exp(-a * (theta - b)))
+  p = c + (d - c) * logistic
+  dp = a * (d - c) * logistic * (1.0 - logistic)
+  d2p = a * dp * (1.0 - 2.0 * logistic)
+  pq = p * (1.0 - p)
+  u = np.asarray(response_vector, dtype=float)
+  info = np.sum(dp**2 / pq)
+  j = np.sum(dp * d2p / pq)
+  return float(np.sum((u - p) * dp / pq) + j / (2.0 * info))
