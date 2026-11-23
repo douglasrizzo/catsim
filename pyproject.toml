@@ -186,7 +186,10 @@ docs = [
 [tool.pytest.ini_options]
 # The suite and the package's docstring examples.
 testpaths = ["tests", "src/catsim"]
-addopts = "--strict-markers --strict-config --doctest-modules"
+# importlib: the tests and the docstring examples both import the catsim that is installed. With the
+# default mode, running the suite from an unpacked sdist imported src/catsim a second time beside the
+# installed package and failed with "import file mismatch".
+addopts = "--strict-markers --strict-config --doctest-modules --import-mode=importlib"
 xfail_strict = true
 filterwarnings = ["error"]
 markers = [
