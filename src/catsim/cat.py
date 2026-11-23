@@ -243,9 +243,3 @@ def random_response_vector(size: int) -> list[bool]:
       A list of random boolean values with equal probability of True and False.
   """
   return [bool(random.getrandbits(1)) for _ in range(size)]
-
-
-if __name__ == "__main__":
-  import doctest
-
-  doctest.testmod()

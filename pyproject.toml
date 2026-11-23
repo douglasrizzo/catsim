@@ -166,8 +166,9 @@ docs = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "--strict-markers --strict-config"
+# The suite and the package's docstring examples.
+testpaths = ["tests", "src/catsim"]
+addopts = "--strict-markers --strict-config --doctest-modules"
 xfail_strict = true
 filterwarnings = ["error"]
 markers = [

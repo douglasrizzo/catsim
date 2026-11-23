@@ -436,9 +436,3 @@ class ItemBank:
   def __getitem__(self, index: int | slice | list | IntArray) -> FloatArray:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]
-
-
-if __name__ == "__main__":
-  import doctest
-
-  doctest.testmod()
