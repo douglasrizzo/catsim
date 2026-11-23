@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
 from catsim.item_bank import ItemBank
-from catsim.state import CatSessionState, ExposureTracker, SimulationResult
+from catsim.state import CatSessionState, ExposureTracker, SimulationResult, StopReason
 
 
 def finished_session(session_id: int, items: list[int]) -> CatSessionState:
@@ -38,6 +40,21 @@ def test_session_state_rejects_a_history_that_does_not_match_its_responses(
   """
   with pytest.raises(ValueError, match=match):
     CatSessionState(session_id=0, theta_history=theta_history, administered_item_ids=items, responses=responses)
+
+
+def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> None:
+  """A stop reason restored from storage as its string is the StopReason member again; an unknown one is rejected.
+
+  Fails if the string is kept, so that ``stop_reason is StopReason.STOPPER`` is False for a restored session, or if
+  a reason catsim never sets is accepted.
+  """
+  persisted = json.loads(json.dumps({"stop_reason": StopReason.STOPPER, "unknown": "paused"}))
+
+  restored = CatSessionState(session_id=0, theta_history=[0.0], stop_reason=persisted["stop_reason"])
+
+  assert restored.stop_reason is StopReason.STOPPER
+  with pytest.raises(ValueError, match="'paused' is not a valid StopReason"):
+    CatSessionState(session_id=0, theta_history=[0.0], stop_reason=persisted["unknown"])
 
 
 def test_exposure_tracker_returns_zero_rates_for_non_positive_session_counts() -> None:

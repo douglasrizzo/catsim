@@ -42,7 +42,7 @@ class CatSessionState:
   ------
   ValueError
       If the session does not have one response per administered item and one more estimate than
-      responses.
+      responses, or if ``stop_reason`` is not a :class:`StopReason` value.
   """
 
   session_id: Hashable
@@ -53,7 +53,15 @@ class CatSessionState:
   stop_reason: StopReason | None = None
 
   def __post_init__(self) -> None:
-    """Reject a session whose items, responses and estimates do not line up."""
+    """Take its own copy of the histories and reject a session whose entries do not line up."""
+    # The engine appends to these lists, so they must be lists the session owns: a snapshot's tuples
+    # would fail half-way through a step, and a caller's lists would change under the caller.
+    self.administered_item_ids = list(self.administered_item_ids)
+    self.responses = list(self.responses)
+    self.theta_history = list(self.theta_history)
+    if self.stop_reason is not None:
+      # A stop reason restored from storage comes back as its string value.
+      self.stop_reason = StopReason(self.stop_reason)
     n_responses = len(self.responses)
     if len(self.administered_item_ids) != n_responses:
       msg = (

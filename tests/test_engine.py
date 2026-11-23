@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
@@ -415,6 +416,29 @@ def test_apply_response_rejects_an_item_index_that_is_not_an_integer(item_bank, 
     engine.apply_response(session, item_bank, item_id=item_id, response=True, context=context)
 
   assert session == before
+
+
+def test_a_session_rebuilt_from_a_snapshot_takes_the_next_step(item_bank) -> None:
+  """A session rebuilt from a snapshot's fields continues like the original, and the snapshot stays as it was.
+
+  Fails if the rebuilt state keeps the snapshot's tuples: apply_response appended the item and the response,
+  then failed on the history tuple, leaving a step half-applied and the item impossible to retry.
+  """
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  snapshot = session.snapshot()
+  rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
+
+  engine.apply_response(rebuilt, item_bank, item_id=4, response=False, context=context)
+
+  assert (rebuilt.administered_item_ids, rebuilt.responses, rebuilt.theta_history) == (
+    [3, 4],
+    [True, False],
+    [0.0, 0.5, 0.5],
+  )
+  assert (snapshot.administered_item_ids, snapshot.responses, snapshot.theta_history) == ((3,), (True,), (0.0, 0.5))
 
 
 def test_a_step_result_keeps_the_session_as_the_step_left_it(item_bank) -> None:
