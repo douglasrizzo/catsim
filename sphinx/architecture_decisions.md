@@ -15,4 +15,5 @@ adr/0006-versioned-tutorial-notebooks
 adr/0007-release-gated-by-docs
 adr/0008-random-tie-breaking
 adr/0009-ability-scale-and-extreme-patterns
+adr/0010-published-progressive-schedule
 ```
