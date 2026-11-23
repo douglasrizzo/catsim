@@ -798,6 +798,21 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="StopReason">
+<a class="viewcode-back" href="../../api/state.html#catsim.state.StopReason">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">StopReason</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">"""Why a CAT session ended.</span>
+
+<span class="sd">  ``STOPPER`` means the engine's stopper was satisfied by the session's current state. ``NO_ITEMS``</span>
+<span class="sd">  means the selector had no item to offer, which is not necessarily the end of the item bank: a</span>
+<span class="sd">  selector that follows a fixed list or works through strata can run out first.</span>
+<span class="sd">  """</span>
+
+  <span class="n">STOPPER</span> <span class="o">=</span> <span class="s2">"stopper"</span>
+  <span class="n">NO_ITEMS</span> <span class="o">=</span> <span class="s2">"no_items"</span></div>
+
+
+
 <div class="viewcode-block" id="CatSessionState">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -811,7 +826,7 @@ window.runMermaid = runMermaid;</script>
   <span class="n">responses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
   <span class="n">theta_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
   <span class="n">status</span><span class="p">:</span> <span class="n">SessionStatus</span> <span class="o">=</span> <span class="n">SessionStatus</span><span class="o">.</span><span class="n">NOT_STARTED</span>
-  <span class="n">stop_reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+  <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
   <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
   <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -861,7 +876,7 @@ window.runMermaid = runMermaid;</script>
   <span class="n">responses</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
   <span class="n">theta_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
   <span class="n">status</span><span class="p">:</span> <span class="n">SessionStatus</span>
-  <span class="n">stop_reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+  <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span>
   <span class="n">metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span></div>
 
 
@@ -877,7 +892,7 @@ window.runMermaid = runMermaid;</script>
   <span class="n">response</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span>
   <span class="n">updated_theta</span><span class="p">:</span> <span class="nb">float</span>
   <span class="n">stopped</span><span class="p">:</span> <span class="nb">bool</span>
-  <span class="n">stop_reason</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+  <span class="n">stop_reason</span><span class="p">:</span> <span class="n">StopReason</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 
