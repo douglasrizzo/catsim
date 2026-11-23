@@ -2,9 +2,20 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   # 1. Fast fail checks first
+  - repo: local
+    hooks:
+      # Catches `git add -f` past .gitignore too.
+      - id: forbid-local-dirs
+        name: local-only directories must not be committed
+        entry: these paths are local-only (see AGENTS.md)
+        language: fail
+        files: ^(\.claude|\.plans|\.pre-commit-cache|papers)/
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      - id: check-added-large-files
+        args: [--maxkb=1024, --enforce-all]  # --enforce-all: CI runs --all-files, where nothing is newly added
       - id: check-merge-conflict
       - id: check-ast
       - id: check-toml
