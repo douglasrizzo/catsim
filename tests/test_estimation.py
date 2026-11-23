@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import pytest
 from scipy.optimize import minimize_scalar
+from scipy.special import expit
 
 from catsim import irt
 from catsim.estimation import (
@@ -1020,6 +1021,34 @@ class TestWarmLikelihoodEstimator:
     assert estimator.calls == 1
     assert estimator.evaluations > 0
     assert estimator.total_evaluations == estimator.evaluations
+
+  @pytest.mark.parametrize(
+    ("b", "theta", "correct"),
+    [
+      pytest.param(5.0, -2.0, True, id="correct_on_a_far_too_hard_item"),
+      pytest.param(-5.0, 2.0, False, id="incorrect_on_a_far_too_easy_item"),
+    ],
+  )
+  def test_modified_score_is_exact_where_the_probability_rounds_off(
+    self, b: float, theta: float, correct: bool
+  ) -> None:
+    """At a logit of +-70 one of P and Q is below 1e-30, and the score must keep it.
+
+    For one item without guessing or slipping the modified score is a Q + a (Q - P) / 2 after
+    a correct answer and -a P + a (Q - P) / 2 after an incorrect one. Computing Q as 1 - P and
+    clipping P Q at machine epsilon lost the likelihood term entirely, leaving only the
+    correction: 5 instead of 15 for the far-too-hard item.
+    """
+    a = 10.0
+    items = np.array([[a, b, 0.0, 1.0]])
+    z = a * (theta - b)
+    p, q = expit(z), expit(-z)
+    expected = (a * q if correct else -a * p) + a * (q - p) / 2.0
+
+    modified_score = WarmLikelihoodEstimator.__dict__["_modified_score"].__func__
+    value = modified_score(theta, [correct], items)[0]
+
+    assert value == pytest.approx(expected, rel=1e-12)
 
   def test_estimate_solves_warm_modified_score_equation(self) -> None:
     """Every estimate must be an interior root of Warm's modified score equation.

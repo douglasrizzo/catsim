@@ -79,14 +79,19 @@ class WarmLikelihoodEstimator(BaseEstimator):
     """
     thetas = numpy.atleast_1d(numpy.asarray(theta, dtype=float))[:, None]
     a, b, c, d = items[:, 0], items[:, 1], items[:, 2], items[:, 3]
-    logistic = expit(a * (thetas - b))
+    z = a * (thetas - b)
+    # The logistic and its complement both come from the logit, so Q and P Q stay exact where P
+    # rounds to 1 instead of losing their digits to 1 - P
+    logistic, complement = expit(z), expit(-z)
     p = c + (d - c) * logistic
-    dp = a * (d - c) * logistic * (1.0 - logistic)
-    d2p = a * dp * (1.0 - 2.0 * logistic)
-    pq = numpy.clip(p * (1.0 - p), numpy.finfo(float).eps, None)
+    q = (1.0 - d) + (d - c) * complement
+    dp = a * (d - c) * logistic * complement
+    d2p = a * dp * (complement - logistic)
+    pq = numpy.maximum(p * q, numpy.finfo(float).tiny)
 
-    responses = numpy.asarray(response_vector, dtype=float)
-    score = numpy.sum((responses - p) * dp / pq, axis=1)
+    # u - P is Q for a correct response and -P for an incorrect one
+    residual = numpy.where(numpy.asarray(response_vector, dtype=bool), q, -p)
+    score = numpy.sum(residual * dp / pq, axis=1)
     info = numpy.sum(dp**2 / pq, axis=1)
     j = numpy.sum(dp * d2p / pq, axis=1)
     correction = numpy.divide(j, 2.0 * info, out=numpy.zeros_like(j), where=info > 0.0)
