@@ -130,9 +130,14 @@ class ProportionalSelector(FiniteSelector):
     position = len(administered_items) + 1
     exponent = self._exponent(position)
 
-    info = numpy.asarray(item_bank.information(est_theta), dtype=float)
-    weights = numpy.power(numpy.maximum(info[candidates], 0.0), exponent)
-    total = float(weights.sum())
-    probs = numpy.full(candidates.size, 1.0 / candidates.size, dtype=float) if total <= 0 else weights / total
+    info = numpy.maximum(numpy.asarray(item_bank.information(est_theta), dtype=float)[candidates], 0.0)
+    info_max = float(info.max())
+    if info_max <= 0:
+      probs = numpy.full(candidates.size, 1.0 / candidates.size, dtype=float)
+    else:
+      # Scaling by the maximum leaves the probabilities unchanged and keeps a large exponent from
+      # underflowing every weight to 0; the best item's weight is 1, so the sum is at least 1.
+      weights = numpy.power(info / info_max, exponent)
+      probs = weights / weights.sum()
 
     return int(rng.choice(candidates, p=probs))

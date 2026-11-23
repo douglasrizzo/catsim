@@ -1270,6 +1270,21 @@ class TestProportionalSelector:
     assert probs[1] > 0.999999
     assert probs[0] < 1e-6
 
+  def test_large_exponent_does_not_underflow_to_uniform_sampling(self) -> None:
+    """Test that a large exponent on low information still favors the best item.
+
+    Far from every item the information is small (0.028 at most here), and raised to
+    the power 230 it underflows to 0 for every item, which used to trigger the
+    uniform fallback at a position that should be close to maximum information.
+    """
+    item_bank = ItemBank(np.column_stack([np.ones(10), np.linspace(-1.0, 1.0, 10), np.zeros(10), np.ones(10)]))
+    selector = ProportionalSelector(test_size=2, sharpness=230.0)
+    rng = np.random.default_rng(7)
+
+    selections = [selector.select(item_bank, [9], -4.5, rng=rng) for _ in range(100)]
+
+    assert selections.count(0) == 100
+
 
 _N_ITEMS = 30
 SELECTOR_FACTORIES = {

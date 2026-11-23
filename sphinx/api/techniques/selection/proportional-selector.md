@@ -35,7 +35,10 @@ $$
 
 Here $k > 0$ is a sharpness parameter and $s > 0$ is the same
 acceleration parameter used by the progressive selector; the sums run over
-the available items, and the weight is clamped at 1 past position $N$.
+the available items, and the weight is clamped at 1 past position $N$. The
+implementation divides the information by its maximum over the available items
+before raising it to the power, which leaves the probabilities unchanged and
+keeps a large exponent from underflowing every weight to zero.
 
 Segall (2004) selects each item with probability proportional to $V_i$; in
 his paper $V_i$ was an expected variance, and with Fisher information
