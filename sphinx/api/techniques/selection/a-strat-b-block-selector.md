@@ -22,6 +22,15 @@ p. 157):
 2. Within each block, sort the items by increasing $a_i$.
 3. The $j$-th item of every block joins stratum $j$.
 
+```{figure} /b-blocking.svg
+:alt: Blocks 1 to k under an arrow labelled b, each block sorted along its own arrow labelled a. The first items of blocks 1 to k are gathered into the first cell of a new row of strata.
+:width: 400px
+
+Items sorted by $b$ into $k$ blocks of `n_strata` items, each block sorted by $a$. The first item of
+every block, $\{1_1, 2_1, \dots, k_1\}$, forms the first stratum, the second items the second
+stratum, and so on.
+```
+
 Each stratum therefore contains one item from every difficulty block, and the
 strata ascend in discrimination. Selection then follows the a-stratified rule:
 at test position $t$, return the non-administered item of stratum $s(t)$ whose

@@ -23,6 +23,13 @@ $$
 a_{(1)} \le a_{(2)} \le \dots \le a_{(J)}.
 $$
 
+```{figure} /alpha-strat.svg
+:alt: A row of strata numbered 1 to k under an arrow labelled a, shading darker from stratum 1 to stratum k.
+:width: 400px
+
+The item bank sorted by increasing $a$ and split into strata $1, \dots, k$.
+```
+
 The test is split into as many stages, and the item at test position $t$ comes
 from stratum $s(t)$ (see {doc}`stratified-selector`). Within that stratum the
 selector returns the non-administered item whose difficulty is closest to the

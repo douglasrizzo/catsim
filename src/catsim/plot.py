@@ -103,12 +103,7 @@ def item_curve(
     if title is not None:
       ax.set_title(title, size=18)
 
-    ax.annotate(
-      "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " + format(d) + "$",
-      bbox={"facecolor": "white", "alpha": 1},
-      xy=(0.75, 0.05),
-      xycoords="axes fraction",
-    )
+    _annotate_parameters(ax, a, b, c, d)
     ax.set_xlabel(r"$\theta$")
     ax.grid()
 
@@ -144,14 +139,26 @@ def item_curve(
     if title is not None:
       ax.set_title(title, size=18)
 
-    ax2.annotate(
-      "$a = " + format(a) + "$\n$b = " + format(b) + "$\n$c = " + format(c) + "$\n$d = " + format(d) + "$",
-      bbox={"facecolor": "white", "alpha": 1},
-      xy=(0.75, 0.05),
-      xycoords="axes fraction",
-    )
+    _annotate_parameters(ax2, a, b, c, d)
 
   return ax
+
+
+def _annotate_parameters(ax: Axes, a: float, b: float, c: float, d: float) -> None:
+  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes.
+
+  The curves of typical items keep clear of that corner: at the low end of the ability range the ICC is
+  near its lower asymptote and the IIC near zero. A very flat item with d < 1 (a around 0.1) is the
+  exception, as its information curve leans left into the corner.
+  """
+  ax.annotate(
+    f"$a = {a:.3g}$\n$b = {b:.3g}$\n$c = {c:.3g}$\n$d = {d:.3g}$",
+    bbox={"facecolor": "white", "alpha": 1},
+    xy=(0.02, 0.97),
+    xycoords="axes fraction",
+    ha="left",
+    va="top",
+  )
 
 
 def gen3d_dataset_scatter(
@@ -256,17 +263,21 @@ def item_exposure(
   title : str or None, optional
       The plot title. Default is None.
   simulation : SimulationResult or None, optional
-      Simulation result containing exposure data. Default is None.
+      Simulation result containing exposure data and the item bank. Pass either this or
+      ``exposure_rates``. Default is None.
   item_bank : ItemBank or numpy.ndarray or None, optional
       An ItemBank, or an item matrix of [a, b, c, d] parameters, which is converted to an ItemBank.
-      Exposure rates come from ``simulation`` or ``exposure_rates``. Default is None.
+      Only used with ``exposure_rates``, and required when ``par`` is given. Default is None.
+  exposure_rates : numpy.ndarray or None, optional
+      The exposure rate of each item, in item bank order. Pass either this or ``simulation``.
+      Default is None.
   par : str or None, optional
-      A string representing one of the item parameters ('a', 'b', 'c', 'd') to order
-      the items by and use on the x axis, or None to use the default order of the item
-      bank. If `hist=True`, no sorting will be done. Default is None.
+      A string representing one of the item parameters ('a', 'b', 'c', 'd') to plot on
+      the x axis, or None to plot the exposures in item bank order. If `hist=True`, no
+      sorting will be done. Default is None.
   hist : bool, optional
       If True, plots a histogram of item exposures. Otherwise, plots a line chart of
-      the exposures, sorted in the x-axis by the parameter chosen in `par`. Default is False.
+      the exposures against the parameter chosen in `par`. Default is False.
 
   Returns
   -------
@@ -276,11 +287,34 @@ def item_exposure(
   Raises
   ------
   ValueError
-      If neither simulation, item_bank, nor exposure_rates is provided, or if
-      par is not one of 'a', 'b', 'c', 'd', or None.
+      If neither or both of ``simulation`` and ``exposure_rates`` are given, if ``item_bank`` is
+      passed with ``simulation``, if ``par`` is not one of 'a', 'b', 'c', 'd' or None, if ``par``
+      is given with ``exposure_rates`` but no ``item_bank``, or if ``exposure_rates`` and
+      ``item_bank`` differ in length.
   """
-  if simulation is None and item_bank is None and exposure_rates is None:
-    msg = "One of: simulation, item_bank, exposure_rates must be passed."
+  if simulation is not None:
+    if item_bank is not None or exposure_rates is not None:
+      msg = "Pass either simulation or exposure_rates (with item_bank), not both; simulation already holds them."
+      raise ValueError(msg)
+    item_bank = simulation.item_bank
+    exposure_rates = simulation.exposure_rates
+  if exposure_rates is None:
+    msg = "Exposure data must be passed, either as simulation or as exposure_rates."
+    raise ValueError(msg)
+
+  supported_parameters = ("a", "b", "c", "d")
+  if par is not None and par not in supported_parameters:
+    msg = f"Unsupported parameter {par!r} for 'par'. Supported parameters are: {', '.join(supported_parameters)}."
+    raise ValueError(msg)
+
+  if isinstance(item_bank, numpy.ndarray):
+    item_bank = ItemBank(item_bank)
+  if item_bank is None:
+    if par is not None:
+      msg = f"item_bank must be passed with exposure_rates to plot exposure against parameter {par!r}."
+      raise ValueError(msg)
+  elif len(exposure_rates) != item_bank.n_items:
+    msg = f"exposure_rates has {len(exposure_rates)} values but the item bank has {item_bank.n_items} items."
     raise ValueError(msg)
 
   if ax is None:
@@ -289,24 +323,10 @@ def item_exposure(
   if title is not None:
     ax.set_title(title, size=18)
 
-  if simulation is not None:
-    item_bank = simulation.item_bank
-    exposure_rates = simulation.exposure_rates
-  elif isinstance(item_bank, numpy.ndarray):
-    item_bank = ItemBank(item_bank)
-
-  if item_bank is None:
-    msg = "item_bank must be provided when simulation is not passed"
-    raise ValueError(msg)
-  if exposure_rates is None:
-    exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-
-  supported_parameters = {"a", "b", "c", "d"}
-  if par is not None and par not in supported_parameters:
-    msg = "Unsupported parameter 'par'. Supported parameters are: " + ", ".join(supported_parameters) + "."
-    raise ValueError(msg)
-
-  if par == "a":
+  if item_bank is None or par is None:
+    parameter = numpy.arange(len(exposure_rates))
+    xlabel = "Items"
+  elif par == "a":
     parameter = item_bank.discrimination
     xlabel = "Item discrimination"
   elif par == "b":
@@ -315,27 +335,19 @@ def item_exposure(
   elif par == "c":
     parameter = item_bank.pseudo_guessing
     xlabel = "Item Guessing"
-  elif par == "d":
+  else:
     parameter = item_bank.upper_asymptote
     xlabel = "Item upper asymptote"
-  else:
-    parameter = numpy.array(range(item_bank.n_items))
-    xlabel = "Items"
 
   if hist:
-    ax.hist(exposure_rates, max(int(item_bank.n_items / 10), 3))
+    ax.hist(exposure_rates, max(len(exposure_rates) // 10, 3))
     ax.set_xlabel("Item exposure")
     ax.set_ylabel("Items")
   else:
-    indexes = parameter.argsort()
-    ax.plot(exposure_rates[indexes], marker="o")
+    indexes = parameter.argsort(kind="stable")
+    ax.plot(parameter[indexes], exposure_rates[indexes], marker="o")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Item exposure")
-
-  # Only show legend if there are labeled artists
-  handles, _ = ax.get_legend_handles_labels()
-  if handles:
-    plt.legend(loc="best")
 
   return ax
 
@@ -365,7 +377,8 @@ def test_progress(
   information and standard error of estimation), the plot calculates these values using
   the examinee's ability estimated at that given time of the test. This means that a test
   that was thought to be informative at a given point may not be as informative after new
-  estimates are made.
+  estimates are made. The value at :math:`x` items uses the estimate made after those
+  :math:`x` items, so these curves start at the first item.
 
   .. plot::
 
@@ -473,57 +486,26 @@ def test_progress(
     msg = "Number of estimated thetas and administered items is not the same."
     raise ValueError(msg)
 
-  # len(thetas) - 1 because the first item is made by the initializer
-  xs = list(range(len(thetas))) if thetas is not None else list(range(len(administered_items[:, 1])))
-
-  if thetas is not None:
-    ax.plot(xs, thetas, label=r"$\hat{\theta}$", marker=marker)
-  if administered_items is not None:
-    difficulties = administered_items[:, 1]
-    ax.plot(xs[1:], difficulties, label="Item difficulty", marker=marker)
+  # x counts the items answered: thetas[0] comes from the initializer and thetas[x] follows the
+  # response to item x, which is plotted at x.
+  xs = list(range(len(thetas)))
+  ax.plot(xs, thetas, label=r"$\hat{\theta}$", marker=marker)
+  ax.plot(xs[1:], administered_items[:, 1], label="Item difficulty", marker=marker)
   if true_theta is not None:
     ax.hlines(true_theta, 0, len(xs) - 1, label=r"$\theta$", colors="black", linestyles="dashed")
-  if thetas is not None and administered_items is not None:
-    # calculate and plot test information, var, standard error and reliability
-    if info:
-      infos = [
-        irt.test_info(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, infos, label=r"$I(\theta)$", marker=marker)
 
-    if var:
-      varss = [
-        irt.var(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, varss, label=r"$Var$", marker=marker)
-
-    if see:
-      sees = [
-        irt.see(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, sees, label=r"$SEE$", marker=marker)
-
-    if reliability:
-      reliabilities = [
-        irt.reliability(
-          thetas[x],
-          administered_items[: x + 1,],
-        )
-        for x in xs
-      ]
-      ax.plot(xs, reliabilities, label="Reliability", marker=marker)
+  # Each quality measure at x uses thetas[x] and the first x items. The curves start at x = 1:
+  # with no items the information is 0 and the variance, SEE and reliability are infinite.
+  quality_xs = xs[1:]
+  for enabled, measure, label in (
+    (info, irt.test_info, r"$I(\theta)$"),
+    (var, irt.var, r"$Var$"),
+    (see, irt.see, r"$SEE$"),
+    (reliability, irt.reliability, "Reliability"),
+  ):
+    if enabled:
+      values = [measure(thetas[x], administered_items[:x]) for x in quality_xs]
+      ax.plot(quality_xs, values, label=label, marker=marker)
   ax.set_xlabel("Items")
   ax.grid()
   ax.legend(loc="best")
