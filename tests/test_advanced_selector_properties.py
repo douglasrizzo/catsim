@@ -120,6 +120,10 @@ def test_cluster_selector_returns_valid_unseen_item(
   est_theta: float,
   administered_count: int,
 ) -> None:
+  """A method that returns an administered item, an index outside the bank or a numpy integer fails.
+
+  Generated labels can skip values, so clusters with no items are exercised too.
+  """
   bank, clusters = bank_clusters
   n = bank.n_items
   assume(administered_count < n)
@@ -135,40 +139,6 @@ def test_cluster_selector_returns_valid_unseen_item(
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert int(item_id) not in administered
-
-
-@given(
-  theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
-  bank_clusters=bank_with_clusters(),
-)
-@CLUSTER_SETTINGS
-def test_cluster_selector_sum_cluster_infos_keys_match_unique_clusters(
-  theta: float,
-  bank_clusters: tuple[ItemBank, list[int]],
-) -> None:
-  bank, clusters = bank_clusters
-  infos = ClusterSelector.sum_cluster_infos(theta, bank, clusters)
-  assert set(infos.keys()) == set(clusters)
-  for v in infos.values():
-    assert np.isfinite(v)
-    assert v >= 0.0
-
-
-@given(
-  theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
-  bank_clusters=bank_with_clusters(),
-)
-@CLUSTER_SETTINGS
-def test_cluster_selector_weighted_le_sum_cluster_infos(
-  theta: float,
-  bank_clusters: tuple[ItemBank, list[int]],
-) -> None:
-  bank, clusters = bank_clusters
-  sums = ClusterSelector.sum_cluster_infos(theta, bank, clusters)
-  weighted = ClusterSelector.weighted_cluster_infos(theta, bank, clusters)
-  assert set(sums.keys()) == set(weighted.keys())
-  for k in sums:
-    assert weighted[k] <= sums[k] + 1e-12
 
 
 # ---------------------------------------------------------------------------

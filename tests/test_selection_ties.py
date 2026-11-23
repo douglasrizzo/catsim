@@ -178,6 +178,27 @@ def test_54321_breaks_ties_at_random_once_the_bin_has_one_item() -> None:
   assert picks == {5, 6, 7, 8}
 
 
+@pytest.mark.parametrize("method", ["item_info", "cluster_info", "weighted_info"])
+def test_cluster_selector_draws_tied_clusters_uniformly(method: str) -> None:
+  """Three clusters holding the same two items tie under every method, so each is chosen about a third of the time.
+
+  Before ADR-0008 reached the choice of cluster, the first tied cluster in sort order won every draw. Each share is
+  binomial with p = 1/3 over 3000 draws, a standard deviation of 0.0086, so the 0.03 tolerance is 3.5 of them; a
+  selector that favoured one cluster, or split the draws between two, would miss by at least 1/6.
+  """
+  item_bank = ItemBank(np.tile([_ITEM, [0.8, -1.0, 0.1, 1.0]], (3, 1)))
+  selector = ClusterSelector(clusters=[0, 0, 1, 1, 2, 2], method=method)
+  rng = np.random.default_rng(3)
+
+  # inside each cluster the first item is the more informative, so the pick names the chosen cluster
+  counts = Counter(
+    selector.select(item_bank=item_bank, administered_items=[], est_theta=0.3, rng=rng) for _ in range(3000)
+  )
+
+  assert set(counts) == {0, 2, 4}
+  assert all(abs(count / 3000 - 1 / 3) < 0.03 for count in counts.values())
+
+
 def test_tie_without_rng_raises_in_a_deterministic_selector() -> None:
   """A deterministic selector called without a generator raises only when items actually tie."""
   with pytest.raises(ValueError, match="rng parameter cannot be None"):
