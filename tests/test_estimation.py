@@ -535,9 +535,6 @@ class TestEAPEstimator:
     )
 
     assert theta == pytest.approx(0.0, abs=1e-12)
-    assert estimator.last_posterior is not None
-    assert np.isclose(estimator.last_posterior.sum(), 1.0)
-    assert estimator.last_posterior_variance() > 0
 
   def test_estimate_uses_custom_prior_mean_with_no_data(self) -> None:
     """Custom priors should control the posterior mean when there is no data."""
@@ -552,16 +549,7 @@ class TestEAPEstimator:
     )
 
     assert theta == pytest.approx(1.2, abs=1e-12)
-    assert estimator.last_posterior is not None
     assert estimator.calls == 1
-    assert estimator.last_posterior_variance() > 0
-
-  def test_last_posterior_variance_is_infinite_before_first_estimate(self) -> None:
-    """The variance accessor should signal that no posterior has been computed yet."""
-    estimator = EAPEstimator()
-
-    assert estimator.last_posterior is None
-    assert estimator.last_posterior_variance() == np.inf
 
   def test_estimate_shifts_positive_after_correct_response(self) -> None:
     """Test that a correct response on a difficult item moves EAP upward."""
@@ -576,36 +564,6 @@ class TestEAPEstimator:
     )
 
     assert theta > 0.0
-
-  def test_last_posterior_variance_decreases_as_items_accumulate(self) -> None:
-    """Each additional item should reduce the posterior variance overall.
-
-    This protects the convergence signal exposed to downstream stopping and
-    selection rules; broken posterior normalization could keep variance flat or rising.
-    """
-    rng = np.random.default_rng(7)
-    item_bank = ItemBank.generate_item_bank(20, seed=3)
-    theta_true = 0.8
-    estimator = EAPEstimator()
-
-    administered_items: list[int] = []
-    response_vector: list[bool] = []
-    variances: list[float] = []
-
-    for idx in range(10):
-      administered_items.append(idx)
-      probability = irt.icc(theta_true, *item_bank.items[idx, :4])
-      response_vector.append(bool(rng.random() < probability))
-      estimator.estimate(
-        item_bank=item_bank,
-        administered_items=administered_items,
-        response_vector=response_vector,
-        est_theta=0.0,
-      )
-      variances.append(estimator.last_posterior_variance())
-
-    assert variances[-1] < variances[0]
-    assert variances[4] < variances[0]
 
   def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self) -> None:
     """A centered prior should shrink EAP more than a flat prior on all-correct data.
@@ -661,37 +619,6 @@ class TestEAPEstimator:
 
     assert theta == pytest.approx(1.5, abs=0.05)
     assert estimator.grid is grid
-    assert estimator.last_posterior is not None
-    assert estimator.last_posterior.shape == (21,)
-    assert np.isclose(estimator.last_posterior.sum(), 1.0)
-
-  def test_last_posterior_updates_between_calls(self) -> None:
-    """Test that the estimator state tracks the most recent posterior only."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = EAPEstimator()
-
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0],
-      response_vector=[True],
-      est_theta=0.0,
-    )
-    first_posterior = estimator.last_posterior
-    assert first_posterior is not None
-
-    estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0, 1],
-      response_vector=[True, False],
-      est_theta=0.0,
-    )
-
-    assert estimator.last_posterior is not None
-    assert estimator.last_posterior is not first_posterior
-    assert np.isclose(estimator.last_posterior.sum(), 1.0)
-    assert estimator.last_posterior_variance() != pytest.approx(
-      posterior_variance(first_posterior, estimator.grid.nodes)
-    )
 
   def test_estimate_converges_toward_mle_on_longer_test(self) -> None:
     """Test that EAP tracks MLE on a longer, information-rich response pattern."""

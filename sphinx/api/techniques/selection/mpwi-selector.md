@@ -11,7 +11,7 @@ information curve by the likelihood of ability values, it weights by the current
 posterior, which naturally combines the prior and the observed response history.
 
 Once Bayesian infrastructure exists, this criterion is attractive because it
-reuses the same posterior already needed by EAP and other posterior-based
+builds on the same `posterior()` helper as EAP and the other posterior-based
 selectors.
 
 ## Definition
@@ -58,9 +58,6 @@ way.
    * - ``log_prior``
      - ``normal_log_prior(0, 1)``
      - Prior used when the selector computes the posterior itself.
-   * - ``estimator``
-     - ``None``
-     - Optional EAP estimator whose cached posterior is reused to avoid recomputation.
    * - ``r_max``
      - ``1.0``
      - Soft exposure cap.
@@ -71,10 +68,9 @@ way.
 Any correct implementation must satisfy the following properties:
 
 1. Scores are posterior-weighted expected item information values, not likelihood-weighted values.
-2. If an estimator with a cached posterior is supplied, the selector may reuse it instead of recomputing the posterior.
-3. With an empty response vector, the selector reduces to prior-weighted expected information.
-4. The selector requires the response vector unless a reusable posterior is already available.
-5. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool if every constrained candidate is excluded.
+2. With an empty response vector, the selector reduces to prior-weighted expected information.
+3. The selector requires the response vector.
+4. Exposure filtering applies before the final argmax, with fallback to the unrestricted remaining pool if every constrained candidate is excluded.
 
 ## References
 
@@ -127,9 +123,6 @@ class MPWISelector(BaseSelector):
       Quadrature grid. Defaults to ``QuadratureGrid.uniform()`` (matches EAPEstimator).
   log_prior : callable or None
       Vectorized log-density of the prior. Defaults to N(0, 1).
-  estimator : EAPEstimator or None
-      If provided, the selector will reuse the estimator's ``last_posterior`` instead
-      of recomputing the quadrature on every call. Strongly recommended in production.
   r_max : float
       Exposure cap.
   """
@@ -138,7 +131,6 @@ class MPWISelector(BaseSelector):
     self,
     grid: QuadratureGrid | None = None,
     log_prior: LogPrior | None = None,
-    estimator=None,  # type: EAPEstimator | None
     r_max: float = 1.0,
   ) -> None:
     if not 0 <= r_max <= 1:
@@ -146,7 +138,6 @@ class MPWISelector(BaseSelector):
     super().__init__()
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._estimator = estimator
     self._r_max = float(r_max)
     # Pre-compute item information at grid nodes lazily, cached in item_bank._selector_cache.
 
@@ -174,9 +165,7 @@ class MPWISelector(BaseSelector):
     administered_items: list[int],
     response_vector: list[bool],
   ) -> FloatArray:
-    """Reuse the estimator's posterior if available; otherwise compute one."""
-    if self._estimator is not None and self._estimator.last_posterior is not None:
-      return self._estimator.last_posterior
+    """Compute the posterior from the session's responses."""
     if not administered_items:
       pp = self._log_prior(self._grid.nodes) + numpy.log(self._grid.weights)
       pp -= pp.max()
@@ -219,16 +208,14 @@ class MPWISelector(BaseSelector):
 **Implementation notes:**
 
 - Cache the information table per item bank and grid because it is bank-static.
-- Reusing `EAPEstimator.last_posterior` is the intended efficient path.
+- Compute the posterior from the session's responses with `posterior()`. Estimators keep no per-session posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`), and one vectorized call over the grid is cheap.
 - This selector shares most of its structure with MLWI and should be implemented in the same module.
 
 **Dependencies:**
 
 - Planned card 01 (`Bayesian Estimation Infrastructure`)
-- Recommended reuse of planned card 06 (`EAPEstimator`)
 
 **Testing notes:**
 
 - With no responses and a standard normal prior, scores should match prior-weighted information.
-- Compare behavior with and without posterior reuse from `EAPEstimator`.
 - Validate exposure-cap fallback behavior.

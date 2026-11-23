@@ -61,9 +61,6 @@ samples (p. 12).
    * - ``log_prior``
      - ``normal_log_prior(0, 1)``
      - Prior used when the selector computes the posterior itself.
-   * - ``estimator``
-     - ``None``
-     - Optional EAP estimator whose cached posterior is reused.
    * - ``r_max``
      - ``1.0``
      - Soft exposure cap.
@@ -129,9 +126,6 @@ class MEPVSelector(BaseSelector):
       Quadrature grid. Defaults to ``QuadratureGrid.uniform()``.
   log_prior : callable or None
       Prior log-density. Defaults to N(0, 1).
-  estimator : EAPEstimator or None
-      If provided, the selector reuses the estimator's ``last_posterior`` instead
-      of recomputing the quadrature.
   r_max : float
       Exposure cap.
   """
@@ -140,7 +134,6 @@ class MEPVSelector(BaseSelector):
     self,
     grid: QuadratureGrid | None = None,
     log_prior: LogPrior | None = None,
-    estimator=None,  # type: EAPEstimator | None
     r_max: float = 1.0,
   ) -> None:
     if not 0 <= r_max <= 1:
@@ -148,7 +141,6 @@ class MEPVSelector(BaseSelector):
     super().__init__()
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._estimator = estimator
     self._r_max = float(r_max)
 
   def __str__(self) -> str:
@@ -175,8 +167,6 @@ class MEPVSelector(BaseSelector):
     administered_items: list[int],
     response_vector: list[bool],
   ) -> FloatArray:
-    if self._estimator is not None and self._estimator.last_posterior is not None:
-      return self._estimator.last_posterior
     if not administered_items:
       lp = self._log_prior(self._grid.nodes) + numpy.log(self._grid.weights)
       lp -= lp.max()
@@ -251,10 +241,9 @@ class MEPVSelector(BaseSelector):
 **Dependencies:**
 
 - Planned card 01 (`Bayesian Estimation Infrastructure`)
-- Recommended reuse of planned card 06 (`EAPEstimator`)
 
 **Testing notes:**
 
 - Identical items should yield equal expected posterior variances.
 - Banks with a clear posterior-precision winner should produce a stable argmin.
-- Validate posterior reuse and exposure-cap fallback behavior.
+- Validate exposure-cap fallback behavior.

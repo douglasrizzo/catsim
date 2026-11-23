@@ -11,10 +11,13 @@ than the maximizer of a likelihood. In CAT practice this is attractive because
 it always returns a finite value, even for all-correct or all-incorrect patterns
 where MLE becomes unstable or undefined.
 
-EAP also exposes a posterior variance naturally, which makes it useful beyond
-estimation itself: the same posterior can drive stopping rules and
-posterior-weighted selectors. That makes it a foundational Bayesian estimator
-for the planned feature set.
+The posterior behind the estimate also yields a posterior variance, which makes
+it useful beyond estimation itself: the same posterior can drive stopping rules
+and posterior-weighted selectors. That makes it a foundational Bayesian
+estimator for the planned feature set. The estimator itself keeps no posterior
+between calls, since one instance serves every session and look-ahead selectors
+call it with hypothetical responses; consumers compute a session's posterior
+with `posterior()` from the Bayesian infrastructure.
 
 ## Definition
 
@@ -78,9 +81,8 @@ Any correct implementation must satisfy the following properties:
 
 1. With no administered items, the estimate equals the mean of the prior induced by the configured grid and prior.
 2. The estimator returns a finite value for extreme response patterns such as all-correct or all-incorrect strings.
-3. The exposed posterior from the most recent estimate is normalized and aligned with the configured quadrature grid.
-4. Posterior variance should generally decrease as additional informative items are administered.
-5. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
+3. The estimate depends only on the arguments of the call, never on earlier calls: the estimator keeps no per-session state ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`).
+4. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
 
 ## References
 

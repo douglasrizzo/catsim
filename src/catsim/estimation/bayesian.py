@@ -288,6 +288,10 @@ def posterior_variance(post: FloatArray, nodes: FloatArray) -> float:
 class EAPEstimator(BaseEstimator):
   """Expected a Posteriori ability estimator.
 
+  The estimator keeps no posterior between calls: one instance serves every session of a
+  simulation, and look-ahead selectors such as MEI call it with hypothetical responses. Compute
+  a session's posterior with :py:func:`posterior` when it is needed.
+
   For full algorithmic details, see :doc:`/api/techniques/estimation/eap-estimator`.
   """
 
@@ -300,7 +304,6 @@ class EAPEstimator(BaseEstimator):
     super().__init__(verbose=verbose)
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._last_posterior: FloatArray | None = None
 
   def __str__(self) -> str:
     """Return a human-readable name for the estimator."""
@@ -318,21 +321,9 @@ class EAPEstimator(BaseEstimator):
 
     items = item_bank.items[administered_items, :4] if administered_items else numpy.empty((0, 4), dtype=float)
     post = posterior(response_vector, items, self._grid, self._log_prior)
-    self._last_posterior = post
     return posterior_mean(post, self._grid.nodes)
-
-  @property
-  def last_posterior(self) -> FloatArray | None:
-    """Return the most recent posterior."""
-    return self._last_posterior
 
   @property
   def grid(self) -> QuadratureGrid:
     """Return the quadrature grid used by the estimator."""
     return self._grid
-
-  def last_posterior_variance(self) -> float:
-    """Return the variance of the most recent posterior."""
-    if self._last_posterior is None:
-      return float("inf")
-    return posterior_variance(self._last_posterior, self._grid.nodes)
