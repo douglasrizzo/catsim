@@ -16,7 +16,7 @@ near-Fisher behavior late, and no need for offline calibration.
 
 ## Definition
 
-At test position $n$ out of a fixed total length $N$, the candidate
+At test position $n$ out of a planned total length $N$, the candidate
 score for item $i$ is
 
 $$
@@ -29,31 +29,51 @@ $$
 
 where $\mathcal{A}$ is the set of available items (the non-administered items
 under the exposure cap, or every non-administered item when the cap excludes
-them all), $R_i$ is a fresh uniform random draw on $[0,1]$, and
+them all), $R_i$ is a fresh uniform random draw on $[0,1]$, and the weight on
+information is
 
 $$
 w_n
 =
-\min\!\left(1, \frac{n-1}{N-1}\right)^s,
+\frac{\sum_{m=1}^{n-1} m^{t}}{\sum_{m=1}^{N-1} m^{t}}
+\quad (n < N),
+\qquad
+w_n = 1
+\quad (n \ge N),
 $$
 
-with acceleration parameter $s > 0$. Dividing by the largest available
-information is equivalent to Revuelta and Ponsoda's (1998) random component
-drawn on $[0, \max_{j \in \mathcal{A}} I_j]$, as Barrada et al. (2008, p. 496,
-Equation 6) describe it. The weight is clamped at 1 so
-that a session running past $N$ stays fully information-based. The selector
-chooses the available item with the largest score.
+with acceleration parameter $t$, any real number. The weight is 0 at the first
+position and 1 at the last. With $t = 0$ it is linear, $w_n = (n-1)/(N-1)$;
+positive $t$ keeps the random component longer and negative $t$ drops it sooner
+(Barrada et al., 2008, p. 498; Figure 1, p. 499, plots $t = -1, 0, 1, 2$).
+Dividing by the largest available information is equivalent to Revuelta and
+Ponsoda's (1998) random component drawn on $[0, \max_{j \in \mathcal{A}} I_j]$,
+as Barrada et al. (2008, p. 496, Equation 6) describe it. The selector chooses
+the available item with the largest score.
 
-Barrada et al. (2008, p. 498, Equation 12; Figure 1, p. 499) parameterize the
-schedule as a cumulative power sum with an acceleration parameter $t$,
-$w = \sum_{k=1}^{n-1} k^{t} / \sum_{k=1}^{N-1} k^{t}$, which is also what `catR`
-implements in
-[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R). It agrees with the power schedule above at $t = 0$, $s = 1$ (linear),
-and for long tests approaches the power schedule with $s = t + 1$, since
-$\sum_{k=1}^{m} k^{t} \approx m^{t+1}/(t+1)$; for short tests the two differ, so
-`acceleration` is not interchangeable with their $t$. Revuelta and Ponsoda's original schedule,
-$w = (n - 1)/N$, stops just short of 1 at the last item (Barrada et al., 2008,
-p. 496, Equation 7).
+The schedule is Barrada et al.'s (2008, p. 498, Equation 12), with $m$ for their
+$h - 1$ and $n$, $N$ for their $k$, $K$. As printed, both sums in Equation 12 run
+to $k$, and Equations 12 and 13 both use the exponent $s$; the text under them,
+which names $t$ and $s$ as the two acceleration parameters and gives a weight of
+1 at the last item, puts $K$ in the denominator and $t$ in Equation 12. `catR`
+computes it that way in
+[`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), with its
+argument `AP` as $t$ and `thr` as $N$ when `rule = "length"`. catsim departs
+from both in three places:
+
+- The default is $t = 0$, the linear schedule; `catR`'s `nextItem` defaults to
+  `AP = 1`.
+- Past position $N$, which a session reaches when its stopper allows more items
+  than planned, the weight stays 1. In `catR` the sums keep growing, and the
+  weight passes 1 and gives the random component a negative coefficient.
+- With $N = 1$ the only position is the last, and the weight is 1. Equation 12
+  and `catR` give 0 at the first position whatever $N$ is.
+
+`catR`'s other schedule, for its precision stopping rule, is not implemented.
+Revuelta and Ponsoda's original schedule, $w = (n - 1)/N$, stops just short of 1
+at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
+not test it separately, since it differs little from Equation 12 with $t = 0$
+(p. 500).
 
 ## Parameters
 
@@ -69,8 +89,8 @@ p. 496, Equation 7).
      - required
      - Planned test length :math:`N`, at least 1; required because the schedule depends on test position.
    * - ``acceleration``
-     - ``1.0``
-     - Positive exponent :math:`s`. Values above 1 delay the transition to information-based selection; values below 1 accelerate it.
+     - ``0.0``
+     - Acceleration parameter :math:`t`, any finite number. 0 makes the schedule linear; positive values keep the random component longer and negative values drop it sooner.
    * - ``r_max``
      - ``1.0``
      - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
@@ -82,7 +102,7 @@ p. 496, Equation 7).
 Any correct implementation must satisfy the following properties:
 
 1. The blend weight is exactly 0 at position 1 and exactly 1 at the final test position when `test_size > 1`.
-2. With `acceleration = 1`, the schedule is linear in test position; larger acceleration delays the shift toward information-based scoring and smaller acceleration speeds it up.
+2. With `acceleration = 0`, the schedule is linear in test position; positive acceleration delays the shift toward information-based scoring and negative acceleration speeds it up.
 3. At the first position, selection is driven only by the random component and is therefore independent of item information.
 4. At the final position, the score reduces to normalized information and behaves like an information-based selector subject to the exposure rule.
 5. The random component must be drawn from the provided RNG when one is supplied so repeated simulations remain reproducible.
