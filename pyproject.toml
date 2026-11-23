@@ -1,6 +1,6 @@
 [build-system]
 # setuptools 77 is the first release that reads the SPDX `license` string below.
-requires = ["setuptools>=77"]
+requires = ["setuptools>=84.2.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
