@@ -124,6 +124,7 @@ hidden runtime coupling.
 - Documentation availability is part of release readiness.
 - Publishing workflows are intentionally coupled to the documentation deployment path.
 - Do not decouple package publication from docs deployment unless explicitly requested.
+- Bump the version with `uv version` only; `pyproject.toml` is its single source.
 
 ## Commit And Git Hygiene
 
