@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import numpy
 import numpy.typing as npt
@@ -14,9 +14,8 @@ from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
+  from .._typing import FloatArray
   from ..item_bank import ItemBank
-
-FloatArray = npt.NDArray[numpy.floating[Any]]
 
 # Grid used to bracket the roots of the modified score before refining them with Brent's method.
 _SCAN_POINTS = 121
