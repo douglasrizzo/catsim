@@ -65,6 +65,17 @@ class TestNumericalSearchEstimatorEstimate:
     assert reference == pytest.approx(0.5816, abs=1e-4)
     assert theta == pytest.approx(reference, abs=1e-4)
 
+  def test_estimate_without_items_returns_est_theta(self) -> None:
+    """With no item administered the estimate is est_theta, not a search bound.
+
+    The log-likelihood of no responses is flat, and searching it returned 5.9999995.
+    """
+    item_bank = ItemBank.generate_item_bank(10, seed=42)
+
+    theta = NumericalSearchEstimator().estimate(item_bank, [], [], 1.7)
+
+    assert theta == 1.7
+
   def test_estimate_all_correct(self) -> None:
     """Test estimation with all correct responses."""
     item_bank = ItemBank.generate_item_bank(50)

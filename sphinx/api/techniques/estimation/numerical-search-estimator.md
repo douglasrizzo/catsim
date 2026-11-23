@@ -88,6 +88,7 @@ Any correct implementation must satisfy the following properties:
 3. The estimator increments its call counter on every estimation request.
 4. Evaluation counts are the optimizer's reported function evaluations.
 5. A `tol` that is not positive is rejected at construction.
+6. With no administered items, it returns `est_theta` unchanged.
 
 ## References
 

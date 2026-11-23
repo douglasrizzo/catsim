@@ -83,7 +83,7 @@ class NumericalSearchEstimator(BaseEstimator):
     response_vector : list[bool]
         A boolean list containing the examinee's answers to the administered items.
     est_theta : float
-        The current estimated ability.
+        The current estimated ability, returned unchanged when no item has been administered.
 
     Returns
     -------
@@ -100,6 +100,9 @@ class NumericalSearchEstimator(BaseEstimator):
 
     self._calls += 1
     self._last_evaluations = 0
+
+    if len(administered_items) == 0:
+      return float(est_theta)
 
     summarized_answers = set(response_vector)
 
