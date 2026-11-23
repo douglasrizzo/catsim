@@ -610,6 +610,15 @@ class TestEAPEstimator:
 
     assert (estimator.calls, estimator.evaluations, estimator.total_evaluations) == (0, 0, 0)
 
+  @pytest.mark.parametrize("missing", ["item_bank", "administered_items", "response_vector"])
+  def test_estimate_rejects_missing_inputs(self, missing: str) -> None:
+    """None inputs raise the shared estimator error instead of failing inside NumPy."""
+    kwargs = {"item_bank": ItemBank.generate_item_bank(5, seed=1), "administered_items": [0], "response_vector": [True]}
+    kwargs[missing] = None
+
+    with pytest.raises(ValueError, match=f"{missing} parameter cannot be None"):
+      EAPEstimator().estimate(**kwargs, est_theta=0.0)
+
   def test_estimate_accepts_numpy_item_indices(self) -> None:
     """A NumPy index array gives the same estimate as the equivalent list."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)

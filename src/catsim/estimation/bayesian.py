@@ -352,9 +352,10 @@ class EAPEstimator(BaseEstimator):
     Raises
     ------
     ValueError
-        If ``response_vector`` and ``administered_items`` have different lengths, or if
-        ``response_vector`` contains non-Boolean elements.
+        If any argument is None, if ``response_vector`` and ``administered_items`` have different
+        lengths, or if ``response_vector`` contains non-Boolean elements.
     """
+    self._require_inputs(item_bank, administered_items, response_vector)
     post = posterior(response_vector, item_bank.items[administered_items, :4], self._grid, self._log_prior)
     self._calls += 1
     self._last_evaluations = self._grid.nodes.size
