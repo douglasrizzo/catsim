@@ -135,7 +135,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     self._calls += 1
     self._last_evaluations = 0
 
-    if not administered_items:
+    if len(administered_items) == 0:
       return float(est_theta)
 
     items = item_bank.items[administered_items, :4]

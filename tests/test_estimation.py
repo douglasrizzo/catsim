@@ -269,15 +269,15 @@ class TestNumericalSearchEstimatorWithMethods:
     assert theta == pytest.approx(ref_theta, abs=1e-5)
 
 
-@pytest.mark.parametrize(
-  "make_estimator",
-  [
-    pytest.param(NumericalSearchEstimator, id="mle"),
-    pytest.param(EAPEstimator, id="eap"),
-    pytest.param(MAPEstimator, id="map"),
-    pytest.param(WarmLikelihoodEstimator, id="wle"),
-  ],
-)
+ESTIMATORS = [
+  pytest.param(NumericalSearchEstimator, id="mle"),
+  pytest.param(EAPEstimator, id="eap"),
+  pytest.param(MAPEstimator, id="map"),
+  pytest.param(WarmLikelihoodEstimator, id="wle"),
+]
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
 @pytest.mark.parametrize(
   ("response_vector", "match"),
   [
@@ -298,6 +298,27 @@ def test_estimators_reject_responses_that_do_not_fit_the_items(
 
   with pytest.raises(ValueError, match=match):
     make_estimator().estimate(item_bank, [0, 1, 2], response_vector, 0.0)
+
+
+@pytest.mark.parametrize("make_estimator", ESTIMATORS)
+@pytest.mark.parametrize(
+  ("administered_items", "response_vector"),
+  [pytest.param([0], [True], id="one_item"), pytest.param([0, 3], [True, False], id="two_items")],
+)
+def test_estimators_accept_numpy_item_indices(
+  make_estimator: Callable[[], BaseEstimator], administered_items: list[int], response_vector: list[bool]
+) -> None:
+  """A NumPy index array gives the same estimate as the equivalent list.
+
+  Testing the indices for truth raises for an array of two or more, and reads the array [0] as
+  empty, so WLE returned est_theta for it without estimating anything.
+  """
+  item_bank = ItemBank.generate_item_bank(10, seed=42)
+
+  from_list = make_estimator().estimate(item_bank, administered_items, response_vector, 0.7)
+  from_array = make_estimator().estimate(item_bank, np.array(administered_items), response_vector, 0.7)
+
+  assert from_array == pytest.approx(from_list, abs=1e-15)
 
 
 class TestBayesianHelpers:
@@ -655,16 +676,6 @@ class TestEAPEstimator:
 
     with pytest.raises(ValueError, match=f"{missing} parameter cannot be None"):
       EAPEstimator().estimate(**kwargs, est_theta=0.0)
-
-  def test_estimate_accepts_numpy_item_indices(self) -> None:
-    """A NumPy index array gives the same estimate as the equivalent list."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = EAPEstimator()
-
-    from_list = estimator.estimate(item_bank, [0, 3], [True, False], 0.0)
-    from_array = estimator.estimate(item_bank, np.array([0, 3]), [True, False], 0.0)
-
-    assert from_array == pytest.approx(from_list, abs=1e-15)
 
 
 class TestMAPEstimator:
