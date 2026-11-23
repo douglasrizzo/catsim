@@ -34,7 +34,8 @@ class ItemBank:
   ----------
   items : numpy.ndarray
       The normalized item parameter matrix (n_items x 4) with columns
-      [discrimination, difficulty, pseudo-guessing, upper_asymptote]. Exposure
+      [discrimination, difficulty, pseudo-guessing, upper_asymptote]. It is read-only,
+      like the column views returned by the parameter properties. Exposure
       is a property of a run, kept in :py:class:`catsim.state.SimulationResult`.
   n_items : int
       Number of items in the bank.
@@ -90,6 +91,9 @@ class ItemBank:
     # Validate if requested
     if validate:
       irt.validate_item_bank(self._items)
+    # Read-only, together with the column views below, so the cached values derived from the
+    # parameters cannot go stale
+    self._items.flags.writeable = False
 
     # Lazy-loaded cached values (computed on first access)
     self._max_info_thetas: FloatArray | None = None
@@ -107,7 +111,7 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        The item matrix with shape (n_items, 4) containing
+        The read-only item matrix with shape (n_items, 4) containing
         [a, b, c, d] for each item.
     """
     return self._items
