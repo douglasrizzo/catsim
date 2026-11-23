@@ -17,6 +17,7 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
+from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
 
 # SciPy reads `bracket` as where to start looking, not as a bound. From (-6, 6), brent and golden search downhill
@@ -40,15 +41,7 @@ class TestNumericalSearchEstimatorMethods:
   def test_available_methods_contains_expected(self) -> None:
     """Test that available methods contains expected methods."""
     methods = NumericalSearchEstimator.available_methods()
-    expected = {
-      "ternary",
-      "dichotomous",
-      "fibonacci",
-      "golden",
-      "brent",
-      "bounded",
-      "golden2",
-    }
+    expected = {"ternary", "dichotomous", "fibonacci", "golden", "brent", "bounded", "golden2"}
     assert methods == expected
 
   def test_all_methods_can_be_instantiated(self) -> None:
@@ -210,10 +203,7 @@ class TestNumericalSearchEstimatorEstimate:
 class TestNumericalSearchEstimatorWithMethods:
   """Test estimation with different methods."""
 
-  @pytest.mark.parametrize(
-    "method",
-    sorted(NumericalSearchEstimator.available_methods()),
-  )
+  @pytest.mark.parametrize("method", sorted(NumericalSearchEstimator.available_methods()))
   def test_estimate_with_all_methods(self, method: str) -> None:
     """Test that all methods produce valid estimates."""
     item_bank = ItemBank.generate_item_bank(50)
@@ -522,48 +512,38 @@ class TestBayesianHelpers:
 class TestEAPEstimator:
   """Tests for the EAP estimator."""
 
-  def test_estimate_returns_prior_mean_with_no_data(self) -> None:
-    """Test that an empty response vector returns the prior mean."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = EAPEstimator()
+  @pytest.mark.parametrize(
+    ("log_prior", "expected"),
+    [
+      pytest.param(None, 0.0, id="default_standard_normal"),
+      pytest.param(normal_log_prior(mean=1.2, sd=0.5), 1.2, id="shifted_normal"),
+    ],
+  )
+  def test_estimate_returns_prior_mean_with_no_data(self, log_prior: LogPrior | None, expected: float) -> None:
+    """With no responses the estimate is the prior mean, whatever est_theta says.
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=0.0,
-    )
+    An estimator that fell back to est_theta, or ignored a custom prior, would return 0.7 or 0.0.
+    """
+    estimator = EAPEstimator(log_prior=log_prior)
 
-    assert theta == pytest.approx(0.0, abs=1e-12)
+    theta = estimator.estimate(ItemBank.generate_item_bank(10, seed=42), [], [], 0.7)
 
-  def test_estimate_uses_custom_prior_mean_with_no_data(self) -> None:
-    """Custom priors should control the posterior mean when there is no data."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
-    estimator = EAPEstimator(log_prior=normal_log_prior(mean=1.2, sd=0.5))
+    assert theta == pytest.approx(expected, abs=1e-12)
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=0.0,
-    )
+  def test_estimate_is_the_posterior_mean_over_the_given_grid_prior_and_items(self) -> None:
+    """The estimate weighs the given grid's nodes by the given prior and the administered items only.
 
-    assert theta == pytest.approx(1.2, abs=1e-12)
-    assert estimator.calls == 1
+    On the 3-node grid {-1, 0, 1} with a flat prior, a correct answer to item 1 (a = 1, b = 0) gives
+    the nodes masses proportional to sigma(-1), 1/2 and sigma(1), which sum to 3/2, so the posterior mean
+    is (sigma(1) - sigma(-1)) / (3/2) = tanh(1/2) / 1.5 = 0.3081. Using item 0 instead gives 0.548, the
+    default grid 2.759 and the default normal prior 0.253.
+    """
+    item_bank = ItemBank(np.array([[1.0, 3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]]))
+    estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=3, low=-1.0, high=1.0), log_prior=uniform_log_prior())
 
-  def test_estimate_shifts_positive_after_correct_response(self) -> None:
-    """Test that a correct response on a difficult item moves EAP upward."""
-    item_bank = ItemBank(np.array([[1.5, 2.0, 0.0, 1.0]], dtype=float))
-    estimator = EAPEstimator()
+    theta = estimator.estimate(item_bank, [1], [True], 0.0)
 
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[0],
-      response_vector=[True],
-      est_theta=0.0,
-    )
-
-    assert theta > 0.0
+    assert theta == pytest.approx(np.tanh(0.5) / 1.5, rel=1e-12)
 
   @pytest.mark.parametrize("sign", [1.0, -1.0], ids=["all_correct", "all_incorrect"])
   def test_estimate_is_pulled_toward_prior_on_extreme_short_pattern(self, sign: float) -> None:
@@ -606,22 +586,6 @@ class TestEAPEstimator:
     assert 0.0 < sign * normal_theta < 5.0
     assert abs(normal_theta) < abs(flat_theta)
 
-  def test_estimate_uses_custom_grid_and_prior(self) -> None:
-    """Test that custom grid and prior parameters shape the posterior as expected."""
-    grid = QuadratureGrid.uniform(n_nodes=21, low=-3.0, high=3.0)
-    estimator = EAPEstimator(grid=grid, log_prior=normal_log_prior(mean=1.5, sd=0.5))
-    item_bank = ItemBank.generate_item_bank(5, seed=7)
-
-    theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=[],
-      response_vector=[],
-      est_theta=0.0,
-    )
-
-    assert theta == pytest.approx(1.5, abs=0.05)
-    assert estimator.grid is grid
-
   def test_evaluations_count_one_per_grid_node(self) -> None:
     """Each estimate evaluates the likelihood once per grid node, and the counters say so."""
     item_bank = ItemBank.generate_item_bank(10, seed=42)
@@ -653,33 +617,3 @@ class TestEAPEstimator:
     from_array = estimator.estimate(item_bank, np.array([0, 3]), [True, False], 0.0)
 
     assert from_array == pytest.approx(from_list, abs=1e-15)
-
-  def test_estimate_converges_toward_mle_on_longer_test(self) -> None:
-    """Test that EAP tracks MLE on a longer, information-rich response pattern."""
-    item_bank = ItemBank.generate_item_bank(30, seed=1)
-    theta_true = 0.25
-    administered_items = list(range(30))
-    response_vector = [irt.icc(theta_true, *item_bank.items[i, :4]) >= 0.5 for i in administered_items]
-
-    mle = NumericalSearchEstimator()
-    mle_theta = mle.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    estimator = EAPEstimator(
-      grid=QuadratureGrid.uniform(n_nodes=81),
-      log_prior=uniform_log_prior(),
-    )
-    eap_theta = estimator.estimate(
-      item_bank=item_bank,
-      administered_items=administered_items,
-      response_vector=response_vector,
-      est_theta=0.0,
-    )
-
-    assert np.isfinite(mle_theta)
-    assert np.isfinite(eap_theta)
-    assert abs(eap_theta - mle_theta) < 0.3
