@@ -17,7 +17,8 @@ and posterior-weighted selectors. That makes it a foundational Bayesian
 estimator for the planned feature set. The estimator itself keeps no posterior
 between calls, since one instance serves every session and look-ahead selectors
 call it with hypothetical responses; consumers compute a session's posterior
-with `posterior()` from the Bayesian infrastructure.
+with `posterior()` from the Bayesian infrastructure, and its variance with
+`posterior_variance()`.
 
 ## Definition
 
