@@ -40,9 +40,9 @@ class ItemBank:
   n_items : int
       Number of items in the bank.
   max_info_thetas : numpy.ndarray
-      Cached theta values where each item provides maximum information.
+      Cached, read-only theta values where each item provides maximum information.
   max_info_values : numpy.ndarray
-      Cached maximum information values for each item.
+      Cached, read-only maximum information values for each item.
 
   Raises
   ------
@@ -134,10 +134,12 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array of theta values, one per item.
+        Read-only array of theta values, one per item.
     """
     if self._max_info_thetas is None:
-      self._max_info_thetas = irt.max_info_hpc(self._items)
+      thetas = irt.max_info_hpc(self._items)
+      thetas.flags.writeable = False
+      self._max_info_thetas = thetas
     return self._max_info_thetas
 
   @property
@@ -147,11 +149,13 @@ class ItemBank:
     Returns
     -------
     numpy.ndarray
-        Array of maximum information values, one per item.
+        Read-only array of maximum information values, one per item.
     """
     if self._max_info_values is None:
       # Ensure max_info_thetas is computed first
-      self._max_info_values = irt.inf_hpc(self.max_info_thetas, self._items)
+      values = irt.inf_hpc(self.max_info_thetas, self._items)
+      values.flags.writeable = False
+      self._max_info_values = values
     return self._max_info_values
 
   @property

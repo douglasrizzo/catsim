@@ -118,6 +118,27 @@ class TestItemBankCreation:
 
     assert bank.difficulty.tolist() == [0.5, -0.2]
 
+  @pytest.mark.parametrize(
+    "cache",
+    [
+      pytest.param(lambda bank: bank.max_info_thetas, id="max_info_thetas"),
+      pytest.param(lambda bank: bank.max_info_values, id="max_info_values"),
+    ],
+  )
+  def test_max_info_caches_are_read_only(self, cache: Callable[[ItemBank], np.ndarray]) -> None:
+    """Writing into a cached max-information array raises and leaves the cache alone.
+
+    The stratified selectors rank items by these caches, so a writable cache let a caller change the ranking
+    without touching the parameters. For 2PL items the maximum is at theta = b, where the information is a**2 / 4.
+    """
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]))
+
+    with pytest.raises(ValueError, match="read-only"):
+      cache(bank)[0] = 99.0
+
+    assert bank.max_info_thetas.tolist() == [0.5, -0.2]
+    assert bank.max_info_values.tolist() == pytest.approx([0.25, 0.4225])
+
   def test_validation_enabled_by_default(self) -> None:
     """A bank is validated unless told otherwise, so a = -1 raises instead of being accepted."""
     items = np.array([[-1.0, 0.0, 0.0, 1.0]])
