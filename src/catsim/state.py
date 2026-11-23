@@ -23,6 +23,18 @@ class SessionStatus(StrEnum):
   STOPPED = "stopped"
 
 
+class StopReason(StrEnum):
+  """Why a CAT session ended.
+
+  ``STOPPER`` means the engine's stopper was satisfied by the session's current state. ``NO_ITEMS``
+  means the selector had no item to offer, which is not necessarily the end of the item bank: a
+  selector that follows a fixed list or works through strata can run out first.
+  """
+
+  STOPPER = "stopper"
+  NO_ITEMS = "no_items"
+
+
 @dataclass(slots=True)
 class CatSessionState:
   """Mutable runtime state for a single examinee CAT session."""
@@ -34,7 +46,7 @@ class CatSessionState:
   responses: list[bool] = field(default_factory=list)
   theta_history: list[float] = field(default_factory=list)
   status: SessionStatus = SessionStatus.NOT_STARTED
-  stop_reason: str | None = None
+  stop_reason: StopReason | None = None
   metadata: dict[str, Any] = field(default_factory=dict)
 
   def __post_init__(self) -> None:
@@ -78,7 +90,7 @@ class CatSessionSnapshot:
   responses: list[bool]
   theta_history: list[float]
   status: SessionStatus
-  stop_reason: str | None
+  stop_reason: StopReason | None
   metadata: dict[str, Any]
 
 
@@ -91,7 +103,7 @@ class CatStepResult:
   response: bool | None
   updated_theta: float
   stopped: bool
-  stop_reason: str | None = None
+  stop_reason: StopReason | None = None
 
 
 @dataclass(slots=True)

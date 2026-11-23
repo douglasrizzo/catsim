@@ -22,7 +22,7 @@ from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
-from catsim.state import CatSessionState, SessionStatus
+from catsim.state import CatSessionState, SessionStatus, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -99,6 +99,8 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
   )
   def init_engine(self, selection_order: tuple[int, ...], max_items: int) -> None:
     self.item_bank = ItemBank.generate_item_bank(8, seed=0)
+    # max_items stays below the bank size, so only the stopper can end the session
+    self.max_items = max_items
     self.selector = QueueOrderSelector(selection_order)
     self.engine = CatEngine(
       FixedPointInitializer(0.0),
@@ -125,12 +127,14 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_item_ids)
     was_stopped = self.session.status == SessionStatus.STOPPED
+    prev_reason = self.session.stop_reason
     result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
     if was_stopped:
       # Stepping a terminal session must be a no-op.
       assert result.stopped is True
       assert result.selected_item_id is None
       assert len(self.session.administered_item_ids) == prev_admin
+      assert self.session.stop_reason == prev_reason
     elif self.session.status == SessionStatus.IN_PROGRESS:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
@@ -138,7 +142,8 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
         assert result.response is True
     else:
       assert result.stopped is True
-      assert self.session.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert self.session.stop_reason is StopReason.STOPPER
+      assert self.session.administered_count == self.max_items
 
   @invariant()
   def session_lists_consistent(self) -> None:
@@ -150,7 +155,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
     assert len(s.theta_history) == 1 + len(s.administered_item_ids)
     if s.status == SessionStatus.STOPPED:
-      assert s.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert s.stop_reason is StopReason.STOPPER
 
 
 class CatEngineIntegrationMachine(RuleBasedStateMachine):
@@ -162,6 +167,8 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
   )
   def init_engine(self, bank_seed: int, max_items: int) -> None:
     self.item_bank = ItemBank.generate_item_bank(12, seed=bank_seed)
+    # max_items stays below the bank size, so only the stopper can end the session
+    self.max_items = max_items
     self.engine = CatEngine(
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
@@ -183,11 +190,13 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     prev_hist = len(self.session.theta_history)
     prev_admin = len(self.session.administered_item_ids)
     was_stopped = self.session.status == SessionStatus.STOPPED
+    prev_reason = self.session.stop_reason
     result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
     if was_stopped:
       assert result.stopped is True
       assert result.selected_item_id is None
       assert len(self.session.administered_item_ids) == prev_admin
+      assert self.session.stop_reason == prev_reason
     elif self.session.status == SessionStatus.IN_PROGRESS:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
@@ -195,7 +204,8 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
         assert np.isfinite(self.session.current_theta)
     else:
       assert result.stopped is True
-      assert self.session.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert self.session.stop_reason is StopReason.STOPPER
+      assert self.session.administered_count == self.max_items
 
   @invariant()
   def session_lists_consistent(self) -> None:
@@ -207,7 +217,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
     assert len(s.theta_history) == 1 + len(s.administered_item_ids)
     if s.status == SessionStatus.STOPPED:
-      assert s.stop_reason in {"stop_rule", "item_bank_exhausted", "selector_stopped"}
+      assert s.stop_reason is StopReason.STOPPER
 
 
 def test_cat_engine_orchestration_state_machine() -> None:

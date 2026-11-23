@@ -2,9 +2,9 @@
 
 
 class NoItemsAvailableError(RuntimeError):
-  """Exception raised when no items are available for selection.
+  """Exception raised by an item selector that has no item to offer.
 
-  This exception is raised by item selectors when they are unable to select
-  a new item because all items in the item bank have been exhausted or
-  no items meet the selection criteria.
+  A selector raises it when none of the items it may choose from is left. That is not necessarily
+  the end of the item bank: a selector that follows a fixed list of items or works through strata
+  can run out first. ``CatEngine`` ends the session with ``StopReason.NO_ITEMS``.
   """
