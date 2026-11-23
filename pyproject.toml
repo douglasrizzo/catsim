@@ -271,6 +271,9 @@ possibly-missing-import = "error"
 redundant-cast = "error"
 unused-ignore-comment = "error"
 unused-type-ignore-comment = "error"
+# A function tested for truth instead of called; both rules only warn by default.
+redundant-condition = "error"
+truthiness-test-of-callable = "error"
 
 [tool.uv]
 # soupsieve 4 (the first release without its ReDoS) needs Python >= 3.11.5. Resolving the lock
@@ -282,34 +285,19 @@ environments = ["python_full_version >= '3.11.5'"]
 # Pylint
 # ---------------------------------------------------------------------------
 [tool.pylint.messages-control]
+# Only messages Ruff and ty lack. ty reports incompatible overrides, overridden finals and functions
+# tested for truth; Ruff reports the slot, classmethod, except, finally, statement and dict-key checks.
 enable = [
   "duplicate-code",
   "too-many-ancestors",
   "too-many-instance-attributes",
-  "arguments-differ",
-  "signature-differs",
-  "arguments-renamed",
-  "invalid-overridden-method",
-  "overridden-final-method",
-  "subclassed-final-class",
   "attribute-defined-outside-init",
   "super-init-not-called",
   "non-parent-init-called",
   "useless-parent-delegation",
   "unused-private-member",
-  "redefined-slots-in-subclass",
-  "bad-classmethod-argument",
-  "bad-mcs-method-argument",
-  "no-classmethod-decorator",
-  "no-staticmethod-decorator",
   "bad-except-order",
-  "duplicate-except",
-  "return-in-finally",
-  "lost-exception",
   "cyclic-import",
-  "pointless-statement",
-  "duplicate-key",
-  "missing-parentheses-for-call-in-test",
   "redefined-outer-name",
 ]
 disable = ["all"]
