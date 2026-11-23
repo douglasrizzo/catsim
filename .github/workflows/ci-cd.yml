@@ -399,21 +399,11 @@ jobs:
           name: python-package-distributions
           path: dist/
 
-      - name: Sign the dists with Sigstore
+      - name: Sign the dists with Sigstore and attach them to the release
+        # On a published release the action uploads the dists and their .sigstore.json bundles
+        # to it (release-signing-artifacts defaults to true).
         uses: sigstore/gh-action-sigstore-python@790bc6befb9d733738f18d8f895854b453640ec9 # v3.5.0
         with:
           inputs: >-
             ./dist/*.tar.gz
             ./dist/*.whl
-
-      - name: Upload artifact signatures to GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        # Upload to GitHub Release using the `gh` CLI.
-        # `dist/` contains the built packages, and the
-        # sigstore-produced signatures and certificates.
-        run: >-
-          gh release upload
-          '${{ github.ref_name }}' dist/**
-          --repo '${{ github.repository }}'
-          --clobber
