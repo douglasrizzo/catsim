@@ -765,7 +765,11 @@ def test_apply_response_rejects_invalid_item_index(
   estimator,
   fixed_length_stopper,
 ) -> None:
-  """Applying a response should validate item ids."""
+  """An item index past the end of the bank raises ValueError naming the valid range.
+
+  Fails if apply_response records the index: the estimator would then fail on it half-way through the step, or a
+  bank-sized index would read past the item parameters.
+  """
   engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, context=context, true_theta=0.0)
@@ -806,7 +810,11 @@ def test_apply_response_rejects_duplicate_items(
   estimator,
   fixed_length_stopper,
 ) -> None:
-  """A session cannot administer the same item twice."""
+  """A response to an item the session already had raises ValueError.
+
+  Fails if the item is administered again: its response would count twice in the estimate and its administration
+  twice in the exposure tracker.
+  """
   engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = CatSessionState(

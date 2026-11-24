@@ -279,11 +279,21 @@ class ExposureControlMachine(RuleBasedStateMachine):
 
 
 def test_cat_engine_orchestration_state_machine() -> None:
+  """Stepping a session with stub strategies keeps its items, responses and estimates in line, in any step order.
+
+  Fails if a step records an item without its response or estimate, administers an item twice, or changes a session
+  that has already stopped.
+  """
   run_state_machine_as_test(CatEngineOrchestrationMachine, settings=_ORCHESTRATION_SETTINGS)
 
 
 @pytest.mark.slow
 def test_cat_engine_integration_state_machine() -> None:
+  """The same invariants hold with the real maximum-information selector and numerical estimator.
+
+  Fails if a real strategy makes a step record an item without its response or estimate, give an item twice or a
+  non-finite estimate, or change a session that has already stopped.
+  """
   run_state_machine_as_test(CatEngineIntegrationMachine, settings=_INTEGRATION_SETTINGS)
 
 
