@@ -19,4 +19,5 @@ adr/0013-random-numbers-and-reproducibility
 adr/0014-public-import-paths-and-names
 adr/0015-plotting-as-an-optional-extra
 adr/0016-session-exclusions-and-exposure-control
+adr/0017-four-parameter-item-matrix
 ```
