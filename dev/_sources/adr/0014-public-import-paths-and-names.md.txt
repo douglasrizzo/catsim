@@ -23,8 +23,9 @@ while `administered_items` also named a parameter matrix; the responses were `re
 - The public import paths are:
   - `catsim`, for the core types: the engine, the session state and step results, the runner and
     its result, the item bank, `StepContext`, `Estimate` and the exceptions;
-  - `catsim.selection`, `catsim.estimation`, `catsim.initialization` and `catsim.stopping`, for the
-    strategies, their base classes and the helpers documented for custom strategies;
+  - `catsim.selection`, `catsim.estimation`, `catsim.initialization`, `catsim.stopping` and
+    `catsim.exposure`, for the strategies and the exposure controls, their base classes and the
+    helpers documented for custom strategies;
   - `catsim.irt`, `catsim.metrics`, `catsim.plot` and `catsim.typing`, modules of functions and
     type aliases.
 - Every other module is internal: the module files of the subpackages and the modules that define

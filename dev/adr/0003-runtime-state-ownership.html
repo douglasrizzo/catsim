@@ -414,6 +414,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
 </ul>
 </div>
 </nav></div>
@@ -504,7 +505,7 @@ no restriction for the first respondent and none at all when <code class="docuti
 <p>Treat calibrated item data as domain data and keep runtime state in dedicated execution models:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> holds item parameters and related derived data</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds per-examinee runtime state</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds per-examinee runtime state, the items it excluded included (ADR-0016)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> (in <code class="docutils literal notranslate"><span class="pre">catsim.state</span></code>) and <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> (in <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code>) hold
 run-level exposure information</p></li>
 </ul>
@@ -514,6 +515,8 @@ run-level exposure information</p></li>
 <code class="docutils literal notranslate"><span class="pre">tracker.start_session()</span></code> when the run context has a tracker, after the initializer has
 succeeded, and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> records each administered item. <code class="docutils literal notranslate"><span class="pre">RunContext</span></code> has no
 <code class="docutils literal notranslate"><span class="pre">total_sessions</span></code>, and <code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> takes no argument.</p></li>
+<li><p>The tracker also counts each item’s proposals, its administrations plus the times the engine’s
+exposure control declined it (ADR-0016). Declines never enter the rates.</p></li>
 <li><p>A session is selected against each item’s administrations divided by the number of other
 sessions started so far. With sessions run one after another, as <code class="docutils literal notranslate"><span class="pre">SimulationRunner</span></code> runs them,
 that is catR’s rate: the share of the examinees tested before the current one. The session being
@@ -555,10 +558,12 @@ in the denominator, which lowers every later rate a little; so does starting a s
 one examinee. The tracker cannot tell such a session from one still running, so the count stays.</p></li>
 <li><p>The tracker’s counts are not part of any session snapshot. A deployment that restarts with a new
 tracker applies no cap until new sessions have run. To keep the cap across restarts, the
-application saves <code class="docutils literal notranslate"><span class="pre">tracker.counts</span></code> and <code class="docutils literal notranslate"><span class="pre">tracker.n_sessions</span></code> (e.g. as a list and an int in JSON)
-and rebuilds the tracker with <code class="docutils literal notranslate"><span class="pre">ExposureTracker(n_items,</span> <span class="pre">counts=...,</span> <span class="pre">n_sessions=...)</span></code>, which checks
-that there is one non-negative integer count per item and keeps its own copy of them. Saving is
-the application’s job: it decides when (after every administration, on shutdown) and where.</p></li>
+application saves <code class="docutils literal notranslate"><span class="pre">tracker.counts</span></code>, <code class="docutils literal notranslate"><span class="pre">tracker.proposals</span></code> and <code class="docutils literal notranslate"><span class="pre">tracker.n_sessions</span></code> (e.g. as two
+lists and an int in JSON) and rebuilds the tracker with
+<code class="docutils literal notranslate"><span class="pre">ExposureTracker(n_items,</span> <span class="pre">counts=...,</span> <span class="pre">n_sessions=...,</span> <span class="pre">proposals=...)</span></code>, which checks that there is
+one non-negative integer count per item, with no more administrations than proposals and no more
+proposals than sessions, and keeps its own copy of them. Saving is the application’s job: it
+decides when (after every administration, on shutdown) and where.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> gives the rates a session in progress is selected against, which leave
 that session out; the run’s own exposure is <code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code>.</p></li>
 </ul>

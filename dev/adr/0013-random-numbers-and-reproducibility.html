@@ -414,6 +414,7 @@
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0013: Random Numbers and Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
 </ul>
 </div>
 </nav></div>
@@ -506,7 +507,8 @@ generator comes from and on what draws from it, which nothing recorded.</p>
 in a fixed state, and a generator is used as is and advanced by the run.</p></li>
 <li><p>That one generator serves the whole run. It reaches the strategies through <code class="docutils literal notranslate"><span class="pre">RunContext.rng</span></code> and
 <code class="docutils literal notranslate"><span class="pre">StepContext.rng</span></code> (ADR-0004) and the simulated responses through <code class="docutils literal notranslate"><span class="pre">ResponseProvider.answer</span></code>, so the
-initializer, the selectors and the responses of every session draw from one stream.</p></li>
+initializer, the selectors, the engine’s exposure control (ADR-0016) and the responses of every
+session draw from one stream. An engine without an exposure control draws nothing for it.</p></li>
 <li><p>The sessions run one after another, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, so the draws of a session
 depend on every draw of the sessions before it.</p></li>
 <li><p>The runner draws nothing itself. The true abilities are an input: to simulate a population, the

@@ -765,6 +765,7 @@ window.runMermaid = runMermaid;</script>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
@@ -843,7 +844,8 @@ and practical properties such as item exposure and content coverage.</p>
 <p>A selector reads the session from a <a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>: the
 administered items and their responses, the current estimate <code class="docutils literal notranslate"><span class="pre">theta</span></code>, the run’s random
 generator and exposure rates, and <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>, items it must pass over although they
-have not been administered. Where the pages below speak of non-administered items, they
+have not been administered, such as those the engine’s exposure control
+(<a class="reference internal" href="../../exposure.html#catsim.exposure.BaseExposureControl" title="catsim.exposure.BaseExposureControl"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseExposureControl</span></code></a>) declined. Where the pages below speak of non-administered items, they
 mean the items that are neither administered nor excluded. Excluded items do not count
 toward the test position, the number of administered items.</p>
 <section id="implemented">

@@ -416,6 +416,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
 </ul>
 </div>
 </nav></div>
@@ -562,9 +563,13 @@ estimator’s and the stopper’s contexts before it changes the session (ADR-00
 <li><p>The examinee’s true ability and the session’s bookkeeping are not in the context: strategies
 cannot see the simulated truth.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> holds items a selector must not choose although they have not been administered.
-The engine passes none; a wrapper such as Sympson-Hetter passes them on with
-<code class="docutils literal notranslate"><span class="pre">dataclasses.replace</span></code>. Selectors draw their candidates through <code class="docutils literal notranslate"><span class="pre">catsim.selection.base.remaining</span></code>,
+The engine passes the session’s excluded items, among them those its exposure control declined
+(ADR-0016); a wrapper that passes a changed context on with <code class="docutils literal notranslate"><span class="pre">dataclasses.replace</span></code> adds to them,
+never replaces them. Selectors draw their candidates through <code class="docutils literal notranslate"><span class="pre">catsim.selection.remaining</span></code>,
 which leaves out both, and the test position stays <code class="docutils literal notranslate"><span class="pre">len(context.administered_items)</span></code>.</p></li>
+<li><p>The exposure control, an optional engine component (ADR-0016), takes the context the selector
+proposed from and the proposed item: <code class="docutils literal notranslate"><span class="pre">accept(context,</span> <span class="pre">item_id)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code>. The rules below apply to
+it as to the other strategies.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">select</span></code> returns an <code class="docutils literal notranslate"><span class="pre">int</span></code>. A selector with no item to offer raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>; <code class="docutils literal notranslate"><span class="pre">None</span></code>
 is not a return value.</p></li>
 <li><p>The initializer keeps its two arguments, keyword-only: it runs once per session, before any step

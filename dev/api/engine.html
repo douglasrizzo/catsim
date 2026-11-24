@@ -47,7 +47,7 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Runtime State – catsim.state" href="state.html" />
+    <link rel="next" title="Exposure Controls – catsim.exposure" href="exposure.html" />
     <link rel="prev" title="Initialization Techniques" href="techniques/initialization/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
@@ -401,6 +401,7 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="techniques/index.html">Techniques</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
@@ -473,7 +474,7 @@
 <p>Engine primitives for manual and automated CAT execution.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.engine.CatEngine">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.engine.</span></span><span class="sig-name descname"><span class="pre">CatEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseInitializer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stopper</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseStopper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#CatEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.engine.CatEngine" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.engine.</span></span><span class="sig-name descname"><span class="pre">CatEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseInitializer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseSelector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseEstimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stopper</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BaseStopper</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_control</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="exposure.html#catsim.exposure.BaseExposureControl" title="catsim.exposure.BaseExposureControl"><span class="pre">BaseExposureControl</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#CatEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.engine.CatEngine" title="Link to this definition">#</a></dt>
 <dd><p>Engine for stepwise CAT execution on one item bank.</p>
 <p>Every session the engine runs is tested on its item bank: the item indices a session records,
 and the exposure tracker of the run, refer to that bank. An application with several banks
@@ -490,6 +491,10 @@ builds one engine per bank.</p>
 <dt><strong>estimator</strong><span class="classifier">BaseEstimator</span></dt><dd><p>Updates the ability estimate after each response.</p>
 </dd>
 <dt><strong>stopper</strong><span class="classifier">BaseStopper</span></dt><dd><p>Decides when a session has ended.</p>
+</dd>
+<dt><strong>exposure_control</strong><span class="classifier">BaseExposureControl or None, optional</span></dt><dd><p>Decides whether to administer each item the selector proposes; a declined item is excluded
+from the session for the rest of its test. Default is None, which administers every proposed
+item.</p>
 </dd>
 </dl>
 </dd>
@@ -529,6 +534,8 @@ tracker, if it has one.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
+<dt>ExcludedItemError</dt><dd><p>If the item is in the session’s <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>.</p>
+</dd>
 <dt>ValueError</dt><dd><p>If the session has stopped, the item index is outside the bank or the item was already
 administered in this session.</p>
 </dd>
@@ -564,6 +571,13 @@ other check:</p>
 </div>
 <p>The stopper is consulted here only for a session that has no responses yet. After that,
 <a class="reference internal" href="#catsim.engine.CatEngine.apply_response" title="catsim.engine.CatEngine.apply_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">apply_response()</span></code></a> evaluates it once for every new state, and what it records is final.</p>
+<p>With an exposure control, the items it declines join the session’s <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> and the
+exposure tracker’s proposals, once the selection has ended, so an application that saves its
+sessions saves them after this call too. A selection that raises leaves both unchanged.</p>
+<p>Each call selects anew, and the exposure control decides anew: a second call before the
+response may decline the item the first returned, or end the session. An application that has
+shown an item keeps its id, which <a class="reference internal" href="#catsim.engine.CatEngine.apply_response" title="catsim.engine.CatEngine.apply_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">apply_response()</span></code></a> needs, and shows it again rather than
+calling this method again.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -577,7 +591,16 @@ other check:</p>
 <dd class="field-even"><dl class="simple">
 <dt>int or None</dt><dd><p>Index of the next item to administer. None when the session has ended: it was already
 stopped (and is left untouched), its stopper is satisfied (reason <code class="docutils literal notranslate"><span class="pre">StopReason.STOPPER</span></code>),
-or the selector has no item to offer (reason <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>).</p>
+or the selector has no item to offer, or none the exposure control accepts (reason
+<code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ExcludedItemError</dt><dd><p>If the selector proposes an item the session excluded.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If the selector proposes an item outside the bank or one already administered.</p>
 </dd>
 </dl>
 </dd>
@@ -699,9 +722,9 @@ ability; an application that steps sessions itself can wrap whatever collects re
 <dt class="sig sig-object py" id="catsim.engine.RunContext">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.engine.</span></span><span class="sig-name descname"><span class="pre">RunContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.state.ExposureTracker" title="catsim.state.ExposureTracker"><span class="pre">ExposureTracker</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#RunContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.engine.RunContext" title="Link to this definition">#</a></dt>
 <dd><p>Runtime services shared by CAT sessions in one run.</p>
-<p><code class="docutils literal notranslate"><span class="pre">exposure_tracker</span></code> counts sessions and item administrations across the run and gives selectors
-the exposure rates their <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap is checked against. Without one, selectors get no rates and
-apply no cap.</p>
+<p><code class="docutils literal notranslate"><span class="pre">exposure_tracker</span></code> counts sessions, item administrations and proposals across the run and gives
+selectors the exposure rates their <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap is checked against. Without one, selectors get no
+rates and apply no cap.</p>
 </dd></dl>
 
 </section>
@@ -726,11 +749,11 @@ apply no cap.</p>
       </div>
     </a>
     <a class="right-next"
-       href="state.html"
+       href="exposure.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></p>
+        <p class="prev-next-title">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

@@ -73,9 +73,13 @@ class BaseInitializer(ABC):
 - The examinee's true ability and the session's bookkeeping are not in the context: strategies
   cannot see the simulated truth.
 - `excluded_items` holds items a selector must not choose although they have not been administered.
-  The engine passes none; a wrapper such as Sympson-Hetter passes them on with
-  `dataclasses.replace`. Selectors draw their candidates through `catsim.selection.base.remaining`,
+  The engine passes the session's excluded items, among them those its exposure control declined
+  (ADR-0016); a wrapper that passes a changed context on with `dataclasses.replace` adds to them,
+  never replaces them. Selectors draw their candidates through `catsim.selection.remaining`,
   which leaves out both, and the test position stays `len(context.administered_items)`.
+- The exposure control, an optional engine component (ADR-0016), takes the context the selector
+  proposed from and the proposed item: `accept(context, item_id) -> bool`. The rules below apply to
+  it as to the other strategies.
 - `select` returns an `int`. A selector with no item to offer raises `NoItemsAvailableError`; `None`
   is not a return value.
 - The initializer keeps its two arguments, keyword-only: it runs once per session, before any step

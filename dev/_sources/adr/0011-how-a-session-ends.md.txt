@@ -24,7 +24,8 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 
 - A session ends for one of two reasons, the members of the `StopReason` enum:
   - `STOPPER` (`"stopper"`): the engine's stopper is satisfied by the session's current state;
-  - `NO_ITEMS` (`"no_items"`): the selector has no item to offer.
+  - `NO_ITEMS` (`"no_items"`): the selector has no item to offer, or none that the engine's
+    exposure control accepts (ADR-0016).
 
   `stop_reason` is `None` while the session runs, and it is the only record of whether the
   session has ended: `is_stopped` reads it, and there is no separate status field. Lifecycle
@@ -33,8 +34,9 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   item" signal: `select` returns an `int` (ADR-0004).
 - `select_next` is the only place that decides whether a session continues. It returns `None` and
   records the reason when the stopper is satisfied or the selector has no item, and it returns
-  `None` without changing anything for a session that has already stopped. A manual session is
-  therefore one loop with no other stop check:
+  `None` without changing anything for a session that has already stopped. It records the items
+  the exposure control declined once the selection has ended, so a selection that raises changes
+  nothing. A manual session is therefore one loop with no other stop check:
 
   ```python
   while (item_id := engine.select_next(state, context)) is not None:
@@ -51,8 +53,9 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   A stopper that checks bank exhaustion itself and says stop reports `STOPPER`, because all the
   engine knows is that its stopper said stop.
 - `apply_response` applies a response atomically, and only to a running session. It raises
-  `ValueError` for a stopped session and `TypeError` for an item index that is not an integer or a
-  response that is not a `bool` or `numpy.bool_`. It estimates and asks the stopper on step contexts
+  `ValueError` for a stopped session, `ExcludedItemError` (a `ValueError`) for an item the session
+  excluded, and `TypeError` for an item index that is not an integer or a response that is not a
+  `bool` or `numpy.bool_`. It estimates and asks the stopper on step contexts
   built from the session with the new item and response (ADR-0004), and commits the item, the
   response, the estimate, the exposure count and the stop decision only once both have succeeded.
 

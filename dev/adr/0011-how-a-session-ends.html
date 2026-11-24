@@ -414,6 +414,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0014-public-import-paths-and-names.html">ADR-0014: Public Import Paths and One Name per Concept</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
 </ul>
 </div>
 </nav></div>
@@ -501,7 +502,8 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 <li><p>A session ends for one of two reasons, the members of the <code class="docutils literal notranslate"><span class="pre">StopReason</span></code> enum:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">STOPPER</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;stopper&quot;</span></code>): the engine’s stopper is satisfied by the session’s current state;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>): the selector has no item to offer.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> (<code class="docutils literal notranslate"><span class="pre">&quot;no_items&quot;</span></code>): the selector has no item to offer, or none that the engine’s
+exposure control accepts (ADR-0016).</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code> while the session runs, and it is the only record of whether the
 session has ended: <code class="docutils literal notranslate"><span class="pre">is_stopped</span></code> reads it, and there is no separate status field. Lifecycle
@@ -511,8 +513,9 @@ states such as paused or abandoned belong to the application.</p>
 item” signal: <code class="docutils literal notranslate"><span class="pre">select</span></code> returns an <code class="docutils literal notranslate"><span class="pre">int</span></code> (ADR-0004).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">select_next</span></code> is the only place that decides whether a session continues. It returns <code class="docutils literal notranslate"><span class="pre">None</span></code> and
 records the reason when the stopper is satisfied or the selector has no item, and it returns
-<code class="docutils literal notranslate"><span class="pre">None</span></code> without changing anything for a session that has already stopped. A manual session is
-therefore one loop with no other stop check:</p>
+<code class="docutils literal notranslate"><span class="pre">None</span></code> without changing anything for a session that has already stopped. It records the items
+the exposure control declined once the selection has ended, so a selection that raises changes
+nothing. A manual session is therefore one loop with no other stop check:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">item_id</span> <span class="o">:=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
   <span class="n">engine</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 </pre></div>
@@ -528,8 +531,9 @@ once per state therefore loses nothing.</p></li>
 A stopper that checks bank exhaustion itself and says stop reports <code class="docutils literal notranslate"><span class="pre">STOPPER</span></code>, because all the
 engine knows is that its stopper said stop.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">apply_response</span></code> applies a response atomically, and only to a running session. It raises
-<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a stopped session and <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> for an item index that is not an integer or a
-response that is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>. It estimates and asks the stopper on step contexts
+<code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a stopped session, <code class="docutils literal notranslate"><span class="pre">ExcludedItemError</span></code> (a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>) for an item the session
+excluded, and <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> for an item index that is not an integer or a response that is not a
+<code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>. It estimates and asks the stopper on step contexts
 built from the session with the new item and response (ADR-0004), and commits the item, the
 response, the estimate, the exposure count and the stop decision only once both have succeeded.</p></li>
 </ul>

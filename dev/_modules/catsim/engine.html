@@ -807,7 +807,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoItemsAvailableError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExcludedItemError</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">CatStepResult</span><span class="p">,</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">StopReason</span>
 
@@ -815,6 +815,7 @@ window.runMermaid = runMermaid;</script>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
 
   <span class="kn">from</span><span class="w"> </span><span class="nn">.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.exposure</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseExposureControl</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionSnapshot</span>
@@ -827,9 +828,9 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">RunContext</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Runtime services shared by CAT sessions in one run.</span>
 
-<span class="sd">  ``exposure_tracker`` counts sessions and item administrations across the run and gives selectors</span>
-<span class="sd">  the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and</span>
-<span class="sd">  apply no cap.</span>
+<span class="sd">  ``exposure_tracker`` counts sessions, item administrations and proposals across the run and gives</span>
+<span class="sd">  selectors the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no</span>
+<span class="sd">  rates and apply no cap.</span>
 <span class="sd">  """</span>
 
   <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span>
@@ -892,6 +893,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Updates the ability estimate after each response.</span>
 <span class="sd">  stopper : BaseStopper</span>
 <span class="sd">      Decides when a session has ended.</span>
+<span class="sd">  exposure_control : BaseExposureControl or None, optional</span>
+<span class="sd">      Decides whether to administer each item the selector proposes; a declined item is excluded</span>
+<span class="sd">      from the session for the rest of its test. Default is None, which administers every proposed</span>
+<span class="sd">      item.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
@@ -906,6 +911,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">selector</span><span class="p">:</span> <span class="n">BaseSelector</span><span class="p">,</span>
     <span class="n">estimator</span><span class="p">:</span> <span class="n">BaseEstimator</span><span class="p">,</span>
     <span class="n">stopper</span><span class="p">:</span> <span class="n">BaseStopper</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">exposure_control</span><span class="p">:</span> <span class="n">BaseExposureControl</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="c1"># Checked here because a NumPy array of parameters would otherwise fail only at the first session.</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">):</span>
@@ -916,6 +923,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_estimator</span> <span class="o">=</span> <span class="n">estimator</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span> <span class="o">=</span> <span class="n">stopper</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_control</span> <span class="o">=</span> <span class="n">exposure_control</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">item_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemBank</span><span class="p">:</span>
@@ -935,8 +943,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    StepContext</span>
-<span class="sd">        The session's items, responses and current estimate with its standard error, with no</span>
-<span class="sd">        excluded items.</span>
+<span class="sd">        The session's items, responses, excluded items and current estimate with its standard</span>
+<span class="sd">        error.</span>
 <span class="sd">    """</span>
     <span class="n">tracker</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span>
     <span class="k">return</span> <span class="n">StepContext</span><span class="p">(</span>
@@ -944,6 +952,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">rng</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">,</span>
       <span class="n">administered_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span>
       <span class="n">responses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">responses</span><span class="p">),</span>
+      <span class="n">excluded_items</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">),</span>
       <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
       <span class="n">se</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span>
       <span class="n">exposure_rates</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">(),</span>
@@ -1018,6 +1027,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    The stopper is consulted here only for a session that has no responses yet. After that,</span>
 <span class="sd">    :meth:`apply_response` evaluates it once for every new state, and what it records is final.</span>
 
+<span class="sd">    With an exposure control, the items it declines join the session's ``excluded_items`` and the</span>
+<span class="sd">    exposure tracker's proposals, once the selection has ended, so an application that saves its</span>
+<span class="sd">    sessions saves them after this call too. A selection that raises leaves both unchanged.</span>
+
+<span class="sd">    Each call selects anew, and the exposure control decides anew: a second call before the</span>
+<span class="sd">    response may decline the item the first returned, or end the session. An application that has</span>
+<span class="sd">    shown an item keeps its id, which :meth:`apply_response` needs, and shows it again rather than</span>
+<span class="sd">    calling this method again.</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    state : CatSessionState</span>
@@ -1030,7 +1048,15 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    int or None</span>
 <span class="sd">        Index of the next item to administer. None when the session has ended: it was already</span>
 <span class="sd">        stopped (and is left untouched), its stopper is satisfied (reason ``StopReason.STOPPER``),</span>
-<span class="sd">        or the selector has no item to offer (reason ``StopReason.NO_ITEMS``).</span>
+<span class="sd">        or the selector has no item to offer, or none the exposure control accepts (reason</span>
+<span class="sd">        ``StopReason.NO_ITEMS``).</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ExcludedItemError</span>
+<span class="sd">        If the selector proposes an item the session excluded.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the selector proposes an item outside the bank or one already administered.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
@@ -1038,13 +1064,49 @@ window.runMermaid = runMermaid;</script>
       <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">STOPPER</span>
       <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="n">declined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+      <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepted_item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">),</span> <span class="n">declined</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">NoItemsAvailableError</span><span class="p">:</span>
+      <span class="n">item_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Committed only here, so a selection that raises changes neither the session nor the tracker.</span>
+    <span class="n">state</span><span class="o">.</span><span class="n">excluded_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">declined</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">declined_item</span> <span class="ow">in</span> <span class="n">declined</span><span class="p">:</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span><span class="o">.</span><span class="n">record_decline</span><span class="p">(</span><span class="n">declined_item</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="n">StopReason</span><span class="o">.</span><span class="n">NO_ITEMS</span>
-      <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">item_id</span></div>
 
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_accepted_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">declined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the first item the selector proposes that the exposure control accepts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    context : StepContext</span>
+<span class="sd">        The session as it stands.</span>
+<span class="sd">    declined : list[int]</span>
+<span class="sd">        Receives each item the control declines, in order.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    int</span>
+<span class="sd">        The accepted item.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    NoItemsAvailableError</span>
+<span class="sd">        If the selector has no item left to propose.</span>
+<span class="sd">    """</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+      <span class="c1"># Checked before the control or a response provider sees it: a live provider shows the item to an</span>
+      <span class="c1"># examinee, and a selector that ignores excluded_items would be asked again forever.</span>
+      <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">context</span><span class="p">)))</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_control</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposure_control</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">item_id</span>
+      <span class="n">declined</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+      <span class="n">context</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">excluded_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="n">item_id</span><span class="p">))</span>
 
 <div class="viewcode-block" id="CatEngine.apply_response">
 <a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.apply_response">[docs]</a>
@@ -1081,6 +1143,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
+<span class="sd">    ExcludedItemError</span>
+<span class="sd">        If the item is in the session's ``excluded_items``.</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the session has stopped, the item index is outside the bank or the item was already</span>
 <span class="sd">        administered in this session.</span>
@@ -1095,10 +1159,10 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"response must be a bool, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">response</span><span class="si">!r}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="c1"># The estimator starts from the previous estimate; the stopper judges the new one.</span>
     <span class="n">answered</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
       <span class="n">current</span><span class="p">,</span>
@@ -1158,14 +1222,12 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">item_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">CatStepResult</span><span class="p">(</span><span class="n">session</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">selected_item_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="c1"># checked before the provider is asked: a live provider shows the item to an examinee</span>
-    <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">response_provider</span><span class="o">.</span><span class="n">answer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">snapshot</span><span class="p">(),</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span></div>
 
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_checked_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return ``item_id`` as an int, raising unless it is an item of the bank the session has not had.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_checked_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return ``item_id`` as an int, raising unless the session in ``context`` may be given it.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1176,6 +1238,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ------</span>
 <span class="sd">    TypeError</span>
 <span class="sd">        If ``item_id`` is not an integer.</span>
+<span class="sd">    ExcludedItemError</span>
+<span class="sd">        If the context excludes the item.</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If ``item_id`` is not an index of the bank, or the session has already had the item.</span>
 <span class="sd">    """</span>
@@ -1187,9 +1251,12 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">item_id</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">item_id</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Invalid item index </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2">. Must be between 0 and </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> has already been administered in this session"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">item_id</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Item </span><span class="si">{</span><span class="n">item_id</span><span class="si">}</span><span class="s2"> is excluded from this session; remove it from the session's excluded_items to give it"</span>
+      <span class="k">raise</span> <span class="n">ExcludedItemError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">item_id</span>
 
 <div class="viewcode-block" id="CatEngine.run_session">

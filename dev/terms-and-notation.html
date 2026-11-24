@@ -520,6 +520,9 @@ pattern</em> or <em>response vector</em>. In the API: <code class="docutils lite
 </dd>
 <dt>administered items</dt><dd><p>The items given so far, in order. In the API: <code class="docutils literal notranslate"><span class="pre">administered_items</span></code>.</p>
 </dd>
+<dt>excluded items</dt><dd><p>Items a session must not be given although it has not had them, such as the items its exposure
+control declined. They do not count toward the test length. In the API: <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code>.</p>
+</dd>
 <dt>test length <span class="math notranslate nohighlight">\(n\)</span></dt><dd><p>The number of administered items. In the API: <code class="docutils literal notranslate"><span class="pre">test_lengths</span></code> in a simulation result. A
 <code class="docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code> ends the test at <code class="docutils literal notranslate"><span class="pre">max_items</span></code>; a selector that plans its schedule for a test of
 known length takes it as <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p>
@@ -544,8 +547,13 @@ rule</em> or <em>termination criterion</em>. Every stopper derives from <code cl
 <code class="docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code> or <code class="docutils literal notranslate"><span class="pre">StandardErrorStopper</span></code>. <code class="docutils literal notranslate"><span class="pre">StopRule</span></code> is the stopper that combines several
 others; these pages say “rule” only for it.</p>
 </dd>
+<dt>exposure control</dt><dd><p>Keeping items from being given so often that they become known to future examinees. Some
+selectors do it themselves, with an exposure cap <code class="docutils literal notranslate"><span class="pre">r_max</span></code> or by choosing at random. An engine can
+also take an <em>exposure control</em>, a <code class="docutils literal notranslate"><span class="pre">BaseExposureControl</span></code>, which may decline the item the selector
+proposes; the session then excludes that item for the rest of its test.</p>
+</dd>
 <dt>stop reason</dt><dd><p>Why a session ended: <code class="docutils literal notranslate"><span class="pre">StopReason.STOPPER</span></code> when its stopper was satisfied, <code class="docutils literal notranslate"><span class="pre">StopReason.NO_ITEMS</span></code>
-when its selector had no item to offer.</p>
+when its selector had no item to offer, or none that the exposure control accepted.</p>
 </dd>
 <dt>standard error <span class="math notranslate nohighlight">\(SE(\hat{\theta})\)</span></dt><dd><p>The uncertainty of an ability estimate, on the scale of <span class="math notranslate nohighlight">\(\theta\)</span>. Also called the <em>standard
 error of estimation</em> (SEE) or <em>standard error of measurement</em> (SEM). Each estimator computes it
@@ -561,6 +569,10 @@ simulation result.</p>
 <dt>exposure rate <span class="math notranslate nohighlight">\(r_i\)</span></dt><dd><p>The share of examinees who were given item <span class="math notranslate nohighlight">\(i\)</span>. In the API: <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code> in a simulation
 result. Exposure-control selectors limit it with a cap, <code class="docutils literal notranslate"><span class="pre">r_max</span></code>. While a run is in progress the
 rates are counted over the examinees tested so far; <code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> says how.</p>
+</dd>
+<dt>proposal rate</dt><dd><p>The share of examinees for whom the selector proposed item <span class="math notranslate nohighlight">\(i\)</span>: the item was given or the
+exposure control declined it. In the API: <code class="docutils literal notranslate"><span class="pre">proposal_rates</span></code> in a simulation result. Without an
+exposure control it equals the exposure rate.</p>
 </dd>
 <dt>overlap rate</dt><dd><p>The expected share of items that two examinees have in common. In the API: <code class="docutils literal notranslate"><span class="pre">overlap_rate</span></code> in a
 simulation result, <code class="docutils literal notranslate"><span class="pre">None</span></code> unless every session has the same test length.</p>

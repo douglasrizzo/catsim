@@ -414,6 +414,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0014: Public Import Paths and One Name per Concept</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0015-plotting-as-an-optional-extra.html">ADR-0015: Plotting as an Optional Extra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0016-session-exclusions-and-exposure-control.html">ADR-0016: The Session Keeps Its Excluded Items, and an Exposure Control May Decline a Proposal</a></li>
 </ul>
 </div>
 </nav></div>
@@ -500,8 +501,9 @@ while <code class="docutils literal notranslate"><span class="pre">administered_
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">catsim</span></code>, for the core types: the engine, the session state and step results, the runner and
 its result, the item bank, <code class="docutils literal notranslate"><span class="pre">StepContext</span></code>, <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> and the exceptions;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code> and <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code>, for the
-strategies, their base classes and the helpers documented for custom strategies;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">catsim.selection</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.estimation</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.initialization</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.stopping</span></code> and
+<code class="docutils literal notranslate"><span class="pre">catsim.exposure</span></code>, for the strategies and the exposure controls, their base classes and the
+helpers documented for custom strategies;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">catsim.irt</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.metrics</span></code>, <code class="docutils literal notranslate"><span class="pre">catsim.plot</span></code> and <code class="docutils literal notranslate"><span class="pre">catsim.typing</span></code>, modules of functions and
 type aliases.</p></li>
 </ul>

@@ -797,7 +797,7 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">"""Cluster-based item selection (Meneghetti, 2015).</span>
 
 <span class="sd">:class:`ClusterSelector` chooses a cluster of items before it chooses an item. :class:`ClusterMethod`</span>
-<span class="sd">names the ways it can score a cluster, and :class:`ExposureControl` what it administers when the chosen</span>
+<span class="sd">names the ways it can score a cluster, and :class:`CapFallback` what it administers when the chosen</span>
 <span class="sd">cluster has no item below the exposure cap.</span>
 <span class="sd">"""</span>
 
@@ -835,9 +835,9 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="ExposureControl">
-<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.ExposureControl">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExposureControl</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+<div class="viewcode-block" id="CapFallback">
+<a class="viewcode-back" href="../../../api/techniques/selection/cluster-selector.html#catsim.selection.CapFallback">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CapFallback</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""What :class:`ClusterSelector` administers when no remaining item of the chosen cluster is below ``r_max``.</span>
 
 <span class="sd">  Attributes</span>
@@ -876,9 +876,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Exposure-rate cap for choosing an item inside the selected cluster: items at or above it are</span>
 <span class="sd">      passed over unless no other item in the cluster remains. It does not affect which cluster is</span>
 <span class="sd">      chosen. Default is 1 (no cap).</span>
-<span class="sd">  r_control : ExposureControl or str, optional</span>
+<span class="sd">  r_control : CapFallback or str, optional</span>
 <span class="sd">      What to administer when every remaining item in the selected cluster is at or above ``r_max``; see</span>
-<span class="sd">      :class:`ExposureControl`. Default is ``ExposureControl.PASSIVE``.</span>
+<span class="sd">      :class:`CapFallback`. Default is ``CapFallback.PASSIVE``.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -898,7 +898,7 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return the selector as a constructor call that names every argument."""</span>
     <span class="k">return</span> <span class="p">(</span>
       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(clusters=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">clusters</span><span class="si">!r}</span><span class="s2">, method=ClusterMethod.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, "</span>
-      <span class="sa">f</span><span class="s2">"r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">, r_control=ExposureControl.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)"</span>
+      <span class="sa">f</span><span class="s2">"r_max=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="si">!r}</span><span class="s2">, r_control=CapFallback.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)"</span>
     <span class="p">)</span>
 
   <span class="nd">@property</span>
@@ -917,8 +917,8 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">r_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExposureControl</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the item exposure control method."""</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">r_control</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CapFallback</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return what the selector administers when no remaining item of the chosen cluster is below ``r_max``."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -926,7 +926,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">method</span><span class="p">:</span> <span class="n">ClusterMethod</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ClusterMethod</span><span class="o">.</span><span class="n">ITEM_INFO</span><span class="p">,</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="n">r_control</span><span class="p">:</span> <span class="n">ExposureControl</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">ExposureControl</span><span class="o">.</span><span class="n">PASSIVE</span><span class="p">,</span>
+    <span class="n">r_control</span><span class="p">:</span> <span class="n">CapFallback</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">CapFallback</span><span class="o">.</span><span class="n">PASSIVE</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Initialize a ClusterSelector object.</span>
 
@@ -938,8 +938,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        Cluster-scoring method. Default is ``ClusterMethod.ITEM_INFO``.</span>
 <span class="sd">    r_max : float, optional</span>
 <span class="sd">        Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.</span>
-<span class="sd">    r_control : ExposureControl or str, optional</span>
-<span class="sd">        Item exposure control method. Default is ``ExposureControl.PASSIVE``.</span>
+<span class="sd">    r_control : CapFallback or str, optional</span>
+<span class="sd">        What to administer when no remaining item of the chosen cluster is below ``r_max``. Default</span>
+<span class="sd">        is ``CapFallback.PASSIVE``.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -962,11 +963,9 @@ window.runMermaid = runMermaid;</script>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">r_control</span> <span class="o">=</span> <span class="n">ExposureControl</span><span class="p">(</span><span class="n">r_control</span><span class="p">)</span>
+      <span class="n">r_control</span> <span class="o">=</span> <span class="n">CapFallback</span><span class="p">(</span><span class="n">r_control</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">r_control</span><span class="si">}</span><span class="s2"> is not a valid item exposure control method; choose one from </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">ExposureControl</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
-      <span class="p">)</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">r_control</span><span class="si">}</span><span class="s2"> is not a valid cap fallback; choose one from </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">CapFallback</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -1011,7 +1010,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">in_cluster</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_clusters</span><span class="p">[</span><span class="n">candidates</span><span class="p">]</span> <span class="o">==</span> <span class="n">cluster</span><span class="p">]</span>
     <span class="c1"># A cap of 1 is no cap (see below_cap), so the aggressive fallback never applies to it.</span>
     <span class="k">if</span> <span class="p">(</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="ow">is</span> <span class="n">ExposureControl</span><span class="o">.</span><span class="n">AGGRESSIVE</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_r_control</span> <span class="ow">is</span> <span class="n">CapFallback</span><span class="o">.</span><span class="n">AGGRESSIVE</span>
       <span class="ow">and</span> <span class="n">exposure_rates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
       <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">&lt;</span> <span class="mi">1</span>
       <span class="ow">and</span> <span class="p">(</span><span class="n">exposure_rates</span><span class="p">[</span><span class="n">in_cluster</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>

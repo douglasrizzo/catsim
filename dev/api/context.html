@@ -401,6 +401,7 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="techniques/index.html">Techniques</a></li>
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
@@ -536,9 +537,10 @@ Default is no items.</p>
 <dt><strong>responses</strong><span class="classifier">tuple[bool, …], optional</span></dt><dd><p>The examinee’s responses to <code class="docutils literal notranslate"><span class="pre">administered_items</span></code>, one per item, in the same order. Default
 is no responses.</p>
 </dd>
-<dt><strong>excluded_items</strong><span class="classifier">tuple[int, …], optional</span></dt><dd><p>Items a selector must not choose although they have not been administered, such as items an
-exposure-control wrapper has declined. They do not count toward the test position. The
-engine always passes none.</p>
+<dt><strong>excluded_items</strong><span class="classifier">tuple[int, …], optional</span></dt><dd><p>Items a selector must not choose although they have not been administered: the session’s
+excluded items, such as those the engine’s exposure control declined. They do not count
+toward the test position. A wrapper that passes a changed context on adds to them, never
+replaces them. Default is no items.</p>
 </dd>
 <dt><strong>theta</strong><span class="classifier">float, optional</span></dt><dd><p>The current ability estimate. For the estimator, it is the estimate before the newest
 response, the starting point of its update. Default is 0.</p>
