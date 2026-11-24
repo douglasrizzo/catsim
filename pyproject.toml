@@ -32,10 +32,12 @@ keywords = [
 name = "catsim"
 version = "0.21.0"
 description = "Computerized adaptive testing toolkit"
+# The CI test job's lowest-direct entry installs exactly these floors. numpy 2.0 changed the C ABI,
+# so scipy releases before 1.13 do not work with it.
 dependencies = [
-    "scipy",
-    "tqdm",
-    "numpy",
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "tqdm>=4.64",
     "typing-extensions>=4.4",
 ]
 requires-python = ">=3.11"
@@ -43,7 +45,9 @@ readme = "README.md"
 license = "BSD-3-Clause"
 
 [project.optional-dependencies]
-plot = ["matplotlib>=3.10"]  # catsim.plot, the only module that imports matplotlib
+# matplotlib before 3.10.7 warns about deprecated pyparsing 3.3 names on import, which the tests
+# turn into an error.
+plot = ["matplotlib>=3.10.7"]  # catsim.plot, the only module that imports matplotlib
 
 [project.urls]
 Documentation = "https://douglasrizzo.com.br/catsim"
@@ -190,7 +194,7 @@ dev = [
     "hypothesis>=6.127.0",
     "import-linter>=2.17",
     "ipykernel>=7.1.0",
-    "matplotlib>=3.10",  # the plot extra: tests/test_plot.py and the notebooks
+    "matplotlib>=3.10.7",  # the plot extra: tests/test_plot.py and the notebooks
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
     "pylint>=4.0.5",
