@@ -11,7 +11,7 @@ A selector reads the session from a {py:class}`~catsim.StepContext`: the
 administered items and their responses, the current estimate `theta`, the run's random
 generator and exposure rates, and `excluded_items`, items it must pass over although they
 have not been administered, such as those the engine's exposure control
-({py:class}`~catsim.exposure.BaseExposureControl`) declined. Where the pages below speak of non-administered items, they
+({py:class}`~catsim.exposure.BaseExposureControl`) declined. Where the pages below speak of remaining items, they
 mean the items that are neither administered nor excluded. Excluded items do not count
 toward the test position, the number of administered items.
 
