@@ -14,6 +14,7 @@ from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
+  BaseSelector,
   ClusterSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
@@ -25,7 +26,6 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
-from catsim.selection.base import BaseSelector
 from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
 from catsim.state import ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule

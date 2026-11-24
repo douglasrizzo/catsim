@@ -11,8 +11,7 @@ import pytest
 from scipy.integrate import quad
 
 from catsim import Estimate, StepContext, irt
-from catsim.estimation import BaseEstimator
-from catsim.estimation.numerical import NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import (
@@ -34,9 +33,10 @@ from catsim.selection import (
   RandomSelector,
   The54321Selector,
   UrrySelector,
+  below_cap,
   progressive,
+  remaining,
 )
-from catsim.selection.base import below_cap, remaining
 from tests.contexts import make_context
 
 

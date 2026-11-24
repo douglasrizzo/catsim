@@ -240,8 +240,7 @@ The initializer runs once per session and receives the item bank and the run's r
 
 ```python
 from catsim import StepContext
-from catsim.selection import BaseSelector
-from catsim.selection.base import pick_best, remaining
+from catsim.selection import BaseSelector, pick_best, remaining
 
 
 class EasiestFirstSelector(BaseSelector):

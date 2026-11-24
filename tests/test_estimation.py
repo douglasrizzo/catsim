@@ -18,6 +18,7 @@ from catsim import Estimate, StepContext, irt
 from catsim.estimation import (
   BaseEstimator,
   EAPEstimator,
+  LogPrior,
   MAPEstimator,
   NumericalSearchEstimator,
   QuadratureGrid,
@@ -28,7 +29,6 @@ from catsim.estimation import (
   posterior_variance,
   uniform_log_prior,
 )
-from catsim.estimation.bayesian import LogPrior
 from catsim.item_bank import ItemBank
 from tests.contexts import make_context
 

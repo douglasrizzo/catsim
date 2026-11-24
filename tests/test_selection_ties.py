@@ -20,8 +20,9 @@ from catsim.selection import (
   RandomesqueSelector,
   The54321Selector,
   UrrySelector,
+  best_pool,
+  pick_best,
 )
-from catsim.selection.base import best_pool, pick_best
 from tests.contexts import make_context
 
 _N_COPIES = 6

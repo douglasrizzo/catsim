@@ -16,8 +16,7 @@ from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector
-from catsim.selection.base import remaining
+from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
 from catsim.state import CatSessionSnapshot, CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 from tests.contexts import make_context
