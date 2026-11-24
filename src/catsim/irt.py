@@ -7,7 +7,6 @@ such rows, shape ``(n, 4)``: discrimination, difficulty, pseudo-guessing and upp
 
 import math
 from collections.abc import Sequence
-from enum import Enum
 from typing import overload
 
 import numpy
@@ -47,30 +46,6 @@ abilities are normally distributed N(0, 1). Recommended for numerical search
 algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
 than the item bank difficulty range prevents artificial restrictions on ability
 estimates."""
-
-
-class NumParams(Enum):
-  """Enumerator that informs how many parameters each logistic model of IRT has.
-
-  Created to avoid accessing magic numbers in the code. Each value corresponds
-  to the number of parameters in the respective IRT model.
-
-  Attributes
-  ----------
-  PL1 : int
-      One-parameter logistic model (Rasch model).
-  PL2 : int
-      Two-parameter logistic model.
-  PL3 : int
-      Three-parameter logistic model.
-  PL4 : int
-      Four-parameter logistic model.
-  """
-
-  PL1 = 1
-  PL2 = 2
-  PL3 = 3
-  PL4 = 4
 
 
 def _split_params(items: FloatArray) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
@@ -686,74 +661,6 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
   return values if numpy.ndim(theta) else float(values)
 
 
-def normalize_item_bank(items: FloatArray) -> FloatArray:
-  r"""Normalize an item matrix so that it conforms to the standard used by catsim.
-
-  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item
-  discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
-  parameter and column 3 represents the item upper asymptote.
-
-  This function automatically expands item matrices with fewer than 4 columns:
-
-  - 1 column (1PL): Assumed to be difficulty. Discrimination=1, c=0, d=1 are added.
-  - 2 columns (2PL): Assumed to be [discrimination, difficulty]. c=0, d=1 are added.
-  - 3 columns (3PL): Assumed to be [discrimination, difficulty, pseudo-guessing]. d=1 is added.
-  - 4 columns (4PL): Already complete, returned as-is.
-
-  Parameters
-  ----------
-  items : numpy.ndarray
-      The item matrix with 1, 2, 3, or 4 columns.
-
-  Returns
-  -------
-  numpy.ndarray
-      An :math:`n \times 4` item matrix conforming to the 4-parameter logistic model,
-      with columns [a, b, c, d].
-  """
-  if len(items.shape) == 1:
-    items = numpy.expand_dims(items, axis=0)
-  if items.shape[1] == NumParams.PL1.value:
-    items = numpy.append(numpy.ones((items.shape[0], 1)), items, axis=1)
-  if items.shape[1] == NumParams.PL2.value:
-    items = numpy.append(items, numpy.zeros((items.shape[0], 1)), axis=1)
-  if items.shape[1] == NumParams.PL3.value:
-    items = numpy.append(items, numpy.ones((items.shape[0], 1)), axis=1)
-
-  return items
-
-
-def detect_model(items: FloatArray) -> int:
-  """Detect which logistic model an item matrix fits into.
-
-  Examines the item parameters to determine if they represent a 1PL, 2PL, 3PL,
-  or 4PL model based on which parameters vary.
-
-  Parameters
-  ----------
-  items : numpy.ndarray
-      An item matrix with at least four columns.
-
-  Returns
-  -------
-  int
-      An integer between 1 and 4 denoting the logistic model:
-      - 1: Rasch/1PL (all discrimination equal, no guessing, no upper asymptote)
-      - 2: 2PL (varying discrimination, no guessing, no upper asymptote)
-      - 3: 3PL (varying discrimination, guessing present, no upper asymptote variation)
-      - 4: 4PL (all parameters vary)
-  """
-  a, _, c, d = _split_params(items)
-
-  if any(d != 1):
-    return 4
-  if any(c != 0):
-    return 3
-  if len(set(a)) > 1:
-    return 2
-  return 1
-
-
 def validate_response_vector(responses: Sequence[bool], n_items: int) -> None:
   """Check that ``responses`` holds one Boolean answer per administered item.
 
@@ -775,61 +682,3 @@ def validate_response_vector(responses: Sequence[bool], n_items: int) -> None:
   if len(set(responses) - {True, False}) > 0:
     msg = "responses must contain only Boolean elements"
     raise ValueError(msg)
-
-
-def validate_item_bank(items: FloatArray) -> None:
-  r"""Validate the shape and parameters in the item matrix to ensure it conforms to catsim standards.
-
-  The item matrix must have dimension :math:`n \times 4`, in which column 0 represents item
-  discrimination, column 1 represents item difficulty, column 2 represents the pseudo-guessing
-  parameter and column 3 represents the item upper asymptote.
-
-  The item matrix must have at least one line (representing an item) and exactly four columns,
-  representing the discrimination, difficulty, pseudo-guessing and upper asymptote parameters
-  (:math:`a`, :math:`b`, :math:`c` and :math:`d`), respectively. The item matrix is considered
-  valid if every parameter is finite and, for all items in the matrix,
-  :math:`a > 0 \wedge 0 \leq c < d \leq 1`.
-
-  Parameters
-  ----------
-  items : numpy.ndarray
-      The item matrix to validate.
-
-  Raises
-  ------
-  TypeError
-      If items is not a numpy.ndarray.
-  ValueError
-      If the item matrix is not :math:`n \times 4`, has no items, or has a parameter that is NaN,
-      infinite or out of its range. The message lists every parameter violation found, separated by
-      ``"; "``.
-  """
-  if not isinstance(items, numpy.ndarray):
-    msg = "Item matrix is not of type numpy.ndarray"
-    raise TypeError(msg)
-
-  if items.shape[1:] != (NumParams.PL4.value,):
-    msg = f"Item matrix has shape {items.shape}; it must be 2-D with exactly 4 columns: a, b, c and d"
-    raise ValueError(msg)
-  if items.shape[0] == 0:
-    msg = "Item matrix has no items"
-    raise ValueError(msg)
-
-  errors: list[str] = []
-  if not numpy.isfinite(items).all():
-    errors.append("There are items with NaN or infinite parameters")
-  if any(items[:, 0] <= 0):
-    errors.append("There are items with discrimination <= 0")
-  if any(items[:, 2] < 0):
-    errors.append("There are items with pseudo-guessing < 0")
-  if any(items[:, 2] > 1):
-    errors.append("There are items with pseudo-guessing > 1")
-  if any(items[:, 3] > 1):
-    errors.append("There are items with upper asymptote > 1")
-  if any(items[:, 3] < 0):
-    errors.append("There are items with upper asymptote < 0")
-  if any(items[:, 2] >= items[:, 3]):
-    errors.append("There are items with pseudo-guessing >= upper asymptote")
-
-  if errors:
-    raise ValueError("; ".join(errors))

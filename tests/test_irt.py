@@ -1,7 +1,6 @@
 """Tests for catsim.irt module."""
 
 import math
-import re
 
 import numpy as np
 import pytest
@@ -36,46 +35,6 @@ class TestIcc:
     item = np.array([1.0, 0.0, 0.2, 0.9])
 
     np.testing.assert_allclose(irt.icc(np.array([-1000.0, 1000.0]), item), [0.2, 0.9], rtol=1e-12)
-
-
-class TestDetectModel:
-  """Tests for the detect_model() function."""
-
-  def test_detect_1pl_model(self) -> None:
-    """Test detection of 1PL model (only b varies)."""
-    items = np.array([
-      [1.0, -1.0, 0.0, 1.0],
-      [1.0, 0.0, 0.0, 1.0],
-      [1.0, 1.0, 0.0, 1.0],
-    ])
-    assert irt.detect_model(items) == 1
-
-  def test_detect_2pl_model(self) -> None:
-    """Test detection of 2PL model (a and b vary)."""
-    items = np.array([
-      [0.8, -1.0, 0.0, 1.0],
-      [1.2, 0.0, 0.0, 1.0],
-      [1.5, 1.0, 0.0, 1.0],
-    ])
-    assert irt.detect_model(items) == 2
-
-  def test_detect_3pl_model(self) -> None:
-    """Test detection of 3PL model (a, b, c vary)."""
-    items = np.array([
-      [0.8, -1.0, 0.1, 1.0],
-      [1.2, 0.0, 0.15, 1.0],
-      [1.5, 1.0, 0.2, 1.0],
-    ])
-    assert irt.detect_model(items) == 3
-
-  def test_detect_4pl_model(self) -> None:
-    """Test detection of 4PL model (all parameters vary)."""
-    items = np.array([
-      [0.8, -1.0, 0.1, 0.95],
-      [1.2, 0.0, 0.15, 0.98],
-      [1.5, 1.0, 0.2, 0.99],
-    ])
-    assert irt.detect_model(items) == 4
 
 
 class TestInformation:
@@ -267,143 +226,6 @@ class TestMaxInfoTheta:
     thetas[0] = 99.0
 
     np.testing.assert_array_equal(items[:, 1], [0.5, -0.2])
-
-
-class TestNormalizeItemBank:
-  """Tests for the normalize_item_bank() function."""
-
-  def test_normalize_1pl(self) -> None:
-    """Test normalization of 1PL (difficulty only)."""
-    items = np.array([[0.0], [1.0]])  # Just difficulty
-    normalized = irt.normalize_item_bank(items)
-    assert normalized.shape == (2, 4)
-    # Check a=1, b=original, c=0, d=1
-    assert np.allclose(normalized[:, 0], 1.0)  # a
-    assert np.allclose(normalized[:, 2], 0.0)  # c
-    assert np.allclose(normalized[:, 3], 1.0)  # d
-
-  def test_normalize_2pl(self) -> None:
-    """Test normalization of 2PL (a, b)."""
-    items = np.array([[1.5, 0.0], [1.0, 1.0]])
-    normalized = irt.normalize_item_bank(items)
-    assert normalized.shape == (2, 4)
-    assert np.allclose(normalized[:, 2], 0.0)  # c
-    assert np.allclose(normalized[:, 3], 1.0)  # d
-
-  def test_normalize_3pl(self) -> None:
-    """Test normalization of 3PL (a, b, c)."""
-    items = np.array([[1.5, 0.0, 0.2], [1.0, 1.0, 0.1]])
-    normalized = irt.normalize_item_bank(items)
-    assert normalized.shape == (2, 4)
-    assert np.allclose(normalized[:, 3], 1.0)  # d
-
-  def test_normalize_4pl_unchanged(self) -> None:
-    """Test that 4PL items are returned unchanged."""
-    items = np.array([[1.5, 0.0, 0.2, 0.95], [1.0, 1.0, 0.1, 0.98]])
-    normalized = irt.normalize_item_bank(items)
-    assert np.array_equal(items, normalized)
-
-  def test_normalize_single_item(self) -> None:
-    """Test normalization of a single item (1D array)."""
-    item = np.array([0.5])  # Single difficulty value
-    normalized = irt.normalize_item_bank(item)
-    assert normalized.shape == (1, 4)
-
-
-class TestValidateItemBank:
-  """Tests for the validate_item_bank() function."""
-
-  def test_validate_accepts_parameters_on_the_edges_of_their_ranges(self) -> None:
-    """A small positive a, c = 0 and d = 1 are valid; a strict comparison in the wrong place would reject them."""
-    items = np.array([[1e-3, -5.0, 0.0, 1.0], [1.2, 0.5, 0.15, 0.98]])
-
-    irt.validate_item_bank(items)
-
-  def test_validate_not_numpy_array_raises(self) -> None:
-    """A nested list is not an item matrix; without the type check it would fail later with an unrelated error."""
-    items = [[1.0, 0.0, 0.1, 0.95]]
-    with pytest.raises(TypeError, match=r"not of type numpy\.ndarray"):
-      irt.validate_item_bank(items)  # type: ignore[arg-type]
-
-  @pytest.mark.parametrize(
-    "shape",
-    [
-      pytest.param((4,), id="one dimension"),
-      pytest.param((3, 0), id="no columns"),
-      pytest.param((2, 3), id="three columns"),
-      pytest.param((1, 5), id="five columns"),
-      pytest.param((2, 4, 1), id="three dimensions"),
-    ],
-  )
-  def test_validate_rejects_a_matrix_that_is_not_n_by_4(self, shape: tuple[int, ...]) -> None:
-    """A matrix that is not n x 4 raises ValueError naming its shape.
-
-    Without the shape check, missing columns fail with an IndexError and a fifth column is ignored.
-    """
-    items = np.ones(shape)
-
-    with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
-      irt.validate_item_bank(items)
-
-  def test_validate_rejects_a_matrix_without_items(self) -> None:
-    """A 0 x 4 matrix raises ValueError: with no rows, every parameter check passes vacuously."""
-    with pytest.raises(ValueError, match="no items"):
-      irt.validate_item_bank(np.empty((0, 4)))
-
-  @pytest.mark.parametrize(
-    ("item", "message"),
-    [
-      pytest.param([-0.5, 0.0, 0.1, 0.95], "discrimination <= 0", id="a < 0"),
-      pytest.param([0.0, 0.0, 0.1, 0.95], "discrimination <= 0", id="a = 0"),
-      pytest.param([1.0, 0.0, -0.1, 0.95], "pseudo-guessing < 0", id="c < 0"),
-      pytest.param([1.0, 0.0, 1.5, 0.95], "pseudo-guessing > 1", id="c > 1"),
-      pytest.param([1.0, 0.0, 0.1, 1.5], "upper asymptote > 1", id="d > 1"),
-      pytest.param([1.0, 0.0, 0.1, -0.1], "upper asymptote < 0", id="d < 0"),
-      pytest.param([1.0, 0.0, 0.3, 0.3], "pseudo-guessing >= upper asymptote", id="c = d"),
-    ],
-  )
-  def test_validate_rejects_a_parameter_out_of_its_range(self, item: list[float], message: str) -> None:
-    """Each range check raises ValueError naming the parameter; it used to print the message and return by default.
-
-    a = 0 gives no information and no point of maximum information; c >= d makes the ICC flat or decreasing and the
-    information formula divide by d - c.
-    """
-    items = np.array([[1.0, 0.0, 0.0, 1.0], item])
-
-    with pytest.raises(ValueError, match=message):
-      irt.validate_item_bank(items)
-
-  @pytest.mark.parametrize(
-    "item",
-    [
-      pytest.param([np.nan, 0.0, 0.0, 1.0], id="a = nan"),
-      pytest.param([1.0, np.nan, 0.0, 1.0], id="b = nan"),
-      pytest.param([1.0, 0.0, np.nan, 1.0], id="c = nan"),
-      pytest.param([1.0, 0.0, 0.0, np.nan], id="d = nan"),
-      pytest.param([np.inf, 0.0, 0.0, 1.0], id="a = inf"),
-      pytest.param([-np.inf, 0.0, 0.0, 1.0], id="a = -inf"),
-      pytest.param([1.0, np.inf, 0.0, 1.0], id="b = inf"),
-      pytest.param([1.0, -np.inf, 0.0, 1.0], id="b = -inf"),
-    ],
-  )
-  def test_validate_rejects_nan_and_infinite_parameters(self, item: list[float]) -> None:
-    """NaN and infinite parameters raise ValueError.
-
-    Every range check compares, and comparisons with NaN are false; b was never checked and a = inf passed, so such an
-    item was accepted and turned the ICC, likelihoods and information sums it entered into NaN.
-    """
-    items = np.array([[1.0, 0.5, 0.1, 1.0], item])
-
-    with pytest.raises(ValueError, match="NaN or infinite parameters"):
-      irt.validate_item_bank(items)
-
-  def test_validate_reports_every_violation_on_one_line(self) -> None:
-    """All violations are listed, separated by "; "; the messages used to start with and be joined by newlines."""
-    items = np.array([[-1.0, 0.0, -0.1, 1.0]])
-    expected = "There are items with discrimination <= 0; There are items with pseudo-guessing < 0"
-
-    with pytest.raises(ValueError, match=rf"\A{re.escape(expected)}\Z"):
-      irt.validate_item_bank(items)
 
 
 class TestLogLikelihood:

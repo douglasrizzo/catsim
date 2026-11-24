@@ -127,67 +127,6 @@ def test_theta_scale_round_trip_identity(m: tuple[float, float, float, float]) -
   assert np.allclose(back, theta, rtol=1e-9, atol=1e-9)
 
 
-@given(items=item_params_matrix())
-@IRT_SETTINGS
-def test_normalize_item_bank_idempotent_for_four_columns(items: np.ndarray) -> None:
-  once = irt.normalize_item_bank(items)
-  twice = irt.normalize_item_bank(once)
-  assert np.array_equal(once, twice)
-
-
-@given(
-  st.lists(st.floats(-2.5, 2.5, allow_nan=False, allow_infinity=False), min_size=1, max_size=14).map(
-    lambda xs: np.asarray(xs, dtype=np.float64).reshape(-1, 1)
-  )
-)
-@IRT_SETTINGS
-def test_normalize_one_column_is_rasch_expansion(difficulties: np.ndarray) -> None:
-  out = irt.normalize_item_bank(difficulties)
-  assert out.shape == (difficulties.shape[0], 4)
-  assert np.allclose(out[:, 0], 1.0)
-  assert np.allclose(out[:, 2], 0.0)
-  assert np.allclose(out[:, 3], 1.0)
-  assert np.allclose(out[:, 1].ravel(), difficulties.ravel())
-
-
-@given(
-  st.lists(
-    st.tuples(
-      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
-      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-    ),
-    min_size=1,
-    max_size=12,
-  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
-)
-@IRT_SETTINGS
-def test_normalize_two_column_is_two_pl_expansion(two_pl: np.ndarray) -> None:
-  out = irt.normalize_item_bank(two_pl)
-  assert out.shape == (two_pl.shape[0], 4)
-  assert np.allclose(out[:, :2], two_pl)
-  assert np.allclose(out[:, 2], 0.0)
-  assert np.allclose(out[:, 3], 1.0)
-
-
-@given(
-  st.lists(
-    st.tuples(
-      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
-      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
-      st.floats(0.0, 0.25, allow_nan=False, allow_infinity=False),
-    ),
-    min_size=1,
-    max_size=12,
-  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
-)
-@IRT_SETTINGS
-def test_normalize_three_column_is_three_pl_expansion(three_pl: np.ndarray) -> None:
-  out = irt.normalize_item_bank(three_pl)
-  assert out.shape == (three_pl.shape[0], 4)
-  assert np.allclose(out[:, :3], three_pl)
-  assert np.allclose(out[:, 3], 1.0)
-
-
 @given(items=item_params_matrix(max_items=8))
 @IRT_SETTINGS
 def test_max_info_theta_is_the_peak_of_the_information(items: np.ndarray) -> None:

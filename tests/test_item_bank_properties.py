@@ -18,13 +18,6 @@ BANK_SETTINGS = settings(max_examples=25, deadline=None)
 
 @given(params=item_params_matrix())
 @BANK_SETTINGS
-def test_item_bank_model_matches_detect_model(params: np.ndarray) -> None:
-  bank = ItemBank(params, validate=True)
-  assert bank.model == irt.detect_model(params)
-
-
-@given(params=item_params_matrix())
-@BANK_SETTINGS
 def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.ndarray) -> None:
   """Item i's cached value is its information at max_info_thetas[i].
 
@@ -42,6 +35,59 @@ def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.n
 def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None:
   bank = ItemBank(params, validate=True)
   assert np.array_equal(bank.items, params)
+
+
+@given(
+  st.lists(st.floats(-2.5, 2.5, allow_nan=False, allow_infinity=False), min_size=1, max_size=14).map(
+    lambda xs: np.asarray(xs, dtype=np.float64).reshape(-1, 1)
+  )
+)
+@BANK_SETTINGS
+def test_one_column_is_read_as_difficulties(difficulties: np.ndarray) -> None:
+  """One column holds b, completed with a = 1, c = 0 and d = 1; reading it as the discrimination would not."""
+  items = ItemBank(difficulties).items
+
+  np.testing.assert_array_equal(items[:, 1], difficulties[:, 0])
+  np.testing.assert_array_equal(items[:, [0, 2, 3]], np.tile([1.0, 0.0, 1.0], (len(difficulties), 1)))
+
+
+@given(
+  st.lists(
+    st.tuples(
+      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
+      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+    ),
+    min_size=1,
+    max_size=12,
+  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
+)
+@BANK_SETTINGS
+def test_two_columns_are_read_as_discrimination_and_difficulty(two_pl: np.ndarray) -> None:
+  """Two columns hold a and b, completed with c = 0 and d = 1; filling the wrong columns would move them."""
+  items = ItemBank(two_pl).items
+
+  np.testing.assert_array_equal(items[:, :2], two_pl)
+  np.testing.assert_array_equal(items[:, 2:], np.tile([0.0, 1.0], (len(two_pl), 1)))
+
+
+@given(
+  st.lists(
+    st.tuples(
+      st.floats(0.3, 2.5, allow_nan=False, allow_infinity=False),
+      st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
+      st.floats(0.0, 0.25, allow_nan=False, allow_infinity=False),
+    ),
+    min_size=1,
+    max_size=12,
+  ).map(lambda rows: np.asarray(rows, dtype=np.float64))
+)
+@BANK_SETTINGS
+def test_three_columns_are_read_as_a_b_and_c(three_pl: np.ndarray) -> None:
+  """Three columns hold a, b and c, completed with d = 1; completing them with d = 0 would make every item invalid."""
+  items = ItemBank(three_pl).items
+
+  np.testing.assert_array_equal(items[:, :3], three_pl)
+  np.testing.assert_array_equal(items[:, 3], 1.0)
 
 
 @given(
