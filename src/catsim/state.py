@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import operator
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -12,6 +13,8 @@ from .context import Estimate
 
 if TYPE_CHECKING:
   from collections.abc import Hashable
+
+  import numpy.typing as npt
 
   from .typing import FloatArray, IntArray
 
@@ -181,7 +184,7 @@ class CatStepResult:
     return self.session.stop_reason
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, init=False)
 class ExposureTracker:
   """Count item administrations and sessions across a run, and give sessions their exposure rates.
 
@@ -195,15 +198,44 @@ class ExposureTracker:
   is the share of the examinees tested before the current one, as in catR's
   ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,
   as in a live deployment, see each other's administrations as they happen.
+
+  A new tracker starts from zero. An application that must keep the exposure across restarts saves
+  ``counts`` and ``n_sessions`` and passes them back to rebuild the tracker.
+
+  Parameters
+  ----------
+  n_items : int
+      Number of items in the bank.
+  counts : array-like of int or None, optional
+      Each item's administrations so far, as a saved tracker's ``counts`` holds them. The tracker
+      keeps a copy. Default is None, for no administrations.
+  n_sessions : int, optional
+      Sessions started so far, as a saved tracker's ``n_sessions`` holds them. Default is 0.
+
+  Raises
+  ------
+  ValueError
+      If ``counts`` does not hold one count per item or holds a negative count, or ``n_sessions`` is
+      negative.
+  TypeError
+      If ``counts`` holds a value that is not an integer, or ``n_sessions`` is not an integer.
   """
 
   n_items: int
-  counts: IntArray = field(init=False)
-  n_sessions: int = field(init=False, default=0)
+  counts: IntArray
+  n_sessions: int
 
-  def __post_init__(self) -> None:
-    """Allocate the item counts, all zero."""
-    self.counts = numpy.zeros(self.n_items, dtype=int)
+  def __init__(self, n_items: int, counts: npt.ArrayLike | None = None, n_sessions: int = 0) -> None:
+    self.n_items = n_items
+    self.counts = numpy.zeros(n_items, dtype=int) if counts is None else _restored_counts(n_items, counts)
+    try:
+      self.n_sessions = operator.index(n_sessions)
+    except TypeError:
+      msg = f"n_sessions must be an integer, got {type(n_sessions).__name__} {n_sessions!r}"
+      raise TypeError(msg) from None
+    if self.n_sessions < 0:
+      msg = f"n_sessions cannot be negative, got {self.n_sessions}"
+      raise ValueError(msg)
 
   def start_session(self) -> None:
     """Count a session that has started."""
@@ -232,3 +264,39 @@ class ExposureTracker:
     if others < 1:
       return numpy.zeros(self.n_items)
     return self.counts / others
+
+
+def _restored_counts(n_items: int, counts: npt.ArrayLike) -> IntArray:
+  """Return a copy of a saved tracker's counts, checking there is one non-negative integer per item.
+
+  Parameters
+  ----------
+  n_items : int
+      Number of items in the bank.
+  counts : array-like of int
+      The saved counts.
+
+  Returns
+  -------
+  numpy.ndarray
+      A new integer array the tracker owns.
+
+  Raises
+  ------
+  ValueError
+      If ``counts`` does not hold one count per item or holds a negative count.
+  TypeError
+      If ``counts`` holds a value that is not an integer.
+  """
+  restored = numpy.array(counts)
+  if restored.shape != (n_items,):
+    msg = f"counts must hold one count per item ({n_items}), got shape {restored.shape}"
+    raise ValueError(msg)
+  # bool is not an integer dtype to NumPy, so a mask passed by mistake is rejected too.
+  if not numpy.issubdtype(restored.dtype, numpy.integer):
+    msg = f"counts must be integers, got dtype {restored.dtype}"
+    raise TypeError(msg)
+  if (restored < 0).any():
+    msg = f"counts cannot be negative, got {restored.min()}"
+    raise ValueError(msg)
+  return restored

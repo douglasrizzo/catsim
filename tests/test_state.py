@@ -138,3 +138,64 @@ def test_exposure_tracker_gives_sessions_side_by_side_each_others_administration
   tracker.record(1)
 
   assert tracker.rates().tolist() == [0.5, 0.5, 0.0]
+
+
+def test_a_tracker_rebuilt_from_saved_counts_continues_where_the_saved_one_was() -> None:
+  """A tracker rebuilt from a saved one's counts and n_sessions gives the rates the saved one would have given.
+
+  Four sessions gave items [0, 1], [0, 2], [0, 3] and [0] on a 4-item bank, so the counts are [4, 1, 1, 1] over 4
+  sessions. The next session is selected against them over the 4 others: [1, 0.25, 0.25, 0.25]. Fails if the
+  rebuilt tracker ignores the saved counts (all zero) or the saved sessions (the rates over no other session).
+  """
+  original = ExposureTracker(4)
+  for items in ([0, 1], [0, 2], [0, 3], [0]):
+    original.start_session()
+    for item_id in items:
+      original.record(item_id)
+  saved = json.loads(json.dumps({"counts": original.counts.tolist(), "n_sessions": original.n_sessions}))
+  rebuilt = ExposureTracker(4, counts=saved["counts"], n_sessions=saved["n_sessions"])
+
+  original.start_session()
+  rebuilt.start_session()
+
+  assert rebuilt.rates().tolist() == original.rates().tolist() == [1.0, 0.25, 0.25, 0.25]
+
+
+def test_a_rebuilt_tracker_owns_its_counts() -> None:
+  """Recording on a rebuilt tracker leaves the caller's array alone.
+
+  Fails if the tracker keeps the array it was given, so the application's saved copy would change with every
+  administration and could be saved twice.
+  """
+  saved = np.array([2, 0, 1])
+  tracker = ExposureTracker(3, counts=saved, n_sessions=2)
+
+  tracker.record(1)
+
+  assert saved.tolist() == [2, 0, 1]
+  assert tracker.counts.tolist() == [2, 1, 1]
+
+
+@pytest.mark.parametrize(
+  ("counts", "n_sessions", "error", "match"),
+  [
+    pytest.param([1, 0, 2], 3, ValueError, r"one count per item \(4\), got shape \(3,\)", id="too-few-counts"),
+    pytest.param(
+      [[1, 0], [2, 0]], 3, ValueError, r"one count per item \(4\), got shape \(2, 2\)", id="two-dimensional"
+    ),
+    pytest.param([1, -1, 0, 0], 3, ValueError, "counts cannot be negative, got -1", id="negative-count"),
+    pytest.param([1.0, 0.0, 2.0, 0.0], 3, TypeError, "counts must be integers, got dtype float64", id="float-counts"),
+    pytest.param([1, 0, 2, 0], -1, ValueError, "n_sessions cannot be negative, got -1", id="negative-sessions"),
+    pytest.param([1, 0, 2, 0], 3.0, TypeError, "n_sessions must be an integer, got float 3.0", id="float-sessions"),
+  ],
+)
+def test_a_tracker_rejects_saved_counts_it_cannot_use(
+  counts: list, n_sessions: int, error: type[Exception], match: str
+) -> None:
+  """Counts that are not one non-negative integer per item, or a session count that is not a non-negative integer, fail.
+
+  Fails if the tracker accepts counts saved for another bank (rates() would then broadcast or fail mid-session), a
+  negative count or session count (negative rates, which no r_max cap would hold back), or fractional values.
+  """
+  with pytest.raises(error, match=match):
+    ExposureTracker(4, counts=counts, n_sessions=n_sessions)
