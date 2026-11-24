@@ -27,6 +27,7 @@ extending
 :maxdepth: 2
 
 api/index
+planned-techniques
 architecture_decisions
 contributing
 references

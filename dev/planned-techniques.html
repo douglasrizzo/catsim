@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Planned techniques &#8212; catsim 0.21.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=75c7c72ae941e8b558d8" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mermaid.css?v=3d2a72d1" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=75c7c72ae941e8b558d8"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8" />
+
+    <script src="_static/documentation_options.js?v=c4f92b34"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'planned-techniques';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="_static/favicon.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Architecture Decision Records" href="architecture_decisions.html" />
+    <link rel="prev" title="Array Type Aliases – catsim.typing" href="api/typing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.21.0" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation" aria-expanded="false" aria-controls="pst-primary-sidebar-modal">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/horizontal-light.svg" class="logo__image only-light" alt="catsim 0.21.0 documentation - Home"/>
+    <img src="_static/horizontal-dark.svg" class="logo__image only-dark pst-js-only" alt="catsim 0.21.0 documentation - Home"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="introduction.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="terms-and-notation.html">
+    Terms and Notation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="live-sessions.html">
+    Live CAT Sessions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reproducibility.html">
+    Reproducibility
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+    Planned techniques
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="references.html">
+    Bibliography
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page" aria-expanded="false" aria-controls="pst-secondary-sidebar-modal">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal" tabindex="-1"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="introduction.html">
+    Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="terms-and-notation.html">
+    Terms and Notation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="live-sessions.html">
+    Live CAT Sessions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="reproducibility.html">
+    Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
+    Planned techniques
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contributing
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="references.html">
+    Bibliography
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/douglasrizzo/catsim" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-house"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Planned techniques</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="planned-techniques">
+<h1>Planned techniques<a class="headerlink" href="#planned-techniques" title="Link to this heading">#</a></h1>
+<p>The methods below are not yet available in catsim; each one’s specification on GitHub gives its
+definition, parameters and sources.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Technique</p></th>
+<th class="head"><p>Family</p></th>
+<th class="head"><p>Motivation</p></th>
+<th class="head"><p>Key reference</p></th>
+<th class="head"><p>Spec</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Owen sequential Bayesian estimator</p></td>
+<td><p>estimation</p></td>
+<td><p>Reproduces Owen’s procedure, which carries only the mean and variance of a normal approximation of the posterior from one response to the next, and shows how that approximation and the order of the responses move the ability estimate away from the full posterior’s estimate</p></td>
+<td><p><span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id17" title="R. J. Owen. A Bayesian sequential procedure for quantal response in the context of adaptive mental testing. Journal of the American Statistical Association, 70(350):351–356, 1975. doi:10.1080/01621459.1975.10479871.">Owen, 1975</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/estimation/owen-estimator.md">owen-estimator.md</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Posterior Kullback-Leibler selector (KLP)</p></td>
+<td><p>selection</p></td>
+<td><p>Weights the KL divergence by the current posterior, not by the <a class="reference internal" href="api/techniques/selection/kl-selector.html"><span class="doc">KL selector’s</span></a> uniform window, so selection is broad early in the test and concentrates as the posterior narrows, with no half-width schedule to tune</p></td>
+<td><p><span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id18" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. doi:10.1177/014662169602000303.">Chang and Ying, 1996</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/selection/klp-selector.md">klp-selector.md</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Minimum expected posterior variance selector (MEPV)</p></td>
+<td><p>selection</p></td>
+<td><p>Chooses the item that minimizes the expected posterior variance after the next response, which targets squared-error loss directly; its gains over <a class="reference internal" href="api/techniques/selection/mei-selector.html"><span class="doc">MEI</span></a> and MPWI are modest</p></td>
+<td><p><span class="bibtex-citation" id="id3">[<a class="reference internal" href="references.html#id19" title="W. J. van der Linden. Bayesian item selection criteria for adaptive testing. Psychometrika, 63(2):201–216, 1998. doi:10.1007/BF02294775.">van der Linden, 1998</a>]</span>; <span class="bibtex-citation" id="id4">[<a class="reference internal" href="references.html#id20" title="S. W. Choi and R. J. Swartz. Comparison of CAT item selection criteria for polytomous items. Applied Psychological Measurement, 33(6):419–440, 2009. doi:10.1177/0146621608327801.">Choi and Swartz, 2009</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/selection/mepv-selector.md">mepv-selector.md</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Maximum posterior weighted information selector (MPWI)</p></td>
+<td><p>selection</p></td>
+<td><p>Weights each item’s information by the current posterior: the Bayesian counterpart of <a class="reference internal" href="api/techniques/selection/mlwi-selector.html"><span class="doc">MLWI</span></a>, whose prior can carry what is known about the examinee in advance</p></td>
+<td><p><span class="bibtex-citation" id="id5">[<a class="reference internal" href="references.html#id19" title="W. J. van der Linden. Bayesian item selection criteria for adaptive testing. Psychometrika, 63(2):201–216, 1998. doi:10.1007/BF02294775.">van der Linden, 1998</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/selection/mpwi-selector.md">mpwi-selector.md</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Sympson-Hetter exposure control</p></td>
+<td><p>exposure control</p></td>
+<td><p>Accepts the item the selector proposes with a probability calibrated by simulation, so that each item’s exposure rate stays at about the exposure cap <span class="math notranslate nohighlight">\(r_{\max}\)</span> or below; the mechanism works with any selector, but its probabilities are calibrated for one selector, test design and population</p></td>
+<td><p><span class="bibtex-citation" id="id6">[<a class="reference internal" href="references.html#id21" title="J. B. Sympson and R. D. Hetter. Controlling item-exposure rates in computerized adaptive testing. In Proceedings of the 27th Annual Meeting of the Military Testing Association, 973–977. San Diego, CA, 1985. Navy Personnel Research and Development Center.">Sympson and Hetter, 1985</a>]</span>; <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id22" title="M. L. Stocking and C. Lewis. Controlling item exposure conditional on ability in computerized adaptive testing. Journal of Educational and Behavioral Statistics, 23(1):57–75, 1998. doi:10.3102/10769986023001057.">Stocking and Lewis, 1998</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/selection/sympson-hetter-exposure.md">sympson-hetter-exposure.md</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Sequential probability ratio test stopper (SPRT)</p></td>
+<td><p>stopping</p></td>
+<td><p>Classifies the examinee above or below a cut score as soon as the likelihood ratio of the responses at two abilities around the cut crosses Wald’s bounds, deciding from the likelihood where the <a class="reference internal" href="api/techniques/stopping/confidence-interval-stopper.html"><span class="doc">confidence-interval stopper</span></a> decides from the ability estimate and its standard error</p></td>
+<td><p><span class="bibtex-citation" id="id8">[<a class="reference internal" href="references.html#id23" title="M. D. Reckase. A procedure for decision making using tailored testing. In D. J. Weiss, editor, New horizons in testing: Latent trait test theory and computerized adaptive testing, pages 237–255. Academic Press, New York, 1983. doi:10.1016/B978-0-12-742780-5.50023-8.">Reckase, 1983</a>]</span>; <span class="bibtex-citation" id="id9">[<a class="reference internal" href="references.html#id24" title="A. Wald. Sequential Analysis. Wiley, New York, 1947.">Wald, 1947</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/stopping/sprt-stopper.md">sprt-stopper.md</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Generalized likelihood ratio stopper (GLR)</p></td>
+<td><p>stopping</p></td>
+<td><p>Compares the likelihood at the maximum likelihood estimate with that at the nearest point of the competing hypothesis, not at the SPRT’s two fixed points; in Bartroff et al.’s simulations, its classification tests were nearly as powerful as a truncated SPRT’s and considerably shorter</p></td>
+<td><p><span class="bibtex-citation" id="id10">[<a class="reference internal" href="references.html#id25" title="J. Bartroff, M. D. Finkelman, and T. L. Lai. Modern sequential analysis and its applications to computerized adaptive testing. Psychometrika, 73(3):473–486, 2008. doi:10.1007/s11336-007-9053-9.">Bartroff <em>et al.</em>, 2008</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/stopping/glr-stopper.md">glr-stopper.md</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Stochastic curtailment stopper</p></td>
+<td><p>stopping</p></td>
+<td><p>Stops a truncated SPRT once its classification is unlikely to change before the maximum test length, so it never administers more items than the SPRT; in Finkelman’s simulation, it shortened the tests of examinees near the cut score with virtually no loss of accuracy</p></td>
+<td><p><span class="bibtex-citation" id="id11">[<a class="reference internal" href="references.html#id26" title="M. Finkelman. On using stochastic curtailment to shorten the SPRT in sequential mastery testing. Journal of Educational and Behavioral Statistics, 33(4):442–463, 2008. doi:10.3102/1076998607308573.">Finkelman, 2008</a>]</span>; <span class="bibtex-citation" id="id12">[<a class="reference internal" href="references.html#id27" title="M. D. Finkelman. Variations on stochastic curtailment in sequential mastery testing. Applied Psychological Measurement, 34(1):27–45, 2010. doi:10.1177/0146621609336113.">Finkelman, 2010</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/stopping/stochastic-curtailment-stopper.md">stochastic-curtailment-stopper.md</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Kullback-Leibler information stopper</p></td>
+<td><p>stopping</p></td>
+<td><p>Stops when no remaining item has enough integrated KL information around the ability estimate, so that stopping uses the same scale as KL item selection; no source proposes this rule, which applies the minimum-information rule to Chang and Ying’s KL index</p></td>
+<td><p><span class="bibtex-citation" id="id13">[<a class="reference internal" href="references.html#id18" title="H.-H. Chang and Z. Ying. A global information approach to computerized adaptive testing. Applied Psychological Measurement, 20(3):213–229, 1996. doi:10.1177/014662169602000303.">Chang and Ying, 1996</a>]</span>; <span class="bibtex-citation" id="id14">[<a class="reference internal" href="references.html#id28" title="S. W. Choi, M. W. Grady, and B. G. Dodd. A new stopping rule for computerized adaptive testing. Educational and Psychological Measurement, 71(1):37–53, 2011. doi:10.1177/0013164410387338.">Choi <em>et al.</em>, 2011</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/stopping/kl-stopper.md">kl-stopper.md</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Minimum information in bank stopper</p></td>
+<td><p>stopping</p></td>
+<td><p>Stops when no remaining item is informative enough at the ability estimate, which shortens the tests of examinees at extreme abilities, for whom the item bank has few informative items; alone it typically gives less precise estimates than a <a class="reference internal" href="api/techniques/stopping/standard-error-stopper.html"><span class="doc">standard error stopper</span></a>, and Choi et al. combine the two</p></td>
+<td><p><span class="bibtex-citation" id="id15">[<a class="reference internal" href="references.html#id29" title="B. G. Dodd, W. R. Koch, and R. J. De Ayala. Operational characteristics of adaptive testing procedures using the graded response model. Applied Psychological Measurement, 13(2):129–143, 1989. doi:10.1177/014662168901300202.">Dodd <em>et al.</em>, 1989</a>]</span>; <span class="bibtex-citation" id="id16">[<a class="reference internal" href="references.html#id28" title="S. W. Choi, M. W. Grady, and B. G. Dodd. A new stopping rule for computerized adaptive testing. Educational and Psychological Measurement, 71(1):37–53, 2011. doi:10.1177/0013164410387338.">Choi <em>et al.</em>, 2011</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/stopping/min-info-bank-stopper.md">min-info-bank-stopper.md</a></p></td>
+</tr>
+<tr class="row-even"><td><p>Predicted standard error reduction stopper (PSER)</p></td>
+<td><p>stopping</p></td>
+<td><p>Predicts how much the best remaining item would reduce the standard error, stops before the target when that reduction is negligible, and continues past the target while it is still substantial</p></td>
+<td><p><span class="bibtex-citation" id="id17">[<a class="reference internal" href="references.html#id28" title="S. W. Choi, M. W. Grady, and B. G. Dodd. A new stopping rule for computerized adaptive testing. Educational and Psychological Measurement, 71(1):37–53, 2011. doi:10.1177/0013164410387338.">Choi <em>et al.</em>, 2011</a>]</span></p></td>
+<td><p><a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/stopping/predicted-sem-stopper.md">predicted-sem-stopper.md</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="api/typing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="architecture_decisions.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Architecture Decision Records</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/planned-techniques.md.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=75c7c72ae941e8b558d8"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=75c7c72ae941e8b558d8"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2015-2026, Douglas De Rizzo Meneghetti.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.2.0.
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.24.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
