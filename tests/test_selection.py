@@ -37,6 +37,7 @@ from catsim.selection import (
   progressive,
   remaining,
 )
+from tests.banks import two_pl_bank
 from tests.conftest import SELECTOR_FACTORIES
 from tests.contexts import make_context
 
@@ -60,12 +61,6 @@ class ShiftEstimator(BaseEstimator):
 
   def estimate(self, context: StepContext) -> Estimate:
     return Estimate(theta=context.theta + (0.5 if context.responses[-1] else -0.5), se=1.0)
-
-
-def _two_pl_bank(discriminations: list[float], difficulties: list[float]) -> ItemBank:
-  """Build a 2PL bank, whose item information at theta is a^2 P (1 - P)."""
-  n_items = len(discriminations)
-  return ItemBank(np.column_stack([discriminations, difficulties, np.zeros(n_items), np.ones(n_items)]))
 
 
 class _DeterministicRNG:
@@ -254,7 +249,7 @@ class TestMaxInfoSelector:
 
   def test_select_returns_the_most_informative_remaining_item(self) -> None:
     """The pick is the remaining item with the largest information at the estimate."""
-    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
+    item_bank = two_pl_bank(list(self.BANK_A), [0.0] * 4)
     selector = MaxInfoSelector()
 
     assert selector.select(make_context(item_bank, [], theta=0.0)) == 1
@@ -262,7 +257,7 @@ class TestMaxInfoSelector:
 
   def test_select_skips_items_at_the_exposure_cap(self) -> None:
     """An item whose exposure rate has reached r_max is passed over for the next most informative one."""
-    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
+    item_bank = two_pl_bank(list(self.BANK_A), [0.0] * 4)
     exposure_rates = np.array([0.0, 0.5, 0.0, 0.0])
 
     selected = MaxInfoSelector(r_max=0.5).select(make_context(item_bank, [], theta=0.0, exposure_rates=exposure_rates))
@@ -275,7 +270,7 @@ class TestMaxInfoSelector:
     Such an item has a rate of exactly 1. Fails if the strict ``rate < r_max`` test passes it over, which made the
     default selector give the second examinee none of the first examinee's items.
     """
-    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
+    item_bank = two_pl_bank(list(self.BANK_A), [0.0] * 4)
 
     selected = MaxInfoSelector().select(
       make_context(item_bank, [], theta=0.0, exposure_rates=np.array([0.0, 1.0, 0.0, 0.0]))
@@ -285,7 +280,7 @@ class TestMaxInfoSelector:
 
   def test_select_ignores_the_cap_when_every_item_is_over_it(self) -> None:
     """With every remaining item at or over r_max, the most informative one is still administered."""
-    item_bank = _two_pl_bank(list(self.BANK_A), [0.0] * 4)
+    item_bank = two_pl_bank(list(self.BANK_A), [0.0] * 4)
 
     selected = MaxInfoSelector(r_max=0.5).select(make_context(item_bank, [], theta=0.0, exposure_rates=np.ones(4)))
 
@@ -338,7 +333,7 @@ class TestUrrySelector:
   def test_select_matches_difficulty_to_the_estimate_whatever_the_discrimination(self) -> None:
     """The pick is the remaining item whose difficulty is closest to the estimate, not the most informative one."""
     # at theta = 0.8, item 0 is the most informative but item 1's difficulty is the closest
-    item_bank = _two_pl_bank([2.5, 0.5, 1.0, 1.0], [0.3, 0.9, -1.0, 2.5])
+    item_bank = two_pl_bank([2.5, 0.5, 1.0, 1.0], [0.3, 0.9, -1.0, 2.5])
     selector = UrrySelector()
 
     assert MaxInfoSelector().select(make_context(item_bank, [], theta=0.8)) == 0
@@ -1013,7 +1008,7 @@ class TestClusterSelector:
     r_control: str = "passive",
     clusters: tuple[int, ...] = CLUSTERS,
   ) -> int | None:
-    item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
+    item_bank = two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
     selector = ClusterSelector(clusters=list(clusters), method=method, r_max=r_max, r_control=r_control)
     return selector.select(make_context(item_bank, administered, theta=0.0, exposure_rates=exposure_rates))
 
@@ -1048,7 +1043,7 @@ class TestClusterSelector:
   @pytest.mark.parametrize("n_labels", [len(CLUSTERS) - 1, len(CLUSTERS) + 1])
   def test_select_rejects_labels_that_do_not_match_the_bank(self, method: str, n_labels: int) -> None:
     """Labels for another bank size raised IndexError, or with cluster_info silently skipped the unlabelled items."""
-    item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
+    item_bank = two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
     selector = ClusterSelector(clusters=[*self.CLUSTERS, 2][:n_labels], method=method)
 
     with pytest.raises(ValueError, match=f"clusters holds {n_labels} labels, but the item bank has 14 items"):
@@ -1059,7 +1054,7 @@ class TestClusterSelector:
 
     The three clusters are relabelled 0, 3 and 5, so labels 1, 2 and 4 hold no item and must not appear.
     """
-    item_bank = _two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
+    item_bank = two_pl_bank(list(self.DISCRIMINATIONS), [0.0] * len(self.DISCRIMINATIONS))
     clusters = [{0: 0, 1: 3, 2: 5}[label] for label in self.CLUSTERS]
     sums = {0: (3 * 0.2**2 + 2.0**2) / 4, 3: (7 * 1.0**2 + 1.05**2) / 4, 5: (1.7**2 + 1.8**2) / 4}
 
@@ -1285,7 +1280,7 @@ class TestProportionalSelector:
     rng = _DeterministicRNG([0.0, 0.0, 0.0, 0.0])
 
     ProportionalSelector(test_size=2).select(
-      make_context(_two_pl_bank([1.0] * 4, [0.0, 1.0, 2.0, 3.0]), [3], theta=-400.0, rng=rng)
+      make_context(two_pl_bank([1.0] * 4, [0.0, 1.0, 2.0, 3.0]), [3], theta=-400.0, rng=rng)
     )
 
     ((_, probs),) = rng.choice_calls
@@ -1397,7 +1392,7 @@ SELECTOR_REPRS = {
   "AStratBBlockSelector": "AStratBBlockSelector(test_size=12, n_strata=4)",
   "MaxInfoStratSelector": "MaxInfoStratSelector(test_size=12, n_strata=4)",
   "MaxInfoBBlockSelector": "MaxInfoBBlockSelector(test_size=12, n_strata=4)",
-  "MEISelector": "MEISelector(estimator=RecordingEstimator(), r_max=0.5)",
+  "MEISelector": "MEISelector(estimator=NumericalSearchEstimator(tol=0.001, bounds=(-4.0, 4.0)), r_max=0.5)",
   "MEISelector-default-estimator": (
     "MEISelector(estimator=NumericalSearchEstimator(tol=1e-06, bounds=(-6.0, 6.0)), r_max=1.0)"
   ),
@@ -1415,7 +1410,6 @@ def test_repr_is_the_constructor_call(source: str) -> None:
   namespace = {
     **vars(importlib.import_module("catsim.selection")),
     "NumericalSearchEstimator": NumericalSearchEstimator,
-    "RecordingEstimator": RecordingEstimator,
   }
 
   assert repr(eval(source, namespace)) == source
