@@ -148,37 +148,32 @@ class TestSee:
 class TestConfidenceInterval:
   """Tests for the confidence_interval() function."""
 
-  def test_confidence_interval_symmetric(self) -> None:
-    """Test that CI is symmetric around theta."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.5, 0.0, 1.0]])
-    theta = 0.0
-    lower, upper = irt.confidence_interval(theta, items, confidence=0.95)
-    assert lower < theta < upper
-    assert abs(theta - lower) == pytest.approx(abs(upper - theta))
+  @pytest.mark.parametrize(
+    ("confidence", "z"),
+    [(0.90, 1.6448536270), (0.95, 1.9599639845), (0.99, 2.5758293035)],
+  )
+  def test_interval_is_theta_plus_or_minus_the_normal_quantile_times_the_standard_error(
+    self, confidence: float, z: float
+  ) -> None:
+    """Two 1PL items located at theta hold information 1/4 each: the SE is sqrt(2), the interval theta +- z sqrt(2).
 
-  def test_confidence_interval_wider_with_higher_confidence(self) -> None:
-    """Test that higher confidence produces wider intervals."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.5, 0.0, 1.0]])
-    theta = 0.0
-    lower_90, upper_90 = irt.confidence_interval(theta, items, confidence=0.90)
-    lower_99, upper_99 = irt.confidence_interval(theta, items, confidence=0.99)
-    width_90 = upper_90 - lower_90
-    width_99 = upper_99 - lower_99
-    assert width_99 > width_90
+    z is the standard normal's (1 + confidence) / 2 quantile, from published tables. A one-sided quantile (1.2816 for
+    90%), the variance in place of the SE, or an interval centred anywhere but theta fails.
+    """
+    items = np.array([[1.0, 0.5, 0.0, 1.0], [1.0, 0.5, 0.0, 1.0]])
 
-  def test_confidence_interval_invalid_confidence_raises(self) -> None:
-    """Test that invalid confidence raises ValueError."""
+    lower, upper = irt.confidence_interval(0.5, items, confidence=confidence)
+
+    assert lower == pytest.approx(0.5 - z * math.sqrt(2), rel=1e-9)
+    assert upper == pytest.approx(0.5 + z * math.sqrt(2), rel=1e-9)
+
+  @pytest.mark.parametrize("confidence", [0.0, 1.0, 1.5])
+  def test_rejects_a_confidence_outside_zero_and_one(self, confidence: float) -> None:
+    """A confidence of 0 would give an interval of zero width, 1 an infinite one and 1.5 NaN bounds; each must raise."""
     items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      irt.confidence_interval(0.0, items, confidence=1.5)
 
-  def test_confidence_interval_boundary_confidence_raises(self) -> None:
-    """Test that confidence=0 or confidence=1 raises ValueError."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
     with pytest.raises(ValueError, match="between 0 and 1"):
-      irt.confidence_interval(0.0, items, confidence=0.0)
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      irt.confidence_interval(0.0, items, confidence=1.0)
+      irt.confidence_interval(0.0, items, confidence=confidence)
 
 
 class TestReliability:
