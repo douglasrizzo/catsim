@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.MLWISelector`
-**Reference:** Veerkamp & Berger (1997)
-
 # Maximum Likelihood Weighted Information Selector
+
+:Class: {py:class}`catsim.selection.MLWISelector`
+:Sources: Veerkamp & Berger (1997)
 
 ## Motivation
 
@@ -26,11 +25,11 @@ It is the general weighted information criterion of the same report (p. 7,
 Equations 7 and 8) with the likelihood as the weight, and it needs no
 provisional ability estimate (p. 12). Before any response the likelihood is 1,
 so the first item is the one with the most total information (p. 12). Magis and
-Raîche (2012, p. 9, Table 1) give the same criterion. In Veerkamp and Berger's
-simulations it did better than maximum information at the ML estimate
-(pp. 17–18).
+Raîche (2012, p. 9, Table 1) give the same criterion.
 
-As in their simulations (p. 15, Equation 20), the implementation approximates
+### Computation
+
+As in Veerkamp and Berger's simulations (p. 15, Equation 20), catsim approximates
 the integral on a fixed grid
 $\{\theta_q\}_{q=1}^{Q}$ with spacing $\Delta_q$:
 
@@ -69,15 +68,20 @@ which item is selected.
        item is.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+In Veerkamp and Berger's simulations MLWI did better than maximum information at
+the ML estimate (pp. 17–18). On long tests, where the likelihood is sharply
+peaked, its choices approach maximum-information selection near the ML estimate.
 
-1. With an empty response vector, the likelihood weights reduce to a constant and the selector therefore reduces to choosing the largest integral of item information over the configured bounds.
-2. On long tests with sharply peaked likelihoods, MLWI approaches maximum-information selection evaluated near the MLE.
-3. The likelihood weighting must be computed in a numerically stable way that avoids underflow on long response vectors.
-4. The selector requires the response vector; the current point estimate alone is insufficient to define the likelihood weights.
-5. Exposure filtering is applied before the final argmax, with fallback to the unconstrained non-administered pool if every constrained candidate is excluded.
+## Guarantees
+
+1. Before any response, it selects the item with the most information integrated
+   over `bounds`.
+2. It never returns an item that was already administered or excluded.
+3. When every remaining item is at or above the exposure cap, it falls back to the
+   remaining item with the largest weighted information.
+4. When no item remains, it raises `NoItemsAvailableError`.
 
 ## References
 

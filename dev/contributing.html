@@ -141,91 +141,53 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="introduction.html">
-    Introduction
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Getting started
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="terms-and-notation.html">
-    Terms and Notation
+  <a class="nav-link nav-internal" href="api/techniques/index.html">
+    Techniques
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="running-simulations.html">
-    Running Simulations
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="live-sessions.html">
-    Live CAT Sessions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="reproducibility.html">
-    Reproducibility
-  </a>
-</li>
-
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                aria-controls="pst-nav-more-links">
-                    More
-                </button>
-                <ul id="pst-nav-more-links" class="dropdown-menu">
-                    
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="extending.html">
-    Extending catsim
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="api/index.html">
-    API Reference
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="planned-techniques.html">
+  <a class="nav-link nav-internal" href="planned-techniques.html">
     Planned techniques
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="architecture_decisions.html">
-    Architecture Decision Records
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API reference
   </a>
 </li>
 
 
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="#" aria-current="page">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="architecture_decisions.html">
+    Architecture decisions
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#" aria-current="page">
     Contributing
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="references.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="references.html">
     Bibliography
   </a>
 </li>
 
-                </ul>
-            </li>
-            
   </ul>
 </nav></div>
       
@@ -322,50 +284,15 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="introduction.html">
-    Introduction
+  <a class="nav-link nav-internal" href="getting-started.html">
+    Getting started
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="terms-and-notation.html">
-    Terms and Notation
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="running-simulations.html">
-    Running Simulations
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="live-sessions.html">
-    Live CAT Sessions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="reproducibility.html">
-    Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="extending.html">
-    Extending catsim
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="api/techniques/index.html">
+    Techniques
   </a>
 </li>
 
@@ -378,8 +305,15 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="architecture_decisions.html">
-    Architecture Decision Records
+    Architecture decisions
   </a>
 </li>
 
@@ -531,7 +465,7 @@
 uv<span class="w"> </span>run<span class="w"> </span>pre-commit<span class="w"> </span>install
 </pre></div>
 </div>
-<p>pre-commit then runs the repository’s formatters and checks on every commit.</p>
+<p>The first command installs catsim with its runtime dependencies, declared in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, and the tools for tests, linting, type checking, coverage and notebooks. pre-commit then runs the repository’s formatters and checks on every commit.</p>
 </section>
 <section id="quality-gate">
 <h2>Quality gate<a class="headerlink" href="#quality-gate" title="Link to this heading">#</a></h2>
@@ -549,16 +483,20 @@ uv<span class="w"> </span>run<span class="w"> </span>ty<span class="w"> </span>c
 </section>
 <section id="building-the-documentation">
 <h2>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Link to this heading">#</a></h2>
-<p>The documentation sources are in <code class="docutils literal notranslate"><span class="pre">sphinx/</span></code>. Build the HTML pages with:</p>
+<p>The documentation sources are in <code class="docutils literal notranslate"><span class="pre">sphinx/</span></code>. Build the HTML pages with the command below, which also installs Sphinx and its extensions (the <code class="docutils literal notranslate"><span class="pre">docs</span></code> dependency group):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>run<span class="w"> </span>--group<span class="w"> </span>docs<span class="w"> </span>sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>-W<span class="w"> </span>--keep-going<span class="w"> </span>sphinx<span class="w"> </span>sphinx/_build/html
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">-W</span></code> turns warnings into errors. The build also regenerates <code class="docutils literal notranslate"><span class="pre">README.md</span></code> from <code class="docutils literal notranslate"><span class="pre">sphinx/readme_head.md</span></code> and <code class="docutils literal notranslate"><span class="pre">sphinx/readme_body.md</span></code>, so edit those two files instead of <code class="docutils literal notranslate"><span class="pre">README.md</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">-W</span></code> turns warnings into errors.</p>
+<p>Links to the Python, NumPy, Matplotlib and SciPy documentation come from those projects’ intersphinx inventories. The build downloads each inventory and, when a site cannot be reached, reads the copy stored in <code class="docutils literal notranslate"><span class="pre">sphinx/_inventories/</span></code>. Refresh the stored copies with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>sphinx<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>p<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">python</span><span class="o">=</span>https://docs.python.org/3/<span class="w"> </span><span class="nv">numpy</span><span class="o">=</span>https://numpy.org/doc/stable/<span class="w"> </span><span class="nv">matplotlib</span><span class="o">=</span>https://matplotlib.org/stable/<span class="w"> </span><span class="nv">scipy</span><span class="o">=</span>https://docs.scipy.org/doc/scipy/<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span>curl<span class="w"> </span>-fsSL<span class="w"> </span>-o<span class="w"> </span><span class="s2">"_inventories/</span><span class="si">${</span><span class="nv">p</span><span class="p">%%=*</span><span class="si">}</span><span class="s2">.inv"</span><span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">p</span><span class="p">#*=</span><span class="si">}</span><span class="s2">objects.inv"</span><span class="p">;</span><span class="w"> </span><span class="k">done</span>
+</pre></div>
+</div>
 <p>A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the <code class="docutils literal notranslate"><span class="pre">dev</span></code> → <code class="docutils literal notranslate"><span class="pre">main</span></code> pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer’s approval in the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.</p>
 </section>
 <section id="adding-a-technique">
 <h2>Adding a technique<a class="headerlink" href="#adding-a-technique" title="Link to this heading">#</a></h2>
-<p>Each implemented technique has a page under <code class="docutils literal notranslate"><span class="pre">sphinx/api/techniques/</span></code> with its definition, parameters and behavioral contracts. A new technique starts as a spec in <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/dev/specs"><code class="docutils literal notranslate"><span class="pre">specs/</span></code></a>, written from the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md">spec template</a>; <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md"><code class="docutils literal notranslate"><span class="pre">specs/README.md</span></code></a> explains how a spec is revalidated, implemented and then promoted into the documentation. The template’s Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists.</p>
+<p>Each implemented technique has a page under <code class="docutils literal notranslate"><span class="pre">sphinx/api/techniques/</span></code> with its definition, its parameters and its Guarantees section. A new technique starts as a spec in <a class="reference external" href="https://github.com/douglasrizzo/catsim/tree/dev/specs"><code class="docutils literal notranslate"><span class="pre">specs/</span></code></a>, written from the <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md">spec template</a>; <a class="reference external" href="https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md"><code class="docutils literal notranslate"><span class="pre">specs/README.md</span></code></a> explains how a spec is revalidated, implemented and then promoted into the documentation. The template’s Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists.</p>
 </section>
 <section id="how-to-contribute">
 <h2>How to contribute<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h2>

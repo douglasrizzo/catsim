@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:mod}`catsim.estimation`; {py:class}`catsim.estimation.QuadratureGrid`
-**Reference:** Bock & Mislevy (1982); Bock & Aitkin (1981)
-
 # Bayesian Estimation Infrastructure
+
+:Class: {py:class}`catsim.estimation.QuadratureGrid`
+:Sources: Bock & Mislevy (1982); Bock & Aitkin (1981)
 
 ## Motivation
 
@@ -63,7 +62,7 @@ likelihood is not a polynomial (p. 433).
 By default the grid has 121 equally spaced nodes on $[-6, 6]$ (spacing 0.1) and
 the prior is $\mathcal{N}(0, 1)$.
 
-### Grid resolution
+### Computation
 
 The grid is accurate while it resolves the posterior. Compared with a
 2,401-node reference, the default grid reproduces the posterior mean and
@@ -114,15 +113,16 @@ shrink the standard deviation by about 1% at a posterior standard deviation of
        ``uniform_log_prior(low, high)`` gives a flat prior instead.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+As informative items accumulate, the posterior variance generally contracts
+rather than expands without bound.
 
-1. The posterior probabilities on the quadrature grid sum to 1 after normalization.
-2. The posterior computation is numerically stable on long response vectors; it must not return NaNs or all-zero weights solely due to exponentiation underflow.
-3. With an empty response vector, the posterior reduces to the normalized prior multiplied by the grid weights.
-4. Posterior mean and posterior variance are computed from the same normalized discrete posterior and therefore remain internally consistent.
-5. As informative items accumulate, posterior variance should generally contract rather than expand without bound.
+## Guarantees
+
+1. The posterior probabilities on the quadrature grid sum to 1.
+2. The posterior of a long response vector has no NaNs and no all-zero weights from exponentiation underflow.
+3. With no responses, the posterior is the prior times the grid weights, normalized.
 
 ## References
 

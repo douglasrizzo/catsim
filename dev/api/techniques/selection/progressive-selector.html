@@ -50,7 +50,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Proportional Selector" href="proportional-selector.html" />
-    <link rel="prev" title="Kullback-Leibler Selector" href="kl-selector.html" />
+    <link rel="prev" title="5-4-3-2-1 Selector" href="the-54321-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -143,91 +143,53 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../introduction.html">
-    Introduction
+  <a class="nav-link nav-internal" href="../../../getting-started.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Techniques
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../terms-and-notation.html">
-    Terms and Notation
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../running-simulations.html">
-    Running Simulations
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../live-sessions.html">
-    Live CAT Sessions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../reproducibility.html">
-    Reproducibility
-  </a>
-</li>
-
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                aria-controls="pst-nav-more-links">
-                    More
-                </button>
-                <ul id="pst-nav-more-links" class="dropdown-menu">
-                    
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../extending.html">
-    Extending catsim
-  </a>
-</li>
-
-
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="../../index.html">
-    API Reference
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../planned-techniques.html">
+  <a class="nav-link nav-internal" href="../../../planned-techniques.html">
     Planned techniques
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../architecture_decisions.html">
-    Architecture Decision Records
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../contributing.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../architecture_decisions.html">
+    Architecture decisions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../contributing.html">
     Contributing
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../references.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../references.html">
     Bibliography
   </a>
 </li>
 
-                </ul>
-            </li>
-            
   </ul>
 </nav></div>
       
@@ -324,50 +286,15 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../introduction.html">
-    Introduction
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../terms-and-notation.html">
-    Terms and Notation
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../running-simulations.html">
-    Running Simulations
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../live-sessions.html">
-    Live CAT Sessions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../reproducibility.html">
-    Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../extending.html">
-    Extending catsim
+  <a class="nav-link nav-internal" href="../../../getting-started.html">
+    Getting started
   </a>
 </li>
 
 
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="../index.html">
+    Techniques
   </a>
 </li>
 
@@ -380,8 +307,15 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../architecture_decisions.html">
-    Architecture Decision Records
+    Architecture decisions
   </a>
 </li>
 
@@ -457,24 +391,26 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="reference internal" href="index.html">Selection Techniques</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../estimation/index.html">Estimation Techniques</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../stopping/index.html">Stopping Criteria</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Selection Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="max-info-selector.html">Maximum Fisher Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="urry-selector.html">Urry Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interval-info-selector.html">Interval Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kl-selector.html">Kullback-Leibler Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mei-selector.html">Maximum Expected Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlwi-selector.html">Maximum Likelihood Weighted Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="random-selector.html">Random Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="randomesque-selector.html">Randomesque Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="the-54321-selector.html">5-4-3-2-1 Selector</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Progressive Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="proportional-selector.html">Proportional Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stratified-selector.html">Stratified Selectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear-selector.html">Linear Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cluster-selector.html">Cluster Selector</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../estimation/index.html">Estimation Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stopping/index.html">Stopping Criteria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </div>
 </nav></div>
@@ -516,9 +452,6 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
-    
-    
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Techniques</a></li>
     
     
@@ -541,11 +474,16 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Implemented
-<strong>Module:</strong> <a class="reference internal" href="#catsim.selection.ProgressiveSelector" title="catsim.selection.ProgressiveSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.ProgressiveSelector</span></code></a>
-<strong>Reference:</strong> Revuelta &amp; Ponsoda (1998); Barrada et al. (2008, 2010)</p>
-<section class="tex2jax_ignore mathjax_ignore" id="progressive-selector">
+  <section class="tex2jax_ignore mathjax_ignore" id="progressive-selector">
 <h1>Progressive Selector<a class="headerlink" href="#progressive-selector" title="Link to this heading">#</a></h1>
+<dl class="myst field-list simple">
+<dt class="field-odd">Class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.ProgressiveSelector" title="catsim.selection.ProgressiveSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.ProgressiveSelector</span></code></a></p>
+</dd>
+<dt class="field-even">Sources<span class="colon">:</span></dt>
+<dd class="field-even"><p>Revuelta &amp; Ponsoda (1998); Barrada et al. (2008, 2010)</p>
+</dd>
+</dl>
 <section id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
 <p>Pure maximum-information selection tends to overuse a small set of highly
@@ -565,9 +503,9 @@ score for item <span class="math notranslate nohighlight">\(i\)</span> is</p>
 (1-w_n)\,R_i
 +
 w_n\,\frac{I_i(\hat{\theta})}{\max_{j \in \mathcal{A}} I_j(\hat{\theta})},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> is the set of available items (the non-administered items
-under the exposure cap, or every non-administered item when the cap excludes
-them all), <span class="math notranslate nohighlight">\(R_i\)</span> is a fresh uniform random draw on <span class="math notranslate nohighlight">\([0,1]\)</span>, and the weight on
+<p>where <span class="math notranslate nohighlight">\(\mathcal{A}\)</span> is the set of available items (the remaining items, neither
+administered nor excluded, under the exposure cap, or every remaining item when
+the cap excludes them all), <span class="math notranslate nohighlight">\(R_i\)</span> is a fresh uniform random draw on <span class="math notranslate nohighlight">\([0,1]\)</span>, and the weight on
 information is</p>
 <div class="math notranslate nohighlight">
 \[w_n
@@ -589,8 +527,10 @@ the available item with the largest score.</p>
 <span class="math notranslate nohighlight">\(h - 1\)</span> and <span class="math notranslate nohighlight">\(n\)</span>, <span class="math notranslate nohighlight">\(N\)</span> for their <span class="math notranslate nohighlight">\(k\)</span>, <span class="math notranslate nohighlight">\(K\)</span>. As printed, both sums in Equation 12 run
 to <span class="math notranslate nohighlight">\(k\)</span>, and Equations 12 and 13 both use the exponent <span class="math notranslate nohighlight">\(s\)</span>; the text under them,
 which names <span class="math notranslate nohighlight">\(t\)</span> and <span class="math notranslate nohighlight">\(s\)</span> as the two acceleration parameters and gives a weight of
-1 at the last item, puts <span class="math notranslate nohighlight">\(K\)</span> in the denominator and <span class="math notranslate nohighlight">\(t\)</span> in Equation 12. <code class="docutils literal notranslate"><span class="pre">catR</span></code>
-computes it that way in
+1 at the last item, puts <span class="math notranslate nohighlight">\(K\)</span> in the denominator and <span class="math notranslate nohighlight">\(t\)</span> in Equation 12.</p>
+<section id="computation">
+<h3>Computation<a class="headerlink" href="#computation" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">catR</span></code> computes the schedule that way in
 <a class="reference external" href="https://github.com/cran/catR/blob/master/R/nextItem.R"><code class="docutils literal notranslate"><span class="pre">nextItem.R</span></code></a>, with its
 argument <code class="docutils literal notranslate"><span class="pre">AP</span></code> as <span class="math notranslate nohighlight">\(t\)</span> and <code class="docutils literal notranslate"><span class="pre">thr</span></code> as <span class="math notranslate nohighlight">\(N\)</span> when <code class="docutils literal notranslate"><span class="pre">rule</span> <span class="pre">=</span> <span class="pre">&quot;length&quot;</span></code>. catsim departs
 from both in three places:</p>
@@ -603,11 +543,8 @@ weight passes 1 and gives the random component a negative coefficient.</p></li>
 <li><p>With <span class="math notranslate nohighlight">\(N = 1\)</span> the only position is the last, and the weight is 1. Equation 12
 and <code class="docutils literal notranslate"><span class="pre">catR</span></code> give 0 at the first position whatever <span class="math notranslate nohighlight">\(N\)</span> is.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">catR</span></code>’s other schedule, for its precision stopping rule, is not implemented.
-Revuelta and Ponsoda’s original schedule, <span class="math notranslate nohighlight">\(w = (n - 1)/N\)</span>, stops just short of 1
-at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
-not test it separately, since it differs little from Equation 12 with <span class="math notranslate nohighlight">\(t = 0\)</span>
-(p. 500).</p>
+<p><code class="docutils literal notranslate"><span class="pre">catR</span></code>’s other schedule, for its precision stopping rule, is not implemented.</p>
+</section>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
@@ -641,15 +578,24 @@ out before the scores are computed, unless every remaining item is.</p></td>
 </table>
 </div>
 </section>
-<section id="behavioral-contracts">
-<h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
-<p>Any correct implementation must satisfy the following properties:</p>
+<section id="behavior-and-comparison">
+<h2>Behavior and Comparison<a class="headerlink" href="#behavior-and-comparison" title="Link to this heading">#</a></h2>
+<p>Revuelta and Ponsoda’s original schedule, <span class="math notranslate nohighlight">\(w = (n - 1)/N\)</span>, stops just short of 1
+at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
+not test it separately, since it differs little from Equation 12 with <span class="math notranslate nohighlight">\(t = 0\)</span>
+(p. 500).</p>
+</section>
+<section id="guarantees">
+<h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>The blend weight is exactly 0 at position 1 and exactly 1 at the final test position when <code class="docutils literal notranslate"><span class="pre">test_size</span> <span class="pre">&gt;</span> <span class="pre">1</span></code>.</p></li>
-<li><p>With <code class="docutils literal notranslate"><span class="pre">acceleration</span> <span class="pre">=</span> <span class="pre">0</span></code>, the schedule is linear in test position; positive acceleration delays the shift toward information-based scoring and negative acceleration speeds it up.</p></li>
-<li><p>At the first position, selection is driven only by the random component and is therefore independent of item information.</p></li>
-<li><p>At the final position, the score reduces to normalized information and behaves like an information-based selector subject to the exposure rule.</p></li>
-<li><p>The random component must be drawn from the provided RNG when one is supplied so repeated simulations remain reproducible.</p></li>
+<li><p>It never returns an item that was already administered or excluded.</p></li>
+<li><p>When <code class="docutils literal notranslate"><span class="pre">test_size</span></code> is above 1, the choice at the first position does not depend on item
+information: every available item is equally likely.</p></li>
+<li><p>From the <code class="docutils literal notranslate"><span class="pre">test_size</span></code>-th item on, it returns the most informative available item.</p></li>
+<li><p>When every remaining item is at or above the exposure cap, it chooses among all
+the remaining items.</p></li>
+<li><p>It draws with the session’s random generator, so a run with the same seed
+administers the same items.</p></li>
 </ol>
 </section>
 <section id="references">
@@ -753,12 +699,12 @@ unless no other items are available. Default is 1 (no restriction).</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="kl-selector.html"
+       href="the-54321-selector.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Kullback-Leibler Selector</p>
+        <p class="prev-next-title">5-4-3-2-1 Selector</p>
       </div>
     </a>
     <a class="right-next"
@@ -790,9 +736,13 @@ unless no other items are available. Default is 1 (no restriction).</p>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#computation">Computation</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavior-and-comparison">Behavior and Comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.ProgressiveSelector"><code class="docutils literal notranslate"><span class="pre">ProgressiveSelector</span></code></a><ul class="nav section-nav flex-column">

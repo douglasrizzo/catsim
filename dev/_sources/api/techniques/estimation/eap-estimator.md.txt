@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.estimation.EAPEstimator`
-**Reference:** Bock & Mislevy (1982)
-
 # Expected A Posteriori Estimator
+
+:Class: {py:class}`catsim.estimation.EAPEstimator`
+:Sources: Bock & Mislevy (1982)
 
 ## Motivation
 
@@ -18,11 +17,7 @@ variance serves as the error variance of the estimate (Bock & Mislevy, 1982,
 p. 432); in their simulations the posterior standard deviation behaved like the
 standard error of measurement (p. 431). The estimator reports the posterior
 standard deviation as the estimate's standard error, as catR does (Magis &
-Raîche, 2012, p. 6, Equation 11), and the precision stoppers judge it. The
-estimator itself keeps no posterior between calls, since one instance serves
-every session and look-ahead selectors call it with hypothetical responses;
-consumers that need the whole posterior, such as posterior-weighted selectors,
-compute it with `posterior()` from the Bayesian infrastructure.
+Raîche, 2012, p. 6, Equation 11), and the precision stoppers judge it.
 
 ## Definition
 
@@ -62,17 +57,10 @@ the variance, the square of their Equation 5, without Sheppard's correction (see
 {doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
 The estimator returns a {py:class}`~catsim.Estimate` with
-$\hat{\theta}_{\mathrm{EAP}}$, the posterior standard deviation
-$\sqrt{\operatorname{Var}(\theta \mid \mathbf{u})}$ as its standard error, and
-$Q$, the grid's node count, as its evaluation count: the likelihood is evaluated
-once per node. With no administered item the posterior is the prior, so the
-estimate and its standard error are the prior's mean and standard deviation on
-the grid.
-
-The estimate depends on the prior and on the grid. The default grid (121 nodes
-on $[-6, 6]$) is accurate while the posterior standard deviation is at least
-about 0.065; longer tests need a finer grid (see
-{doc}`/api/techniques/estimation/bayesian-infrastructure`).
+$\hat{\theta}_{\mathrm{EAP}}$ and the posterior standard deviation
+$\sqrt{\operatorname{Var}(\theta \mid \mathbf{u})}$ as its standard error. With
+no administered item the posterior is the prior, so the estimate and its
+standard error are the prior's mean and standard deviation on the grid.
 
 ## Parameters
 
@@ -92,15 +80,18 @@ about 0.065; longer tests need a finer grid (see
      - Prior density on :math:`\theta`; changing it changes both shrinkage and zero-data behavior.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+The estimate depends on the prior and on the grid. The default grid (121 nodes
+on $[-6, 6]$) is accurate while the posterior standard deviation is at least
+about 0.065; longer tests need a finer grid (see
+{doc}`/api/techniques/estimation/bayesian-infrastructure`).
 
-1. With no administered items, the estimate and its standard error equal the mean and standard deviation of the prior induced by the configured grid and prior.
-2. The estimator returns a finite value for extreme response patterns such as all-correct or all-incorrect strings.
-3. The estimate depends only on the arguments of the call, never on earlier calls: the estimator keeps no per-session state ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`).
-4. The standard error is the posterior standard deviation on the grid, and the evaluation count is the grid's node count.
-5. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
+## Guarantees
+
+1. The estimate is finite for extreme response patterns such as all-correct or all-incorrect strings.
+2. The standard error is the posterior standard deviation on the grid.
+3. Relative to a flatter prior, a centered normal prior produces stronger shrinkage of extreme short-test estimates toward the prior mean.
 
 ## References
 

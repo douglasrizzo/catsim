@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.stopping.ConfidenceIntervalStopper`
-**Reference:** Thissen (2000); Wainer (2000)
-
 # Confidence Interval Stopper
+
+:Class: {py:class}`catsim.stopping.ConfidenceIntervalStopper`
+:Sources: Thissen (2000); Wainer (2000)
 
 ## Motivation
 
@@ -38,8 +37,6 @@ computes it by its own formula: the Fisher standard error
 $1/\sqrt{I(\hat{\theta})}$ for maximum likelihood and the WLE, the posterior
 standard deviation for EAP, and for MAP the information plus the prior's
 negative curvature (see {doc}`/api/techniques/stopping/standard-error-stopper`).
-A smaller standard error narrows the interval, so EAP and MAP sessions are
-usually classified sooner than they would be on the Fisher error.
 
 Given sorted boundary points $b_1 < \dots < b_m$, the rule stops when the
 entire confidence interval falls within one interval induced by those boundaries:
@@ -54,11 +51,6 @@ the standard error is infinite, and so is the interval, so the test does not
 stop. A context built by hand, such as one for
 {meth}`~catsim.stopping.StopRule.satisfied` after a run, must pass the session's
 `current_se` as `se`, whose default is infinite.
-
-Magis and Raîche (2012, p. 11) describe the classification criterion with a
-single ability threshold: a confidence interval for ability is built after every
-item, and the test stops once the threshold is no longer inside it. catsim
-generalizes this to several boundaries; with one boundary the two rules agree.
 
 ## Parameters
 
@@ -78,14 +70,21 @@ generalizes this to several boundaries; with one boundary the two rules agree.
      - Confidence level :math:`\gamma` used to form the normal-approximation interval.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+A smaller standard error narrows the interval, so EAP and MAP sessions are
+usually classified sooner than they would be on the Fisher error.
 
-1. `interval_bounds` must be nonempty and strictly increasing, and `confidence` must lie strictly between 0 and 1; otherwise the constructor raises `ValueError`.
-2. The stopper returns `True` exactly when the full confidence interval lies within a single induced classification interval.
-3. If the confidence interval crosses any configured boundary, the stopper returns `False`.
-4. Before any response the standard error is infinite, so the stopper returns `False`.
+Magis and Raîche (2012, p. 11) describe the classification criterion with a
+single ability threshold: a confidence interval for ability is built after every
+item, and the test stops once the threshold is no longer inside it. catsim
+generalizes this to several boundaries; with one boundary the two rules agree.
+
+## Guarantees
+
+1. The stopper stops the test exactly when the full confidence interval lies within a single induced classification interval.
+2. If the confidence interval crosses any configured boundary, the test does not stop.
+3. Before any response the standard error is infinite, so the test does not stop.
 
 ## References
 

@@ -48,7 +48,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Randomesque Selector" href="randomesque-selector.html" />
-    <link rel="prev" title="Linear Selector" href="linear-selector.html" />
+    <link rel="prev" title="Maximum Likelihood Weighted Information Selector" href="mlwi-selector.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -141,91 +141,53 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../introduction.html">
-    Introduction
+  <a class="nav-link nav-internal" href="../../../getting-started.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../index.html">
+    Techniques
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../terms-and-notation.html">
-    Terms and Notation
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../running-simulations.html">
-    Running Simulations
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../live-sessions.html">
-    Live CAT Sessions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../reproducibility.html">
-    Reproducibility
-  </a>
-</li>
-
-            <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                aria-controls="pst-nav-more-links">
-                    More
-                </button>
-                <ul id="pst-nav-more-links" class="dropdown-menu">
-                    
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../extending.html">
-    Extending catsim
-  </a>
-</li>
-
-
-<li class=" current active">
-  <a class="nav-link dropdown-item nav-internal" href="../../index.html">
-    API Reference
-  </a>
-</li>
-
-
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../planned-techniques.html">
+  <a class="nav-link nav-internal" href="../../../planned-techniques.html">
     Planned techniques
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../architecture_decisions.html">
-    Architecture Decision Records
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../contributing.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../architecture_decisions.html">
+    Architecture decisions
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../contributing.html">
     Contributing
   </a>
 </li>
 
 
-<li class=" ">
-  <a class="nav-link dropdown-item nav-internal" href="../../../references.html">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../references.html">
     Bibliography
   </a>
 </li>
 
-                </ul>
-            </li>
-            
   </ul>
 </nav></div>
       
@@ -322,50 +284,15 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../introduction.html">
-    Introduction
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../terms-and-notation.html">
-    Terms and Notation
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../running-simulations.html">
-    Running Simulations
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../live-sessions.html">
-    Live CAT Sessions
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../reproducibility.html">
-    Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../extending.html">
-    Extending catsim
+  <a class="nav-link nav-internal" href="../../../getting-started.html">
+    Getting started
   </a>
 </li>
 
 
 <li class="nav-item current active">
-  <a class="nav-link nav-internal" href="../../index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="../index.html">
+    Techniques
   </a>
 </li>
 
@@ -378,8 +305,15 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../architecture_decisions.html">
-    Architecture Decision Records
+    Architecture decisions
   </a>
 </li>
 
@@ -455,24 +389,26 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="../index.html">Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="reference internal" href="index.html">Selection Techniques</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../estimation/index.html">Estimation Techniques</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../stopping/index.html">Stopping Criteria</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Selection Techniques</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="max-info-selector.html">Maximum Fisher Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="urry-selector.html">Urry Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interval-info-selector.html">Interval Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kl-selector.html">Kullback-Leibler Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mei-selector.html">Maximum Expected Information Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mlwi-selector.html">Maximum Likelihood Weighted Information Selector</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">Random Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="randomesque-selector.html">Randomesque Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="the-54321-selector.html">5-4-3-2-1 Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="progressive-selector.html">Progressive Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="proportional-selector.html">Proportional Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="stratified-selector.html">Stratified Selectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear-selector.html">Linear Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cluster-selector.html">Cluster Selector</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../estimation/index.html">Estimation Techniques</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../stopping/index.html">Stopping Criteria</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </div>
 </nav></div>
@@ -514,9 +450,6 @@
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">API Reference</a></li>
-    
-    
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Techniques</a></li>
     
     
@@ -539,23 +472,36 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <p><strong>Status:</strong> Implemented
-<strong>Module:</strong> <a class="reference internal" href="#catsim.selection.RandomSelector" title="catsim.selection.RandomSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.RandomSelector</span></code></a></p>
-<section class="tex2jax_ignore mathjax_ignore" id="random-selector">
+  <section class="tex2jax_ignore mathjax_ignore" id="random-selector">
 <h1>Random Selector<a class="headerlink" href="#random-selector" title="Link to this heading">#</a></h1>
-<section id="specification">
-<h2>Specification<a class="headerlink" href="#specification" title="Link to this heading">#</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">RandomSelector</span></code> selects uniformly at random from the non-administered item
-pool. It is a simple stochastic baseline for comparing adaptive selection
-techniques against a non-adaptive item choice rule.</p>
+<dl class="myst field-list simple">
+<dt class="field-odd">Class<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#catsim.selection.RandomSelector" title="catsim.selection.RandomSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.RandomSelector</span></code></a></p>
+</dd>
+</dl>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">RandomSelector</span></code> is a non-adaptive baseline: it ignores the ability estimate, the responses and
+the item parameters. Comparing an adaptive selector against it shows how much of a test’s
+precision comes from choosing items adaptively. Because every item is equally likely, it also
+spreads exposure as evenly as a selector can.</p>
 </section>
-<section id="behavioral-contracts">
-<h2>Behavioral Contracts<a class="headerlink" href="#behavioral-contracts" title="Link to this heading">#</a></h2>
-<p>Any correct implementation must satisfy the following properties:</p>
+<section id="definition">
+<h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
+<p>At each step the selector draws one item uniformly at random from the items that are neither
+administered nor excluded.</p>
+</section>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">RandomSelector</span></code> takes no parameters.</p>
+</section>
+<section id="guarantees">
+<h2>Guarantees<a class="headerlink" href="#guarantees" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>It samples only from non-administered items.</p></li>
-<li><p>It uses the configured random number generator when one is provided.</p></li>
-<li><p>If no non-administered items remain, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
+<li><p>It never returns an item that was already administered or excluded.</p></li>
+<li><p>It draws with the session’s random generator, so a run with the same seed administers the same
+items.</p></li>
+<li><p>When no item remains, it raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
 </ol>
 </section>
 <section id="api-reference">
@@ -603,12 +549,12 @@ item selection strategies.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="linear-selector.html"
+       href="mlwi-selector.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Linear Selector</p>
+        <p class="prev-next-title">Maximum Likelihood Weighted Information Selector</p>
       </div>
     </a>
     <a class="right-next"
@@ -639,8 +585,10 @@ item selection strategies.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#specification">Specification</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#behavioral-contracts">Behavioral Contracts</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#motivation">Motivation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#definition">Definition</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#guarantees">Guarantees</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#api-reference">API Reference</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.RandomSelector"><code class="docutils literal notranslate"><span class="pre">RandomSelector</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.selection.RandomSelector.select"><code class="docutils literal notranslate"><span class="pre">RandomSelector.select()</span></code></a></li>

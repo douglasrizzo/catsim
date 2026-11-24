@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.stopping.MaxLengthStopper`
-**Reference:** Wainer (2000); Thissen (2000)
-
 # Maximum Length Stopper
+
+:Class: {py:class}`catsim.stopping.MaxLengthStopper`
+:Sources: Wainer (2000); Thissen (2000)
 
 ## Motivation
 
@@ -21,10 +20,6 @@ $$
 m \ge m_{\max}.
 $$
 
-It does not look at the item bank or at the ability estimate. A session whose
-bank runs out before $m_{\max}$ items is ended by the engine, once the selector
-has no item left to give.
-
 ## Parameters
 
 ```{eval-rst}
@@ -40,13 +35,16 @@ has no item left to give.
      - Number of administered items at which the test stops. Must be at least 1.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+It does not look at the item bank or at the ability estimate. A session whose
+bank runs out before $m_{\max}$ items is ended by the engine, once the selector
+has no item left to give.
 
-1. The stopper returns `True` exactly when at least `max_items` items have been administered.
+## Guarantees
+
+1. The stopper stops the test exactly when at least `max_items` items have been administered.
 2. It ignores the item bank and the ability estimate; in particular, administering the whole bank does not stop the test.
-3. A `max_items` below 1 raises `ValueError`.
 
 ## References
 

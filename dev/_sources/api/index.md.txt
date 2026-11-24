@@ -14,16 +14,15 @@ technique pages document each strategy with its method.
 ```{toctree}
 :maxdepth: 2
 
-techniques/index
 engine
-state
 context
+state
 simulation
 item_bank
 exposure
-exceptions
-metrics
 irt
+metrics
 plot
 typing
+exceptions
 ```
