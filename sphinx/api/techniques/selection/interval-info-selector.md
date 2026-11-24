@@ -66,8 +66,11 @@ define each estimator's standard error.
 Before the first response the standard error is infinite and the interval is
 the whole ability scale (p. 11, Equation 16). The report keeps this unbounded
 interval while the total score is zero or perfect; catsim keeps it only while
-the standard error is infinite. With a fixed `interval` $\delta$, the interval
-is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$ throughout the test.
+the standard error is infinite. A standard error of zero, or nearly zero, collapses
+the interval onto $\hat{\theta}$; catsim then selects by the items' information at
+$\hat{\theta}$, the limit of the information averaged over the interval. With a
+fixed `interval` $\delta$, the interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$
+throughout the test.
 
 The integral has a closed form (see {py:func}`catsim.irt.info_integral`). Since
 $dP/d\theta = a (P - c)(d - P)/(d - c)$, substituting $P$ for $\theta$ gives

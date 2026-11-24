@@ -1,5 +1,7 @@
 """Information-based selectors: maximum information, Urry's rule and interval information."""
 
+import math
+
 import numpy
 from scipy import stats
 from typing_extensions import override
@@ -109,14 +111,20 @@ class UrrySelector(BaseSelector):
     return pick_best(candidates, -numpy.abs(difficulty - context.theta), context.rng)
 
 
+# Below this half-width the integral's antiderivative difference loses more precision to rounding than the
+# information at the estimate, the interval's limit, loses to the interval's width (an O(width^2) error).
+_MIN_HALF_WIDTH = math.sqrt(numpy.finfo(float).eps)
+
+
 class IntervalInfoSelector(BaseSelector):
   r"""Select the item whose information, integrated over an interval around the estimate, is largest.
 
   By default the interval is the estimate plus or minus :math:`\lambda` times the estimator's
   standard error (``context.se``), where :math:`\lambda` is the standard normal quantile of
   ``(1 + confidence) / 2`` :cite:p:`Veerkamp1997`. It spans the whole ability scale before the first
-  response and narrows as the standard error falls. Setting ``interval`` fixes the half-width. The
-  selector applies no exposure cap: ``context.exposure_rates`` is ignored.
+  response and narrows as the standard error falls; a standard error of zero, or nearly zero, selects
+  by the items' information at the estimate, the interval's limit. Setting ``interval`` fixes the
+  half-width. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -196,5 +204,10 @@ class IntervalInfoSelector(BaseSelector):
     else:
       half_width = self._interval
 
-    information_integral = irt.info_integral(theta - half_width, theta + half_width, item_bank.items[candidates])
-    return pick_best(candidates, information_integral, context.rng)
+    items = item_bank.items[candidates]
+    if half_width < _MIN_HALF_WIDTH:
+      # the interval has collapsed onto the estimate, where every integral is 0 or rounding noise
+      scores = irt.information(theta, items)
+    else:
+      scores = irt.info_integral(theta - half_width, theta + half_width, items)
+    return pick_best(candidates, scores, context.rng)
