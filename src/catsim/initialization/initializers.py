@@ -3,6 +3,7 @@
 import math
 
 import numpy
+from typing_extensions import override
 
 from ..item_bank import ItemBank
 from .base import BaseInitializer
@@ -42,11 +43,13 @@ class UniformInitializer(BaseInitializer):
     self._low = float(low)
     self._high = float(high)
 
+  @override
   def __repr__(self) -> str:
     """Return the initializer as a constructor call that names every argument."""
     return f"{type(self).__name__}(low={self._low!r}, high={self._high!r})"
 
-  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+  @override
+  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:
     """Draw an initial ability value between ``low`` and ``high``.
 
     Parameters
@@ -96,11 +99,13 @@ class NormalInitializer(BaseInitializer):
     self._mean = float(mean)
     self._sd = float(sd)
 
+  @override
   def __repr__(self) -> str:
     """Return the initializer as a constructor call that names every argument."""
     return f"{type(self).__name__}(mean={self._mean!r}, sd={self._sd!r})"
 
-  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+  @override
+  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:
     r"""Draw an initial ability value from :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.
 
     Parameters
@@ -141,6 +146,7 @@ class FixedPointInitializer(BaseInitializer):
   For full algorithmic details, see :doc:`/api/techniques/initialization/index`.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the initializer as a constructor call that names every argument."""
     return f"{type(self).__name__}(start={self._start!r})"
@@ -152,7 +158,8 @@ class FixedPointInitializer(BaseInitializer):
       raise ValueError(msg)
     self._start = float(start)
 
-  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
+  @override
+  def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:
     """Return the same ability value that was passed to the constructor.
 
     Parameters

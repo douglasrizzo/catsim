@@ -10,6 +10,7 @@ import numpy.typing as npt
 from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq
 from scipy.special import expit
+from typing_extensions import override
 
 from .. import irt
 from ..context import Estimate
@@ -70,6 +71,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument."""
     return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
@@ -104,6 +106,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     correction = numpy.divide(j, 2.0 * info, out=numpy.zeros_like(j), where=info > 0.0)
     return score + correction
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.
 

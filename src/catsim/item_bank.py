@@ -10,6 +10,7 @@ from typing import Any, Self, assert_never
 import numpy
 import numpy.typing as npt
 from numpy.random import Generator
+from typing_extensions import override
 
 from . import irt
 from .typing import FloatArray, IntArray
@@ -416,6 +417,7 @@ class ItemBank:
 
     return cls(numpy.array([a, b, c, d]).T)
 
+  @override
   def __repr__(self) -> str:
     """Get string representation of the ItemBank."""
     return f"ItemBank(n_items={self.n_items}, model={self.model})"

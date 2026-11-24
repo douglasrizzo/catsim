@@ -2,6 +2,8 @@
 
 import operator
 
+from typing_extensions import override
+
 from ..context import StepContext
 from .base import BaseSelector, best_pool, remaining
 
@@ -13,11 +15,13 @@ class RandomSelector(BaseSelector):
   item selection strategies.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}()"
 
-  def select(self, context: StepContext) -> int:  # noqa: PLR6301
+  @override
+  def select(self, context: StepContext) -> int:
     """Return a remaining item drawn uniformly at random.
 
     Parameters
@@ -55,6 +59,7 @@ class The54321Selector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/the-54321-selector`.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(initial_bin_size={self._initial_bin_size!r})"
@@ -86,6 +91,7 @@ class The54321Selector(BaseSelector):
     """Get the number of most informative items the first item is drawn from."""
     return self._initial_bin_size
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return an item drawn uniformly from the bin of the most informative remaining items.
 
@@ -121,6 +127,7 @@ class RandomesqueSelector(BaseSelector):
       Number of most informative remaining items each item is drawn from, at least 1.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(bin_size={self._bin_size!r})"
@@ -153,6 +160,7 @@ class RandomesqueSelector(BaseSelector):
     """Get the bin size."""
     return self._bin_size
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return an item drawn uniformly from the ``bin_size`` most informative remaining items.
 

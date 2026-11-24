@@ -5,6 +5,7 @@ import math
 import numpy
 from scipy.integrate import quad
 from scipy.special import log_expit
+from typing_extensions import override
 
 from ..context import StepContext
 from ..typing import FloatArray
@@ -84,6 +85,7 @@ class KLSelector(BaseSelector):
     self._window = float(window)
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(window={self._window!r}, r_max={self._r_max!r})"
@@ -109,6 +111,7 @@ class KLSelector(BaseSelector):
     )
     return float(val)
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the largest KL divergence integrated over the window.
 

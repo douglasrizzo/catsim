@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from typing_extensions import override
+
 from .base import BaseStopper
 
 if TYPE_CHECKING:
@@ -38,6 +40,7 @@ class MaxLengthStopper(BaseStopper):
       msg = f"max_items must be at least 1, got {self.max_items}"
       raise ValueError(msg)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether at least `max_items` items have been administered.
 

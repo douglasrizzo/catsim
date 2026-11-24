@@ -2,6 +2,7 @@
 
 import numpy
 from scipy.optimize import minimize_scalar
+from typing_extensions import override
 
 from .. import irt
 from ..context import Estimate, StepContext
@@ -93,10 +94,12 @@ class NumericalSearchEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument."""
     return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 

@@ -36,6 +36,7 @@ dependencies = [
     "scipy",
     "tqdm",
     "numpy",
+    "typing-extensions>=4.4",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
@@ -274,8 +275,7 @@ include = ["src/catsim"]
 
 [tool.ty.rules]
 # ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (NumPy and
-# SciPy stubs leak Any into return values), and missing-override-decorator until the strategies use
-# typing.override.
+# SciPy stubs leak Any into return values).
 possibly-unresolved-reference = "error"
 missing-type-argument = "error"
 blanket-ignore-comment = "error"
@@ -287,6 +287,8 @@ unused-type-ignore-comment = "error"
 # A function tested for truth instead of called; both rules only warn by default.
 redundant-condition = "error"
 truthiness-test-of-callable = "error"
+# Every override carries @override, so a base-class rename fails the check at each orphaned override.
+missing-override-decorator = "error"
 
 [tool.uv]
 # soupsieve 4 (the first release without its ReDoS) needs Python >= 3.11.5. Resolving the lock

@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from typing_extensions import override
+
 from .base import BaseStopper
 from .length import MaxLengthStopper
 
@@ -90,11 +92,13 @@ class StopRule(BaseStopper):
     object.__setattr__(self, "stoppers", stoppers)
     object.__setattr__(self, "min_items", min_items)
 
+  @override
   def __repr__(self) -> str:
     """Return the rule as the call that builds it."""
     stoppers = ", ".join(repr(stopper) for stopper in self.stoppers)
     return f"StopRule({stoppers}, min_items={self.min_items})"
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the test has `min_items` items and any of the stoppers holds.
 

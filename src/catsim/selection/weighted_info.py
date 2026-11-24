@@ -3,6 +3,7 @@
 from collections.abc import Sequence
 
 import numpy
+from typing_extensions import override
 
 from .. import irt
 from ..context import StepContext
@@ -62,6 +63,7 @@ class MLWISelector(BaseSelector):
     self._delta = (bounds[1] - bounds[0]) / (n_nodes - 1)
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(n_nodes={self._n_nodes!r}, bounds={self._bounds!r}, r_max={self._r_max!r})"
@@ -90,6 +92,7 @@ class MLWISelector(BaseSelector):
     log_likelihood -= float(numpy.max(log_likelihood))
     return numpy.exp(log_likelihood)
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the largest information integrated against the likelihood of the responses.
 

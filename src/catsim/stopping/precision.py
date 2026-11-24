@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from scipy import stats
+from typing_extensions import override
 
 from .base import BaseStopper
 
@@ -50,6 +51,7 @@ class StandardErrorStopper(BaseStopper):
       msg = f"max_se must be positive, got {self.max_se}"
       raise ValueError(msg)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the standard error at the current estimate is at most `max_se`.
 
@@ -115,6 +117,7 @@ class ConfidenceIntervalStopper(BaseStopper):
     # a tuple keeps the frozen stopper hashable and its bands unchangeable
     object.__setattr__(self, "interval_bounds", bounds)
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Return whether the confidence interval at the current estimate lies within one ability band.
 

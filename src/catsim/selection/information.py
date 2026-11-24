@@ -1,6 +1,7 @@
 """Information-based selectors: maximum information, Urry's rule and interval information."""
 
 import numpy
+from typing_extensions import override
 
 from .. import irt
 from ..context import StepContext
@@ -37,6 +38,7 @@ class MaxInfoSelector(BaseSelector):
     super().__init__()
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(r_max={self._r_max!r})"
@@ -52,6 +54,7 @@ class MaxInfoSelector(BaseSelector):
     """
     return self._r_max
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the most informative remaining item at the current estimate, among those below ``r_max``.
 
@@ -81,11 +84,13 @@ class UrrySelector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/urry-selector`.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}()"
 
-  def select(self, context: StepContext) -> int:  # noqa: PLR6301
+  @override
+  def select(self, context: StepContext) -> int:
     """Return the remaining item whose difficulty is closest to the current estimate.
 
     Parameters
@@ -132,6 +137,7 @@ class IntervalInfoSelector(BaseSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/interval-info-selector`.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(interval={self._interval!r}, confidence={self._confidence!r})"
@@ -173,6 +179,7 @@ class IntervalInfoSelector(BaseSelector):
     """Get the confidence level of the default interval."""
     return self._confidence
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the remaining item with the largest information integrated over the interval.
 
