@@ -74,7 +74,7 @@ integral over the whole scale is $a_i$ (Equation 28).
      - Description
    * - ``interval``
      - ``None``
-     - Fixed half-width :math:`\delta` around ``est_theta``. When ``None``, the
+     - Fixed half-width :math:`\delta` around the estimate. When ``None``, the
        confidence interval above is used.
    * - ``confidence``
      - ``0.95``
@@ -90,7 +90,7 @@ Any correct implementation must satisfy the following properties:
 3. With a fixed `interval`, the interval is $\hat{\theta} \pm \delta$.
 4. It never returns an already administered item.
 5. If no non-administered items remain, it raises `NoItemsAvailableError`.
-6. It applies no exposure cap: it ignores `exposure_rates`.
+6. It applies no exposure cap: it ignores the context's `exposure_rates`.
 
 ## References
 

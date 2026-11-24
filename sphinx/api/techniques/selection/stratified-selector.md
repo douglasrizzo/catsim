@@ -95,10 +95,10 @@ Any correct implementation must satisfy the following properties:
 
 1. The strata partition the bank and ascend in the stratification key; with blocking, every block of `n_strata` items ordered by location contributes its `j`-th item by key to stratum `j`.
 2. The active stratum is determined solely by the number of administered items, `test_size` and `n_strata`. Asked for an item once `test_size` items have been administered, the selector raises `ValueError` naming both numbers, so a stopper that allows longer tests than `test_size` fails loudly instead of ending sessions as if the bank were exhausted.
-3. The returned item is the non-administered item of the active stratum whose location is closest to `est_theta`.
+3. The returned item is the non-administered item of the active stratum whose location is closest to the estimate, the context's `theta`.
 4. If the active stratum has no non-administered items left, the selector raises `NoItemsAvailableError`.
 5. The class itself is abstract; subclasses only choose the key, the location and the blocking variable.
-6. It applies no exposure cap: it ignores `exposure_rates`. The strata are its exposure control.
+6. It applies no exposure cap: it ignores the context's `exposure_rates`. The strata are its exposure control.
 
 ## References
 

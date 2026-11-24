@@ -44,9 +44,9 @@ This selector has no constructor parameters.
 
 Any correct implementation must satisfy the following properties:
 
-1. It ranks items by increasing absolute distance between item difficulty and `est_theta`.
+1. It ranks items by increasing absolute distance between item difficulty and the estimate, the context's `theta`.
 2. It never returns an already administered item.
-3. It applies no exposure cap: it ignores `exposure_rates`, and only difficulty proximity controls the choice.
+3. It applies no exposure cap: it ignores the context's `exposure_rates`, and only difficulty proximity controls the choice.
 4. In Rasch/1PL settings, the chosen item coincides with a maximum-information choice because information is maximized near $b_i = \hat{\theta}$.
 5. If no non-administered items remain, it raises `NoItemsAvailableError`.
 
