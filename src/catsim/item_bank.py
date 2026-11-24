@@ -328,7 +328,7 @@ class ItemBank:
     n_items: int,
     model: IrtModel | str = IrtModel.PL4,
     corr: float = 0.0,
-    rng: int | Generator = 0,
+    rng: int | Generator | None = None,
   ) -> Self:
     """Draw a bank of ``n_items`` items of one logistic model.
 
@@ -341,7 +341,7 @@ class ItemBank:
     * upper asymptote: uniform on [0.94, 1].
 
     The first three are the distributions of the simulated 3PL banks of :cite:t:`Bar10` (p. 445); the
-    upper asymptote's is catsim's own. The same seed gives the same bank.
+    upper asymptote's is catsim's own.
 
     Parameters
     ----------
@@ -352,9 +352,10 @@ class ItemBank:
         Default is ``IrtModel.PL4``.
     corr : float, optional
         Correlation between discrimination and difficulty, ignored for ``IrtModel.PL1``. Default is 0.
-    rng : int or numpy.random.Generator, optional
-        Seed of the random generator the parameters are drawn from, or a generator to draw from,
-        which the call advances. Default is 0.
+    rng : int, numpy.random.Generator or None, optional
+        Where the parameters are drawn from. None, the default, draws fresh randomness, so every call
+        gives another bank. An int seeds a new generator, so the same seed gives the same bank. A
+        generator is drawn from as is, and the call advances it.
 
     Returns
     -------

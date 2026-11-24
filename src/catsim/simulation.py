@@ -289,7 +289,7 @@ class SimulationRunner:
     self,
     true_thetas: npt.ArrayLike,
     *,
-    rng: int | numpy.random.Generator = 0,
+    rng: int | numpy.random.Generator | None = None,
     progress: bool = False,
   ) -> SimulationResult:
     """Run one simulated session per true ability, one after another.
@@ -306,10 +306,11 @@ class SimulationRunner:
         numbers. Session ``i`` simulates the examinee of ability ``true_thetas[i]`` and has session
         id ``i``. To simulate ``n`` examinees from a population, draw their abilities, e.g.
         ``numpy.random.default_rng(1).normal(0, 1, n)``.
-    rng : int or numpy.random.Generator, optional
-        Seed of the run's random generator, or a generator to draw from, which the run advances, so
-        passing the same generator to another run gives other results.
-        Default is 0, so a call that passes no seed is deterministic.
+    rng : int, numpy.random.Generator or None, optional
+        The source of the run's random draws. None, the default, draws fresh randomness, so every
+        call gives other tests. An int seeds a new generator, so the same seed gives the same result.
+        A generator is drawn from as is, and the run advances it, so passing the same generator to
+        another run gives other results.
     progress : bool, optional
         Whether to show a ``tqdm`` progress bar over the sessions. Default is False.
 
