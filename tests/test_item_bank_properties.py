@@ -93,12 +93,12 @@ def test_three_columns_are_read_as_a_b_and_c(three_pl: np.ndarray) -> None:
 @given(
   n=st.integers(min_value=12, max_value=80),
   seed=st.integers(min_value=0, max_value=999_999),
-  itemtype=st.sampled_from(["1PL", "2PL", "3PL", "4PL"]),
+  model=st.sampled_from(["1PL", "2PL", "3PL", "4PL"]),
 )
 @BANK_SETTINGS
-def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, itemtype: str) -> None:
+def test_generate_gives_n_valid_items(n: int, seed: int, model: str) -> None:
   """Every model and seed gives n items that pass validation; an invalid draw (a <= 0, c >= d) would raise here."""
-  bank = ItemBank.generate_item_bank(n, itemtype=itemtype, seed=seed, validate=True)
+  bank = ItemBank.generate(n, model=model, rng=seed)
   assert bank.n_items == n
 
 

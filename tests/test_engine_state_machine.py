@@ -98,7 +98,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     max_items=st.integers(min_value=4, max_value=7),
   )
   def init_engine(self, selection_order: tuple[int, ...], max_items: int) -> None:
-    self.item_bank = ItemBank.generate_item_bank(8, seed=0)
+    self.item_bank = ItemBank.generate(8, rng=0)
     # max_items stays below the bank size, so only the stopper can end the session
     self.max_items = max_items
     self.selector = QueueOrderSelector(selection_order)
@@ -165,7 +165,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     max_items=st.integers(min_value=3, max_value=5),
   )
   def init_engine(self, bank_seed: int, max_items: int) -> None:
-    self.item_bank = ItemBank.generate_item_bank(12, seed=bank_seed)
+    self.item_bank = ItemBank.generate(12, rng=bank_seed)
     # max_items stays below the bank size, so only the stopper can end the session
     self.max_items = max_items
     self.engine = CatEngine(

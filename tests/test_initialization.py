@@ -20,7 +20,7 @@ N_DRAWS = 10_000
 
 def sample(initializer: BaseInitializer, seed: int = 42, n: int = N_DRAWS) -> np.ndarray:
   """Draw ``n`` initial abilities from one generator seeded with ``seed``."""
-  item_bank = ItemBank.generate_item_bank(10, seed=42)
+  item_bank = ItemBank.generate(10, rng=42)
   rng = np.random.default_rng(seed)
   return np.array([initializer.initialize(item_bank=item_bank, rng=rng) for _ in range(n)])
 
@@ -126,7 +126,7 @@ class TestFixedPointInitializerInitialize:
   @pytest.mark.parametrize(("start", "expected"), [(1.5, 1.5), (0, 0.0), (np.float64(-1.25), -1.25)])
   def test_initialize_returns_start_as_builtin_float(self, start: float, expected: float) -> None:
     """The start was returned as given, so an int or a NumPy scalar reached the session's theta history."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
     theta = FixedPointInitializer(start).initialize(item_bank=item_bank, rng=np.random.default_rng(42))
 
     assert type(theta) is float

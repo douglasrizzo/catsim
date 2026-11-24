@@ -51,7 +51,7 @@ class StopRule(BaseStopper):
   >>> rule = StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20), min_items=5)
   >>> rule
   StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)
-  >>> bank = ItemBank.generate_item_bank(100, seed=0)
+  >>> bank = ItemBank.generate(100, rng=0)
   >>> rng = numpy.random.default_rng(0)
   >>> ten = StepContext(
   ...   item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10, se=0.6

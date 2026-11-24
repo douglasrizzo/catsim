@@ -212,12 +212,12 @@ def _old_bin(item_bank: ItemBank, administered_items: list[int], est_theta: floa
   return [idx for idx in ordered if idx not in administered_items][:size]
 
 
-@pytest.mark.parametrize("itemtype", ["1PL", "2PL", "3PL", "4PL"])
-def test_untied_banks_give_the_same_picks_as_before(itemtype: str) -> None:
+@pytest.mark.parametrize("model", ["1PL", "2PL", "3PL", "4PL"])
+def test_untied_banks_give_the_same_picks_as_before(model: str) -> None:
   """On banks without ties, the rewritten selectors choose exactly what they chose before ADR-0008."""
   rng = np.random.default_rng(11)
   for _ in range(40):
-    item_bank = ItemBank.generate_item_bank(60, itemtype=itemtype, seed=int(rng.integers(1_000_000)))
+    item_bank = ItemBank.generate(60, model=model, rng=int(rng.integers(1_000_000)))
     administered_items = [int(idx) for idx in rng.choice(60, int(rng.integers(0, 20)), replace=False)]
     est_theta = float(rng.normal())
     rates = rng.uniform(0.0, 0.6, 60)

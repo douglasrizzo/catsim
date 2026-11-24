@@ -185,7 +185,7 @@ def finished_session(session_id: int, items: list[int]) -> CatSessionState:
 def result_of(sessions: list[CatSessionState], n_items: int = 5) -> SimulationResult:
   """Return a result holding the given sessions, on a bank of n_items items no session's exposure is counted in."""
   return SimulationResult(
-    item_bank=ItemBank.generate_item_bank(n_items, seed=0),
+    item_bank=ItemBank.generate(n_items, rng=0),
     sessions=sessions,
     exposure_counts=np.zeros(n_items, dtype=int),
     duration=0.0,
@@ -361,7 +361,7 @@ def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
     finished_session(1, [0, 2]),
   ]
   result = SimulationResult(
-    item_bank=ItemBank.generate_item_bank(5, seed=0),
+    item_bank=ItemBank.generate(5, rng=0),
     sessions=sessions,
     exposure_counts=np.array([2, 1, 1, 0, 0]),
     duration=0.0,

@@ -5,7 +5,7 @@ and precomputing derived values that depend only on static item content.
 """
 
 from enum import StrEnum
-from typing import Any, Self
+from typing import Any, Self, assert_never
 
 import numpy
 import numpy.typing as npt
@@ -88,7 +88,7 @@ class ItemBank:
   >>> bank.n_items
   2
   >>> # Generate from distributions
-  >>> bank = ItemBank.generate(100, item_type='3PL')
+  >>> bank = ItemBank.generate(100, model="3PL", rng=7)
   >>> bank.n_items
   100
   """
@@ -342,68 +342,63 @@ class ItemBank:
     return irt.total_information(theta, items_to_use)
 
   @classmethod
-  def generate_item_bank(
+  def generate(
     cls,
-    n: int,
-    itemtype: IrtModel | str = IrtModel.PL4,
-    corr: float = 0,
-    rng: Generator | None = None,
-    seed: int = 0,
-    validate: bool = True,
+    n_items: int,
+    model: IrtModel | str = IrtModel.PL4,
+    corr: float = 0.0,
+    rng: int | Generator = 0,
   ) -> Self:
-    """Generate a synthetic item bank with parameters following real-world distributions.
+    """Draw a bank of ``n_items`` items of one logistic model.
 
-    Item parameters are drawn from the following distributions:
+    The parameters the model varies are drawn from these distributions; the others are
+    :math:`a = 1`, :math:`c = 0` and :math:`d = 1`.
 
-    * discrimination: :math:`N(1.2, 0.25)`, truncated to positive values
-    * difficulty: :math:`N(0,  1)`
-    * pseudo-guessing: :math:`N(0.25, 0.02)` (clipped at 0)
-    * upper asymptote: :math:`U(0.94, 1)`
+    * discrimination: normal with mean 1.2 and standard deviation 0.25, truncated to positive values;
+    * difficulty: standard normal, with correlation ``corr`` to the discrimination;
+    * guessing parameter: normal with mean 0.25 and standard deviation 0.02, clipped at 0;
+    * upper asymptote: uniform on [0.94, 1].
 
-    The first three are the distributions of the simulated 3PL banks of :cite:t:`Bar10` (p. 445), also
-    used in earlier studies by the same group. Those studies did not use an upper asymptote; its
-    distribution here is catsim's own choice.
+    The first three are the distributions of the simulated 3PL banks of :cite:t:`Bar10` (p. 445); the
+    upper asymptote's is catsim's own. The same seed gives the same bank.
 
     Parameters
     ----------
-    n : int
-        Number of items to be generated.
-    itemtype : IrtModel or str, optional
+    n_items : int
+        Number of items.
+    model : IrtModel or str, optional
         The logistic model of the items, an :py:class:`IrtModel` or its name in any case ("3pl").
         Default is ``IrtModel.PL4``.
     corr : float, optional
-        The correlation between item discrimination and difficulty, ignored for ``IrtModel.PL1``.
-        Default is 0.
-    rng : numpy.random.Generator or None, optional
-        Optional random number generator to generate the item bank. If not passed,
-        one will be created using the seed parameter. Default is None.
-    seed : int, optional
-        Seed used to create a random number generator if one is not provided.
-        Default is 0.
-    validate : bool, optional
-        Whether to validate item parameters. Default is True.
+        Correlation between discrimination and difficulty, ignored for ``IrtModel.PL1``. Default is 0.
+    rng : int or numpy.random.Generator, optional
+        Seed of the random generator the parameters are drawn from, or a generator to draw from,
+        which the call advances. Default is 0.
 
     Returns
     -------
     ItemBank
-        A new ItemBank instance with generated parameters.
+        The generated bank.
 
     Raises
     ------
     ValueError
-        If ``itemtype`` is not "1PL", "2PL", "3PL" or "4PL", in any case.
+        If ``model`` is not "1PL", "2PL", "3PL" or "4PL", in any case.
 
     Examples
     --------
-    >>> bank = ItemBank.generate_item_bank(100, itemtype='3PL', corr=0.3)
+    >>> bank = ItemBank.generate(100, model="3PL", corr=0.3, rng=7)
     >>> bank.n_items
     100
     >>> bank.model
     <IrtModel.PL3: '3PL'>
     """
-    model = IrtModel(itemtype.upper())
-
-    # Generate parameters following standard distributions
+    names = [member.value for member in IrtModel]
+    if not isinstance(model, str) or model.upper() not in names:
+      msg = f"Invalid model {model!r}; must be one of: {', '.join(names)}"
+      raise ValueError(msg)
+    model = IrtModel(model.upper())
+    generator = numpy.random.default_rng(rng)
     means = [0, 1.2]
     stds = [1, 0.25]
     covs = [
@@ -411,43 +406,34 @@ class ItemBank:
       [stds[0] * stds[1] * corr, stds[1] ** 2],
     ]
 
-    if rng is None:
-      rng = numpy.random.default_rng(seed)
+    b, a = generator.multivariate_normal(means, covs, n_items).T
 
-    b, a = rng.multivariate_normal(means, covs, n).T
-
-    if model == IrtModel.PL1:
-      a = numpy.ones(n)
-    else:
+    def redraw_non_positive_discriminations() -> None:
       # redraw the rare non-positive discriminations, together with their difficulties, which samples
       # the bivariate normal truncated to a > 0 and leaves every other item untouched
       invalid = a <= 0
       while invalid.any():
-        b[invalid], a[invalid] = rng.multivariate_normal(means, covs, int(invalid.sum())).T
+        b[invalid], a[invalid] = generator.multivariate_normal(means, covs, int(invalid.sum())).T
         invalid = a <= 0
 
-    c = rng.normal(0.25, 0.02, n).clip(min=0) if model in {IrtModel.PL3, IrtModel.PL4} else numpy.zeros(n)
-    d = rng.uniform(0.94, 1, n) if model == IrtModel.PL4 else numpy.ones(n)
+    c = numpy.zeros(n_items)
+    d = numpy.ones(n_items)
+    match model:
+      case IrtModel.PL1:
+        a = numpy.ones(n_items)
+      case IrtModel.PL2:
+        redraw_non_positive_discriminations()
+      case IrtModel.PL3:
+        redraw_non_positive_discriminations()
+        c = generator.normal(0.25, 0.02, n_items).clip(min=0)
+      case IrtModel.PL4:
+        redraw_non_positive_discriminations()
+        c = generator.normal(0.25, 0.02, n_items).clip(min=0)
+        d = generator.uniform(0.94, 1, n_items)
+      case _:
+        assert_never(model)
 
-    return cls(numpy.array([a, b, c, d]).T, validate=validate)
-
-  @classmethod
-  def generate(cls, *args: Any, **kwargs: Any) -> Self:  # noqa: ANN401 (forwards to generate_item_bank)
-    """Alias for generate_item_bank for convenience.
-
-    Accepts both 'item_type' and 'itemtype' for backward compatibility.
-
-    Returns
-    -------
-    ItemBank
-        A new ItemBank instance with generated parameters.
-    """
-    # Handle parameter name alias
-    if "item_type" in kwargs:
-      kwargs["itemtype"] = kwargs.pop("item_type")
-    if "n_items" in kwargs:
-      kwargs["n"] = kwargs.pop("n_items")
-    return cls.generate_item_bank(*args, **kwargs)
+    return cls(numpy.array([a, b, c, d]).T)
 
   def __repr__(self) -> str:
     """Get string representation of the ItemBank."""

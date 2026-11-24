@@ -118,7 +118,7 @@ def _progressive_item_bank() -> ItemBank:
 class TestRemaining:
   """Tests for remaining, the items a selector may still administer."""
 
-  BANK = ItemBank.generate_item_bank(6, seed=0)
+  BANK = ItemBank.generate(6, rng=0)
 
   def test_returns_the_items_not_administered_in_ascending_order(self) -> None:
     """An administered item left in would be administered twice; a dropped one could never be chosen.
@@ -264,7 +264,7 @@ class TestRandomSelector:
 
   def test_select_draws_every_remaining_item(self) -> None:
     """Over many seeds every remaining item is drawn; a selector that ignored rng or skipped items would miss some."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    item_bank = ItemBank.generate(50, rng=42)
     administered = [3, 17, 25]
 
     selections = {
@@ -282,7 +282,7 @@ class TestLinearSelector:
   def test_select_follows_the_order_of_the_list(self) -> None:
     """A selector that administered its items in bank order would return 5 first instead of 15."""
     selector = LinearSelector([15, 5, 10])
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    item_bank = ItemBank.generate(50, rng=42)
 
     administered: list[int] = []
     for _ in range(3):
@@ -293,7 +293,7 @@ class TestLinearSelector:
   def test_select_rejects_items_outside_the_bank(self) -> None:
     """LinearSelector([0, 99]) on a 20-item bank used to return 99, an index the engine then rejected."""
     selector = LinearSelector([0, 99])
-    item_bank = ItemBank.generate_item_bank(20, seed=1)
+    item_bank = ItemBank.generate(20, rng=1)
 
     with pytest.raises(ValueError, match=r"items \[99\] are not in the item bank, whose indices run from 0 to 19"):
       selector.select(make_context(item_bank, [0], theta=0.0))
@@ -323,7 +323,7 @@ class TestRandomesqueSelector:
 
   def test_draws_from_the_bin_of_most_informative_remaining_items(self) -> None:
     """Every pick is one of the bin_size most informative remaining items, and each of them gets picked."""
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    item_bank = ItemBank.generate(50, rng=42)
     administered = [3, 17, 25]
     by_information = [int(i) for i in np.argsort(-item_bank.information(-0.4)) if i not in administered]
     selector = RandomesqueSelector(4)
@@ -350,7 +350,7 @@ class TestThe54321Selector:
     Earlier versions sized the bin as test_size - k, so a 20-item test drew its first item from the top
     20, and past test_size the negative bin drew from almost the whole bank.
     """
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    item_bank = ItemBank.generate(50, rng=42)
     administered = list(range(n_administered))
     by_information = [int(i) for i in np.argsort(-item_bank.information(0.3)) if i not in administered]
     selector = The54321Selector()
@@ -381,7 +381,7 @@ class TestStratifiedSelectors:
     Earlier versions of AStratSelector and AStratBBlockSelector ignored the estimate and gave every
     examinee the same test, and MaxInfoStratSelector maximized information instead of matching theta_max.
     """
-    item_bank = ItemBank.generate_item_bank(200, itemtype="3PL", seed=1)
+    item_bank = ItemBank.generate(200, model="3PL", rng=1)
     _, location = _stratified_keys(item_bank, selector_class)
     tests = {}
     for theta in (-2.0, 2.0):
@@ -400,7 +400,7 @@ class TestStratifiedSelectors:
   @pytest.mark.parametrize("selector_class", [AStratSelector, MaxInfoStratSelector])
   def test_strata_ascend_in_the_stratification_key(self, selector_class: type) -> None:
     """Without blocking, the bank is split into contiguous strata of increasing a (or maximum information)."""
-    item_bank = ItemBank.generate_item_bank(103, itemtype="3PL", seed=2)
+    item_bank = ItemBank.generate(103, model="3PL", rng=2)
     key, _ = _stratified_keys(item_bank, selector_class)
     strata = selector_class(30, n_strata=5).strata(item_bank)
 
@@ -416,7 +416,7 @@ class TestStratifiedSelectors:
     Earlier versions made each location block a stratum, so every test moved from the easiest block to
     the hardest regardless of the estimate.
     """
-    item_bank = ItemBank.generate_item_bank(102, itemtype="3PL", corr=0.5, seed=3)
+    item_bank = ItemBank.generate(102, model="3PL", corr=0.5, rng=3)
     key, location = _stratified_keys(item_bank, selector_class)
     n_strata = 4
     strata = selector_class(20, n_strata=n_strata).strata(item_bank)
@@ -434,7 +434,7 @@ class TestStratifiedSelectors:
 
   def test_stages_span_several_items_with_fewer_strata(self) -> None:
     """With 5 strata in a 30-item test (Barrada et al., 2006), each stage administers 6 items from its stratum."""
-    item_bank = ItemBank.generate_item_bank(250, itemtype="3PL", seed=4)
+    item_bank = ItemBank.generate(250, model="3PL", rng=4)
     selector = AStratSelector(30, n_strata=5)
     strata = selector.strata(item_bank)
     administered: list[int] = []
@@ -449,7 +449,7 @@ class TestStratifiedSelectors:
     AStratSelector(test_size=4) under a 20-item stopper stopped every session at 13 items of a 40-item bank with
     stop reason "item_bank_exhausted".
     """
-    item_bank = ItemBank.generate_item_bank(60, seed=5)
+    item_bank = ItemBank.generate(60, rng=5)
     selector = MaxInfoStratSelector(5)
     administered: list[int] = []
     for _ in range(5):
@@ -460,7 +460,7 @@ class TestStratifiedSelectors:
 
   def test_raises_when_the_current_stratum_is_exhausted(self) -> None:
     """A stage whose stratum has no items left raises NoItemsAvailableError."""
-    item_bank = ItemBank.generate_item_bank(6, seed=6)
+    item_bank = ItemBank.generate(6, rng=6)
     selector = AStratSelector(10, n_strata=2)
     first_stratum = selector.strata(item_bank)[0].tolist()
 
@@ -487,7 +487,7 @@ class TestIntervalInfoSelector:
 
   def test_default_interval_is_the_confidence_interval_of_the_estimate(self) -> None:
     """Veerkamp & Berger (1997) integrate over theta_hat +/- z / sqrt(I(theta_hat)) of the administered items."""
-    item_bank = ItemBank.generate_item_bank(60, itemtype="3PL", seed=7)
+    item_bank = ItemBank.generate(60, model="3PL", rng=7)
     administered = [3, 11, 25, 40, 52]
     theta = 0.7
     half_width = 1.959963984540054 / np.sqrt(irt.total_information(theta, item_bank.items[administered]))
@@ -522,7 +522,7 @@ class TestIntervalInfoSelector:
 
   def test_fixed_interval_matches_numerical_integration(self) -> None:
     """A fixed half-width integrates information over theta_hat +/- interval."""
-    item_bank = ItemBank.generate_item_bank(40, seed=8)
+    item_bank = ItemBank.generate(40, rng=8)
     integrals = [quad(irt.information, -1.3, -0.3, args=(item,))[0] for item in item_bank.items]
 
     selected = IntervalInfoSelector(interval=0.5).select(make_context(item_bank, [], theta=-0.8))
@@ -531,7 +531,7 @@ class TestIntervalInfoSelector:
 
   def test_select_excludes_administered_and_raises_when_exhausted(self) -> None:
     """Administered items are never returned; an exhausted bank raises NoItemsAvailableError."""
-    item_bank = ItemBank.generate_item_bank(3, seed=9)
+    item_bank = ItemBank.generate(3, rng=9)
     selector = IntervalInfoSelector(interval=1.0)
 
     assert selector.select(make_context(item_bank, [0, 2], theta=0.0)) == 1
@@ -548,7 +548,7 @@ class TestMEISelector:
     A look-ahead that dropped the history, appended one hypothetical response only, or started from another estimate
     would score the candidates on the wrong pattern.
     """
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
     estimator = RecordingEstimator()
 
     MEISelector(estimator=estimator).select(make_context(item_bank, [0], [True], theta=0.25))
@@ -558,7 +558,7 @@ class TestMEISelector:
 
   def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
     """With every remaining item over r_max, the cap is ignored and the best remaining item is still chosen."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
     selector = MEISelector(estimator=RecordingEstimator(), r_max=0.5)
 
     selected = selector.select(
@@ -707,7 +707,7 @@ class TestMLWISelector:
 
   def test_select_matches_manual_weighted_information(self) -> None:
     """Likelihood-weighted scores should match the manual integration."""
-    item_bank = ItemBank.generate_item_bank(8, seed=42)
+    item_bank = ItemBank.generate(8, rng=42)
     selector = MLWISelector(n_nodes=11)
     administered_items = [0, 1]
     response_vector = [True, False]
@@ -735,7 +735,7 @@ class TestMLWISelector:
 
   def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
     """With every remaining item over r_max, the cap is ignored and the best remaining item is still chosen."""
-    item_bank = ItemBank.generate_item_bank(8, seed=42)
+    item_bank = ItemBank.generate(8, rng=42)
     selector = MLWISelector(n_nodes=11, r_max=0.5)
 
     selected = selector.select(
@@ -758,7 +758,7 @@ class TestMLWISelector:
     This verifies the no-data degeneracy case where likelihood weights become
     uniform; if that fallback changed, MLWI would stop matching its mathematical definition.
     """
-    item_bank = ItemBank.generate_item_bank(8, seed=0)
+    item_bank = ItemBank.generate(8, rng=0)
     n_nodes = 21
     selector = MLWISelector(n_nodes=n_nodes)
     nodes = np.linspace(-6.0, 6.0, n_nodes)
@@ -788,7 +788,7 @@ class TestMLWISelector:
 
   def test_select_stays_finite_on_a_long_test(self) -> None:
     """Normalizing the log-likelihood keeps 300-item likelihood weights from underflowing."""
-    item_bank = ItemBank.generate_item_bank(320, seed=7)
+    item_bank = ItemBank.generate(320, rng=7)
     rng = np.random.default_rng(7)
     administered_items = list(range(300))
     response_vector = [bool(rng.random() < irt.icc(0.4, item_bank.items[idx])) for idx in administered_items]
@@ -827,7 +827,7 @@ class TestMLWISelector:
     As the likelihood sharpens, MLWI should concentrate on the MLE neighborhood,
     so disagreement here would signal broken weighting or integration.
     """
-    item_bank = ItemBank.generate_item_bank(30, seed=1)
+    item_bank = ItemBank.generate(30, rng=1)
     theta_true = 0.7
     rng = np.random.default_rng(5)
     administered_items = list(range(20))
@@ -910,7 +910,7 @@ class TestKLSelector:
     """
     rng = np.random.default_rng(n_administered)
     for _ in range(10):
-      item_bank = ItemBank.generate_item_bank(25, itemtype="3PL", seed=int(rng.integers(1_000_000)))
+      item_bank = ItemBank.generate(25, model="3PL", rng=int(rng.integers(1_000_000)))
       administered = [int(idx) for idx in rng.choice(25, n_administered, replace=False)]
       theta_hat = float(rng.uniform(-1.5, 1.5))
       half_width = 2.0 / np.sqrt(max(1, n_administered))
@@ -1094,7 +1094,7 @@ class TestClusterSelector:
 
   def test_aggressive_control_breaks_exposure_ties_at_random(self) -> None:
     """Items tied for the smallest exposure rate are drawn uniformly (ADR-0008)."""
-    item_bank = ItemBank.generate_item_bank(12, seed=4)
+    item_bank = ItemBank.generate(12, rng=4)
     rates = np.full(12, 0.5)
     rates[[3, 7, 9]] = 0.2
     selector = ClusterSelector(clusters=[0] * 12, r_max=0.1, r_control="aggressive")
@@ -1290,7 +1290,7 @@ def test_scheduled_selectors_reject_non_finite_acceleration(
 )
 def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[[], BaseSelector]) -> None:
   """Two runs seeded alike choose the same items at every position, as contract 5 promises."""
-  item_bank = ItemBank.generate_item_bank(40, seed=5)
+  item_bank = ItemBank.generate(40, rng=5)
 
   def run(seed: int) -> list[int | None]:
     selector, rng, administered = make_selector(), np.random.default_rng(seed), []
@@ -1332,7 +1332,7 @@ def test_select_takes_a_minimal_context(make_selector: Callable[[int], BaseSelec
   A selector that still took the old arguments, or that needs a field the minimal context leaves at its default (no
   responses, no exposure rates), fails here, and numpy integers must not leak into session state.
   """
-  item_bank = ItemBank.generate_item_bank(1, seed=3)
+  item_bank = ItemBank.generate(1, rng=3)
 
   item_id = make_selector(1).select(StepContext(item_bank=item_bank, rng=np.random.default_rng(0)))
 
@@ -1347,7 +1347,7 @@ def test_select_never_returns_an_excluded_item(make_selector: Callable[[int], Ba
   Each round excludes the earlier picks and selects with the same seed, so a selector that ignored them would repeat
   the first one.
   """
-  item_bank = ItemBank.generate_item_bank(_N_ITEMS, seed=3)
+  item_bank = ItemBank.generate(_N_ITEMS, rng=3)
   selector = make_selector(_N_ITEMS)
   excluded: list[int] = []
 
@@ -1364,7 +1364,7 @@ def test_excluded_items_do_not_move_the_test_position() -> None:
   The a-stratified selector's first stratum of a three-item test holds the three least discriminating of nine items;
   with two of them excluded, the third is the only item it may give first.
   """
-  item_bank = ItemBank.generate_item_bank(9, seed=0)
+  item_bank = ItemBank.generate(9, rng=0)
   first_stratum = np.argsort(item_bank.discrimination, kind="stable")[:3].tolist()
 
   item_id = AStratSelector(test_size=3).select(make_context(item_bank, excluded_items=first_stratum[:2]))

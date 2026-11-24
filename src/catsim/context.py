@@ -33,7 +33,7 @@ class StepContext:
   >>> import numpy
   >>> from catsim import ItemBank, StepContext
   >>> from catsim.estimation import EAPEstimator
-  >>> bank = ItemBank.generate_item_bank(20, seed=0)
+  >>> bank = ItemBank.generate(20, rng=0)
   >>> context = StepContext(
   ...   item_bank=bank, rng=numpy.random.default_rng(0), administered_items=(3, 7), responses=(True, False)
   ... )

@@ -50,7 +50,7 @@ def item_curve(
       import matplotlib.pyplot as plt
       from catsim.item_bank import ItemBank
       from catsim.plot import item_curve, PlotType
-      item_bank = ItemBank.generate_item_bank(1)
+      item_bank = ItemBank.generate(1)
       item = item_bank.items[0]
       fig, axes = plt.subplots(3, 1, figsize=(7, 15))
       item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC, ax=axes[0])
@@ -174,7 +174,7 @@ def gen3d_dataset_scatter(
       import matplotlib.pyplot as plt
       from catsim import plot
       from catsim.item_bank import ItemBank
-      item_bank = ItemBank.generate_item_bank(100)
+      item_bank = ItemBank.generate(100)
       plot.gen3d_dataset_scatter(item_bank)
       plt.show()
 
@@ -243,7 +243,7 @@ def item_exposure(
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
 
       engine = CatEngine(
-          ItemBank.generate_item_bank(100),
+          ItemBank.generate(100),
           UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
@@ -395,7 +395,7 @@ def test_progress(
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
       engine = CatEngine(
-          ItemBank.generate_item_bank(100),
+          ItemBank.generate(100),
           UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
