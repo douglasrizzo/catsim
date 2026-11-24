@@ -281,7 +281,7 @@ thr = "thr"  # catR's nextItem argument for the test length, quoted on the progr
 writeable = "writeable"  # numpy's ndarray.flags.writeable
 
 [tool.ty.src]
-include = ["src/catsim"]
+include = ["src/catsim", "tests"]
 
 [tool.ty.rules]
 # ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (NumPy and

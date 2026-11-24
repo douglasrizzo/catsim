@@ -4,17 +4,27 @@ from __future__ import annotations
 
 import subprocess
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from matplotlib.patches import Rectangle
 
 from catsim import CatSessionSnapshot, CatSessionState, Estimate, ItemBank, plot
 from catsim.plot import PlotType
+from catsim.typing import FloatArray
 
 if TYPE_CHECKING:
   from matplotlib.lines import Line2D
+
+
+class _ExposureOptions(TypedDict, total=False):
+  """The keyword options of plot.item_exposure that the rejection tests pass."""
+
+  item_bank: ItemBank
+  par: str
+  hist: bool
 
 
 def _run_python(code: str) -> subprocess.CompletedProcess[str]:
@@ -63,12 +73,12 @@ class TestItemCurve:
   A, B, C = ITEM[:3]
 
   @classmethod
-  def _icc(cls, theta: np.ndarray) -> np.ndarray:
+  def _icc(cls, theta: FloatArray | float) -> FloatArray | float:
     """The item's characteristic curve in closed form, c + (1 - c) / (1 + exp(-a (theta - b)))."""
     return cls.C + (1 - cls.C) / (1 + np.exp(-cls.A * (theta - cls.B)))
 
   @classmethod
-  def _information(cls, theta: np.ndarray) -> np.ndarray:
+  def _information(cls, theta: FloatArray | float) -> FloatArray | float:
     """The three-parameter item's information in closed form, a^2 (P - c)^2 (1 - P) / ((1 - c)^2 P)."""
     p = cls._icc(theta)
     return cls.A**2 * (p - cls.C) ** 2 * (1 - p) / ((1 - cls.C) ** 2 * p)
@@ -81,7 +91,7 @@ class TestItemCurve:
     """
     ax = plot.item_curve(self.ITEM, kind=PlotType.ICC)
     (line,) = ax.get_lines()
-    x, y = line.get_xdata(), line.get_ydata()
+    x, y = np.asarray(line.get_xdata()), np.asarray(line.get_ydata())
 
     np.testing.assert_allclose([x[0], x[-1]], [self.B - 4, self.B + 4])
     np.testing.assert_allclose(np.interp(self.B, x, y), 0.6)
@@ -96,12 +106,12 @@ class TestItemCurve:
     """
     ax = plot.item_curve(self.ITEM, kind=PlotType.IIC)
     curve, dot = ax.get_lines()
-    x, y = curve.get_xdata(), curve.get_ydata()
+    x, y = np.asarray(curve.get_xdata()), np.asarray(curve.get_ydata())
     peak = self.B + np.log((1 + np.sqrt(1 + 8 * self.C)) / 2) / self.A
 
     np.testing.assert_allclose(np.interp(self.B, x, y), self.A**2 / 6)
     np.testing.assert_allclose(y, self._information(x))
-    np.testing.assert_allclose(dot.get_xydata(), [[peak, self._information(peak)]])
+    np.testing.assert_allclose(np.asarray(dot.get_xydata()), [[peak, self._information(peak)]])
     assert dot.get_color() == curve.get_color()
 
   @pytest.mark.parametrize(
@@ -145,7 +155,9 @@ class TestItemCurve:
     figure = ax.figure
     figure.canvas.draw()
     (annotation,) = [text for axis in figure.axes for text in axis.texts]
-    box = annotation.get_bbox_patch().get_window_extent()
+    box_patch = annotation.get_bbox_patch()
+    assert box_patch is not None
+    box = box_patch.get_window_extent()
     axes_box = ax.get_window_extent()
 
     assert axes_box.x0 <= box.x0 < box.x1 <= axes_box.x1
@@ -208,8 +220,8 @@ class TestItemExposure:
     ax = plot.item_exposure(self.RATES, item_bank=self.ITEM_BANK, par=par)
     (line,) = ax.get_lines()
     assert (ax.get_xlabel(), ax.get_ylabel()) == (xlabel, "Exposure rate")
-    np.testing.assert_allclose(line.get_xdata(), expected_x)
-    np.testing.assert_allclose(line.get_ydata(), expected_y)
+    np.testing.assert_allclose(np.asarray(line.get_xdata()), expected_x)
+    np.testing.assert_allclose(np.asarray(line.get_ydata()), expected_y)
 
   def test_item_exposure_rates_alone_plot_in_item_order(self) -> None:
     """Exposure rates without an item bank plot against the item index when no parameter is asked for.
@@ -219,17 +231,18 @@ class TestItemExposure:
     ax = plot.item_exposure(self.RATES)
     (line,) = ax.get_lines()
     assert ax.get_xlabel() == "Items"
-    np.testing.assert_array_equal(line.get_xdata(), [0, 1, 2, 3])
-    np.testing.assert_allclose(line.get_ydata(), self.RATES)
+    np.testing.assert_array_equal(np.asarray(line.get_xdata()), [0, 1, 2, 3])
+    np.testing.assert_allclose(np.asarray(line.get_ydata()), self.RATES)
 
   def test_item_exposure_histogram(self) -> None:
     """The histogram counts the items in each exposure bin, with at least three bins.
 
     Rates [0, 0, 0.5, 1] in three equal bins over [0, 1] give counts [2, 1, 1]. Fails if the histogram
-    is drawn from other data or with another number of bins.
+    is drawn from other data, with another number of bins, or with patches other than bars.
     """
     ax = plot.item_exposure(np.array([0.0, 0.0, 0.5, 1.0]), hist=True)
-    assert [patch.get_height() for patch in ax.patches] == [2, 1, 1]
+    heights = [patch.get_height() if isinstance(patch, Rectangle) else None for patch in ax.patches]
+    assert heights == [2, 1, 1]
 
   @pytest.mark.parametrize(
     ("rates", "kwargs", "message"),
@@ -243,7 +256,7 @@ class TestItemExposure:
     ids=["par-without-item-bank", "par-with-hist", "length-mismatch", "unknown-par", "two-dimensional-rates"],
   )
   def test_item_exposure_rejects_inputs_that_cannot_give_a_true_plot(
-    self, rates: np.ndarray, kwargs: dict, message: str
+    self, rates: FloatArray, kwargs: _ExposureOptions, message: str
   ) -> None:
     """Inputs that cannot give a true plot raise a ValueError before any figure is created.
 
@@ -289,16 +302,16 @@ class TestSessionProgress:
     lines = self._lines(ax)
 
     estimate = lines[r"Ability estimate $\hat{\theta}$"]
-    np.testing.assert_array_equal(estimate.get_xdata(), [0, 1, 2, 3])
-    np.testing.assert_allclose(estimate.get_ydata(), [0.0, 0.8, 0.5, 0.6])
+    np.testing.assert_array_equal(np.asarray(estimate.get_xdata()), [0, 1, 2, 3])
+    np.testing.assert_allclose(np.asarray(estimate.get_ydata()), [0.0, 0.8, 0.5, 0.6])
     standard_error = lines["Standard error"]
-    np.testing.assert_array_equal(standard_error.get_xdata(), [1, 2, 3])
-    np.testing.assert_allclose(standard_error.get_ydata(), [1.1, 0.9, 0.7])
+    np.testing.assert_array_equal(np.asarray(standard_error.get_xdata()), [1, 2, 3])
+    np.testing.assert_allclose(np.asarray(standard_error.get_ydata()), [1.1, 0.9, 0.7])
     assert standard_error.axes is not ax
     difficulty = lines["Item difficulty"]
-    np.testing.assert_array_equal(difficulty.get_xdata(), [1, 2, 3])
-    np.testing.assert_allclose(difficulty.get_ydata(), [1.2, -0.5, 0.3])
-    np.testing.assert_allclose(lines[r"True ability $\theta$"].get_ydata(), [0.4, 0.4])
+    np.testing.assert_array_equal(np.asarray(difficulty.get_xdata()), [1, 2, 3])
+    np.testing.assert_allclose(np.asarray(difficulty.get_ydata()), [1.2, -0.5, 0.3])
+    np.testing.assert_allclose(np.asarray(lines[r"True ability $\theta$"].get_ydata()), [0.4, 0.4])
 
   def test_session_progress_band_spans_one_standard_error_around_each_estimate(self) -> None:
     """The band runs from estimate minus to estimate plus its standard error, from the first item on.
@@ -307,7 +320,7 @@ class TestSessionProgress:
     """
     ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
     (band,) = ax.collections
-    vertices = {(float(x), round(float(y), 9)) for path in band.get_paths() for x, y in path.vertices}
+    vertices = {(float(x), round(float(y), 9)) for path in band.get_paths() for x, y in np.asarray(path.vertices)}
 
     assert vertices == {(1.0, -0.3), (1.0, 1.9), (2.0, -0.4), (2.0, 1.4), (3.0, -0.1), (3.0, 1.3)}
 

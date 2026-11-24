@@ -87,11 +87,12 @@ def test_stop_rule_satisfied_returns_exactly_the_stoppers_that_hold(
   administered_count: int,
 ) -> None:
   """satisfied() that drops a stopper that holds, adds one that does not, reorders them or applies min_items fails."""
-  rule = StopRule(*(FixedStopper(held, label) for label, held in enumerate(holds)), min_items=min_items)
+  stoppers = [FixedStopper(held, label) for label, held in enumerate(holds)]
+  rule = StopRule(*stoppers, min_items=min_items)
 
   satisfied = rule.satisfied(make_context(RULE_BANK, list(range(administered_count)), theta=0.0))
 
-  assert [stopper.label for stopper in satisfied] == [label for label, held in enumerate(holds) if held]
+  assert satisfied == tuple(stopper for stopper in stoppers if stopper.holds)
 
 
 CI_SETTINGS = settings(max_examples=25, deadline=None)

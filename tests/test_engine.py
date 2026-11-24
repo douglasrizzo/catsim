@@ -50,17 +50,18 @@ class ScriptedResponseProvider:
 class RecordingResponseProvider:
   """Response provider that answers correctly and records what each call was given."""
 
-  calls: list[tuple] = dataclasses.field(default_factory=list)
+  calls: list[tuple[ItemBank, int, CatSessionSnapshot, np.random.Generator]] = dataclasses.field(default_factory=list)
 
-  def answer(self, item_bank, item_id, session, rng) -> bool:
+  def answer(self, item_bank: ItemBank, item_id: int, session: CatSessionSnapshot, rng: np.random.Generator) -> bool:
     """Record the call's arguments and answer correctly."""
     self.calls.append((item_bank, item_id, session, rng))
     return True
 
 
-class ExhaustedSelector:
+class ExhaustedSelector(BaseSelector):
   """Selector stub that behaves like an exhausted item bank."""
 
+  @override
   def select(self, context: StepContext) -> int:
     """Raise NoItemsAvailableError, as a selector does on an exhausted bank."""
     del context
@@ -69,14 +70,15 @@ class ExhaustedSelector:
 
 
 @dataclass
-class RecordingInitializer:
+class RecordingInitializer(BaseInitializer):
   """Initializer stub that records the arguments it receives."""
 
   theta: float
-  seen_item_bank: object | None = None
-  seen_rng: object | None = None
+  seen_item_bank: ItemBank | None = None
+  seen_rng: np.random.Generator | None = None
 
-  def initialize(self, *, item_bank, rng) -> float:
+  @override
+  def initialize(self, *, item_bank: ItemBank, rng: np.random.Generator) -> float:
     """Record the item bank and generator, and return the fixed theta."""
     self.seen_item_bank = item_bank
     self.seen_rng = rng
@@ -84,12 +86,13 @@ class RecordingInitializer:
 
 
 @dataclass
-class RecordingSelector:
+class RecordingSelector(BaseSelector):
   """Selector stub that records the context it is given."""
 
   item_id: int
   seen: StepContext | None = None
 
+  @override
   def select(self, context: StepContext) -> int:
     """Record the context and return the fixed item."""
     self.seen = context
@@ -97,7 +100,7 @@ class RecordingSelector:
 
 
 @dataclass
-class RecordingEstimator:
+class RecordingEstimator(BaseEstimator):
   """Estimator stub that records the context it is given."""
 
   theta: float
@@ -105,24 +108,27 @@ class RecordingEstimator:
   evaluations: int | None = None
   seen: StepContext | None = None
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     """Record the context and return the fixed estimate."""
     self.seen = context
     return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
 
 
-class FloatEstimator:
+class FloatEstimator(BaseEstimator):
   """Estimator stub written for the contract where estimate returned a bare float."""
 
-  def estimate(self, context: StepContext) -> float:
+  @override
+  def estimate(self, context: StepContext) -> float:  # ty: ignore[incompatible-method-override]
     """Return a bare float instead of an Estimate."""
     del context
     return 0.5
 
 
-class FailingEstimator:
+class FailingEstimator(BaseEstimator):
   """Estimator stub that fails on every call."""
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     """Raise ValueError."""
     del context
@@ -130,10 +136,11 @@ class FailingEstimator:
     raise ValueError(msg)
 
 
-class FailingInitializer:
+class FailingInitializer(BaseInitializer):
   """Initializer stub that fails on every call."""
 
-  def initialize(self, *, item_bank, rng) -> float:
+  @override
+  def initialize(self, *, item_bank: ItemBank, rng: np.random.Generator) -> float:
     """Raise ValueError."""
     del item_bank, rng
     msg = "initialization failed"
@@ -164,12 +171,13 @@ class CountingLengthStopper(BaseStopper):
 
 
 @dataclass
-class RecordingStopper:
+class RecordingStopper(BaseStopper):
   """Stopper stub that records the context it is given."""
 
   should_stop: bool
   seen: StepContext | None = None
 
+  @override
   def stop(self, context: StepContext) -> bool:
     """Record the context and return the fixed decision."""
     self.seen = context
@@ -292,6 +300,7 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   stopped = engine.should_stop(state, RunContext(rng=rng))
 
   assert stopped is True
+  assert stopper.seen is not None
   assert stopper.seen.item_bank is item_bank
   assert stopper.seen.rng is rng
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((2, 4), (True, False))
@@ -326,6 +335,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   selected = engine.select_next(state, context)
 
   assert selected == 4
+  assert selector.seen is not None
   assert selector.seen.item_bank is item_bank
   assert (selector.seen.administered_items, selector.seen.responses) == ((1, 2), (True, False))
   assert selector.seen.excluded_items == (5, 0)
@@ -354,6 +364,7 @@ def test_a_tracker_caps_exposure_across_sessions_with_no_other_setting() -> None
   for session_id in range(4):
     session = engine.start_session(session_id, context)
     item_id = engine.select_next(session, context)
+    assert item_id is not None
     engine.apply_response(session, item_id, response=True, context=context)
     first_items.append(item_id)
 
@@ -371,6 +382,7 @@ def test_select_next_passes_no_exposure_rates_without_a_tracker(item_bank) -> No
   session = engine.start_session(0, context)
 
   assert engine.select_next(session, context) == 2
+  assert selector.seen is not None
   assert selector.seen.exposure_rates is None
 
 
@@ -391,6 +403,7 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
 
   assert tracker.counts[3] == 1
   assert tracker.counts.sum() == 1
+  assert estimator.seen is not None
   assert estimator.seen.item_bank is item_bank
   assert (estimator.seen.administered_items, estimator.seen.responses) == ((3,), (True,))
   assert estimator.seen.theta == pytest.approx(0.7)
@@ -421,6 +434,7 @@ def test_apply_response_starts_the_estimator_from_the_current_estimate_and_its_s
 
   engine.apply_response(session, item_id=3, response=False, context=RunContext(rng=np.random.default_rng(0)))
 
+  assert estimator.seen is not None
   assert (estimator.seen.theta, estimator.seen.se) == (0.5, 0.9)
   assert (session.current_theta, session.current_se) == (1.1, 0.42)
 
@@ -441,6 +455,7 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
 
   result = engine.apply_response(session, item_id=0, response=False, context=context)
 
+  assert stopper.seen is not None
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
   assert (stopper.seen.theta, stopper.seen.se) == (0.3, 0.42)
   assert session.stop_reason is StopReason.STOPPER
@@ -542,15 +557,15 @@ def test_session_state_holds_builtin_python_values(item_bank) -> None:
   engine = CatEngine(
     item_bank,
     RecordingInitializer(theta=0),
-    RecordingSelector(item_id=np.int64(3)),
-    RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),
-    RecordingStopper(np.False_),
+    RecordingSelector(item_id=np.int64(3)),  # ty: ignore[invalid-argument-type]
+    RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),  # ty: ignore[invalid-argument-type]
+    RecordingStopper(np.False_),  # ty: ignore[invalid-argument-type]
   )
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, context=context)
 
-  result = engine.step(session, FixedResponseProvider(np.True_), context)
-  engine.apply_response(session, item_id=np.int64(5), response=np.False_, context=context)
+  result = engine.step(session, FixedResponseProvider(np.True_), context)  # ty: ignore[invalid-argument-type]
+  engine.apply_response(session, item_id=np.int64(5), response=np.False_, context=context)  # ty: ignore[invalid-argument-type]
 
   assert session.theta_history == (0.0, 0.25, 0.25)
   assert [type(theta) for theta in session.theta_history] == [float, float, float]
@@ -650,10 +665,10 @@ def test_a_step_result_cannot_be_changed(item_bank) -> None:
   result = engine.apply_response(session, item_id=3, response=True, context=context)
 
   with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
-    result.response = False  # type: ignore[misc]
+    result.response = False  # ty: ignore[invalid-assignment]
   for sequence in (result.session.administered_items, result.session.responses, result.session.estimates):
     with pytest.raises(AttributeError, match="object has no attribute 'append'"):
-      sequence.append(sequence[0])  # type: ignore[attr-defined]
+      sequence.append(sequence[0])  # ty: ignore[missing-attribute]
   assert (result.session.administered_items, result.session.responses) == ((3,), (True,))
 
 

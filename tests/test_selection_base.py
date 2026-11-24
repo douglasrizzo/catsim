@@ -234,9 +234,9 @@ def test_numpy_integer_arguments_are_stored_as_python_ints(numpy_source: str, so
 @pytest.mark.parametrize(
   "build",
   [
-    lambda: RandomesqueSelector(bin_size=2.5),
-    lambda: AStratSelector(test_size=12.5),
-    lambda: AStratSelector(test_size=12, n_strata=4.5),
+    lambda: RandomesqueSelector(bin_size=2.5),  # ty: ignore[invalid-argument-type]
+    lambda: AStratSelector(test_size=12.5),  # ty: ignore[invalid-argument-type]
+    lambda: AStratSelector(test_size=12, n_strata=4.5),  # ty: ignore[invalid-argument-type]
   ],
   ids=["bin_size", "test_size", "n_strata"],
 )

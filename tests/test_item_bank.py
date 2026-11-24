@@ -31,7 +31,7 @@ class TestItemBankCreation:
   def test_a_nested_list_raises_type_error(self) -> None:
     """A nested list is not an item matrix; without the type check it fails later with an unrelated AttributeError."""
     with pytest.raises(TypeError, match=r"not of type numpy\.ndarray"):
-      ItemBank([[1.0, 0.0, 0.1, 0.95]])  # type: ignore[arg-type]
+      ItemBank([[1.0, 0.0, 0.1, 0.95]])  # ty: ignore[invalid-argument-type]
 
   @pytest.mark.parametrize(
     "shape", [pytest.param((), id="0-d"), pytest.param((2, 2, 4), id="3-D"), pytest.param((2, 5, 4), id="3-D, 5 deep")]
@@ -275,7 +275,7 @@ class TestItemBankGenerate:
     for column, (mean, std, tolerance) in zip(columns, expected, strict=True):
       assert np.mean(column) == pytest.approx(mean, abs=tolerance)
       assert np.std(column) == pytest.approx(std, abs=tolerance)
-    assert 0.94 <= bank.upper_asymptote.min() <= bank.upper_asymptote.max() <= 1
+    assert 0.94 <= np.min(bank.upper_asymptote) <= np.max(bank.upper_asymptote) <= 1
 
   @pytest.mark.parametrize("corr", [-0.5, 0.5])
   def test_discrimination_and_difficulty_have_the_given_correlation(self, corr: float) -> None:
@@ -302,7 +302,7 @@ class TestItemBankGenerate:
     Converting with IrtModel(model.upper()) alone echoes "PL1" for "pl1" and raises AttributeError for 3.
     """
     with pytest.raises(ValueError, match=re.escape(f"Invalid model {model!r}; must be one of: 1PL, 2PL, 3PL, 4PL")):
-      ItemBank.generate(10, model=model)  # type: ignore[arg-type]
+      ItemBank.generate(10, model=model)  # ty: ignore[invalid-argument-type]
 
   def test_the_same_seed_gives_the_same_bank(self) -> None:
     """Two calls with seed 5 give the same parameters, and seed 6 others.
@@ -346,7 +346,7 @@ class TestItemBankGenerate:
 
     bank = ItemBank.generate(500, model="2PL", rng=876)
 
-    assert bank.discrimination.min() > 0
+    assert np.min(bank.discrimination) > 0
     np.testing.assert_array_equal(bank.discrimination[raw_a > 0], raw_a[raw_a > 0])
 
 

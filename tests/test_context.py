@@ -17,9 +17,9 @@ def test_lists_are_stored_as_tuples() -> None:
   context = StepContext(
     item_bank=BANK,
     rng=np.random.default_rng(0),
-    administered_items=items,
-    responses=responses,
-    excluded_items=excluded,
+    administered_items=items,  # ty: ignore[invalid-argument-type]
+    responses=responses,  # ty: ignore[invalid-argument-type]
+    excluded_items=excluded,  # ty: ignore[invalid-argument-type]
   )
   items.append(1)
   responses.append(True)
@@ -31,14 +31,14 @@ def test_lists_are_stored_as_tuples() -> None:
 @pytest.mark.parametrize(
   ("administered_items", "responses", "match"),
   [
-    pytest.param([0, 1, 2], [True], "same length", id="too_short"),
-    pytest.param([0, 1, 2], [True, True, True, False], "same length", id="too_long"),
-    pytest.param([], [True], "same length", id="responses_without_items"),
-    pytest.param([0, 1, 2], [1.0, 0.5, 0.0], "only Boolean", id="not_boolean"),
+    pytest.param((0, 1, 2), (True,), "same length", id="too_short"),
+    pytest.param((0, 1, 2), (True, True, True, False), "same length", id="too_long"),
+    pytest.param((), (True,), "same length", id="responses_without_items"),
+    pytest.param((0, 1, 2), (1.0, 0.5, 0.0), "only Boolean", id="not_boolean"),
   ],
 )
 def test_rejects_responses_that_do_not_fit_the_items(
-  administered_items: list[int], responses: list[bool], match: str
+  administered_items: tuple[int, ...], responses: tuple[bool, ...], match: str
 ) -> None:
   """A context holds one Boolean response per administered item, so no strategy has to check.
 
@@ -65,22 +65,30 @@ def test_contexts_with_exposure_rates_compare_by_identity() -> None:
 @pytest.mark.parametrize("index", [-1, 3])
 def test_rejects_item_indices_outside_the_bank(field: str, index: int) -> None:
   """NumPy reads -1 as the last item, so excluding item -1 silently dropped item 2; 3 raised a bare IndexError."""
-  responses = (True,) if field == "administered_items" else ()
+  administered, excluded = ((index,), ()) if field == "administered_items" else ((), (index,))
   with pytest.raises(ValueError, match=f"{field} must hold item indices between 0 and 2"):
-    StepContext(item_bank=BANK, rng=np.random.default_rng(0), responses=responses, **{field: (index,)})
+    StepContext(
+      item_bank=BANK,
+      rng=np.random.default_rng(0),
+      administered_items=administered,
+      responses=(True,) * len(administered),
+      excluded_items=excluded,
+    )
 
 
 @pytest.mark.parametrize(
-  ("fields", "match"),
+  ("theta", "se", "evaluations", "match"),
   [
-    pytest.param({"theta": float("nan"), "se": 0.3}, "theta must be finite", id="nan_theta"),
-    pytest.param({"theta": float("inf"), "se": 0.3}, "theta must be finite", id="infinite_theta"),
-    pytest.param({"theta": 0.0, "se": float("nan")}, "se must be non-negative", id="nan_se"),
-    pytest.param({"theta": 0.0, "se": -0.1}, "se must be non-negative", id="negative_se"),
-    pytest.param({"theta": 0.0, "se": 0.3, "evaluations": -1}, "evaluations must be non-negative", id="negative_count"),
+    pytest.param(float("nan"), 0.3, None, "theta must be finite", id="nan_theta"),
+    pytest.param(float("inf"), 0.3, None, "theta must be finite", id="infinite_theta"),
+    pytest.param(0.0, float("nan"), None, "se must be non-negative", id="nan_se"),
+    pytest.param(0.0, -0.1, None, "se must be non-negative", id="negative_se"),
+    pytest.param(0.0, 0.3, -1, "evaluations must be non-negative", id="negative_count"),
   ],
 )
-def test_estimate_rejects_values_no_stopper_can_judge(fields: dict[str, float], match: str) -> None:
+def test_estimate_rejects_values_no_stopper_can_judge(
+  theta: float, se: float, evaluations: int | None, match: str
+) -> None:
   """A NaN error fails every comparison: a confidence-interval stopper then stops at once, and an SE stopper never."""
   with pytest.raises(ValueError, match=match):
-    Estimate(**fields)
+    Estimate(theta, se, evaluations)

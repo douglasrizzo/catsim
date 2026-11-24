@@ -5,26 +5,27 @@ from fractions import Fraction
 
 import numpy as np
 import pytest
+from typing_extensions import override
 
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, ProgressiveSelector, ProportionalSelector, progressive
+from catsim.typing import FloatArray, IntArray
 from tests.banks import two_pl_bank
 from tests.contexts import make_context
 
 
-class _DeterministicRNG:
+class _DeterministicRNG(np.random.Generator):
   """Deterministic stand-in for numpy's Generator in selector tests."""
 
-  def __init__(self, uniform_values: list[float] | np.ndarray) -> None:
+  def __init__(self, uniform_values: list[float] | FloatArray) -> None:
+    super().__init__(np.random.PCG64(0))
     self._uniform_values = np.asarray(uniform_values, dtype=float)
-    self.choice_calls: list[tuple[np.ndarray, np.ndarray | None]] = []
+    self.choice_calls: list[tuple[IntArray, FloatArray | None]] = []
 
-  def uniform(
-    self,
-    low: float = 0.0,  # noqa: ARG002
-    high: float = 1.0,  # noqa: ARG002
-    size: int | tuple[int, ...] | None = None,
-  ) -> float | np.ndarray:
+  # The overrides are unannotated: Generator's methods are overloads that these stubs do not reproduce.
+  @override
+  def uniform(self, low=0.0, high=1.0, size=None):
+    del low, high
     if size is None:
       return float(self._uniform_values[0])
     expected_size = int(np.prod(size)) if isinstance(size, tuple) else int(size)
@@ -33,7 +34,9 @@ class _DeterministicRNG:
       raise ValueError(msg)
     return self._uniform_values.copy()
 
-  def choice(self, a: np.ndarray | list[int], p: np.ndarray | None = None) -> int:
+  @override
+  def choice(self, a, size=None, replace=True, p=None, axis=0, shuffle=True):
+    del size, replace, axis, shuffle
     candidate_indices = np.asarray(a, dtype=int)
     probabilities = None if p is None else np.asarray(p, dtype=float)
     self.choice_calls.append((
@@ -42,7 +45,7 @@ class _DeterministicRNG:
     ))
     if probabilities is None:
       return int(candidate_indices[0])
-    return int(candidate_indices[int(probabilities.argmax())])
+    return int(candidate_indices[np.argmax(probabilities)])
 
 
 def _progressive_item_bank() -> ItemBank:
@@ -197,6 +200,7 @@ class TestProportionalSelector:
     )
 
     ((candidates, probs),) = rng.choice_calls
+    assert probs is not None
     remaining_items = [item for item in range(4) if item not in administered]
     assert candidates.tolist() == remaining_items
     weights = self.INFO_AT_ZERO[remaining_items] ** exponent
@@ -216,6 +220,7 @@ class TestProportionalSelector:
     )
 
     ((_, probs),) = rng.choice_calls
+    assert probs is not None
     # This far out the information ratios are e^-b to double precision, and the exponent is the test length, 2.
     weights = np.exp(-2.0 * np.array([0.0, 1.0, 2.0]))
     np.testing.assert_allclose(probs, weights / weights.sum())

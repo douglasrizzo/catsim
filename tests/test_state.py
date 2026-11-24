@@ -6,6 +6,7 @@ import json
 import math
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 
 from catsim import Estimate
@@ -57,7 +58,7 @@ def test_session_state_rejects_estimates_that_are_not_estimate_objects(estimates
   with pytest.raises(TypeError, match="needs Estimate entries in estimates"):
     CatSessionState(
       session_id=0,
-      estimates=estimates,  # type: ignore[arg-type]
+      estimates=estimates,  # ty: ignore[invalid-argument-type]
       administered_items=list(range(n_responses)),
       responses=[True] * n_responses,
     )
@@ -126,13 +127,14 @@ def test_session_state_rejects_item_indices_that_are_not_integers(field_name: st
   so an excluded item could be given or an administered one given again. Fails too if "3" is accepted and the session
   breaks later inside a strategy with a TypeError that says nothing about the saved data.
   """
-  n_responses = 1 if field_name == "administered_items" else 0
+  administered, excluded = ([entry], []) if field_name == "administered_items" else ([], [entry])
   with pytest.raises(TypeError, match=rf"needs integer item indices in {field_name}, got {entry!r}"):
     CatSessionState(
       session_id=0,
-      estimates=[Estimate(0.0, math.inf)] * (n_responses + 1),
-      responses=[True] * n_responses,
-      **{field_name: [entry]},
+      estimates=[Estimate(0.0, math.inf)] * (len(administered) + 1),
+      administered_items=administered,  # ty: ignore[invalid-argument-type]
+      responses=[True] * len(administered),
+      excluded_items=excluded,  # ty: ignore[invalid-argument-type]
     )
 
 
@@ -144,9 +146,9 @@ def test_session_state_stores_numpy_integer_indices_as_python_ints() -> None:
   state = CatSessionState(
     session_id=0,
     estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)],
-    administered_items=[np.int64(4)],
+    administered_items=[np.int64(4)],  # ty: ignore[invalid-argument-type]
     responses=[True],
-    excluded_items=[np.int64(7)],
+    excluded_items=[np.int64(7)],  # ty: ignore[invalid-argument-type]
   )
 
   assert json.dumps([state.administered_items, state.excluded_items]) == "[[4], [7]]"
@@ -270,7 +272,7 @@ def test_a_rebuilt_tracker_owns_its_counts() -> None:
   ],
 )
 def test_a_tracker_rejects_saved_counts_it_cannot_use(
-  counts: list, n_sessions: int, error: type[Exception], match: str
+  counts: npt.ArrayLike, n_sessions: int, error: type[Exception], match: str
 ) -> None:
   """Counts that are not one non-negative integer per item, or a session count that is not a non-negative integer, fail.
 
@@ -327,7 +329,9 @@ def test_a_tracker_rebuilt_without_proposals_takes_its_counts_as_its_own_copy() 
     pytest.param([2, 1, 4, 0], ValueError, "an item has 4 proposals but only 3 sessions", id="above-sessions"),
   ],
 )
-def test_a_tracker_rejects_saved_proposals_it_cannot_use(proposals: list, error: type[Exception], match: str) -> None:
+def test_a_tracker_rejects_saved_proposals_it_cannot_use(
+  proposals: npt.ArrayLike, error: type[Exception], match: str
+) -> None:
   """Proposals that are not one non-negative integer per item, or that do not fit the counts and sessions, fail.
 
   The saved counts are [2, 1, 1, 0] over 3 sessions. Fails if the tracker accepts proposals saved for another bank,

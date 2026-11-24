@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 import subprocess
 import sys
-from dataclasses import dataclass
 
 import numpy as np
 import pytest
@@ -476,14 +475,18 @@ def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths() -> N
   assert zero_length.overlap_rate is None
 
 
-@dataclass
-class FakeRng:
-  """Minimal RNG stub for deterministic response-provider tests."""
+class FakeRng(np.random.Generator):
+  """Generator whose uniform draw is always the given sample, for deterministic response-provider tests."""
 
-  sample: float
+  def __init__(self, sample: float) -> None:
+    super().__init__(np.random.PCG64(0))
+    self.sample = sample
 
-  def uniform(self) -> float:
+  # Unannotated: Generator.uniform's overloads return an array for a size, which this stub never takes.
+  @override
+  def uniform(self, low=0.0, high=1.0, size=None):
     """Return the fixed sample."""
+    del low, high, size
     return self.sample
 
 
@@ -523,4 +526,4 @@ def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_pro
   session = CatSessionState(session_id=0, estimates=[Estimate(-1.5, math.inf)], true_theta=1.5).snapshot()
   rng = FakeRng(sample=draw)
 
-  assert SimulatedResponseProvider().answer(item_bank, item_id, session, rng) is expected  # type: ignore[arg-type]
+  assert SimulatedResponseProvider().answer(item_bank, item_id, session, rng) is expected

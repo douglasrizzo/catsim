@@ -22,6 +22,7 @@ class RecordingEstimator(BaseEstimator):
     self.records.append((context.administered_items, context.responses, context.theta))
     return Estimate(theta=float(len(context.responses)), se=1.0)
 
+  @override
   def __repr__(self) -> str:
     return "RecordingEstimator()"
 
