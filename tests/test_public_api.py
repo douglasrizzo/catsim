@@ -134,10 +134,11 @@ def test_every_public_definition_of_an_internal_module_is_exported(package_name:
 
 
 def test_no_public_signature_takes_a_retired_name() -> None:
-  """A public function, constructor or method that still takes a retired name, such as est_theta or seed, fails here.
+  """A public function, constructor or method with a parameter of a retired name, such as est_theta or seed, fails here.
 
   ADR-0014 gives each concept one name; ``posterior`` took ``response_vector`` and ``ItemBank.test_information`` took
-  ``item_indices`` where the rest of the API says ``responses`` and ``indices``.
+  ``item_indices`` where the rest of the API says ``responses`` and ``indices``. Only parameter names are checked, not
+  the functions' own names: ``irt.validate_response_vector`` keeps its name.
   """
   offenders = {
     f"{qualified}({parameter})"

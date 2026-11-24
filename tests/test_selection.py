@@ -685,8 +685,8 @@ class TestMEISelector:
     def probability(theta: float, b: float) -> float:
       return 1.0 / (1.0 + np.exp(-(theta - b)))
 
-    def total_information(theta: float, items: list[int]) -> float:
-      return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in items)
+    def total_information(theta: float, indices: list[int]) -> float:
+      return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in indices)
 
     context = make_context(item_bank, [0], [True], theta=theta)
     expected = {}
