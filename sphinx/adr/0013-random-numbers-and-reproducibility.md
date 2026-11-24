@@ -43,9 +43,9 @@ generator comes from and on what draws from it, which nothing recorded.
   runner, on the same engine configuration and package versions.
 - Reordering `true_thetas` changes the results, and so does inserting or removing an examinee:
   every later session starts from another point of the stream.
-- A change in how many numbers one component draws, such as a selector that now breaks a tie where
-  it did not, shifts the draws of every later session, so seeded results can change across catsim
-  versions.
+- A change in how many numbers one component draws, such as a selector changed to break ties it
+  used to leave alone, shifts the draws of every later session, so seeded results can change across
+  catsim versions.
 - Running the sessions of one run in parallel would make the draws depend on their timing, so the
   runner does not. To parallelise, split the population and run each part with a generator of its
   own, for example `numpy.random.default_rng(child)` for each `child` of
