@@ -297,7 +297,7 @@ def calibrate(
 - `catsim.exposure` is a new top-level package, so it needs a layer in the import-linter contract
   (`pyproject.toml`). The control imports `catsim.selection`, and a `proposal_rates` built on
   `SimulationRunner` imports the runtime layers, which the selection layer may not, so the package
-  goes in the top layer, beside `simulation` and `plot`.
+  goes in a layer above `simulation` (beside `plot`, or its own).
 - The acceptance draw uses the context's `rng`, the run's generator (ADR-0008), and an item with
   $K_i = 1$ draws nothing.
 - Conditional SH (Stocking & Lewis, 1995) and content-balanced variants are later work.
