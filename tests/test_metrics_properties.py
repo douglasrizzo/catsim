@@ -9,7 +9,7 @@ from hypothesis import strategies as st
 
 from catsim import metrics
 
-METRIC_SETTINGS = settings(max_examples=35, deadline=None)
+METRIC_SETTINGS = settings(max_examples=35)
 
 
 @given(

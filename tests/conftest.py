@@ -6,6 +6,7 @@ from collections.abc import Callable
 
 import matplotlib
 import pytest
+from hypothesis import settings
 
 matplotlib.use("Agg")
 
@@ -37,6 +38,11 @@ from catsim.selection import (
 )
 from catsim.simulation import SimulationRunner
 from catsim.stopping import MaxLengthStopper
+
+# Property examples build item banks and run whole sessions, whose time varies with the drawn sizes, so Hypothesis's
+# 200 ms deadline per example would fail them on a slow machine. Each module's settings(...) inherit the profile.
+settings.register_profile("catsim", deadline=None)
+settings.load_profile("catsim")
 
 # Every concrete selector catsim.selection exports, each factory building its selector for a bank of n_items items.
 # The selection properties run sessions until the selector has no item left, so the selectors that can run out before

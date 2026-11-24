@@ -16,7 +16,7 @@ from tests.conftest import HALF_BANK_SELECTORS, SELECTOR_FACTORIES
 from tests.contexts import make_context
 from tests.hypothesis_strategies import item_params_matrix
 
-SEL_SETTINGS = settings(max_examples=25, deadline=None)
+SEL_SETTINGS = settings(max_examples=25)
 BANKS = item_params_matrix(min_items=2, max_items=12)
 THETAS = st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False)
 SEEDS = st.integers(min_value=0, max_value=2**31 - 1)

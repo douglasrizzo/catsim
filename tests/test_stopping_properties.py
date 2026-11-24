@@ -12,7 +12,7 @@ from catsim.item_bank import ItemBank
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StopRule
 from tests.contexts import make_context
 
-STOP_SETTINGS = settings(max_examples=40, deadline=None)
+STOP_SETTINGS = settings(max_examples=40)
 
 
 @given(
@@ -95,7 +95,7 @@ def test_stop_rule_satisfied_returns_exactly_the_stoppers_that_hold(
   assert satisfied == tuple(stopper for stopper in stoppers if stopper.holds)
 
 
-CI_SETTINGS = settings(max_examples=25, deadline=None)
+CI_SETTINGS = settings(max_examples=25)
 
 
 @given(

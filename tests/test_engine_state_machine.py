@@ -98,13 +98,11 @@ class RandomlyDecliningControl(BaseExposureControl):
 _ORCHESTRATION_SETTINGS = settings(
   max_examples=25,
   stateful_step_count=60,
-  deadline=None,
 )
 
 _INTEGRATION_SETTINGS = settings(
   max_examples=10,
   stateful_step_count=40,
-  deadline=None,
 )
 
 
