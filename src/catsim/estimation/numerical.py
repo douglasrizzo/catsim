@@ -94,9 +94,8 @@ class NumericalSearchEstimator(BaseEstimator):
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 
-    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test
-    information at the estimate (:cite:t:`Magis12`, Eq. 3, p. 4), or ``math.inf`` where the
-    information is 0. The evaluation count is the number of log-likelihood evaluations SciPy's
+    The standard error is the inverse square root of the test information at the estimate, or
+    ``math.inf`` where the information is 0. The evaluation count is the number of log-likelihood evaluations SciPy's
     search made; Dodd's step makes none. With no administered item, the estimate is
     ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 

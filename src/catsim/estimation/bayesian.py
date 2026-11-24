@@ -124,13 +124,10 @@ def uniform_log_prior(low: float = THETA_MIN_EXTENDED, high: float = THETA_MAX_E
 class QuadratureGrid:
   r"""A fixed quadrature grid for posterior computations.
 
-  The posterior at node :math:`\theta_q` is proportional to
-  :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`, so the weights take part in the
-  posterior itself. Equal weights, as built by :meth:`uniform`, cancel in the normalization. Two grids
-  are equal only if they are the same object, and a grid can be a set member or a dictionary key.
-
-  For the full posterior specification and quadrature contract, see
-  :doc:`/api/techniques/estimation/bayesian-infrastructure`.
+  A node's posterior mass is proportional to its weight times the prior density and the likelihood
+  there, so the weights take part in the posterior itself; equal weights, as :meth:`uniform` builds,
+  cancel in the normalization. Two grids are equal only if they are the same object, and a grid can
+  be a set member or a dictionary key.
 
   Parameters
   ----------
@@ -216,9 +213,9 @@ def posterior(
 ) -> FloatArray:
   r"""Compute the normalized discrete posterior over ``grid.nodes``.
 
-  Each node gets mass proportional to :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`,
-  computed in log space and shifted by its maximum before exponentiating, so the likelihood of
-  many responses does not underflow.
+  Each node's mass is proportional to its weight times the prior density and the likelihood there,
+  computed in log space and shifted by its maximum before exponentiating, so the likelihood of many
+  responses does not underflow.
 
   Parameters
   ----------
@@ -270,7 +267,7 @@ def posterior_mean(post: FloatArray, nodes: FloatArray) -> float:
   Returns
   -------
   float
-      :math:`\sum_q \theta_q\,\tilde{p}_q`.
+      The probability-weighted mean of the nodes.
   """
   return float(numpy.sum(nodes * post))
 
@@ -288,7 +285,7 @@ def posterior_variance(post: FloatArray, nodes: FloatArray) -> float:
   Returns
   -------
   float
-      :math:`\sum_q (\theta_q - \bar{\theta})^2\,\tilde{p}_q`, where :math:`\bar{\theta}` is
+      The probability-weighted mean of the squared distances between the nodes and
       :func:`posterior_mean`.
   """
   mean = posterior_mean(post, nodes)
@@ -298,11 +295,9 @@ def posterior_variance(post: FloatArray, nodes: FloatArray) -> float:
 class EAPEstimator(BaseEstimator):
   """Expected a Posteriori ability estimator.
 
-  The estimator keeps no posterior between calls: one instance serves every session of a
-  simulation, and look-ahead selectors such as MEI call it with hypothetical responses. Compute
-  a session's posterior with :py:func:`posterior` when it is needed.
-
-  For full algorithmic details, see :doc:`/api/techniques/estimation/eap-estimator`.
+  The mean of the ability's posterior over a quadrature grid, with the posterior standard deviation
+  as its standard error; see :doc:`/api/techniques/estimation/eap-estimator`. The estimator keeps no
+  posterior between calls: :py:func:`posterior` computes a session's posterior when it is needed.
 
   Parameters
   ----------
@@ -334,9 +329,8 @@ class EAPEstimator(BaseEstimator):
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the posterior mean and the posterior standard deviation.
 
-    With no administered item they are the prior's mean and standard deviation on the grid. The
-    standard error is the posterior standard deviation (:cite:t:`Magis12`, Eq. 11, p. 6), as in
-    catR. Each call evaluates the likelihood once per grid node, which is its evaluation count.
+    With no administered item they are the prior's mean and standard deviation on the grid. Each
+    call evaluates the likelihood once per grid node, which is its evaluation count.
 
     Parameters
     ----------
@@ -373,11 +367,9 @@ _FLAT_MAXIMUM_POINTS = 3
 class MAPEstimator(BaseEstimator):
   """Maximum a Posteriori ability estimator.
 
-  The posterior mode is located on 201 equally spaced points over the search bounds, then
-  refined with a bounded scalar search between the best point's neighbors. The grid keeps the
-  estimate inside the prior's support and finds the global mode of a multimodal posterior.
-
-  For full algorithmic details, see :doc:`/api/techniques/estimation/map-estimator`.
+  The mode of the ability's posterior within the search bounds; see
+  :doc:`/api/techniques/estimation/map-estimator`. The search finds the global mode of a multimodal
+  posterior and keeps the estimate inside the prior's support.
 
   Parameters
   ----------
@@ -448,12 +440,10 @@ class MAPEstimator(BaseEstimator):
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.
 
-    The standard error is :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`, the test
-    information plus the prior's negative curvature at the mode, taken by a central difference so
-    any prior works. For a normal prior with variance :math:`\sigma^2` that is
-    :math:`1/\sqrt{I(\hat\theta) + 1/\sigma^2}` (:cite:t:`Magis12`, Eq. 6, p. 5; catR's
-    default), and inside a uniform prior's support the Fisher standard error. The evaluation count
-    is the number of search points plus the refinement's posterior evaluations.
+    The standard error is the inverse square root of the test information plus the prior's negative
+    curvature at the mode, which a central difference gives for any prior; inside a uniform prior's
+    support it is the Fisher standard error. The evaluation count is the number of search points
+    plus the refinement's posterior evaluations.
 
     Parameters
     ----------

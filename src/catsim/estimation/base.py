@@ -9,17 +9,14 @@ from ..context import Estimate, StepContext
 class BaseEstimator(ABC):
   """Base class for ability estimators.
 
-  An estimator updates the ability estimate from the responses a
-  :class:`~catsim.StepContext` holds, the newest one included, and reports it as an
-  :class:`~catsim.Estimate`: the estimate, its standard error by the estimator's own
-  formula, and how many objective evaluations it took. The engine records every step's
-  :class:`~catsim.Estimate` in the session, and stoppers judge the standard error the
-  estimator reported (ADR-0004).
+  An estimator updates the ability estimate from the responses a :class:`~catsim.StepContext`
+  holds, the newest one included, and reports it as an :class:`~catsim.Estimate`: the estimate, its
+  standard error by the estimator's own formula, which the stoppers judge, and how many objective
+  evaluations it took.
 
   An estimator holds its configuration and caches derived from the item bank, never per-session
-  state: one estimator serves every session of a run, an application may interleave the sessions
-  of several examinees on it, and look-ahead selectors such as MEI call it with hypothetical
-  responses.
+  state: one estimator serves every session of a run, which an application may interleave, and
+  look-ahead selectors such as MEI call it with hypothetical responses.
   """
 
   @abstractmethod
