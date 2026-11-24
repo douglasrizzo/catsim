@@ -1,4 +1,4 @@
-"""Property-based tests for :mod:`catsim.cat`."""
+"""Property-based tests for :mod:`catsim.metrics`."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from catsim import cat
+from catsim import metrics
 
 CAT_SETTINGS = settings(max_examples=35, deadline=None)
 
@@ -28,5 +28,7 @@ def test_mse_is_squared_bias_plus_error_variance(pairs: list[tuple[float, float]
   actual, predicted = zip(*pairs, strict=True)
   errors = np.subtract(predicted, actual)
 
-  assert cat.mse(actual, predicted) == pytest.approx(cat.bias(actual, predicted) ** 2 + np.var(errors), abs=1e-9)
-  assert cat.rmse(actual, predicted) == pytest.approx(np.sqrt(cat.mse(actual, predicted)), abs=1e-9)
+  assert metrics.mse(actual, predicted) == pytest.approx(
+    metrics.bias(actual, predicted) ** 2 + np.var(errors), abs=1e-9
+  )
+  assert metrics.rmse(actual, predicted) == pytest.approx(np.sqrt(metrics.mse(actual, predicted)), abs=1e-9)
