@@ -129,8 +129,10 @@ class NumericalSearchEstimator(BaseEstimator):
       theta = _dodd(context.theta, context.item_bank, correct=responses[0], bounds=self._bounds)
       return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
+    log_likelihood = irt.log_likelihood_function(responses, items)
+
     def negative_log_likelihood(theta: float) -> float:
-      return -irt.log_likelihood(theta, responses, items)
+      return -float(log_likelihood(theta))
 
     res = minimize_scalar(
       negative_log_likelihood,

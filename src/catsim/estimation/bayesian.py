@@ -409,9 +409,11 @@ class MAPEstimator(BaseEstimator):
     """Return the estimator as a constructor call that names every argument, with None for a default prior."""
     return f"{type(self).__name__}(log_prior={self._log_prior_argument!r}, tol={self._tol!r}, bounds={self._bounds!r})"
 
-  def _negative_log_posterior(self, theta: float, responses: Sequence[bool], items: FloatArray) -> float:
+  def _negative_log_posterior(
+    self, theta: float, log_likelihood: Callable[[float | FloatArray], float | FloatArray]
+  ) -> float:
     """Return the negative log-posterior at a candidate theta."""
-    log_lik = irt.log_likelihood(theta, responses, items)
+    log_lik = float(log_likelihood(theta))
     log_pr = float(self._log_prior(numpy.array([theta], dtype=float))[0])
     return -(log_lik + log_pr)
 
@@ -468,11 +470,11 @@ class MAPEstimator(BaseEstimator):
     ValueError
         If the log-posterior has no finite maximum within the search bounds.
     """
-    responses = context.responses
     items = context.item_bank.get_items(context.administered_items)
+    log_likelihood = irt.log_likelihood_function(context.responses, items)
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
-    log_post = irt.log_likelihood(nodes, responses, items) + self._log_prior(nodes)
-    peak = log_post.max()
+    log_post = log_likelihood(nodes) + self._log_prior(nodes)
+    peak = numpy.max(log_post)
     if not numpy.isfinite(peak):
       msg = (
         f"the log-posterior is not finite at any of the {nodes.size} search points in {self._bounds}; "
@@ -492,7 +494,7 @@ class MAPEstimator(BaseEstimator):
     with numpy.errstate(invalid="ignore"):
       result = minimize_scalar(
         self._negative_log_posterior,
-        args=(responses, items),
+        args=(log_likelihood,),
         bounds=(nodes[max(best - 1, 0)], nodes[min(best + 1, nodes.size - 1)]),
         method="bounded",
         options={"xatol": self._tol},
