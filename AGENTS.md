@@ -56,30 +56,34 @@ hidden runtime coupling.
 - A new top-level module in `src/catsim/` must be placed in the import-linter `layers` contract in
   `pyproject.toml`. The contract is exhaustive, so `lint-imports` fails until the module is placed.
 
-## Documentation Rules
+## Documentation
 
-- `README.md` is generated from `sphinx/readme_head.md` and `sphinx/readme_body.md`.
-  - If shared README text changes, update the Sphinx source files rather than editing `README.md`
-    in isolation.
-- Durable technical rationale belongs in ADRs, not in temporary plan files.
-- Tutorials are maintained as notebooks under `notebooks/`.
-- When public APIs change, update:
-  - relevant Sphinx pages
-  - tutorial notebooks
-  - README/Sphinx readme content when appropriate
-- No test runs the code in the docs: the `pycon` blocks and code in `sphinx/introduction.md` and
-  `sphinx/reproducibility.md`, and the README snippets. After an API change, run them by hand.
+Before writing or reviewing documentation of any kind, read `sphinx/AGENTS.md`, the documentation
+charter. Each kind of document has one job and audience:
 
-## Tutorial Notebook Rules
+- `README.md`: what catsim is, install, a quickstart; newcomers. It is generated from
+  `sphinx/readme_head.md` and `sphinx/readme_body.md`: edit those, never `README.md` alone.
+- `sphinx/introduction.md` and `sphinx/terms-and-notation.md`: the CAT and IRT primer and the
+  glossary; readers new to CAT.
+- Guides: one task end to end; researchers and application developers.
+- Technique pages (`sphinx/api/techniques/`): a method's definition, behaviour and sources;
+  researchers.
+- Docstrings: the call contract; anyone calling the object.
+- ADRs (`sphinx/adr/`): why the architecture is shaped this way; contributors.
+- Notebooks: learning by doing, one level per notebook. They are `.ipynb` files in `notebooks/`,
+  edited directly, with no generated-notebook workflow.
+- `specs/`: planned methods with implementation sketches; contributors.
 
-- Keep tutorial notebooks as `.ipynb` files in `notebooks/`.
-- Do not reintroduce generated-notebook workflows unless explicitly requested.
-- Prefer examples that teach the current architecture:
-  - `CatEngine`
-  - `SimulationRunner`
-  - `SimulationResult`
-- Notebook outputs are normalized through pre-commit hooks.
-- Notebook execution is part of validation, not optional polish.
+Hard rules:
+
+- A docstring is the call contract: no method math, design rationale or history.
+- History ("now", "no longer", "replaces", card IDs, PR numbers) goes only in the GitHub release
+  notes and the 1.0 notice. There is no CHANGELOG file.
+- Use the terms and symbols of `sphinx/terms-and-notation.md`.
+- No internal names or design rationale in user pages: link the ADR.
+- One home per topic; other documents link to it.
+- When a public API changes, update its docstrings, the Sphinx pages, the notebooks and the README
+  sources in the same PR. No test runs the code in Sphinx pages or the README: run it by hand.
 
 ## Testing And Validation
 

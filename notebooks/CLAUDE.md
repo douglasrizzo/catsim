@@ -1,0 +1,1 @@
+@../sphinx/AGENTS.md

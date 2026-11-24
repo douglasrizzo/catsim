@@ -86,7 +86,9 @@ release = version
 
 language = "en"
 
-exclude_patterns = ["_build", "readme_head.md", "readme_body.md"]
+# AGENTS.md and CLAUDE.md are instructions for agents and contributors, and the templates are copied,
+# not read: none of them is a page.
+exclude_patterns = ["_build", "readme_head.md", "readme_body.md", "AGENTS.md", "CLAUDE.md", "**/_template.md"]
 
 pygments_style = "sphinx"
 
