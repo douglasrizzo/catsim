@@ -23,6 +23,8 @@ _ITEM_FUNCTIONS = [
   pytest.param(irt.information, id="information"),
   pytest.param(lambda _theta, items: irt.max_info_theta(items), id="max_info_theta"),
   pytest.param(lambda theta, items: irt.info_integral(theta - 1.0, theta + 2.0, items), id="info_integral"),
+  pytest.param(lambda theta, items: irt.log_response_probabilities(theta, items)[0], id="log_p"),
+  pytest.param(lambda theta, items: irt.log_response_probabilities(theta, items)[1], id="log_q"),
 ]
 
 
