@@ -836,10 +836,10 @@ class TestMLWISelector:
 
     assert MLWISelector().select(make_context(item_bank, [0, 1], [False, True])) == 3
 
-  @pytest.mark.parametrize("bounds", [(-np.inf, 6.0), (-6.0, np.inf)])
+  @pytest.mark.parametrize("bounds", [(-np.inf, 6.0), (-6.0, np.inf), (np.nan, 6.0)])
   def test_init_rejects_non_finite_bounds(self, bounds: tuple[float, float]) -> None:
     """A non-finite bound would spread NaN nodes over the grid and fail only at the first selection."""
-    with pytest.raises(ValueError, match="must be finite"):
+    with pytest.raises(ValueError, match=r"^bounds must be finite, got \("):
       MLWISelector(bounds=bounds)
 
   def test_init_rejects_non_increasing_bounds(self) -> None:

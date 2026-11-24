@@ -1,5 +1,7 @@
 """Likelihood-weighted information selector implementations."""
 
+import math
+
 from typing_extensions import override
 
 from .. import irt
@@ -50,6 +52,9 @@ class MLWISelector(BaseSelector):
     if n_nodes < _MIN_NODES:
       msg = f"n_nodes must be >= {_MIN_NODES}, got {n_nodes}"
       raise ValueError(msg)
+    if not (math.isfinite(bounds[0]) and math.isfinite(bounds[1])):
+      msg = f"bounds must be finite, got {bounds}"
+      raise ValueError(msg)
     if not bounds[0] < bounds[1]:
       msg = f"bounds must be increasing, got {bounds}"
       raise ValueError(msg)
@@ -57,9 +62,8 @@ class MLWISelector(BaseSelector):
     super().__init__()
     self._n_nodes = n_nodes
     self._bounds = (float(bounds[0]), float(bounds[1]))
-    # the prior first: it rejects non-finite bounds before the grid would spread NaN nodes over them
-    self._log_prior = uniform_log_prior(*self._bounds)
     self._grid = QuadratureGrid.uniform(n_nodes, *self._bounds)
+    self._log_prior = uniform_log_prior(*self._bounds)
     self._r_max = check_r_max(r_max)
 
   @override
