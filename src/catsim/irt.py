@@ -668,7 +668,9 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
   Raises
   ------
   ValueError
-      If ``responses`` does not hold one Boolean per item.
+      If ``responses`` does not hold one response per item.
+  TypeError
+      If a response is not a ``bool`` or ``numpy.bool_``.
 
   Examples
   --------
@@ -706,7 +708,9 @@ def log_likelihood_function(
   Raises
   ------
   ValueError
-      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one Boolean per item.
+      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one response per item.
+  TypeError
+      If a response is not a ``bool`` or ``numpy.bool_``.
 
   Examples
   --------
@@ -741,6 +745,9 @@ def log_likelihood_function(
 def validate_response_vector(responses: Sequence[bool], n_items: int) -> None:
   """Check that ``responses`` holds one Boolean answer per administered item.
 
+  An answer must be a ``bool`` or a ``numpy.bool_``, such as an element of a NumPy Boolean array;
+  1, 0, 1.0 and 0.0 are rejected.
+
   Parameters
   ----------
   responses : Sequence[bool]
@@ -751,11 +758,15 @@ def validate_response_vector(responses: Sequence[bool], n_items: int) -> None:
   Raises
   ------
   ValueError
-      If ``responses`` does not have ``n_items`` elements, or if it contains non-Boolean elements.
+      If ``responses`` does not have ``n_items`` elements.
+  TypeError
+      If an element of ``responses`` is not a ``bool`` or ``numpy.bool_``.
   """
   if len(responses) != n_items:
     msg = f"responses and items must have the same length, got {len(responses)} and {n_items}"
     raise ValueError(msg)
-  if len(set(responses) - {True, False}) > 0:
-    msg = "responses must contain only Boolean elements"
-    raise ValueError(msg)
+  # Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.
+  for response in responses:
+    if not isinstance(response, (bool, numpy.bool_)):
+      msg = f"a response must be a bool or a numpy.bool_, got {type(response).__name__} {response!r}"
+      raise TypeError(msg)

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import numpy
 
+from . import irt
 from .context import Estimate
 
 if TYPE_CHECKING:
@@ -73,8 +74,9 @@ class CatSessionState:
       responses, if ``excluded_items`` repeats an item or holds an administered one, or if
       ``stop_reason`` is not a :class:`StopReason` value.
   TypeError
-      If an entry of ``estimates`` is not an :class:`~catsim.Estimate`, or an entry of
-      ``administered_items`` or ``excluded_items`` is not an integer.
+      If an entry of ``estimates`` is not an :class:`~catsim.Estimate`, an entry of
+      ``administered_items`` or ``excluded_items`` is not an integer, or a response is not a
+      ``bool`` or ``numpy.bool_``.
   """
 
   session_id: Hashable
@@ -107,6 +109,9 @@ class CatSessionState:
         f"len(administered_items)={len(self.administered_items)} and len(responses)={n_responses}"
       )
       raise ValueError(msg)
+    irt.validate_response_vector(self.responses, n_responses)
+    # numpy.bool_ entries pass the check; the engine appends Python bools, and so must a restored session.
+    self.responses = [bool(response) for response in self.responses]
     if len(self.estimates) != n_responses + 1:
       msg = (
         f"Session {self.session_id} needs the initial estimate and one estimate per response in "
