@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 
@@ -26,6 +29,18 @@ class FirstRemainingSelector(BaseSelector):
   def select(self, context: StepContext) -> int:
     assert context.exposure_rates is not None, "SimulationRunner should always pass exposure rates"
     self.seen_exposure_rates.append(context.exposure_rates.copy())
+    return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
+
+
+class RngRecordingSelector(BaseSelector):
+  """Select the lowest-index remaining item and record the generator each call was given."""
+
+  def __init__(self) -> None:
+    super().__init__()
+    self.seen_rngs: list[np.random.Generator] = []
+
+  def select(self, context: StepContext) -> int:
+    self.seen_rngs.append(context.rng)
     return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
 
 
@@ -69,6 +84,16 @@ class TestSimulationRunnerRun:
     ):
       simulation_runner.run(np.array([[0.0, 1.0]]))
 
+  @pytest.mark.parametrize("bad", [np.nan, np.inf], ids=["nan", "inf"])
+  def test_run_rejects_a_true_ability_that_is_not_finite(self, simulation_runner: SimulationRunner, bad: float) -> None:
+    """A NaN or infinite true ability fails before any session runs.
+
+    Fails if the runner simulates it: the response probability at NaN is NaN, so every simulated
+    response would silently be wrong.
+    """
+    with pytest.raises(ValueError, match="true_thetas must be finite numbers"):
+      simulation_runner.run([0.0, bad])
+
   def test_two_runs_with_the_same_seed_give_the_same_sessions(self, simulation_runner: SimulationRunner) -> None:
     """Every run builds its generator from its seed, so the same seed gives the same tests on the same runner.
 
@@ -86,6 +111,19 @@ class TestSimulationRunnerRun:
     assert np.array_equal(second.exposure_counts, first.exposure_counts)
     assert other_seed.administered_items != first.administered_items
 
+  def test_a_generator_passed_as_rng_is_the_one_every_session_draws_from(self, item_bank: ItemBank) -> None:
+    """A Generator passed as rng is used as is, and every session of the run gets that same one.
+
+    Fails if the runner reseeds or copies the generator, or gives each session a generator of its own.
+    """
+    selector = RngRecordingSelector()
+    rng = np.random.default_rng(5)
+
+    make_runner(item_bank, selector, max_items=2).run([0.0, 1.0], rng=rng)
+
+    assert len(selector.seen_rngs) == 4
+    assert all(seen is rng for seen in selector.seen_rngs)
+
   def test_a_run_with_a_progress_bar_matches_a_quiet_run(self, simulation_runner: SimulationRunner) -> None:
     """progress=True only adds a progress bar: fails if it changes the sessions or the run does not complete."""
     thetas = [-0.5, 0.0, 0.5]
@@ -93,6 +131,13 @@ class TestSimulationRunnerRun:
 
     assert shown.administered_items == quiet.administered_items
     assert shown.latest_estimations == quiet.latest_estimations
+
+  def test_importing_the_simulation_module_does_not_import_tqdm(self) -> None:
+    """tqdm is imported only for a run that shows a progress bar; fails if catsim imports it at module level."""
+    code = "import sys, catsim, catsim.simulation; print('tqdm' in sys.modules)"
+    completed = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True)
+
+    assert completed.stdout.strip() == "False"
 
   def test_run_populates_sessions(self, simulation_result: SimulationResult) -> None:
     """Every session of a run is run to its stopper: 10 items, 10 responses and 11 estimates.
