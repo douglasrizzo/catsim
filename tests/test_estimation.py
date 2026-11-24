@@ -2,6 +2,7 @@
 
 import importlib
 import inspect
+import math
 from collections.abc import Callable
 from functools import partial
 from itertools import pairwise, product
@@ -748,15 +749,27 @@ class TestMAPEstimator:
       assert theta == pytest.approx(reference, abs=1e-4), pattern
 
   def test_evaluations_add_the_refinement_to_the_search_points(self) -> None:
-    """Each estimate counts the 201 search points plus the refinement steps."""
+    """Each estimate counts the 201 search points plus every posterior evaluation of the refinement.
+
+    The prior below records how many points each call evaluates it at: the search evaluates the posterior at 201
+    points in one call, the refinement at one point per call, and the standard error's curvature, which is not a
+    posterior evaluation, at three. A count that left out the refinement or added the curvature's points fails.
+    """
+    sizes: list[int] = []
+    normal = normal_log_prior()
+
+    def recording_prior(theta: np.ndarray) -> np.ndarray:
+      sizes.append(theta.size)
+      return normal(theta)
+
     item_bank = ItemBank.generate_item_bank(20, seed=7)
-    estimator = MAPEstimator()
 
-    first = estimator.estimate(make_context(item_bank, [0, 1, 2, 3], [True, False, True, True], theta=0.0))
-    second = estimator.estimate(make_context(item_bank, [0, 1, 2, 3, 4], [True, False, True, True, False], theta=0.0))
+    estimate = MAPEstimator(log_prior=recording_prior).estimate(
+      make_context(item_bank, [0, 1, 2, 3], [True, False, True, True], theta=0.0)
+    )
 
-    assert first.evaluations > 201
-    assert second.evaluations > 201
+    assert sizes.count(201) == 1
+    assert estimate.evaluations == 201 + sizes.count(1)
 
   @staticmethod
   def _hard_items() -> ItemBank:
@@ -846,12 +859,55 @@ class TestMAPEstimator:
     assert theta == pytest.approx(2.0, abs=1e-5)
 
   def test_estimate_takes_the_middle_of_a_flat_posterior(self) -> None:
-    """A uniform prior with no responses has no unique mode, so the middle of the bounds is returned."""
+    """A uniform prior with no responses has no unique mode, so the middle of the bounds is returned.
+
+    Neither the prior nor the data carry information, so the SE is infinite, and no refinement runs, so only the 201
+    search points count. An SE of 0 or NaN, or a count that added a refinement, fails.
+    """
     estimator = MAPEstimator(log_prior=uniform_log_prior())
 
-    theta = estimator.estimate(make_context(self._hard_items(), [], [], theta=0.0)).theta
+    estimate = estimator.estimate(make_context(self._hard_items(), [], [], theta=0.0))
 
-    assert theta == pytest.approx(0.0, abs=1e-12)
+    assert estimate.theta == pytest.approx(0.0, abs=1e-12)
+    assert (estimate.se, estimate.evaluations) == (math.inf, 201)
+
+  def test_standard_error_adds_the_normal_priors_precision_to_the_information(self) -> None:
+    """With an N(0, 0.8^2) prior and one 4PL item, the SE is 1 / sqrt(I + 1 / 0.8^2) at the estimate.
+
+    I is the item's information, written out in this module. An SE that left out the prior (the Fisher SE, 1.80
+    here), added its variance instead of its precision, or subtracted the precision, fails.
+    """
+    items = np.array([[1.5, 0.5, 0.2, 0.95]])
+    estimator = MAPEstimator(log_prior=normal_log_prior(mean=0.0, sd=0.8))
+
+    estimate = estimator.estimate(make_context(ItemBank(items), [0], [True], theta=0.0))
+
+    assert estimate.se == pytest.approx(1.0 / math.sqrt(_information(estimate.theta, items) + 1.0 / 0.8**2), rel=1e-6)
+
+  @pytest.mark.parametrize(
+    ("low", "high", "response_vector", "edge"),
+    [
+      pytest.param(-6.0, 6.0, [True, False, False], None, id="inside_the_support"),
+      pytest.param(-1.0, 1.0, [True, True, True], 1.0, id="at_the_edge_of_the_support"),
+    ],
+  )
+  def test_standard_error_under_a_uniform_prior_is_the_fisher_one(
+    self, low: float, high: float, response_vector: list[bool], edge: float | None
+  ) -> None:
+    """A uniform prior adds nothing to the information, so the SE is 1 / sqrt(I) at the estimate, I written out here.
+
+    All correct answers to the three hard items put the mode at the upper edge of U(-1, 1), where the prior's
+    curvature, a central difference, reaches outside the support and is not finite. Taking it as it is made the
+    precision infinite and the SE infinite (or 0); a prior term added inside the support fails too.
+    """
+    items = self._hard_items()
+    estimator = MAPEstimator(log_prior=uniform_log_prior(low, high))
+
+    estimate = estimator.estimate(make_context(items, [0, 1, 2], response_vector, theta=0.0))
+
+    if edge is not None:
+      assert estimate.theta == pytest.approx(edge, abs=1e-5)
+    assert estimate.se == pytest.approx(1.0 / math.sqrt(_information(estimate.theta, items.items)), rel=1e-12)
 
 
 class TestWarmLikelihoodEstimator:
@@ -1046,6 +1102,15 @@ class TestWarmLikelihoodEstimator:
       assert abs(wle_bias) < 0.1
       if abs(mle_bias) > 0.05:
         assert abs(wle_bias) < 0.5 * abs(mle_bias)
+
+
+def _information(theta: float, items: np.ndarray) -> float:
+  """Test information of 4PL items, the sum of P'^2 / (P Q), written out independently of catsim."""
+  a, b, c, d = items.T
+  logistic = 1.0 / (1.0 + np.exp(-a * (theta - b)))
+  p = c + (d - c) * logistic
+  dp = a * (d - c) * logistic * (1.0 - logistic)
+  return float(np.sum(dp**2 / (p * (1.0 - p))))
 
 
 def _warm_modified_score(theta: float, response_vector: list[bool], items: np.ndarray) -> float:
