@@ -81,8 +81,12 @@ jobs:
             python-version: "3.14"
             resolution: highest
           # Every direct dependency at the lower bound pyproject.toml declares, on the oldest Python,
-          # so the floors stay ones CI has tested.
+          # so the floors stay ones CI has tested. macOS too: its numpy wheels link Apple's Accelerate
+          # rather than OpenBLAS, so a floor that passes on Linux can fail there.
           - os: ubuntu-latest
+            python-version: "3.11"
+            resolution: lowest-direct
+          - os: macos-latest
             python-version: "3.11"
             resolution: lowest-direct
 
