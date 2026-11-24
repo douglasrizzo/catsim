@@ -94,8 +94,8 @@ def item_curve(
   Raises
   ------
   ValueError
-      If ``item`` is not one row of four parameters or ``kind`` is not a :class:`PlotType`,
-      before any figure is created.
+      If ``item`` is not one row of four parameters or ``kind`` is neither a :class:`PlotType`
+      nor one of its values, before any figure is created.
   """
   item = numpy.asarray(item, dtype=float)
   if item.shape != (4,):
@@ -138,7 +138,7 @@ def _prepare_axes(ax: Axes | None, title: str | None) -> Axes:
   return ax
 
 
-def _draw_icc(ax: Axes, thetas: FloatArray, item: FloatArray, color: str | None = None) -> None:
+def _draw_icc(ax: Axes, thetas: FloatArray, item: FloatArray, *, color: str | None = None) -> None:
   """Draw the item's characteristic curve, in ``color`` or the next colour of the axes' cycle."""
   ax.plot(thetas, irt.icc(thetas, item), color=color, label=r"$P(\theta)$")
   ax.set_ylabel(r"$P(\theta)$")
@@ -156,7 +156,12 @@ def _draw_information(
 
 
 def _annotate_parameters(ax: Axes, item: FloatArray) -> None:
-  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes."""
+  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes.
+
+  The curves of typical items keep clear of that corner: at the low end of the ability range the ICC is near its
+  lower asymptote and the IIC near zero. A very flat item (a of 0.2 or less) with c = 0 and d < 1 is the exception:
+  its information curve falls from the left edge of the plot, under the box.
+  """
   a, b, c, d = item
   ax.annotate(
     f"$a = {a:.3g}$\n$b = {b:.3g}$\n$c = {c:.3g}$\n$d = {d:.3g}$",

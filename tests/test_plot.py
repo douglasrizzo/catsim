@@ -371,7 +371,10 @@ def test_plot_draws_on_the_given_axes_and_returns_them(draw) -> None:
 
 
 def test_importing_every_plot_name_collects_no_test(pytester: pytest.Pytester) -> None:
-  """A public plot function named like a test, as test_progress was, is collected by pytest wherever it is imported."""
+  """A public catsim.plot name that pytest collects runs as a test in every test module that imports it.
+
+  Fails if any catsim.plot name looks like a test to pytest, as test_progress did.
+  """
   names = [
     name
     for name in vars(plot)
