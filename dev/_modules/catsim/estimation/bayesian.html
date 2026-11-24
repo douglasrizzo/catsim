@@ -1103,8 +1103,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
 <span class="sd">      If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has</span>
-<span class="sd">      zero posterior mass, if ``responses`` and ``items`` differ in length, or if ``responses``</span>
-<span class="sd">      contains non-Boolean elements.</span>
+<span class="sd">      zero posterior mass, or if ``responses`` and ``items`` differ in length.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
 <span class="sd">  """</span>
   <span class="n">log_lik</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">,</span> <span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
   <span class="n">log_post</span> <span class="o">=</span> <span class="n">log_prior</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">+</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">weights</span><span class="p">)</span>

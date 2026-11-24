@@ -585,8 +585,10 @@ None when the run has no exposure tracker, which means no cap applies. Default i
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not hold one Boolean response per administered item, or an index in
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">responses</span></code> does not hold one response per administered item, or an index in
 <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> or <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> is outside the item bank.</p>
+</dd>
+<dt>TypeError</dt><dd><p>If a response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
 </dd>
 </dl>
 </dd>

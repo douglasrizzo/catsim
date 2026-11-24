@@ -860,8 +860,7 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Protocol</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExcludedItemError</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
@@ -869,6 +868,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
+
+  <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
   <span class="kn">from</span><span class="w"> </span><span class="nn">.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.exposure</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseExposureControl</span>
@@ -1223,10 +1224,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> has stopped (reason: </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="si">}</span><span class="s2">) and accepts no more responses"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="c1"># Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"response must be a bool, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">response</span><span class="si">!r}</span><span class="s2">"</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">irt</span><span class="o">.</span><span class="n">validate_response_vector</span><span class="p">((</span><span class="n">response</span><span class="p">,),</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
 

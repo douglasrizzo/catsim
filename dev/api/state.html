@@ -571,8 +571,9 @@ list.</p>
 responses, if <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> repeats an item or holds an administered one, or if
 <code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is not a <a class="reference internal" href="#catsim.StopReason" title="catsim.StopReason"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopReason</span></code></a> value.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If an entry of <code class="docutils literal notranslate"><span class="pre">estimates</span></code> is not an <a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>, or an entry of
-<code class="docutils literal notranslate"><span class="pre">administered_items</span></code> or <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> is not an integer.</p>
+<dt>TypeError</dt><dd><p>If an entry of <code class="docutils literal notranslate"><span class="pre">estimates</span></code> is not an <a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>, an entry of
+<code class="docutils literal notranslate"><span class="pre">administered_items</span></code> or <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> is not an integer, or a response is not a
+<code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
 </dd>
 </dl>
 </dd>

@@ -928,8 +928,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``responses`` does not hold one Boolean response per administered item, or an index in</span>
+<span class="sd">      If ``responses`` does not hold one response per administered item, or an index in</span>
 <span class="sd">      ``administered_items`` or ``excluded_items`` is outside the item bank.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>

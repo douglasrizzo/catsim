@@ -861,6 +861,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -930,8 +931,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      responses, if ``excluded_items`` repeats an item or holds an administered one, or if</span>
 <span class="sd">      ``stop_reason`` is not a :class:`StopReason` value.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If an entry of ``estimates`` is not an :class:`~catsim.Estimate`, or an entry of</span>
-<span class="sd">      ``administered_items`` or ``excluded_items`` is not an integer.</span>
+<span class="sd">      If an entry of ``estimates`` is not an :class:`~catsim.Estimate`, an entry of</span>
+<span class="sd">      ``administered_items`` or ``excluded_items`` is not an integer, or a response is not a</span>
+<span class="sd">      ``bool`` or ``numpy.bool_``.</span>
 <span class="sd">  """</span>
 
   <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span>
@@ -964,6 +966,9 @@ window.runMermaid = runMermaid;</script>
         <span class="sa">f</span><span class="s2">"len(administered_items)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span><span class="si">}</span><span class="s2"> and len(responses)=</span><span class="si">{</span><span class="n">n_responses</span><span class="si">}</span><span class="s2">"</span>
       <span class="p">)</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">irt</span><span class="o">.</span><span class="n">validate_response_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">,</span> <span class="n">n_responses</span><span class="p">)</span>
+    <span class="c1"># numpy.bool_ entries pass the check; the engine appends Python bools, and so must a restored session.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">responses</span> <span class="o">=</span> <span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimates</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_responses</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> needs the initial estimate and one estimate per response in "</span>

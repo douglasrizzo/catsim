@@ -1558,7 +1558,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``responses`` does not hold one Boolean per item.</span>
+<span class="sd">      If ``responses`` does not hold one response per item.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
@@ -1599,7 +1601,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one Boolean per item.</span>
+<span class="sd">      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one response per item.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If a response is not a ``bool`` or ``numpy.bool_``.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
@@ -1637,6 +1641,9 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">validate_response_vector</span><span class="p">(</span><span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Check that ``responses`` holds one Boolean answer per administered item.</span>
 
+<span class="sd">  An answer must be a ``bool`` or a ``numpy.bool_``, such as an element of a NumPy Boolean array;</span>
+<span class="sd">  1, 0, 1.0 and 0.0 are rejected.</span>
+
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  responses : Sequence[bool]</span>
@@ -1647,14 +1654,18 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If ``responses`` does not have ``n_items`` elements, or if it contains non-Boolean elements.</span>
+<span class="sd">      If ``responses`` does not have ``n_items`` elements.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If an element of ``responses`` is not a ``bool`` or ``numpy.bool_``.</span>
 <span class="sd">  """</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n_items</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"responses and items must have the same length, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">})</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"responses must contain only Boolean elements"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
+  <span class="c1"># Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.</span>
+  <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"a response must be a bool or a numpy.bool_, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">response</span><span class="si">!r}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 </pre></div>
 

@@ -598,21 +598,36 @@ scale:</p>
 </table>
 </div>
 <p><strong>Strata without blocking.</strong> Items are sorted by increasing <span class="math notranslate nohighlight">\(k_i\)</span> and split
-into <span class="math notranslate nohighlight">\(S\)</span> contiguous strata whose sizes differ by at most one item. This is the
-a-stratified procedure of Chang and Ying (1999), as described step by step by
-Barrada et al. (2006, p. 157).</p>
+into <span class="math notranslate nohighlight">\(S\)</span> contiguous strata of <span class="math notranslate nohighlight">\(\lfloor J/S \rfloor\)</span> items, the first
+<span class="math notranslate nohighlight">\(J \bmod S\)</span> of them holding one item more. This is the a-stratified procedure
+of Chang and Ying (1999), as described step by step by Barrada et al. (2006,
+p. 157).</p>
 <p><strong>Strata with blocking</strong> (Chang et al., 2001; described by Barrada et al., 2006,
 p. 157). Items are sorted by increasing
 <span class="math notranslate nohighlight">\(\ell_i\)</span> and grouped into consecutive blocks of <span class="math notranslate nohighlight">\(S\)</span> items. Each block is
-sorted by increasing <span class="math notranslate nohighlight">\(k_i\)</span>, and its <span class="math notranslate nohighlight">\(j\)</span>-th item joins stratum <span class="math notranslate nohighlight">\(j\)</span>. Every
-stratum therefore spans the whole range of locations, while the strata still
-ascend in <span class="math notranslate nohighlight">\(k_i\)</span>. A trailing block with <span class="math notranslate nohighlight">\(r &lt; S\)</span> items sends its <span class="math notranslate nohighlight">\(j\)</span>-th item
-to stratum <span class="math notranslate nohighlight">\(\lfloor jS/r \rfloor\)</span>.</p>
-<p><strong>Stages.</strong> The item at 0-indexed test position <span class="math notranslate nohighlight">\(t &lt; L\)</span> is drawn from stratum</p>
+sorted by increasing <span class="math notranslate nohighlight">\(k_i\)</span>, and its <span class="math notranslate nohighlight">\(j\)</span>-th item joins stratum <span class="math notranslate nohighlight">\(j\)</span>. Every full
+block therefore gives one item to every stratum, so each stratum spans the
+locations those blocks cover, while the strata still ascend in <span class="math notranslate nohighlight">\(k_i\)</span>. A
+trailing block with <span class="math notranslate nohighlight">\(r &lt; S\)</span> items, those of highest location, gives its items,
+in the same order, to the first <span class="math notranslate nohighlight">\(r\)</span> strata, so the strata have the sizes they
+would have without blocking.</p>
+<p><strong>Stages.</strong> The test’s positions are split, in order, into <span class="math notranslate nohighlight">\(S\)</span> stages of
+consecutive positions, sized like the strata: <span class="math notranslate nohighlight">\(\lfloor L/S \rfloor\)</span> positions
+each, the first <span class="math notranslate nohighlight">\(L \bmod S\)</span> stages one more. With <span class="math notranslate nohighlight">\(q = \lfloor L/S \rfloor\)</span>
+and <span class="math notranslate nohighlight">\(m = L \bmod S\)</span>, the item at 0-indexed test position <span class="math notranslate nohighlight">\(t &lt; L\)</span> is drawn from
+stratum</p>
 <div class="math notranslate nohighlight">
-\[s(t) = \left\lfloor \frac{tS}{L} \right\rfloor,\]</div>
-<p>so each stratum serves about <span class="math notranslate nohighlight">\(L/S\)</span> consecutive positions. There is no stage
-for position <span class="math notranslate nohighlight">\(L\)</span> or later: asked for an item there, the selector raises
+\[\begin{split}s(t) =
+\begin{cases}
+\left\lfloor \dfrac{t}{q + 1} \right\rfloor &amp; \text{if } t &lt; m(q + 1), \\[1ex]
+m + \left\lfloor \dfrac{t - m(q + 1)}{q} \right\rfloor &amp; \text{otherwise.}
+\end{cases}\end{split}\]</div>
+<p>Barrada et al. (2006, pp. 157–158) use a bank and a test that divide evenly
+into strata; when they do not, catsim gives the extra items and positions to
+the first strata and stages. A test of at most <span class="math notranslate nohighlight">\(J\)</span> items (<span class="math notranslate nohighlight">\(L \le J\)</span>) then
+never needs more items from a stratum than the stratum holds, so a session
+without excluded items administers all <span class="math notranslate nohighlight">\(L\)</span> items. There is no stage for
+position <span class="math notranslate nohighlight">\(L\)</span> or later: asked for an item there, the selector raises
 <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
 <p><strong>Selection.</strong> Within the active stratum, the selector takes the item whose
 location is closest to the estimate (Barrada et al., 2006, p. 157). With <span class="math notranslate nohighlight">\(R_t\)</span>
@@ -662,6 +677,7 @@ items from each in a 30-item test.</p></td>
 <li><p>The active stratum is determined solely by the number of administered items, <code class="docutils literal notranslate"><span class="pre">test_size</span></code> and <code class="docutils literal notranslate"><span class="pre">n_strata</span></code>. Asked for an item once <code class="docutils literal notranslate"><span class="pre">test_size</span></code> items have been administered, the selector raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> naming both numbers, so a stopper that allows longer tests than <code class="docutils literal notranslate"><span class="pre">test_size</span></code> fails loudly instead of ending sessions as if the bank were exhausted.</p></li>
 <li><p>The returned item is the non-administered item of the active stratum whose location is closest to the estimate, the context’s <code class="docutils literal notranslate"><span class="pre">theta</span></code>.</p></li>
 <li><p>If the active stratum has no non-administered items left, the selector raises <code class="docutils literal notranslate"><span class="pre">NoItemsAvailableError</span></code>.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">n_strata</span> <span class="pre">&lt;=</span> <span class="pre">test_size</span> <span class="pre">&lt;=</span> <span class="pre">n_items</span></code>, no stage needs more items than its stratum holds, so a session without excluded items administers <code class="docutils literal notranslate"><span class="pre">test_size</span></code> items.</p></li>
 <li><p>The class itself is abstract; subclasses only choose the key, the location and the blocking variable.</p></li>
 <li><p>It applies no exposure cap: it ignores the context’s <code class="docutils literal notranslate"><span class="pre">exposure_rates</span></code>. The strata are its exposure control.</p></li>
 </ol>

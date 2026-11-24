@@ -830,8 +830,9 @@ responses does not underflow.</p>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt>ValueError</dt><dd><p>If the log-prior or log-likelihood is NaN or <span class="math notranslate nohighlight">\(+\infty\)</span> at any node, if every node has
-zero posterior mass, if <code class="docutils literal notranslate"><span class="pre">responses</span></code> and <code class="docutils literal notranslate"><span class="pre">items</span></code> differ in length, or if <code class="docutils literal notranslate"><span class="pre">responses</span></code>
-contains non-Boolean elements.</p>
+zero posterior mass, or if <code class="docutils literal notranslate"><span class="pre">responses</span></code> and <code class="docutils literal notranslate"><span class="pre">items</span></code> differ in length.</p>
+</dd>
+<dt>TypeError</dt><dd><p>If a response is not a <code class="docutils literal notranslate"><span class="pre">bool</span></code> or <code class="docutils literal notranslate"><span class="pre">numpy.bool_</span></code>.</p>
 </dd>
 </dl>
 </dd>

@@ -573,8 +573,9 @@ every block, <span class="math notranslate nohighlight">\(\{1_1, 2_1, \dots, k_1
 stratum, and so on.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>Each stratum therefore contains one item from every difficulty block, and the
-strata ascend in discrimination. Selection then follows the a-stratified rule:
+<p>Each stratum therefore contains one item from every full difficulty block (a
+trailing block of fewer than <span class="math notranslate nohighlight">\(S\)</span> items fills the first strata), and the strata
+ascend in discrimination. Selection then follows the a-stratified rule:
 at test position <span class="math notranslate nohighlight">\(t\)</span>, return the non-administered item of stratum <span class="math notranslate nohighlight">\(s(t)\)</span> whose
 difficulty is closest to the current estimate,</p>
 <div class="math notranslate nohighlight">
