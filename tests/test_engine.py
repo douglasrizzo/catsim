@@ -20,7 +20,7 @@ from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector, remaining
 from catsim.state import CatSessionSnapshot, CatSessionState, ExposureTracker, StopReason
-from catsim.stopping import BaseStopper, MaxLengthStopper
+from catsim.stopping import BaseStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 from tests.contexts import make_context
 
 
@@ -113,6 +113,18 @@ class RecordingEstimator(BaseEstimator):
     """Record the context and return the fixed estimate."""
     self.seen = context
     return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
+
+
+@dataclass
+class ScriptedSEEstimator(BaseEstimator):
+  """Estimator stub whose estimate after the n-th response has the n-th scripted standard error."""
+
+  ses: list[float]
+
+  @override
+  def estimate(self, context: StepContext) -> Estimate:
+    """Return theta 0 with the scripted standard error for the number of responses."""
+    return Estimate(theta=0.0, se=self.ses[len(context.responses) - 1])
 
 
 class FloatEstimator(BaseEstimator):
@@ -309,10 +321,11 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
 
 def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   """select_next hands the selector the bank, the session's items, responses, excluded items and current estimate with
-  its SE, the generator and the rates.
+  its SE, the generator and the rates, and engine.context returns that same context.
 
   Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
-  input is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
+  input is dropped or taken from elsewhere, such as the initial estimate instead of the current one, or if
+  engine.context differs from what the selector is given.
   """
   selector = RecordingSelector(item_id=4)
   tracker = ExposureTracker(item_bank.n_items)
@@ -344,6 +357,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   expected_rates = np.zeros(item_bank.n_items)
   expected_rates[[0, 3]] = [1.0, 0.5]
   assert np.array_equal(selector.seen.exposure_rates, expected_rates)
+  assert _context_fields(engine.context(state, context)) == _context_fields(selector.seen)
 
 
 def test_a_tracker_caps_exposure_across_sessions_with_no_other_setting() -> None:
@@ -384,6 +398,63 @@ def test_select_next_passes_no_exposure_rates_without_a_tracker(item_bank) -> No
   assert engine.select_next(session, context) == 2
   assert selector.seen is not None
   assert selector.seen.exposure_rates is None
+
+
+def _context_fields(context: StepContext) -> tuple[object, ...]:
+  """Return a context's fields, with its exposure rates as a list, for comparison."""
+  rates = None if context.exposure_rates is None else context.exposure_rates.tolist()
+  return (
+    context.item_bank,
+    context.rng,
+    context.administered_items,
+    context.responses,
+    context.excluded_items,
+    context.theta,
+    context.se,
+    rates,
+  )
+
+
+def test_context_without_a_run_context_has_the_session_and_no_exposure_rates(item_bank) -> None:
+  """A session asked about without its run, as a finished one from a result is, gets its own fields and no rates.
+
+  Fails if a missing run context raises, if the engine makes up rates, such as all zeros, for a run it does not see,
+  or if the generator is seeded, so that every call draws the same numbers.
+  """
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False)
+  )
+  state = CatSessionState(
+    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.4, 0.8)], administered_items=[6], responses=[True]
+  )
+
+  context = engine.context(state)
+
+  assert _context_fields(context)[2:] == ((6,), (True,), (), 0.4, 0.8, None)
+  assert engine.context(state).rng.integers(2**62) != engine.context(state).rng.integers(2**62)
+
+
+@pytest.mark.parametrize(
+  ("max_items", "ses", "ended_by"),
+  [(3, [0.9, 0.7, 0.5], "cap"), (5, [0.9, 0.6, 0.35], "precision")],
+)
+def test_a_stop_rule_names_the_criterion_that_ended_a_finished_session(
+  item_bank, max_items: int, ses: list[float], ended_by: str
+) -> None:
+  """Both sessions end after 3 items against a target SE of 0.4.
+
+  With a cap of 3 and SEs 0.9, 0.7, 0.5, the cap holds and the SE target does not; with a cap of 5 and SEs 0.9, 0.6,
+  0.35, the SE target holds after the third item and the cap does not. Fails if the context is not the session as it
+  ended: no SE target holds at the initial infinite SE, and no cap with the items before the last response.
+  """
+  cap, precision = MaxLengthStopper(max_items), StandardErrorStopper(0.4)
+  rule = StopRule(cap, precision)
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), LowestIndexSelector(), ScriptedSEEstimator(ses), rule)
+  run = RunContext(rng=np.random.default_rng(0))
+  session = engine.run_session(engine.start_session(0, run), FixedResponseProvider(True), run)
+
+  assert session.administered_count == 3
+  assert rule.satisfied(engine.context(session)) == (cap if ended_by == "cap" else precision,)
 
 
 def test_apply_response_records_exposure_and_returns_complete_step_result(item_bank) -> None:

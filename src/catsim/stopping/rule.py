@@ -120,10 +120,9 @@ class StopRule(BaseStopper):
   def satisfied(self, context: StepContext) -> tuple[BaseStopper, ...]:
     """Return the stoppers that hold for a session, regardless of `min_items`.
 
-    Called with a finished session's items, final estimate and its standard error
-    (``se=session.current_se``; a context built without it has an infinite error, which no
-    precision stopper accepts), it tells which criteria ended the session, for example precision
-    or the length cap.
+    Called with a finished session's context, ``rule.satisfied(engine.context(session))``, it tells
+    which criteria hold as the session ended, for example precision or the length cap; when the
+    session's ``stop_reason`` is ``STOPPER``, they are the criteria that ended it.
 
     Parameters
     ----------

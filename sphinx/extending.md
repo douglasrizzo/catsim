@@ -137,8 +137,9 @@ class ContentBalancedSelector(BaseSelector):
 ```
 
 Among the areas with items left, `argmin` picks the one given least, the lowest-numbered on a tie.
-A strategy can be called by hand, with a context built from its two required fields and any
-others, which is how to test one:
+A strategy can be called by hand, which is how to test one, with a context built from its two
+required fields and any others (for a session an engine runs, {py:meth}`~catsim.CatEngine.context`
+gives the one its selector sees next):
 
 ```python
 item_bank = ItemBank.generate(300, "3PL", rng=1)
