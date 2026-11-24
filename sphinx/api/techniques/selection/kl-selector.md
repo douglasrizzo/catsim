@@ -48,9 +48,15 @@ curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses $n = 1$, so the
 window is $\hat{\theta} \pm c$. Chang and Ying also define a Bayesian version
 that weights the divergence by the posterior (p. 222), a planned extension,
-KLP. Each integral is computed with SciPy's adaptive
-quadrature. The selector chooses the non-administered item with the
+KLP. The selector chooses the non-administered item with the
 largest value of $K_i(\hat{\theta})$.
+
+Each integral is computed with a 24-point Gauss-Legendre rule over the
+window. On banks drawn by `ItemBank.generate`, its
+relative error against adaptive quadrature is at most about $10^{-11}$. The
+error grows with the discrimination and the width of the window: over
+$\hat{\theta} \pm 3$, it is about $5 \times 10^{-9}$ for an item with $a = 4$
+and $10^{-6}$ for one with $a = 6$.
 
 ## Parameters
 

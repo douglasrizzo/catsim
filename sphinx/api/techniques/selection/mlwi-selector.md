@@ -11,10 +11,6 @@ information curve by the likelihood of ability values given the observed
 responses. This makes it a frequentist analogue of posterior-weighted selectors:
 it spreads attention across plausible ability values without introducing a prior.
 
-That positioning is useful strategically. It gives catsim a weighted-information
-selector that is conceptually close to later Bayesian variants while staying
-independent of the Bayesian infrastructure.
-
 ## Definition
 
 For candidate item $i$, MLWI is defined as (Veerkamp & Berger, 1994,
@@ -44,8 +40,11 @@ $$
 \sum_{q=1}^{Q} I_i(\theta_q)\,L(\mathbf{u}\mid\theta_q)\,\Delta_q.
 $$
 
-Likelihood values are normalized numerically with a log-sum-exp style shift
-before exponentiation; the constant factor cancels under $\arg\max$.
+catsim divides the likelihood values by their sum over the grid, which makes them
+the posterior that {py:func}`catsim.estimation.posterior` computes under a
+uniform prior on `bounds`. That division and the spacing $\Delta_q$, the same
+at every node, scale every item's score by one constant, so they do not change
+which item is selected.
 
 ## Parameters
 
