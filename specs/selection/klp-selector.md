@@ -132,31 +132,12 @@ It is removed when the spec is promoted to "Implemented" status.
 # src/catsim/selection/kl.py (added to the existing module)
 
 import numpy
-from scipy.special import log_expit
 
+from .. import irt
 from ..context import StepContext
-from ..estimation.bayesian import LogPrior, QuadratureGrid, normal_log_prior, posterior
+from ..estimation import LogPrior, QuadratureGrid, normal_log_prior, posterior
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
-
-
-def _log_probabilities_hpc(theta: FloatArray, items: FloatArray) -> tuple[FloatArray, FloatArray]:
-  """Return the log-probabilities of a correct and an incorrect response, one row per ability and one column per item.
-
-  The vectorized form of ``_log_probabilities``: both come from the logit, so the log-probability of
-  an incorrect response stays exact where the probability of a correct one rounds to 1.
-
-  Returns
-  -------
-  tuple[numpy.ndarray, numpy.ndarray]
-      The log-probabilities of a correct and of an incorrect response.
-  """
-  a, b, c, d = items.T
-  z = a * (theta[:, numpy.newaxis] - b)
-  # c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly
-  with numpy.errstate(divide="ignore"):
-    log_c, log_1md, log_dmc = numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
-  return numpy.logaddexp(log_c, log_dmc + log_expit(z)), numpy.logaddexp(log_1md, log_dmc + log_expit(-z))
 
 
 def _kl_divergences(nodes: FloatArray, theta_hat: float, items: FloatArray) -> FloatArray:
@@ -167,8 +148,8 @@ def _kl_divergences(nodes: FloatArray, theta_hat: float, items: FloatArray) -> F
   numpy.ndarray
       The divergences, of shape ``(len(nodes), len(items))``.
   """
-  log_p_hat, log_q_hat = _log_probabilities_hpc(numpy.array([theta_hat]), items)
-  log_p, log_q = _log_probabilities_hpc(nodes, items)
+  log_p_hat, log_q_hat = irt.log_response_probabilities(theta_hat, items)
+  log_p, log_q = irt.log_response_probabilities(nodes, items)
   return numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
 
 
@@ -227,7 +208,7 @@ class KLPSelector(BaseSelector):
     item_bank = context.item_bank
     post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
     divergences = _kl_divergences(self._grid.nodes, context.theta, item_bank.get_items(candidates))
-    return pick_best(candidates, post @ divergences, context.rng)
+    return pick_best(candidates, (post[:, None] * divergences).sum(axis=0), context.rng)
 ```
 
 **Implementation notes:**
@@ -240,12 +221,16 @@ class KLPSelector(BaseSelector):
   current estimate.
 - The divergence table depends on the current estimate, so it is computed for the candidates at
   every call and not cached (Contract 3).
-- `_log_probabilities_hpc` vectorizes `kl.py`'s `_log_probabilities`, the per-item terms of
-  `irt.log_likelihood`. Share one implementation among the three rather than adding a copy.
+- The log-probabilities come from `irt.log_response_probabilities`, which `irt.log_likelihood` and
+  `KLSelector` also use. `KLSelector._kl_global` computes the same divergence at its Gauss-Legendre
+  nodes: share `_kl_divergences` with it rather than keeping two copies.
+- The score sums over the nodes rather than using `post @ divergences`, as `KLSelector` and
+  `MLWISelector` do: a matrix product can round identical columns differently, which breaks the
+  exact ties of {doc}`ADR-0008 </adr/0008-random-tie-breaking>`.
 - The selection and estimation layers do not import each other (`[tool.importlinter]` in
-  `pyproject.toml`). Add `"catsim.selection.kl -> catsim.estimation.bayesian"` to that contract's
-  `ignore_imports`, as `MEISelector` does for its estimator, or move the grid and posterior helpers
-  to a lower layer.
+  `pyproject.toml`). Add `"catsim.selection.kl -> catsim.estimation"` to that contract's
+  `ignore_imports`, as `MLWISelector` does for the same helpers, or move the grid and posterior
+  helpers to a lower layer.
 - The default grid is catsim's (121 nodes on $[-6, 6]$, equal weights). catR's 33 nodes on
   $[-4, 4]$ with the trapezoidal rule are a `QuadratureGrid` with trapezoid weights, for
   comparisons with catR.

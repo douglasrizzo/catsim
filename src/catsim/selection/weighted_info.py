@@ -1,14 +1,14 @@
 """Likelihood-weighted information selector implementations."""
 
-from collections.abc import Sequence
+import math
 
-import numpy
 from typing_extensions import override
 
 from .. import irt
 from ..context import StepContext
+from ..estimation import QuadratureGrid, posterior, uniform_log_prior
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
-from ..typing import FloatArray
+from ..typing import FloatArray, IntArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 _MIN_NODES = 5
@@ -47,10 +47,13 @@ class MLWISelector(BaseSelector):
     Raises
     ------
     ValueError
-        If n_nodes is below 5, the bounds are not increasing, or r_max is not in (0, 1].
+        If n_nodes is below 5, the bounds are not finite or not increasing, or r_max is not in (0, 1].
     """
     if n_nodes < _MIN_NODES:
       msg = f"n_nodes must be >= {_MIN_NODES}, got {n_nodes}"
+      raise ValueError(msg)
+    if not (math.isfinite(bounds[0]) and math.isfinite(bounds[1])):
+      msg = f"bounds must be finite, got {bounds}"
       raise ValueError(msg)
     if not bounds[0] < bounds[1]:
       msg = f"bounds must be increasing, got {bounds}"
@@ -59,8 +62,8 @@ class MLWISelector(BaseSelector):
     super().__init__()
     self._n_nodes = n_nodes
     self._bounds = (float(bounds[0]), float(bounds[1]))
-    self._nodes = numpy.linspace(bounds[0], bounds[1], n_nodes)
-    self._delta = (bounds[1] - bounds[0]) / (n_nodes - 1)
+    self._grid = QuadratureGrid.uniform(n_nodes, *self._bounds)
+    self._log_prior = uniform_log_prior(*self._bounds)
     self._r_max = check_r_max(r_max)
 
   @override
@@ -83,14 +86,15 @@ class MLWISelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
-  def _likelihood_weights(
-    self,
-    responses: Sequence[bool],
-    items: FloatArray,
-  ) -> FloatArray:
-    log_likelihood = irt.log_likelihood(self._nodes, responses, items)
-    log_likelihood -= float(numpy.max(log_likelihood))
-    return numpy.exp(log_likelihood)
+  def _score(self, context: StepContext, candidates: IntArray) -> FloatArray:
+    """Return each candidate's information averaged over the grid, weighted by the likelihood of the responses."""
+    item_bank = context.item_bank
+    # under a flat prior the posterior over the grid is the likelihood, normalized to sum to 1
+    weights = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    information = irt.information(self._grid.nodes, item_bank.get_items(candidates))
+    # a sum over the node axis adds each column in the same order, so identical items tie exactly
+    # (ADR-0008); a matrix product may round columns differently
+    return (weights[:, None] * information).sum(axis=0)
 
   @override
   def select(self, context: StepContext) -> int:
@@ -106,15 +110,5 @@ class MLWISelector(BaseSelector):
     int
         Index of the selected item.
     """
-    item_bank = context.item_bank
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
-
-    if context.administered_items:
-      weights = self._likelihood_weights(context.responses, item_bank.get_items(context.administered_items))
-    else:
-      weights = numpy.ones_like(self._nodes, dtype=float)
-
-    # information of every candidate at every node, one row per node
-    info = irt.information(self._nodes, item_bank.get_items(candidates))
-    scores = (weights @ info) * self._delta
-    return pick_best(candidates, scores, context.rng)
+    return pick_best(candidates, self._score(context, candidates), context.rng)

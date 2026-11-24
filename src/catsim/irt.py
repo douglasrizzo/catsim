@@ -580,6 +580,51 @@ def info_integral(lower: float, upper: float, items: FloatArray) -> FloatArray:
   return antiderivative(upper) - antiderivative(lower)
 
 
+def log_response_probabilities(theta: float | FloatArray, items: FloatArray) -> tuple[FloatArray, FloatArray]:
+  r"""Return the log-probabilities of a correct and of an incorrect response to each item.
+
+  With the logit :math:`z_i = a_i(\theta - b_i)` and the logistic function
+  :math:`\sigma(z) = 1 / (1 + e^{-z})`, the :py:func:`icc` and its complement :math:`Q_i = 1 - P_i` are
+
+  .. math::
+
+      P_i(\theta) = c_i + (d_i - c_i)\,\sigma(z_i), \qquad
+      Q_i(\theta) = (1 - d_i) + (d_i - c_i)\,\sigma(-z_i)
+
+  Both logarithms are computed from :math:`z_i`, never from a :math:`P_i` that has rounded to 0 or 1, so
+  they are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to
+  :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing
+  or slipping they keep falling linearly in :math:`z_i`.
+
+  Parameters
+  ----------
+  theta : float or numpy.ndarray
+      An ability, or an array of abilities.
+  items : numpy.ndarray
+      One item ``[a, b, c, d]``, shape ``(4,)``, or a matrix of items, shape ``(n, 4)``, whose items
+      satisfy :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.
+
+  Returns
+  -------
+  tuple[numpy.ndarray, numpy.ndarray]
+      :math:`\log P_i(\theta)` and :math:`\log Q_i(\theta)`, every ability against every item, each of
+      shape ``numpy.shape(theta) + items.shape[:-1]``.
+
+  Examples
+  --------
+  >>> import numpy
+  >>> log_p, log_q = log_response_probabilities(0.0, numpy.array([[1.0, 0.0, 0.2, 1.0]]))
+  >>> numpy.exp(log_p).round(4), numpy.exp(log_q).round(4)
+  (array([0.6]), array([0.4]))
+  """
+  _, _, c, d = _split_params(items)
+  z = _logit(theta, items)
+  # c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly
+  with numpy.errstate(divide="ignore"):
+    log_c, log_1md, log_dmc = numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
+  return numpy.logaddexp(log_c, log_dmc + log_expit(z)), numpy.logaddexp(log_1md, log_dmc + log_expit(-z))
+
+
 @overload
 def log_likelihood(theta: float, responses: Sequence[bool], items: FloatArray) -> float: ...
 @overload
@@ -592,9 +637,10 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
       \log L(\theta) = \sum_{i=1}^{n} \left[ u_i \log P_i(\theta) + (1 - u_i) \log Q_i(\theta) \right]
 
   where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`
-  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are exact at any distance from the
-  difficulty: far from it, a correct guess costs :math:`\log c_i` and a slip
-  :math:`\log(1 - d_i)`. With no items the log-likelihood is 0.
+  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms come from
+  :py:func:`log_response_probabilities` and are exact at any distance from the difficulty: far from
+  it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
+  log-likelihood is 0.
 
   Parameters
   ----------
@@ -624,13 +670,7 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
   -1.3863
   """
   validate_response_vector(responses, items.shape[0])
-  _, _, c, d = _split_params(items)
-  z = _logit(theta, items)
-  # c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly
-  with numpy.errstate(divide="ignore"):
-    log_c, log_1md, log_dmc = numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
-  log_p = numpy.logaddexp(log_c, log_dmc + log_expit(z))
-  log_q = numpy.logaddexp(log_1md, log_dmc + log_expit(-z))
+  log_p, log_q = log_response_probabilities(theta, items)
   values = numpy.sum(numpy.where(numpy.asarray(responses, dtype=bool), log_p, log_q), axis=-1)
   return values if numpy.ndim(theta) else float(values)
 

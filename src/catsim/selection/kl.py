@@ -1,51 +1,32 @@
 """Kullback-Leibler item selector."""
 
-import math
+import functools
 
 import numpy
-from scipy.integrate import quad
-from scipy.special import log_expit
 from typing_extensions import override
 
+from .. import irt
 from ..context import StepContext
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
-
-def _log_probabilities(theta: float, a: float, b: float, c: float, d: float) -> tuple[float, float]:
-  """Return the log-probabilities of a correct and an incorrect response at ``theta``.
-
-  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood`, so
-  the log-probability of an incorrect response stays exact where the probability of a correct one
-  rounds to 1.
-
-  Returns
-  -------
-  tuple[float, float]
-      The log-probabilities of a correct and of an incorrect response.
-  """
-  z = a * (theta - b)
-  log_dmc = math.log(d - c)
-  log_c = math.log(c) if c > 0 else -math.inf
-  log_1md = math.log1p(-d) if d < 1 else -math.inf
-  return (
-    float(numpy.logaddexp(log_c, log_dmc + log_expit(z))),
-    float(numpy.logaddexp(log_1md, log_dmc + log_expit(-z))),
-  )
+# The integrand's complex singularities lie about pi / a from the real axis, so the Gauss-Legendre
+# error falls like exp(-2 pi n / (a h)) for n nodes, discrimination a and half-width h. Four nodes
+# per unit of a * h, for the steepest item, keep every integral within a relative 1e-10 of
+# adaptive quadrature up to a * h = 60 (a = 10 over theta_hat +- 6), for integrals above 1e-5; smaller
+# ones are limited by rounding in the integrand instead. Past a * h = 60 the count stays at the cap and the
+# error grows: about 3e-9 at a * h = 90 and 2e-7 at 120.
+_NODES_PER_UNIT = 4.0
+_MIN_NODES = 24
+_MAX_NODES = 240
 
 
-def _kl_integrand(
-  theta: float,
-  theta_hat: float,
-  a: float,
-  b: float,
-  c: float,
-  d: float,
-) -> float:
-  """Return the KL divergence between response distributions at two ability values."""
-  log_p_hat, log_q_hat = _log_probabilities(theta_hat, a, b, c, d)
-  log_p, log_q = _log_probabilities(theta, a, b, c, d)
-  return math.exp(log_p_hat) * (log_p_hat - log_p) + math.exp(log_q_hat) * (log_q_hat - log_q)
+@functools.cache
+def _gauss_legendre(n_nodes: int) -> tuple[FloatArray, FloatArray]:
+  """Return the nodes on [-1, 1] and the weights of the n-node Gauss-Legendre rule, read-only."""
+  nodes, weights = numpy.polynomial.legendre.leggauss(n_nodes)
+  nodes.flags.writeable = weights.flags.writeable = False
+  return nodes, weights
 
 
 class KLSelector(BaseSelector):
@@ -101,15 +82,17 @@ class KLSelector(BaseSelector):
     return self._r_max
 
   @staticmethod
-  def _kl_global(theta_hat: float, item: FloatArray, half_width: float) -> float:
-    """Integrate the KL divergence for one item over the local ability window."""
-    val, _ = quad(
-      _kl_integrand,
-      theta_hat - half_width,
-      theta_hat + half_width,
-      args=(theta_hat, float(item[0]), float(item[1]), float(item[2]), float(item[3])),
-    )
-    return float(val)
+  def _kl_global(theta_hat: float, items: FloatArray, half_width: float) -> FloatArray:
+    """Integrate each item's KL divergence over theta_hat +- half_width, with one rule sized for the steepest item."""
+    steepness = float(numpy.max(items[:, 0])) * half_width
+    n_nodes = int(numpy.clip(numpy.ceil(_NODES_PER_UNIT * steepness), _MIN_NODES, _MAX_NODES))
+    nodes, weights = _gauss_legendre(n_nodes)
+    log_p_hat, log_q_hat = irt.log_response_probabilities(theta_hat, items)
+    log_p, log_q = irt.log_response_probabilities(theta_hat + half_width * nodes, items)
+    divergence = numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
+    # one rule for every item, and a sum over the node axis that adds each column in the same order,
+    # so identical items tie exactly (ADR-0008); a matrix product may round columns differently
+    return half_width * (weights[:, None] * divergence).sum(axis=0)
 
   @override
   def select(self, context: StepContext) -> int:
@@ -128,6 +111,5 @@ class KLSelector(BaseSelector):
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     half_width = self._window / numpy.sqrt(max(1, len(context.administered_items)))
 
-    items = context.item_bank.items
-    kl_values = numpy.array([self._kl_global(context.theta, items[int(idx)], half_width) for idx in candidates])
-    return pick_best(candidates, kl_values, context.rng)
+    scores = self._kl_global(context.theta, context.item_bank.get_items(candidates), half_width)
+    return pick_best(candidates, scores, context.rng)

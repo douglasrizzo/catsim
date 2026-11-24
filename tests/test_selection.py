@@ -115,6 +115,38 @@ def _progressive_item_bank() -> ItemBank:
   )
 
 
+def _kl_reference(items: np.ndarray, theta_hat: float, half_width: float) -> list[float]:
+  """Return each item's Bernoulli divergence from theta_hat integrated over theta_hat +- half_width by scipy's quad.
+
+  P and Q are written as sums of positive terms, so they stay accurate at any logit, and quad splits the window at
+  the difficulty, where a steep item's divergence turns.
+  """
+  lower, upper = theta_hat - half_width, theta_hat + half_width
+
+  def divergence(theta: float, item: np.ndarray) -> float:
+    a, b, c, d = item
+    p_hat, q_hat = (
+      c + (d - c) / (1 + np.exp(-a * (theta_hat - b))),
+      (1 - d) + (d - c) / (1 + np.exp(a * (theta_hat - b))),
+    )
+    p, q = c + (d - c) / (1 + np.exp(-a * (theta - b))), (1 - d) + (d - c) / (1 + np.exp(a * (theta - b)))
+    return p_hat * np.log(p_hat / p) + q_hat * np.log(q_hat / q)
+
+  return [
+    quad(
+      divergence,
+      lower,
+      upper,
+      args=(item,),
+      epsabs=0.0,
+      epsrel=1e-12,
+      limit=200,
+      points=[item[1]] if lower < item[1] < upper else None,
+    )[0]
+    for item in items
+  ]
+
+
 class TestRemaining:
   """Tests for remaining, the items a selector may still administer."""
 
@@ -730,73 +762,47 @@ class TestMEISelector:
 class TestMLWISelector:
   """Tests for MLWISelector."""
 
-  def test_select_matches_manual_weighted_information(self) -> None:
-    """Likelihood-weighted scores should match the manual integration."""
-    item_bank = ItemBank.generate(8, rng=42)
-    selector = MLWISelector(n_nodes=11)
-    administered_items = [0, 1]
-    responses = [True, False]
-    candidates = np.array([idx for idx in range(item_bank.n_items) if idx not in administered_items])
+  # two administered 2PL items near 0, then an easy, a middle, a hard and a flat candidate
+  HAND_BUILT = np.array([
+    [1.0, 0.0, 0.0, 1.0],
+    [1.0, 0.5, 0.0, 1.0],
+    [1.6, -2.0, 0.0, 1.0],
+    [1.3, 0.3, 0.0, 1.0],
+    [1.6, 2.0, 0.0, 1.0],
+    [0.5, 0.0, 0.0, 1.0],
+  ])
 
-    selected = selector.select(
-      make_context(item_bank, administered_items, responses, theta=0.0, rng=np.random.default_rng(42))
-    )
+  @pytest.mark.parametrize(
+    ("responses", "expected"),
+    [([True, True], 4), ([False, False], 2), ([True, False], 3)],
+  )
+  def test_select_matches_brute_force_weighted_information(self, responses: list[bool], expected: int) -> None:
+    """The pick has the largest sum of likelihood times information over the 41 nodes, and it moves with the responses.
 
-    nodes = np.linspace(-6.0, 6.0, 11)
-    delta = (6.0 - (-6.0)) / (11 - 1)
-    log_likelihood = np.array(
-      [irt.log_likelihood(float(theta), responses, item_bank.get_items(administered_items)) for theta in nodes],
-      dtype=float,
-    )
-    log_likelihood -= float(log_likelihood.max())
-    weights = np.exp(log_likelihood)
-    manual_scores = np.array(
-      [float(np.sum(irt.information(nodes, item_bank.items[int(idx)]) * weights) * delta) for idx in candidates],
-      dtype=float,
-    )
-    expected = int(candidates[int(manual_scores.argmax())])
+    The reference multiplies the response probabilities node by node. Ignoring the likelihood ties the easy and the
+    hard item on their total information, and reading the responses reversed swaps them.
+    """
+    nodes = np.linspace(-6.0, 6.0, 41)
+    likelihood = np.ones_like(nodes)
+    for item, correct in zip(self.HAND_BUILT[:2], responses, strict=True):
+      p = irt.icc(nodes, item)
+      likelihood *= p if correct else 1.0 - p
+    brute_force = [float(np.sum(likelihood * irt.information(nodes, item))) for item in self.HAND_BUILT[2:]]
 
-    assert selected == expected
+    selected = MLWISelector().select(make_context(ItemBank(self.HAND_BUILT), [0, 1], responses))
+
+    assert selected == 2 + int(np.argmax(brute_force)) == expected
 
   def test_select_falls_back_when_exposure_cap_blocks_all_candidates(self) -> None:
     """With every remaining item over r_max, the cap is ignored and the best remaining item is still chosen."""
-    item_bank = ItemBank.generate(8, rng=42)
-    selector = MLWISelector(n_nodes=11, r_max=0.5)
+    selector = MLWISelector(r_max=0.5)
 
     selected = selector.select(
-      make_context(
-        item_bank,
-        [0, 1],
-        [True, False],
-        theta=0.0,
-        rng=np.random.default_rng(42),
-        exposure_rates=np.ones(item_bank.n_items, dtype=float),
-      )
+      make_context(ItemBank(self.HAND_BUILT), [0, 1], [True, False], exposure_rates=np.ones(len(self.HAND_BUILT)))
     )
 
-    # the pick of the manual integration in test_select_matches_manual_weighted_information
-    assert selected == 6
-
-  def test_select_with_no_responses_reduces_to_information_integral(self) -> None:
-    """With no responses, MLWI should reduce to the integral of item information.
-
-    This verifies the no-data degeneracy case where likelihood weights become
-    uniform; if that fallback changed, MLWI would stop matching its mathematical definition.
-    """
-    item_bank = ItemBank.generate(8, rng=0)
-    n_nodes = 21
-    selector = MLWISelector(n_nodes=n_nodes)
-    nodes = np.linspace(-6.0, 6.0, n_nodes)
-    delta = (6.0 - (-6.0)) / (n_nodes - 1)
-
-    manual_scores = np.array(
-      [float(np.sum(irt.information(nodes, item_bank.items[idx])) * delta) for idx in range(item_bank.n_items)],
-      dtype=float,
-    )
-
-    selected = selector.select(make_context(item_bank, [], [], theta=0.0))
-
-    assert selected == int(manual_scores.argmax())
+    # the pick of test_select_matches_brute_force_weighted_information for these responses
+    assert selected == 3
 
   def test_select_with_no_data_prefers_the_most_discriminating_item(self) -> None:
     """With flat weights a 2PL item's integrated information is its discrimination a, whatever its difficulty."""
@@ -811,33 +817,30 @@ class TestMLWISelector:
 
     assert selected == 1
 
-  def test_select_stays_finite_on_a_long_test(self) -> None:
-    """Normalizing the log-likelihood keeps 300-item likelihood weights from underflowing."""
-    item_bank = ItemBank.generate(320, rng=7)
-    rng = np.random.default_rng(7)
-    administered_items = list(range(300))
-    responses = [bool(rng.random() < irt.icc(0.4, item_bank.items[idx])) for idx in administered_items]
-    selector = MLWISelector()
+  def test_select_after_responses_to_extreme_items(self) -> None:
+    """Items far from every node leave the likelihood flat inside the grid, so the most discriminating item is chosen.
 
-    weights = selector._likelihood_weights(responses, item_bank.get_items(administered_items))
-    selected = selector.select(make_context(item_bank, administered_items, responses, theta=0.0))
-
-    assert np.isfinite(weights).all()
-    assert weights.max() == pytest.approx(1.0)
-    assert selected in range(300, 320)
-
-  def test_likelihood_weights_stay_finite_for_extreme_items(self) -> None:
-    """Items far from every node should give finite weights, not NaN.
-
-    With log(1 - P) computed after P rounded to 1, these two responses made the log-likelihood
-    -inf at every node, and subtracting its maximum gave NaN weights.
+    A wrong answer to an item at b = -6 and a right one to an item at b = 6, both with a = 200, have a log-likelihood
+    of -2400 at every inner node. Computing log(1 - P) after P rounds to 1 would make it -inf at every node, and the
+    selection would raise.
     """
-    items = np.array([[200.0, -6.0, 0.0, 1.0], [200.0, 6.0, 0.0, 1.0]])
+    item_bank = ItemBank(
+      np.array([
+        [200.0, -6.0, 0.0, 1.0],
+        [200.0, 6.0, 0.0, 1.0],
+        [0.8, 2.0, 0.0, 1.0],
+        [1.9, -2.5, 0.0, 1.0],
+        [1.2, 0.0, 0.0, 1.0],
+      ])
+    )
 
-    weights = MLWISelector()._likelihood_weights([False, True], items)
+    assert MLWISelector().select(make_context(item_bank, [0, 1], [False, True])) == 3
 
-    assert np.isfinite(weights).all()
-    assert weights.max() == pytest.approx(1.0)
+  @pytest.mark.parametrize("bounds", [(-np.inf, 6.0), (-6.0, np.inf), (np.nan, 6.0)])
+  def test_init_rejects_non_finite_bounds(self, bounds: tuple[float, float]) -> None:
+    """A non-finite bound would spread NaN nodes over the grid and fail only at the first selection."""
+    with pytest.raises(ValueError, match=r"^bounds must be finite, got \("):
+      MLWISelector(bounds=bounds)
 
   def test_init_rejects_non_increasing_bounds(self) -> None:
     """Reversed bounds would flip the sign of every score and select the least informative item."""
@@ -887,43 +890,61 @@ class TestKLSelector:
     with pytest.raises(ValueError, match=match):
       KLSelector(**kwargs)
 
-  def test_kl_integrand_is_exact_where_the_probability_rounds_to_one(self) -> None:
-    """Test the KL integrand for an item whose correct-response probability rounds to 1.
-
-    At theta_hat = b, P = 1/2, and at a logit of z = 40 the divergence is
-    -log 2 + z/2 + log(1 + e^-z). Computing log(1 - P) after P rounds to 1 caps the
-    second term, so this guards the logit-based log-probabilities.
-    """
-    kl_module = importlib.import_module("catsim.selection.kl")
-    z = 40.0
-    value = kl_module.__dict__["_kl_integrand"](4.0, 0.0, 10.0, 0.0, 0.0, 1.0)
-    assert value == pytest.approx(-np.log(2.0) + z / 2 + np.log1p(np.exp(-z)), rel=1e-12)
-
   @pytest.mark.parametrize(
-    "item",
+    "items",
     [
-      pytest.param((1.0, 0.0, 0.0, 1.0), id="2pl"),
-      pytest.param((1.5, 0.3, 0.2, 1.0), id="3pl"),
-      pytest.param((1.2, -0.5, 0.0, 0.9), id="4pl_without_guessing"),
-      pytest.param((1.8, 0.4, 0.15, 0.85), id="4pl"),
+      *(
+        pytest.param(ItemBank.generate(30, model=model, rng=7).items, id=model)
+        for model in ("1PL", "2PL", "3PL", "4PL")
+      ),
+      pytest.param(
+        np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 0.3, 0.2, 1.0], [1.2, -0.5, 0.0, 0.9], [1.8, 0.4, 0.15, 0.85]]),
+        id="every_branch",
+      ),
     ],
   )
-  @pytest.mark.parametrize(("theta", "theta_hat"), [(-2.0, 1.0), (0.5, -0.5), (3.0, 2.5)])
-  def test_kl_integrand_matches_the_bernoulli_divergence(
-    self, item: tuple[float, float, float, float], theta: float, theta_hat: float
-  ) -> None:
-    """Test the logit-based integrand against P-hat log(P-hat/P) + Q-hat log(Q-hat/Q).
+  @pytest.mark.parametrize(("theta_hat", "half_width"), [(-1.2, 3.0), (0.4, 3.0 / np.sqrt(5)), (2.0, 0.5), (0.0, 6.0)])
+  def test_kl_integrals_match_adaptive_quadrature(self, items: np.ndarray, theta_hat: float, half_width: float) -> None:
+    """Each item's integral matches scipy's adaptive quadrature of the Bernoulli divergence to 1e-9.
 
-    The c = 0 and d = 1 cases reach the logaddexp branches with an infinite term, the
-    others with two finite ones, so this covers every path of the log-probabilities.
+    Nodes not scaled to the window, a missing half-width factor or the two abilities swapped in the divergence miss
+    every item; a fixed 24-node rule misses the generated items over theta_hat +- 6.
     """
-    kl_module = importlib.import_module("catsim.selection.kl")
-    p_hat, p = irt.icc(theta_hat, np.array(item)), irt.icc(theta, np.array(item))
-    expected = p_hat * np.log(p_hat / p) + (1 - p_hat) * np.log((1 - p_hat) / (1 - p))
+    reference = _kl_reference(items, theta_hat, half_width)
 
-    value = kl_module.__dict__["_kl_integrand"](theta, theta_hat, *item)
+    np.testing.assert_allclose(KLSelector._kl_global(theta_hat, items, half_width), reference, rtol=1e-9)
 
-    assert value == pytest.approx(expected, rel=1e-10, abs=1e-14)
+  @pytest.mark.parametrize(
+    "items",
+    [
+      pytest.param(np.array([[4.0, 0.3, 0.0, 1.0], [6.0, -0.6, 0.0, 1.0], [10.0, 0.8, 0.0, 1.0]]), id="2pl"),
+      pytest.param(np.array([[4.0, -0.2, 0.25, 0.9], [6.0, 0.4, 0.3, 0.85], [10.0, -0.5, 0.2, 0.95]]), id="4pl"),
+    ],
+  )
+  @pytest.mark.parametrize(("theta_hat", "half_width"), [(0.0, 1.5), (0.3, 3.0), (-0.2, 6.0)])
+  def test_kl_integrals_of_steep_items_match_adaptive_quadrature(
+    self, items: np.ndarray, theta_hat: float, half_width: float
+  ) -> None:
+    """Items with a = 4 to 10 get integrals within 1e-10 of adaptive quadrature, over narrow and wide windows.
+
+    A rule whose node count ignores the discrimination misses them: 24 nodes are off by up to 2e-3, enough to change
+    which of two steep items is selected.
+    """
+    reference = _kl_reference(items, theta_hat, half_width)
+
+    np.testing.assert_allclose(KLSelector._kl_global(theta_hat, items, half_width), reference, rtol=1e-10)
+
+  def test_select_ranks_steep_items_by_their_integrals(self) -> None:
+    """Of two steep items whose KL integrals over 0 +- 3 differ by 4e-6 of their size, the larger one is selected.
+
+    A fixed 24-node rule errs by more than that margin on them and selects the other item.
+    """
+    # the second discrimination is tuned so that the two integrals differ by a relative 4e-6
+    items = np.array([[6.0, -0.6, 0.0, 1.0], [5.011988691929875, 0.3, 0.0, 1.0]])
+    reference = _kl_reference(items, 0.0, 3.0)
+
+    assert reference[0] > reference[1]
+    assert KLSelector().select(make_context(ItemBank(items))) == 0
 
   @pytest.mark.parametrize("n_administered", [0, 1, 4, 9])
   def test_select_maximizes_kl_over_a_window_shrinking_with_the_test(self, n_administered: int) -> None:

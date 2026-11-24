@@ -362,6 +362,8 @@ ignore_imports = [
   # MEISelector runs one-step-ahead ability updates with an estimator.
   "catsim.selection.expected_info -> catsim.estimation.base",
   "catsim.selection.expected_info -> catsim.estimation.numerical",
+  # MLWISelector weights information by the posterior over a quadrature grid under a flat prior.
+  "catsim.selection.weighted_info -> catsim.estimation",
 ]
 
 [[tool.importlinter.contracts]]

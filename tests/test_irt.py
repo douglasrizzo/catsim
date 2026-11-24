@@ -229,6 +229,55 @@ class TestMaxInfoTheta:
     np.testing.assert_array_equal(items[:, 1], [0.5, -0.2])
 
 
+class TestLogResponseProbabilities:
+  """Tests for the log_response_probabilities() function."""
+
+  def test_log_response_probabilities_of_a_hand_worked_item(self) -> None:
+    """At a logit of ln 3 the logistic term is 3/4, so [1, 0, 0.2, 0.9] has P = 0.2 + 0.7 * 3/4 = 0.725 and Q = 0.275.
+
+    Ignoring c or d, or swapping the two outputs, changes either value.
+    """
+    log_p, log_q = irt.log_response_probabilities(math.log(3.0), np.array([1.0, 0.0, 0.2, 0.9]))
+
+    assert float(log_p) == pytest.approx(math.log(0.725), rel=1e-12)
+    assert float(log_q) == pytest.approx(math.log(0.275), rel=1e-12)
+
+  @pytest.mark.parametrize(
+    "item",
+    [
+      pytest.param((1.0, 0.0, 0.0, 1.0), id="2pl"),
+      pytest.param((1.5, 0.3, 0.2, 1.0), id="3pl"),
+      pytest.param((1.2, -0.5, 0.0, 0.9), id="4pl_without_guessing"),
+      pytest.param((1.8, 0.4, 0.15, 0.85), id="4pl"),
+    ],
+  )
+  def test_log_response_probabilities_match_the_icc(self, item: tuple[float, float, float, float]) -> None:
+    """Near the difficulty, the outputs are log P and log(1 - P) of the icc.
+
+    c = 0 and d = 1 reach the logaddexp branches with an infinite term, the other items with two finite ones,
+    so a wrong branch on any path changes a value.
+    """
+    thetas = np.array([-2.0, -0.5, 0.0, 1.0, 3.0])
+    p = irt.icc(thetas, np.array(item))
+
+    log_p, log_q = irt.log_response_probabilities(thetas, np.array(item))
+
+    np.testing.assert_allclose(log_p, np.log(p), rtol=1e-12)
+    np.testing.assert_allclose(log_q, np.log1p(-p), rtol=1e-10)
+
+  def test_log_response_probabilities_are_exact_where_p_rounds_to_0_or_1(self) -> None:
+    """A 2PL item's log P and log Q equal -log(1 + e^-z) and -log(1 + e^z) at logits where P rounds to 0 or 1.
+
+    Taking logarithms of P or of 1 - P once P has rounded gives -inf beyond |z| = 37 and loses precision past 25.
+    """
+    z = np.array([-700.0, -40.0, 40.0, 700.0])
+
+    log_p, log_q = irt.log_response_probabilities(z, np.array([[1.0, 0.0, 0.0, 1.0]]))
+
+    np.testing.assert_allclose(log_p[:, 0], -np.logaddexp(0.0, -z), rtol=1e-12)
+    np.testing.assert_allclose(log_q[:, 0], -np.logaddexp(0.0, z), rtol=1e-12)
+
+
 class TestLogLikelihood:
   """Tests for the log_likelihood() function."""
 
