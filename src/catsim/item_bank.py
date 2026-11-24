@@ -493,10 +493,15 @@ def _normalize(items: FloatArray) -> FloatArray:
   ------
   TypeError
       If ``items`` is not a numpy.ndarray.
+  ValueError
+      If ``items`` is neither 1-D nor 2-D.
   """
   if not isinstance(items, numpy.ndarray):
     msg = "Item matrix is not of type numpy.ndarray"
     raise TypeError(msg)
+  if items.ndim not in {1, 2}:
+    msg = f"Item matrix has shape {items.shape}; it must be one item (1-D) or a matrix of items (2-D)"
+    raise ValueError(msg)
   matrix = numpy.array(numpy.atleast_2d(items), dtype=float)
   n_columns = matrix.shape[1]
   if not 0 < n_columns < _N_PARAMS:

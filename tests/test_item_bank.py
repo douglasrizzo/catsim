@@ -33,6 +33,20 @@ class TestItemBankCreation:
     with pytest.raises(TypeError, match=r"not of type numpy\.ndarray"):
       ItemBank([[1.0, 0.0, 0.1, 0.95]])  # type: ignore[arg-type]
 
+  @pytest.mark.parametrize(
+    "shape", [pytest.param((), id="0-d"), pytest.param((2, 2, 4), id="3-D"), pytest.param((2, 5, 4), id="3-D, 5 deep")]
+  )
+  def test_rejects_an_array_that_is_neither_one_item_nor_a_matrix(self, shape: tuple[int, ...]) -> None:
+    """A 0-d array is not a one-item bank, and a 3-D array is not a matrix of items.
+
+    Without the dimension check a scalar becomes one 1PL item of that difficulty, and a 3-D array fails with numpy's
+    broadcast error or is reported as a matrix with the wrong number of columns.
+    """
+    with pytest.raises(
+      ValueError, match=re.escape(f"shape {shape}; it must be one item (1-D) or a matrix of items (2-D)")
+    ):
+      ItemBank(np.ones(shape))
+
   @pytest.mark.parametrize("validate", [True, False])
   def test_rejects_a_matrix_with_more_than_four_columns(self, validate: bool) -> None:
     """A bank saved with the old fifth exposure-rate column raises and says how to drop it, instead of being misread."""
@@ -176,8 +190,8 @@ class TestItemBankValidation:
   def test_rejects_a_matrix_that_is_not_n_by_4(self, shape: tuple[int, ...]) -> None:
     """A matrix that is not n x 4 raises ValueError naming its shape.
 
-    Without the shape check, missing columns fail with an IndexError and a fifth column is ignored. ItemBank completes
-    1 to 3 columns first, so only a matrix with more than two dimensions reaches this check through it.
+    Without the shape check, missing columns fail with an IndexError and a fifth column is ignored. ItemBank rejects
+    other dimensions and completes 1 to 3 columns before it, so the check is called directly.
     """
     with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
       item_bank_module._validate(np.ones(shape))
