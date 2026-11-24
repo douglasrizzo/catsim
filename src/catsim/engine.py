@@ -12,7 +12,7 @@ import numpy
 
 from .context import Estimate, StepContext
 from .exceptions import NoItemsAvailableError
-from .irt import icc
+from .item_bank import ItemBank
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
   from .estimation import BaseEstimator
   from .initialization import BaseInitializer
-  from .item_bank import ItemBank
   from .selection import BaseSelector
+  from .state import CatSessionSnapshot
   from .stopping import BaseStopper
 
 
@@ -39,77 +39,112 @@ class RunContext:
 
 
 class ResponseProvider(Protocol):
-  """Protocol for providing responses to administered items."""
+  """Source of the examinee's responses for :meth:`CatEngine.step` and :meth:`CatEngine.run_session`.
 
-  def answer(self, state: CatSessionState, item_bank: ItemBank, item_id: int, context: RunContext) -> bool:
-    """Return the response for the selected item."""
-
-
-class SimulatedResponseProvider:
-  """Generate responses from an examinee's true theta."""
-
-  def answer(  # noqa: PLR6301
-    self, state: CatSessionState, item_bank: ItemBank, item_id: int, context: RunContext
-  ) -> bool:
-    """Sample a Bernoulli response using the 4PL model."""
-    if state.true_theta is None:
-      msg = "true_theta is required to simulate responses"
-      raise ValueError(msg)
-
-    item = item_bank.get_item(item_id)
-    probability = icc(state.true_theta, item[0], item[1], item[2], item[3])
-    return bool(probability >= context.rng.uniform())
-
-
-def _step_context(state: CatSessionState, item_bank: ItemBank, context: RunContext) -> StepContext:
-  """Return what a strategy may read about a session as it stands.
-
-  Parameters
-  ----------
-  state : CatSessionState
-      The session.
-  item_bank : ItemBank
-      Item bank used by the session.
-  context : RunContext
-      Runtime services of the run, which give the random generator and the exposure rates.
-
-  Returns
-  -------
-  StepContext
-      The session's items, responses and current estimate with its standard error, with no
-      excluded items.
+  :class:`~catsim.simulation.SimulatedResponseProvider` draws them from a simulated examinee's true
+  ability; an application that steps sessions itself can wrap whatever collects real answers.
   """
-  tracker = context.exposure_tracker
-  return StepContext(
-    item_bank=item_bank,
-    rng=context.rng,
-    administered_items=tuple(state.administered_item_ids),
-    responses=tuple(state.responses),
-    theta=state.current_theta,
-    se=state.current_se,
-    exposure_rates=None if tracker is None else tracker.rates(),
-  )
+
+  def answer(self, item_bank: ItemBank, item_id: int, session: CatSessionSnapshot, rng: numpy.random.Generator) -> bool:
+    """Return whether the examinee answers the item correctly.
+
+    Parameters
+    ----------
+    item_bank : ItemBank
+        The engine's item bank.
+    item_id : int
+        Index of the item the selector chose.
+    session : CatSessionSnapshot
+        The session as it stands before the response, which the provider cannot change.
+    rng : numpy.random.Generator
+        The run's random generator, the one the strategies draw from.
+
+    Returns
+    -------
+    bool
+        True for a correct response.
+    """
 
 
 class CatEngine:
-  """Engine for stepwise CAT execution."""
+  """Engine for stepwise CAT execution on one item bank.
+
+  Every session the engine runs is tested on its item bank: the item indices a session records,
+  and the exposure tracker of the run, refer to that bank. An application with several banks
+  builds one engine per bank.
+
+  Parameters
+  ----------
+  item_bank : ItemBank
+      The calibrated items the engine's sessions are tested on.
+  initializer : BaseInitializer
+      Gives each session its initial ability estimate.
+  selector : BaseSelector
+      Chooses the next item.
+  estimator : BaseEstimator
+      Updates the ability estimate after each response.
+  stopper : BaseStopper
+      Decides when a session has ended.
+
+  Raises
+  ------
+  TypeError
+      If ``item_bank`` is not an :class:`~catsim.item_bank.ItemBank`.
+  """
 
   def __init__(
     self,
+    item_bank: ItemBank,
     initializer: BaseInitializer,
     selector: BaseSelector,
     estimator: BaseEstimator,
     stopper: BaseStopper,
   ) -> None:
+    # Checked here because a NumPy array of parameters would otherwise fail only at the first session.
+    if not isinstance(item_bank, ItemBank):
+      msg = f"item_bank must be an ItemBank, got {type(item_bank).__name__}; wrap item parameters in ItemBank(...)"
+      raise TypeError(msg)
+    self._item_bank = item_bank
     self._initializer = initializer
     self._selector = selector
     self._estimator = estimator
     self._stopper = stopper
 
+  @property
+  def item_bank(self) -> ItemBank:
+    """Return the item bank the engine's sessions are tested on."""
+    return self._item_bank
+
+  def _step_context(self, state: CatSessionState, context: RunContext) -> StepContext:
+    """Return what a strategy may read about a session as it stands.
+
+    Parameters
+    ----------
+    state : CatSessionState
+        The session.
+    context : RunContext
+        Runtime services of the run, which give the random generator and the exposure rates.
+
+    Returns
+    -------
+    StepContext
+        The session's items, responses and current estimate with its standard error, with no
+        excluded items.
+    """
+    tracker = context.exposure_tracker
+    return StepContext(
+      item_bank=self._item_bank,
+      rng=context.rng,
+      administered_items=tuple(state.administered_item_ids),
+      responses=tuple(state.responses),
+      theta=state.current_theta,
+      se=state.current_se,
+      exposure_rates=None if tracker is None else tracker.rates(),
+    )
+
   def start_session(
     self,
     session_id: Hashable,
-    item_bank: ItemBank,
     context: RunContext,
     true_theta: float | None = None,
   ) -> CatSessionState:
@@ -122,8 +157,6 @@ class CatEngine:
     ----------
     session_id : Hashable
         Identifier of the session, such as an int, a str or a UUID.
-    item_bank : ItemBank
-        Item bank used by the session.
     context : RunContext
         Runtime services of the run.
     true_theta : float or None, optional
@@ -135,21 +168,19 @@ class CatEngine:
         A running session whose estimate history holds the initial estimate, with an infinite
         standard error.
     """
-    initial_theta = float(self._initializer.initialize(item_bank=item_bank, rng=context.rng))
+    initial_theta = float(self._initializer.initialize(item_bank=self._item_bank, rng=context.rng))
     if context.exposure_tracker is not None:
       context.exposure_tracker.start_session()
     initial = Estimate(theta=initial_theta, se=math.inf, evaluations=0)
     return CatSessionState(session_id=session_id, estimates=[initial], true_theta=true_theta)
 
-  def should_stop(self, state: CatSessionState, item_bank: ItemBank, context: RunContext) -> bool:
+  def should_stop(self, state: CatSessionState, context: RunContext) -> bool:
     """Return whether the session satisfies the stopping criterion.
 
     Parameters
     ----------
     state : CatSessionState
         The session to check.
-    item_bank : ItemBank
-        Item bank used by the session.
     context : RunContext
         Runtime services of the run.
 
@@ -158,16 +189,16 @@ class CatEngine:
     bool
         What the stopper says about the session as it stands.
     """
-    return bool(self._stopper.stop(_step_context(state, item_bank, context)))
+    return bool(self._stopper.stop(self._step_context(state, context)))
 
-  def select_next(self, state: CatSessionState, item_bank: ItemBank, context: RunContext) -> int | None:
+  def select_next(self, state: CatSessionState, context: RunContext) -> int | None:
     """Select the next item to administer, or end the session.
 
     This is the one place that decides whether a session continues, so a manual loop needs no
     other check::
 
-      while (item_id := engine.select_next(state, item_bank, context)) is not None:
-        engine.apply_response(state, item_bank, item_id, ask_examinee(item_id), context)
+      while (item_id := engine.select_next(state, context)) is not None:
+        engine.apply_response(state, item_id, ask_examinee(item_id), context)
 
     The stopper is consulted here only for a session that has no responses yet. After that,
     :meth:`apply_response` evaluates it once for every new state, and what it records is final.
@@ -176,8 +207,6 @@ class CatEngine:
     ----------
     state : CatSessionState
         The session to continue. It is marked stopped when this method returns None for it.
-    item_bank : ItemBank
-        Item bank used by the session.
     context : RunContext
         Runtime services of the run: the random generator and, optionally, the exposure tracker.
 
@@ -190,12 +219,12 @@ class CatEngine:
     """
     if state.is_stopped:
       return None
-    if state.administered_count == 0 and self.should_stop(state, item_bank, context):
+    if state.administered_count == 0 and self.should_stop(state, context):
       state.stop_reason = StopReason.STOPPER
       return None
 
     try:
-      item_id = self._selector.select(_step_context(state, item_bank, context))
+      item_id = self._selector.select(self._step_context(state, context))
     except NoItemsAvailableError:
       state.stop_reason = StopReason.NO_ITEMS
       return None
@@ -204,7 +233,6 @@ class CatEngine:
   def apply_response(
     self,
     state: CatSessionState,
-    item_bank: ItemBank,
     item_id: int,
     response: bool,
     context: RunContext,
@@ -219,8 +247,6 @@ class CatEngine:
     ----------
     state : CatSessionState
         The session that administered the item. It must not be stopped.
-    item_bank : ItemBank
-        Item bank used by the session.
     item_id : int
         Index of the administered item, usually the one :meth:`select_next` returned.
     response : bool
@@ -255,15 +281,15 @@ class CatEngine:
     except TypeError:
       msg = f"item_id must be an integer, got {type(item_id).__name__} {item_id!r}"
       raise TypeError(msg) from None
-    if item_id < 0 or item_id >= item_bank.n_items:
-      msg = f"Invalid item index {item_id}. Must be between 0 and {item_bank.n_items - 1}"
+    if item_id < 0 or item_id >= self._item_bank.n_items:
+      msg = f"Invalid item index {item_id}. Must be between 0 and {self._item_bank.n_items - 1}"
       raise ValueError(msg)
     if item_id in state.administered_item_ids:
       msg = f"Item {item_id} has already been administered in this session"
       raise ValueError(msg)
 
     response = bool(response)
-    current = _step_context(state, item_bank, context)
+    current = self._step_context(state, context)
     # The estimator starts from the previous estimate; the stopper judges the new one.
     answered = dataclasses.replace(
       current,
@@ -296,7 +322,6 @@ class CatEngine:
   def step(
     self,
     state: CatSessionState,
-    item_bank: ItemBank,
     response_provider: ResponseProvider,
     context: RunContext,
   ) -> CatStepResult:
@@ -306,8 +331,6 @@ class CatEngine:
     ----------
     state : CatSessionState
         The session to advance.
-    item_bank : ItemBank
-        Item bank used by the session.
     response_provider : ResponseProvider
         Source of the examinee's response to the selected item.
     context : RunContext
@@ -320,20 +343,19 @@ class CatEngine:
         result with no item and no response that reports the session stopped, with the stop
         reason it has (an already stopped session keeps its earlier one).
     """
-    item_id = self.select_next(state, item_bank, context)
+    item_id = self.select_next(state, context)
     if item_id is None:
       return CatStepResult(session=state.snapshot(), selected_item_id=None, response=None)
-    response = response_provider.answer(state, item_bank, item_id, context)
-    return self.apply_response(state, item_bank, item_id, response, context)
+    response = response_provider.answer(self._item_bank, item_id, state.snapshot(), context.rng)
+    return self.apply_response(state, item_id, response, context)
 
   def run_session(
     self,
     state: CatSessionState,
-    item_bank: ItemBank,
     response_provider: ResponseProvider,
     context: RunContext,
   ) -> CatSessionState:
     """Run a session until a stop condition is reached."""
     while not state.is_stopped:
-      self.step(state, item_bank, response_provider, context)
+      self.step(state, response_provider, context)
     return state

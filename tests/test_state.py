@@ -1,4 +1,4 @@
-"""Tests for runtime state and aggregate simulation result models."""
+"""Tests for the runtime state of sessions and runs."""
 
 from __future__ import annotations
 
@@ -9,18 +9,7 @@ import numpy as np
 import pytest
 
 from catsim import Estimate
-from catsim.item_bank import ItemBank
-from catsim.state import CatSessionState, ExposureTracker, SimulationResult, StopReason
-
-
-def finished_session(session_id: int, items: list[int]) -> CatSessionState:
-  """Return a session that administered ``items``, all answered correctly, with a constant estimate."""
-  return CatSessionState(
-    session_id=session_id,
-    estimates=[Estimate(0.0, math.inf)] * (len(items) + 1),
-    administered_item_ids=items,
-    responses=[True] * len(items),
-  )
+from catsim.state import CatSessionState, ExposureTracker, StopReason
 
 
 @pytest.mark.parametrize(
@@ -151,91 +140,76 @@ def test_exposure_tracker_gives_sessions_side_by_side_each_others_administration
   assert tracker.rates().tolist() == [0.5, 0.5, 0.0]
 
 
-def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
-  """A session without a true theta counts as an examinee at 0.
+def test_a_tracker_rebuilt_from_saved_counts_continues_where_the_saved_one_was() -> None:
+  """A tracker rebuilt from a saved one's counts and n_sessions gives the rates the saved one would have given.
 
-  Fails if examinees drops such a session or holds None for it, so it no longer lines up with
-  latest_estimations.
+  Four sessions gave items [0, 1], [0, 2], [0, 3] and [0] on a 4-item bank, so the counts are [4, 1, 1, 1] over 4
+  sessions. The next session is selected against them over the 4 others: [1, 0.25, 0.25, 0.25]. Fails if the
+  rebuilt tracker ignores the saved counts (all zero) or the saved sessions (the rates over no other session).
   """
-  sessions = [
-    CatSessionState(session_id=0, estimates=[Estimate(0.2, math.inf)], true_theta=None),
-    CatSessionState(session_id=1, estimates=[Estimate(-0.4, math.inf)], true_theta=1.0),
-  ]
-  result = SimulationResult(
-    item_bank=item_bank,
-    sessions=sessions,
-    exposure_counts=np.zeros(item_bank.n_items, dtype=int),
-    duration=0.1,
-  )
+  original = ExposureTracker(4)
+  for items in ([0, 1], [0, 2], [0, 3], [0]):
+    original.start_session()
+    for item_id in items:
+      original.record(item_id)
+  saved = json.loads(json.dumps({"counts": original.counts.tolist(), "n_sessions": original.n_sessions}))
+  rebuilt = ExposureTracker(4, counts=saved["counts"], n_sessions=saved["n_sessions"])
 
-  assert np.array_equal(result.examinees, np.array([0.0, 1.0]))
+  original.start_session()
+  rebuilt.start_session()
+
+  assert rebuilt.rates().tolist() == original.rates().tolist() == [1.0, 0.25, 0.25, 0.25]
 
 
-def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
-  """A result with no sessions has zero exposure rates and no overlap rate.
+def test_a_rebuilt_tracker_owns_its_counts() -> None:
+  """Recording on a rebuilt tracker leaves the caller's array alone.
 
-  Fails if exposure_rates divides the counts by zero sessions (NaN, with a warning that the test settings turn into
-  an error), or if overlap_rate computes a number for a run without tests.
+  Fails if the tracker keeps the array it was given, so the application's saved copy would change with every
+  administration and could be saved twice.
   """
-  result = SimulationResult(
-    item_bank=item_bank,
-    sessions=[],
-    exposure_counts=np.zeros(item_bank.n_items, dtype=int),
-    duration=0.0,
-  )
+  saved = np.array([2, 0, 1])
+  tracker = ExposureTracker(3, counts=saved, n_sessions=2)
 
-  assert np.array_equal(result.exposure_rates, np.zeros(item_bank.n_items))
-  assert result.overlap_rate is None
+  tracker.record(1)
+
+  assert saved.tolist() == [2, 0, 1]
+  assert tracker.counts.tolist() == [2, 1, 1]
 
 
-def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
-  """Two 2-item tests, [0, 1] and [0, 2], on a 5-item bank give exposure rates [1, 0.5, 0.5, 0, 0].
+@pytest.mark.parametrize(
+  ("counts", "n_sessions", "error", "match"),
+  [
+    pytest.param([1, 0, 2], 3, ValueError, r"one count per item \(4\), got shape \(3,\)", id="too-few-counts"),
+    pytest.param(
+      [[1, 0], [2, 0]], 3, ValueError, r"one count per item \(4\), got shape \(2, 2\)", id="two-dimensional"
+    ),
+    pytest.param([1, -1, 0, 0], 3, ValueError, "counts cannot be negative, got -1", id="negative-count"),
+    pytest.param([1.0, 0.0, 2.0, 0.0], 3, TypeError, "counts must be integers, got dtype float64", id="float-counts"),
+    pytest.param([1, 0, 2, 0], -1, ValueError, "n_sessions cannot be negative, got -1", id="negative-sessions"),
+    pytest.param([1, 0, 2, 0], 3.0, TypeError, "n_sessions must be an integer, got float 3.0", id="float-sessions"),
+    pytest.param([1, 0, 2, 0], True, TypeError, "n_sessions must be an integer, got bool True", id="bool-sessions"),
+    pytest.param(
+      [5, 0, 2, 0], 3, ValueError, "an item has 5 administrations but only 3 sessions", id="counts-above-sessions"
+    ),
+  ],
+)
+def test_a_tracker_rejects_saved_counts_it_cannot_use(
+  counts: list, n_sessions: int, error: type[Exception], match: str
+) -> None:
+  """Counts that are not one non-negative integer per item, or a session count that is not a non-negative integer, fail.
 
-  The rates average Q / N, so (N / Q) var(r) + Q / N reduces to sum(r^2) / Q = 1.5 / 2 = 0.75. A wrong test
-  length of 1 would give 0.9.
+  Fails if the tracker accepts counts saved for another bank (rates() would then broadcast or fail mid-session), a
+  negative count or session count (negative rates, which no r_max cap would hold back), fractional values, a bool
+  for the session count, or counts from another save than the session count (a rate above 1 for every session).
   """
-  sessions = [
-    finished_session(0, [0, 1]),
-    finished_session(1, [0, 2]),
-  ]
-  result = SimulationResult(
-    item_bank=ItemBank.generate_item_bank(5, seed=0),
-    sessions=sessions,
-    exposure_counts=np.array([2, 1, 1, 0, 0]),
-    duration=0.0,
-  )
-
-  assert result.exposure_rates.tolist() == [1.0, 0.5, 0.5, 0.0, 0.0]
-  assert result.overlap_rate == pytest.approx(0.75)
+  with pytest.raises(error, match=match):
+    ExposureTracker(4, counts=counts, n_sessions=n_sessions)
 
 
-def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths(item_bank) -> None:
-  """Overlap is None for sessions of different lengths or of no items.
+def test_a_tracker_rebuilt_from_compact_counts_counts_past_their_type() -> None:
+  """Counts saved as uint8 kept that type, so the 256th administration wrapped the count to 0 and lifted the cap."""
+  tracker = ExposureTracker(2, counts=np.array([255, 0], dtype=np.uint8), n_sessions=300)
 
-  Fails if overlap_rate computes a number from a test length the sessions do not share, or divides
-  by a test length of zero.
-  """
-  heterogeneous_sessions = [
-    finished_session(0, [0]),
-    finished_session(1, [0, 1]),
-  ]
-  heterogeneous = SimulationResult(
-    item_bank=item_bank,
-    sessions=heterogeneous_sessions,
-    exposure_counts=np.zeros(item_bank.n_items, dtype=int),
-    duration=0.0,
-  )
+  tracker.record(0)
 
-  zero_length_sessions = [
-    finished_session(0, []),
-    finished_session(1, []),
-  ]
-  zero_length = SimulationResult(
-    item_bank=item_bank,
-    sessions=zero_length_sessions,
-    exposure_counts=np.zeros(item_bank.n_items, dtype=int),
-    duration=0.0,
-  )
-
-  assert heterogeneous.overlap_rate is None
-  assert zero_length.overlap_rate is None
+  assert tracker.counts.tolist() == [256, 0]

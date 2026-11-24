@@ -1,20 +1,21 @@
-"""State models for CAT execution and simulation."""
+"""Runtime state of CAT sessions and of the runs they belong to."""
 
 from __future__ import annotations
 
+import operator
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import TYPE_CHECKING
 
 import numpy
 
-from . import cat
 from .context import Estimate
 
 if TYPE_CHECKING:
   from collections.abc import Hashable
 
-  from .item_bank import ItemBank
+  import numpy.typing as npt
+
   from .typing import FloatArray, IntArray
 
 
@@ -183,7 +184,7 @@ class CatStepResult:
     return self.session.stop_reason
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, init=False)
 class ExposureTracker:
   """Count item administrations and sessions across a run, and give sessions their exposure rates.
 
@@ -197,15 +198,56 @@ class ExposureTracker:
   is the share of the examinees tested before the current one, as in catR's
   ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,
   as in a live deployment, see each other's administrations as they happen.
+
+  A new tracker starts from zero. An application that must keep the exposure across restarts saves
+  ``counts`` and ``n_sessions`` and passes them back to rebuild the tracker.
+
+  Parameters
+  ----------
+  n_items : int
+      Number of items in the bank.
+  counts : array-like of int or None, optional
+      Each item's administrations so far, as a saved tracker's ``counts`` holds them. The tracker
+      keeps a copy. Default is None, for no administrations.
+  n_sessions : int, optional
+      Sessions started so far, as a saved tracker's ``n_sessions`` holds them. Default is 0.
+
+  Raises
+  ------
+  ValueError
+      If ``counts`` does not hold one count per item, holds a negative count or a count above
+      ``n_sessions``, or ``n_sessions`` is negative.
+  TypeError
+      If ``counts`` holds a value that is not an integer, or ``n_sessions`` is not an integer (a
+      bool included).
   """
 
   n_items: int
-  counts: IntArray = field(init=False)
-  n_sessions: int = field(init=False, default=0)
+  counts: IntArray
+  n_sessions: int
 
-  def __post_init__(self) -> None:
-    """Allocate the item counts, all zero."""
-    self.counts = numpy.zeros(self.n_items, dtype=int)
+  def __init__(self, n_items: int, counts: npt.ArrayLike | None = None, n_sessions: int = 0) -> None:
+    self.n_items = n_items
+    self.counts = numpy.zeros(n_items, dtype=int) if counts is None else _restored_counts(n_items, counts)
+    # bool is an int to operator.index, but a flag passed by mistake is not a session count.
+    if isinstance(n_sessions, (bool, numpy.bool_)):
+      msg = f"n_sessions must be an integer, got {type(n_sessions).__name__} {n_sessions!r}"
+      raise TypeError(msg)
+    try:
+      self.n_sessions = operator.index(n_sessions)
+    except TypeError:
+      msg = f"n_sessions must be an integer, got {type(n_sessions).__name__} {n_sessions!r}"
+      raise TypeError(msg) from None
+    if self.n_sessions < 0:
+      msg = f"n_sessions cannot be negative, got {self.n_sessions}"
+      raise ValueError(msg)
+    # A session administers an item at most once, so no item can have more administrations than sessions.
+    if self.counts.size and int(numpy.max(self.counts)) > self.n_sessions:
+      msg = (
+        f"counts and n_sessions do not belong together: an item has {int(numpy.max(self.counts))} administrations "
+        f"but only {self.n_sessions} sessions started"
+      )
+      raise ValueError(msg)
 
   def start_session(self) -> None:
     """Count a session that has started."""
@@ -227,7 +269,8 @@ class ExposureTracker:
     -------
     numpy.ndarray
         A new array with one rate per item; all zero while at most one session has started. This is
-        not the run's final exposure, which :attr:`SimulationResult.exposure_rates` gives.
+        not the run's final exposure, which
+        :attr:`~catsim.simulation.SimulationResult.exposure_rates` gives.
     """
     others = self.n_sessions - 1
     if others < 1:
@@ -235,72 +278,38 @@ class ExposureTracker:
     return self.counts / others
 
 
-@dataclass(slots=True)
-class SimulationResult:
-  """Aggregate result for a batch of CAT sessions."""
+def _restored_counts(n_items: int, counts: npt.ArrayLike) -> IntArray:
+  """Return a copy of a saved tracker's counts, checking there is one non-negative integer per item.
 
-  item_bank: ItemBank
-  sessions: list[CatSessionState]
-  exposure_counts: IntArray
-  duration: float
+  Parameters
+  ----------
+  n_items : int
+      Number of items in the bank.
+  counts : array-like of int
+      The saved counts.
 
-  @property
-  def exposure_rates(self) -> FloatArray:
-    """Return per-item exposure rates across the simulated sessions."""
-    n_sessions = len(self.sessions)
-    if n_sessions == 0:
-      return numpy.zeros(self.item_bank.n_items, dtype=float)
-    return self.exposure_counts.astype(float) / n_sessions
+  Returns
+  -------
+  numpy.ndarray
+      A new integer array the tracker owns.
 
-  @property
-  def administered_items(self) -> list[list[int]]:
-    """Return administered item ids for each session."""
-    return [session.administered_item_ids for session in self.sessions]
-
-  @property
-  def estimations(self) -> list[list[float]]:
-    """Return theta history for each session."""
-    return [list(session.theta_history) for session in self.sessions]
-
-  @property
-  def response_vectors(self) -> list[list[bool]]:
-    """Return response vectors for each session."""
-    return [session.responses for session in self.sessions]
-
-  @property
-  def latest_estimations(self) -> list[float]:
-    """Return final theta estimates for each session."""
-    return [session.current_theta for session in self.sessions]
-
-  @property
-  def examinees(self) -> FloatArray:
-    """Return true theta values for the simulated sessions."""
-    return numpy.asarray([0.0 if session.true_theta is None else session.true_theta for session in self.sessions])
-
-  @property
-  def bias(self) -> float:
-    """Return simulation bias."""
-    return cat.bias(self.examinees, self.latest_estimations)
-
-  @property
-  def mse(self) -> float:
-    """Return simulation MSE."""
-    return cat.mse(self.examinees, self.latest_estimations)
-
-  @property
-  def rmse(self) -> float:
-    """Return simulation RMSE."""
-    return cat.rmse(self.examinees, self.latest_estimations)
-
-  @property
-  def overlap_rate(self) -> float | None:
-    """Return overlap rate when all sessions have the same test length."""
-    if not self.sessions:
-      return None
-    test_sizes = {len(session.administered_item_ids) for session in self.sessions}
-    if len(test_sizes) != 1:
-      return None
-    test_size = test_sizes.pop()
-    if test_size == 0:
-      return None
-    return cat.overlap_rate(self.exposure_rates, test_size)
+  Raises
+  ------
+  ValueError
+      If ``counts`` does not hold one count per item or holds a negative count.
+  TypeError
+      If ``counts`` holds a value that is not an integer.
+  """
+  restored = numpy.array(counts)
+  if restored.shape != (n_items,):
+    msg = f"counts must hold one count per item ({n_items}), got shape {restored.shape}"
+    raise ValueError(msg)
+  # bool is not an integer dtype to NumPy, so a mask passed by mistake is rejected too.
+  if not numpy.issubdtype(restored.dtype, numpy.integer):
+    msg = f"counts must be integers, got dtype {restored.dtype}"
+    raise TypeError(msg)
+  if (restored < 0).any():
+    msg = f"counts cannot be negative, got {restored.min()}"
+    raise ValueError(msg)
+  # Saved in a compact type such as uint8, the counts would wrap to 0 past its maximum.
+  return restored.astype(numpy.int64)

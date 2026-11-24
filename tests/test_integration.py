@@ -7,7 +7,7 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
+from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, UniformInitializer
 from catsim.item_bank import ItemBank
@@ -26,8 +26,8 @@ from catsim.selection import (
   UrrySelector,
 )
 from catsim.selection.base import BaseSelector
-from catsim.simulation import SimulationRunner
-from catsim.state import ExposureTracker, SimulationResult, StopReason
+from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
+from catsim.state import ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
@@ -40,16 +40,12 @@ def run_simulation(
   examinees: int = 12,
   seed: int = 42,
 ) -> SimulationResult:
-  """Run a small deterministic simulation and return its aggregate result."""
-  runner = SimulationRunner(
-    item_bank,
-    UniformInitializer(low=-2.0, high=2.0),
-    selector,
-    estimator or NumericalSearchEstimator(),
-    stopper,
-    seed=seed,
+  """Run a small deterministic simulation of examinees drawn from N(0, 1) and return its aggregate result."""
+  engine = CatEngine(
+    item_bank, UniformInitializer(low=-2.0, high=2.0), selector, estimator or NumericalSearchEstimator(), stopper
   )
-  result = runner.run(examinees)
+  true_thetas = np.random.default_rng(seed).normal(0, 1, examinees)
+  result = SimulationRunner(engine).run(true_thetas, rng=seed)
   assert len(result.sessions) == examinees
   assert all(session.is_stopped for session in result.sessions)
   assert result.exposure_counts.sum() == sum(len(session.administered_item_ids) for session in result.sessions)
@@ -178,13 +174,13 @@ def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() ->
   def components() -> tuple[FixedPointInitializer, RandomesqueSelector, NumericalSearchEstimator, MaxLengthStopper]:
     return FixedPointInitializer(0.0), RandomesqueSelector(3), NumericalSearchEstimator(), MaxLengthStopper(6)
 
-  batched = SimulationRunner(item_bank, *components(), seed=7).run([0.3]).sessions[0]
+  batched = SimulationRunner(CatEngine(item_bank, *components())).run([0.3], rng=7).sessions[0]
 
-  engine = CatEngine(*components())
+  engine = CatEngine(item_bank, *components())
   context = RunContext(rng=np.random.default_rng(7), exposure_tracker=ExposureTracker(item_bank.n_items))
-  manual = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.3)
+  manual = engine.start_session(session_id=0, context=context, true_theta=0.3)
   # step one item at a time, as an interactive caller would, until a step reports the session stopped
-  while not engine.step(manual, item_bank, SimulatedResponseProvider(), context).stopped:
+  while not engine.step(manual, SimulatedResponseProvider(), context).stopped:
     pass
 
   assert manual.administered_item_ids == batched.administered_item_ids

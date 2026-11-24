@@ -31,32 +31,40 @@ Tutorial notebooks are available in the repository under [`notebooks/`](https://
 The main architecture decisions behind the current engine and simulation model are documented as
 [Architecture Decision Records](https://douglasrizzo.com.br/catsim/architecture_decisions.html).
 
-1. Have an [item matrix](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
-1. Have a sample of examinee proficiencies, or a number of examinees to be generated;
+1. Have an [item bank](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
+1. Have the true abilities of the examinees to simulate, for example drawn from a normal
+   distribution;
 1. Create an [initializer](https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html),
-   an item [selector](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html), a
+   an item [selector](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html), an
    ability [estimator](https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html)
    and a [stopping criterion](https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html);
-1. Create a [simulation runner](https://douglasrizzo.com.br/catsim/api/simulation.html)
-   with those components.
+1. Build a [CAT engine](https://douglasrizzo.com.br/catsim/api/engine.html) from the item bank and
+   those components, and a [simulation runner](https://douglasrizzo.com.br/catsim/api/simulation.html)
+   on that engine;
 1. Run the simulation and inspect the returned result object;
 1. [Plot](https://douglasrizzo.com.br/catsim/api/plot.html) your results.
 
 ```python
+import numpy
+from catsim import CatEngine, ItemBank, SimulationRunner
 from catsim.initialization import UniformInitializer
 from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
-from catsim.simulation import SimulationRunner
-from catsim import ItemBank
-initializer = UniformInitializer()
-selector = MaxInfoSelector()
-estimator = NumericalSearchEstimator()
-stopper = StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20))
-runner = SimulationRunner(ItemBank.generate_item_bank(100), initializer, selector, estimator, stopper)
-result = runner.run(10)
+engine = CatEngine(
+    ItemBank.generate_item_bank(100),
+    UniformInitializer(),
+    MaxInfoSelector(),
+    NumericalSearchEstimator(),
+    StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
+)
+true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
+result = SimulationRunner(engine).run(true_thetas, rng=0)
 print(result.rmse)
 ```
+
+The same `rng` gives the same result on every run; see
+[Reproducibility](https://douglasrizzo.com.br/catsim/reproducibility.html).
 
 ## Dependencies
 

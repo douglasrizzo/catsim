@@ -36,6 +36,7 @@ def test_select_next_returns_unseen_item_within_bank(
   assume(administered_prefix < n - 1)
   bank = ItemBank(params, validate=True)
   engine = CatEngine(
+    bank,
     FixedPointInitializer(0.0),
     MaxInfoSelector(),
     NumericalSearchEstimator(),
@@ -49,7 +50,7 @@ def test_select_next_returns_unseen_item_within_bank(
     responses=[True] * administered_prefix,
   )
   ctx = RunContext(rng=np.random.default_rng(seed))
-  item_id = engine.select_next(state, bank, ctx)
+  item_id = engine.select_next(state, ctx)
   assert item_id is not None
   assert type(item_id) is int
   assert 0 <= int(item_id) < n

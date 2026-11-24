@@ -11,14 +11,14 @@ import numpy as np
 import pytest
 
 from catsim import Estimate, StepContext
-from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
+from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector
 from catsim.selection.base import remaining
-from catsim.state import CatSessionState, ExposureTracker, StopReason
+from catsim.state import CatSessionSnapshot, CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 from tests.contexts import make_context
 
@@ -29,7 +29,7 @@ class FixedResponseProvider:
 
   response: bool
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     return self.response
 
 
@@ -39,8 +39,19 @@ class ScriptedResponseProvider:
 
   responses: list[bool]
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
-    return self.responses[len(state.responses)]
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
+    return self.responses[len(session.responses)]
+
+
+@dataclass
+class RecordingResponseProvider:
+  """Response provider that answers correctly and records what each call was given."""
+
+  calls: list[tuple] = dataclasses.field(default_factory=list)
+
+  def answer(self, item_bank, item_id, session, rng) -> bool:
+    self.calls.append((item_bank, item_id, session, rng))
+    return True
 
 
 class ExhaustedSelector:
@@ -151,16 +162,6 @@ class RecordingStopper:
     return self.should_stop
 
 
-@dataclass
-class FakeRng:
-  """Minimal RNG stub for deterministic response-provider tests."""
-
-  sample: float
-
-  def uniform(self) -> float:
-    return self.sample
-
-
 class LowestIndexSelector(BaseSelector):
   """Custom selector: the remaining item with the lowest index."""
 
@@ -190,6 +191,14 @@ class HalfInitializer(BaseInitializer):
     return 0.5
 
 
+def test_engine_rejects_item_parameters_that_are_not_an_item_bank(item_bank) -> None:
+  """A bare parameter array was accepted and failed only at the first session, with an AttributeError on n_items."""
+  with pytest.raises(TypeError, match=r"item_bank must be an ItemBank, got ndarray; wrap item parameters in ItemBank"):
+    CatEngine(
+      item_bank.items, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False)
+    )
+
+
 def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> None:
   """start_session gives the initializer the bank and the run's generator, and starts a running session at its estimate.
 
@@ -200,11 +209,11 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   selector = RandomSelector()
   estimator = NumericalSearchEstimator()
   stopper = MaxLengthStopper(5)
-  engine = CatEngine(initializer, selector, estimator, stopper)
+  engine = CatEngine(item_bank, initializer, selector, estimator, stopper)
   rng = np.random.default_rng(123)
   context = RunContext(rng=rng)
 
-  session = engine.start_session(session_id=7, item_bank=item_bank, context=context, true_theta=-0.5)
+  session = engine.start_session(session_id=7, context=context, true_theta=-0.5)
 
   assert initializer.seen_item_bank is item_bank
   assert initializer.seen_rng is rng
@@ -226,8 +235,8 @@ def test_start_session_counts_a_session_in_the_tracker_only_once_it_has_started(
   strategies = (RecordingSelector(0), RecordingEstimator(0.0), RecordingStopper(False))
 
   with pytest.raises(ValueError, match="initialization failed"):
-    CatEngine(FailingInitializer(), *strategies).start_session(0, item_bank, context)
-  CatEngine(RecordingInitializer(0.0), *strategies).start_session(1, item_bank, context)
+    CatEngine(item_bank, FailingInitializer(), *strategies).start_session(0, context)
+  CatEngine(item_bank, RecordingInitializer(0.0), *strategies).start_session(1, context)
 
   assert tracker.n_sessions == 1
 
@@ -238,7 +247,7 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   Fails if any of them is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
   """
   stopper = RecordingStopper(should_stop=True)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
   state = CatSessionState(
     session_id=3,
     estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(1.75, 0.6)],
@@ -247,7 +256,7 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   )
   rng = np.random.default_rng(5)
 
-  stopped = engine.should_stop(state, item_bank, RunContext(rng=rng))
+  stopped = engine.should_stop(state, RunContext(rng=rng))
 
   assert stopped is True
   assert stopper.seen.item_bank is item_bank
@@ -272,7 +281,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   tracker.start_session()
   rng = np.random.default_rng(99)
   context = RunContext(rng=rng, exposure_tracker=tracker)
-  engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
   state = CatSessionState(
     session_id=0,
     estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(-0.25, 0.6)],
@@ -280,7 +289,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
     responses=[True, False],
   )
 
-  selected = engine.select_next(state, item_bank, context)
+  selected = engine.select_next(state, context)
 
   assert selected == 4
   assert selector.seen.item_bank is item_bank
@@ -303,15 +312,15 @@ def test_a_tracker_caps_exposure_across_sessions_with_no_other_setting() -> None
   """
   item_bank = ItemBank(np.array([[a, 0.0, 0.0, 1.0] for a in (2.0, 1.5, 1.0, 0.5)]))
   engine = CatEngine(
-    RecordingInitializer(0.0), MaxInfoSelector(r_max=0.5), RecordingEstimator(0.0), RecordingStopper(False)
+    item_bank, RecordingInitializer(0.0), MaxInfoSelector(r_max=0.5), RecordingEstimator(0.0), RecordingStopper(False)
   )
   context = RunContext(rng=np.random.default_rng(0), exposure_tracker=ExposureTracker(item_bank.n_items))
 
   first_items = []
   for session_id in range(4):
-    session = engine.start_session(session_id, item_bank, context)
-    item_id = engine.select_next(session, item_bank, context)
-    engine.apply_response(session, item_bank, item_id, True, context)
+    session = engine.start_session(session_id, context)
+    item_id = engine.select_next(session, context)
+    engine.apply_response(session, item_id, True, context)
     first_items.append(item_id)
 
   assert first_items == [0, 1, 2, 0]
@@ -323,11 +332,11 @@ def test_select_next_passes_no_exposure_rates_without_a_tracker(item_bank) -> No
   Fails if the engine makes up rates for a run that does not track exposure, or fails on the missing tracker.
   """
   selector = RecordingSelector(item_id=2)
-  engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
   context = RunContext(rng=np.random.default_rng(11))
-  session = engine.start_session(0, item_bank, context)
+  session = engine.start_session(0, context)
 
-  assert engine.select_next(session, item_bank, context) == 2
+  assert engine.select_next(session, context) == 2
   assert selector.seen.exposure_rates is None
 
 
@@ -340,11 +349,11 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   estimator = RecordingEstimator(theta=1.1)
   tracker = ExposureTracker(item_bank.n_items)
   # A non-zero start tells an estimator handed StepContext's default theta of 0 apart from one handed the session's.
-  engine = CatEngine(RecordingInitializer(0.7), RecordingSelector(0), estimator, RecordingStopper(False))
+  engine = CatEngine(item_bank, RecordingInitializer(0.7), RecordingSelector(0), estimator, RecordingStopper(False))
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  session = engine.start_session(session_id=1, item_bank=item_bank, context=context, true_theta=0.2)
+  session = engine.start_session(session_id=1, context=context, true_theta=0.2)
 
-  result = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  result = engine.apply_response(session, item_id=3, response=True, context=context)
 
   assert tracker.counts[3] == 1
   assert tracker.counts.sum() == 1
@@ -371,12 +380,12 @@ def test_apply_response_starts_the_estimator_from_the_current_estimate_and_its_s
   returned.
   """
   estimator = RecordingEstimator(theta=1.1, se=0.42)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
   session = CatSessionState(
     session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9)], administered_item_ids=[1], responses=[True]
   )
 
-  engine.apply_response(session, item_bank, item_id=3, response=False, context=RunContext(rng=np.random.default_rng(0)))
+  engine.apply_response(session, item_id=3, response=False, context=RunContext(rng=np.random.default_rng(0)))
 
   assert (estimator.seen.theta, estimator.seen.se) == (0.5, 0.9)
   assert (session.current_theta, session.current_se) == (1.1, 0.42)
@@ -390,11 +399,13 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   the session still running.
   """
   stopper = RecordingStopper(True)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3, se=0.42), stopper)
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3, se=0.42), stopper
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session = engine.start_session(session_id=0, context=context, true_theta=0.0)
 
-  result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
+  result = engine.apply_response(session, item_id=0, response=False, context=context)
 
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
   assert (stopper.seen.theta, stopper.seen.se) == (0.3, 0.42)
@@ -431,12 +442,12 @@ def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
   """
   tracker = ExposureTracker(item_bank.n_items)
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, stopper)
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), RecordingSelector(0), estimator, stopper)
+  session = engine.start_session(session_id=0, context=context)
   before = copy.deepcopy(session)
 
   with pytest.raises(exception, match=error):
-    engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+    engine.apply_response(session, item_id=3, response=True, context=context)
 
   assert session == before
   assert tracker.counts.sum() == 0
@@ -451,12 +462,14 @@ def test_apply_response_rejects_a_response_that_is_not_a_bool(item_bank, respons
   """
   tracker = ExposureTracker(item_bank.n_items)
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
+  session = engine.start_session(session_id=0, context=context)
   before = copy.deepcopy(session)
 
   with pytest.raises(TypeError, match="response must be a bool"):
-    engine.apply_response(session, item_bank, item_id=3, response=response, context=context)
+    engine.apply_response(session, item_id=3, response=response, context=context)
 
   assert session == before
   assert tracker.counts.sum() == 0
@@ -468,15 +481,19 @@ def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
   Fails if apply_response appends an item to a session its stopper has already ended.
   """
   engine = CatEngine(
-    RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), CountingLengthStopper(max_items=1)
+    item_bank,
+    RecordingInitializer(0.0),
+    RecordingSelector(0),
+    RecordingEstimator(0.5),
+    CountingLengthStopper(max_items=1),
   )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
-  engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
+  session = engine.start_session(session_id=0, context=context)
+  engine.apply_response(session, item_id=0, response=True, context=context)
   before = copy.deepcopy(session)
 
   with pytest.raises(ValueError, match=r"Session 0 has stopped \(reason: stopper\)"):
-    engine.apply_response(session, item_bank, item_id=1, response=True, context=context)
+    engine.apply_response(session, item_id=1, response=True, context=context)
 
   assert session == before
 
@@ -489,16 +506,17 @@ def test_session_state_holds_builtin_python_values(item_bank) -> None:
   response or a ``numpy.bool_`` stop decision is stored as given.
   """
   engine = CatEngine(
+    item_bank,
     RecordingInitializer(theta=0),
     RecordingSelector(item_id=np.int64(3)),
     RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),
     RecordingStopper(np.False_),
   )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  session = engine.start_session(session_id=0, context=context)
 
-  result = engine.step(session, item_bank, FixedResponseProvider(np.True_), context)
-  engine.apply_response(session, item_bank, item_id=np.int64(5), response=np.False_, context=context)
+  result = engine.step(session, FixedResponseProvider(np.True_), context)
+  engine.apply_response(session, item_id=np.int64(5), response=np.False_, context=context)
 
   assert session.theta_history == (0.0, 0.25, 0.25)
   assert [type(theta) for theta in session.theta_history] == [float, float, float]
@@ -525,12 +543,14 @@ def test_apply_response_rejects_an_item_index_that_is_not_an_integer(item_bank, 
   comparisons.
   """
   context = RunContext(rng=np.random.default_rng(42))
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
+  session = engine.start_session(session_id=0, context=context)
   before = copy.deepcopy(session)
 
   with pytest.raises(TypeError, match="item_id must be an integer"):
-    engine.apply_response(session, item_bank, item_id=item_id, response=True, context=context)
+    engine.apply_response(session, item_id=item_id, response=True, context=context)
 
   assert session == before
 
@@ -541,14 +561,16 @@ def test_a_session_rebuilt_from_a_snapshot_takes_the_next_step(item_bank) -> Non
   Fails if the rebuilt state keeps the snapshot's tuples: apply_response appended the item and the response,
   then failed on the history tuple, leaving a step half-applied and the item impossible to retry.
   """
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
-  engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  session = engine.start_session(session_id=0, context=context)
+  engine.apply_response(session, item_id=3, response=True, context=context)
   snapshot = session.snapshot()
   rebuilt = CatSessionState(**{field.name: getattr(snapshot, field.name) for field in dataclasses.fields(snapshot)})
 
-  engine.apply_response(rebuilt, item_bank, item_id=4, response=False, context=context)
+  engine.apply_response(rebuilt, item_id=4, response=False, context=context)
 
   assert (rebuilt.administered_item_ids, rebuilt.responses, rebuilt.theta_history) == (
     [3, 4],
@@ -564,12 +586,14 @@ def test_a_step_result_keeps_the_session_as_the_step_left_it(item_bank) -> None:
   Fails if the snapshot shares the session's lists, so the next response also shows up in the
   earlier result.
   """
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  session = engine.start_session(session_id=0, context=context)
 
-  first = engine.apply_response(session, item_bank, item_id=0, response=True, context=context)
-  second = engine.apply_response(session, item_bank, item_id=1, response=False, context=context)
+  first = engine.apply_response(session, item_id=0, response=True, context=context)
+  second = engine.apply_response(session, item_id=1, response=False, context=context)
 
   assert (first.session.administered_item_ids, first.session.responses) == ((0,), (True,))
   assert first.session.theta_history == (0.0, 0.5)
@@ -584,10 +608,12 @@ def test_a_step_result_cannot_be_changed(item_bank) -> None:
   step results, but ``result.response = False`` and ``result.session.responses.append(True)`` both
   worked.
   """
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
-  result = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  session = engine.start_session(session_id=0, context=context)
+  result = engine.apply_response(session, item_id=3, response=True, context=context)
 
   with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
     result.response = False  # type: ignore[misc]
@@ -602,12 +628,14 @@ def test_snapshots_of_the_same_session_state_are_equal_and_hash_alike(item_bank)
 
   Fails if a snapshot field is a list or a dict, which made ``hash(snapshot)`` raise TypeError.
   """
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.5), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
-  first = engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
+  session = engine.start_session(session_id=0, context=context)
+  first = engine.apply_response(session, item_id=3, response=True, context=context)
   same_state = session.snapshot()
-  engine.apply_response(session, item_bank, item_id=4, response=False, context=context)
+  engine.apply_response(session, item_id=4, response=False, context=context)
 
   assert hash(first.session) == hash(same_state)
   assert len({first.session, same_state, session.snapshot()}) == 2
@@ -618,16 +646,43 @@ def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> 
 
   Fails if step applies a different item or response, or skips the estimate.
   """
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  session = engine.start_session(session_id=0, context=context)
 
-  result = engine.step(session, item_bank, FixedResponseProvider(False), context)
+  result = engine.step(session, FixedResponseProvider(False), context)
 
   assert (result.selected_item_id, result.response, result.updated_theta) == (4, False, pytest.approx(0.7))
   assert session.administered_item_ids == [4]
   assert session.responses == [False]
   assert session.theta_history == (0.0, pytest.approx(0.7))
+
+
+def test_step_gives_the_provider_a_snapshot_of_the_session_and_the_runs_generator(item_bank) -> None:
+  """The provider gets the engine's bank, the selected item, the session before the response and the run's rng.
+
+  Fails if step hands the provider the live session (a provider could then change it, and what it
+  holds would move on with the step), another bank or item, or a generator other than the run's.
+  """
+  provider = RecordingResponseProvider()
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.2), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False)
+  )
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=9, context=context, true_theta=1.0)
+  before = session.snapshot()
+
+  engine.step(session, provider, context)
+
+  seen_bank, seen_item, seen_session, seen_rng = provider.calls[0]
+  assert seen_bank is item_bank
+  assert seen_item == 4
+  assert seen_rng is context.rng
+  assert isinstance(seen_session, CatSessionSnapshot)
+  assert seen_session == before
+  assert seen_session.administered_item_ids == ()
 
 
 def test_run_session_stops_at_fixed_length(
@@ -641,11 +696,11 @@ def test_run_session_stops_at_fixed_length(
   Fails if it returns before the session ends or keeps administering items after the stopper is satisfied.
   """
   stopper = MaxLengthStopper(3)
-  engine = CatEngine(fixed_initializer, random_selector, estimator, stopper)
+  engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session = engine.start_session(session_id=0, context=context, true_theta=0.0)
 
-  final_session = engine.run_session(session, item_bank, FixedResponseProvider(True), context)
+  final_session = engine.run_session(session, FixedResponseProvider(True), context)
 
   assert final_session.stop_reason is StopReason.STOPPER
   assert len(final_session.administered_item_ids) == 3
@@ -658,55 +713,14 @@ def test_the_stopper_is_evaluated_once_per_session_state(item_bank, max_info_sel
   evaluated, which doubled the calls (a 5-item session made 10).
   """
   stopper = CountingLengthStopper(max_items=5)
-  engine = CatEngine(RecordingInitializer(0.0), max_info_selector, RecordingEstimator(0.0), stopper)
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), max_info_selector, RecordingEstimator(0.0), stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  session = engine.start_session(session_id=0, context=context)
 
-  engine.run_session(session, item_bank, FixedResponseProvider(True), context)
+  engine.run_session(session, FixedResponseProvider(True), context)
 
   assert session.administered_count == 5
   assert stopper.calls == 6
-
-
-def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
-  """Simulated responses require a true theta on the session."""
-  provider = SimulatedResponseProvider()
-  context = RunContext(rng=np.random.default_rng(42))
-  state = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)])
-
-  with pytest.raises(ValueError, match="true_theta is required") as exc_info:
-    provider.answer(state, item_bank, 0, context)
-
-  assert str(exc_info.value) == "true_theta is required to simulate responses"
-
-
-@pytest.mark.parametrize(
-  ("item_id", "draw", "expected"),
-  [
-    # 2PL item at b = 0: P = 0.82; the estimate (-1.5) or item 0 would both give P below 0.2
-    pytest.param(1, 0.5, True, id="2pl-correct"),
-    pytest.param(1, 0.9, False, id="2pl-incorrect"),
-    # 4PL item with c = 0.2, d = 0.9: P = 0.2 + 0.7 * 0.82 = 0.77; without c and d it would be 0.82
-    pytest.param(2, 0.79, False, id="4pl-upper-asymptote"),
-    # 3PL item at b = 5 with c = 0.3: P = 0.3 + 0.7 * 0.03 = 0.32; without c it would be 0.03
-    pytest.param(3, 0.31, True, id="3pl-guessing"),
-  ],
-)
-def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_probability(
-  item_id: int, draw: float, expected: bool
-) -> None:
-  """The response is correct when the uniform draw falls below the chosen item's 4PL probability at the true theta.
-
-  Together the cases fail if the response used the estimate instead of the true theta (1.5), another item,
-  or dropped the item's guessing or upper-asymptote parameter.
-  """
-  item_bank = ItemBank(
-    np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
-  )
-  state = CatSessionState(session_id=0, estimates=[Estimate(-1.5, math.inf)], true_theta=1.5)
-  context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
-
-  assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
 
 
 def test_stepping_a_stopped_session_keeps_its_stop_reason(item_bank) -> None:
@@ -715,12 +729,14 @@ def test_stepping_a_stopped_session_keeps_its_stop_reason(item_bank) -> None:
   Fails if the engine decides again why a stopped session ended: a session whose selector ran out
   was relabelled as stopped by its selector on the next step.
   """
-  engine = CatEngine(RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
-  engine.step(session, item_bank, FixedResponseProvider(True), context)
+  session = engine.start_session(session_id=0, context=context)
+  engine.step(session, FixedResponseProvider(True), context)
 
-  result = engine.step(session, item_bank, FixedResponseProvider(True), context)
+  result = engine.step(session, FixedResponseProvider(True), context)
 
   assert (result.stopped, result.selected_item_id, result.stop_reason) == (True, None, StopReason.NO_ITEMS)
   assert session.stop_reason is StopReason.NO_ITEMS
@@ -735,15 +751,15 @@ def test_apply_response_rejects_invalid_item_index(
   fixed_length_stopper,
 ) -> None:
   """Applying a response should validate item ids."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
+  engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
+  session = engine.start_session(session_id=0, context=context, true_theta=0.0)
 
   with pytest.raises(
     ValueError,
     match=rf"Invalid item index {item_bank.n_items}\. Must be between 0 and {item_bank.n_items - 1}",
   ):
-    engine.apply_response(session, item_bank, item_bank.n_items, True, context)
+    engine.apply_response(session, item_bank.n_items, True, context)
 
 
 def test_apply_response_rejects_duplicate_items(
@@ -754,14 +770,14 @@ def test_apply_response_rejects_duplicate_items(
   fixed_length_stopper,
 ) -> None:
   """A session cannot administer the same item twice."""
-  engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
+  engine = CatEngine(item_bank, fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = CatSessionState(
     session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)], administered_item_ids=[0], responses=[True]
   )
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
-    engine.apply_response(session, item_bank, 0, False, context)
+    engine.apply_response(session, 0, False, context)
 
 
 def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank) -> None:
@@ -771,11 +787,11 @@ def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank
   not, or if the terminal step result misreports the session.
   """
   selector = RecordingSelector(item_id=0)
-  engine = CatEngine(RecordingInitializer(0.4), selector, RecordingEstimator(0.0), RecordingStopper(True))
+  engine = CatEngine(item_bank, RecordingInitializer(0.4), selector, RecordingEstimator(0.0), RecordingStopper(True))
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  session = engine.start_session(session_id=0, context=context)
 
-  result = engine.step(session, item_bank, FixedResponseProvider(True), context)
+  result = engine.step(session, FixedResponseProvider(True), context)
 
   assert selector.seen is None
   assert (result.stopped, result.selected_item_id, result.response) == (True, None, None)
@@ -791,11 +807,13 @@ def test_select_next_ends_the_session_when_the_selector_has_no_item(item_bank) -
   Fails if select_next lets the error escape, or returns None, while leaving the session in progress: a manual loop
   then had to copy step's handling, and notebook 02's did not.
   """
-  engine = CatEngine(RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False))
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.0), ExhaustedSelector(), RecordingEstimator(0.0), RecordingStopper(False)
+  )
   context = RunContext(rng=np.random.default_rng(42))
-  session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
+  session = engine.start_session(session_id=0, context=context)
 
-  assert engine.select_next(session, item_bank, context) is None
+  assert engine.select_next(session, context) is None
   assert session.stop_reason is StopReason.NO_ITEMS
 
 
@@ -806,11 +824,11 @@ def test_custom_strategies_written_against_the_base_classes_run_a_session(item_b
   three items. Fails if the engine calls a strategy with anything but its documented signature, or gives it a context
   without the session's items and responses.
   """
-  engine = CatEngine(HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
+  engine = CatEngine(item_bank, HalfInitializer(), LowestIndexSelector(), CorrectCountEstimator(), ThreeItemStopper())
   context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, item_bank, context)
+  session = engine.start_session(0, context)
 
-  engine.run_session(session, item_bank, FixedResponseProvider(True), context)
+  engine.run_session(session, FixedResponseProvider(True), context)
 
   assert session.administered_item_ids == [0, 1, 2]
   assert session.theta_history == (0.5, 1.0, 2.0, 3.0)
@@ -822,10 +840,10 @@ MIXED_PATTERN = [True, False, False, True, True, False]
 
 def _run_scripted_session(item_bank: ItemBank, selector: BaseSelector, estimator: BaseEstimator) -> CatSessionState:
   """Return a session that answered MIXED_PATTERN to the items the selector chose, from an initial estimate of 0."""
-  engine = CatEngine(RecordingInitializer(0.0), selector, estimator, MaxLengthStopper(len(MIXED_PATTERN)))
+  engine = CatEngine(item_bank, RecordingInitializer(0.0), selector, estimator, MaxLengthStopper(len(MIXED_PATTERN)))
   context = RunContext(rng=np.random.default_rng(0))
-  session = engine.start_session(0, item_bank, context)
-  return engine.run_session(session, item_bank, ScriptedResponseProvider(MIXED_PATTERN), context)
+  session = engine.start_session(0, context)
+  return engine.run_session(session, ScriptedResponseProvider(MIXED_PATTERN), context)
 
 
 def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item_bank) -> None:

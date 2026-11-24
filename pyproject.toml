@@ -327,7 +327,8 @@ type = "layers"
 containers = ["catsim"]
 exhaustive = true  # every new top-level module must be placed in a layer
 layers = [
-  "simulation : plot",
+  "plot",  # reads SimulationResult
+  "simulation",
   "engine",
   "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
   "state",

@@ -142,7 +142,7 @@ In the last example, parameters $a$ and $b$ have a
 correlation of $0.5$, an adjustment that may be useful in case simulations
 require it {cite:p}`Chang2001`.
 
-The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results ({py:attr}`catsim.state.SimulationResult.exposure_rates`). The exposure rate is commonly denoted as $r$ and computed as follows:
+The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results ({py:attr}`catsim.simulation.SimulationResult.exposure_rates`). The exposure rate is commonly denoted as $r$ and computed as follows:
 
 $$
 r_i = \frac{q_i}{N}

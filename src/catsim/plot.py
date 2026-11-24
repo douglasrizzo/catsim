@@ -8,7 +8,8 @@ from matplotlib.axes import Axes
 
 from . import irt
 from .item_bank import ItemBank
-from .state import CatSessionState, SimulationResult
+from .simulation import SimulationResult
+from .state import CatSessionState
 from .typing import FloatArray
 
 
@@ -231,24 +232,27 @@ def item_exposure(
       :caption: Item exposure rates for a given item bank, after a simulation has been performed.
 
       import matplotlib.pyplot as plt
+      import numpy
       from catsim.item_bank import ItemBank
       from catsim import plot
       from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+      from catsim.engine import CatEngine
       from catsim.simulation import SimulationRunner
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
 
-      runner = SimulationRunner(
+      engine = CatEngine(
           ItemBank.generate_item_bank(100),
           UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
-      result = runner.run(10)
+      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
+      result = SimulationRunner(engine).run(true_thetas)
       plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])
       plot.item_exposure(title='Exposures', simulation=result, par='b', ax=axes[1])
       plt.tight_layout()
@@ -381,23 +385,26 @@ def test_progress(
   .. plot::
 
       import matplotlib.pyplot as plt
+      import numpy
       from catsim.item_bank import ItemBank
       from catsim import plot
       from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
       from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+      from catsim.engine import CatEngine
       from catsim.simulation import SimulationRunner
 
       fig, axes = plt.subplots(2, 1, figsize=(7, 12))
-      runner = SimulationRunner(
+      engine = CatEngine(
           ItemBank.generate_item_bank(100),
           UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
           StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
       )
-      result = runner.run(10)
+      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
+      result = SimulationRunner(engine).run(true_thetas)
       plot.test_progress(simulation=result, index=0, ax=axes[0])
       plot.test_progress(simulation=result, index=0, info=True, var=True, see=True, ax=axes[1])
       plt.tight_layout()

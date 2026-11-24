@@ -33,7 +33,7 @@ class FixedResponseProvider:
 
   response: bool
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     return self.response
 
 
@@ -72,7 +72,7 @@ class AlternatingResponseProvider:
   def __init__(self) -> None:
     self._count = 0
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     self._count += 1
     return self._count % 2 == 0
 
@@ -103,6 +103,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     self.max_items = max_items
     self.selector = QueueOrderSelector(selection_order)
     self.engine = CatEngine(
+      self.item_bank,
       FixedPointInitializer(0.0),
       self.selector,
       RecordingEstimator(theta=0.5),
@@ -114,7 +115,6 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     # guarded by mutually exclusive conditions made Hypothesis discard most rule draws.
     self.session: CatSessionState = self.engine.start_session(
       session_id=0,
-      item_bank=self.item_bank,
       context=self.context,
       true_theta=0.0,
     )
@@ -128,7 +128,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
     prev_admin = len(self.session.administered_item_ids)
     was_stopped = self.session.is_stopped
     prev_reason = self.session.stop_reason
-    result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
+    result = self.engine.step(self.session, self.response_provider, self.context)
     if was_stopped:
       # Stepping a terminal session must be a no-op.
       assert result.stopped is True
@@ -169,6 +169,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     # max_items stays below the bank size, so only the stopper can end the session
     self.max_items = max_items
     self.engine = CatEngine(
+      self.item_bank,
       FixedPointInitializer(0.0),
       MaxInfoSelector(),
       NumericalSearchEstimator(),
@@ -178,7 +179,6 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     self.response_provider = AlternatingResponseProvider()
     self.session: CatSessionState = self.engine.start_session(
       session_id=0,
-      item_bank=self.item_bank,
       context=self.context,
       true_theta=0.25,
     )
@@ -190,7 +190,7 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     prev_admin = len(self.session.administered_item_ids)
     was_stopped = self.session.is_stopped
     prev_reason = self.session.stop_reason
-    result = self.engine.step(self.session, self.item_bank, self.response_provider, self.context)
+    result = self.engine.step(self.session, self.response_provider, self.context)
     if was_stopped:
       assert result.stopped is True
       assert result.selected_item_id is None
