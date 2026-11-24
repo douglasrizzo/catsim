@@ -386,6 +386,19 @@ class TestBayesianHelpers:
     with pytest.raises(ValueError, match="must be finite"):
       uniform_log_prior(float("nan"), 1.0)
 
+  def test_quadrature_grid_compares_and_hashes_by_identity(self) -> None:
+    """Two grids compare unequal unless they are the same object, and a grid can be a set member or dict key.
+
+    Fails if the dataclass generates equality and hashing from its array fields: comparing two grids of more than one
+    node then raises "the truth value of an array ... is ambiguous", and hashing raises "unhashable type".
+    """
+    grid, twin = QuadratureGrid.uniform(), QuadratureGrid.uniform()
+    same = grid
+
+    assert grid == same
+    assert grid != twin
+    assert len({grid, twin, same}) == 2
+
   def test_quadrature_grid_uniform_defaults(self) -> None:
     """Test the default uniform quadrature grid."""
     grid = QuadratureGrid.uniform()
