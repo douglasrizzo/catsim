@@ -5,6 +5,7 @@ from collections.abc import Callable
 
 import numpy as np
 import pytest
+from typing_extensions import override
 
 from catsim.item_bank import ItemBank
 from catsim.selection import (
@@ -150,30 +151,40 @@ def test_selectors_break_ties_at_random(make_selector: Callable[[], BaseSelector
   assert picks == set(range(1, _N_COPIES))
 
 
+class _TieRecordingRng(np.random.Generator):
+  """Generator that records the candidates each tie is broken among, then draws from them as numpy does."""
+
+  def __init__(self) -> None:
+    super().__init__(np.random.PCG64(0))
+    self.ties: list[list[int]] = []
+
+  # Unannotated: Generator.choice's overloads cover more than the one-dimensional draw pick_best makes.
+  @override
+  def choice(self, a, size=None, replace=True, p=None, axis=0, shuffle=True):
+    self.ties.append(np.asarray(a).tolist())
+    return super().choice(a, size, replace, p, axis, shuffle)
+
+
 @pytest.mark.parametrize(
-  "score",
+  ("selector", "administered_items", "responses", "theta"),
   [
-    pytest.param(
-      lambda bank: KLSelector._kl_global(1.0, bank.get_items(range(1, bank.n_items)), 3.0),
-      id="KLSelector",
-    ),
-    pytest.param(
-      lambda bank: MLWISelector()._score(
-        make_context(bank, [0, 1, 2], [True, False, True]), np.arange(3, bank.n_items)
-      ),
-      id="MLWISelector",
-    ),
+    pytest.param(KLSelector(), [0], [True], 1.0, id="KLSelector"),
+    pytest.param(MLWISelector(), [0, 1, 2], [True, False, True], 0.0, id="MLWISelector"),
   ],
 )
 def test_selectors_that_integrate_over_ability_tie_identical_items_exactly(
-  score: Callable[[ItemBank], np.ndarray],
+  selector: BaseSelector, administered_items: list[int], responses: list[bool], theta: float
 ) -> None:
-  """On 1,000 identical items, the selectors that sum over ability nodes give every candidate the same score.
+  """On 1,000 identical items, the selectors that sum over ability nodes break one tie among every candidate.
 
   A matrix product over the nodes can round columns differently: on this bank it left two distinct scores, and
   only the copies holding the larger one could be drawn.
   """
-  assert np.unique(score(_identical_bank(1000))).size == 1
+  rng = _TieRecordingRng()
+
+  selector.select(make_context(_identical_bank(1000), administered_items, responses, theta=theta, rng=rng))
+
+  assert rng.ties == [list(range(len(administered_items), 1000))]
 
 
 def test_progressive_breaks_ties_at_random_once_fully_information_based() -> None:

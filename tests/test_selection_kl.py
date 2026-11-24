@@ -78,7 +78,8 @@ class TestKLSelector:
     """
     reference = _kl_reference(items, theta_hat, half_width)
 
-    np.testing.assert_allclose(KLSelector._kl_global(theta_hat, items, half_width), reference, rtol=1e-9)
+    integrals = KLSelector._kl_global(theta_hat, items, half_width)  # noqa: SLF001 - select shows only the largest
+    np.testing.assert_allclose(integrals, reference, rtol=1e-9)
 
   @pytest.mark.parametrize(
     "items",
@@ -98,7 +99,8 @@ class TestKLSelector:
     """
     reference = _kl_reference(items, theta_hat, half_width)
 
-    np.testing.assert_allclose(KLSelector._kl_global(theta_hat, items, half_width), reference, rtol=1e-10)
+    integrals = KLSelector._kl_global(theta_hat, items, half_width)  # noqa: SLF001 - select shows only the largest
+    np.testing.assert_allclose(integrals, reference, rtol=1e-10)
 
   def test_select_ranks_steep_items_by_their_integrals(self) -> None:
     """Of two steep items whose KL integrals over 0 +- 3 differ by 4e-6 of their size, the larger one is selected.

@@ -173,7 +173,6 @@ ignore-one-line-docstrings = true
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
   "RUF069",   # Exact float expectations are acceptable in tests
   "S",        # Security rules are too noisy for intentionally non-production test code
-  "SLF001",   # Tests may access private members to set up or inspect internal state
   "TC001",    # Test-only type imports do not justify TYPE_CHECKING indirection
   "TC003",    # Test-only type imports do not justify TYPE_CHECKING indirection
 ]

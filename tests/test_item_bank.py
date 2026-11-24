@@ -174,7 +174,7 @@ class TestItemBankValidation:
     other dimensions and completes 1 to 3 columns before it, so the check is called directly.
     """
     with pytest.raises(ValueError, match=re.escape(f"shape {shape}; it must be 2-D with exactly 4 columns")):
-      item_bank_module._validate(np.ones(shape))
+      item_bank_module._validate(np.ones(shape))  # noqa: SLF001 - ItemBank fixes the shape before this check
 
   def test_rejects_a_matrix_without_items(self) -> None:
     """A 0 x 4 matrix raises ValueError: with no rows, every parameter check passes vacuously."""

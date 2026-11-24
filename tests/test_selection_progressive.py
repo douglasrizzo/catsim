@@ -8,7 +8,7 @@ import pytest
 from typing_extensions import override
 
 from catsim.item_bank import ItemBank
-from catsim.selection import BaseSelector, ProgressiveSelector, ProportionalSelector, progressive
+from catsim.selection import BaseSelector, ProgressiveSelector, ProportionalSelector
 from catsim.typing import FloatArray, IntArray
 from tests.banks import two_pl_bank
 from tests.contexts import make_context
@@ -64,7 +64,30 @@ def _progressive_item_bank() -> ItemBank:
 
 
 class TestPositionWeight:
-  """Tests for _position_weight, the schedule ProgressiveSelector and ProportionalSelector share."""
+  """Tests for the position weight, the schedule ProgressiveSelector and ProportionalSelector share.
+
+  ProportionalSelector draws each remaining item with probability proportional to its information raised to the test
+  length times the weight, so the probabilities it hands the generator give the weight away.
+  """
+
+  # Eight 1PL items, whose information at theta = 0 is e^b / (1 + e^b)^2 in closed form.
+  DIFFICULTIES = np.linspace(-1.5, 2.0, 8)
+
+  def _draw_probabilities(self, test_size: int, acceleration: float, position: int) -> FloatArray:
+    """Return the probabilities ProportionalSelector draws with at a position, the earlier items administered."""
+    rng = _DeterministicRNG([])
+    ProportionalSelector(test_size=test_size, acceleration=acceleration).select(
+      make_context(two_pl_bank([1.0] * 8, self.DIFFICULTIES.tolist()), list(range(position - 1)), theta=0.0, rng=rng)
+    )
+    ((_, probs),) = rng.choice_calls
+    assert probs is not None
+    return probs
+
+  def _probabilities_for(self, position: int, exponent: float) -> FloatArray:
+    """Return the remaining items' information raised to the exponent, normalized, from the closed form."""
+    difficulties = self.DIFFICULTIES[position - 1 :]
+    weights = (np.exp(difficulties) / (1 + np.exp(difficulties)) ** 2) ** exponent
+    return weights / weights.sum()
 
   @pytest.mark.parametrize(
     ("test_size", "acceleration", "position", "expected"),
@@ -89,17 +112,23 @@ class TestPositionWeight:
     rows. Past N the weight stays 1: the stopper, not the selector, ends the test, and a weight above 1 would give the
     random component a negative coefficient. A one-item test is at its last position from the start.
     """
-    assert progressive._position_weight(position, test_size, acceleration) == pytest.approx(expected)
+    np.testing.assert_allclose(
+      self._draw_probabilities(test_size, acceleration, position),
+      self._probabilities_for(position, test_size * expected),
+      rtol=1e-12,
+    )
 
-  @pytest.mark.parametrize("acceleration", [600, 1000])
-  def test_large_acceleration_does_not_overflow(self, acceleration: int) -> None:
-    """4.0 ** 600 overflows to inf, which would make the weight inf / inf, NaN, for an accepted finite acceleration.
+  def test_large_acceleration_does_not_overflow(self) -> None:
+    """3.0 ** 1000 and 4.0 ** 1000 overflow to inf, which would make the weight inf / inf and every draw NaN.
 
-    The expected value is the ratio of the sums in exact integer arithmetic.
+    The acceleration is finite, so the selector accepts it. The expected weight is the ratio of the sums in exact
+    integer arithmetic.
     """
-    expected = Fraction(sum(m**acceleration for m in range(1, 4)), sum(m**acceleration for m in range(1, 5)))
+    expected = Fraction(sum(m**1000 for m in range(1, 4)), sum(m**1000 for m in range(1, 5)))
 
-    assert progressive._position_weight(4, 5, float(acceleration)) == pytest.approx(float(expected), rel=1e-12)
+    np.testing.assert_allclose(
+      self._draw_probabilities(5, 1000.0, 4), self._probabilities_for(4, 5 * float(expected)), rtol=1e-12
+    )
 
 
 class TestProgressiveSelector:
