@@ -221,38 +221,44 @@ def gen3d_dataset_scatter(
   return ax
 
 
+# The item parameter each value of item_exposure's ``par`` reads: its column in the item matrix and the axis label.
+_ITEM_PARAMETERS = {
+  "a": (0, "Item discrimination"),
+  "b": (1, "Item difficulty"),
+  "c": (2, "Item guessing parameter"),
+  "d": (3, "Item upper asymptote"),
+}
+
+
 def item_exposure(
-  ax: Axes | None = None,
-  title: str | None = None,
-  simulation: SimulationResult | None = None,
-  item_bank: ItemBank | FloatArray | None = None,
-  exposure_rates: FloatArray | None = None,
+  exposure_rates: FloatArray,
+  *,
+  item_bank: ItemBank | None = None,
   par: str | None = None,
   hist: bool = False,
+  ax: Axes | None = None,
+  title: str | None = None,
 ) -> Axes:
-  """Generate a plot showing item bank exposure rates.
+  """Plot the exposure rate of each item: in item order, against an item parameter, or as a histogram.
 
-  The plot visualizes how frequently each item was administered during a simulation,
-  which is important for assessing item security and test balance.
+  With ``par``, the items are sorted by that parameter and each item's exposure rate is drawn at its
+  value, which shows which items a selector favours. With ``hist=True``, the plot counts the items
+  in each range of exposure rates.
 
   .. plot::
-      :caption: Item exposure rates for a given item bank, after a simulation has been performed.
+      :caption: The exposure rates of a simulation, as a histogram and against the item difficulty.
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim.item_bank import ItemBank
+      from catsim import CatEngine, ItemBank, SimulationRunner
       from catsim import plot
+      from catsim.estimation import NumericalSearchEstimator
       from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
-      from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
-      from catsim.engine import CatEngine
-      from catsim.simulation import SimulationRunner
-
-      fig, axes = plt.subplots(2, 1, figsize=(7, 12))
 
       engine = CatEngine(
-          ItemBank.generate(100),
+          ItemBank.generate(100, rng=0),
           UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
@@ -260,105 +266,84 @@ def item_exposure(
       )
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
       result = SimulationRunner(engine).run(true_thetas)
-      plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])
-      plot.item_exposure(title='Exposures', simulation=result, par='b', ax=axes[1])
+      fig, axes = plt.subplots(2, 1, figsize=(7, 12))
+      plot.item_exposure(result.exposure_rates, hist=True, ax=axes[0], title="Exposure rates")
+      plot.item_exposure(result.exposure_rates, item_bank=result.item_bank, par="b", ax=axes[1])
       plt.tight_layout()
       plt.show()
 
   Parameters
   ----------
-  ax : matplotlib.axes.Axes or None, optional
-      Matplotlib axes object to plot on. If None, a new figure is created. Default is None.
-  title : str or None, optional
-      The plot title. Default is None.
-  simulation : SimulationResult or None, optional
-      Simulation result containing exposure data and the item bank. Pass either this or
-      ``exposure_rates``. Default is None.
-  item_bank : ItemBank or numpy.ndarray or None, optional
-      An ItemBank, or an item matrix of [a, b, c, d] parameters, which is converted to an ItemBank.
-      Only used with ``exposure_rates``, and required when ``par`` is given. Default is None.
-  exposure_rates : numpy.ndarray or None, optional
-      The exposure rate of each item, in item bank order. Pass either this or ``simulation``.
-      Default is None.
+  exposure_rates : numpy.ndarray
+      The exposure rate of each item, in item bank order, such as ``SimulationResult.exposure_rates``.
+  item_bank : ItemBank or None, optional
+      The item bank the rates belong to, needed with ``par``. Default is None.
   par : str or None, optional
-      A string representing one of the item parameters ('a', 'b', 'c', 'd') to plot on
-      the x axis, or None to plot the exposures in item bank order. If `hist=True`, no
-      sorting will be done. Default is None.
+      The item parameter to plot the rates against: ``"a"``, ``"b"``, ``"c"`` or ``"d"``. Default is
+      None, which plots the rates in item bank order.
   hist : bool, optional
-      If True, plots a histogram of item exposures. Otherwise, plots a line chart of
-      the exposures against the parameter chosen in `par`. Default is False.
+      Whether to draw a histogram of the rates. Default is False.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
 
   Returns
   -------
   matplotlib.axes.Axes
-      The matplotlib axes object containing the plot.
+      The axes the plot is on.
 
   Raises
   ------
   ValueError
-      If neither or both of ``simulation`` and ``exposure_rates`` are given, if ``item_bank`` is
-      passed with ``simulation``, if ``par`` is not one of 'a', 'b', 'c', 'd' or None, if ``par``
-      is given with ``exposure_rates`` but no ``item_bank``, or if ``exposure_rates`` and
-      ``item_bank`` differ in length.
+      If ``exposure_rates`` is not one-dimensional, ``par`` is not one of ``"a"``, ``"b"``, ``"c"``
+      and ``"d"``, ``par`` is given with ``hist=True`` or without ``item_bank``, or the rates and
+      the item bank differ in length; always before any figure is created.
   """
-  if simulation is not None:
-    if item_bank is not None or exposure_rates is not None:
-      msg = "Pass either simulation or exposure_rates (with item_bank), not both; simulation already holds them."
-      raise ValueError(msg)
-    item_bank = simulation.item_bank
-    exposure_rates = simulation.exposure_rates
-  if exposure_rates is None:
-    msg = "Exposure data must be passed, either as simulation or as exposure_rates."
-    raise ValueError(msg)
-
-  supported_parameters = ("a", "b", "c", "d")
-  if par is not None and par not in supported_parameters:
-    msg = f"Unsupported parameter {par!r} for 'par'. Supported parameters are: {', '.join(supported_parameters)}."
-    raise ValueError(msg)
-
-  if isinstance(item_bank, numpy.ndarray):
-    item_bank = ItemBank(item_bank)
-  if item_bank is None:
-    if par is not None:
-      msg = f"item_bank must be passed with exposure_rates to plot exposure against parameter {par!r}."
-      raise ValueError(msg)
-  elif len(exposure_rates) != item_bank.n_items:
-    msg = f"exposure_rates has {len(exposure_rates)} values but the item bank has {item_bank.n_items} items."
-    raise ValueError(msg)
-
-  if ax is None:
-    _, ax = plt.subplots()
-
-  if title is not None:
-    ax.set_title(title, size=18)
-
-  if item_bank is None or par is None:
-    parameter = numpy.arange(len(exposure_rates))
-    xlabel = "Items"
-  elif par == "a":
-    parameter = item_bank.discrimination
-    xlabel = "Item discrimination"
-  elif par == "b":
-    parameter = item_bank.difficulty
-    xlabel = "Item difficulty"
-  elif par == "c":
-    parameter = item_bank.pseudo_guessing
-    xlabel = "Item Guessing"
-  else:
-    parameter = item_bank.upper_asymptote
-    xlabel = "Item upper asymptote"
+  exposure_rates = numpy.asarray(exposure_rates, dtype=float)
+  _check_exposure_inputs(exposure_rates, item_bank, par, hist=hist)
+  ax = _prepare_axes(ax, title)
 
   if hist:
     ax.hist(exposure_rates, max(len(exposure_rates) // 10, 3))
-    ax.set_xlabel("Item exposure")
+    ax.set_xlabel("Exposure rate")
     ax.set_ylabel("Items")
-  else:
-    indexes = parameter.argsort(kind="stable")
-    ax.plot(parameter[indexes], exposure_rates[indexes], marker="o")
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel("Item exposure")
+    return ax
 
+  if par is None or item_bank is None:
+    values = numpy.arange(len(exposure_rates))
+    xlabel = "Items"
+  else:
+    column, xlabel = _ITEM_PARAMETERS[par]
+    values = item_bank.items[:, column]
+  order = values.argsort(kind="stable")
+  ax.plot(values[order], exposure_rates[order], marker="o")
+  ax.set_xlabel(xlabel)
+  ax.set_ylabel("Exposure rate")
   return ax
+
+
+def _check_exposure_inputs(
+  exposure_rates: FloatArray, item_bank: ItemBank | None, par: str | None, *, hist: bool
+) -> None:
+  """Raise ValueError for inputs of :func:`item_exposure` that cannot give a true plot."""
+  if exposure_rates.ndim != 1:
+    msg = f"exposure_rates must hold one rate per item, got an array of shape {exposure_rates.shape}."
+    raise ValueError(msg)
+  if item_bank is not None and len(exposure_rates) != item_bank.n_items:
+    msg = f"exposure_rates has {len(exposure_rates)} values but the item bank has {item_bank.n_items} items."
+    raise ValueError(msg)
+  if par is None:
+    return
+  if par not in _ITEM_PARAMETERS:
+    msg = f"Unsupported parameter {par!r} for 'par'. Supported parameters are: {', '.join(_ITEM_PARAMETERS)}."
+    raise ValueError(msg)
+  if hist:
+    msg = f"A histogram of exposure rates has no parameter axis: pass par={par!r} or hist=True, not both."
+    raise ValueError(msg)
+  if item_bank is None:
+    msg = f"item_bank must be passed to plot exposure rates against parameter {par!r}."
+    raise ValueError(msg)
 
 
 def test_progress(
