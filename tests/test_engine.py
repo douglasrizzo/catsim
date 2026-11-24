@@ -18,7 +18,7 @@ from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector
 from catsim.selection.base import remaining
-from catsim.state import CatSessionState, ExposureTracker, StopReason
+from catsim.state import CatSessionSnapshot, CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
 from tests.contexts import make_context
 
@@ -41,6 +41,17 @@ class ScriptedResponseProvider:
 
   def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     return self.responses[len(session.responses)]
+
+
+@dataclass
+class RecordingResponseProvider:
+  """Response provider that answers correctly and records what each call was given."""
+
+  calls: list[tuple] = dataclasses.field(default_factory=list)
+
+  def answer(self, item_bank, item_id, session, rng) -> bool:
+    self.calls.append((item_bank, item_id, session, rng))
+    return True
 
 
 class ExhaustedSelector:
@@ -639,6 +650,31 @@ def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> 
   assert session.administered_item_ids == [4]
   assert session.responses == [False]
   assert session.theta_history == (0.0, pytest.approx(0.7))
+
+
+def test_step_gives_the_provider_a_snapshot_of_the_session_and_the_runs_generator(item_bank) -> None:
+  """The provider gets the engine's bank, the selected item, the session before the response and the run's rng.
+
+  Fails if step hands the provider the live session (a provider could then change it, and what it
+  holds would move on with the step), another bank or item, or a generator other than the run's.
+  """
+  provider = RecordingResponseProvider()
+  engine = CatEngine(
+    item_bank, RecordingInitializer(0.2), RecordingSelector(4), RecordingEstimator(0.7), RecordingStopper(False)
+  )
+  context = RunContext(rng=np.random.default_rng(42))
+  session = engine.start_session(session_id=9, context=context, true_theta=1.0)
+  before = session.snapshot()
+
+  engine.step(session, provider, context)
+
+  seen_bank, seen_item, seen_session, seen_rng = provider.calls[0]
+  assert seen_bank is item_bank
+  assert seen_item == 4
+  assert seen_rng is context.rng
+  assert isinstance(seen_session, CatSessionSnapshot)
+  assert seen_session == before
+  assert seen_session.administered_item_ids == ()
 
 
 def test_run_session_stops_at_fixed_length(
