@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy
 
-from . import cat
+from . import metrics
 from .engine import RunContext
 from .irt import icc
 from .state import ExposureTracker
@@ -141,22 +141,22 @@ class SimulationResult:
     return [session.responses for session in self.sessions]
 
   @property
-  def final_thetas(self) -> list[float]:
+  def final_thetas(self) -> FloatArray:
     """Return each session's final ability estimate."""
-    return [session.current_theta for session in self.sessions]
+    return numpy.array([session.current_theta for session in self.sessions], dtype=float)
 
   @property
-  def final_ses(self) -> list[float]:
+  def final_ses(self) -> FloatArray:
     """Return the standard error of each session's final ability estimate.
 
     It is infinite for a session that ended before its first response.
     """
-    return [session.current_se for session in self.sessions]
+    return numpy.array([session.current_se for session in self.sessions], dtype=float)
 
   @property
-  def test_lengths(self) -> list[int]:
+  def test_lengths(self) -> IntArray:
     """Return how many items each session administered."""
-    return [session.administered_count for session in self.sessions]
+    return numpy.array([session.administered_count for session in self.sessions], dtype=int)
 
   @property
   def true_thetas(self) -> FloatArray:
@@ -227,7 +227,7 @@ class SimulationResult:
     ValueError
         If the result has no session, or any session has no true ability.
     """
-    return cat.bias(self._known_true_thetas(), self.final_thetas)
+    return metrics.bias(self._known_true_thetas(), self.final_thetas)
 
   @property
   def mse(self) -> float:
@@ -238,7 +238,7 @@ class SimulationResult:
     ValueError
         If the result has no session, or any session has no true ability.
     """
-    return cat.mse(self._known_true_thetas(), self.final_thetas)
+    return metrics.mse(self._known_true_thetas(), self.final_thetas)
 
   @property
   def rmse(self) -> float:
@@ -249,25 +249,23 @@ class SimulationResult:
     ValueError
         If the result has no session, or any session has no true ability.
     """
-    return cat.rmse(self._known_true_thetas(), self.final_thetas)
+    return metrics.rmse(self._known_true_thetas(), self.final_thetas)
 
   @property
   def overlap_rate(self) -> float | None:
     """Return the test overlap rate, or None unless every session administered the same number of items.
 
-    The overlap-rate formula (:func:`catsim.cat.overlap_rate`) assumes one fixed test length, so
+    The overlap-rate formula (:func:`catsim.metrics.overlap_rate`) assumes one fixed test length, so
     there is no overlap rate for a run of variable-length tests, for a run with no sessions or for
     tests of no items.
     """
-    if not self.sessions:
+    lengths = self.test_lengths
+    if lengths.size == 0:
       return None
-    test_sizes = set(self.test_lengths)
-    if len(test_sizes) != 1:
+    test_size = int(lengths[0])
+    if test_size == 0 or numpy.any(lengths != test_size):
       return None
-    test_size = test_sizes.pop()
-    if test_size == 0:
-      return None
-    return cat.overlap_rate(self.exposure_rates, test_size)
+    return metrics.overlap_rate(self.exposure_rates, test_size)
 
 
 class SimulationRunner:

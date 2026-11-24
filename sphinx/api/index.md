@@ -11,7 +11,7 @@ engine
 state
 context
 simulation
-cat
+metrics
 irt
 plot
 typing

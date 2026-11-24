@@ -333,7 +333,7 @@ layers = [
   "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
   "state",
   "context",  # StepContext: below state and the strategies, which read it, and above the domain
-  "cat",
+  "metrics",
   "item_bank",
   "irt",
   "typing : exceptions",
@@ -351,7 +351,7 @@ type = "forbidden"
 source_modules = [
   "catsim.irt",
   "catsim.item_bank",
-  "catsim.cat",
+  "catsim.metrics",
   "catsim.selection",
   "catsim.estimation",
   "catsim.initialization",
@@ -368,7 +368,7 @@ source_modules = [
   "catsim.exceptions",
   "catsim.irt",
   "catsim.item_bank",
-  "catsim.cat",
+  "catsim.metrics",
   "catsim.context",
   "catsim.state",
   "catsim.engine",
