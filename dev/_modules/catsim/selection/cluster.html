@@ -862,7 +862,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  a cluster, for example by clustering the item parameters. At each step the selector scores every</span>
 <span class="sd">  cluster that still has an item left, takes the best one, and administers that cluster's most</span>
 <span class="sd">  informative remaining item whose exposure rate is below ``r_max``. Exact ties between clusters and</span>
-<span class="sd">  between items are broken uniformly at random (ADR-0008).</span>
+<span class="sd">  between items are broken uniformly at random.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -880,16 +880,16 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      What to administer when every remaining item in the selected cluster is at or above ``r_max``; see</span>
 <span class="sd">      :class:`CapFallback`. Default is ``CapFallback.PASSIVE``.</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid</span>
+<span class="sd">      method or r_control, or r_max not in (0, 1]).</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
-<span class="sd">  The method has known limits. A cluster keeps the score of items already administered, so</span>
-<span class="sd">  ``item_info`` can return to a cluster whose remaining items are much less informative than items</span>
-<span class="sd">  elsewhere in the bank; in simulations it gave less test information and more test overlap than</span>
-<span class="sd">  :class:`~catsim.selection.MaxInfoSelector`, and no scoring rule improved on</span>
-<span class="sd">  :class:`~catsim.selection.MaxInfoSelector` or :class:`~catsim.selection.RandomesqueSelector`.</span>
-<span class="sd">  Because ``r_max`` applies only inside the chosen cluster, items can end above the cap.</span>
-
-<span class="sd">  For full algorithmic details and the simulation results, see</span>
+<span class="sd">  Because ``r_max`` applies only inside the chosen cluster, items can end above the cap. For the</span>
+<span class="sd">  method, its known limits and its simulation results, see</span>
 <span class="sd">  :doc:`/api/techniques/selection/cluster-selector`.</span>
 <span class="sd">  """</span>
 
@@ -928,26 +928,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">r_control</span><span class="p">:</span> <span class="n">CapFallback</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">CapFallback</span><span class="o">.</span><span class="n">PASSIVE</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a ClusterSelector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    clusters : list[int]</span>
-<span class="sd">        One non-negative integer cluster label per item.</span>
-<span class="sd">    method : ClusterMethod or str, optional</span>
-<span class="sd">        Cluster-scoring method. Default is ``ClusterMethod.ITEM_INFO``.</span>
-<span class="sd">    r_max : float, optional</span>
-<span class="sd">        Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.</span>
-<span class="sd">    r_control : CapFallback or str, optional</span>
-<span class="sd">        What to administer when no remaining item of the chosen cluster is below ``r_max``. Default</span>
-<span class="sd">        is ``CapFallback.PASSIVE``.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid</span>
-<span class="sd">        method or r_control, or r_max not in (0, 1]).</span>
-<span class="sd">    """</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">labels</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="s2">"clusters list cannot be empty"</span>

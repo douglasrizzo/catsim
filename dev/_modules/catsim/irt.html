@@ -797,8 +797,8 @@ window.runMermaid = runMermaid;</script>
 <span></span><span class="sd">"""Item response theory quantities of the four-parameter logistic (4PL) model.</span>
 
 <span class="sd">The functions take one item as a row ``[a, b, c, d]`` of shape ``(4,)``, or several as a matrix of</span>
-<span class="sd">such rows, shape ``(n, 4)``: discrimination, difficulty, pseudo-guessing and upper asymptote.</span>
-<span class="sd">:py:class:`catsim.item_bank.ItemBank` builds and validates such a matrix.</span>
+<span class="sd">such rows, shape ``(n, 4)``: discrimination, difficulty, guessing parameter and upper asymptote.</span>
+<span class="sd">:py:class:`catsim.ItemBank` builds and validates such a matrix.</span>
 <span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
@@ -868,7 +868,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  .. math:: P_i(\theta) = c_i + \frac{d_i - c_i}{1 + e^{-a_i(\theta - b_i)}}</span>
 
-<span class="sd">  The probability rises with :math:`\theta` from the pseudo-guessing parameter :math:`c_i` to the</span>
+<span class="sd">  The probability rises with :math:`\theta` from the guessing parameter :math:`c_i` to the</span>
 <span class="sd">  upper asymptote :math:`d_i`. It rises fastest at the difficulty :math:`b_i`, where it equals</span>
 <span class="sd">  :math:`(c_i + d_i) / 2`, and the discrimination :math:`a_i` sets how fast.</span>
 
@@ -881,10 +881,10 @@ window.runMermaid = runMermaid;</script>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
-<span class="sd">  numpy.ndarray</span>
+<span class="sd">  numpy.ndarray or numpy.float64</span>
 <span class="sd">      Every ability against every item, of shape ``numpy.shape(theta) + items.shape[:-1]``: a float</span>
-<span class="sd">      ``theta`` gives ``(n,)`` for ``n`` items, ``k`` abilities give ``(k, n)``, and a float</span>
-<span class="sd">      ``theta`` with one row gives a 0-d result.</span>
+<span class="sd">      ``theta`` gives ``(n,)`` for ``n`` items and ``k`` abilities give ``(k, n)``. A float ``theta``</span>
+<span class="sd">      with a single item of shape ``(4,)`` gives a NumPy scalar, a ``numpy.float64``.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
@@ -924,8 +924,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  -------</span>
 <span class="sd">  numpy.ndarray</span>
 <span class="sd">      Every ability against every item, of shape ``numpy.shape(theta) + items.shape[:-1]``: a float</span>
-<span class="sd">      ``theta`` gives ``(n,)`` for ``n`` items, ``k`` abilities give ``(k, n)``, and a float</span>
-<span class="sd">      ``theta`` with one row gives a 0-d result.</span>
+<span class="sd">      ``theta`` gives ``(n,)`` for ``n`` items and ``k`` abilities give ``(k, n)``. A float ``theta``</span>
+<span class="sd">      with a single item of shape ``(4,)`` gives a 0-d array.</span>
 
 <span class="sd">  Examples</span>
 <span class="sd">  --------</span>
@@ -1071,7 +1071,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  theta : float</span>
 <span class="sd">      The estimated ability value.</span>
 <span class="sd">  items : numpy.ndarray</span>
-<span class="sd">      A matrix containing item parameters for administered items.</span>
+<span class="sd">      The administered items, a matrix of shape ``(n, 4)``.</span>
 <span class="sd">  confidence : float, optional</span>
 <span class="sd">      The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).</span>
 <span class="sd">      Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).</span>
@@ -1418,18 +1418,11 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">log_response_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">]:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the log-probabilities of a correct and of an incorrect response to each item.</span>
 
-<span class="sd">  With the logit :math:`z_i = a_i(\theta - b_i)` and the logistic function</span>
-<span class="sd">  :math:`\sigma(z) = 1 / (1 + e^{-z})`, the :py:func:`icc` and its complement :math:`Q_i = 1 - P_i` are</span>
-
-<span class="sd">  .. math::</span>
-
-<span class="sd">      P_i(\theta) = c_i + (d_i - c_i)\,\sigma(z_i), \qquad</span>
-<span class="sd">      Q_i(\theta) = (1 - d_i) + (d_i - c_i)\,\sigma(-z_i)</span>
-
-<span class="sd">  Both logarithms are computed from :math:`z_i`, never from a :math:`P_i` that has rounded to 0 or 1, so</span>
-<span class="sd">  they are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to</span>
+<span class="sd">  They are the logarithms of the :py:func:`icc` :math:`P_i` and of its complement :math:`Q_i = 1 - P_i`,</span>
+<span class="sd">  computed from the logit :math:`a_i(\theta - b_i)`, never from a :math:`P_i` that has rounded to 0 or</span>
+<span class="sd">  1. They are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to</span>
 <span class="sd">  :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing</span>
-<span class="sd">  or slipping they keep falling linearly in :math:`z_i`.</span>
+<span class="sd">  or slipping they keep falling linearly in the logit.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1437,7 +1430,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      An ability, or an array of abilities.</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      One item ``[a, b, c, d]``, shape ``(4,)``, or a matrix of items, shape ``(n, 4)``, whose items</span>
-<span class="sd">      satisfy :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.</span>
+<span class="sd">      satisfy :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.ItemBank` validates.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -1498,7 +1491,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      One response per item, True for a correct one.</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      The answered items, a matrix of shape ``(n, 4)`` whose items satisfy</span>
-<span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.</span>
+<span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.ItemBank` validates.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
@@ -1539,7 +1532,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      One response per item, True for a correct one.</span>
 <span class="sd">  items : numpy.ndarray</span>
 <span class="sd">      The answered items, a matrix of shape ``(n, 4)`` whose items satisfy</span>
-<span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.</span>
+<span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.ItemBank` validates.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>

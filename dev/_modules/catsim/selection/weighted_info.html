@@ -829,6 +829,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max are only selected when no</span>
 <span class="sd">      other item remains. Default is 1 (no restriction).</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If n_nodes is below 5, the bounds are not finite or not increasing, or r_max is not in (0, 1].</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/mlwi-selector`.</span>
@@ -840,13 +845,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">THETA_MIN_EXTENDED</span><span class="p">,</span> <span class="n">THETA_MAX_EXTENDED</span><span class="p">),</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a MLWISelector object.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If n_nodes is below 5, the bounds are not finite or not increasing, or r_max is not in (0, 1].</span>
-<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">n_nodes</span> <span class="o">&lt;</span> <span class="n">_MIN_NODES</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_nodes must be &gt;= </span><span class="si">{</span><span class="n">_MIN_NODES</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">n_nodes</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

@@ -119,7 +119,7 @@ Since the denominator in the calculation of the $SEE$ is $I(\theta)$, it is clea
 
 ### The Item Matrix
 
-In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The item matrix has four columns, which hold the parameters $a$, $b$, $c$ and $d$, in this order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing parameters are filled in with $a = 1$, $c = 0$ and $d = 1$. An {py:class}`catsim.item_bank.ItemBank` holds an item matrix, and its {py:meth}`~catsim.item_bank.ItemBank.generate` method generates one as follows:
+In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The item matrix has four columns, which hold the parameters $a$, $b$, $c$ and $d$, in this order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing parameters are filled in with $a = 1$, $c = 0$ and $d = 1$. An {py:class}`catsim.ItemBank` holds an item matrix, and its {py:meth}`~catsim.ItemBank.generate` method generates one as follows:
 
 ```pycon
 >>> from catsim import ItemBank
@@ -141,7 +141,7 @@ In the last example, parameters $a$ and $b$ have a
 correlation of $0.5$, an adjustment that may be useful in case simulations
 require it {cite:p}`Chang2001`.
 
-The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results ({py:attr}`catsim.simulation.SimulationResult.exposure_rates`). The exposure rate is commonly denoted as $r$ and computed as follows:
+The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results ({py:attr}`catsim.SimulationResult.exposure_rates`). The exposure rate is commonly denoted as $r$ and computed as follows:
 
 $$
 r_i = \frac{q_i}{N}
@@ -149,7 +149,7 @@ $$
 
 Where $q_i$ represents the number of tests item $i$ has been used on and $N$ is the total number of tests applied.
 
-During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.state.ExposureTracker` in the run context gives each session $q_i$ and $N$ over the other sessions started so far, which for sessions run one after another is catR's rate over the examinees tested before the current one ({doc}`/adr/0003-runtime-state-ownership`).
+During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.ExposureTracker` in the run context gives each session $q_i$ and $N$ over the other sessions started so far, which for sessions run one after another is catR's rate over the examinees tested before the current one ({doc}`/adr/0003-runtime-state-ownership`).
 
 ## Computerized adaptive tests
 
@@ -199,7 +199,7 @@ In {py:mod}`catsim`, item selection procedures can be found in the {py:mod}`cats
 
 #### Proficiency Estimation
 
-Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test. An estimator returns it as an {py:class}`~catsim.context.Estimate`, which also holds the estimate's standard error, by the estimator's own formula, and how many times the estimator evaluated its objective to find it.
+Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test. An estimator returns it as an {py:class}`~catsim.Estimate`, which also holds the estimate's standard error, by the estimator's own formula, and how many times the estimator evaluated its objective to find it.
 
 In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:
 
@@ -235,7 +235,7 @@ In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.
     ===============================  ==============
 ```
 
-The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.context.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an {py:class}`~catsim.context.Estimate`. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
+The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an {py:class}`~catsim.Estimate`. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
 
 ```python
 from typing_extensions import override

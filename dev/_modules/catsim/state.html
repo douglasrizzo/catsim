@@ -816,7 +816,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="StopReason">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.StopReason">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.StopReason">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">StopReason</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Why a CAT session ended.</span>
 
@@ -831,25 +831,41 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatSessionState">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.CatSessionState">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatSessionState</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Mutable runtime state for a single examinee CAT session.</span>
 
-<span class="sd">  ``session_id`` is whatever hashable value the application identifies the session by, such as an</span>
-<span class="sd">  int, a str or a UUID. ``estimates`` starts with the initial estimate (which</span>
-<span class="sd">  :meth:`~catsim.engine.CatEngine.start_session` records with an infinite standard error and no</span>
-<span class="sd">  evaluations) and gains the :class:`~catsim.context.Estimate` the estimator returned for each</span>
-<span class="sd">  response; its last entry is the current estimate. A restored session's estimates are trusted</span>
-<span class="sd">  as given. A session runs</span>
-<span class="sd">  while ``stop_reason`` is None.</span>
+<span class="sd">  :meth:`~catsim.CatEngine.start_session` creates a session and the engine advances it in place. An</span>
+<span class="sd">  application that saves a session restores it by passing the saved fields back; a restored</span>
+<span class="sd">  session's estimates are trusted as given. A session runs while ``stop_reason`` is None.</span>
 
-<span class="sd">  ``excluded_items`` holds the items the session must not be given although it has not had them.</span>
-<span class="sd">  An application may fill it before the first item, for example with the items the examinee saw in</span>
-<span class="sd">  an earlier attempt; during the test it only grows, as the engine adds the items its exposure</span>
-<span class="sd">  control declines. Removing an item from it during the test is not supported. The engine passes</span>
-<span class="sd">  the items to every strategy and raises :class:`~catsim.exceptions.ExcludedItemError` for a</span>
-<span class="sd">  response to one. Their indices are checked against the item bank at the session's next step.</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  session_id : Hashable</span>
+<span class="sd">      Whatever hashable value the application identifies the session by, such as an int, a str or</span>
+<span class="sd">      a UUID.</span>
+<span class="sd">  estimates : list of Estimate</span>
+<span class="sd">      The initial estimate, which :meth:`~catsim.CatEngine.start_session` records with an infinite</span>
+<span class="sd">      standard error and no evaluations, then the :class:`~catsim.Estimate` the estimator returned</span>
+<span class="sd">      for each response. The last entry is the current estimate.</span>
+<span class="sd">  true_theta : float or None, optional</span>
+<span class="sd">      True ability of a simulated examinee. Default is None.</span>
+<span class="sd">  administered_items : list of int, optional</span>
+<span class="sd">      Indices of the items given so far, in order. Default is an empty list.</span>
+<span class="sd">  responses : list of bool, optional</span>
+<span class="sd">      The responses to the administered items, in the same order. Default is an empty list.</span>
+<span class="sd">  stop_reason : StopReason or None, optional</span>
+<span class="sd">      Why the session ended, or None while it runs. The reason's string value, as a saved session</span>
+<span class="sd">      holds it, is accepted. Default is None.</span>
+<span class="sd">  excluded_items : list of int, optional</span>
+<span class="sd">      Items the session must not be given although it has not had them. An application may fill it</span>
+<span class="sd">      before the first item, for example with the items the examinee saw in an earlier attempt;</span>
+<span class="sd">      during the test it only grows, as the engine adds the items its exposure control declines.</span>
+<span class="sd">      Removing an item from it during the test is not supported. The engine passes the items to</span>
+<span class="sd">      every strategy and raises :class:`~catsim.ExcludedItemError` for a response to one. Their</span>
+<span class="sd">      indices are checked against the item bank at the session's next step. Default is an empty</span>
+<span class="sd">      list.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
@@ -858,7 +874,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      responses, if ``excluded_items`` repeats an item or holds an administered one, or if</span>
 <span class="sd">      ``stop_reason`` is not a :class:`StopReason` value.</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`, or an entry of</span>
+<span class="sd">      If an entry of ``estimates`` is not an :class:`~catsim.Estimate`, or an entry of</span>
 <span class="sd">      ``administered_items`` or ``excluded_items`` is not an integer.</span>
 <span class="sd">  """</span>
 
@@ -932,7 +948,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CatSessionState.snapshot">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionState.snapshot">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.CatSessionState.snapshot">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionSnapshot</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return an immutable copy of the current session state."""</span>
     <span class="k">return</span> <span class="n">CatSessionSnapshot</span><span class="p">(</span>
@@ -949,10 +965,30 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatSessionSnapshot">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.CatSessionSnapshot">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.CatSessionSnapshot">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatSessionSnapshot</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Immutable, hashable copy of a session at a specific point in time."""</span>
+<span class="w">  </span><span class="sd">"""Immutable, hashable copy of a session at a specific point in time.</span>
+
+<span class="sd">  :meth:`CatSessionState.snapshot` builds one, with the session's lists as tuples.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  session_id : Hashable</span>
+<span class="sd">      The session's identifier.</span>
+<span class="sd">  estimates : tuple of Estimate</span>
+<span class="sd">      The estimates up to the snapshot, the initial one first.</span>
+<span class="sd">  true_theta : float or None</span>
+<span class="sd">      True ability of a simulated examinee, or None.</span>
+<span class="sd">  administered_items : tuple of int</span>
+<span class="sd">      Indices of the items given up to the snapshot, in order.</span>
+<span class="sd">  responses : tuple of bool</span>
+<span class="sd">      The responses to the administered items, in the same order.</span>
+<span class="sd">  stop_reason : StopReason or None</span>
+<span class="sd">      Why the session had ended, or None if it was running.</span>
+<span class="sd">  excluded_items : tuple of int, optional</span>
+<span class="sd">      Items the session must not be given although it has not had them. Default is an empty tuple.</span>
+<span class="sd">  """</span>
 
   <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span>
   <span class="n">estimates</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Estimate</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
@@ -985,13 +1021,20 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatStepResult">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.CatStepResult">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.CatStepResult">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatStepResult</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Result of one CAT step: the item administered, its response and the session as the step left it.</span>
 
-<span class="sd">  ``selected_item_id`` and ``response`` are None for a step that administered nothing because the</span>
-<span class="sd">  session had ended.</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  session : CatSessionSnapshot</span>
+<span class="sd">      The session as the step left it.</span>
+<span class="sd">  selected_item_id : int or None</span>
+<span class="sd">      Index of the item the step administered, or None for a step that administered nothing because</span>
+<span class="sd">      the session had ended.</span>
+<span class="sd">  response : bool or None</span>
+<span class="sd">      The response to that item, or None when the step administered nothing.</span>
 <span class="sd">  """</span>
 
   <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span>
@@ -1016,24 +1059,22 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="ExposureTracker">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.ExposureTracker">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExposureTracker</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.</span>
 
 <span class="sd">  One tracker is shared by every session of a run or of a live deployment, through</span>
-<span class="sd">  :class:`~catsim.engine.RunContext`. The engine calls :meth:`start_session` when a session starts,</span>
-<span class="sd">  :meth:`record` for every administered item and :meth:`record_decline` for every item the engine's</span>
-<span class="sd">  exposure control declines. ``counts`` holds each item's administrations so far, those of sessions</span>
-<span class="sd">  still in progress included, ``proposals`` its administrations plus its declines, and</span>
-<span class="sd">  ``n_sessions`` the number of sessions started. A session proposes an item at most once, so</span>
-<span class="sd">  neither count can exceed ``n_sessions``.</span>
+<span class="sd">  :class:`~catsim.RunContext`, and the engine updates it. ``counts`` holds each item's</span>
+<span class="sd">  administrations so far, those of sessions still in progress included, ``proposals`` its</span>
+<span class="sd">  administrations plus the times the engine's exposure control declined it, and ``n_sessions`` the</span>
+<span class="sd">  number of sessions started. A session proposes an item at most once, so neither count can exceed</span>
+<span class="sd">  ``n_sessions``.</span>
 
 <span class="sd">  A session is selected against each item's administrations divided by the number of other sessions</span>
-<span class="sd">  started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that</span>
-<span class="sd">  is the share of the examinees tested before the current one, as in catR's</span>
-<span class="sd">  ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,</span>
-<span class="sd">  as in a live deployment, see each other's administrations as they happen.</span>
+<span class="sd">  started so far. With sessions run one after another, as a simulation runs them, that is the share</span>
+<span class="sd">  of the examinees tested before the current one; the first session sees every rate at 0. Sessions</span>
+<span class="sd">  that run side by side, as in a live deployment, see each other's administrations as they happen.</span>
 
 <span class="sd">  A new tracker starts from zero. An application that must keep the exposure across restarts saves</span>
 <span class="sd">  ``counts``, ``proposals`` and ``n_sessions`` and passes them back to rebuild the tracker.</span>
@@ -1114,29 +1155,41 @@ window.runMermaid = runMermaid;</script>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExposureTracker.start_session">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.start_session">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.ExposureTracker.start_session">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">start_session</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Count a session that has started."""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="ExposureTracker.record">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.record">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.ExposureTracker.record">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Record one administration for an item, which is also one proposal of it."""</span>
+<span class="w">    </span><span class="sd">"""Record one administration for an item, which is also one proposal of it.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_id : int</span>
+<span class="sd">        Index of the administered item.</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="ExposureTracker.record_decline">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.record_decline">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.ExposureTracker.record_decline">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">record_decline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Record one proposal of an item that the exposure control declined; its administrations are unchanged."""</span>
+<span class="w">    </span><span class="sd">"""Record one proposal of an item that the exposure control declined; its administrations are unchanged.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_id : int</span>
+<span class="sd">        Index of the declined item.</span>
+<span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">proposals</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 
 <div class="viewcode-block" id="ExposureTracker.rates">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.rates">[docs]</a>
+<a class="viewcode-back" href="../../api/state.html#catsim.ExposureTracker.rates">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">rates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the exposure rates a session in progress is selected against.</span>
 
@@ -1150,7 +1203,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        A new array with one rate per item; all zero while at most one session has started. This is</span>
 <span class="sd">        not the run's final exposure, which</span>
-<span class="sd">        :attr:`~catsim.simulation.SimulationResult.exposure_rates` gives.</span>
+<span class="sd">        :attr:`~catsim.SimulationResult.exposure_rates` gives.</span>
 <span class="sd">    """</span>
     <span class="n">others</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">others</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>

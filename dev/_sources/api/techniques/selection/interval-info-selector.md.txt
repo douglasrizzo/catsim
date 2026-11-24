@@ -57,7 +57,7 @@ Equation 13); catsim's is the EAP estimator's prior.
 
 catsim builds the interval as $\hat{\theta} \pm \lambda\, SE(\hat{\theta})$, with
 the standard error the current estimator reports (the `se` field of
-{py:class}`~catsim.context.StepContext`). MLE and WLE sessions therefore get
+{py:class}`~catsim.StepContext`). MLE and WLE sessions therefore get
 Equation 11 and EAP sessions Equation 12; a MAP session gets the MAP
 estimator's standard error, which includes the prior's curvature, by the same
 reasoning. The {doc}`estimation pages </api/techniques/estimation/index>`

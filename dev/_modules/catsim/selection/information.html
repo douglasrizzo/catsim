@@ -818,24 +818,17 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not</span>
 <span class="sd">      be selected unless no other items are available. Default is 1 (no restriction).</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If r_max is not in (0, 1].</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a MaxInfoSelector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    r_max : float, optional</span>
-<span class="sd">        Maximum exposure rate for items. Default is 1.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If r_max is not in (0, 1].</span>
-<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span> <span class="o">=</span> <span class="n">check_r_max</span><span class="p">(</span><span class="n">r_max</span><span class="p">)</span>
 
@@ -929,12 +922,11 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">IntervalInfoSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Select the item whose information, integrated over an interval around the estimate, is largest.</span>
 
-<span class="sd">  By default the interval is the estimate plus or minus :math:`\lambda` times the estimator's</span>
-<span class="sd">  standard error (``context.se``), where :math:`\lambda` is the standard normal quantile of</span>
-<span class="sd">  ``(1 + confidence) / 2`` :cite:p:`Veerkamp1997`. It spans the whole ability scale before the first</span>
-<span class="sd">  response and narrows as the standard error falls; a standard error of zero, or nearly zero, selects</span>
-<span class="sd">  by the items' information at the estimate, the interval's limit. Setting ``interval`` fixes the</span>
-<span class="sd">  half-width. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
+<span class="sd">  By default the interval is a confidence interval for the estimate, built from the estimator's</span>
+<span class="sd">  standard error (``context.se``) :cite:p:`Veerkamp1997`. It spans the whole ability scale before the</span>
+<span class="sd">  first response and narrows as the standard error falls; a standard error of zero, or nearly zero,</span>
+<span class="sd">  selects by the items' information at the estimate. Setting ``interval`` fixes the half-width. The</span>
+<span class="sd">  selector applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -943,6 +935,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      confidence interval.</span>
 <span class="sd">  confidence : float, optional</span>
 <span class="sd">      Confidence level of the default interval. Default is 0.95.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``interval`` is not positive or ``confidence`` is not between 0 and 1.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -955,21 +952,6 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(interval=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="si">!r}</span><span class="s2">, confidence=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Initialize an IntervalInfoSelector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    interval : float or None, optional</span>
-<span class="sd">        Fixed half-width of the interval. Default is None, which uses a confidence interval of</span>
-<span class="sd">        :math:`\hat\theta`.</span>
-<span class="sd">    confidence : float, optional</span>
-<span class="sd">        Confidence level of the default interval. Default is 0.95.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``interval`` is not positive or ``confidence`` is not between 0 and 1.</span>
-<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">interval</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"interval must be positive, got </span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>

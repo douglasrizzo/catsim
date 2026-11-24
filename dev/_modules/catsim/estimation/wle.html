@@ -829,24 +829,11 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">WarmLikelihoodEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Warm's (1989) weighted likelihood estimator (WLE).</span>
 
-<span class="sd">  The estimate is the root of Warm's modified score equation</span>
-
-<span class="sd">  .. math::</span>
-
-<span class="sd">    \sum_i \frac{(u_i - P_i) P_i'}{P_i Q_i} + \frac{J(\theta)}{2 I(\theta)} = 0,</span>
-<span class="sd">    \qquad J(\theta) = \sum_i \frac{P_i' P_i''}{P_i Q_i},</span>
-
-<span class="sd">  which removes the first-order (:math:`O(n^{-1})`) bias of the MLE and stays finite for</span>
-<span class="sd">  all-correct and all-incorrect response patterns. For models without guessing or slipping</span>
-<span class="sd">  (:math:`c = 0`, :math:`d = 1`), :math:`J = I'` and the estimate maximizes</span>
-<span class="sd">  :math:`L(\theta)\sqrt{I(\theta)}`.</span>
-
-<span class="sd">  The modified score is scanned at 121 equally spaced points over ``bounds`` (0.1 apart on the</span>
-<span class="sd">  default bounds) to bracket its roots, which are then refined with Brent's method. If several</span>
-<span class="sd">  roots exist, the one with the largest weighted likelihood is returned; if none does, the</span>
-<span class="sd">  estimate is the bound the modified score points to.</span>
-
-<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/estimation/warm-wle`.</span>
+<span class="sd">  The root of Warm's modified score equation, which removes the MLE's first-order bias and stays</span>
+<span class="sd">  finite for all-correct and all-incorrect response patterns; see</span>
+<span class="sd">  :doc:`/api/techniques/estimation/warm-wle`. If the equation has several roots within ``bounds``,</span>
+<span class="sd">  the one with the largest weighted likelihood is returned; if it has none, the bound the modified</span>
+<span class="sd">  score points to.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -910,15 +897,10 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.</span>
 
-<span class="sd">    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test</span>
-<span class="sd">    information at the estimate, or ``math.inf`` where the information is 0. This is catR's</span>
-<span class="sd">    default for the WLE (``semTheta`` with ``sem.type = "classic"``). :cite:t:`Magis12` (Eq. 14,</span>
-<span class="sd">    p. 6) add a term to the information, :math:`(I'J - IJ')/(2I^2)`, which catR has not used since</span>
-<span class="sd">    version 3.0 and which, with guessing or slipping parameters, can make the sum negative; catsim</span>
-<span class="sd">    follows catR (ADR-0004). The evaluation count is</span>
-<span class="sd">    the number of modified-score evaluations: the scan, Brent's refinement and, when several roots</span>
-<span class="sd">    compete, the integration that ranks them. With no administered item, the estimate is</span>
-<span class="sd">    ``context.theta`` and ``context.se``, unchanged, after no evaluation.</span>
+<span class="sd">    The standard error is the inverse square root of the test information at the estimate, without</span>
+<span class="sd">    Warm's correction (the technique page compares the two), or ``math.inf`` where the information</span>
+<span class="sd">    is 0. The evaluation count is the number of modified-score evaluations. With no administered</span>
+<span class="sd">    item, the estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

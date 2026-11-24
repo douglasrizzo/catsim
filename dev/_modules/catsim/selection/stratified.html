@@ -817,8 +817,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking</span>
 <span class="sd">  on a location key so that every stratum covers the whole ability range. The test is split into</span>
 <span class="sd">  ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item</span>
-<span class="sd">  whose location is closest to the current ability estimate. The strata are the selector's exposure</span>
-<span class="sd">  control: it applies no exposure cap, and ``context.exposure_rates`` is ignored.</span>
+<span class="sd">  whose location is closest to the current ability estimate. The strata are its exposure control:</span>
+<span class="sd">  it applies no exposure cap and ignores ``context.exposure_rates``.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -828,6 +828,13 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  n_strata : int or None, optional</span>
 <span class="sd">      Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which</span>
 <span class="sd">      uses one stratum per test item.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``test_size`` or ``n_strata`` is not an integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -840,22 +847,6 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(test_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span><span class="si">!r}</span><span class="s2">, n_strata=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_strata</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_strata</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a StratifiedSelector.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    test_size : int</span>
-<span class="sd">        Number of items in the test.</span>
-<span class="sd">    n_strata : int or None, optional</span>
-<span class="sd">        Number of strata. Default is None, which uses ``test_size`` strata.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    TypeError</span>
-<span class="sd">        If ``test_size`` or ``n_strata`` is not an integer.</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.</span>
-<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">check_test_size</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
     <span class="n">n_strata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="k">if</span> <span class="n">n_strata</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">n_strata</span><span class="p">)</span>
@@ -893,11 +884,8 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">strata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">IntArray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return the item indices of each stratum, from the first test stage to the last.</span>
 
-<span class="sd">    Without blocking, items are sorted by the stratification key and split into ``n_strata`` contiguous</span>
-<span class="sd">    groups. With blocking :cite:p:`Chang2001`, items are sorted by the blocking key and grouped into</span>
-<span class="sd">    consecutive blocks of ``n_strata`` items; each block is sorted by the stratification key and its</span>
-<span class="sd">    :math:`j`-th item goes to stratum :math:`j`, so every stratum spans the range of the blocking key.</span>
-<span class="sd">    The strata are computed once per item bank.</span>
+<span class="sd">    The strata ascend in the stratification key; with blocking, every stratum spans the range of the</span>
+<span class="sd">    blocking key. The strata are computed once per item bank.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

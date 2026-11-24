@@ -402,11 +402,13 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="techniques/index.html">Techniques</a></li>
-<li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -476,8 +478,8 @@
 <p>This module contains functions pertaining to the Item Response Theory logistic models, including probability calculations, information functions, likelihood estimation, and other IRT-related utilities.</p>
 <p id="module-catsim.irt">Item response theory quantities of the four-parameter logistic (4PL) model.</p>
 <p>The functions take one item as a row <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d]</span></code> of shape <code class="docutils literal notranslate"><span class="pre">(4,)</span></code>, or several as a matrix of
-such rows, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code>: discrimination, difficulty, pseudo-guessing and upper asymptote.
-<code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.item_bank.ItemBank</span></code> builds and validates such a matrix.</p>
+such rows, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code>: discrimination, difficulty, guessing parameter and upper asymptote.
+<a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.ItemBank</span></code></a> builds and validates such a matrix.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="catsim.irt.THETA_MAX_EXTENDED">
 <span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">THETA_MAX_EXTENDED</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6.0</span></span><a class="headerlink" href="#catsim.irt.THETA_MAX_EXTENDED" title="Link to this definition">#</a></dt>
@@ -531,7 +533,7 @@ of estimation.</p>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>theta</strong><span class="classifier">float</span></dt><dd><p>The estimated ability value.</p>
 </dd>
-<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A matrix containing item parameters for administered items.</p>
+<dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The administered items, a matrix of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code>.</p>
 </dd>
 <dt><strong>confidence</strong><span class="classifier">float, optional</span></dt><dd><p>The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).
 Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).</p>
@@ -570,7 +572,7 @@ Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).</p>
 answers item <span class="math notranslate nohighlight">\(i\)</span> correctly with probability</p>
 <div class="math notranslate nohighlight">
 \[P_i(\theta) = c_i + \frac{d_i - c_i}{1 + e^{-a_i(\theta - b_i)}}\]</div>
-<p>The probability rises with <span class="math notranslate nohighlight">\(\theta\)</span> from the pseudo-guessing parameter <span class="math notranslate nohighlight">\(c_i\)</span> to the
+<p>The probability rises with <span class="math notranslate nohighlight">\(\theta\)</span> from the guessing parameter <span class="math notranslate nohighlight">\(c_i\)</span> to the
 upper asymptote <span class="math notranslate nohighlight">\(d_i\)</span>. It rises fastest at the difficulty <span class="math notranslate nohighlight">\(b_i\)</span>, where it equals
 <span class="math notranslate nohighlight">\((c_i + d_i) / 2\)</span>, and the discrimination <span class="math notranslate nohighlight">\(a_i\)</span> sets how fast.</p>
 <dl class="field-list simple">
@@ -584,9 +586,9 @@ upper asymptote <span class="math notranslate nohighlight">\(d_i\)</span>. It ri
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>numpy.ndarray</dt><dd><p>Every ability against every item, of shape <code class="docutils literal notranslate"><span class="pre">numpy.shape(theta)</span> <span class="pre">+</span> <span class="pre">items.shape[:-1]</span></code>: a float
-<code class="docutils literal notranslate"><span class="pre">theta</span></code> gives <code class="docutils literal notranslate"><span class="pre">(n,)</span></code> for <code class="docutils literal notranslate"><span class="pre">n</span></code> items, <code class="docutils literal notranslate"><span class="pre">k</span></code> abilities give <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">n)</span></code>, and a float
-<code class="docutils literal notranslate"><span class="pre">theta</span></code> with one row gives a 0-d result.</p>
+<dt>numpy.ndarray or numpy.float64</dt><dd><p>Every ability against every item, of shape <code class="docutils literal notranslate"><span class="pre">numpy.shape(theta)</span> <span class="pre">+</span> <span class="pre">items.shape[:-1]</span></code>: a float
+<code class="docutils literal notranslate"><span class="pre">theta</span></code> gives <code class="docutils literal notranslate"><span class="pre">(n,)</span></code> for <code class="docutils literal notranslate"><span class="pre">n</span></code> items and <code class="docutils literal notranslate"><span class="pre">k</span></code> abilities give <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">n)</span></code>. A float <code class="docutils literal notranslate"><span class="pre">theta</span></code>
+with a single item of shape <code class="docutils literal notranslate"><span class="pre">(4,)</span></code> gives a NumPy scalar, a <code class="docutils literal notranslate"><span class="pre">numpy.float64</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -661,8 +663,8 @@ at <span class="math notranslate nohighlight">\(\theta = b_i\)</span>. Far from 
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>numpy.ndarray</dt><dd><p>Every ability against every item, of shape <code class="docutils literal notranslate"><span class="pre">numpy.shape(theta)</span> <span class="pre">+</span> <span class="pre">items.shape[:-1]</span></code>: a float
-<code class="docutils literal notranslate"><span class="pre">theta</span></code> gives <code class="docutils literal notranslate"><span class="pre">(n,)</span></code> for <code class="docutils literal notranslate"><span class="pre">n</span></code> items, <code class="docutils literal notranslate"><span class="pre">k</span></code> abilities give <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">n)</span></code>, and a float
-<code class="docutils literal notranslate"><span class="pre">theta</span></code> with one row gives a 0-d result.</p>
+<code class="docutils literal notranslate"><span class="pre">theta</span></code> gives <code class="docutils literal notranslate"><span class="pre">(n,)</span></code> for <code class="docutils literal notranslate"><span class="pre">n</span></code> items and <code class="docutils literal notranslate"><span class="pre">k</span></code> abilities give <code class="docutils literal notranslate"><span class="pre">(k,</span> <span class="pre">n)</span></code>. A float <code class="docutils literal notranslate"><span class="pre">theta</span></code>
+with a single item of shape <code class="docutils literal notranslate"><span class="pre">(4,)</span></code> gives a 0-d array.</p>
 </dd>
 </dl>
 </dd>
@@ -696,7 +698,7 @@ log-likelihood is 0.</p>
 <dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>One response per item, True for a correct one.</p>
 </dd>
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The answered items, a matrix of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> whose items satisfy
-<span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code> validates.</p>
+<span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> validates.</p>
 </dd>
 </dl>
 </dd>
@@ -736,7 +738,7 @@ function.</p>
 <dt><strong>responses</strong><span class="classifier">Sequence[bool]</span></dt><dd><p>One response per item, True for a correct one.</p>
 </dd>
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>The answered items, a matrix of shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code> whose items satisfy
-<span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code> validates.</p>
+<span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> validates.</p>
 </dd>
 </dl>
 </dd>
@@ -768,22 +770,18 @@ shape of <code class="docutils literal notranslate"><span class="pre">theta</spa
 <dt class="sig sig-object py" id="catsim.irt.log_response_probabilities">
 <span class="sig-prename descclassname"><span class="pre">catsim.irt.</span></span><span class="sig-name descname"><span class="pre">log_response_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/catsim/irt.html#log_response_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.irt.log_response_probabilities" title="Link to this definition">#</a></dt>
 <dd><p>Return the log-probabilities of a correct and of an incorrect response to each item.</p>
-<p>With the logit <span class="math notranslate nohighlight">\(z_i = a_i(\theta - b_i)\)</span> and the logistic function
-<span class="math notranslate nohighlight">\(\sigma(z) = 1 / (1 + e^{-z})\)</span>, the <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> and its complement <span class="math notranslate nohighlight">\(Q_i = 1 - P_i\)</span> are</p>
-<div class="math notranslate nohighlight">
-\[P_i(\theta) = c_i + (d_i - c_i)\,\sigma(z_i), \qquad
-Q_i(\theta) = (1 - d_i) + (d_i - c_i)\,\sigma(-z_i)\]</div>
-<p>Both logarithms are computed from <span class="math notranslate nohighlight">\(z_i\)</span>, never from a <span class="math notranslate nohighlight">\(P_i\)</span> that has rounded to 0 or 1, so
-they are exact at any distance from the difficulty: far below it <span class="math notranslate nohighlight">\(\log P_i\)</span> tends to
+<p>They are the logarithms of the <a class="reference internal" href="#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">icc()</span></code></a> <span class="math notranslate nohighlight">\(P_i\)</span> and of its complement <span class="math notranslate nohighlight">\(Q_i = 1 - P_i\)</span>,
+computed from the logit <span class="math notranslate nohighlight">\(a_i(\theta - b_i)\)</span>, never from a <span class="math notranslate nohighlight">\(P_i\)</span> that has rounded to 0 or
+1. They are exact at any distance from the difficulty: far below it <span class="math notranslate nohighlight">\(\log P_i\)</span> tends to
 <span class="math notranslate nohighlight">\(\log c_i\)</span>, far above it <span class="math notranslate nohighlight">\(\log Q_i\)</span> tends to <span class="math notranslate nohighlight">\(\log(1 - d_i)\)</span>, and without guessing
-or slipping they keep falling linearly in <span class="math notranslate nohighlight">\(z_i\)</span>.</p>
+or slipping they keep falling linearly in the logit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>theta</strong><span class="classifier">float or numpy.ndarray</span></dt><dd><p>An ability, or an array of abilities.</p>
 </dd>
 <dt><strong>items</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>One item <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c,</span> <span class="pre">d]</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(4,)</span></code>, or a matrix of items, shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">4)</span></code>, whose items
-satisfy <span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code> validates.</p>
+satisfy <span class="math notranslate nohighlight">\(0 \leq c &lt; d \leq 1\)</span>, as <a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> validates.</p>
 </dd>
 </dl>
 </dd>

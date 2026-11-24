@@ -1,6 +1,9 @@
-# Strategy Inputs and Estimates -- {mod}`catsim.context`
+# Strategy Inputs and Estimates
 
 ```{eval-rst}
-.. automodule:: catsim.context
+.. autoclass:: catsim.StepContext
+   :members:
+
+.. autoclass:: catsim.Estimate
    :members:
 ```

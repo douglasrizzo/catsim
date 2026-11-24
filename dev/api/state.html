@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Runtime State – catsim.state &#8212; catsim 0.21.0 documentation</title>
+    <title>Session State &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -47,8 +47,8 @@
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Strategy Inputs and Estimates – catsim.context" href="context.html" />
-    <link rel="prev" title="Exposure Controls – catsim.exposure" href="exposure.html" />
+    <link rel="next" title="Strategy Inputs and Estimates" href="context.html" />
+    <link rel="prev" title="CAT Engine" href="engine.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -400,11 +400,13 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="techniques/index.html">Techniques</a></li>
-<li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -452,7 +454,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Session State</span></li>
   </ul>
 </nav>
 </div>
@@ -469,149 +471,205 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.state">
-<span id="runtime-state-catsim-state"></span><h1>Runtime State – <a class="reference internal" href="#module-catsim.state" title="catsim.state"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a><a class="headerlink" href="#module-catsim.state" title="Link to this heading">#</a></h1>
-<p>Runtime state of CAT sessions and of the runs they belong to.</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="session-state">
+<h1>Session State<a class="headerlink" href="#session-state" title="Link to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="catsim.state.CatSessionSnapshot">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">CatSessionSnapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Hashable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="context.html#catsim.context.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.state.StopReason" title="catsim.state.StopReason"><span class="pre">StopReason</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">excluded_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionSnapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.CatSessionSnapshot" title="Link to this definition">#</a></dt>
-<dd><p>Immutable, hashable copy of a session at a specific point in time.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionSnapshot.current_se">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.CatSessionSnapshot.current_se" title="Link to this definition">#</a></dt>
-<dd><p>Return the standard error of the ability estimate at the time of the snapshot.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionSnapshot.current_theta">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.CatSessionSnapshot.current_theta" title="Link to this definition">#</a></dt>
-<dd><p>Return the ability estimate at the time of the snapshot.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionSnapshot.is_stopped">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_stopped</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.state.CatSessionSnapshot.is_stopped" title="Link to this definition">#</a></dt>
-<dd><p>Return whether the session had ended at the time of the snapshot.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionSnapshot.theta_history">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta_history</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.state.CatSessionSnapshot.theta_history" title="Link to this definition">#</a></dt>
-<dd><p>Return the ability estimates up to the snapshot, the initial one first.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">CatSessionState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">session_id:</span> <span class="pre">Hashable,</span> <span class="pre">estimates:</span> <span class="pre">list[Estimate],</span> <span class="pre">true_theta:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">administered_items:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">responses:</span> <span class="pre">list[bool]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">stop_reason:</span> <span class="pre">StopReason</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">excluded_items:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.CatSessionState" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">CatSessionState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">session_id:</span> <span class="pre">Hashable,</span> <span class="pre">estimates:</span> <span class="pre">list[Estimate],</span> <span class="pre">true_theta:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">administered_items:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">responses:</span> <span class="pre">list[bool]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">stop_reason:</span> <span class="pre">StopReason</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">excluded_items:</span> <span class="pre">list[int]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.CatSessionState" title="Link to this definition">#</a></dt>
 <dd><p>Mutable runtime state for a single examinee CAT session.</p>
-<p><code class="docutils literal notranslate"><span class="pre">session_id</span></code> is whatever hashable value the application identifies the session by, such as an
-int, a str or a UUID. <code class="docutils literal notranslate"><span class="pre">estimates</span></code> starts with the initial estimate (which
-<a class="reference internal" href="engine.html#catsim.engine.CatEngine.start_session" title="catsim.engine.CatEngine.start_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_session()</span></code></a> records with an infinite standard error and no
-evaluations) and gains the <a class="reference internal" href="context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a> the estimator returned for each
-response; its last entry is the current estimate. A restored session’s estimates are trusted
-as given. A session runs
-while <code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is None.</p>
-<p><code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> holds the items the session must not be given although it has not had them.
-An application may fill it before the first item, for example with the items the examinee saw in
-an earlier attempt; during the test it only grows, as the engine adds the items its exposure
-control declines. Removing an item from it during the test is not supported. The engine passes
-the items to every strategy and raises <code class="xref py py-class docutils literal notranslate"><span class="pre">ExcludedItemError</span></code> for a
-response to one. Their indices are checked against the item bank at the session’s next step.</p>
+<p><a class="reference internal" href="engine.html#catsim.CatEngine.start_session" title="catsim.CatEngine.start_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_session()</span></code></a> creates a session and the engine advances it in place. An
+application that saves a session restores it by passing the saved fields back; a restored
+session’s estimates are trusted as given. A session runs while <code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is None.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
+<dt><strong>session_id</strong><span class="classifier">Hashable</span></dt><dd><p>Whatever hashable value the application identifies the session by, such as an int, a str or
+a UUID.</p>
+</dd>
+<dt><strong>estimates</strong><span class="classifier">list of Estimate</span></dt><dd><p>The initial estimate, which <a class="reference internal" href="engine.html#catsim.CatEngine.start_session" title="catsim.CatEngine.start_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_session()</span></code></a> records with an infinite
+standard error and no evaluations, then the <a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a> the estimator returned
+for each response. The last entry is the current estimate.</p>
+</dd>
+<dt><strong>true_theta</strong><span class="classifier">float or None, optional</span></dt><dd><p>True ability of a simulated examinee. Default is None.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">list of int, optional</span></dt><dd><p>Indices of the items given so far, in order. Default is an empty list.</p>
+</dd>
+<dt><strong>responses</strong><span class="classifier">list of bool, optional</span></dt><dd><p>The responses to the administered items, in the same order. Default is an empty list.</p>
+</dd>
+<dt><strong>stop_reason</strong><span class="classifier">StopReason or None, optional</span></dt><dd><p>Why the session ended, or None while it runs. The reason’s string value, as a saved session
+holds it, is accepted. Default is None.</p>
+</dd>
+<dt><strong>excluded_items</strong><span class="classifier">list of int, optional</span></dt><dd><p>Items the session must not be given although it has not had them. An application may fill it
+before the first item, for example with the items the examinee saw in an earlier attempt;
+during the test it only grows, as the engine adds the items its exposure control declines.
+Removing an item from it during the test is not supported. The engine passes the items to
+every strategy and raises <a class="reference internal" href="exceptions.html#catsim.ExcludedItemError" title="catsim.ExcludedItemError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExcludedItemError</span></code></a> for a response to one. Their
+indices are checked against the item bank at the session’s next step. Default is an empty
+list.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
 <dt>ValueError</dt><dd><p>If the session does not have one response per administered item and one more estimate than
 responses, if <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> repeats an item or holds an administered one, or if
-<code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is not a <a class="reference internal" href="#catsim.state.StopReason" title="catsim.state.StopReason"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopReason</span></code></a> value.</p>
+<code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is not a <a class="reference internal" href="#catsim.StopReason" title="catsim.StopReason"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopReason</span></code></a> value.</p>
 </dd>
-<dt>TypeError</dt><dd><p>If an entry of <code class="docutils literal notranslate"><span class="pre">estimates</span></code> is not an <a class="reference internal" href="context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>, or an entry of
+<dt>TypeError</dt><dd><p>If an entry of <code class="docutils literal notranslate"><span class="pre">estimates</span></code> is not an <a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>, or an entry of
 <code class="docutils literal notranslate"><span class="pre">administered_items</span></code> or <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> is not an integer.</p>
 </dd>
 </dl>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState.administered_count">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">administered_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.state.CatSessionState.administered_count" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState.administered_count">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">administered_count</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#catsim.CatSessionState.administered_count" title="Link to this definition">#</a></dt>
 <dd><p>Return the number of administered items.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState.current_se">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.CatSessionState.current_se" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState.current_se">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.CatSessionState.current_se" title="Link to this definition">#</a></dt>
 <dd><p>Return the standard error of the current ability estimate.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState.current_theta">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.CatSessionState.current_theta" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState.current_theta">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.CatSessionState.current_theta" title="Link to this definition">#</a></dt>
 <dd><p>Return the current ability estimate, that of the last entry of <code class="docutils literal notranslate"><span class="pre">estimates</span></code>.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState.is_stopped">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_stopped</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.state.CatSessionState.is_stopped" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState.is_stopped">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_stopped</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.CatSessionState.is_stopped" title="Link to this definition">#</a></dt>
 <dd><p>Return whether the session has ended.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState.snapshot">
-<span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#catsim.state.CatSessionSnapshot" title="catsim.state.CatSessionSnapshot"><span class="pre">CatSessionSnapshot</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionState.snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.CatSessionState.snapshot" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState.snapshot">
+<span class="sig-name descname"><span class="pre">snapshot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#catsim.CatSessionSnapshot" title="catsim.state.CatSessionSnapshot"><span class="pre">CatSessionSnapshot</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionState.snapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.CatSessionState.snapshot" title="Link to this definition">#</a></dt>
 <dd><p>Return an immutable copy of the current session state.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatSessionState.theta_history">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta_history</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.state.CatSessionState.theta_history" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionState.theta_history">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta_history</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.CatSessionState.theta_history" title="Link to this definition">#</a></dt>
 <dd><p>Return the ability estimates in order, the initial one first.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="catsim.state.CatStepResult">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">CatStepResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.state.CatSessionSnapshot" title="catsim.state.CatSessionSnapshot"><span class="pre">CatSessionSnapshot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatStepResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.CatStepResult" title="Link to this definition">#</a></dt>
-<dd><p>Result of one CAT step: the item administered, its response and the session as the step left it.</p>
-<p><code class="docutils literal notranslate"><span class="pre">selected_item_id</span></code> and <code class="docutils literal notranslate"><span class="pre">response</span></code> are None for a step that administered nothing because the
-session had ended.</p>
+<dt class="sig sig-object py" id="catsim.CatSessionSnapshot">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">CatSessionSnapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Hashable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="context.html#catsim.Estimate" title="catsim.Estimate"><span class="pre">Estimate</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.StopReason" title="catsim.StopReason"><span class="pre">StopReason</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">excluded_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionSnapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.CatSessionSnapshot" title="Link to this definition">#</a></dt>
+<dd><p>Immutable, hashable copy of a session at a specific point in time.</p>
+<p><a class="reference internal" href="#catsim.CatSessionState.snapshot" title="catsim.CatSessionState.snapshot"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CatSessionState.snapshot()</span></code></a> builds one, with the session’s lists as tuples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>session_id</strong><span class="classifier">Hashable</span></dt><dd><p>The session’s identifier.</p>
+</dd>
+<dt><strong>estimates</strong><span class="classifier">tuple of Estimate</span></dt><dd><p>The estimates up to the snapshot, the initial one first.</p>
+</dd>
+<dt><strong>true_theta</strong><span class="classifier">float or None</span></dt><dd><p>True ability of a simulated examinee, or None.</p>
+</dd>
+<dt><strong>administered_items</strong><span class="classifier">tuple of int</span></dt><dd><p>Indices of the items given up to the snapshot, in order.</p>
+</dd>
+<dt><strong>responses</strong><span class="classifier">tuple of bool</span></dt><dd><p>The responses to the administered items, in the same order.</p>
+</dd>
+<dt><strong>stop_reason</strong><span class="classifier">StopReason or None</span></dt><dd><p>Why the session had ended, or None if it was running.</p>
+</dd>
+<dt><strong>excluded_items</strong><span class="classifier">tuple of int, optional</span></dt><dd><p>Items the session must not be given although it has not had them. Default is an empty tuple.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatStepResult.current_theta">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.CatStepResult.current_theta" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatSessionSnapshot.current_se">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_se</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.CatSessionSnapshot.current_se" title="Link to this definition">#</a></dt>
+<dd><p>Return the standard error of the ability estimate at the time of the snapshot.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.CatSessionSnapshot.current_theta">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.CatSessionSnapshot.current_theta" title="Link to this definition">#</a></dt>
+<dd><p>Return the ability estimate at the time of the snapshot.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.CatSessionSnapshot.is_stopped">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_stopped</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.CatSessionSnapshot.is_stopped" title="Link to this definition">#</a></dt>
+<dd><p>Return whether the session had ended at the time of the snapshot.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.CatSessionSnapshot.theta_history">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">theta_history</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.CatSessionSnapshot.theta_history" title="Link to this definition">#</a></dt>
+<dd><p>Return the ability estimates up to the snapshot, the initial one first.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.CatStepResult">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">CatStepResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.CatSessionSnapshot" title="catsim.state.CatSessionSnapshot"><span class="pre">CatSessionSnapshot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">selected_item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatStepResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.CatStepResult" title="Link to this definition">#</a></dt>
+<dd><p>Result of one CAT step: the item administered, its response and the session as the step left it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>session</strong><span class="classifier">CatSessionSnapshot</span></dt><dd><p>The session as the step left it.</p>
+</dd>
+<dt><strong>selected_item_id</strong><span class="classifier">int or None</span></dt><dd><p>Index of the item the step administered, or None for a step that administered nothing because
+the session had ended.</p>
+</dd>
+<dt><strong>response</strong><span class="classifier">bool or None</span></dt><dd><p>The response to that item, or None when the step administered nothing.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="catsim.CatStepResult.current_theta">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">current_theta</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.CatStepResult.current_theta" title="Link to this definition">#</a></dt>
 <dd><p>Return the ability estimate after the step.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatStepResult.stop_reason">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stop_reason</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#catsim.state.StopReason" title="catsim.state.StopReason"><span class="pre">StopReason</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.state.CatStepResult.stop_reason" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatStepResult.stop_reason">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stop_reason</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#catsim.StopReason" title="catsim.state.StopReason"><span class="pre">StopReason</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.CatStepResult.stop_reason" title="Link to this definition">#</a></dt>
 <dd><p>Return why the session ended, or None if it is still running.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.CatStepResult.stopped">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stopped</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.state.CatStepResult.stopped" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.CatStepResult.stopped">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">stopped</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#catsim.CatStepResult.stopped" title="Link to this definition">#</a></dt>
 <dd><p>Return whether the session had ended by the end of the step.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="catsim.state.ExposureTracker">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">ExposureTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.StopReason">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">StopReason</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#StopReason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.StopReason" title="Link to this definition">#</a></dt>
+<dd><p>Why a CAT session ended.</p>
+<p><code class="docutils literal notranslate"><span class="pre">STOPPER</span></code> means the engine’s stopper was satisfied by the session’s current state. <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>
+means the selector had no item to offer, which is not necessarily the end of the item bank: a
+selector that follows a fixed list or works through strata can run out first.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="catsim.ExposureTracker">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">ExposureTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker" title="Link to this definition">#</a></dt>
 <dd><p>Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.</p>
 <p>One tracker is shared by every session of a run or of a live deployment, through
-<a class="reference internal" href="engine.html#catsim.engine.RunContext" title="catsim.engine.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>. The engine calls <a class="reference internal" href="#catsim.state.ExposureTracker.start_session" title="catsim.state.ExposureTracker.start_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_session()</span></code></a> when a session starts,
-<a class="reference internal" href="#catsim.state.ExposureTracker.record" title="catsim.state.ExposureTracker.record"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record()</span></code></a> for every administered item and <a class="reference internal" href="#catsim.state.ExposureTracker.record_decline" title="catsim.state.ExposureTracker.record_decline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">record_decline()</span></code></a> for every item the engine’s
-exposure control declines. <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds each item’s administrations so far, those of sessions
-still in progress included, <code class="docutils literal notranslate"><span class="pre">proposals</span></code> its administrations plus its declines, and
-<code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> the number of sessions started. A session proposes an item at most once, so
-neither count can exceed <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code>.</p>
+<a class="reference internal" href="engine.html#catsim.RunContext" title="catsim.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>, and the engine updates it. <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds each item’s
+administrations so far, those of sessions still in progress included, <code class="docutils literal notranslate"><span class="pre">proposals</span></code> its
+administrations plus the times the engine’s exposure control declined it, and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> the
+number of sessions started. A session proposes an item at most once, so neither count can exceed
+<code class="docutils literal notranslate"><span class="pre">n_sessions</span></code>.</p>
 <p>A session is selected against each item’s administrations divided by the number of other sessions
-started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that
-is the share of the examinees tested before the current one, as in catR’s
-<code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code>; the first session sees every rate at 0. Sessions that run side by side,
-as in a live deployment, see each other’s administrations as they happen.</p>
+started so far. With sessions run one after another, as a simulation runs them, that is the share
+of the examinees tested before the current one; the first session sees every rate at 0. Sessions
+that run side by side, as in a live deployment, see each other’s administrations as they happen.</p>
 <p>A new tracker starts from zero. An application that must keep the exposure across restarts saves
 <code class="docutils literal notranslate"><span class="pre">counts</span></code>, <code class="docutils literal notranslate"><span class="pre">proposals</span></code> and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> and passes them back to rebuild the tracker.</p>
 <dl class="field-list simple">
@@ -643,8 +701,8 @@ an integer (a bool included).</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="catsim.state.ExposureTracker.rates">
-<span class="sig-name descname"><span class="pre">rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.rates" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.ExposureTracker.rates">
+<span class="sig-name descname"><span class="pre">rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker.rates" title="Link to this definition">#</a></dt>
 <dd><p>Return the exposure rates a session in progress is selected against.</p>
 <p>Each item’s administrations are divided by the sessions started so far other than the one
 asking, so a session never counts itself. Its own administrations stay in the counts, but only
@@ -655,7 +713,7 @@ exceed 1.</p>
 <dd class="field-odd"><dl class="simple">
 <dt>numpy.ndarray</dt><dd><p>A new array with one rate per item; all zero while at most one session has started. This is
 not the run’s final exposure, which
-<a class="reference internal" href="simulation.html#catsim.simulation.SimulationResult.exposure_rates" title="catsim.simulation.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">exposure_rates</span></code></a> gives.</p>
+<a class="reference internal" href="simulation.html#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">exposure_rates</span></code></a> gives.</p>
 </dd>
 </dl>
 </dd>
@@ -663,32 +721,39 @@ not the run’s final exposure, which
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="catsim.state.ExposureTracker.record">
-<span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.record" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.ExposureTracker.record">
+<span class="sig-name descname"><span class="pre">record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker.record" title="Link to this definition">#</a></dt>
 <dd><p>Record one administration for an item, which is also one proposal of it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_id</strong><span class="classifier">int</span></dt><dd><p>Index of the administered item.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="catsim.state.ExposureTracker.record_decline">
-<span class="sig-name descname"><span class="pre">record_decline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.record_decline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.record_decline" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.ExposureTracker.record_decline">
+<span class="sig-name descname"><span class="pre">record_decline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.record_decline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker.record_decline" title="Link to this definition">#</a></dt>
 <dd><p>Record one proposal of an item that the exposure control declined; its administrations are unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>item_id</strong><span class="classifier">int</span></dt><dd><p>Index of the declined item.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="catsim.state.ExposureTracker.start_session">
-<span class="sig-name descname"><span class="pre">start_session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.start_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.start_session" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="catsim.ExposureTracker.start_session">
+<span class="sig-name descname"><span class="pre">start_session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.start_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker.start_session" title="Link to this definition">#</a></dt>
 <dd><p>Count a session that has started.</p>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="catsim.state.StopReason">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">StopReason</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#StopReason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.StopReason" title="Link to this definition">#</a></dt>
-<dd><p>Why a CAT session ended.</p>
-<p><code class="docutils literal notranslate"><span class="pre">STOPPER</span></code> means the engine’s stopper was satisfied by the session’s current state. <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code>
-means the selector had no item to offer, which is not necessarily the end of the item bank: a
-selector that follows a fixed list or works through strata can run out first.</p>
 </dd></dl>
 
 </section>
@@ -704,12 +769,12 @@ selector that follows a fixed list or works through strata can run out first.</p
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="exposure.html"
+       href="engine.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></p>
+        <p class="prev-next-title">CAT Engine</p>
       </div>
     </a>
     <a class="right-next"
@@ -717,7 +782,7 @@ selector that follows a fixed list or works through strata can run out first.</p
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></p>
+        <p class="prev-next-title">Strategy Inputs and Estimates</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -740,36 +805,36 @@ selector that follows a fixed list or works through strata can run out first.</p
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionSnapshot"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionSnapshot.current_se"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.current_se</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionSnapshot.current_theta"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.current_theta</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionSnapshot.is_stopped"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.is_stopped</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionSnapshot.theta_history"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.theta_history</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState"><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState.administered_count"><code class="docutils literal notranslate"><span class="pre">CatSessionState.administered_count</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState.current_se"><code class="docutils literal notranslate"><span class="pre">CatSessionState.current_se</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState.current_theta"><code class="docutils literal notranslate"><span class="pre">CatSessionState.current_theta</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState.is_stopped"><code class="docutils literal notranslate"><span class="pre">CatSessionState.is_stopped</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState.snapshot"><code class="docutils literal notranslate"><span class="pre">CatSessionState.snapshot()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionState.theta_history"><code class="docutils literal notranslate"><span class="pre">CatSessionState.theta_history</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState"><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState.administered_count"><code class="docutils literal notranslate"><span class="pre">CatSessionState.administered_count</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState.current_se"><code class="docutils literal notranslate"><span class="pre">CatSessionState.current_se</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState.current_theta"><code class="docutils literal notranslate"><span class="pre">CatSessionState.current_theta</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState.is_stopped"><code class="docutils literal notranslate"><span class="pre">CatSessionState.is_stopped</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState.snapshot"><code class="docutils literal notranslate"><span class="pre">CatSessionState.snapshot()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatSessionState.theta_history"><code class="docutils literal notranslate"><span class="pre">CatSessionState.theta_history</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionSnapshot"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionSnapshot.current_se"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.current_se</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionSnapshot.current_theta"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.current_theta</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionSnapshot.is_stopped"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.is_stopped</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatSessionSnapshot.theta_history"><code class="docutils literal notranslate"><span class="pre">CatSessionSnapshot.theta_history</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatStepResult"><code class="docutils literal notranslate"><span class="pre">CatStepResult</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatStepResult.current_theta"><code class="docutils literal notranslate"><span class="pre">CatStepResult.current_theta</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatStepResult.stop_reason"><code class="docutils literal notranslate"><span class="pre">CatStepResult.stop_reason</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.CatStepResult.stopped"><code class="docutils literal notranslate"><span class="pre">CatStepResult.stopped</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatStepResult"><code class="docutils literal notranslate"><span class="pre">CatStepResult</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatStepResult.current_theta"><code class="docutils literal notranslate"><span class="pre">CatStepResult.current_theta</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatStepResult.stop_reason"><code class="docutils literal notranslate"><span class="pre">CatStepResult.stop_reason</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatStepResult.stopped"><code class="docutils literal notranslate"><span class="pre">CatStepResult.stopped</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker"><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.rates"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.record"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.record()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.record_decline"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.record_decline()</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.start_session"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.start_session()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.StopReason"><code class="docutils literal notranslate"><span class="pre">StopReason</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.ExposureTracker"><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.ExposureTracker.rates"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.ExposureTracker.record"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.record()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.ExposureTracker.record_decline"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.record_decline()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.ExposureTracker.start_session"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.start_session()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.StopReason"><code class="docutils literal notranslate"><span class="pre">StopReason</span></code></a></li>
 </ul>
   </nav></div>
 

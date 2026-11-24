@@ -408,11 +408,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -619,13 +621,13 @@ items from each in a 30-item test.</p></td>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.StratifiedSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">StratifiedSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_strata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#StratifiedSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
 <p>Abstract base class for selectors that divide the item bank into stage-aligned strata.</p>
 <p>The bank is sorted by a stratification key and split into <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> strata, optionally after blocking
 on a location key so that every stratum covers the whole ability range. The test is split into
 <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> consecutive stages, and each stage draws from its own stratum the non-administered item
-whose location is closest to the current ability estimate. The strata are the selector’s exposure
-control: it applies no exposure cap, and <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>
+whose location is closest to the current ability estimate. The strata are its exposure control:
+it applies no exposure cap and ignores <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -634,6 +636,14 @@ item past it, so the stopper must end the test by then.</p>
 </dd>
 <dt><strong>n_strata</strong><span class="classifier">int or None, optional</span></dt><dd><p>Number of strata (and test stages). Must be between 1 and <code class="docutils literal notranslate"><span class="pre">test_size</span></code>. Default is None, which
 uses one stratum per test item.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">test_size</span></code> or <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> is not an integer.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">test_size</span></code> is smaller than 1 or <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> is not between 1 and <code class="docutils literal notranslate"><span class="pre">test_size</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -648,7 +658,7 @@ uses one stratum per test item.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.StratifiedSelector.select">
-<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#StratifiedSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.select" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#StratifiedSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.select" title="Link to this definition">#</a></dt>
 <dd><p>Return the available item of the current stage’s stratum whose location is closest to the estimate.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -676,13 +686,10 @@ uses one stratum per test item.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.StratifiedSelector.strata">
-<span class="sig-name descname"><span class="pre">strata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#StratifiedSelector.strata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.strata" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">strata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.integer" title="(in NumPy v2.5)"><span class="pre">integer</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/selection/stratified.html#StratifiedSelector.strata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.StratifiedSelector.strata" title="Link to this definition">#</a></dt>
 <dd><p>Return the item indices of each stratum, from the first test stage to the last.</p>
-<p>Without blocking, items are sorted by the stratification key and split into <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> contiguous
-groups. With blocking <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>, items are sorted by the blocking key and grouped into
-consecutive blocks of <code class="docutils literal notranslate"><span class="pre">n_strata</span></code> items; each block is sorted by the stratification key and its
-<span class="math notranslate nohighlight">\(j\)</span>-th item goes to stratum <span class="math notranslate nohighlight">\(j\)</span>, so every stratum spans the range of the blocking key.
-The strata are computed once per item bank.</p>
+<p>The strata ascend in the stratification key; with blocking, every stratum spans the range of the
+blocking key. The strata are computed once per item bank.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

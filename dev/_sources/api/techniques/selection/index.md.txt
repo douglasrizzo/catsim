@@ -1,10 +1,13 @@
 # Selection Techniques
 
+```{py:module} catsim.selection
+```
+
 Item selection techniques determine which item from the bank to administer at each
 step of an adaptive test. The choice of selector affects both measurement precision
 and practical properties such as item exposure and content coverage.
 
-A selector reads the session from a {py:class}`~catsim.context.StepContext`: the
+A selector reads the session from a {py:class}`~catsim.StepContext`: the
 administered items and their responses, the current estimate `theta`, the run's random
 generator and exposure rates, and `excluded_items`, items it must pass over although they
 have not been administered, such as those the engine's exposure control
@@ -55,4 +58,26 @@ on this rule. See {doc}`/adr/0008-random-tie-breaking`.
 :full:
 :strict:
 :namespace: catsim
+```
+
+## Base Class and Helpers
+
+Every selector subclasses {class}`~catsim.selection.BaseSelector`. The functions after it are the
+rules the built-in selectors share, for custom selectors that should behave alike.
+
+```{eval-rst}
+.. autoclass:: catsim.selection.BaseSelector
+   :members:
+
+.. autofunction:: catsim.selection.remaining
+
+.. autofunction:: catsim.selection.below_cap
+
+.. autofunction:: catsim.selection.pick_best
+
+.. autofunction:: catsim.selection.best_pool
+
+.. autofunction:: catsim.selection.check_r_max
+
+.. autofunction:: catsim.selection.check_test_size
 ```

@@ -842,21 +842,26 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="The54321Selector">
 <a class="viewcode-back" href="../../../api/techniques/selection/the-54321-selector.html#catsim.selection.The54321Selector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">The54321Selector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Implementation of the 5-4-3-2-1 selector proposed by :cite:p:`McBride83`.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Draw each opening item at random from a shrinking bin of the most informative items.</span>
 
-<span class="sd">  The first item is drawn at random from the 5 most informative items at the current :math:`\hat\theta`,</span>
-<span class="sd">  the second from the 4 most informative remaining items, and so on, so that from the fifth item on the</span>
-<span class="sd">  most informative item is administered. Randomizing the opening items, which every examinee would</span>
-<span class="sd">  otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in</span>
-<span class="sd">  precision. Items tied with the least informative item of a bin also join it, so from the fifth</span>
-<span class="sd">  item on, ties for the most information are broken uniformly at random (ADR-0008). The selector</span>
-<span class="sd">  applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
+<span class="sd">  The 5-4-3-2-1 method of :cite:t:`McBride83`: the first item is drawn from the 5 most informative</span>
+<span class="sd">  items at the current estimate, the second from the 4 most informative remaining ones, and so on,</span>
+<span class="sd">  until from the fifth item on the most informative item is administered. Items tied with the least</span>
+<span class="sd">  informative item of a bin also join it. The selector applies no exposure cap:</span>
+<span class="sd">  ``context.exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  initial_bin_size : int, optional</span>
 <span class="sd">      Number of most informative items the first item is drawn from; each following item draws from</span>
 <span class="sd">      one fewer. Default is 5.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``initial_bin_size`` is not an integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``initial_bin_size`` is smaller than 1.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -869,20 +874,6 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(initial_bin_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_bin_size</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_bin_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a The54321Selector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    initial_bin_size : int, optional</span>
-<span class="sd">        Number of most informative items the first item is drawn from. Default is 5.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    TypeError</span>
-<span class="sd">        If ``initial_bin_size`` is not an integer.</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``initial_bin_size`` is smaller than 1.</span>
-<span class="sd">    """</span>
     <span class="n">initial_bin_size</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">initial_bin_size</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">initial_bin_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"initial_bin_size must be at least 1, got </span><span class="si">{</span><span class="n">initial_bin_size</span><span class="si">}</span><span class="s2">"</span>
@@ -902,7 +893,7 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return an item drawn uniformly from the bin of the most informative remaining items.</span>
 
 <span class="sd">    The bin holds ``initial_bin_size`` items at the first position, one fewer at each following</span>
-<span class="sd">    position, and at least one, plus every item tied with its least informative item (ADR-0008).</span>
+<span class="sd">    position, and at least one, plus every item tied with its least informative item.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -925,16 +916,22 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="RandomesqueSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/randomesque-selector.html#catsim.selection.RandomesqueSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RandomesqueSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sd">"""Implementation of the randomesque selector proposed by :cite:p:`Kingsbury89`.</span>
+<span class="w">  </span><span class="sd">"""Draw each item at random from the ``bin_size`` most informative remaining items.</span>
 
-<span class="sd">  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in</span>
-<span class="sd">  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also</span>
-<span class="sd">  join the bin (ADR-0008). The selector applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
+<span class="sd">  The randomesque method of :cite:t:`Kingsbury89`. Items tied with the least informative item of the</span>
+<span class="sd">  bin also join it. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  bin_size : int</span>
 <span class="sd">      Number of most informative remaining items each item is drawn from, at least 1.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``bin_size`` is not an integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``bin_size`` is smaller than 1.</span>
 <span class="sd">  """</span>
 
   <span class="nd">@override</span>
@@ -943,21 +940,6 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">(bin_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bin_size</span><span class="si">!r}</span><span class="s2">)"</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bin_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a RandomesqueSelector object.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    bin_size : int</span>
-<span class="sd">        The number of most informative items to be taken into consideration when</span>
-<span class="sd">        randomly selecting one of them.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    TypeError</span>
-<span class="sd">        If ``bin_size`` is not an integer.</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``bin_size`` is smaller than 1.</span>
-<span class="sd">    """</span>
     <span class="n">bin_size</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">bin_size</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bin_size</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"bin_size must be at least 1, got </span><span class="si">{</span><span class="n">bin_size</span><span class="si">}</span><span class="s2">"</span>
@@ -976,7 +958,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return an item drawn uniformly from the ``bin_size`` most informative remaining items.</span>
 
-<span class="sd">    The bin also holds every item tied with its least informative item (ADR-0008).</span>
+<span class="sd">    The bin also holds every item tied with its least informative item.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

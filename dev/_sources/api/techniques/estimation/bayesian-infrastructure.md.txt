@@ -1,5 +1,5 @@
 **Status:** Implemented
-**Module:** {py:mod}`catsim.estimation.bayesian`; {py:class}`catsim.estimation.QuadratureGrid`
+**Module:** {py:mod}`catsim.estimation`; {py:class}`catsim.estimation.QuadratureGrid`
 **Reference:** Bock & Mislevy (1982); Bock & Aitkin (1981)
 
 # Bayesian Estimation Infrastructure
@@ -141,6 +141,8 @@ Bock, R. D., & Mislevy, R. J. (1982). Adaptive EAP estimation of ability in a mi
 .. autoclass:: catsim.estimation.QuadratureGrid
    :members:
    :show-inheritance:
+
+.. autodata:: catsim.estimation.LogPrior
 
 .. autofunction:: catsim.estimation.normal_log_prior
 

@@ -806,7 +806,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">BaseExposureControl</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Base class for exposure controls, which may decline the item a selector proposes.</span>
 
-<span class="sd">  :class:`~catsim.engine.CatEngine` asks its control about every item the selector proposes. A</span>
+<span class="sd">  :class:`~catsim.CatEngine` asks its control about every item the selector proposes. A</span>
 <span class="sd">  declined item is excluded from the session for the rest of its test, and the selector proposes</span>
 <span class="sd">  again; a session with no item left to accept ends with ``StopReason.NO_ITEMS``. A control holds</span>
 <span class="sd">  configuration only, never per-session state, and draws from ``context.rng``. This one administers</span>

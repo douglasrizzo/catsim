@@ -820,9 +820,9 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">StandardErrorStopper</span><span class="p">(</span><span class="n">BaseStopper</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Stop once the standard error of the ability estimate is at most a target value.</span>
 
-<span class="sd">  The standard error is the one the estimator reported with the current estimate,</span>
-<span class="sd">  ``context.se`` (ADR-0004): the posterior standard deviation for EAP, the Fisher standard error</span>
-<span class="sd">  for maximum likelihood. Before any response it is infinite, so the test does not stop.</span>
+<span class="sd">  The standard error is the one the estimator reported with the current estimate, ``context.se``:</span>
+<span class="sd">  the posterior standard deviation for EAP, the Fisher standard error for maximum likelihood.</span>
+<span class="sd">  Before any response it is infinite, so the test does not stop.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -876,13 +876,10 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">ConfidenceIntervalStopper</span><span class="p">(</span><span class="n">BaseStopper</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Stop once the confidence interval for the ability estimate falls within one ability band.</span>
 
-<span class="sd">  The bounds cut the ability scale into bands. For example, ``[-2.0, -0.5, 0.5, 2.0]``</span>
-<span class="sd">  gives five: :math:`(-\infty, -2.0]`, :math:`[-2.0, -0.5]`, :math:`[-0.5, 0.5]`,</span>
-<span class="sd">  :math:`[0.5, 2.0]` and :math:`[2.0, \infty)`. The test stops once no bound lies strictly</span>
-<span class="sd">  inside the interval :math:`\hat\theta \pm z \cdot SE`, where :math:`SE` is the standard error</span>
-<span class="sd">  the estimator reported, ``context.se`` (ADR-0004), and :math:`z` the standard normal quantile</span>
-<span class="sd">  of the confidence level. Before any response the standard error is infinite, so the test does</span>
-<span class="sd">  not stop.</span>
+<span class="sd">  The bounds cut the ability scale into bands: ``[-2.0, -0.5, 0.5, 2.0]`` gives five. The test</span>
+<span class="sd">  stops once no bound lies strictly inside the confidence interval built from the current estimate</span>
+<span class="sd">  and the standard error the estimator reported, ``context.se``. Before any response the standard</span>
+<span class="sd">  error is infinite, so the test does not stop.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>

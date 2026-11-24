@@ -828,12 +828,11 @@ window.runMermaid = runMermaid;</script>
 <div class="viewcode-block" id="KLSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/kl-selector.html#catsim.selection.KLSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">KLSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Kullback-Leibler global-information item selector.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Select the item with the most Kullback-Leibler information around the current estimate.</span>
 
-<span class="sd">  Each candidate's KL divergence between the response distributions at the current estimate</span>
-<span class="sd">  and at nearby abilities is integrated over :math:`\hat\theta \pm c / \sqrt{\max(1, n)}`,</span>
-<span class="sd">  where :math:`c` is ``window`` and :math:`n` the number of administered items, and the item with</span>
-<span class="sd">  the largest integral is selected.</span>
+<span class="sd">  Each candidate's KL divergence between the response distributions at the estimate and at nearby</span>
+<span class="sd">  abilities is integrated over a window around the estimate, which narrows as items are</span>
+<span class="sd">  administered, and the item with the largest integral is selected.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -844,19 +843,17 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected</span>
 <span class="sd">      unless no other items are available. Default is 1 (no restriction).</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If window is not positive, or if r_max is not in (0, 1].</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/kl-selector`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a KLSelector object.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If window is not positive, or if r_max is not in (0, 1].</span>
-<span class="sd">    """</span>
     <span class="k">if</span> <span class="n">window</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"window must be positive, got </span><span class="si">{</span><span class="n">window</span><span class="si">}</span><span class="s2">"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -871,7 +868,7 @@ window.runMermaid = runMermaid;</script>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">window</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return Chang and Ying's constant :math:`c`: the integration half-width is :math:`c / \sqrt{\max(1, n)}`."""</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""Return Chang and Ying's constant :math:`c`, the window's half-width before it narrows."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span>
 
   <span class="nd">@property</span>

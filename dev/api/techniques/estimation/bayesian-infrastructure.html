@@ -408,11 +408,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -484,7 +486,7 @@
                 <article class="bd-article">
                   
   <p><strong>Status:</strong> Implemented
-<strong>Module:</strong> <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation.bayesian</span></code>; <a class="reference internal" href="#catsim.estimation.QuadratureGrid" title="catsim.estimation.QuadratureGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.QuadratureGrid</span></code></a>
+<strong>Module:</strong> <a class="reference internal" href="index.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a>; <a class="reference internal" href="#catsim.estimation.QuadratureGrid" title="catsim.estimation.QuadratureGrid"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.QuadratureGrid</span></code></a>
 <strong>Reference:</strong> Bock &amp; Mislevy (1982); Bock &amp; Aitkin (1981)</p>
 <section class="tex2jax_ignore mathjax_ignore" id="bayesian-estimation-infrastructure">
 <h1>Bayesian Estimation Infrastructure<a class="headerlink" href="#bayesian-estimation-infrastructure" title="Link to this heading">#</a></h1>
@@ -625,12 +627,10 @@ changing the shared kernel.</p></td>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">QuadratureGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#QuadratureGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.QuadratureGrid" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A fixed quadrature grid for posterior computations.</p>
-<p>The posterior at node <span class="math notranslate nohighlight">\(\theta_q\)</span> is proportional to
-<span class="math notranslate nohighlight">\(w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)\)</span>, so the weights take part in the
-posterior itself. Equal weights, as built by <a class="reference internal" href="#catsim.estimation.QuadratureGrid.uniform" title="catsim.estimation.QuadratureGrid.uniform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform()</span></code></a>, cancel in the normalization. Two grids
-are equal only if they are the same object, and a grid can be a set member or a dictionary key.</p>
-<p>For the full posterior specification and quadrature contract, see
-<a class="reference internal" href="#"><span class="doc">Bayesian Estimation Infrastructure</span></a>.</p>
+<p>A node’s posterior mass is proportional to its weight times the prior density and the likelihood
+there, so the weights take part in the posterior itself; equal weights, as <a class="reference internal" href="#catsim.estimation.QuadratureGrid.uniform" title="catsim.estimation.QuadratureGrid.uniform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform()</span></code></a> builds,
+cancel in the normalization. Two grids are equal only if they are the same object, and a grid can
+be a set member or a dictionary key.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -679,6 +679,12 @@ default bounds.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="catsim.estimation.LogPrior">
+<span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">LogPrior</span></span><a class="headerlink" href="#catsim.estimation.LogPrior" title="Link to this definition">#</a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]]], <code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code>[<a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">floating</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Any</span></code></a>]]]</p>
 </dd></dl>
 
 <dl class="py function">
@@ -743,9 +749,9 @@ bounds and <span class="math notranslate nohighlight">\(-\infty\)</span> outside
 <dt class="sig sig-object py" id="catsim.estimation.posterior">
 <span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">posterior</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.estimation.QuadratureGrid" title="catsim.estimation.bayesian.QuadratureGrid"><span class="pre">QuadratureGrid</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/bayesian.html#posterior"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.posterior" title="Link to this definition">#</a></dt>
 <dd><p>Compute the normalized discrete posterior over <code class="docutils literal notranslate"><span class="pre">grid.nodes</span></code>.</p>
-<p>Each node gets mass proportional to <span class="math notranslate nohighlight">\(w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)\)</span>,
-computed in log space and shifted by its maximum before exponentiating, so the likelihood of
-many responses does not underflow.</p>
+<p>Each node’s mass is proportional to its weight times the prior density and the likelihood there,
+computed in log space and shifted by its maximum before exponentiating, so the likelihood of many
+responses does not underflow.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -791,7 +797,7 @@ contains non-Boolean elements.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p><span class="math notranslate nohighlight">\(\sum_q \theta_q\,\tilde{p}_q\)</span>.</p>
+<dt>float</dt><dd><p>The probability-weighted mean of the nodes.</p>
 </dd>
 </dl>
 </dd>
@@ -813,7 +819,7 @@ contains non-Boolean elements.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p><span class="math notranslate nohighlight">\(\sum_q (\theta_q - \bar{\theta})^2\,\tilde{p}_q\)</span>, where <span class="math notranslate nohighlight">\(\bar{\theta}\)</span> is
+<dt>float</dt><dd><p>The probability-weighted mean of the squared distances between the nodes and
 <a class="reference internal" href="#catsim.estimation.posterior_mean" title="catsim.estimation.posterior_mean"><code class="xref py py-func docutils literal notranslate"><span class="pre">posterior_mean()</span></code></a>.</p>
 </dd>
 </dl>
@@ -884,6 +890,7 @@ contains non-Boolean elements.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.QuadratureGrid.uniform"><code class="docutils literal notranslate"><span class="pre">QuadratureGrid.uniform()</span></code></a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.LogPrior"><code class="docutils literal notranslate"><span class="pre">LogPrior</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.normal_log_prior"><code class="docutils literal notranslate"><span class="pre">normal_log_prior()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.uniform_log_prior"><code class="docutils literal notranslate"><span class="pre">uniform_log_prior()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.estimation.posterior"><code class="docutils literal notranslate"><span class="pre">posterior()</span></code></a></li>

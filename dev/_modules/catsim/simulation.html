@@ -819,7 +819,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SimulatedResponseProvider">
-<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulatedResponseProvider">[docs]</a>
+<a class="viewcode-back" href="../../api/simulation.html#catsim.SimulatedResponseProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimulatedResponseProvider</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Draw a simulated examinee's responses from their true ability.</span>
 
@@ -828,7 +828,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="SimulatedResponseProvider.answer">
-<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulatedResponseProvider.answer">[docs]</a>
+<a class="viewcode-back" href="../../api/simulation.html#catsim.SimulatedResponseProvider.answer">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -906,16 +906,27 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SimulationResult">
-<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulationResult">[docs]</a>
+<a class="viewcode-back" href="../../api/simulation.html#catsim.SimulationResult">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimulationResult</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""The sessions of a simulated run, with the run's item exposure and duration.</span>
 
 <span class="sd">  :meth:`SimulationRunner.run` returns one; one can also be built from sessions an application ran</span>
-<span class="sd">  itself, whose true abilities may be unknown. ``exposure_counts`` holds each item's</span>
-<span class="sd">  administrations over the run, ``duration`` the run's wall-clock time in seconds and</span>
-<span class="sd">  ``proposal_counts`` each item's proposals: its administrations plus the times the engine's</span>
-<span class="sd">  exposure control declined it, or None for a result built without them.</span>
+<span class="sd">  itself, whose true abilities may be unknown.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  item_bank : ItemBank</span>
+<span class="sd">      The item bank the sessions drew from.</span>
+<span class="sd">  sessions : list of CatSessionState</span>
+<span class="sd">      The run's sessions, in the order they ran.</span>
+<span class="sd">  exposure_counts : numpy.ndarray</span>
+<span class="sd">      Each item's administrations over the run.</span>
+<span class="sd">  duration : float</span>
+<span class="sd">      The run's wall-clock time, in seconds.</span>
+<span class="sd">  proposal_counts : numpy.ndarray or None, optional</span>
+<span class="sd">      Each item's proposals: its administrations plus the times the engine's exposure control</span>
+<span class="sd">      declined it. Default is None, for a result built without them.</span>
 <span class="sd">  """</span>
 
   <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span>
@@ -991,7 +1002,7 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return how many objective evaluations each session's estimates took, summed over its responses.</span>
 
 <span class="sd">    The initial estimate, which no estimator computed, counts 0. A session is None when the estimator</span>
-<span class="sd">    gave no count for one of its estimates (:attr:`~catsim.context.Estimate.evaluations`).</span>
+<span class="sd">    gave no count for one of its estimates (the ``evaluations`` of an :class:`~catsim.Estimate`).</span>
 <span class="sd">    """</span>
     <span class="n">totals</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
@@ -1041,7 +1052,7 @@ window.runMermaid = runMermaid;</script>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the mean of the final estimates minus the true abilities.</span>
+<span class="w">    </span><span class="sd">"""Return the mean of the final estimates minus the true abilities, :func:`catsim.metrics.bias`.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -1054,6 +1065,8 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the mean squared difference between the final estimates and the true abilities.</span>
 
+<span class="sd">    See :func:`catsim.metrics.mse`.</span>
+
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
@@ -1063,7 +1076,7 @@ window.runMermaid = runMermaid;</script>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the square root of :attr:`mse`.</span>
+<span class="w">    </span><span class="sd">"""Return the square root of :attr:`mse`, :func:`catsim.metrics.rmse`.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -1091,7 +1104,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="SimulationRunner">
-<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulationRunner">[docs]</a>
+<a class="viewcode-back" href="../../api/simulation.html#catsim.SimulationRunner">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimulationRunner</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Run a simulated CAT session on an engine for each of a set of examinees.</span>
 
@@ -1110,7 +1123,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span>
 
 <div class="viewcode-block" id="SimulationRunner.run">
-<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulationRunner.run">[docs]</a>
+<a class="viewcode-back" href="../../api/simulation.html#catsim.SimulationRunner.run">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
@@ -1121,9 +1134,9 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Run one simulated session per true ability, one after another.</span>
 
 <span class="sd">    One random generator serves the whole run: the initializer, the selectors' tie-breaking and</span>
-<span class="sd">    randomization and the simulated responses of every session draw from it, in session order</span>
-<span class="sd">    (ADR-0013). It is built from ``rng`` at the start of every call, so the same seed gives the same</span>
-<span class="sd">    result however many times the runner has run.</span>
+<span class="sd">    randomization and the simulated responses of every session draw from it, in session order. It</span>
+<span class="sd">    is built from ``rng`` at the start of every call, so the same seed gives the same result however</span>
+<span class="sd">    many times the runner has run; see :doc:`/reproducibility`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

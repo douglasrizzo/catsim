@@ -877,6 +877,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected</span>
 <span class="sd">      unless no other items are available. Default is 1 (no restriction).</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``test_size`` is not an integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in</span>
+<span class="sd">      (0, 1].</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/progressive-selector`.</span>
@@ -888,14 +896,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a ProgressiveSelector object.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in</span>
-<span class="sd">        (0, 1].</span>
-<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">check_test_size</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span> <span class="o">=</span> <span class="n">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>
@@ -978,6 +978,14 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Maximum exposure rate for items. Items with exposure rates &gt;= r_max will not be selected</span>
 <span class="sd">      unless no other items are available. Default is 1 (no restriction).</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``test_size`` is not an integer.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in</span>
+<span class="sd">      (0, 1].</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  For full algorithmic details, see :doc:`/api/techniques/selection/proportional-selector`.</span>
@@ -989,14 +997,6 @@ window.runMermaid = runMermaid;</script>
     <span class="n">acceleration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">r_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Initialize a ProportionalSelector object.</span>
-
-<span class="sd">    Raises</span>
-<span class="sd">    ------</span>
-<span class="sd">    ValueError</span>
-<span class="sd">        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in</span>
-<span class="sd">        (0, 1].</span>
-<span class="sd">    """</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_test_size</span> <span class="o">=</span> <span class="n">check_test_size</span><span class="p">(</span><span class="n">test_size</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_acceleration</span> <span class="o">=</span> <span class="n">_check_acceleration</span><span class="p">(</span><span class="n">acceleration</span><span class="p">)</span>

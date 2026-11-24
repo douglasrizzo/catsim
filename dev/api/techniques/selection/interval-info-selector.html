@@ -408,11 +408,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -530,7 +532,7 @@ estimate the report uses the posterior standard deviation:</p>
 Equation 13); catsim’s is the EAP estimator’s prior.</p>
 <p>catsim builds the interval as <span class="math notranslate nohighlight">\(\hat{\theta} \pm \lambda\, SE(\hat{\theta})\)</span>, with
 the standard error the current estimator reports (the <code class="docutils literal notranslate"><span class="pre">se</span></code> field of
-<a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>). MLE and WLE sessions therefore get
+<a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>). MLE and WLE sessions therefore get
 Equation 11 and EAP sessions Equation 12; a MAP session gets the MAP
 estimator’s standard error, which includes the prior’s curvature, by the same
 reasoning. The <a class="reference internal" href="../estimation/index.html"><span class="doc">estimation pages</span></a>
@@ -603,14 +605,13 @@ confidence interval above is used.</p></td>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.IntervalInfoSelector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">IntervalInfoSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/information.html#IntervalInfoSelector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
 <p>Select the item whose information, integrated over an interval around the estimate, is largest.</p>
-<p>By default the interval is the estimate plus or minus <span class="math notranslate nohighlight">\(\lambda\)</span> times the estimator’s
-standard error (<code class="docutils literal notranslate"><span class="pre">context.se</span></code>), where <span class="math notranslate nohighlight">\(\lambda\)</span> is the standard normal quantile of
-<code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">confidence)</span> <span class="pre">/</span> <span class="pre">2</span></code> <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id7" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. doi:10.3102/10769986022002203.">Veerkamp and Berger, 1997</a>]</span>. It spans the whole ability scale before the first
-response and narrows as the standard error falls; a standard error of zero, or nearly zero, selects
-by the items’ information at the estimate, the interval’s limit. Setting <code class="docutils literal notranslate"><span class="pre">interval</span></code> fixes the
-half-width. The selector applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>
+<p>By default the interval is a confidence interval for the estimate, built from the estimator’s
+standard error (<code class="docutils literal notranslate"><span class="pre">context.se</span></code>) <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id7" title="Wim J. J. Veerkamp and Martijn P. F. Berger. Some new item selection criteria for adaptive testing. Journal of Educational and Behavioral Statistics, 22(2):203–226, 1997. doi:10.3102/10769986022002203.">Veerkamp and Berger, 1997</a>]</span>. It spans the whole ability scale before the
+first response and narrows as the standard error falls; a standard error of zero, or nearly zero,
+selects by the items’ information at the estimate. Setting <code class="docutils literal notranslate"><span class="pre">interval</span></code> fixes the half-width. The
+selector applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -618,6 +619,12 @@ half-width. The selector applies no exposure cap: <code class="docutils literal 
 confidence interval.</p>
 </dd>
 <dt><strong>confidence</strong><span class="classifier">float, optional</span></dt><dd><p>Confidence level of the default interval. Default is 0.95.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">interval</span></code> is not positive or <code class="docutils literal notranslate"><span class="pre">confidence</span></code> is not between 0 and 1.</p>
 </dd>
 </dl>
 </dd>
@@ -638,7 +645,7 @@ confidence interval.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.IntervalInfoSelector.select">
-<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/information.html#IntervalInfoSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector.select" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/information.html#IntervalInfoSelector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.IntervalInfoSelector.select" title="Link to this definition">#</a></dt>
 <dd><p>Return the remaining item with the largest information integrated over the interval.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

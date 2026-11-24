@@ -810,8 +810,6 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">UniformInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Draw each examinee's initial ability from a uniform distribution.</span>
 
-<span class="sd">  The default interval, :math:`(-0.5, 0.5)`, is the starting rule of Barrada et al. (2006).</span>
-
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  low : float, optional</span>
@@ -912,7 +910,7 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../api/techniques/initialization/index.html#catsim.initialization.NormalInitializer.initialize">[docs]</a>
   <span class="nd">@override</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">"""Draw an initial ability value from :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.</span>
+<span class="w">    </span><span class="sd">"""Draw an initial ability value from the normal distribution of the given mean and standard deviation.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -935,9 +933,6 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../../api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">FixedPointInitializer</span><span class="p">(</span><span class="n">BaseInitializer</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Initialize every examinee's ability at the same fixed point.</span>
-
-<span class="sd">  This initializer is useful for controlled experiments where you want all</span>
-<span class="sd">  examinees to start with the same initial ability estimate.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>

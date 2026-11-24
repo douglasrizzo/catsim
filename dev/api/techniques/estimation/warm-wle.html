@@ -408,11 +408,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -547,7 +549,7 @@ Raîche, 2012), whose
 <a class="reference external" href="https://github.com/cran/catR/blob/master/R/thetaEst.R"><code class="docutils literal notranslate"><span class="pre">thetaEst.R</span></code></a> solves the
 same equation with <code class="docutils literal notranslate"><span class="pre">uniroot</span></code>; catsim adds the explicit handling of multiple
 roots.</p>
-<p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>. Its standard error
+<p>The estimator returns a <a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>. Its standard error
 is the Fisher one at the estimate, <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat{\theta})}\)</span>, infinite where
 the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
 14), who add <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information, and follows catR: since
@@ -621,21 +623,13 @@ the items, so no unconditional bias guarantee is made for that case.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.estimation.WarmLikelihoodEstimator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.estimation.</span></span><span class="sig-name descname"><span class="pre">WarmLikelihoodEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(-6.0,</span> <span class="pre">6.0)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="index.html#catsim.estimation.BaseEstimator" title="catsim.estimation.base.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></a></p>
 <p>Warm’s (1989) weighted likelihood estimator (WLE).</p>
-<p>The estimate is the root of Warm’s modified score equation</p>
-<div class="math notranslate nohighlight">
-\[\sum_i \frac{(u_i - P_i) P_i'}{P_i Q_i} + \frac{J(\theta)}{2 I(\theta)} = 0,
-\qquad J(\theta) = \sum_i \frac{P_i' P_i''}{P_i Q_i},\]</div>
-<p>which removes the first-order (<span class="math notranslate nohighlight">\(O(n^{-1})\)</span>) bias of the MLE and stays finite for
-all-correct and all-incorrect response patterns. For models without guessing or slipping
-(<span class="math notranslate nohighlight">\(c = 0\)</span>, <span class="math notranslate nohighlight">\(d = 1\)</span>), <span class="math notranslate nohighlight">\(J = I'\)</span> and the estimate maximizes
-<span class="math notranslate nohighlight">\(L(\theta)\sqrt{I(\theta)}\)</span>.</p>
-<p>The modified score is scanned at 121 equally spaced points over <code class="docutils literal notranslate"><span class="pre">bounds</span></code> (0.1 apart on the
-default bounds) to bracket its roots, which are then refined with Brent’s method. If several
-roots exist, the one with the largest weighted likelihood is returned; if none does, the
-estimate is the bound the modified score points to.</p>
-<p>For full algorithmic details, see <a class="reference internal" href="#"><span class="doc">Warm Weighted Likelihood Estimator</span></a>.</p>
+<p>The root of Warm’s modified score equation, which removes the MLE’s first-order bias and stays
+finite for all-correct and all-incorrect response patterns; see
+<a class="reference internal" href="#"><span class="doc">Warm Weighted Likelihood Estimator</span></a>. If the equation has several roots within <code class="docutils literal notranslate"><span class="pre">bounds</span></code>,
+the one with the largest weighted likelihood is returned; if it has none, the bound the modified
+score points to.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -654,17 +648,12 @@ estimate is the bound the modified score points to.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.estimation.WarmLikelihoodEstimator.estimate">
-<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.context.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator.estimate" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">estimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../context.html#catsim.Estimate" title="catsim.Estimate"><span class="pre">Estimate</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/estimation/wle.html#WarmLikelihoodEstimator.estimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.estimation.WarmLikelihoodEstimator.estimate" title="Link to this definition">#</a></dt>
 <dd><p>Return the root of Warm’s modified score equation, or <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> when no item has been administered.</p>
-<p>The standard error is <span class="math notranslate nohighlight">\(1/\sqrt{I(\hat\theta)}\)</span>, the inverse square root of the test
-information at the estimate, or <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information is 0. This is catR’s
-default for the WLE (<code class="docutils literal notranslate"><span class="pre">semTheta</span></code> with <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>). <span class="bibtex-citation" id="id1">Magis and Raîche [<a class="reference internal" href="../../../references.html#id13" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">2012</a>]</span> (Eq. 14,
-p. 6) add a term to the information, <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span>, which catR has not used since
-version 3.0 and which, with guessing or slipping parameters, can make the sum negative; catsim
-follows catR (ADR-0004). The evaluation count is
-the number of modified-score evaluations: the scan, Brent’s refinement and, when several roots
-compete, the integration that ranks them. With no administered item, the estimate is
-<code class="docutils literal notranslate"><span class="pre">context.theta</span></code> and <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, unchanged, after no evaluation.</p>
+<p>The standard error is the inverse square root of the test information at the estimate, without
+Warm’s correction (the technique page compares the two), or <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information
+is 0. The evaluation count is the number of modified-score evaluations. With no administered
+item, the estimate is <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> and <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, unchanged, after no evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

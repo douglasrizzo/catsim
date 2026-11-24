@@ -821,6 +821,8 @@ window.runMermaid = runMermaid;</script>
   <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 
 <span class="n">LogPrior</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">FloatArray</span><span class="p">],</span> <span class="n">FloatArray</span><span class="p">]</span>
+<span class="sd">"""A log prior density: maps an array of abilities to their log-densities, elementwise."""</span>
+
 <span class="n">_MIN_QUADRATURE_NODES</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="c1"># Step of the central difference that gives a prior's curvature at the MAP estimate.</span>
 <span class="n">_CURVATURE_STEP</span> <span class="o">=</span> <span class="mf">1e-4</span>
@@ -926,13 +928,10 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuadratureGrid</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""A fixed quadrature grid for posterior computations.</span>
 
-<span class="sd">  The posterior at node :math:`\theta_q` is proportional to</span>
-<span class="sd">  :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`, so the weights take part in the</span>
-<span class="sd">  posterior itself. Equal weights, as built by :meth:`uniform`, cancel in the normalization. Two grids</span>
-<span class="sd">  are equal only if they are the same object, and a grid can be a set member or a dictionary key.</span>
-
-<span class="sd">  For the full posterior specification and quadrature contract, see</span>
-<span class="sd">  :doc:`/api/techniques/estimation/bayesian-infrastructure`.</span>
+<span class="sd">  A node's posterior mass is proportional to its weight times the prior density and the likelihood</span>
+<span class="sd">  there, so the weights take part in the posterior itself; equal weights, as :meth:`uniform` builds,</span>
+<span class="sd">  cancel in the normalization. Two grids are equal only if they are the same object, and a grid can</span>
+<span class="sd">  be a set member or a dictionary key.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1024,9 +1023,9 @@ window.runMermaid = runMermaid;</script>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the normalized discrete posterior over ``grid.nodes``.</span>
 
-<span class="sd">  Each node gets mass proportional to :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`,</span>
-<span class="sd">  computed in log space and shifted by its maximum before exponentiating, so the likelihood of</span>
-<span class="sd">  many responses does not underflow.</span>
+<span class="sd">  Each node's mass is proportional to its weight times the prior density and the likelihood there,</span>
+<span class="sd">  computed in log space and shifted by its maximum before exponentiating, so the likelihood of many</span>
+<span class="sd">  responses does not underflow.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1081,7 +1080,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      :math:`\sum_q \theta_q\,\tilde{p}_q`.</span>
+<span class="sd">      The probability-weighted mean of the nodes.</span>
 <span class="sd">  """</span>
   <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nodes</span> <span class="o">*</span> <span class="n">post</span><span class="p">))</span></div>
 
@@ -1102,7 +1101,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      :math:`\sum_q (\theta_q - \bar{\theta})^2\,\tilde{p}_q`, where :math:`\bar{\theta}` is</span>
+<span class="sd">      The probability-weighted mean of the squared distances between the nodes and</span>
 <span class="sd">      :func:`posterior_mean`.</span>
 <span class="sd">  """</span>
   <span class="n">mean</span> <span class="o">=</span> <span class="n">posterior_mean</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span>
@@ -1115,11 +1114,9 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">EAPEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Expected a Posteriori ability estimator.</span>
 
-<span class="sd">  The estimator keeps no posterior between calls: one instance serves every session of a</span>
-<span class="sd">  simulation, and look-ahead selectors such as MEI call it with hypothetical responses. Compute</span>
-<span class="sd">  a session's posterior with :py:func:`posterior` when it is needed.</span>
-
-<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/estimation/eap-estimator`.</span>
+<span class="sd">  The mean of the ability's posterior over a quadrature grid, with the posterior standard deviation</span>
+<span class="sd">  as its standard error; see :doc:`/api/techniques/estimation/eap-estimator`. The estimator keeps no</span>
+<span class="sd">  posterior between calls: :py:func:`posterior` computes a session's posterior when it is needed.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1153,9 +1150,8 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mean and the posterior standard deviation.</span>
 
-<span class="sd">    With no administered item they are the prior's mean and standard deviation on the grid. The</span>
-<span class="sd">    standard error is the posterior standard deviation (:cite:t:`Magis12`, Eq. 11, p. 6), as in</span>
-<span class="sd">    catR. Each call evaluates the likelihood once per grid node, which is its evaluation count.</span>
+<span class="sd">    With no administered item they are the prior's mean and standard deviation on the grid. Each</span>
+<span class="sd">    call evaluates the likelihood once per grid node, which is its evaluation count.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1196,11 +1192,9 @@ window.runMermaid = runMermaid;</script>
 <span class="k">class</span><span class="w"> </span><span class="nc">MAPEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Maximum a Posteriori ability estimator.</span>
 
-<span class="sd">  The posterior mode is located on 201 equally spaced points over the search bounds, then</span>
-<span class="sd">  refined with a bounded scalar search between the best point's neighbors. The grid keeps the</span>
-<span class="sd">  estimate inside the prior's support and finds the global mode of a multimodal posterior.</span>
-
-<span class="sd">  For full algorithmic details, see :doc:`/api/techniques/estimation/map-estimator`.</span>
+<span class="sd">  The mode of the ability's posterior within the search bounds; see</span>
+<span class="sd">  :doc:`/api/techniques/estimation/map-estimator`. The search finds the global mode of a multimodal</span>
+<span class="sd">  posterior and keeps the estimate inside the prior's support.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1273,12 +1267,10 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Estimate</span><span class="p">:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.</span>
 
-<span class="sd">    The standard error is :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`, the test</span>
-<span class="sd">    information plus the prior's negative curvature at the mode, taken by a central difference so</span>
-<span class="sd">    any prior works. For a normal prior with variance :math:`\sigma^2` that is</span>
-<span class="sd">    :math:`1/\sqrt{I(\hat\theta) + 1/\sigma^2}` (:cite:t:`Magis12`, Eq. 6, p. 5; catR's</span>
-<span class="sd">    default), and inside a uniform prior's support the Fisher standard error. The evaluation count</span>
-<span class="sd">    is the number of search points plus the refinement's posterior evaluations.</span>
+<span class="sd">    The standard error is the inverse square root of the test information plus the prior's negative</span>
+<span class="sd">    curvature at the mode, which a central difference gives for any prior; inside a uniform prior's</span>
+<span class="sd">    support it is the Fisher standard error. The evaluation count is the number of search points</span>
+<span class="sd">    plus the refinement's posterior evaluations.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

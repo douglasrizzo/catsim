@@ -408,11 +408,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../initialization/index.html">Initialization Techniques</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">Session State</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../item_bank.html">Item Bank</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../exposure.html">Exposure Controls – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.exposure</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../exceptions.html">Exceptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../metrics.html">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -559,20 +561,26 @@ following item draws from one fewer, down to 1.</p></td>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.selection.The54321Selector">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.selection.</span></span><span class="sig-name descname"><span class="pre">The54321Selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">initial_bin_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/catsim/selection/randomized.html#The54321Selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></p>
-<p>Implementation of the 5-4-3-2-1 selector proposed by <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../../../references.html#id8" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In New horizons in testing: Latent trait test theory and computerized adaptive testing, pages 223–236. Academic Press, New York, 1983. doi:10.1016/B978-0-12-742780-5.50022-6.">McBride and Martin, 1983</a>]</span>.</p>
-<p>The first item is drawn at random from the 5 most informative items at the current <span class="math notranslate nohighlight">\(\hat\theta\)</span>,
-the second from the 4 most informative remaining items, and so on, so that from the fifth item on the
-most informative item is administered. Randomizing the opening items, which every examinee would
-otherwise share while <span class="math notranslate nohighlight">\(\hat\theta\)</span> is still rough, reduces their exposure at little cost in
-precision. Items tied with the least informative item of a bin also join it, so from the fifth
-item on, ties for the most information are broken uniformly at random (ADR-0008). The selector
-applies no exposure cap: <code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>
+<dd><p>Bases: <a class="reference internal" href="index.html#catsim.selection.BaseSelector" title="catsim.selection.base.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a></p>
+<p>Draw each opening item at random from a shrinking bin of the most informative items.</p>
+<p>The 5-4-3-2-1 method of <span class="bibtex-citation" id="id1">McBride and Martin [<a class="reference internal" href="../../../references.html#id8" title="J. R. McBride and J. T. Martin. Reliability and validity of adaptive ability tests in a military setting. In New horizons in testing: Latent trait test theory and computerized adaptive testing, pages 223–236. Academic Press, New York, 1983. doi:10.1016/B978-0-12-742780-5.50022-6.">1983</a>]</span>: the first item is drawn from the 5 most informative
+items at the current estimate, the second from the 4 most informative remaining ones, and so on,
+until from the fifth item on the most informative item is administered. Items tied with the least
+informative item of a bin also join it. The selector applies no exposure cap:
+<code class="docutils literal notranslate"><span class="pre">context.exposure_rates</span></code> is ignored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>initial_bin_size</strong><span class="classifier">int, optional</span></dt><dd><p>Number of most informative items the first item is drawn from; each following item draws from
 one fewer. Default is 5.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">initial_bin_size</span></code> is not an integer.</p>
+</dd>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">initial_bin_size</span></code> is smaller than 1.</p>
 </dd>
 </dl>
 </dd>
@@ -587,10 +595,10 @@ one fewer. Default is 5.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.selection.The54321Selector.select">
-<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.context.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/randomized.html#The54321Selector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/catsim/selection/randomized.html#The54321Selector.select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.selection.The54321Selector.select" title="Link to this definition">#</a></dt>
 <dd><p>Return an item drawn uniformly from the bin of the most informative remaining items.</p>
 <p>The bin holds <code class="docutils literal notranslate"><span class="pre">initial_bin_size</span></code> items at the first position, one fewer at each following
-position, and at least one, plus every item tied with its least informative item (ADR-0008).</p>
+position, and at least one, plus every item tied with its least informative item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">

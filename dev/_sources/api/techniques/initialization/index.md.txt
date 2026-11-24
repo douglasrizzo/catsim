@@ -1,5 +1,8 @@
 # Initialization Techniques
 
+```{py:module} catsim.initialization
+```
+
 Initialization techniques choose the initial ability estimate
 $\hat{\theta}_0$ before an adaptive test has administered any items. The
 choice of initializer affects the first item selection and can be useful for
@@ -145,4 +148,11 @@ Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating rando
 :full:
 :strict:
 :namespace: catsim
+```
+
+## Base Class
+
+```{eval-rst}
+.. autoclass:: catsim.initialization.BaseInitializer
+   :members:
 ```

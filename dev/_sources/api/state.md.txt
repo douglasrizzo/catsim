@@ -1,6 +1,18 @@
-# Runtime State -- {mod}`catsim.state`
+# Session State
 
 ```{eval-rst}
-.. automodule:: catsim.state
+.. autoclass:: catsim.CatSessionState
+   :members:
+
+.. autoclass:: catsim.CatSessionSnapshot
+   :members:
+
+.. autoclass:: catsim.CatStepResult
+   :members:
+
+.. autoclass:: catsim.StopReason
+   :members:
+
+.. autoclass:: catsim.ExposureTracker
    :members:
 ```

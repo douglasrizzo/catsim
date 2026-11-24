@@ -823,14 +823,20 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="RunContext">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.RunContext">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.RunContext">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">RunContext</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Runtime services shared by CAT sessions in one run.</span>
 
-<span class="sd">  ``exposure_tracker`` counts sessions, item administrations and proposals across the run and gives</span>
-<span class="sd">  selectors the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no</span>
-<span class="sd">  rates and apply no cap.</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  rng : numpy.random.Generator</span>
+<span class="sd">      The run's random generator, which the initializer, the selector, the exposure control and the</span>
+<span class="sd">      response provider draw from.</span>
+<span class="sd">  exposure_tracker : ExposureTracker or None, optional</span>
+<span class="sd">      Counts sessions, item administrations and proposals across the run and gives selectors the</span>
+<span class="sd">      exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and</span>
+<span class="sd">      apply no cap. Default is None.</span>
 <span class="sd">  """</span>
 
   <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span>
@@ -839,16 +845,16 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="ResponseProvider">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.ResponseProvider">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.ResponseProvider">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ResponseProvider</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">  </span><span class="sd">"""Source of the examinee's responses for :meth:`CatEngine.step` and :meth:`CatEngine.run_session`.</span>
 
-<span class="sd">  :class:`~catsim.simulation.SimulatedResponseProvider` draws them from a simulated examinee's true</span>
+<span class="sd">  :class:`~catsim.SimulatedResponseProvider` draws them from a simulated examinee's true</span>
 <span class="sd">  ability; an application that steps sessions itself can wrap whatever collects real answers.</span>
 <span class="sd">  """</span>
 
 <div class="viewcode-block" id="ResponseProvider.answer">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.ResponseProvider.answer">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.ResponseProvider.answer">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return whether the examinee answers the item correctly.</span>
 
@@ -873,7 +879,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatEngine">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CatEngine</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Engine for stepwise CAT execution on one item bank.</span>
 
@@ -901,7 +907,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  TypeError</span>
-<span class="sd">      If ``item_bank`` is not an :class:`~catsim.item_bank.ItemBank`.</span>
+<span class="sd">      If ``item_bank`` is not an :class:`~catsim.ItemBank`.</span>
 <span class="sd">  """</span>
 
   <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -959,7 +965,7 @@ window.runMermaid = runMermaid;</script>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="CatEngine.start_session">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.start_session">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.start_session">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">start_session</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">session_id</span><span class="p">:</span> <span class="n">Hashable</span><span class="p">,</span>
@@ -994,7 +1000,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatEngine.should_stop">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.should_stop">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.should_stop">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return whether the session satisfies the stopping criterion.</span>
 
@@ -1014,27 +1020,25 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatEngine.select_next">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.select_next">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.select_next">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">select_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Select the next item to administer, or end the session.</span>
 
-<span class="sd">    This is the one place that decides whether a session continues, so a manual loop needs no</span>
-<span class="sd">    other check::</span>
+<span class="sd">    This alone decides whether a session continues, so a manual loop needs no other check::</span>
 
 <span class="sd">      while (item_id := engine.select_next(state, context)) is not None:</span>
 <span class="sd">        engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)</span>
 
-<span class="sd">    The stopper is consulted here only for a session that has no responses yet. After that,</span>
-<span class="sd">    :meth:`apply_response` evaluates it once for every new state, and what it records is final.</span>
-
-<span class="sd">    With an exposure control, the items it declines join the session's ``excluded_items`` and the</span>
-<span class="sd">    exposure tracker's proposals, once the selection has ended, so an application that saves its</span>
-<span class="sd">    sessions saves them after this call too. A selection that raises leaves both unchanged.</span>
+<span class="sd">    The stopper is consulted here only before the first response; after that,</span>
+<span class="sd">    :meth:`apply_response` evaluates it once per new state, and what it records is final. The items</span>
+<span class="sd">    the exposure control declines join the session's ``excluded_items`` and the tracker's proposals</span>
+<span class="sd">    when the selection ends, so save sessions after this call too; a selection that raises changes</span>
+<span class="sd">    neither.</span>
 
 <span class="sd">    Each call selects anew, and the exposure control decides anew: a second call before the</span>
 <span class="sd">    response may decline the item the first returned, or end the session. An application that has</span>
-<span class="sd">    shown an item keeps its id, which :meth:`apply_response` needs, and shows it again rather than</span>
-<span class="sd">    calling this method again.</span>
+<span class="sd">    shown an item keeps its id for :meth:`apply_response` and shows it again rather than calling</span>
+<span class="sd">    this method again.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1109,7 +1113,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">context</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">excluded_items</span><span class="o">=</span><span class="p">(</span><span class="o">*</span><span class="n">context</span><span class="o">.</span><span class="n">excluded_items</span><span class="p">,</span> <span class="n">item_id</span><span class="p">))</span>
 
 <div class="viewcode-block" id="CatEngine.apply_response">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.apply_response">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.apply_response">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">apply_response</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
@@ -1150,7 +1154,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        administered in this session.</span>
 <span class="sd">    TypeError</span>
 <span class="sd">        If the item index is not an integer, the response is not a ``bool`` or ``numpy.bool_``, or</span>
-<span class="sd">        the estimator returns something other than an :class:`~catsim.context.Estimate`.</span>
+<span class="sd">        the estimator returns something other than an :class:`~catsim.Estimate`.</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> has stopped (reason: </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="si">}</span><span class="s2">) and accepts no more responses"</span>
@@ -1194,7 +1198,7 @@ window.runMermaid = runMermaid;</script>
 
 
 <div class="viewcode-block" id="CatEngine.step">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.step">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.step">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
@@ -1260,14 +1264,29 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="n">item_id</span>
 
 <div class="viewcode-block" id="CatEngine.run_session">
-<a class="viewcode-back" href="../../api/engine.html#catsim.engine.CatEngine.run_session">[docs]</a>
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.run_session">[docs]</a>
   <span class="k">def</span><span class="w"> </span><span class="nf">run_session</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span>
     <span class="n">response_provider</span><span class="p">:</span> <span class="n">ResponseProvider</span><span class="p">,</span>
     <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatSessionState</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Run a session until a stop condition is reached."""</span>
+<span class="w">    </span><span class="sd">"""Step a session until it stops.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    state : CatSessionState</span>
+<span class="sd">        The session to run, which this call advances in place.</span>
+<span class="sd">    response_provider : ResponseProvider</span>
+<span class="sd">        Source of the examinee's responses.</span>
+<span class="sd">    context : RunContext</span>
+<span class="sd">        Runtime services of the run.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    CatSessionState</span>
+<span class="sd">        ``state``, stopped, with its ``stop_reason`` set.</span>
+<span class="sd">    """</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">response_provider</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">state</span></div>
