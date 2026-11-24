@@ -162,7 +162,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     # right end of a bracket is a valid Brent endpoint), plus any bound the modified score
     # points outward from.
     candidates: list[float] = []
-    for idx in numpy.flatnonzero((values[:-1] > 0.0) & (values[1:] <= 0.0)):
+    for idx in numpy.flatnonzero((values[:-1] > 0.0) & (values[1:] <= 0.0)).tolist():
       root, result = brentq(score, grid[idx], grid[idx + 1], xtol=self._tol, full_output=True)
       candidates.append(float(root))
       evaluations += result.function_calls

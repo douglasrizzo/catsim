@@ -85,7 +85,7 @@ class MLWISelector(BaseSelector):
     administered_items: FloatArray,
   ) -> FloatArray:
     log_likelihood = irt.log_likelihood_hpc(self._nodes, response_vector, administered_items)
-    log_likelihood -= float(log_likelihood.max())
+    log_likelihood -= float(numpy.max(log_likelihood))
     return numpy.exp(log_likelihood)
 
   def select(
