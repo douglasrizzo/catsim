@@ -83,10 +83,10 @@ def icc(theta: float | FloatArray, items: FloatArray) -> FloatArray:
 
   Returns
   -------
-  numpy.ndarray
+  numpy.ndarray or numpy.float64
       Every ability against every item, of shape ``numpy.shape(theta) + items.shape[:-1]``: a float
-      ``theta`` gives ``(n,)`` for ``n`` items, ``k`` abilities give ``(k, n)``, and a float
-      ``theta`` with one row gives a 0-d result.
+      ``theta`` gives ``(n,)`` for ``n`` items and ``k`` abilities give ``(k, n)``. A float ``theta``
+      with one item row gives a NumPy scalar, a ``numpy.float64``.
 
   Examples
   --------
@@ -123,8 +123,8 @@ def information(theta: float | FloatArray, items: FloatArray) -> FloatArray:
   -------
   numpy.ndarray
       Every ability against every item, of shape ``numpy.shape(theta) + items.shape[:-1]``: a float
-      ``theta`` gives ``(n,)`` for ``n`` items, ``k`` abilities give ``(k, n)``, and a float
-      ``theta`` with one row gives a 0-d result.
+      ``theta`` gives ``(n,)`` for ``n`` items and ``k`` abilities give ``(k, n)``. A float ``theta``
+      with one item row gives a 0-d array.
 
   Examples
   --------
@@ -258,7 +258,7 @@ def confidence_interval(theta: float, items: FloatArray, confidence: float = 0.9
   theta : float
       The estimated ability value.
   items : numpy.ndarray
-      A matrix containing item parameters for administered items.
+      The administered items, a matrix of shape ``(n, 4)``.
   confidence : float, optional
       The confidence level, must be between 0 and 1. Default is 0.95 (95% confidence).
       Common values are 0.90 (90%), 0.95 (95%), and 0.99 (99%).
@@ -587,18 +587,11 @@ def info_integral(lower: float, upper: float, items: FloatArray) -> FloatArray:
 def log_response_probabilities(theta: float | FloatArray, items: FloatArray) -> tuple[FloatArray, FloatArray]:
   r"""Return the log-probabilities of a correct and of an incorrect response to each item.
 
-  With the logit :math:`z_i = a_i(\theta - b_i)` and the logistic function
-  :math:`\sigma(z) = 1 / (1 + e^{-z})`, the :py:func:`icc` and its complement :math:`Q_i = 1 - P_i` are
-
-  .. math::
-
-      P_i(\theta) = c_i + (d_i - c_i)\,\sigma(z_i), \qquad
-      Q_i(\theta) = (1 - d_i) + (d_i - c_i)\,\sigma(-z_i)
-
-  Both logarithms are computed from :math:`z_i`, never from a :math:`P_i` that has rounded to 0 or 1, so
-  they are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to
+  They are the logarithms of the :py:func:`icc` :math:`P_i` and of its complement :math:`Q_i = 1 - P_i`,
+  computed from the logit :math:`a_i(\theta - b_i)`, never from a :math:`P_i` that has rounded to 0 or
+  1. They are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to
   :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing
-  or slipping they keep falling linearly in :math:`z_i`.
+  or slipping they keep falling linearly in the logit.
 
   Parameters
   ----------
