@@ -28,3 +28,19 @@ class TestLinearSelector:
 
     with pytest.raises(ValueError, match=r"items \[99\] are not in the item bank, whose indices run from 0 to 19"):
       selector.select(make_context(item_bank, [0], theta=0.0))
+
+  @pytest.mark.parametrize(
+    ("items", "match"),
+    [
+      pytest.param([], "items cannot be empty", id="empty"),
+      pytest.param([3, -1, 2], "item indices must be non-negative, got -1", id="negative"),
+    ],
+  )
+  def test_constructor_rejects_a_list_it_cannot_administer(self, items: list[int], match: str) -> None:
+    """An empty list or a negative index is rejected when the selector is built.
+
+    Without the checks, an empty list failed inside min(), with a message about an empty sequence rather than the
+    argument, and a negative index was never a remaining item, so every session skipped it without a word.
+    """
+    with pytest.raises(ValueError, match=match):
+      LinearSelector(items)
