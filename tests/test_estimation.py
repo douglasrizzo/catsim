@@ -673,8 +673,36 @@ class TestEAPEstimator:
     assert 0.0 < sign * normal_theta < 5.0
     assert abs(normal_theta) < abs(flat_theta)
 
+  def test_standard_error_is_the_posterior_standard_deviation(self) -> None:
+    """The SE is the standard deviation of the posterior over the estimator's grid, computed here by brute force.
+
+    The posterior weighs each node of the given grid by the N(0.5, 1.2^2) prior and the 2PL/4PL likelihood. An SE that
+    was the posterior variance, the Fisher SE at the posterior mean, or the spread of the prior or of another grid
+    fails.
+    """
+    items = np.array([[1.4, -0.5, 0.0, 1.0], [0.9, 0.8, 0.15, 0.95], [1.8, 0.2, 0.0, 1.0]])
+    responses = [True, False, True]
+    grid = QuadratureGrid.uniform(n_nodes=41, low=-4.0, high=4.0)
+    nodes = grid.nodes
+    a, b, c, d = (items[:, [k]] for k in range(4))
+    p = c + (d - c) / (1.0 + np.exp(-a * (nodes - b)))
+    likelihood = np.prod(np.where(np.array(responses)[:, None], p, 1.0 - p), axis=0)
+    mass = grid.weights * np.exp(-0.5 * ((nodes - 0.5) / 1.2) ** 2) * likelihood
+    mass /= mass.sum()
+    mean = mass @ nodes
+    reference = np.sqrt(mass @ (nodes - mean) ** 2)
+    estimator = EAPEstimator(grid=grid, log_prior=normal_log_prior(mean=0.5, sd=1.2))
+
+    estimate = estimator.estimate(make_context(ItemBank(items), [0, 1, 2], responses, theta=0.0))
+
+    assert estimate.theta == pytest.approx(mean, rel=1e-12)
+    assert estimate.se == pytest.approx(reference, rel=1e-12)
+
   def test_evaluations_count_one_per_grid_node(self) -> None:
-    """Each estimate evaluates the likelihood once per grid node, and its evaluation count says so."""
+    """Each estimate evaluates the likelihood once per grid node, and its evaluation count says so.
+
+    A count of anything but the grid's 31 nodes, such as one per administered item or the default grid's 121, fails.
+    """
     item_bank = ItemBank.generate_item_bank(10, seed=42)
     estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=31))
 
