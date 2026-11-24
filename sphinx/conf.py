@@ -110,6 +110,8 @@ html_theme_options = {
   "navigation_depth": 2,
   "collapse_navigation": True,
   "show_nav_level": 2,
+  # The navbar shows the seven top-level entries of the table of contents without a "More" menu.
+  "header_links_before_dropdown": 7,
   "navbar_end": ["navbar-icon-links", "theme-switcher"],
   "logo": {
     "image_light": "logo/horizontal-light.svg",

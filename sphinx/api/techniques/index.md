@@ -1,10 +1,10 @@
 # Techniques
 
-This section contains the CAT techniques implemented in {mod}`catsim`. Each
-technique page combines the mathematical specification, behavioral contract,
-and class-level API reference.
+This section documents the CAT techniques implemented in {mod}`catsim`. Each technique page gives
+the method's definition, parameters, guarantees and sources, followed by the API reference of its
+class.
 
-For module-level API browsing, see the {doc}`/api/index` appendix.
+For the modules and the core types, see the {doc}`/api/index`.
 
 ```{toctree}
 :maxdepth: 2
