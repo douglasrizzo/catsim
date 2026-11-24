@@ -31,8 +31,9 @@ every block, $\{1_1, 2_1, \dots, k_1\}$, forms the first stratum, the second ite
 stratum, and so on.
 ```
 
-Each stratum therefore contains one item from every difficulty block, and the
-strata ascend in discrimination. Selection then follows the a-stratified rule:
+Each stratum therefore contains one item from every full difficulty block (a
+trailing block of fewer than $S$ items fills the first strata), and the strata
+ascend in discrimination. Selection then follows the a-stratified rule:
 at test position $t$, return the non-administered item of stratum $s(t)$ whose
 difficulty is closest to the current estimate,
 
