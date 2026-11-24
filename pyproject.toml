@@ -350,7 +350,7 @@ layers = [
   "plot",  # draws items and sessions; nothing in catsim imports it
   "simulation",
   "engine",
-  "selection | estimation | initialization | stopping",  # "|": siblings that never import each other
+  "selection | estimation | initialization | stopping | exposure",  # "|": siblings that never import each other
   "state",
   "context",  # StepContext: below state and the strategies, which read it, and above the domain
   "metrics",
@@ -376,6 +376,7 @@ source_modules = [
   "catsim.estimation",
   "catsim.initialization",
   "catsim.stopping",
+  "catsim.exposure",
 ]
 forbidden_modules = ["catsim.state", "catsim.engine", "catsim.simulation", "catsim.plot"]
 
@@ -397,6 +398,7 @@ source_modules = [
   "catsim.estimation",
   "catsim.initialization",
   "catsim.stopping",
+  "catsim.exposure",
 ]
 forbidden_modules = ["matplotlib", "mpl_toolkits"]
 

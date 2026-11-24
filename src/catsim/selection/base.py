@@ -212,6 +212,10 @@ class BaseSelector(ABC):
   chooses with :func:`pick_best` or :func:`best_pool`, which apply the package's tie-breaking rule
   (ADR-0008). The test position is ``len(context.administered_items)``.
 
+  The excluded items are the session's, among them those the engine's exposure control declined. A
+  selector that passes a changed context to another adds to them, never replaces them. The engine
+  raises for a proposed item that is outside the bank, administered or excluded.
+
   A selector holds its configuration and caches derived from the item bank, never per-session
   state: one selector serves every session of a run, and an application may interleave the
   sessions of several examinees on it.

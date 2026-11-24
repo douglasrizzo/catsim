@@ -19,6 +19,7 @@ if TYPE_CHECKING:
   from collections.abc import Hashable
 
   from .estimation import BaseEstimator
+  from .exposure import BaseExposureControl
   from .initialization import BaseInitializer
   from .selection import BaseSelector
   from .state import CatSessionSnapshot
@@ -85,6 +86,10 @@ class CatEngine:
       Updates the ability estimate after each response.
   stopper : BaseStopper
       Decides when a session has ended.
+  exposure_control : BaseExposureControl or None, optional
+      Decides whether to administer each item the selector proposes; a declined item is excluded
+      from the session for the rest of its test. Default is None, which administers every proposed
+      item.
 
   Raises
   ------
@@ -99,6 +104,8 @@ class CatEngine:
     selector: BaseSelector,
     estimator: BaseEstimator,
     stopper: BaseStopper,
+    *,
+    exposure_control: BaseExposureControl | None = None,
   ) -> None:
     # Checked here because a NumPy array of parameters would otherwise fail only at the first session.
     if not isinstance(item_bank, ItemBank):
@@ -109,6 +116,7 @@ class CatEngine:
     self._selector = selector
     self._estimator = estimator
     self._stopper = stopper
+    self._exposure_control = exposure_control
 
   @property
   def item_bank(self) -> ItemBank:
@@ -204,6 +212,10 @@ class CatEngine:
     The stopper is consulted here only for a session that has no responses yet. After that,
     :meth:`apply_response` evaluates it once for every new state, and what it records is final.
 
+    With an exposure control, the items it declines join the session's ``excluded_items`` and the
+    exposure tracker's proposals, once the selection has ended, so an application that saves its
+    sessions saves them after this call too. A selection that raises leaves both unchanged.
+
     Parameters
     ----------
     state : CatSessionState
@@ -216,7 +228,15 @@ class CatEngine:
     int or None
         Index of the next item to administer. None when the session has ended: it was already
         stopped (and is left untouched), its stopper is satisfied (reason ``StopReason.STOPPER``),
-        or the selector has no item to offer (reason ``StopReason.NO_ITEMS``).
+        or the selector has no item to offer, or none the exposure control accepts (reason
+        ``StopReason.NO_ITEMS``).
+
+    Raises
+    ------
+    ExcludedItemError
+        If the selector proposes an item the session excluded.
+    ValueError
+        If the selector proposes an item outside the bank or one already administered.
     """
     if state.is_stopped:
       return None
@@ -224,12 +244,45 @@ class CatEngine:
       state.stop_reason = StopReason.STOPPER
       return None
 
+    declined: list[int] = []
     try:
-      item_id = self._selector.select(self._step_context(state, context))
+      item_id: int | None = self._accepted_item(self._step_context(state, context), declined)
     except NoItemsAvailableError:
+      item_id = None
+    # Committed only here, so a selection that raises changes neither the session nor the tracker.
+    state.excluded_items.extend(declined)
+    if item_id is None:
       state.stop_reason = StopReason.NO_ITEMS
-      return None
-    return int(item_id)
+    return item_id
+
+  def _accepted_item(self, context: StepContext, declined: list[int]) -> int:
+    """Return the first item the selector proposes that the exposure control accepts.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session as it stands.
+    declined : list[int]
+        Receives each item the control declines, in order.
+
+    Returns
+    -------
+    int
+        The accepted item.
+
+    Raises
+    ------
+    NoItemsAvailableError
+        If the selector has no item left to propose.
+    """
+    while True:
+      # Checked before the control or a response provider sees it: a live provider shows the item to an
+      # examinee, and a selector that ignores excluded_items would be asked again forever.
+      item_id = self._checked_item(context, int(self._selector.select(context)))
+      if self._exposure_control is None or bool(self._exposure_control.accept(context, item_id)):
+        return item_id
+      declined.append(item_id)
+      context = dataclasses.replace(context, excluded_items=(*context.excluded_items, item_id))
 
   def apply_response(
     self,
@@ -340,8 +393,6 @@ class CatEngine:
     item_id = self.select_next(state, context)
     if item_id is None:
       return CatStepResult(session=state.snapshot(), selected_item_id=None, response=None)
-    # checked before the provider is asked: a live provider shows the item to an examinee
-    item_id = self._checked_item(self._step_context(state, context), item_id)
     response = response_provider.answer(self._item_bank, item_id, state.snapshot(), context.rng)
     return self.apply_response(state, item_id, response=response, context=context)
 
