@@ -1,20 +1,23 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.<module>.<ClassName>`
-**Reference:** Author (Year). *Title*. Journal, volume(issue), pages. <https://doi.org/>...
+**Status:** Planned
+**Module:** `catsim.<family>.<module>.<ClassName>` (planned)
+**Reference:** Author (Year)
+**Last validated:** YYYY-MM-DD, against \<the sources and catR version checked>.
+**Implementation guidance:** written against the current strategy contract on YYYY-MM-DD.
 
-% SPEC TEMPLATE — copy this file and fill in each section.
-% Remove this comment block before committing.
+% SPEC TEMPLATE for a planned technique. Copy this file into specs/<family>/, fill in each section
+% and remove these comments before committing.
 %
-% Status values: Implemented | Planned
-% For Planned specs, include the "Implementation Guidance" section at the bottom.
-% Remove "Implementation Guidance" when promoting to Implemented.
+% The sections from Motivation to References have the names and order of the technique-page
+% template, sphinx/api/techniques/_template.md, and follow its rules (sphinx/AGENTS.md, "Technique
+% pages"): promoting the spec moves them onto a technique page. The sections after References are
+% for contributors and are removed on promotion. specs/README.md describes the workflow.
 
 # \<Technique Name>
 
 ## Motivation
 
-\<1–3 paragraphs: what problem does this technique solve, when to prefer it over
-alternatives, and what makes it distinctive.>
+\<1-3 paragraphs for a researcher: what the method does, the problem it solves, when to choose it
+over the alternatives and what makes it distinctive.>
 
 ## Definition
 
@@ -28,6 +31,13 @@ $$
 formula or design choice where it appears, with the page, equation, table or
 figure, e.g. "(Barrada et al., 2008, p. 498, Equation 12)". Cite only locations
 you have read. Say where the implementation departs from its sources.>
+
+% Optional: how the implementation will solve the definition numerically, when it changes what
+% users observe. Delete the subsection otherwise.
+
+### Computation
+
+\<Search range, grid, tolerance; where they depart from the sources or from catR.>
 
 ## Parameters
 
@@ -44,13 +54,18 @@ you have read. Say where the implementation departs from its sources.>
      - <description, including recommended ranges if the literature provides them>
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+\<How the method behaves in practice (short tests, extreme response patterns, exposure) and how it
+compares with its alternatives and with catR's implementation, with sources.>
 
-1. \<Property 1 — a testable statement about input/output behaviour.>
-2. \<Property 2.>
-3. \<Add as many as are meaningful.>
+## Guarantees
+
+% Properties a user relies on and can observe, in the user's terms. They are promoted to the
+% technique page, and each one also gets a test.
+
+1. \<A property a user can observe, e.g. "It never returns an item that was already administered.">
+2. \<Add as many as are meaningful.>
 
 ## References
 
@@ -60,30 +75,39 @@ published version is not open, add a link to an open copy ("Open copy: ...") or,
 if there is none, say so and name the open source that describes the method
 ("Not openly available; X (Year) describes the method.").>
 
-% OPEN QUESTIONS — optional, for Planned specs only. List the design choices that are still open,
-% each with its options, its trade-off and the option the spec assumes for now. Answer them
-% before implementing, and remove the section when promoting to "Implemented".
+% -----------------------------------------------------------------------
+% CONTRIBUTOR-ONLY SECTIONS: Tests, Open Questions and Implementation Guidance are removed when the
+% spec is promoted to a technique page.
+% -----------------------------------------------------------------------
+
+## Tests
+
+Besides the guarantees above, any correct implementation must satisfy these properties, each
+checked by a test:
+
+1. \<A property only an implementation sees, e.g. "It keeps no per-session state." or "The
+   evaluation count is the number of grid nodes.">
+2. \<A test scenario with an expected value that does not come from the implementation: a
+   hand-worked case, a published value or catR's output, with its source.>
+
+% OPEN QUESTIONS: optional. List the design choices that are still open, each with its options, its
+% trade-off and the option the spec assumes for now. Answer them before implementing.
 
 ## Open Questions
 
 1. \<Question: the options, their trade-off, and which one the spec assumes.>
 
-% -----------------------------------------------------------------------
-
-% IMPLEMENTATION GUIDANCE — remove this entire section when promoting to
-
-% "Implemented" status. It is for contributors and agents only.
-
-% -----------------------------------------------------------------------
+% IMPLEMENTATION GUIDANCE: the sketch is the first python block under this heading. Keep it runnable
+% against the current API.
 
 ## Implementation Guidance
 
 :::{note}
 This section is for contributors and agents implementing this technique.
-It is removed when the spec is promoted to "Implemented" status.
+It is removed when the spec is promoted to a technique page.
 :::
 
-**Proposed location:** `src/catsim/<module>/<filename>.py`
+**Proposed location:** `src/catsim/<family>/<module>.py`
 
 **Mock implementation:**
 
@@ -94,7 +118,3 @@ It is removed when the spec is promoted to "Implemented" status.
 **Implementation notes:**
 
 \<Performance, caching, edge cases, design decisions.>
-
-**Testing notes:**
-
-\<Suggested test scenarios and expected outcomes.>
