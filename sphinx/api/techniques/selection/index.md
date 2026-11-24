@@ -15,26 +15,39 @@ have not been administered, such as those the engine's exposure control
 mean the items that are neither administered nor excluded. Excluded items do not count
 toward the test position, the number of administered items.
 
-## Implemented
-
 ```{toctree}
+:caption: Information-based
 :maxdepth: 1
 
-linear-selector
-random-selector
-randomesque-selector
-the-54321-selector
 max-info-selector
 urry-selector
 interval-info-selector
 kl-selector
-progressive-selector
-proportional-selector
-cluster-selector
-stratified-selector
 mei-selector
 mlwi-selector
 ```
+
+```{toctree}
+:caption: Randomized and exposure control
+:maxdepth: 1
+
+random-selector
+randomesque-selector
+the-54321-selector
+progressive-selector
+proportional-selector
+stratified-selector
+```
+
+```{toctree}
+:caption: Other
+:maxdepth: 1
+
+linear-selector
+cluster-selector
+```
+
+(selection-ties)=
 
 ## Ties
 

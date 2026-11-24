@@ -92,7 +92,7 @@ built-in ones do:
   `r_max`, or all of them when none is;
 - {py:func}`~catsim.selection.pick_best` returns the candidate with the highest score, and breaks
   exact ties at random with the generator it is given, as every built-in selector does
-  ({doc}`/api/techniques/selection/index`);
+  ({ref}`selection-ties`);
 - {py:func}`~catsim.selection.best_pool` returns the best candidates, with every candidate tied at
   the cutoff, for selectors that draw from a pool of good items;
 - {py:func}`~catsim.selection.check_r_max` and {py:func}`~catsim.selection.check_test_size` check a
