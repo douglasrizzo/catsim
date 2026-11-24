@@ -6,10 +6,11 @@ import numpy as np
 import pytest
 
 from catsim import StepContext
+from catsim.engine import CatEngine
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import BaseSelector, RandomSelector
+from catsim.selection import BaseSelector
 from catsim.simulation import SimulationRunner
 from catsim.state import SimulationResult, StopReason
 from catsim.stopping import MaxLengthStopper
@@ -28,105 +29,70 @@ class FirstRemainingSelector(BaseSelector):
     return next(i for i in range(context.item_bank.n_items) if i not in context.administered_items)
 
 
-class TestSimulationRunnerInit:
-  """Tests for SimulationRunner initialization."""
-
-  def test_init_with_item_bank(self, item_bank: ItemBank) -> None:
-    """Runner should accept an ItemBank directly."""
-    runner = SimulationRunner(
-      item_bank,
-      FixedPointInitializer(0.0),
-      RandomSelector(),
-      estimator=NumericalSearchEstimator(),
-      stopper=MaxLengthStopper(5),
-      seed=42,
-    )
-    assert runner.item_bank is item_bank
-
-  def test_init_with_numpy_array(self) -> None:
-    """Runner should auto-convert numpy arrays into ItemBank."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.2, 0.5, 0.0, 1.0]])
-    runner = SimulationRunner(
-      items,
-      FixedPointInitializer(0.0),
-      RandomSelector(),
-      estimator=NumericalSearchEstimator(),
-      stopper=MaxLengthStopper(5),
-      seed=42,
-    )
-    assert isinstance(runner.item_bank, ItemBank)
-    assert runner.item_bank.n_items == 2
-
-  def test_init_with_invalid_item_bank_raises(self) -> None:
-    """Runner should reject invalid item bank objects."""
-    with pytest.raises(TypeError, match=r"must be an ItemBank or numpy\.ndarray") as exc_info:
-      SimulationRunner(  # type: ignore[arg-type]
-        [[1.0, 0.0, 0.0, 1.0]],
-        FixedPointInitializer(0.0),
-        RandomSelector(),
-        estimator=NumericalSearchEstimator(),
-        stopper=MaxLengthStopper(5),
-      )
-
-    assert str(exc_info.value) == "item_bank must be an ItemBank or numpy.ndarray"
+def make_runner(item_bank: ItemBank, selector: BaseSelector, max_items: int) -> SimulationRunner:
+  """Return a runner whose sessions start at 0, use the given selector and stop after max_items items."""
+  return SimulationRunner(
+    CatEngine(item_bank, FixedPointInitializer(0.0), selector, NumericalSearchEstimator(), MaxLengthStopper(max_items))
+  )
 
 
 class TestSimulationRunnerRun:
   """Tests for SimulationRunner.run()."""
 
-  def test_run_with_integer_examinees_returns_result(self, simulation_runner: SimulationRunner) -> None:
-    """Running with an examinee count should return a SimulationResult."""
-    result = simulation_runner.run(5)
-    assert isinstance(result, SimulationResult)
-    assert len(result.sessions) == 5
-
-  def test_run_with_explicit_examinees_preserves_values(self, simulation_runner: SimulationRunner) -> None:
-    """Running with explicit theta values should preserve them in the result."""
-    thetas = np.array([-1.0, 0.0, 1.0])
+  def test_run_keeps_the_true_abilities_in_session_order(self, simulation_runner: SimulationRunner) -> None:
+    """Session i simulates true_thetas[i]; fails if the runner reorders, rounds or replaces the true abilities."""
+    thetas = [0.25, -1.5, 1.0]
     result = simulation_runner.run(thetas)
-    assert np.allclose(result.examinees, thetas)
 
-  def test_run_with_invalid_examinee_count_raises(self, simulation_runner: SimulationRunner) -> None:
-    """Non-positive examinee counts should fail."""
-    with pytest.raises(ValueError, match="must be positive"):
-      simulation_runner.run(0)
+    assert [session.true_theta for session in result.sessions] == thetas
+    assert [session.session_id for session in result.sessions] == [0, 1, 2]
+
+  @pytest.mark.parametrize("count", [5, np.int64(5)], ids=["int", "numpy_int"])
+  def test_run_rejects_a_number_of_examinees(self, simulation_runner: SimulationRunner, count: int) -> None:
+    """run takes the true abilities, not how many examinees to draw.
+
+    Fails if a single number is accepted, either as a count of examinees drawn from the bank, as
+    run(int) did, or as the one true ability of a one-examinee run.
+    """
+    with pytest.raises(TypeError, match=r"one true ability per examinee, not a single number .*rng\.normal\(0, 1, n\)"):
+      simulation_runner.run(count)
 
   def test_run_with_empty_examinee_array_raises(self, simulation_runner: SimulationRunner) -> None:
-    """Empty examinee arrays should fail."""
-    with pytest.raises(ValueError, match="cannot be empty"):
+    """A run with no examinee fails rather than returning an empty result."""
+    with pytest.raises(ValueError, match="true_thetas cannot be empty"):
       simulation_runner.run([])
 
   def test_run_with_multidimensional_examinees_raises(self, simulation_runner: SimulationRunner) -> None:
-    """Only one-dimensional examinee arrays are valid."""
-    with pytest.raises(TypeError, match="one-dimensional") as exc_info:
+    """A two-dimensional array of abilities fails rather than being read as one examinee per row."""
+    with pytest.raises(
+      TypeError, match=r"true_thetas must be one-dimensional, one true ability per examinee, got shape \(1, 2\)"
+    ):
       simulation_runner.run(np.array([[0.0, 1.0]]))
 
-    assert str(exc_info.value) == "Examinees array must be one-dimensional"
+  def test_two_runs_with_the_same_seed_give_the_same_sessions(self, simulation_runner: SimulationRunner) -> None:
+    """Every run builds its generator from its seed, so the same seed gives the same tests on the same runner.
 
-  def test_run_seed_reproducibility(self, item_bank: ItemBank) -> None:
-    """Same seed and inputs should produce the same latest estimations."""
-    runner1 = SimulationRunner(
-      item_bank,
-      FixedPointInitializer(0.0),
-      RandomSelector(),
-      NumericalSearchEstimator(),
-      MaxLengthStopper(5),
-      seed=42,
-    )
-    runner2 = SimulationRunner(
-      item_bank,
-      FixedPointInitializer(0.0),
-      RandomSelector(),
-      NumericalSearchEstimator(),
-      MaxLengthStopper(5),
-      seed=42,
-    )
+    Fails if the runner keeps one generator across runs, so the second run continues the first
+    one's stream, or ignores the seed (a different seed would then give the same tests).
+    """
+    thetas = [-1.0, 0.0, 1.0]
+    first = simulation_runner.run(thetas, rng=3)
+    second = simulation_runner.run(thetas, rng=3)
+    other_seed = simulation_runner.run(thetas, rng=4)
 
-    result1 = runner1.run(5)
-    result2 = runner2.run(5)
+    assert second.administered_items == first.administered_items
+    assert second.response_vectors == first.response_vectors
+    assert second.estimations == first.estimations
+    assert np.array_equal(second.exposure_counts, first.exposure_counts)
+    assert other_seed.administered_items != first.administered_items
 
-    assert result1.latest_estimations == pytest.approx(result2.latest_estimations)
-    assert np.array_equal(result1.exposure_counts, result2.exposure_counts)
+  def test_a_run_with_a_progress_bar_matches_a_quiet_run(self, simulation_runner: SimulationRunner) -> None:
+    """progress=True only adds a progress bar: fails if it changes the sessions or the run does not complete."""
+    thetas = [-0.5, 0.0, 0.5]
+    quiet, shown = simulation_runner.run(thetas, progress=False), simulation_runner.run(thetas, progress=True)
+
+    assert shown.administered_items == quiet.administered_items
+    assert shown.latest_estimations == quiet.latest_estimations
 
   def test_run_populates_sessions(self, simulation_result: SimulationResult) -> None:
     """Every session of a run is run to its stopper: 10 items, 10 responses and 11 estimates.
@@ -138,20 +104,6 @@ class TestSimulationRunnerRun:
       assert session.stop_reason is StopReason.STOPPER
       assert (len(session.administered_item_ids), len(session.responses), len(session.theta_history)) == (10, 10, 11)
 
-  def test_verbose_run_matches_a_quiet_run(self, item_bank: ItemBank) -> None:
-    """verbose=True only adds a progress bar: the run completes and gives the same sessions as a quiet run."""
-
-    def run(verbose: bool) -> SimulationResult:
-      runner = SimulationRunner(
-        item_bank, FixedPointInitializer(0.0), RandomSelector(), NumericalSearchEstimator(), MaxLengthStopper(3)
-      )
-      return runner.run(3, verbose=verbose)
-
-    quiet, verbose = run(verbose=False), run(verbose=True)
-
-    assert verbose.administered_items == quiet.administered_items
-    assert verbose.latest_estimations == pytest.approx(quiet.latest_estimations)
-
   def test_each_session_sees_the_exposure_of_the_sessions_before_it(self, item_bank: ItemBank) -> None:
     """The runner shares one tracker across its sessions, so each sees the exposure of the examinees before it.
 
@@ -161,11 +113,8 @@ class TestSimulationRunnerRun:
     session in progress (0.5, 0.67, 0.75).
     """
     selector = FirstRemainingSelector()
-    runner = SimulationRunner(
-      item_bank, FixedPointInitializer(0.0), selector, NumericalSearchEstimator(), MaxLengthStopper(2)
-    )
 
-    result = runner.run(np.zeros(4))
+    result = make_runner(item_bank, selector, max_items=2).run(np.zeros(4))
 
     # The selector runs twice per session; at its second run the session has given item 0, which it is not
     # offered again, so only item 1's rate counts there.

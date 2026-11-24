@@ -10,6 +10,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
+from catsim.engine import CatEngine
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
@@ -65,21 +66,16 @@ def fixed_length_stopper() -> MaxLengthStopper:
 
 @pytest.fixture
 def simulation_runner(item_bank: ItemBank) -> SimulationRunner:
-  """Provide a deterministic simulation runner."""
+  """Provide a simulation runner that gives every examinee 10 random items."""
   return SimulationRunner(
-    item_bank,
-    FixedPointInitializer(0.0),
-    RandomSelector(),
-    NumericalSearchEstimator(),
-    MaxLengthStopper(10),
-    seed=42,
+    CatEngine(item_bank, FixedPointInitializer(0.0), RandomSelector(), NumericalSearchEstimator(), MaxLengthStopper(10))
   )
 
 
 @pytest.fixture
 def simulation_result(simulation_runner: SimulationRunner):
-  """Provide a completed simulation result."""
-  return simulation_runner.run(5)
+  """Provide a completed simulation result for five examinees."""
+  return simulation_runner.run([-1.0, -0.5, 0.0, 0.5, 1.0], rng=42)
 
 
 @pytest.fixture(autouse=True)
