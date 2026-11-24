@@ -6,7 +6,6 @@ import math
 from collections.abc import Callable
 from functools import partial
 from itertools import pairwise, product
-from typing import Any
 
 import numpy as np
 import pytest
@@ -971,18 +970,24 @@ class TestWarmLikelihoodEstimator:
 
     assert estimate.se == pytest.approx(1.0 / math.sqrt(_information(estimate.theta, items)), rel=1e-12)
 
-  def test_ranking_integral_warnings_reach_the_caller(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    """A ranking integral that does not converge still warns, although quad returns the message."""
-    wle_module = importlib.import_module("catsim.estimation.wle")
-    real_quad = wle_module.quad
+  def test_ranking_integral_warnings_point_at_the_caller(self) -> None:
+    """A ranking integral that does not converge warns, from the line that called estimate.
 
-    def quad_with_warning(*args: Any, **kwargs: Any) -> tuple[Any, ...]:
-      return (*real_quad(*args, **kwargs)[:3], "the maximum number of subdivisions has been achieved")
+    After a wrong answer to a steep item that guesses (a = 200, c = 0.2), the modified score spikes at b and quad runs
+    out of its 200 subdivisions. quad returns that message instead of warning, so dropping it loses the warning; a
+    stacklevel other than 3 blames another line, such as WarmLikelihoodEstimator.estimate's own (2) or the line that
+    calls the wrapper below (4).
+    """
+    context = make_context(ItemBank(np.array([[200.0, 0.0, 0.2, 1.0]])), [0], [False])
 
-    monkeypatch.setattr(wle_module, "quad", quad_with_warning)
+    def estimate() -> Estimate:
+      return WarmLikelihoodEstimator().estimate(context)
 
-    with pytest.warns(IntegrationWarning, match="subdivisions"):
-      WarmLikelihoodEstimator().estimate(make_context(self._two_candidate_bank(), [0, 1], [True, True], theta=0.0))
+    with pytest.warns(IntegrationWarning, match="subdivisions") as caught:
+      estimate()
+
+    call_line = estimate.__code__.co_firstlineno + 1
+    assert {(warning.filename, warning.lineno) for warning in caught} == {(__file__, call_line)}
 
   @pytest.mark.parametrize(
     ("b", "correct", "expected"),

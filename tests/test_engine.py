@@ -9,6 +9,7 @@ from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
 import pytest
+from typing_extensions import override
 
 from catsim import Estimate, ExcludedItemError, StepContext
 from catsim.engine import CatEngine, RunContext
@@ -30,6 +31,7 @@ class FixedResponseProvider:
   response: bool
 
   def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
+    """Return the fixed response."""
     return self.response
 
 
@@ -40,6 +42,7 @@ class ScriptedResponseProvider:
   responses: list[bool]
 
   def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
+    """Return the scripted response for the session's next position."""
     return self.responses[len(session.responses)]
 
 
@@ -50,6 +53,7 @@ class RecordingResponseProvider:
   calls: list[tuple] = dataclasses.field(default_factory=list)
 
   def answer(self, item_bank, item_id, session, rng) -> bool:
+    """Record the call's arguments and answer correctly."""
     self.calls.append((item_bank, item_id, session, rng))
     return True
 
@@ -58,6 +62,7 @@ class ExhaustedSelector:
   """Selector stub that behaves like an exhausted item bank."""
 
   def select(self, context: StepContext) -> int:
+    """Raise NoItemsAvailableError, as a selector does on an exhausted bank."""
     del context
     msg = "No items remain"
     raise NoItemsAvailableError(msg)
@@ -72,6 +77,7 @@ class RecordingInitializer:
   seen_rng: object | None = None
 
   def initialize(self, *, item_bank, rng) -> float:
+    """Record the item bank and generator, and return the fixed theta."""
     self.seen_item_bank = item_bank
     self.seen_rng = rng
     return self.theta
@@ -85,6 +91,7 @@ class RecordingSelector:
   seen: StepContext | None = None
 
   def select(self, context: StepContext) -> int:
+    """Record the context and return the fixed item."""
     self.seen = context
     return self.item_id
 
@@ -99,6 +106,7 @@ class RecordingEstimator:
   seen: StepContext | None = None
 
   def estimate(self, context: StepContext) -> Estimate:
+    """Record the context and return the fixed estimate."""
     self.seen = context
     return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
 
@@ -107,6 +115,7 @@ class FloatEstimator:
   """Estimator stub written for the contract where estimate returned a bare float."""
 
   def estimate(self, context: StepContext) -> float:
+    """Return a bare float instead of an Estimate."""
     del context
     return 0.5
 
@@ -115,6 +124,7 @@ class FailingEstimator:
   """Estimator stub that fails on every call."""
 
   def estimate(self, context: StepContext) -> Estimate:
+    """Raise ValueError."""
     del context
     msg = "estimation failed"
     raise ValueError(msg)
@@ -124,6 +134,7 @@ class FailingInitializer:
   """Initializer stub that fails on every call."""
 
   def initialize(self, *, item_bank, rng) -> float:
+    """Raise ValueError."""
     del item_bank, rng
     msg = "initialization failed"
     raise ValueError(msg)
@@ -132,6 +143,7 @@ class FailingInitializer:
 class FailingStopper(BaseStopper):
   """Stopper stub that fails on every call."""
 
+  @override
   def stop(self, context: StepContext) -> bool:
     del context
     msg = "stopping failed"
@@ -145,6 +157,7 @@ class CountingLengthStopper(BaseStopper):
     self.max_items = max_items
     self.calls = 0
 
+  @override
   def stop(self, context: StepContext) -> bool:
     self.calls += 1
     return len(context.administered_items) >= self.max_items
@@ -158,6 +171,7 @@ class RecordingStopper:
   seen: StepContext | None = None
 
   def stop(self, context: StepContext) -> bool:
+    """Record the context and return the fixed decision."""
     self.seen = context
     return self.should_stop
 
@@ -165,6 +179,7 @@ class RecordingStopper:
 class LowestIndexSelector(BaseSelector):
   """Custom selector: the remaining item with the lowest index."""
 
+  @override
   def select(self, context: StepContext) -> int:
     return int(remaining(context)[0])
 
@@ -176,6 +191,7 @@ class DecliningControl(BaseExposureControl):
   declines: frozenset[int]
   calls: list[tuple[int, tuple[int, ...], tuple[int, ...]]] = dataclasses.field(default_factory=list)
 
+  @override
   def accept(self, context: StepContext, item_id: int) -> bool:
     self.calls.append((item_id, context.excluded_items, context.administered_items))
     # a selector proposing a declined item again would otherwise loop forever in a broken engine
@@ -186,6 +202,7 @@ class DecliningControl(BaseExposureControl):
 class CorrectCountEstimator(BaseEstimator):
   """Custom estimator: the number of correct responses."""
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     return Estimate(theta=float(sum(context.responses)), se=1.0)
 
@@ -193,6 +210,7 @@ class CorrectCountEstimator(BaseEstimator):
 class ThreeItemStopper(BaseStopper):
   """Custom stopper: three administered items."""
 
+  @override
   def stop(self, context: StepContext) -> bool:
     return len(context.administered_items) >= 3
 
@@ -200,6 +218,7 @@ class ThreeItemStopper(BaseStopper):
 class HalfInitializer(BaseInitializer):
   """Custom initializer: every session starts at 0.5."""
 
+  @override
   def initialize(self, *, item_bank: ItemBank, rng: np.random.Generator) -> float:
     del item_bank, rng
     return 0.5
@@ -1011,6 +1030,7 @@ def test_a_session_whose_remaining_items_are_all_declined_ends_with_no_items() -
 class ControlFailingAfterADecline(BaseExposureControl):
   """Exposure control that declines item 0 and fails on any other item."""
 
+  @override
   def accept(self, context: StepContext, item_id: int) -> bool:
     del context
     if item_id == 0:

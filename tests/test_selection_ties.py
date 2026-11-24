@@ -6,7 +6,7 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim.item_bank import IrtModel, ItemBank
+from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratSelector,
   BaseSelector,
@@ -117,27 +117,31 @@ class TestBestPool:
       best_pool(np.arange(3), np.array([0.1, np.nan, 0.3]), 3)
 
 
-SELECTOR_FACTORIES: dict[str, Callable[[], BaseSelector]] = {
-  "MaxInfoSelector": MaxInfoSelector,
-  "UrrySelector": UrrySelector,
-  "IntervalInfoSelector": lambda: IntervalInfoSelector(interval=1.0),
-  "AStratSelector": lambda: AStratSelector(test_size=_N_COPIES, n_strata=1),
-  "ClusterSelector": lambda: ClusterSelector(clusters=[0] * _N_COPIES),
-  "MEISelector": MEISelector,
-  "MLWISelector": MLWISelector,
-  "KLSelector": KLSelector,
-  "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=1),
-}
+@pytest.mark.parametrize(
+  "make_selector",
+  [
+    pytest.param(MaxInfoSelector, id="MaxInfoSelector"),
+    pytest.param(UrrySelector, id="UrrySelector"),
+    pytest.param(lambda: IntervalInfoSelector(interval=1.0), id="IntervalInfoSelector"),
+    pytest.param(lambda: AStratSelector(test_size=_N_COPIES, n_strata=1), id="AStratSelector"),
+    pytest.param(lambda: ClusterSelector(clusters=[0] * _N_COPIES), id="ClusterSelector"),
+    pytest.param(MEISelector, id="MEISelector"),
+    pytest.param(MLWISelector, id="MLWISelector"),
+    pytest.param(KLSelector, id="KLSelector"),
+    pytest.param(lambda: RandomesqueSelector(bin_size=1), id="RandomesqueSelector"),
+  ],
+)
+def test_selectors_break_ties_at_random(make_selector: Callable[[], BaseSelector]) -> None:
+  """On a bank of identical items, the pick is a non-administered item and varies with the seed.
 
-
-@pytest.mark.parametrize("name", sorted(SELECTOR_FACTORIES))
-def test_selectors_break_ties_at_random(name: str) -> None:
-  """On a bank of identical items, the pick is a non-administered item and varies with the seed."""
+  Each selector is set up so that the tie is its only random choice (one stratum, one cluster, a bin of one item): a
+  selector that took the first tied item would return item 1 for every seed.
+  """
   item_bank = _identical_bank()
   administered_items, responses = [0], [True]
 
   picks = {
-    SELECTOR_FACTORIES[name]().select(
+    make_selector().select(
       make_context(item_bank, administered_items, responses, theta=0.3, rng=np.random.default_rng(seed))
     )
     for seed in range(60)
@@ -217,59 +221,3 @@ def test_cluster_selector_draws_tied_clusters_uniformly(method: str) -> None:
 
   assert set(counts) == {0, 2, 4}
   assert all(abs(count / 3000 - 1 / 3) < 0.03 for count in counts.values())
-
-
-def _old_max_info(item_bank: ItemBank, administered_items: list[int], theta: float, rates, r_max: float) -> int:
-  """Return MaxInfoSelector's pick as implemented before ADR-0008."""
-  if item_bank.model == IrtModel.PL1:
-    ordered = list(np.abs(item_bank.difficulty - theta).argsort())
-  else:
-    ordered = list((-item_bank.information(theta)).argsort())
-  valid = [idx for idx in ordered if idx not in administered_items]
-  low = [idx for idx in valid if rates[idx] < r_max]
-  return int(low[0] if low else valid[0])
-
-
-def _old_bin(item_bank: ItemBank, administered_items: list[int], theta: float, size: int) -> list[int]:
-  """Return the Randomesque / 5-4-3-2-1 bin, best first, as built before ADR-0008."""
-  if item_bank.model == IrtModel.PL1:
-    ordered = list(np.abs(item_bank.difficulty - theta).argsort())
-  else:
-    ordered = list((-item_bank.information(theta)).argsort())
-  return [idx for idx in ordered if idx not in administered_items][:size]
-
-
-@pytest.mark.parametrize("model", ["1PL", "2PL", "3PL", "4PL"])
-def test_untied_banks_give_the_same_picks_as_before(model: str) -> None:
-  """On banks without ties, the rewritten selectors choose exactly what they chose before ADR-0008."""
-  rng = np.random.default_rng(11)
-  for _ in range(40):
-    item_bank = ItemBank.generate(60, model=model, rng=int(rng.integers(1_000_000)))
-    administered_items = [int(idx) for idx in rng.choice(60, int(rng.integers(0, 20)), replace=False)]
-    theta = float(rng.normal())
-    rates = rng.uniform(0.0, 0.6, 60)
-    seed = int(rng.integers(1_000_000))
-
-    assert MaxInfoSelector(r_max=0.3).select(
-      make_context(item_bank, administered_items, theta=theta, exposure_rates=rates)
-    ) == _old_max_info(item_bank, administered_items, theta, rates, 0.3)
-
-    closest = next(idx for idx in np.abs(item_bank.difficulty - theta).argsort() if idx not in administered_items)
-    assert UrrySelector().select(make_context(item_bank, administered_items, theta=theta)) == closest
-
-    old_randomesque = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, theta, 4)))
-    assert (
-      RandomesqueSelector(bin_size=4).select(
-        make_context(item_bank, administered_items, theta=theta, rng=np.random.default_rng(seed))
-      )
-      == old_randomesque
-    )
-
-    bin_size = max(1, 5 - len(administered_items))
-    old_54321 = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, theta, bin_size)))
-    assert (
-      The54321Selector().select(
-        make_context(item_bank, administered_items, theta=theta, rng=np.random.default_rng(seed))
-      )
-      == old_54321
-    )

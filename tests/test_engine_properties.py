@@ -32,6 +32,11 @@ def test_select_next_returns_unseen_item_within_bank(
   administered_prefix: int,
   seed: int,
 ) -> None:
+  """The engine hands the selector the session's administered items, so the item it selects is a new one.
+
+  An engine that built the selection context without the session's items, or from another session's, would get an
+  administered item back.
+  """
   n = params.shape[0]
   assume(administered_prefix < n - 1)
   bank = ItemBank(params)
@@ -51,7 +56,6 @@ def test_select_next_returns_unseen_item_within_bank(
   )
   ctx = RunContext(rng=np.random.default_rng(seed))
   item_id = engine.select_next(state, ctx)
-  assert item_id is not None
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert int(item_id) not in administered

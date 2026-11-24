@@ -164,7 +164,6 @@ ignore-one-line-docstrings = true
 "tests/*" = [
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
-  "D",        # Test docstrings name what the test checks (AGENTS.md), with no numpydoc sections
   "DOC",      # Test and fixture docstrings have no Returns or Raises sections
   "FBT",      # Test helpers and parametrized tests take booleans positionally
   "PLR0913",  # make_context takes each of StepContext's eight fields
@@ -177,6 +176,11 @@ ignore-one-line-docstrings = true
   "TC001",    # Test-only type imports do not justify TYPE_CHECKING indirection
   "TC003",    # Test-only type imports do not justify TYPE_CHECKING indirection
 ]
+# Every test has a docstring naming the behaviour it checks, or the bug that would make it fail (AGENTS.md):
+# D102 and D103 stay on for tests, with no numpydoc sections, so the other pydocstyle rules are off.
+"tests/test_*.py" = ["D100", "D101", "D104", "D105", "D106", "D107", "D2", "D3", "D4"]
+# Fixtures, strategies and builders are not tests; a new helper module of tests/ joins this list.
+"tests/{__init__,banks,conftest,contexts,hypothesis_strategies}.py" = ["D"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
@@ -231,7 +235,6 @@ filterwarnings = [
     "ignore:'asyncio.([A-Za-z]+EventLoopPolicy|[gs]et_event_loop_policy)' is deprecated:DeprecationWarning",
 ]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
 ]
 

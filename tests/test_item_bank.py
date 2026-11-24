@@ -265,12 +265,14 @@ class TestItemBankGenerate:
 
     The discrimination is N(1.2, 0.25), the difficulty N(0, 1), the guessing parameter N(0.25, 0.02) and the upper
     asymptote U(0.94, 1), whose standard deviation is 0.06 / sqrt(12); swapping a mean and a standard deviation, or
-    the bounds of d, moves them. The tolerances are about five standard errors.
+    the bounds of d, moves them. Each parameter is read through its property, so a property that returned another
+    column fails too. The tolerances are about five standard errors.
     """
     bank = ItemBank.generate(5000, rng=1)
+    columns = [bank.discrimination, bank.difficulty, bank.pseudo_guessing, bank.upper_asymptote]
     expected = [(1.2, 0.25, 0.02), (0.0, 1.0, 0.07), (0.25, 0.02, 0.002), (0.97, 0.06 / math.sqrt(12), 0.002)]
 
-    for column, (mean, std, tolerance) in zip(bank.items.T, expected, strict=True):
+    for column, (mean, std, tolerance) in zip(columns, expected, strict=True):
       assert np.mean(column) == pytest.approx(mean, abs=tolerance)
       assert np.std(column) == pytest.approx(std, abs=tolerance)
     assert 0.94 <= bank.upper_asymptote.min() <= bank.upper_asymptote.max() <= 1
@@ -350,34 +352,6 @@ class TestItemBankGenerate:
 
 class TestItemBankProperties:
   """Tests for ItemBank properties."""
-
-  def test_discrimination_property(self) -> None:
-    """Test discrimination property returns column 0."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    assert np.array_equal(bank.discrimination, np.array([1.0, 1.5]))
-
-  def test_difficulty_property(self) -> None:
-    """Test difficulty property returns column 1."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    assert np.array_equal(bank.difficulty, np.array([0.0, 1.0]))
-
-  def test_pseudo_guessing_property(self) -> None:
-    """Test pseudo_guessing property returns column 2."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    assert np.array_equal(bank.pseudo_guessing, np.array([0.0, 0.1]))
-
-  def test_upper_asymptote_property(self) -> None:
-    """Test upper_asymptote property returns column 3."""
-    items = np.array([[1.0, 0.0, 0.0, 0.95], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    assert np.array_equal(bank.upper_asymptote, np.array([0.95, 1.0]))
 
   @pytest.mark.parametrize(
     ("items", "model"),

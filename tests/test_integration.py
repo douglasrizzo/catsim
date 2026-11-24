@@ -83,8 +83,12 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
     pytest.param(lambda: RandomesqueSelector(3), id="randomesque"),
   ],
 )
-def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector]) -> None:
-  """Finite selectors should drive the shared simulation path without legacy adapters."""
+def test_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector]) -> None:
+  """Each selector drives SimulationRunner through eight-item sessions.
+
+  A selector that raises mid-run, such as a stratified selector built for eight items that runs out of strata, or a
+  run that stops a session before its eighth item, fails.
+  """
   item_bank = ItemBank.generate(80, rng=42)
   result = run_simulation(item_bank, factory(), MaxLengthStopper(8))
 
@@ -101,8 +105,8 @@ def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseS
     pytest.param(UrrySelector(), id="urry"),
   ],
 )
-def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector) -> None:
-  """An infinite selector that raises, or ends a session outside its stopping rule's 3 to 10 items, fails the run."""
+def test_selectors_complete_variable_length_runs(selector: BaseSelector) -> None:
+  """A selector that raises, or a session that ends outside its stopping rule's 3 to 10 items, fails the run."""
   item_bank = ItemBank.generate(100, rng=42)
   result = run_simulation(item_bank, selector, StopRule(StandardErrorStopper(0.6), MaxLengthStopper(10), min_items=3))
 
