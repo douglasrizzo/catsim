@@ -360,7 +360,13 @@ def session_progress(
   IndexError
       If an administered item is not in ``item_bank``, before any figure is created.
   """
-  difficulties = item_bank.difficulty[list(session.administered_items)]
+  administered = numpy.asarray(session.administered_items, dtype=int)
+  # checked by hand: numpy indexing would wrap a negative index around to the bank's last items
+  outside = administered[(administered < 0) | (administered >= item_bank.n_items)]
+  if outside.size > 0:
+    msg = f"Items {outside.tolist()} of the session are not items of the bank, which has {item_bank.n_items} items"
+    raise IndexError(msg)
+  difficulties = item_bank.difficulty[administered]
   thetas = numpy.array(session.theta_history)
   ses = numpy.array([estimate.se for estimate in session.estimates])
   xs = numpy.arange(len(thetas))

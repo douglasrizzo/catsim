@@ -335,13 +335,27 @@ class TestSessionProgress:
     assert len(ticks) > 1
     np.testing.assert_array_equal(ticks, np.round(ticks))
 
-  def test_session_progress_rejects_items_outside_the_bank_before_drawing(self) -> None:
+  @pytest.mark.parametrize(
+    ("items", "bank_size"),
+    [pytest.param([2, 0, 1], 2, id="past the bank"), pytest.param([2, 0, -1], 3, id="negative")],
+  )
+  def test_session_progress_rejects_items_outside_the_bank_before_drawing(
+    self, items: list[int], bank_size: int
+  ) -> None:
     """A session whose items are not in the item bank raises before any figure exists.
 
-    Fails if a bad call leaves an empty figure open behind the error.
+    Fails if a bad call leaves an empty figure open behind the error, or if a negative item index wraps around to the
+    bank's last item, as numpy indexing does, instead of raising.
     """
-    with pytest.raises(IndexError):
-      plot.session_progress(self.SESSION, ItemBank(self.ITEM_BANK.items[:2]))
+    session = CatSessionState(
+      session_id="examinee",
+      estimates=list(self.SESSION.estimates),
+      administered_items=items,
+      responses=[True, False, True],
+    )
+
+    with pytest.raises(IndexError, match="not items of the bank"):
+      plot.session_progress(session, ItemBank(self.ITEM_BANK.items[:bank_size]))
     assert plt.get_fignums() == []
 
 
