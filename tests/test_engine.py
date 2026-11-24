@@ -1011,11 +1011,12 @@ class ControlFailingAfterADecline(BaseExposureControl):
     raise RuntimeError(msg)
 
 
-def test_a_control_that_fails_after_a_decline_leaves_the_session_unchanged(item_bank) -> None:
-  """A selection whose control raises commits none of the declines it made before.
+def test_a_control_that_fails_after_a_decline_leaves_the_session_and_tracker_unchanged(item_bank) -> None:
+  """A selection whose control raises commits none of the declines it made before, to the session or the tracker.
 
-  The control declines item 0, then fails on item 1. Fails if item 0 stays excluded although the selection never
-  finished: retrying the step would give another item than a run in which the control had not failed.
+  The control declines item 0, then fails on item 1. Fails if item 0 stays excluded or counted as proposed although
+  the selection never finished: retrying the step would give another item than a run in which the control had not
+  failed, and the proposal would be counted again on the retry.
   """
   engine = CatEngine(
     item_bank,
@@ -1025,7 +1026,8 @@ def test_a_control_that_fails_after_a_decline_leaves_the_session_unchanged(item_
     ThreeItemStopper(),
     exposure_control=ControlFailingAfterADecline(),
   )
-  context = RunContext(rng=np.random.default_rng(0))
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
   session = engine.start_session(0, context)
 
   with pytest.raises(RuntimeError, match="control failed"):
@@ -1033,6 +1035,35 @@ def test_a_control_that_fails_after_a_decline_leaves_the_session_unchanged(item_
 
   assert session.excluded_items == []
   assert session.stop_reason is None
+  assert int(tracker.proposals.sum()) == 0
+
+
+def test_selecting_again_before_the_response_counts_no_proposal_twice(item_bank) -> None:
+  """A second select_next before the answer, as on a page reload, adds nothing to the tracker's proposals.
+
+  The control declines item 0, so both calls give item 1; after its response, items 0 and 1 have one proposal each.
+  Fails if proposals are counted each time select_next returns an item (item 1 would have two, and its proposal
+  rate could exceed 1) or if the decline is counted again.
+  """
+  engine = CatEngine(
+    item_bank,
+    HalfInitializer(),
+    LowestIndexSelector(),
+    CorrectCountEstimator(),
+    ThreeItemStopper(),
+    exposure_control=DecliningControl(declines=frozenset({0})),
+  )
+  tracker = ExposureTracker(item_bank.n_items)
+  context = RunContext(rng=np.random.default_rng(0), exposure_tracker=tracker)
+  session = engine.start_session(0, context)
+
+  assert engine.select_next(session, context) == 1
+  assert engine.select_next(session, context) == 1
+  engine.apply_response(session, 1, response=True, context=context)
+
+  assert tracker.proposals[:3].tolist() == [1, 1, 0]
+  assert tracker.counts[:3].tolist() == [0, 1, 0]
+  assert int(tracker.proposals.sum()) == 2
 
 
 def test_a_selector_proposing_a_declined_item_again_raises_instead_of_looping(item_bank) -> None:

@@ -251,7 +251,7 @@ show_missing = true
 # src and tests together: on its own, src's public API reads as unused.
 paths = ["src/catsim", "tests"]
 min_confidence = 60
-ignore_decorators = ["@initialize", "@invariant"]  # Hypothesis runs the state machines' rules
+ignore_decorators = ["@initialize", "@invariant", "@rule"]  # Hypothesis runs the state machines' rules
 ignore_names = [
   "WEIGHTED_INFO",  # ClusterMethod member, chosen by its value "weighted_info"
   "_selector_cache",  # empty until the planned MPWI and MEPV selectors cache their tables in it

@@ -20,10 +20,11 @@ from catsim import Estimate
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
+from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import MaxInfoSelector
-from catsim.state import CatSessionState, StopReason
+from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -75,6 +76,16 @@ class AlternatingResponseProvider:
   def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     self._count += 1
     return self._count % 2 == 0
+
+
+class RandomlyDecliningControl(BaseExposureControl):
+  """Exposure control that declines each proposal with a fixed probability, drawn from the run's generator."""
+
+  def __init__(self, probability: float) -> None:
+    self._probability = probability
+
+  def accept(self, context, item_id) -> bool:  # noqa: ARG002
+    return bool(context.rng.random() >= self._probability)
 
 
 _ORCHESTRATION_SETTINGS = settings(
@@ -218,6 +229,55 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
     assert s.stop_reason in {None, StopReason.STOPPER}
 
 
+class ExposureControlMachine(RuleBasedStateMachine):
+  """Sessions that share one tracker under a control that declines at random, stepped and reselected in any order."""
+
+  @initialize(
+    probability=st.floats(min_value=0.0, max_value=0.9),
+    seed=st.integers(min_value=0, max_value=2**32 - 1),
+    max_items=st.integers(min_value=2, max_value=5),
+  )
+  def init_engine(self, probability: float, seed: int, max_items: int) -> None:
+    self.item_bank = ItemBank.generate(8, rng=0)
+    self.engine = CatEngine(
+      self.item_bank,
+      FixedPointInitializer(0.0),
+      MaxInfoSelector(),
+      RecordingEstimator(theta=0.5),
+      MaxLengthStopper(max_items),
+      exposure_control=RandomlyDecliningControl(probability),
+    )
+    self.tracker = ExposureTracker(self.item_bank.n_items)
+    self.context = RunContext(rng=np.random.default_rng(seed), exposure_tracker=self.tracker)
+    self.sessions = [self.engine.start_session(session_id=0, context=self.context)]
+
+  @rule()
+  def step(self) -> None:
+    self.engine.step(self.sessions[-1], FixedResponseProvider(True), self.context)
+
+  @rule()
+  def select_without_answering(self) -> None:
+    # as on a page reload: an item is selected, and its answer never comes
+    self.engine.select_next(self.sessions[-1], self.context)
+
+  @rule()
+  def start_another_session(self) -> None:
+    self.sessions.append(self.engine.start_session(session_id=len(self.sessions), context=self.context))
+
+  @invariant()
+  def proposals_are_administrations_plus_declines(self) -> None:
+    declined = [item_id for session in self.sessions for item_id in session.excluded_items]
+    declines = np.bincount(declined, minlength=self.item_bank.n_items)
+    assert np.array_equal(self.tracker.proposals, self.tracker.counts + declines)
+    assert int(np.max(self.tracker.proposals)) <= self.tracker.n_sessions
+
+  @invariant()
+  def no_item_is_both_administered_and_excluded(self) -> None:
+    for session in self.sessions:
+      assert not set(session.administered_items) & set(session.excluded_items)
+      assert len(set(session.excluded_items)) == len(session.excluded_items)
+
+
 def test_cat_engine_orchestration_state_machine() -> None:
   run_state_machine_as_test(CatEngineOrchestrationMachine, settings=_ORCHESTRATION_SETTINGS)
 
@@ -225,3 +285,13 @@ def test_cat_engine_orchestration_state_machine() -> None:
 @pytest.mark.slow
 def test_cat_engine_integration_state_machine() -> None:
   run_state_machine_as_test(CatEngineIntegrationMachine, settings=_INTEGRATION_SETTINGS)
+
+
+def test_exposure_control_state_machine() -> None:
+  """Under a control that declines at random, the tracker's proposals are the administrations plus the declines.
+
+  Sessions are stepped, reselected without an answer and started in any order. Fails if a decline reaches the
+  tracker but not the session (or the session but not the tracker), if a second select_next before the answer
+  counts a proposal again, or if a session administers an item it excluded.
+  """
+  run_state_machine_as_test(ExposureControlMachine, settings=_ORCHESTRATION_SETTINGS)

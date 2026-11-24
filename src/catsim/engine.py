@@ -30,9 +30,9 @@ if TYPE_CHECKING:
 class RunContext:
   """Runtime services shared by CAT sessions in one run.
 
-  ``exposure_tracker`` counts sessions and item administrations across the run and gives selectors
-  the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and
-  apply no cap.
+  ``exposure_tracker`` counts sessions, item administrations and proposals across the run and gives
+  selectors the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no
+  rates and apply no cap.
   """
 
   rng: numpy.random.Generator
@@ -251,6 +251,9 @@ class CatEngine:
       item_id = None
     # Committed only here, so a selection that raises changes neither the session nor the tracker.
     state.excluded_items.extend(declined)
+    if context.exposure_tracker is not None:
+      for declined_item in declined:
+        context.exposure_tracker.record_decline(declined_item)
     if item_id is None:
       state.stop_reason = StopReason.NO_ITEMS
     return item_id

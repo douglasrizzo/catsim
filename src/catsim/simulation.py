@@ -109,13 +109,16 @@ class SimulationResult:
 
   :meth:`SimulationRunner.run` returns one; one can also be built from sessions an application ran
   itself, whose true abilities may be unknown. ``exposure_counts`` holds each item's
-  administrations over the run and ``duration`` the run's wall-clock time in seconds.
+  administrations over the run, ``duration`` the run's wall-clock time in seconds and
+  ``proposal_counts`` each item's proposals: its administrations plus the times the engine's
+  exposure control declined it, or None for a result built without them.
   """
 
   item_bank: ItemBank
   sessions: list[CatSessionState]
   exposure_counts: IntArray
   duration: float
+  proposal_counts: IntArray | None = None
 
   @property
   def exposure_rates(self) -> FloatArray:
@@ -124,6 +127,20 @@ class SimulationResult:
     if n_sessions == 0:
       return numpy.zeros(self.item_bank.n_items, dtype=float)
     return self.exposure_counts.astype(float) / n_sessions
+
+  @property
+  def proposal_rates(self) -> FloatArray | None:
+    """Return the share of the sessions in which the selector proposed each item, or None without proposal counts.
+
+    A session proposes an item at most once, as the exposure control declines it or the session administers it, so
+    the rate is at most 1. Without an exposure control it equals :attr:`exposure_rates`.
+    """
+    if self.proposal_counts is None:
+      return None
+    n_sessions = len(self.sessions)
+    if n_sessions == 0:
+      return numpy.zeros(self.item_bank.n_items, dtype=float)
+    return self.proposal_counts.astype(float) / n_sessions
 
   @property
   def administered_items(self) -> list[list[int]]:
@@ -317,7 +334,8 @@ class SimulationRunner:
     Returns
     -------
     SimulationResult
-        The sessions, in the order of ``true_thetas``, with the run's exposure counts and duration.
+        The sessions, in the order of ``true_thetas``, with the run's exposure and proposal counts
+        and its duration.
 
     Raises
     ------
@@ -349,4 +367,5 @@ class SimulationRunner:
       sessions=sessions,
       exposure_counts=tracker.counts.copy(),
       duration=duration,
+      proposal_counts=tracker.proposals.copy(),
     )

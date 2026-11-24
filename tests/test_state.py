@@ -246,6 +246,62 @@ def test_a_tracker_rejects_saved_counts_it_cannot_use(
     ExposureTracker(4, counts=counts, n_sessions=n_sessions)
 
 
+def test_a_decline_counts_as_a_proposal_but_not_as_an_administration() -> None:
+  """record_decline adds to an item's proposals only, so declines never raise its exposure rate.
+
+  Three sessions started; item 0 was administered once and declined once, item 1 declined twice. Fails if a decline
+  is counted as an administration (item 1 would then be held back by an r_max cap it never reached) or not counted
+  as a proposal (Sympson-Hetter's calibration would see too few proposals).
+  """
+  tracker = ExposureTracker(3)
+  for _ in range(3):
+    tracker.start_session()
+  tracker.record(0)
+  for item_id in (0, 1, 1):
+    tracker.record_decline(item_id)
+
+  assert tracker.counts.tolist() == [1, 0, 0]
+  assert tracker.proposals.tolist() == [2, 2, 0]
+  assert tracker.rates().tolist() == [0.5, 0.0, 0.0]
+
+
+def test_a_tracker_rebuilt_without_proposals_takes_its_counts_as_its_own_copy() -> None:
+  """A tracker saved before proposals were kept restores with one proposal per administration.
+
+  Fails if the rebuilt tracker starts its proposals at zero (every item would have more administrations than
+  proposals) or shares the counts array (each administration would then add two to both).
+  """
+  tracker = ExposureTracker(3, counts=[2, 0, 1], n_sessions=2)
+
+  tracker.record(1)
+
+  assert tracker.counts.tolist() == [2, 1, 1]
+  assert tracker.proposals.tolist() == [2, 1, 1]
+
+
+@pytest.mark.parametrize(
+  ("proposals", "error", "match"),
+  [
+    pytest.param(
+      [2, 1, 1], ValueError, r"proposals must hold one count per item \(4\), got shape \(3,\)", id="too-few"
+    ),
+    pytest.param([2, -1, 1, 0], ValueError, "proposals cannot be negative, got -1", id="negative"),
+    pytest.param([2.0, 1.0, 1.0, 0.0], TypeError, "proposals must be integers, got dtype float64", id="float"),
+    pytest.param([2, 0, 1, 0], ValueError, "item 1 has 1 administrations but only 0 proposals", id="below-counts"),
+    pytest.param([2, 1, 4, 0], ValueError, "an item has 4 proposals but only 3 sessions", id="above-sessions"),
+  ],
+)
+def test_a_tracker_rejects_saved_proposals_it_cannot_use(proposals: list, error: type[Exception], match: str) -> None:
+  """Proposals that are not one non-negative integer per item, or that do not fit the counts and sessions, fail.
+
+  The saved counts are [2, 1, 1, 0] over 3 sessions. Fails if the tracker accepts proposals saved for another bank,
+  negative or fractional ones, fewer proposals than administrations (every administration is a proposal) or more
+  proposals than sessions (a session proposes an item at most once, so the proposal rate would exceed 1).
+  """
+  with pytest.raises(error, match=match):
+    ExposureTracker(4, counts=[2, 1, 1, 0], n_sessions=3, proposals=proposals)
+
+
 def test_a_tracker_rebuilt_from_compact_counts_counts_past_their_type() -> None:
   """Counts saved as uint8 kept that type, so the 256th administration wrapped the count to 0 and lifted the cap."""
   tracker = ExposureTracker(2, counts=np.array([255, 0], dtype=np.uint8), n_sessions=300)
