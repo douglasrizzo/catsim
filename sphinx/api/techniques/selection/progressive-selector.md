@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.ProgressiveSelector`
-**Reference:** Revuelta & Ponsoda (1998); Barrada et al. (2008, 2010)
-
 # Progressive Selector
+
+:Class: {py:class}`catsim.selection.ProgressiveSelector`
+:Sources: Revuelta & Ponsoda (1998); Barrada et al. (2008, 2010)
 
 ## Motivation
 
@@ -27,9 +26,9 @@ S_i^{(n)}
 w_n\,\frac{I_i(\hat{\theta})}{\max_{j \in \mathcal{A}} I_j(\hat{\theta})},
 $$
 
-where $\mathcal{A}$ is the set of available items (the non-administered items
-under the exposure cap, or every non-administered item when the cap excludes
-them all), $R_i$ is a fresh uniform random draw on $[0,1]$, and the weight on
+where $\mathcal{A}$ is the set of available items (the remaining items, neither
+administered nor excluded, under the exposure cap, or every remaining item when
+the cap excludes them all), $R_i$ is a fresh uniform random draw on $[0,1]$, and the weight on
 information is
 
 $$
@@ -55,8 +54,11 @@ The schedule is Barrada et al.'s (2008, p. 498, Equation 12), with $m$ for their
 $h - 1$ and $n$, $N$ for their $k$, $K$. As printed, both sums in Equation 12 run
 to $k$, and Equations 12 and 13 both use the exponent $s$; the text under them,
 which names $t$ and $s$ as the two acceleration parameters and gives a weight of
-1 at the last item, puts $K$ in the denominator and $t$ in Equation 12. `catR`
-computes it that way in
+1 at the last item, puts $K$ in the denominator and $t$ in Equation 12.
+
+### Computation
+
+`catR` computes the schedule that way in
 [`nextItem.R`](https://github.com/cran/catR/blob/master/R/nextItem.R), with its
 argument `AP` as $t$ and `thr` as $N$ when `rule = "length"`. catsim departs
 from both in three places:
@@ -70,10 +72,6 @@ from both in three places:
   and `catR` give 0 at the first position whatever $N$ is.
 
 `catR`'s other schedule, for its precision stopping rule, is not implemented.
-Revuelta and Ponsoda's original schedule, $w = (n - 1)/N$, stops just short of 1
-at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
-not test it separately, since it differs little from Equation 12 with $t = 0$
-(p. 500).
 
 ## Parameters
 
@@ -97,15 +95,23 @@ not test it separately, since it differs little from Equation 12 with $t = 0$
        out before the scores are computed, unless every remaining item is.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+Revuelta and Ponsoda's original schedule, $w = (n - 1)/N$, stops just short of 1
+at the last item (Barrada et al., 2008, p. 496, Equation 7); Barrada et al. did
+not test it separately, since it differs little from Equation 12 with $t = 0$
+(p. 500).
 
-1. The blend weight is exactly 0 at position 1 and exactly 1 at the final test position when `test_size > 1`.
-2. With `acceleration = 0`, the schedule is linear in test position; positive acceleration delays the shift toward information-based scoring and negative acceleration speeds it up.
-3. At the first position, selection is driven only by the random component and is therefore independent of item information.
-4. At the final position, the score reduces to normalized information and behaves like an information-based selector subject to the exposure rule.
-5. The random component must be drawn from the provided RNG when one is supplied so repeated simulations remain reproducible.
+## Guarantees
+
+1. It never returns an item that was already administered or excluded.
+2. At the first position the choice does not depend on item information: every
+   available item is equally likely.
+3. From position `test_size` on, it returns the most informative available item.
+4. When every remaining item is at or above the exposure cap, it chooses among all
+   the remaining items.
+5. It draws with the session's random generator, so a run with the same seed
+   administers the same items.
 
 ## References
 
