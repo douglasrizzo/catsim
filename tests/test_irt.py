@@ -341,6 +341,21 @@ class TestLogLikelihood:
 
     np.testing.assert_array_equal(values, np.zeros(5))
 
+  def test_log_likelihood_function_keeps_the_pattern_it_was_built_from(self) -> None:
+    """At theta = 1 a right answer to [1, 0, 0, 1] has log P = -log(1 + e^-1), even after the caller reuses its arrays.
+
+    A function that reads the caller's items or responses at each call gives log Q = log 0.5 for the wrong answer to
+    [1, 1, 0, 1] written over them.
+    """
+    items = np.array([[1.0, 0.0, 0.0, 1.0]])
+    responses = [True]
+    log_lik = irt.log_likelihood_function(responses, items)
+
+    items[0, 1] = 1.0
+    responses[0] = False
+
+    assert log_lik(1.0) == pytest.approx(-math.log1p(math.exp(-1.0)), rel=1e-12)
+
   @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
   def test_log_likelihood_rejects_mismatched_lengths(self, build: Callable[[list[bool], np.ndarray], object]) -> None:
     """A response vector that does not match the items raises instead of broadcasting against them.
