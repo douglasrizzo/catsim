@@ -72,9 +72,9 @@ branches from the first item.
    * - ``estimator``
      - ``NumericalSearchEstimator()``
      - Estimator used to compute the hypothetical one-step-ahead ability updates. Any estimator can be
-       passed; EAP, MAP or WLE avoid the limitation described above. Give the selector its own
-       instance: it calls ``estimate`` twice per candidate, which would inflate the counters of an
-       estimator shared with the engine.
+       passed; EAP, MAP or WLE avoid the limitation described above. It may be the engine's own
+       estimator: the selector reads only ``.theta`` from its look-ahead estimates, and the session
+       never records them.
    * - ``r_max``
      - ``1.0``
      - Maximum exposure rate, in :math:`(0, 1]`. Items at or above it are left
