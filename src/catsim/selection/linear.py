@@ -18,6 +18,11 @@ class LinearSelector(BaseSelector):
   items : list[int]
       Indices of the items to administer, in order. They are checked against the item bank at
       every selection.
+
+  Raises
+  ------
+  ValueError
+      If ``items`` is empty or holds a negative index.
   """
 
   @override
@@ -26,18 +31,6 @@ class LinearSelector(BaseSelector):
     return f"{type(self).__name__}(items={self._items!r})"
 
   def __init__(self, items: list[int]) -> None:
-    """Initialize a LinearSelector object.
-
-    Parameters
-    ----------
-    items : list[int]
-        Indices of the items to administer, in order.
-
-    Raises
-    ------
-    ValueError
-        If ``items`` is empty or holds a negative index.
-    """
     if len(items) == 0:
       msg = "items cannot be empty"
       raise ValueError(msg)

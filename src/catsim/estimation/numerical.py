@@ -67,6 +67,11 @@ class NumericalSearchEstimator(BaseEstimator):
   bounds : tuple[float, float], optional
       Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
 
+  Raises
+  ------
+  ValueError
+      If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/estimation/numerical-search-estimator`.
@@ -77,20 +82,6 @@ class NumericalSearchEstimator(BaseEstimator):
     tol: float = 1e-6,
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
-    """Initialize the estimator.
-
-    Parameters
-    ----------
-    tol : float, optional
-        Absolute tolerance of the bounded search, in the ability scale. Default is 1e-6.
-    bounds : tuple[float, float], optional
-        Range of the estimate. Default is ``(THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)``.
-
-    Raises
-    ------
-    ValueError
-        If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
-    """
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 

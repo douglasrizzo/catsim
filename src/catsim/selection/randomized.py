@@ -54,6 +54,13 @@ class The54321Selector(BaseSelector):
       Number of most informative items the first item is drawn from; each following item draws from
       one fewer. Default is 5.
 
+  Raises
+  ------
+  TypeError
+      If ``initial_bin_size`` is not an integer.
+  ValueError
+      If ``initial_bin_size`` is smaller than 1.
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/the-54321-selector`.
@@ -65,20 +72,6 @@ class The54321Selector(BaseSelector):
     return f"{type(self).__name__}(initial_bin_size={self._initial_bin_size!r})"
 
   def __init__(self, initial_bin_size: int = 5) -> None:
-    """Initialize a The54321Selector object.
-
-    Parameters
-    ----------
-    initial_bin_size : int, optional
-        Number of most informative items the first item is drawn from. Default is 5.
-
-    Raises
-    ------
-    TypeError
-        If ``initial_bin_size`` is not an integer.
-    ValueError
-        If ``initial_bin_size`` is smaller than 1.
-    """
     initial_bin_size = operator.index(initial_bin_size)
     if initial_bin_size < 1:
       msg = f"initial_bin_size must be at least 1, got {initial_bin_size}"
@@ -125,6 +118,13 @@ class RandomesqueSelector(BaseSelector):
   ----------
   bin_size : int
       Number of most informative remaining items each item is drawn from, at least 1.
+
+  Raises
+  ------
+  TypeError
+      If ``bin_size`` is not an integer.
+  ValueError
+      If ``bin_size`` is smaller than 1.
   """
 
   @override
@@ -133,21 +133,6 @@ class RandomesqueSelector(BaseSelector):
     return f"{type(self).__name__}(bin_size={self._bin_size!r})"
 
   def __init__(self, bin_size: int) -> None:
-    """Initialize a RandomesqueSelector object.
-
-    Parameters
-    ----------
-    bin_size : int
-        The number of most informative items to be taken into consideration when
-        randomly selecting one of them.
-
-    Raises
-    ------
-    TypeError
-        If ``bin_size`` is not an integer.
-    ValueError
-        If ``bin_size`` is smaller than 1.
-    """
     bin_size = operator.index(bin_size)
     if bin_size < 1:
       msg = f"bin_size must be at least 1, got {bin_size}"

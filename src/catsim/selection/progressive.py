@@ -79,6 +79,12 @@ class ProgressiveSelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max will not be selected
       unless no other items are available. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
+      (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/progressive-selector`.
@@ -90,14 +96,6 @@ class ProgressiveSelector(BaseSelector):
     acceleration: float = 0.0,
     r_max: float = 1.0,
   ) -> None:
-    """Initialize a ProgressiveSelector object.
-
-    Raises
-    ------
-    ValueError
-        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
-        (0, 1].
-    """
     super().__init__()
     self._test_size = check_test_size(test_size)
     self._acceleration = _check_acceleration(acceleration)
@@ -174,6 +172,12 @@ class ProportionalSelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max will not be selected
       unless no other items are available. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
+      (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/proportional-selector`.
@@ -185,14 +189,6 @@ class ProportionalSelector(BaseSelector):
     acceleration: float = 0.0,
     r_max: float = 1.0,
   ) -> None:
-    """Initialize a ProportionalSelector object.
-
-    Raises
-    ------
-    ValueError
-        If ``test_size`` is smaller than 1, ``acceleration`` is not finite or ``r_max`` is not in
-        (0, 1].
-    """
     super().__init__()
     self._test_size = check_test_size(test_size)
     self._acceleration = _check_acceleration(acceleration)

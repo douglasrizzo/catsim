@@ -88,20 +88,6 @@ class ItemBank:
   """
 
   def __init__(self, items: FloatArray) -> None:
-    """Initialize an ItemBank with the given item parameters.
-
-    Parameters
-    ----------
-    items : numpy.ndarray
-        Item parameter matrix.
-
-    Raises
-    ------
-    TypeError
-        If ``items`` is not a numpy.ndarray.
-    ValueError
-        If ``items`` does not have 1 to 4 columns, has no items or has an invalid parameter.
-    """
     # a float copy the caller cannot change afterwards
     self._items = _normalize(items)
     n_columns = self._items.shape[1]

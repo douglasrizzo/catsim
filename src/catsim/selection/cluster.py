@@ -76,6 +76,12 @@ class ClusterSelector(BaseSelector):
       What to administer when every remaining item in the selected cluster is at or above ``r_max``; see
       :class:`CapFallback`. Default is ``CapFallback.PASSIVE``.
 
+  Raises
+  ------
+  ValueError
+      If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
+      method or r_control, or r_max not in (0, 1]).
+
   Notes
   -----
   The method has known limits. A cluster keeps the score of items already administered, so
@@ -124,26 +130,6 @@ class ClusterSelector(BaseSelector):
     r_max: float = 1,
     r_control: CapFallback | str = CapFallback.PASSIVE,
   ) -> None:
-    """Initialize a ClusterSelector object.
-
-    Parameters
-    ----------
-    clusters : list[int]
-        One non-negative integer cluster label per item.
-    method : ClusterMethod or str, optional
-        Cluster-scoring method. Default is ``ClusterMethod.ITEM_INFO``.
-    r_max : float, optional
-        Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.
-    r_control : CapFallback or str, optional
-        What to administer when no remaining item of the chosen cluster is below ``r_max``. Default
-        is ``CapFallback.PASSIVE``.
-
-    Raises
-    ------
-    ValueError
-        If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
-        method or r_control, or r_max not in (0, 1]).
-    """
     labels = numpy.array(clusters)
     if labels.size == 0:
       msg = "clusters list cannot be empty"

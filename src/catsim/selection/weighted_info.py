@@ -31,6 +31,11 @@ class MLWISelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
       other item remains. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If n_nodes is below 5, the bounds are not finite or not increasing, or r_max is not in (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/mlwi-selector`.
@@ -42,13 +47,6 @@ class MLWISelector(BaseSelector):
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
     r_max: float = 1.0,
   ) -> None:
-    """Initialize a MLWISelector object.
-
-    Raises
-    ------
-    ValueError
-        If n_nodes is below 5, the bounds are not finite or not increasing, or r_max is not in (0, 1].
-    """
     if n_nodes < _MIN_NODES:
       msg = f"n_nodes must be >= {_MIN_NODES}, got {n_nodes}"
       raise ValueError(msg)

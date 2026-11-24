@@ -30,19 +30,17 @@ class MEISelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
       other item remains. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If r_max is not in (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/mei-selector`.
   """
 
   def __init__(self, estimator: BaseEstimator | None = None, r_max: float = 1.0) -> None:
-    """Initialize a MEISelector object.
-
-    Raises
-    ------
-    ValueError
-        If r_max is not in (0, 1].
-    """
     super().__init__()
     self._estimator = estimator if estimator is not None else NumericalSearchEstimator()
     self._r_max = check_r_max(r_max)

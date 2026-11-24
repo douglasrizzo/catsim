@@ -20,24 +20,17 @@ class MaxInfoSelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max will not
       be selected unless no other items are available. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If r_max is not in (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-selector`.
   """
 
   def __init__(self, r_max: float = 1) -> None:
-    """Initialize a MaxInfoSelector object.
-
-    Parameters
-    ----------
-    r_max : float, optional
-        Maximum exposure rate for items. Default is 1.
-
-    Raises
-    ------
-    ValueError
-        If r_max is not in (0, 1].
-    """
     super().__init__()
     self._r_max = check_r_max(r_max)
 
@@ -134,6 +127,11 @@ class IntervalInfoSelector(BaseSelector):
   confidence : float, optional
       Confidence level of the default interval. Default is 0.95.
 
+  Raises
+  ------
+  ValueError
+      If ``interval`` is not positive or ``confidence`` is not between 0 and 1.
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/interval-info-selector`.
@@ -145,21 +143,6 @@ class IntervalInfoSelector(BaseSelector):
     return f"{type(self).__name__}(interval={self._interval!r}, confidence={self._confidence!r})"
 
   def __init__(self, interval: float | None = None, confidence: float = 0.95) -> None:
-    r"""Initialize an IntervalInfoSelector object.
-
-    Parameters
-    ----------
-    interval : float or None, optional
-        Fixed half-width of the interval. Default is None, which uses a confidence interval of
-        :math:`\hat\theta`.
-    confidence : float, optional
-        Confidence level of the default interval. Default is 0.95.
-
-    Raises
-    ------
-    ValueError
-        If ``interval`` is not positive or ``confidence`` is not between 0 and 1.
-    """
     if interval is not None and interval <= 0:
       msg = f"interval must be positive, got {interval}"
       raise ValueError(msg)

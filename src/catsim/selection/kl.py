@@ -46,19 +46,17 @@ class KLSelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max will not be selected
       unless no other items are available. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If window is not positive, or if r_max is not in (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/kl-selector`.
   """
 
   def __init__(self, window: float = 3.0, r_max: float = 1.0) -> None:
-    """Initialize a KLSelector object.
-
-    Raises
-    ------
-    ValueError
-        If window is not positive, or if r_max is not in (0, 1].
-    """
     if window <= 0:
       msg = f"window must be positive, got {window}"
       raise ValueError(msg)
