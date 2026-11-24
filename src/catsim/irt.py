@@ -16,18 +16,16 @@ from scipy.special import expit, log_expit
 from .typing import FloatArray
 
 THETA_MIN_TYPICAL = -4.0
-"""Typical lower bound for ability (theta) estimation.
+"""Typical lower bound of the ability scale, the default ``theta_min`` of :py:func:`theta_to_scale`.
 
-This value covers approximately 99.99% of the population (±4 standard deviations)
-assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
-for scale transformations and reporting."""
+Four standard deviations below the mean of abilities distributed N(0, 1), so about 99.99% of the
+population lies within ``THETA_MIN_TYPICAL`` and ``THETA_MAX_TYPICAL``."""
 
 THETA_MAX_TYPICAL = 4.0
-"""Typical upper bound for ability (theta) estimation.
+"""Typical upper bound of the ability scale, the default ``theta_max`` of :py:func:`theta_to_scale`.
 
-This value covers approximately 99.99% of the population (±4 standard deviations)
-assuming abilities are normally distributed N(0, 1). Commonly used in IRT literature
-for scale transformations and reporting."""
+Four standard deviations above the mean of abilities distributed N(0, 1), so about 99.99% of the
+population lies within ``THETA_MIN_TYPICAL`` and ``THETA_MAX_TYPICAL``."""
 
 THETA_MIN_EXTENDED = -6.0
 """Extended lower bound for ability (theta) estimation.
@@ -304,73 +302,30 @@ def confidence_interval(theta: float, items: FloatArray, confidence: float = 0.9
   return (lower_bound, upper_bound)
 
 
-def theta_to_scale(
-  theta: float | FloatArray,
-  scale_min: float = 0,
-  scale_max: float = 100,
-  theta_min: float = -4,
-  theta_max: float = 4,
-) -> float | FloatArray:
-  r"""Convert theta values to a custom score scale using linear transformation.
-
-  This function transforms ability estimates from the standard IRT theta scale
-  (typically centered at 0) to any desired score scale (e.g., 0-100, 200-800).
-
-  The linear transformation is:
-
-  .. math:: \text{score} = a \cdot \theta + b
-
-  where :math:`a` and :math:`b` are determined by mapping the theta range to the score range.
+def _linear_map(scale_min: float, scale_max: float, theta_min: float, theta_max: float) -> tuple[float, float]:
+  """Return the line that takes ``[theta_min, theta_max]`` onto ``[scale_min, scale_max]``.
 
   Parameters
   ----------
-  theta : float or numpy.ndarray
-      Ability value(s) on the theta scale.
-  scale_min : float, optional
-      Minimum value of the target score scale. Default is 0.
-  scale_max : float, optional
-      Maximum value of the target score scale. Default is 100.
-  theta_min : float, optional
-      Minimum theta value to map. Default is -4 (typical lower bound).
-  theta_max : float, optional
-      Maximum theta value to map. Default is 4 (typical upper bound).
+  scale_min : float
+      Score of ``theta_min``.
+  scale_max : float
+      Score of ``theta_max``.
+  theta_min : float
+      Ability mapped to ``scale_min``.
+  theta_max : float
+      Ability mapped to ``scale_max``.
 
   Returns
   -------
-  float or numpy.ndarray
-      The transformed score(s) on the target scale. Returns the same type as input.
+  tuple[float, float]
+      The slope and intercept of the scores as a function of the ability.
 
   Raises
   ------
   ValueError
       If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
       ``scale_min``.
-
-  Notes
-  -----
-  - Values outside [theta_min, theta_max] are extrapolated linearly
-  - The transformation preserves relative distances between ability levels
-  - Common score scales: 0-100, 200-800 (SAT), 0-500 (TOEFL), etc.
-
-  Examples
-  --------
-  >>> # Convert theta to 0-100 scale
-  >>> theta_to_scale(0.0)  # Average ability
-  50.0
-  >>> theta_to_scale(2.0)  # High ability
-  75.0
-  >>> theta_to_scale(-2.0)  # Low ability
-  25.0
-
-  >>> # Convert to SAT-like scale (200-800)
-  >>> theta_to_scale(0.0, scale_min=200, scale_max=800)
-  500.0
-
-  >>> # Convert multiple values at once
-  >>> import numpy as np
-  >>> thetas = np.array([-4, -2, 0, 2, 4])
-  >>> theta_to_scale(thetas)  # doctest: +SKIP
-  array([  0.,  25.,  50.,  75., 100.])
   """
   if theta_max <= theta_min:
     msg = f"theta_max ({theta_max}) must be greater than theta_min ({theta_min})"
@@ -378,50 +333,99 @@ def theta_to_scale(
   if scale_max <= scale_min:
     msg = f"scale_max ({scale_max}) must be greater than scale_min ({scale_min})"
     raise ValueError(msg)
+  slope = (scale_max - scale_min) / (theta_max - theta_min)
+  return slope, scale_min - slope * theta_min
 
-  # Linear transformation: score = a * theta + b
-  # Solve for a and b using the two boundary conditions
-  a = (scale_max - scale_min) / (theta_max - theta_min)
-  b = scale_min - a * theta_min
 
-  return a * theta + b
+def theta_to_scale(
+  theta: float | FloatArray,
+  scale_min: float = 0,
+  scale_max: float = 100,
+  theta_min: float = THETA_MIN_TYPICAL,
+  theta_max: float = THETA_MAX_TYPICAL,
+) -> float | FloatArray:
+  r"""Convert abilities to scores on a reporting scale, such as 0 to 100 or 200 to 800.
+
+  The conversion is the line that takes ``theta_min`` to ``scale_min`` and ``theta_max`` to
+  ``scale_max``:
+
+  .. math::
+
+      \text{score} = \text{scale}_{min} + (\theta - \theta_{min})
+      \frac{\text{scale}_{max} - \text{scale}_{min}}{\theta_{max} - \theta_{min}}
+
+  Abilities outside ``[theta_min, theta_max]`` are extrapolated along the same line.
+  :py:func:`scale_to_theta` is its inverse.
+
+  Parameters
+  ----------
+  theta : float or numpy.ndarray
+      An ability, or an array of abilities.
+  scale_min : float, optional
+      Score of ``theta_min``. Default is 0.
+  scale_max : float, optional
+      Score of ``theta_max``. Default is 100.
+  theta_min : float, optional
+      Ability mapped to ``scale_min``. Default is :py:data:`THETA_MIN_TYPICAL`, -4.
+  theta_max : float, optional
+      Ability mapped to ``scale_max``. Default is :py:data:`THETA_MAX_TYPICAL`, 4.
+
+  Returns
+  -------
+  float or numpy.ndarray
+      The scores, a float for a float ``theta`` and an array of its shape otherwise.
+
+  Raises
+  ------
+  ValueError
+      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
+      ``scale_min``.
+
+  Examples
+  --------
+  >>> theta_to_scale(2.0)
+  75.0
+  >>> theta_to_scale(0.0, scale_min=200, scale_max=800)
+  500.0
+  """
+  slope, intercept = _linear_map(scale_min, scale_max, theta_min, theta_max)
+  return slope * theta + intercept
 
 
 def scale_to_theta(
   score: float | FloatArray,
   scale_min: float = 0,
   scale_max: float = 100,
-  theta_min: float = -4,
-  theta_max: float = 4,
+  theta_min: float = THETA_MIN_TYPICAL,
+  theta_max: float = THETA_MAX_TYPICAL,
 ) -> float | FloatArray:
-  r"""Convert scores from a custom scale to theta values using linear transformation.
+  r"""Convert scores on a reporting scale back to abilities, the inverse of :py:func:`theta_to_scale`.
 
-  This function transforms scores from any desired scale (e.g., 0-100, 200-800)
-  back to the standard IRT theta scale (typically centered at 0).
+  .. math::
 
-  The inverse linear transformation is:
+      \theta = \theta_{min} + (\text{score} - \text{scale}_{min})
+      \frac{\theta_{max} - \theta_{min}}{\text{scale}_{max} - \text{scale}_{min}}
 
-  .. math:: \theta = \frac{\text{score} - b}{a}
-
-  where :math:`a` and :math:`b` are determined by the scale mapping.
+  With the same four bounds, a score converted to an ability and back is the same score. A cut-off
+  score converted this way gives the ability that separates two classifications.
 
   Parameters
   ----------
   score : float or numpy.ndarray
-      Score value(s) on the custom scale.
+      A score, or an array of scores.
   scale_min : float, optional
-      Minimum value of the score scale. Default is 0.
+      Score of ``theta_min``. Default is 0.
   scale_max : float, optional
-      Maximum value of the score scale. Default is 100.
+      Score of ``theta_max``. Default is 100.
   theta_min : float, optional
-      Minimum theta value in the mapping. Default is -4.
+      Ability mapped to ``scale_min``. Default is :py:data:`THETA_MIN_TYPICAL`, -4.
   theta_max : float, optional
-      Maximum theta value in the mapping. Default is 4.
+      Ability mapped to ``scale_max``. Default is :py:data:`THETA_MAX_TYPICAL`, 4.
 
   Returns
   -------
   float or numpy.ndarray
-      The transformed theta value(s). Returns the same type as input.
+      The abilities, a float for a float ``score`` and an array of its shape otherwise.
 
   Raises
   ------
@@ -429,44 +433,15 @@ def scale_to_theta(
       If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
       ``scale_min``.
 
-  Notes
-  -----
-  - This is the inverse of :py:func:`theta_to_scale`
-  - Useful for converting cutoff scores to theta values for classification
-  - Preserves the relative ordering and distances of scores
-
   Examples
   --------
-  >>> # Convert 0-100 score to theta
-  >>> scale_to_theta(50.0)  # Average score
-  0.0
-  >>> scale_to_theta(75.0)  # High score
+  >>> scale_to_theta(75.0)
   2.0
-  >>> scale_to_theta(25.0)  # Low score
-  -2.0
-
-  >>> # Convert from SAT-like scale (200-800)
   >>> scale_to_theta(500.0, scale_min=200, scale_max=800)
   0.0
-
-  >>> # Convert multiple values at once
-  >>> import numpy as np
-  >>> scores = np.array([0, 25, 50, 75, 100])
-  >>> scale_to_theta(scores)  # doctest: +SKIP
-  array([-4., -2.,  0.,  2.,  4.])
   """
-  if theta_max <= theta_min:
-    msg = f"theta_max ({theta_max}) must be greater than theta_min ({theta_min})"
-    raise ValueError(msg)
-  if scale_max <= scale_min:
-    msg = f"scale_max ({scale_max}) must be greater than scale_min ({scale_min})"
-    raise ValueError(msg)
-
-  # Inverse transformation: theta = (score - b) / a
-  a = (scale_max - scale_min) / (theta_max - theta_min)
-  b = scale_min - a * theta_min
-
-  return (score - b) / a
+  slope, intercept = _linear_map(scale_min, scale_max, theta_min, theta_max)
+  return (score - intercept) / slope
 
 
 def reliability(theta: float, items: FloatArray) -> float:

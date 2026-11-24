@@ -1,6 +1,7 @@
 """Tests for catsim.irt module."""
 
 import math
+from collections.abc import Callable
 
 import numpy as np
 import pytest
@@ -296,57 +297,48 @@ class TestLogLikelihood:
 class TestThetaToScale:
   """Tests for the theta_to_scale() function."""
 
-  def test_theta_to_scale_at_midpoint(self) -> None:
-    """Test that theta=0 maps to midpoint of scale."""
-    # Default: theta [-4, 4] -> scale [0, 100]
-    # theta=0 should map to 50
-    scaled = irt.theta_to_scale(0.0)
-    assert scaled == pytest.approx(50.0)
+  def test_theta_to_scale_maps_the_typical_range_onto_0_to_100_by_default(self) -> None:
+    """By default THETA_MIN_TYPICAL = -4 becomes 0, THETA_MAX_TYPICAL = 4 becomes 100 and 2 becomes 75.
 
-  def test_theta_to_scale_at_boundaries(self) -> None:
-    """Test transformation at theta boundaries."""
-    # theta=-4 should map to 0, theta=4 should map to 100
-    assert irt.theta_to_scale(-4.0) == pytest.approx(0.0)
-    assert irt.theta_to_scale(4.0) == pytest.approx(100.0)
+    Other default bounds move the end points, and a wrong slope or intercept moves 2.
+    """
+    np.testing.assert_allclose(irt.theta_to_scale(np.array([-4.0, 4.0, 2.0])), [0.0, 100.0, 75.0], rtol=1e-12)
 
   def test_theta_to_scale_custom_scale(self) -> None:
-    """Test transformation with custom scale range."""
-    # SAT-like scale: 200-800
-    scaled = irt.theta_to_scale(0.0, scale_min=200, scale_max=800)
-    assert scaled == pytest.approx(500.0)
-
-  def test_theta_to_scale_linear(self) -> None:
-    """Test that transformation is linear."""
-    # theta=2 should be 3/4 of the way from min to max
-    scaled = irt.theta_to_scale(2.0)
-    assert scaled == pytest.approx(75.0)
+    """On a 200 to 800 scale each unit of theta is 75 points, so theta = 1 is 575; a slope of 1 or 100 is not."""
+    assert irt.theta_to_scale(1.0, scale_min=200, scale_max=800) == pytest.approx(575.0, rel=1e-12)
 
 
 class TestScaleToTheta:
   """Tests for the scale_to_theta() function."""
 
-  def test_scale_to_theta_at_midpoint(self) -> None:
-    """Test that midpoint of scale maps to theta=0."""
-    theta = irt.scale_to_theta(50.0)
-    assert theta == pytest.approx(0.0)
-
-  def test_scale_to_theta_at_boundaries(self) -> None:
-    """Test transformation at scale boundaries."""
-    assert irt.scale_to_theta(0.0) == pytest.approx(-4.0)
-    assert irt.scale_to_theta(100.0) == pytest.approx(4.0)
-
-  def test_scale_to_theta_roundtrip(self) -> None:
-    """Test roundtrip conversion."""
-    original_theta = 1.5
-    scaled = irt.theta_to_scale(original_theta)
-    recovered_theta = irt.scale_to_theta(scaled)
-    assert recovered_theta == pytest.approx(original_theta)
+  def test_scale_to_theta_maps_0_to_100_onto_the_typical_range_by_default(self) -> None:
+    """By default 0 becomes THETA_MIN_TYPICAL = -4, 100 becomes THETA_MAX_TYPICAL = 4 and 75 becomes 2."""
+    np.testing.assert_allclose(irt.scale_to_theta(np.array([0.0, 100.0, 75.0])), [-4.0, 4.0, 2.0], rtol=1e-12)
 
   def test_scale_to_theta_custom_scale(self) -> None:
-    """Test transformation with custom scale range."""
-    # SAT-like scale: 200-800
-    theta = irt.scale_to_theta(500.0, scale_min=200, scale_max=800)
-    assert theta == pytest.approx(0.0)
+    """On a 200 to 800 scale 575 is 75 points above the midpoint, theta = 1; multiplying by the slope gives 5625."""
+    assert irt.scale_to_theta(575.0, scale_min=200, scale_max=800) == pytest.approx(1.0, rel=1e-12)
+
+
+@pytest.mark.parametrize("function", [irt.theta_to_scale, irt.scale_to_theta], ids=["theta_to_scale", "scale_to_theta"])
+@pytest.mark.parametrize(
+  ("bounds", "message"),
+  [
+    pytest.param(
+      {"theta_min": 1.0, "theta_max": 1.0}, r"theta_max \(1.0\) must be greater than theta_min \(1.0\)", id="empty"
+    ),
+    pytest.param(
+      {"scale_min": 100, "scale_max": 0}, r"scale_max \(0\) must be greater than scale_min \(100\)", id="reversed"
+    ),
+  ],
+)
+def test_scale_conversions_reject_an_empty_or_reversed_range(
+  function: Callable[..., float], bounds: dict[str, float], message: str
+) -> None:
+  """Both conversions reject an empty or reversed range; unchecked, an empty one divides by 0, a reversed one flips."""
+  with pytest.raises(ValueError, match=message):
+    function(50.0, **bounds)
 
 
 def test_importing_every_public_irt_name_collects_no_test(pytester: pytest.Pytester) -> None:
