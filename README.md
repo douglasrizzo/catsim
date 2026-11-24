@@ -15,6 +15,13 @@ Researchers use it to run simulation studies that compare methods of item select
 estimation and stopping, and application developers use the same engine to run adaptive tests in
 their products.
 
+> **Coming from catsim 0.x?** catsim 1.0 has a different API, and code written for 0.x does not run
+> unchanged. The [1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) say
+> what to change, and the [guides](https://douglasrizzo.com.br/catsim/getting-started.html) and
+> [tutorials](https://douglasrizzo.com.br/catsim/tutorials.html) teach the 1.0 API. To keep running
+> 0.x code, install it with `pip install "catsim<1"`; its documentation is at the
+> [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0) on GitHub.
+
 ## Installation
 
 ```bash
