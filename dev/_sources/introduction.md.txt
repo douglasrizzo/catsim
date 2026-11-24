@@ -30,7 +30,7 @@ This approach is more efficient and engaging, reducing test length while maintai
 CAT systems rely on Item Response Theory (IRT), which provides the mathematical
 framework for modeling tests, items, and examinees. While CAT packages exist for
 R {cite:p}`Magis12`, {py:mod}`catsim` brings these capabilities to Python. Built
-on {py:mod}`numpy` and {py:mod}`scipy`, it provides:
+on {py:mod}`numpy` and [SciPy](https://scipy.org/), it provides:
 
 - Multiple initialization, selection, estimation, and stopping methods
 - A reusable CAT engine for manual and embedded workflows
