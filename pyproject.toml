@@ -143,7 +143,6 @@ ignore-one-line-docstrings = true
 [tool.ruff.lint.per-file-ignores]
 "src/catsim/typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
 "notebooks/*" = ["T20"]  # tutorials print their results
-"src/**" = ["PT"]  # pytest style; PT reads plot.test_progress as a test
 "tests/*" = [
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
@@ -327,7 +326,7 @@ type = "layers"
 containers = ["catsim"]
 exhaustive = true  # every new top-level module must be placed in a layer
 layers = [
-  "plot",  # reads SimulationResult
+  "plot",  # draws items and sessions; nothing in catsim imports it
   "simulation",
   "engine",
   "selection | estimation | initialization | stopping",  # "|": siblings that never import each other

@@ -13,14 +13,14 @@ import numpy
 try:
   import matplotlib.pyplot as plt
   from matplotlib.axes import Axes
+  from matplotlib.ticker import MaxNLocator
 except ImportError as error:
   _missing = "catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
   raise ImportError(_missing) from error
 
 from . import irt
 from .item_bank import ItemBank
-from .simulation import SimulationResult
-from .state import CatSessionState
+from .state import CatSessionSnapshot, CatSessionState
 from .typing import FloatArray
 
 
@@ -168,59 +168,6 @@ def _annotate_parameters(ax: Axes, item: FloatArray) -> None:
   )
 
 
-def gen3d_dataset_scatter(
-  item_bank: ItemBank | FloatArray,
-  title: str | None = None,
-  figsize: tuple[float, float] | None = None,
-) -> Axes:
-  """Generate a 3D scatter plot of item parameters.
-
-  Creates a three-dimensional visualization of item parameters (a, b, c) to help
-  understand the distribution of item characteristics in the item bank.
-
-  .. plot::
-
-      import matplotlib.pyplot as plt
-      from catsim import plot
-      from catsim.item_bank import ItemBank
-      item_bank = ItemBank.generate(100)
-      plot.gen3d_dataset_scatter(item_bank)
-      plt.show()
-
-  Parameters
-  ----------
-  item_bank : ItemBank or numpy.ndarray
-      An ItemBank or item matrix containing item parameters.
-      If a numpy array is provided, it will be converted to an ItemBank.
-  title : str or None, optional
-      The scatter plot title. Default is None.
-  figsize : tuple or None, optional
-      Figure size (width, height) in inches. Default is None.
-
-  Returns
-  -------
-  matplotlib.axes.Axes
-      The matplotlib 3D axes object containing the plot.
-  """
-  if isinstance(item_bank, numpy.ndarray):
-    item_bank = ItemBank(item_bank)
-
-  fig = plt.figure(figsize=figsize)
-  ax = fig.add_subplot(111, projection="3d")
-  ax.scatter(
-    list(item_bank.discrimination), list(item_bank.difficulty), zs=list(item_bank.pseudo_guessing), s=10, c="b"
-  )
-
-  if title is not None:
-    ax.set_title(title, size=18)
-
-  ax.set_xlabel("a")
-  ax.set_ylabel("b")
-  ax.set_zlabel("c")
-
-  return ax
-
-
 # The item parameter each value of item_exposure's ``par`` reads: its column in the item matrix and the axis label.
 _ITEM_PARAMETERS = {
   "a": (0, "Item discrimination"),
@@ -346,50 +293,35 @@ def _check_exposure_inputs(
     raise ValueError(msg)
 
 
-def test_progress(
+def session_progress(
+  session: CatSessionState | CatSessionSnapshot,
+  item_bank: ItemBank,
+  *,
   ax: Axes | None = None,
   title: str | None = None,
-  simulation: SimulationResult | None = None,
-  index: int | None = None,
-  session: CatSessionState | None = None,
-  thetas: list[float] | None = None,
-  administered_items: FloatArray | None = None,
-  true_theta: float | None = None,
-  info: bool = False,
-  var: bool = False,
-  see: bool = False,
-  reliability: bool = False,
-  marker: str | int | None = None,
-  figsize: tuple[float, float] | None = None,
 ) -> Axes:
-  """Generate a plot representing an examinee's test progress over time.
+  r"""Plot how a session's ability estimate and its standard error change as items are administered.
 
-  The plot shows how the ability estimate, item difficulties, and measurement quality
-  metrics evolve as items are administered during the test.
-
-  Note that, while some functions increase or decrease monotonically (like test
-  information and standard error of estimation), the plot calculates these values using
-  the examinee's ability estimated at that given time of the test. This means that a test
-  that was thought to be informative at a given point may not be as informative after new
-  estimates are made. The value at :math:`x` items uses the estimate made after those
-  :math:`x` items, so these curves start at the first item.
+  The x axis counts the items administered. The left y axis shows the ability estimate after each
+  response, with a band of one standard error on each side, the difficulty of each administered
+  item and, when the session has one, the true ability. The right y axis shows the standard error
+  each estimate was recorded with, the one precision-based stoppers judge. Infinite standard
+  errors, such as the initial estimate's, are left out.
 
   .. plot::
+      :caption: One simulated session: the ability estimate after each item, with its standard error.
 
       import matplotlib.pyplot as plt
       import numpy
-      from catsim.item_bank import ItemBank
+      from catsim import CatEngine, ItemBank, SimulationRunner
       from catsim import plot
+      from catsim.estimation import NumericalSearchEstimator
       from catsim.initialization import UniformInitializer
       from catsim.selection import MaxInfoSelector
-      from catsim.estimation import NumericalSearchEstimator
       from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
-      from catsim.engine import CatEngine
-      from catsim.simulation import SimulationRunner
 
-      fig, axes = plt.subplots(2, 1, figsize=(7, 12))
       engine = CatEngine(
-          ItemBank.generate(100),
+          ItemBank.generate(100, rng=0),
           UniformInitializer(),
           MaxInfoSelector(),
           NumericalSearchEstimator(),
@@ -397,118 +329,59 @@ def test_progress(
       )
       true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
       result = SimulationRunner(engine).run(true_thetas)
-      plot.test_progress(simulation=result, index=0, ax=axes[0])
-      plot.test_progress(simulation=result, index=0, info=True, var=True, see=True, ax=axes[1])
-      plt.tight_layout()
+      fig, ax = plt.subplots(figsize=(8, 5))
+      plot.session_progress(result.sessions[0], result.item_bank, ax=ax)
       plt.show()
 
   Parameters
   ----------
+  session : CatSessionState or CatSessionSnapshot
+      The session to plot, such as an entry of ``SimulationResult.sessions`` or a live session.
+  item_bank : ItemBank
+      The item bank the session's items come from.
   ax : matplotlib.axes.Axes or None, optional
-      Axis to use. If None, a figure with the necessary axis will be created. Default is None.
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
   title : str or None, optional
-      The plot title. Default is None.
-  simulation : SimulationResult or None, optional
-      Simulation result containing session traces. Default is None.
-  index : int or None, optional
-      The index of the session to be plotted when ``simulation`` is provided.
-  session : CatSessionState or None, optional
-      Not plotted on its own: passing it without ``simulation`` raises ``ValueError``, and with
-      ``simulation`` the session at ``index`` is plotted instead. Default is None.
-  thetas : list[float] or None, optional
-      If a simulation result is not passed, then a list of ability estimations can be manually
-      passed to the function. Default is None.
-  administered_items : numpy.ndarray or None, optional
-      If a simulation result is not passed, then a matrix of administered items, represented
-      by their parameters, can be manually passed to the function. Default is None.
-  true_theta : float or None, optional
-      The value of the examinee's true ability. If it is passed, it will be shown on
-      the plot, otherwise not. Default is None.
-  info : bool, optional
-      Plot test information. It only works if both abilities and administered items are
-      passed. Default is False.
-  var : bool, optional
-      Plot the estimation variance during the test. It only works if both abilities
-      and administered items are passed. Default is False.
-  see : bool, optional
-      Plot the standard error of estimation during the test. It only works if both
-      abilities and administered items are passed. Default is False.
-  reliability : bool, optional
-      Plot the test reliability. It only works if both abilities and administered items
-      are passed. Default is False.
-  marker : str or int or None, optional
-      Matplotlib marker style for the plots. Default is None.
-  figsize : tuple or None, optional
-      Size of the figure to be created, in case no axis is passed. Default is None.
+      The plot title. Default is None, which sets none.
 
   Returns
   -------
   matplotlib.axes.Axes
-      The matplotlib axes object containing the plot.
+      The axes of the ability scale. The standard error is drawn on their twin, which shares the x
+      axis.
 
   Raises
   ------
-  ValueError
-      If ``simulation`` is passed without ``index``, ``session`` without ``simulation``, or
-      neither ``simulation`` nor both ``thetas`` and ``administered_items``; or if ``thetas``
-      does not hold one more estimate than there are administered items.
+  IndexError
+      If an administered item is not in ``item_bank``, before any figure is created.
   """
-  if simulation is None and session is None and thetas is None and administered_items is None:
-    msg = "One of: simulation, session, thetas, administered_items must be passed."
-    raise ValueError(msg)
+  difficulties = item_bank.difficulty[list(session.administered_items)]
+  thetas = numpy.array(session.theta_history)
+  ses = numpy.array([estimate.se for estimate in session.estimates])
+  xs = numpy.arange(len(thetas))
+  finite = numpy.isfinite(ses)
+  ax = _prepare_axes(ax, title)
+  se_axes = ax.twinx()
+  # The legend is on ``ax``, which must be drawn over the twin's line to stay readable.
+  ax.set_zorder(se_axes.get_zorder() + 1)
+  ax.patch.set_visible(False)
 
-  if ax is None:
-    _, ax = plt.subplots(figsize=figsize)
+  ax.plot(xs, thetas, marker=".", color="C0", label=r"Ability estimate $\hat{\theta}$")
+  ax.fill_between(
+    xs[finite], (thetas - ses)[finite], (thetas + ses)[finite], color="C0", alpha=0.2, label=r"$\hat{\theta} \pm SE$"
+  )
+  ax.plot(xs[1:], difficulties, "o", color="C1", label="Item difficulty")
+  if session.true_theta is not None:
+    ax.axhline(session.true_theta, color="black", linestyle="--", label=r"True ability $\theta$")
+  se_axes.plot(xs[finite], ses[finite], color="C2", label="Standard error")
 
-  if title is not None:
-    ax.set_title(title, size=18)
-
-  if simulation is not None:
-    if index is None:
-      msg = "index must be provided when simulation is passed"
-      raise ValueError(msg)
-    session = simulation.sessions[index]
-    thetas = list(session.theta_history)
-    administered_items = simulation.item_bank.get_items(session.administered_items)
-    true_theta = session.true_theta
-
-  if session is not None and simulation is None:
-    msg = "session plotting currently requires the parent simulation result"
-    raise ValueError(msg)
-
-  if thetas is None:
-    msg = "thetas must be provided"
-    raise ValueError(msg)
-  if administered_items is None:
-    msg = "administered_items must be provided"
-    raise ValueError(msg)
-
-  if len(thetas) - 1 != len(administered_items[:, 1]):
-    msg = "Number of estimated thetas and administered items is not the same."
-    raise ValueError(msg)
-
-  # x counts the items answered: thetas[0] comes from the initializer and thetas[x] follows the
-  # response to item x, which is plotted at x.
-  xs = list(range(len(thetas)))
-  ax.plot(xs, thetas, label=r"$\hat{\theta}$", marker=marker)
-  ax.plot(xs[1:], administered_items[:, 1], label="Item difficulty", marker=marker)
-  if true_theta is not None:
-    ax.hlines(true_theta, 0, len(xs) - 1, label=r"$\theta$", colors="black", linestyles="dashed")
-
-  # Each quality measure at x uses thetas[x] and the first x items. The curves start at x = 1:
-  # with no items the information is 0 and the variance, SEE and reliability are infinite.
-  quality_xs = xs[1:]
-  for enabled, measure, label in (
-    (info, irt.total_information, r"$I(\theta)$"),
-    (var, irt.var, r"$Var$"),
-    (see, irt.see, r"$SEE$"),
-    (reliability, irt.reliability, "Reliability"),
-  ):
-    if enabled:
-      values = [measure(thetas[x], administered_items[:x]) for x in quality_xs]
-      ax.plot(quality_xs, values, label=label, marker=marker)
-  ax.set_xlabel("Items")
+  ax.set_xlabel("Items administered")
+  ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+  ax.set_ylabel(r"$\theta$")
+  se_axes.set_ylabel("Standard error", color="C2")
+  se_axes.tick_params(axis="y", colors="C2")
   ax.grid()
-  ax.legend(loc="best")
-
+  handles, labels = ax.get_legend_handles_labels()
+  se_handles, se_labels = se_axes.get_legend_handles_labels()
+  ax.legend(handles + se_handles, labels + se_labels, loc="best")
   return ax

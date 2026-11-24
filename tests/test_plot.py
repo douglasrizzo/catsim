@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from typing import TYPE_CHECKING
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from mpl_toolkits.mplot3d import Axes3D
 
-from catsim import ItemBank, plot
+from catsim import CatSessionSnapshot, CatSessionState, Estimate, ItemBank, plot
 from catsim.plot import PlotType
+
+if TYPE_CHECKING:
+  from matplotlib.lines import Line2D
 
 
 def _run_python(code: str) -> subprocess.CompletedProcess[str]:
@@ -171,16 +174,6 @@ class TestItemCurve:
     assert plt.get_fignums() == []
 
 
-class TestGen3dDatasetScatter:
-  """Tests for gen3d_dataset_scatter()."""
-
-  def test_gen3d_scatter_returns_3d_axes(self, item_bank) -> None:
-    """3D dataset plots should return 3D axes."""
-    ax = plot.gen3d_dataset_scatter(item_bank)
-    assert isinstance(ax, Axes3D)
-    plt.close("all")
-
-
 class TestItemExposure:
   """Tests for item_exposure()."""
 
@@ -263,79 +256,93 @@ class TestItemExposure:
     assert plt.get_fignums() == []
 
 
-class TestTestProgress:
-  """Tests for test_progress()."""
+class TestSessionProgress:
+  """Tests for session_progress()."""
 
-  # Two-parameter items (c = 0, d = 1): each item's information is a^2 P (1 - P), with
-  # P = 1 / (1 + exp(-a (theta - b))).
-  ITEMS = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 0.5, 0.0, 1.0], [0.8, -0.5, 0.0, 1.0]])
-  THETAS = (0.0, 0.4, 0.7, 0.9)
-
-  @classmethod
-  def _info_after(cls, k: int) -> float:
-    """Test information of the first k items at the estimate made after them, in closed form."""
-    a, b = cls.ITEMS[:k, 0], cls.ITEMS[:k, 1]
-    p = 1 / (1 + np.exp(-a * (cls.THETAS[k] - b)))
-    return float(np.sum(a**2 * p * (1 - p)))
-
-  @pytest.mark.parametrize(
-    ("flag", "label", "from_info"),
-    [
-      ("info", r"$I(\theta)$", lambda info: info),
-      ("var", "$Var$", lambda info: 1 / info),
-      ("see", "$SEE$", lambda info: np.sqrt(1 / info)),
-      ("reliability", "Reliability", lambda info: 1 - 1 / info),
-    ],
+  # Three items whose difficulties differ from every estimate and standard error below.
+  ITEM_BANK = ItemBank(np.array([[1.0, -0.5, 0.0, 1.0], [1.0, 0.3, 0.0, 1.0], [1.0, 1.2, 0.0, 1.0]]))
+  # The initial estimate has an infinite standard error, as CatEngine.start_session records it.
+  SESSION = CatSessionState(
+    session_id="examinee",
+    estimates=[Estimate(0.0, np.inf, 0), Estimate(0.8, 1.1, 3), Estimate(0.5, 0.9, 4), Estimate(0.6, 0.7, 5)],
+    true_theta=0.4,
+    administered_items=[2, 0, 1],
+    responses=[True, False, True],
   )
-  def test_test_progress_pairs_each_estimate_with_the_items_before_it(self, flag: str, label: str, from_info) -> None:
-    """The quality curve at x items uses the estimate after x responses and those x items, from x = 1.
 
-    Fails if point x also counts item x + 1 (which made the plotted information drop at the last
-    item), or if the curve starts at x = 0, where no item has been given.
+  @staticmethod
+  def _lines(ax) -> dict[str, Line2D]:
+    """Return the lines of the plot and of its twin axes, by label."""
+    return {line.get_label(): line for axes in ax.figure.axes for line in axes.get_lines()}
+
+  @pytest.mark.parametrize("session", [SESSION, SESSION.snapshot()], ids=["state", "snapshot"])
+  def test_session_progress_plots_the_recorded_estimates_at_each_test_length(
+    self, session: CatSessionState | CatSessionSnapshot
+  ) -> None:
+    """After k items the plot shows the k-th estimate and standard error the session recorded, and the k-th item.
+
+    Fails if an estimate is paired with another number of items, if the standard error is recomputed rather than read
+    from the session (what the stopper judged), if the initial estimate's infinite error is drawn, if difficulties are
+    taken in bank order rather than administration order, or if a session snapshot cannot be plotted.
     """
-    ax = plot.test_progress(thetas=list(self.THETAS), administered_items=self.ITEMS, **{flag: True})
-    (line,) = [line for line in ax.get_lines() if line.get_label() == label]
-    info = np.array([self._info_after(k) for k in (1, 2, 3)])
-    np.testing.assert_array_equal(line.get_xdata(), [1, 2, 3])
-    np.testing.assert_allclose(line.get_ydata(), from_info(info))
+    ax = plot.session_progress(session, self.ITEM_BANK)
+    lines = self._lines(ax)
 
-  def test_test_progress_from_simulation_result(self, simulation_result) -> None:
-    """The chosen session's estimates, item difficulties and true ability are plotted.
+    estimate = lines[r"Ability estimate $\hat{\theta}$"]
+    np.testing.assert_array_equal(estimate.get_xdata(), [0, 1, 2, 3])
+    np.testing.assert_allclose(estimate.get_ydata(), [0.0, 0.8, 0.5, 0.6])
+    standard_error = lines["Standard error"]
+    np.testing.assert_array_equal(standard_error.get_xdata(), [1, 2, 3])
+    np.testing.assert_allclose(standard_error.get_ydata(), [1.1, 0.9, 0.7])
+    assert standard_error.axes is not ax
+    difficulty = lines["Item difficulty"]
+    np.testing.assert_array_equal(difficulty.get_xdata(), [1, 2, 3])
+    np.testing.assert_allclose(difficulty.get_ydata(), [1.2, -0.5, 0.3])
+    np.testing.assert_allclose(lines[r"True ability $\theta$"].get_ydata(), [0.4, 0.4])
 
-    Fails if another session is plotted, if the initial estimate is not drawn at x = 0, or if the difficulty of item k
-    is not drawn at x = k.
+  def test_session_progress_band_spans_one_standard_error_around_each_estimate(self) -> None:
+    """The band runs from estimate minus to estimate plus its standard error, from the first item on.
+
+    Fails if the band uses another width, or reaches x = 0, where the initial estimate's standard error is infinite.
     """
-    session = simulation_result.sessions[2]
-    ax = plot.test_progress(simulation=simulation_result, index=2)
-    lines = {line.get_label(): line for line in ax.get_lines()}
-    n_items = len(session.administered_items)
+    ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
+    (band,) = ax.collections
+    vertices = {(float(x), round(float(y), 9)) for path in band.get_paths() for x, y in path.vertices}
 
-    np.testing.assert_array_equal(lines[r"$\hat{\theta}$"].get_xdata(), np.arange(n_items + 1))
-    np.testing.assert_allclose(lines[r"$\hat{\theta}$"].get_ydata(), session.theta_history)
-    np.testing.assert_array_equal(lines["Item difficulty"].get_xdata(), np.arange(1, n_items + 1))
-    np.testing.assert_allclose(
-      lines["Item difficulty"].get_ydata(), simulation_result.item_bank.items[session.administered_items, 1]
+    assert vertices == {(1.0, -0.3), (1.0, 1.9), (2.0, -0.4), (2.0, 1.4), (3.0, -0.1), (3.0, 1.3)}
+
+  def test_session_progress_without_true_ability_draws_no_true_ability_line(self) -> None:
+    """A live session has no true ability, so the plot draws no line for one.
+
+    Fails if a session without ``true_theta`` raises, or draws a line at some made-up ability.
+    """
+    live = CatSessionState(
+      session_id="live", estimates=list(self.SESSION.estimates[:2]), administered_items=[2], responses=[True]
     )
-    (true_theta_line,) = [collection for collection in ax.collections if collection.get_label() == r"$\theta$"]
-    (true_theta_segment,) = true_theta_line.get_segments()
-    np.testing.assert_allclose(true_theta_segment, [[0, session.true_theta], [n_items, session.true_theta]])
+    ax = plot.session_progress(live, self.ITEM_BANK)
 
-  def test_test_progress_requires_index_with_simulation(self, simulation_result) -> None:
-    """A SimulationResult holds many sessions, so it needs an index.
+    assert set(self._lines(ax)) == {r"Ability estimate $\hat{\theta}$", "Item difficulty", "Standard error"}
 
-    Fails if the call guesses a session instead of raising.
+  def test_session_progress_ticks_whole_numbers_of_items(self) -> None:
+    """The x axis counts items, so its ticks are whole numbers.
+
+    Fails if a short test gets fractional ticks such as 0.5 or 2.5 items.
     """
-    with pytest.raises(ValueError, match="index must be provided"):
-      plot.test_progress(simulation=simulation_result)
+    ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
+    ax.figure.canvas.draw()
 
-  def test_test_progress_rejects_mismatched_lengths(self, item_bank) -> None:
-    """The theta history holds one more value than there are items (the initial estimate).
+    ticks = ax.get_xticks()
+    assert len(ticks) > 1
+    np.testing.assert_array_equal(ticks, np.round(ticks))
 
-    Fails if histories and items that do not line up are plotted anyway.
+  def test_session_progress_rejects_items_outside_the_bank_before_drawing(self) -> None:
+    """A session whose items are not in the item bank raises before any figure exists.
+
+    Fails if a bad call leaves an empty figure open behind the error.
     """
-    administered_items = item_bank.get_items([0, 1, 2])
-    with pytest.raises(ValueError, match="not the same"):
-      plot.test_progress(thetas=[0.0, 0.1], administered_items=administered_items, true_theta=0.0)
+    with pytest.raises(IndexError):
+      plot.session_progress(self.SESSION, ItemBank(self.ITEM_BANK.items[:2]))
+    assert plt.get_fignums() == []
 
 
 @pytest.mark.parametrize(
@@ -343,8 +350,11 @@ class TestTestProgress:
   [
     lambda ax, title: plot.item_curve(TestItemCurve.ITEM, ax=ax, title=title),
     lambda ax, title: plot.item_exposure(TestItemExposure.RATES, ax=ax, title=title),
+    lambda ax, title: plot.session_progress(
+      TestSessionProgress.SESSION, TestSessionProgress.ITEM_BANK, ax=ax, title=title
+    ),
   ],
-  ids=["item_curve", "item_exposure"],
+  ids=["item_curve", "item_exposure", "session_progress"],
 )
 def test_plot_draws_on_the_given_axes_and_returns_them(draw) -> None:
   """A plot function draws on the axes it is given, sets the title there and returns those axes.
@@ -358,3 +368,17 @@ def test_plot_draws_on_the_given_axes_and_returns_them(draw) -> None:
   assert ax.get_title() == "A title"
   assert ax.get_lines() or ax.patches
   assert plt.get_fignums() == [figure.number]
+
+
+def test_importing_every_plot_name_collects_no_test(pytester: pytest.Pytester) -> None:
+  """A public plot function named like a test, as test_progress was, is collected by pytest wherever it is imported."""
+  names = [
+    name
+    for name in vars(plot)
+    if not name.startswith("_") and getattr(getattr(plot, name), "__module__", None) == "catsim.plot"
+  ]
+  pytester.makepyfile(test_user_module=f"from catsim.plot import {', '.join(names)}\n")
+
+  result = pytester.runpytest("--collect-only", "-q")
+
+  assert result.ret == pytest.ExitCode.NO_TESTS_COLLECTED
