@@ -1,5 +1,7 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
+import math
+
 import numpy
 import numpy.typing as npt
 
@@ -124,7 +126,7 @@ def rmse(
   ValueError
       If actual and predicted vectors are not the same size.
   """
-  return numpy.sqrt(mse(actual, predicted))
+  return math.sqrt(mse(actual, predicted))
 
 
 def overlap_rate(exposure_rates: FloatArray, test_size: int) -> float:
@@ -179,8 +181,5 @@ def overlap_rate(exposure_rates: FloatArray, test_size: int) -> float:
     msg = f"Test size ({test_size}) cannot be larger than bank size ({bank_size})"
     raise ValueError(msg)
 
-  # Compute variance of exposure rates
-  var_r = numpy.var(exposure_rates)
-
-  # Apply Barrada et al. (2010) formula
+  var_r = float(numpy.var(exposure_rates))
   return (bank_size / test_size) * var_r + (test_size / bank_size)

@@ -1,178 +1,109 @@
 """Tests for catsim.metrics module."""
 
+from collections.abc import Callable
+
 import numpy as np
 import pytest
+from numpy.typing import ArrayLike
 
 from catsim import metrics
+
+# Errors (predicted minus actual) of -1 and 7: bias (-1 + 7) / 2 = 3, MSE (1 + 49) / 2 = 25, RMSE 5.
+ACTUAL = [1.0, -1.0]
+PREDICTED = [0.0, 6.0]
 
 
 class TestBias:
   """Tests for the bias() function."""
 
-  def test_bias_zero(self) -> None:
-    """Test that identical arrays produce zero bias."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [1.0, 2.0, 3.0]
-    assert metrics.bias(actual, predicted) == pytest.approx(0.0)
+  def test_bias_is_mean_signed_error(self) -> None:
+    """Errors -1 and 7 give a bias of (-1 + 7) / 2 = 3, a builtin float.
 
-  def test_bias_positive(self) -> None:
-    """Test positive bias (overestimation)."""
-    actual = [0.0, 0.0, 0.0]
-    predicted = [1.0, 1.0, 1.0]
-    assert metrics.bias(actual, predicted) == pytest.approx(1.0)
-
-  def test_bias_negative(self) -> None:
-    """Test negative bias (underestimation)."""
-    actual = [1.0, 1.0, 1.0]
-    predicted = [0.0, 0.0, 0.0]
-    assert metrics.bias(actual, predicted) == pytest.approx(-1.0)
-
-  def test_bias_mixed(self) -> None:
-    """Test bias with mixed over and underestimation."""
-    actual = [0.0, 0.0, 0.0, 0.0]
-    predicted = [1.0, -1.0, 2.0, -2.0]
-    # Mean of differences: (1 + (-1) + 2 + (-2)) / 4 = 0
-    assert metrics.bias(actual, predicted) == pytest.approx(0.0)
-
-  def test_bias_with_numpy_arrays(self) -> None:
-    """Test bias with numpy arrays."""
-    actual = np.array([1.0, 2.0, 3.0])
-    predicted = np.array([1.5, 2.5, 3.5])
-    assert metrics.bias(actual, predicted) == pytest.approx(0.5)
-
-  def test_bias_different_sizes_raises(self) -> None:
-    """Test that different sized arrays raise ValueError."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [1.0, 2.0]
-    with pytest.raises(ValueError, match="same size"):
-      metrics.bias(actual, predicted)
+    Fails if bias subtracts the estimates from the true abilities (-3), averages the absolute errors
+    (4) or sums them (6), or returns a numpy.float64 where the signature says float.
+    """
+    value = metrics.bias(ACTUAL, PREDICTED)
+    assert value == 3.0
+    assert type(value) is float
 
 
 class TestMse:
   """Tests for the mse() function."""
 
-  def test_mse_zero(self) -> None:
-    """Test that identical arrays produce zero MSE."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [1.0, 2.0, 3.0]
-    assert metrics.mse(actual, predicted) == pytest.approx(0.0)
+  def test_mse_is_mean_squared_error(self) -> None:
+    """Errors -1 and 7 give an MSE of (1 + 49) / 2 = 25, a builtin float.
 
-  def test_mse_positive(self) -> None:
-    """Test MSE calculation with differences."""
-    actual = [0.0, 0.0, 0.0]
-    predicted = [1.0, 2.0, 3.0]
-    # MSE = (1^2 + 2^2 + 3^2) / 3 = (1 + 4 + 9) / 3 = 14/3
-    assert metrics.mse(actual, predicted) == pytest.approx(14.0 / 3.0)
-
-  def test_mse_negative_differences(self) -> None:
-    """Test that negative differences are squared (always positive)."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [0.0, 0.0, 0.0]
-    # Same MSE as test_mse_positive due to squaring
-    assert metrics.mse(actual, predicted) == pytest.approx(14.0 / 3.0)
-
-  def test_mse_with_numpy_arrays(self) -> None:
-    """Test MSE with numpy arrays."""
-    actual = np.array([0.0, 0.0])
-    predicted = np.array([1.0, 1.0])
-    assert metrics.mse(actual, predicted) == pytest.approx(1.0)
-
-  def test_mse_different_sizes_raises(self) -> None:
-    """Test that different sized arrays raise ValueError."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [1.0, 2.0]
-    with pytest.raises(ValueError, match="same size"):
-      metrics.mse(actual, predicted)
+    Fails if mse averages the signed errors (3) instead of their squares or takes the root (5), or
+    returns a numpy.float64 where the signature says float.
+    """
+    value = metrics.mse(ACTUAL, PREDICTED)
+    assert value == 25.0
+    assert type(value) is float
 
 
 class TestRmse:
   """Tests for the rmse() function."""
 
-  def test_rmse_zero(self) -> None:
-    """Test that identical arrays produce zero RMSE."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [1.0, 2.0, 3.0]
-    assert metrics.rmse(actual, predicted) == pytest.approx(0.0)
+  def test_rmse_is_root_of_mean_squared_error(self) -> None:
+    """Errors -1 and 7 give an RMSE of the root of 25, 5, a builtin float.
 
-  def test_rmse_is_sqrt_of_mse(self) -> None:
-    """Test that RMSE equals sqrt of MSE."""
-    actual = [0.0, 0.0, 0.0]
-    predicted = [1.0, 2.0, 3.0]
-    mse_value = metrics.mse(actual, predicted)
-    rmse_value = metrics.rmse(actual, predicted)
-    assert rmse_value == pytest.approx(np.sqrt(mse_value))
+    Fails if rmse returns the mean squared error (25) or the mean absolute error (4), or a
+    numpy.float64 where the signature says float.
+    """
+    value = metrics.rmse(ACTUAL, PREDICTED)
+    assert value == 5.0
+    assert type(value) is float
 
-  def test_rmse_unit_difference(self) -> None:
-    """Test RMSE with unit differences."""
-    actual = [0.0, 0.0]
-    predicted = [1.0, 1.0]
-    # RMSE = sqrt((1^2 + 1^2) / 2) = sqrt(1) = 1
-    assert metrics.rmse(actual, predicted) == pytest.approx(1.0)
 
-  def test_rmse_different_sizes_raises(self) -> None:
-    """Test that different sized arrays raise ValueError."""
-    actual = [1.0, 2.0, 3.0]
-    predicted = [1.0, 2.0]
-    with pytest.raises(ValueError, match="same size"):
-      metrics.rmse(actual, predicted)
+@pytest.mark.parametrize("metric", [metrics.bias, metrics.mse, metrics.rmse], ids=["bias", "mse", "rmse"])
+def test_error_metrics_reject_vectors_of_different_sizes(metric: Callable[[ArrayLike, ArrayLike], float]) -> None:
+  """Fails if a metric broadcasts a one-element vector against a longer one instead of raising."""
+  with pytest.raises(ValueError, match="same size"):
+    metric([1.0, 2.0, 3.0], [1.0])
 
 
 class TestOverlapRate:
   """Tests for the overlap_rate() function."""
 
-  def test_overlap_rate_uniform_exposure(self) -> None:
-    """Test overlap rate with uniform exposure rates."""
-    # All items exposed equally: variance = 0
-    exposure_rates = np.array([0.3, 0.3, 0.3, 0.3, 0.3])
-    test_size = 3
-    bank_size = 5
-    # T = (N/Q) * 0 + (Q/N) = Q/N = 3/5 = 0.6
-    expected = test_size / bank_size
-    assert metrics.overlap_rate(exposure_rates, test_size) == pytest.approx(expected)
+  @pytest.mark.parametrize(
+    ("exposure_rates", "test_size", "expected"),
+    [
+      # Every item seen by 3 / 5 of the examinees: S_r^2 = 0, so T = n / M = 3 / 5.
+      pytest.param([0.6] * 5, 3, 0.6, id="uniform"),
+      # Every examinee takes items 0 and 1: mean 0.5, S_r^2 = 0.25, T = (4 / 2) * 0.25 + 2 / 4 = 1.
+      pytest.param([1.0, 1.0, 0.0, 0.0], 2, 1.0, id="one-test-for-all"),
+      # Half the examinees take items {0, 1}, half {0, 2}: two examinees share both items with
+      # probability 1/2 and one item otherwise, so T = 1/2 * 1 + 1/2 * 1/2 = 0.75. From the rates:
+      # mean 0.5, S_r^2 = (0.25 + 0 + 0 + 0.25) / 4 = 0.125, T = (4 / 2) * 0.125 + 2 / 4 = 0.75.
+      pytest.param([1.0, 0.5, 0.5, 0.0], 2, 0.75, id="two-tests"),
+    ],
+  )
+  def test_overlap_rate_is_expected_share_of_items(
+    self, exposure_rates: list[float], test_size: int, expected: float
+  ) -> None:
+    """The overlap rate is the expected share of items two examinees' tests have in common.
 
-  def test_overlap_rate_with_variance(self) -> None:
-    """Test overlap rate with non-uniform exposure."""
-    exposure_rates = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
-    test_size = 2
-    bank_size = 5
-    var_r = np.var(exposure_rates)
-    expected = (bank_size / test_size) * var_r + (test_size / bank_size)
-    assert metrics.overlap_rate(exposure_rates, test_size) == pytest.approx(expected)
+    Fails if overlap_rate takes the sample variance of the exposure rates (M - 1 denominator) or
+    swaps the bank size M and the test length n, or returns a numpy.float64 where the signature says
+    float.
+    """
+    value = metrics.overlap_rate(np.array(exposure_rates), test_size)
+    assert value == pytest.approx(expected)
+    assert type(value) is float
 
-  def test_overlap_rate_minimum(self) -> None:
-    """Test that minimum overlap occurs with uniform exposure."""
-    # Minimum overlap is Q/N when variance = 0
-    exposure_rates = np.array([0.5] * 10)
-    test_size = 5
-    result = metrics.overlap_rate(exposure_rates, test_size)
-    assert result == pytest.approx(0.5)  # 5/10
-
-  def test_overlap_rate_invalid_exposure_negative(self) -> None:
-    """Test that negative exposure rates raise ValueError."""
-    exposure_rates = np.array([-0.1, 0.5, 0.5])
+  @pytest.mark.parametrize("exposure_rates", [[-0.1, 0.5, 0.5], [0.5, 1.5, 0.5]], ids=["negative", "above-one"])
+  def test_overlap_rate_rejects_rates_outside_unit_interval(self, exposure_rates: list[float]) -> None:
+    """Fails if overlap_rate accepts an exposure rate below 0 or above 1, which no proportion can be."""
     with pytest.raises(ValueError, match="between 0 and 1"):
-      metrics.overlap_rate(exposure_rates, 2)
+      metrics.overlap_rate(np.array(exposure_rates), 2)
 
-  def test_overlap_rate_invalid_exposure_greater_than_one(self) -> None:
-    """Test that exposure rates > 1 raise ValueError."""
-    exposure_rates = np.array([0.5, 1.5, 0.5])
-    with pytest.raises(ValueError, match="between 0 and 1"):
-      metrics.overlap_rate(exposure_rates, 2)
-
-  def test_overlap_rate_invalid_test_size_zero(self) -> None:
-    """Test that test_size=0 raises ValueError."""
-    exposure_rates = np.array([0.5, 0.5, 0.5])
+  @pytest.mark.parametrize("test_size", [0, -1])
+  def test_overlap_rate_rejects_non_positive_test_size(self, test_size: int) -> None:
+    """Fails if overlap_rate divides by a test size of zero or accepts a negative one."""
     with pytest.raises(ValueError, match="Test size must be positive"):
-      metrics.overlap_rate(exposure_rates, 0)
+      metrics.overlap_rate(np.array([0.5, 0.5, 0.5]), test_size)
 
-  def test_overlap_rate_invalid_test_size_negative(self) -> None:
-    """Test that negative test_size raises ValueError."""
-    exposure_rates = np.array([0.5, 0.5, 0.5])
-    with pytest.raises(ValueError, match="Test size must be positive"):
-      metrics.overlap_rate(exposure_rates, -1)
-
-  def test_overlap_rate_test_size_larger_than_bank(self) -> None:
-    """Test that test_size > bank_size raises ValueError."""
-    exposure_rates = np.array([0.5, 0.5, 0.5])
+  def test_overlap_rate_rejects_test_longer_than_bank(self) -> None:
+    """Fails if overlap_rate accepts a test longer than the bank, which no examinee can take."""
     with pytest.raises(ValueError, match="cannot be larger than bank size"):
-      metrics.overlap_rate(exposure_rates, 10)
+      metrics.overlap_rate(np.array([0.5, 0.5, 0.5]), 10)
