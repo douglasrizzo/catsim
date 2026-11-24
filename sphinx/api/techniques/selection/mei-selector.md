@@ -1,13 +1,12 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.MEISelector`
-**Reference:** van der Linden (1998)
-
 # Maximum Expected Information Selector
+
+:Class: {py:class}`catsim.selection.MEISelector`
+:Sources: van der Linden (1998)
 
 ## Motivation
 
-Maximum-information selectors look only at the present estimate. MEI instead
-asks which candidate item is expected to produce the most informative next test
+Maximum-information selectors look only at the present estimate. MEI asks
+which candidate item is expected to produce the most informative next test
 state after the next response is observed.
 
 That one-step-ahead view makes MEI stronger than plain Fisher selection in cases
@@ -31,8 +30,8 @@ P_i(\hat{\theta})\,I(\hat{\theta}_i^{(1)})
 $$
 
 where $I(\cdot)$ is the information of the administered test extended by
-the candidate item. The selector chooses the non-administered item with the
-largest expected information value.
+the candidate item. The selector chooses the item, neither administered nor
+excluded, with the largest expected information value.
 
 van der Linden's 1996 report, which preceded the 1998 article, defines MEI
 with the observed information of the **whole response pattern**, the
@@ -42,22 +41,8 @@ probabilities at the current estimate (p. 11, Equation 13). He notes that the
 criterion therefore re-evaluates the information of the items already
 administered. Choi and Swartz (2009, Equation 3, extended to polytomous items)
 use the same whole-pattern measure. catsim follows this definition with Fisher
-instead of observed information; the two are equal under the 2PL model the
+rather than observed information; the two are equal under the 2PL model the
 report assumes (p. 10) and differ with guessing or slipping.
-
-`catR` departs from it: its
-[`MEI.R`](https://github.com/cran/catR/blob/master/R/MEI.R) uses only the
-**candidate item's** information at each updated estimate (Magis & Raîche,
-2012, p. 9, Table 1), observed information by default (p. 17). The two forms
-can rank items differently.
-
-With the default estimator (maximum likelihood with Dodd's heuristic), while the
-responses so far are all correct, the hypothetical correct branch is still an
-all-correct pattern, so Dodd's heuristic returns the same updated estimate for
-every candidate; the same happens on the incorrect branch while all responses
-are incorrect. On that branch the look-ahead is a fixed jump rather than an
-estimate. Bayesian estimators and WLE give a genuine updated estimate on both
-branches from the first item.
 
 ### Computation
 
@@ -82,7 +67,7 @@ selection.
    * - ``estimator``
      - ``NumericalSearchEstimator()``
      - Estimator used to compute the hypothetical one-step-ahead ability updates. Any estimator can be
-       passed; EAP, MAP or WLE avoid the limitation described above. It may be the engine's own
+       passed; EAP, MAP or WLE avoid the limitation described below. It may be the engine's own
        estimator: the selector reads only ``.theta`` from its look-ahead estimates, and the session
        never records them.
    * - ``r_max``
@@ -92,15 +77,30 @@ selection.
        item is.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+`catR` departs from van der Linden's definition: its
+[`MEI.R`](https://github.com/cran/catR/blob/master/R/MEI.R) uses only the
+**candidate item's** information at each updated estimate (Magis & Raîche,
+2012, p. 9, Table 1), observed information by default (p. 17). The two forms
+can rank items differently.
 
-1. The score for each candidate equals $P\,I_{\text{correct}} + (1-P)\,I_{\text{incorrect}}$ under the configured estimator.
-2. Each one-step-ahead update starts from the session's observed responses, which the selector reads from its context, plus one hypothetical response to the candidate.
-3. On at least some banks, MEI must differ from plain maximum-information selection; otherwise it is not implementing the forward-looking criterion.
-4. Both hypothetical response branches for every candidate item are evaluated before selection.
-5. Exposure filtering applies to the candidate set before the final argmax, with the same no-items behavior as other selectors.
+With the default estimator (maximum likelihood with Dodd's heuristic), while the
+responses so far are all correct, the hypothetical correct branch is still an
+all-correct pattern, so Dodd's heuristic returns the same updated estimate for
+every candidate; the same happens on the incorrect branch while all responses
+are incorrect. On that branch the look-ahead is a fixed jump rather than an
+estimate. Bayesian estimators and WLE give a genuine updated estimate on both
+branches from the first item.
+
+## Guarantees
+
+1. It never returns an item that was already administered or excluded.
+2. When every remaining item is at or above the exposure cap, it falls back to the
+   remaining item with the largest expected information.
+3. When no item remains, it raises `NoItemsAvailableError`.
+4. Its look-ahead estimates never enter the session, so it may share the engine's
+   estimator.
 
 ## References
 
