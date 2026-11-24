@@ -248,7 +248,7 @@ class SimulationResult:
 
   @property
   def bias(self) -> float:
-    """Return the mean of the final estimates minus the true abilities.
+    """Return the mean of the final estimates minus the true abilities, :func:`catsim.metrics.bias`.
 
     Raises
     ------
@@ -261,6 +261,8 @@ class SimulationResult:
   def mse(self) -> float:
     """Return the mean squared difference between the final estimates and the true abilities.
 
+    See :func:`catsim.metrics.mse`.
+
     Raises
     ------
     ValueError
@@ -270,7 +272,7 @@ class SimulationResult:
 
   @property
   def rmse(self) -> float:
-    """Return the square root of :attr:`mse`.
+    """Return the square root of :attr:`mse`, :func:`catsim.metrics.rmse`.
 
     Raises
     ------
