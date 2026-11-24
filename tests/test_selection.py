@@ -685,16 +685,16 @@ class TestMEISelector:
     def probability(theta: float, b: float) -> float:
       return 1.0 / (1.0 + np.exp(-(theta - b)))
 
-    def test_information(theta: float, items: list[int]) -> float:
+    def total_information(theta: float, items: list[int]) -> float:
       return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in items)
 
     context = make_context(item_bank, [0], [True], theta=theta)
     expected = {}
     for candidate in (1, 2, 3):
       p_correct = probability(theta, difficulties[candidate])
-      expected[candidate] = p_correct * test_information(theta + 0.5, [0, candidate]) + (
+      expected[candidate] = p_correct * total_information(theta + 0.5, [0, candidate]) + (
         1.0 - p_correct
-      ) * test_information(theta - 0.5, [0, candidate])
+      ) * total_information(theta - 0.5, [0, candidate])
       score = selector._expected_information(context, candidate)
       assert score == pytest.approx(expected[candidate], rel=1e-12)
 
@@ -752,7 +752,7 @@ class TestMLWISelector:
     # the pick of the manual integration in test_select_matches_manual_weighted_information
     assert selected == 6
 
-  def test_select_with_empty_response_vector_reduces_to_information_integral(self) -> None:
+  def test_select_with_no_responses_reduces_to_information_integral(self) -> None:
     """With no responses, MLWI should reduce to the integral of item information.
 
     This verifies the no-data degeneracy case where likelihood weights become

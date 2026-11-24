@@ -434,7 +434,7 @@ class TestItemBankMethods:
     assert values.shape == (3, 2)
     np.testing.assert_allclose(values, [method(bank, float(theta)) for theta in thetas], rtol=1e-12)
 
-  def test_test_information_subset_items(self) -> None:
+  def test_total_information_of_a_subset_of_items(self) -> None:
     """Only the listed items count: items 0 and 2 give 1/4 + L (1 - L) at theta = 0, with L = 1 / (1 + e^-1).
 
     Summing every item adds another L (1 - L), for item 1.

@@ -107,7 +107,7 @@ def test_generate_gives_n_valid_items(n: int, seed: int, model: str) -> None:
   theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
 )
 @BANK_SETTINGS
-def test_test_information_sums_every_item_by_default(params: np.ndarray, theta: float) -> None:
+def test_total_information_sums_every_item_by_default(params: np.ndarray, theta: float) -> None:
   """Without item indices the test information sums the information of every item; a default subset leaves some out."""
   expected = sum(float(irt.information(theta, item)) for item in params)
 

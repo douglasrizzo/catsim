@@ -59,7 +59,7 @@ class TestNumericalSearchEstimatorEstimate:
     assert reference == pytest.approx(0.5816, abs=1e-4)
     assert theta == pytest.approx(reference, abs=1e-4)
 
-  def test_estimate_without_items_returns_est_theta(self) -> None:
+  def test_estimate_without_items_returns_the_context_theta(self) -> None:
     """With no item administered the estimate is the context's theta and standard error, not a search bound.
 
     The log-likelihood of no responses is flat, and searching it returned 5.9999995. Its information is 0, so an SE
@@ -443,7 +443,7 @@ class TestBayesianHelpers:
     with pytest.raises(ValueError, match="posterior is undefined"):
       posterior([True], items, grid, impossible_prior)
 
-  def test_posterior_mean_is_zero_with_empty_response_vector(self) -> None:
+  def test_posterior_mean_is_zero_with_no_responses(self) -> None:
     """Test that the prior mean is recovered when there is no data."""
     grid = QuadratureGrid.uniform()
     empty_items = np.empty((0, 4), dtype=float)
@@ -571,7 +571,7 @@ class TestBayesianHelpers:
     for earlier, later in pairwise(variances):
       assert later < earlier
 
-  def test_posterior_is_numerically_stable_on_long_response_vector(self) -> None:
+  def test_posterior_is_numerically_stable_on_many_responses(self) -> None:
     """The posterior should stay normalized and finite on a 50-item response vector.
 
     This protects the log-max-subtract stabilization: if that step regressed,
@@ -704,7 +704,7 @@ class TestEAPEstimator:
 class TestMAPEstimator:
   """Tests for the Maximum a Posteriori estimator."""
 
-  def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
+  def test_estimate_with_no_responses_returns_prior_mode(self) -> None:
     """With no responses the estimate is the default prior's mode, 0, not the context's theta."""
     item_bank = ItemBank.generate(10, rng=42)
     estimator = MAPEstimator()
