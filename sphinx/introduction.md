@@ -149,8 +149,6 @@ $$
 
 Where $q_i$ represents the number of tests item $i$ has been used on and $N$ is the total number of tests applied.
 
-During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.ExposureTracker` in the run context gives each session $q_i$ and $N$ over the other sessions started so far, which for sessions run one after another is catR's rate over the examinees tested before the current one ({doc}`/adr/0003-runtime-state-ownership`).
-
 ## Computerized adaptive tests
 
 Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee's ability is updated after the response of each item. The updated knowledge of an examinee's ability at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.
@@ -189,17 +187,11 @@ With a set value for $\hat{\theta}$, an item is chosen from the item bank and pr
 
 Item selection methods are diverse. The most famous method is to choose the item that maximizes the *gain of information*, represented by {py:class}`catsim.selection.MaxInfoSelector`. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.
 
-In {py:mod}`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of $p$ is given by the IRT logistic model characteristic function ({py:func}`catsim.irt.icc`) at the examinee's true ability $\theta$, given by:
-
-$$
-P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}
-$$
-
 In {py:mod}`catsim`, item selection procedures can be found in the {py:mod}`catsim.selection` module.
 
 #### Proficiency Estimation
 
-Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test. An estimator returns it as an {py:class}`~catsim.Estimate`, which also holds the estimate's standard error, by the estimator's own formula, and how many times the estimator evaluated its objective to find it.
+Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test.
 
 In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:
 
@@ -217,36 +209,22 @@ Since items in a CAT are selected on-the-fly, a stopping criterion must be chose
 
 In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.stopping` module.
 
-## Package architecture
+## Architecture
 
-{py:mod}`catsim` was built using an object-oriented architecture, which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionally, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module's respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using {py:mod}`catsim` and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on {numref}`modules_classes`.
-
-```{eval-rst}
-.. table:: Modules and their corresponding abstract classes
-    :name: modules_classes
-
-    ===============================  ==============
-    Module                           Abstract class
-    ===============================  ==============
-    :py:mod:`catsim.initialization`  :py:class:`catsim.initialization.BaseInitializer`
-    :py:mod:`catsim.selection`       :py:class:`catsim.selection.BaseSelector`
-    :py:mod:`catsim.estimation`      :py:class:`catsim.estimation.BaseEstimator`
-    :py:mod:`catsim.stopping`        :py:class:`catsim.stopping.BaseStopper`
-    ===============================  ==============
+```{mermaid}
+flowchart LR
+    bank[(Item bank)] --> engine[CatEngine]
+    strategies["Strategies:<br>initializer, selector,<br>estimator, stopper"] --> engine
+    app([Your application]) -- "one session,<br>item by item" --> engine
+    runner[SimulationRunner] -- "one session per<br>simulated examinee" --> engine
+    runner -- returns --> result[SimulationResult]
 ```
 
-The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an {py:class}`~catsim.Estimate`. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
-
-```python
-from typing_extensions import override
-
-from catsim import StepContext
-from catsim.selection import BaseSelector, pick_best, remaining
-
-
-class EasiestFirstSelector(BaseSelector):
-    @override
-    def select(self, context: StepContext) -> int:
-        candidates = remaining(context)
-        return pick_best(candidates, -context.item_bank.difficulty[candidates], context.rng)
-```
+A {py:class}`~catsim.CatEngine` holds an item bank and four strategies, one for each phase of the
+lifecycle above, and runs each examinee's test one item at a time. An application asks it for each
+item and gives it each response ({doc}`live-sessions`). A {py:class}`~catsim.SimulationRunner` gives
+the same test to simulated examinees whose true abilities are known, and returns a
+{py:class}`~catsim.SimulationResult` that compares the final estimates with those abilities
+({doc}`running-simulations`). {doc}`reproducibility` shows how to seed a simulation study so that
+it repeats, and {doc}`extending` how to write a strategy of your own.
+{doc}`/adr/0001-explicit-cat-engine` records why catsim is built around the engine.
