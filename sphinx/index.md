@@ -17,6 +17,7 @@ terms-and-notation
 :caption: Guides
 
 running-simulations
+live-sessions
 reproducibility
 ```
 
