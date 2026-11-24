@@ -326,12 +326,14 @@ class TestLogLikelihood:
     responses = [True, False]
     thetas = np.linspace(-3.0, 3.0, 6).reshape(2, 3)
 
+    # near the difficulties log P and log(1 - P) are accurate to 1e-12
+    probabilities = irt.icc(thetas, items)
+    expected = np.log(probabilities[..., 0]) + np.log(1.0 - probabilities[..., 1])
+
     values = irt.log_likelihood(thetas, responses, items)
 
     assert values.shape == (2, 3)
-    np.testing.assert_allclose(
-      values, [[irt.log_likelihood(float(theta), responses, items) for theta in row] for row in thetas], rtol=1e-12
-    )
+    np.testing.assert_allclose(values, expected, rtol=1e-12)
 
   def test_log_likelihood_is_zero_without_items(self) -> None:
     """With no administered items, every ability has log-likelihood 0."""
