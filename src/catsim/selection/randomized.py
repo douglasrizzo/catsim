@@ -40,12 +40,11 @@ class RandomSelector(BaseSelector):
 class The54321Selector(BaseSelector):
   r"""Draw each opening item at random from a shrinking bin of the most informative items.
 
-  The 5-4-3-2-1 method of :cite:t:`McBride83`: the first item is drawn at random from the 5 most
-  informative items at the current :math:`\hat\theta`, the second from the 4 most informative
-  remaining items, and so on, so that from the fifth item on the most informative item is
-  administered. Items tied with the least informative item of a bin also join it, so from then on
-  ties for the most information are broken uniformly at random. The selector applies no exposure
-  cap: ``context.exposure_rates`` is ignored.
+  The 5-4-3-2-1 method of :cite:t:`McBride83`: the first item is drawn from the 5 most informative
+  items at the current estimate, the second from the 4 most informative remaining ones, and so on,
+  until from the fifth item on the most informative item is administered. Items tied with the least
+  informative item of a bin also join it. The selector applies no exposure cap:
+  ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------

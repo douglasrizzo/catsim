@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 class StandardErrorStopper(BaseStopper):
   """Stop once the standard error of the ability estimate is at most a target value.
 
-  The standard error is the one the estimator reported with the current estimate,
-  ``context.se`` (ADR-0004): the posterior standard deviation for EAP, the Fisher standard error
-  for maximum likelihood. Before any response it is infinite, so the test does not stop.
+  The standard error is the one the estimator reported with the current estimate, ``context.se``:
+  the posterior standard deviation for EAP, the Fisher standard error for maximum likelihood.
+  Before any response it is infinite, so the test does not stop.
 
   Parameters
   ----------
@@ -72,13 +72,10 @@ class StandardErrorStopper(BaseStopper):
 class ConfidenceIntervalStopper(BaseStopper):
   r"""Stop once the confidence interval for the ability estimate falls within one ability band.
 
-  The bounds cut the ability scale into bands. For example, ``[-2.0, -0.5, 0.5, 2.0]``
-  gives five: :math:`(-\infty, -2.0]`, :math:`[-2.0, -0.5]`, :math:`[-0.5, 0.5]`,
-  :math:`[0.5, 2.0]` and :math:`[2.0, \infty)`. The test stops once no bound lies strictly
-  inside the interval :math:`\hat\theta \pm z \cdot SE`, where :math:`SE` is the standard error
-  the estimator reported, ``context.se`` (ADR-0004), and :math:`z` the standard normal quantile
-  of the confidence level. Before any response the standard error is infinite, so the test does
-  not stop.
+  The bounds cut the ability scale into bands: ``[-2.0, -0.5, 0.5, 2.0]`` gives five. The test
+  stops once no bound lies strictly inside the confidence interval built from the current estimate
+  and the standard error the estimator reported, ``context.se``. Before any response the standard
+  error is infinite, so the test does not stop.
 
   Parameters
   ----------

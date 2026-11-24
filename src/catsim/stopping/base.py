@@ -13,9 +13,8 @@ class BaseStopper(ABC):
   :class:`~catsim.stopping.StopRule` combines several of them.
 
   Stoppers are pure: the same context always gives the same answer. A stopper holds its
-  configuration and caches derived from the item bank, never per-session state: one engine, and so
-  one stopper, serves every session of a run, and an application may interleave the sessions of
-  several examinees on it.
+  configuration and caches derived from the item bank, never per-session state: one stopper serves
+  every session of a run, which an application may interleave.
   """
 
   @abstractmethod
