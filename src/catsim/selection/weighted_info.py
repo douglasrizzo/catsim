@@ -83,10 +83,10 @@ class MLWISelector(BaseSelector):
 
   def _likelihood_weights(
     self,
-    response_vector: Sequence[bool],
-    administered_items: FloatArray,
+    responses: Sequence[bool],
+    items: FloatArray,
   ) -> FloatArray:
-    log_likelihood = irt.log_likelihood(self._nodes, response_vector, administered_items)
+    log_likelihood = irt.log_likelihood(self._nodes, responses, items)
     log_likelihood -= float(numpy.max(log_likelihood))
     return numpy.exp(log_likelihood)
 

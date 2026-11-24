@@ -11,8 +11,7 @@ import pytest
 from scipy.integrate import quad
 
 from catsim import Estimate, StepContext, irt
-from catsim.estimation import BaseEstimator
-from catsim.estimation.numerical import NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.item_bank import ItemBank
 from catsim.selection import (
@@ -34,9 +33,10 @@ from catsim.selection import (
   RandomSelector,
   The54321Selector,
   UrrySelector,
+  below_cap,
   progressive,
+  remaining,
 )
-from catsim.selection.base import below_cap, remaining
 from tests.contexts import make_context
 
 
@@ -599,17 +599,17 @@ class TestMEISelector:
       )
     )
     administered_items = [0]
-    response_vector = [True]
-    est_theta = 0.0
+    responses = [True]
+    theta = 0.0
 
     mei = MEISelector(estimator=NumericalSearchEstimator())
     max_info = MaxInfoSelector()
 
     mei_choice = mei.select(
-      make_context(item_bank, administered_items, response_vector, theta=est_theta, rng=np.random.default_rng(0))
+      make_context(item_bank, administered_items, responses, theta=theta, rng=np.random.default_rng(0))
     )
     max_info_choice = max_info.select(
-      make_context(item_bank, administered_items, theta=est_theta, rng=np.random.default_rng(0))
+      make_context(item_bank, administered_items, theta=theta, rng=np.random.default_rng(0))
     )
 
     assert mei_choice == 1
@@ -633,8 +633,8 @@ class TestMEISelector:
       )
     )
     administered_items = [0]
-    response_vector = [True]
-    est_theta = 0.4
+    responses = [True]
+    theta = 0.4
     estimator = NumericalSearchEstimator()
     selector = MEISelector(estimator=estimator)
 
@@ -645,19 +645,19 @@ class TestMEISelector:
       [
         float(
           (
-            irt.icc(est_theta, item_bank.items[int(idx)])
-            * item_bank.test_information(
+            irt.icc(theta, item_bank.items[int(idx)])
+            * item_bank.total_information(
               estimator.estimate(
-                make_context(item_bank, [*administered_items, int(idx)], [*response_vector, True], theta=est_theta)
+                make_context(item_bank, [*administered_items, int(idx)], [*responses, True], theta=theta)
               ).theta,
               [*administered_items, int(idx)],
             )
           )
           + (
-            (1.0 - irt.icc(est_theta, item_bank.items[int(idx)]))
-            * item_bank.test_information(
+            (1.0 - irt.icc(theta, item_bank.items[int(idx)]))
+            * item_bank.total_information(
               estimator.estimate(
-                make_context(item_bank, [*administered_items, int(idx)], [*response_vector, False], theta=est_theta)
+                make_context(item_bank, [*administered_items, int(idx)], [*responses, False], theta=theta)
               ).theta,
               [*administered_items, int(idx)],
             )
@@ -669,7 +669,7 @@ class TestMEISelector:
     )
 
     selected = selector.select(
-      make_context(item_bank, administered_items, response_vector, theta=est_theta, rng=np.random.default_rng(0))
+      make_context(item_bank, administered_items, responses, theta=theta, rng=np.random.default_rng(0))
     )
 
     assert selected == 1
@@ -680,21 +680,21 @@ class TestMEISelector:
     difficulties = np.array([0.0, 0.8, -0.6, 1.5])
     item_bank = ItemBank(np.column_stack([np.ones(4), difficulties, np.zeros(4), np.ones(4)]))
     selector = MEISelector(estimator=ShiftEstimator())
-    est_theta = 0.2
+    theta = 0.2
 
     def probability(theta: float, b: float) -> float:
       return 1.0 / (1.0 + np.exp(-(theta - b)))
 
-    def test_information(theta: float, items: list[int]) -> float:
-      return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in items)
+    def total_information(theta: float, indices: list[int]) -> float:
+      return sum(probability(theta, difficulties[j]) * (1.0 - probability(theta, difficulties[j])) for j in indices)
 
-    context = make_context(item_bank, [0], [True], theta=est_theta)
+    context = make_context(item_bank, [0], [True], theta=theta)
     expected = {}
     for candidate in (1, 2, 3):
-      p_correct = probability(est_theta, difficulties[candidate])
-      expected[candidate] = p_correct * test_information(est_theta + 0.5, [0, candidate]) + (
+      p_correct = probability(theta, difficulties[candidate])
+      expected[candidate] = p_correct * total_information(theta + 0.5, [0, candidate]) + (
         1.0 - p_correct
-      ) * test_information(est_theta - 0.5, [0, candidate])
+      ) * total_information(theta - 0.5, [0, candidate])
       score = selector._expected_information(context, candidate)
       assert score == pytest.approx(expected[candidate], rel=1e-12)
 
@@ -710,17 +710,17 @@ class TestMLWISelector:
     item_bank = ItemBank.generate(8, rng=42)
     selector = MLWISelector(n_nodes=11)
     administered_items = [0, 1]
-    response_vector = [True, False]
+    responses = [True, False]
     candidates = np.array([idx for idx in range(item_bank.n_items) if idx not in administered_items])
 
     selected = selector.select(
-      make_context(item_bank, administered_items, response_vector, theta=0.0, rng=np.random.default_rng(42))
+      make_context(item_bank, administered_items, responses, theta=0.0, rng=np.random.default_rng(42))
     )
 
     nodes = np.linspace(-6.0, 6.0, 11)
     delta = (6.0 - (-6.0)) / (11 - 1)
     log_likelihood = np.array(
-      [irt.log_likelihood(float(theta), response_vector, item_bank.get_items(administered_items)) for theta in nodes],
+      [irt.log_likelihood(float(theta), responses, item_bank.get_items(administered_items)) for theta in nodes],
       dtype=float,
     )
     log_likelihood -= float(log_likelihood.max())
@@ -752,7 +752,7 @@ class TestMLWISelector:
     # the pick of the manual integration in test_select_matches_manual_weighted_information
     assert selected == 6
 
-  def test_select_with_empty_response_vector_reduces_to_information_integral(self) -> None:
+  def test_select_with_no_responses_reduces_to_information_integral(self) -> None:
     """With no responses, MLWI should reduce to the integral of item information.
 
     This verifies the no-data degeneracy case where likelihood weights become
@@ -791,11 +791,11 @@ class TestMLWISelector:
     item_bank = ItemBank.generate(320, rng=7)
     rng = np.random.default_rng(7)
     administered_items = list(range(300))
-    response_vector = [bool(rng.random() < irt.icc(0.4, item_bank.items[idx])) for idx in administered_items]
+    responses = [bool(rng.random() < irt.icc(0.4, item_bank.items[idx])) for idx in administered_items]
     selector = MLWISelector()
 
-    weights = selector._likelihood_weights(response_vector, item_bank.get_items(administered_items))
-    selected = selector.select(make_context(item_bank, administered_items, response_vector, theta=0.0))
+    weights = selector._likelihood_weights(responses, item_bank.get_items(administered_items))
+    selected = selector.select(make_context(item_bank, administered_items, responses, theta=0.0))
 
     assert np.isfinite(weights).all()
     assert weights.max() == pytest.approx(1.0)
@@ -831,17 +831,17 @@ class TestMLWISelector:
     theta_true = 0.7
     rng = np.random.default_rng(5)
     administered_items = list(range(20))
-    response_vector = [bool(rng.random() < irt.icc(theta_true, item_bank.items[idx])) for idx in administered_items]
+    responses = [bool(rng.random() < irt.icc(theta_true, item_bank.items[idx])) for idx in administered_items]
     mle_theta = (
       NumericalSearchEstimator()
-      .estimate(make_context(item_bank, administered_items, response_vector, theta=theta_true))
+      .estimate(make_context(item_bank, administered_items, responses, theta=theta_true))
       .theta
     )
 
     mlwi = MLWISelector(n_nodes=81)
     max_info = MaxInfoSelector()
 
-    mlwi_choice = mlwi.select(make_context(item_bank, administered_items, response_vector, theta=mle_theta))
+    mlwi_choice = mlwi.select(make_context(item_bank, administered_items, responses, theta=mle_theta))
     max_info_choice = max_info.select(make_context(item_bank, administered_items, theta=mle_theta))
 
     assert mlwi_choice == max_info_choice

@@ -37,15 +37,15 @@ def test_estimate_is_a_likelihood_maximum_on_the_ability_scale(
   n = params.shape[0]
   assume(k <= n)
   administered_items = list(range(k))
-  response_vector = data.draw(st.lists(st.booleans(), min_size=k, max_size=k))
-  assume(len(set(response_vector)) > 1)
+  responses = data.draw(st.lists(st.booleans(), min_size=k, max_size=k))
+  assume(len(set(responses)) > 1)
   bank = ItemBank(params)
   items = bank.get_items(administered_items)
   estimator = NumericalSearchEstimator()
-  theta = estimator.estimate(make_context(bank, administered_items, response_vector, theta=0.0)).theta
+  theta = estimator.estimate(make_context(bank, administered_items, responses, theta=0.0)).theta
   neighbours = np.clip([theta - 1e-3, theta + 1e-3], THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)
 
   assert THETA_MIN_EXTENDED <= theta <= THETA_MAX_EXTENDED
-  assert max(irt.log_likelihood(x, response_vector, items) for x in neighbours) <= (
-    irt.log_likelihood(theta, response_vector, items) + 1e-4
+  assert max(irt.log_likelihood(x, responses, items) for x in neighbours) <= (
+    irt.log_likelihood(theta, responses, items) + 1e-4
   )

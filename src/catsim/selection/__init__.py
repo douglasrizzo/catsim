@@ -1,13 +1,13 @@
 """Selection components for CAT."""
 
-from .base import BaseSelector
+from .base import BaseSelector, below_cap, best_pool, check_r_max, check_test_size, pick_best, remaining
 from .cluster import ClusterMethod, ClusterSelector, ExposureControl
 from .expected_info import MEISelector
+from .information import IntervalInfoSelector, MaxInfoSelector, UrrySelector
 from .kl import KLSelector
 from .linear import LinearSelector
 from .progressive import ProgressiveSelector, ProportionalSelector
-from .random import RandomesqueSelector, RandomSelector, The54321Selector
-from .selection import IntervalInfoSelector, MaxInfoSelector, UrrySelector
+from .randomized import RandomesqueSelector, RandomSelector, The54321Selector
 from .stratified import (
   AStratBBlockSelector,
   AStratSelector,
@@ -39,4 +39,10 @@ __all__ = [
   "StratifiedSelector",
   "The54321Selector",
   "UrrySelector",
+  "below_cap",
+  "best_pool",
+  "check_r_max",
+  "check_test_size",
+  "pick_best",
+  "remaining",
 ]

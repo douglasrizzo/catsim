@@ -14,6 +14,7 @@ from catsim.item_bank import ItemBank
 from catsim.selection import (
   AStratBBlockSelector,
   AStratSelector,
+  BaseSelector,
   ClusterSelector,
   LinearSelector,
   MaxInfoBBlockSelector,
@@ -25,7 +26,6 @@ from catsim.selection import (
   The54321Selector,
   UrrySelector,
 )
-from catsim.selection.base import BaseSelector
 from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
 from catsim.state import ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
@@ -48,7 +48,7 @@ def run_simulation(
   result = SimulationRunner(engine).run(true_thetas, rng=seed)
   assert len(result.sessions) == examinees
   assert all(session.is_stopped for session in result.sessions)
-  assert result.exposure_counts.sum() == sum(len(session.administered_item_ids) for session in result.sessions)
+  assert result.exposure_counts.sum() == sum(len(session.administered_items) for session in result.sessions)
   return result
 
 
@@ -66,7 +66,7 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
   reused = run_simulation(item_bank, MEISelector(estimator=shared), stopper, estimator=shared, examinees=4)
   fresh = run_simulation(item_bank, MEISelector(estimator=factory()), stopper, estimator=factory(), examinees=4)
 
-  assert all(len(session.administered_item_ids) == 6 for session in reused.sessions)
+  assert all(len(session.administered_items) == 6 for session in reused.sessions)
   assert [session.theta_history for session in reused.sessions] == [session.theta_history for session in fresh.sessions]
 
 
@@ -88,7 +88,7 @@ def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseS
   item_bank = ItemBank.generate(80, rng=42)
   result = run_simulation(item_bank, factory(), MaxLengthStopper(8))
 
-  assert all(len(session.administered_item_ids) == 8 for session in result.sessions)
+  assert all(len(session.administered_items) == 8 for session in result.sessions)
   assert result.overlap_rate is not None
 
 
@@ -106,7 +106,7 @@ def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector
   item_bank = ItemBank.generate(100, rng=42)
   result = run_simulation(item_bank, selector, StopRule(StandardErrorStopper(0.6), MaxLengthStopper(10), min_items=3))
 
-  assert all(3 <= len(session.administered_item_ids) <= 10 for session in result.sessions)
+  assert all(3 <= len(session.administered_items) <= 10 for session in result.sessions)
 
 
 @pytest.mark.integration
@@ -125,7 +125,7 @@ def test_cluster_selector_completes_runs(method: str) -> None:
     MaxLengthStopper(6),
   )
 
-  assert all(len(session.administered_item_ids) == 6 for session in result.sessions)
+  assert all(len(session.administered_items) == 6 for session in result.sessions)
 
 
 @pytest.mark.integration
@@ -147,7 +147,7 @@ def test_stoppers_complete_runs(stopper: BaseStopper, expected_min: int, expecte
   item_bank = ItemBank.generate(100, rng=42)
   result = run_simulation(item_bank, MaxInfoSelector(), stopper)
 
-  assert all(expected_min <= len(session.administered_item_ids) <= expected_max for session in result.sessions)
+  assert all(expected_min <= len(session.administered_items) <= expected_max for session in result.sessions)
 
 
 @pytest.mark.integration
@@ -159,7 +159,7 @@ def test_a_session_whose_stopper_never_holds_ends_when_the_bank_runs_out() -> No
   item_bank = ItemBank.generate(5, rng=42)
   result = run_simulation(item_bank, MaxInfoSelector(), StandardErrorStopper(0.001))
 
-  assert all(sorted(session.administered_item_ids) == [0, 1, 2, 3, 4] for session in result.sessions)
+  assert all(sorted(session.administered_items) == [0, 1, 2, 3, 4] for session in result.sessions)
 
 
 @pytest.mark.integration
@@ -183,7 +183,7 @@ def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() ->
   while not engine.step(manual, SimulatedResponseProvider(), context).stopped:
     pass
 
-  assert manual.administered_item_ids == batched.administered_item_ids
+  assert manual.administered_items == batched.administered_items
   assert manual.responses == batched.responses
   assert manual.theta_history == pytest.approx(batched.theta_history)
   assert manual.stop_reason == batched.stop_reason == StopReason.STOPPER

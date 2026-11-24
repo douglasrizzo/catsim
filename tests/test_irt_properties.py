@@ -79,21 +79,21 @@ def _probability_formula(theta: float, responses: list[bool], items: np.ndarray)
 
 
 @given(
-  est_theta=st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False),
+  theta=st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False),
   items=item_params_matrix(min_items=1, max_items=10),
   responses=st.lists(st.booleans(), min_size=10, max_size=10),
 )
 @IRT_SETTINGS
 def test_log_likelihood_matches_the_probability_formula(
-  est_theta: float,
+  theta: float,
   items: np.ndarray,
   responses: list[bool],
 ) -> None:
   """The logit-based log-likelihood equals sum(log P or log(1 - P)) wherever that formula is accurate."""
   responses = responses[: items.shape[0]]
-  reference, tolerance = _probability_formula(est_theta, responses, items)
+  reference, tolerance = _probability_formula(theta, responses, items)
 
-  assert irt.log_likelihood(est_theta, responses, items) == pytest.approx(reference, abs=tolerance)
+  assert irt.log_likelihood(theta, responses, items) == pytest.approx(reference, abs=tolerance)
 
 
 @given(

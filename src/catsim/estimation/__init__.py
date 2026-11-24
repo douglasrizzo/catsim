@@ -4,6 +4,7 @@
 from .base import BaseEstimator
 from .bayesian import (
   EAPEstimator,
+  LogPrior,
   MAPEstimator,
   QuadratureGrid,
   normal_log_prior,
@@ -18,6 +19,7 @@ from .wle import WarmLikelihoodEstimator
 __all__ = [
   "BaseEstimator",
   "EAPEstimator",
+  "LogPrior",
   "MAPEstimator",
   "NumericalSearchEstimator",
   "QuadratureGrid",

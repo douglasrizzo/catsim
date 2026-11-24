@@ -205,7 +205,7 @@ Proficiency estimation occurs whenever an examinee answers a new item. Given a d
 In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:
 
 ```pycon
->>> response_vector = [1,1,1,0,1,1,0,1,0,0,1,0,0,0,1,0]
+>>> responses = [1,1,1,0,1,1,0,1,0,0,1,0,0,0,1,0]
 ```
 
 Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the $\hat{\theta}$ value that maximizes the *log-likelihood* function, presented in {py:func}`catsim.irt.log_likelihood`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's abilities to estimate new values for them.
@@ -240,8 +240,7 @@ The initializer runs once per session and receives the item bank and the run's r
 
 ```python
 from catsim import StepContext
-from catsim.selection import BaseSelector
-from catsim.selection.base import pick_best, remaining
+from catsim.selection import BaseSelector, pick_best, remaining
 
 
 class EasiestFirstSelector(BaseSelector):

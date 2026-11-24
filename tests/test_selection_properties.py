@@ -19,14 +19,14 @@ SEL_SETTINGS = settings(max_examples=25, deadline=None)
 @given(
   params=item_params_matrix(min_items=4, max_items=18),
   administered_count=st.integers(min_value=0, max_value=15),
-  est_theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
+  theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
   seed=st.integers(min_value=0, max_value=2**31 - 1),
 )
 @SEL_SETTINGS
 def test_max_info_selector_returns_valid_unseen_item(
   params: np.ndarray,
   administered_count: int,
-  est_theta: float,
+  theta: float,
   seed: int,
 ) -> None:
   n = params.shape[0]
@@ -35,7 +35,7 @@ def test_max_info_selector_returns_valid_unseen_item(
   bank = ItemBank(params)
   rng = np.random.default_rng(seed)
   selector = MaxInfoSelector()
-  item_id = selector.select(make_context(bank, administered, theta=est_theta, rng=rng))
+  item_id = selector.select(make_context(bank, administered, theta=theta, rng=rng))
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert item_id not in administered

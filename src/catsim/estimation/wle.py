@@ -75,14 +75,14 @@ class WarmLikelihoodEstimator(BaseEstimator):
     return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
   @staticmethod
-  def _modified_score(theta: npt.ArrayLike, response_vector: Sequence[bool], items: FloatArray) -> FloatArray:
+  def _modified_score(theta: npt.ArrayLike, responses: Sequence[bool], items: FloatArray) -> FloatArray:
     r"""Return Warm's modified score at one or more ability values.
 
     Parameters
     ----------
     theta : array_like
         Ability value(s) at which to evaluate the modified score.
-    response_vector : Sequence[bool]
+    responses : Sequence[bool]
         Responses to the items, in the same order as ``items``.
     items : numpy.ndarray
         Item parameter matrix with columns ``a, b, c, d``.
@@ -105,7 +105,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     pq = numpy.maximum(p * q, numpy.finfo(float).tiny)
 
     # u - P is Q for a correct response and -P for an incorrect one
-    residual = numpy.where(numpy.asarray(response_vector, dtype=bool), q, -p)
+    residual = numpy.where(numpy.asarray(responses, dtype=bool), q, -p)
     score = numpy.sum(residual * dp / pq, axis=1)
     info = numpy.sum(dp**2 / pq, axis=1)
     j = numpy.sum(dp * d2p / pq, axis=1)
@@ -139,15 +139,15 @@ class WarmLikelihoodEstimator(BaseEstimator):
     if not context.administered_items:
       return Estimate(theta=float(context.theta), se=context.se, evaluations=0)
 
-    response_vector = context.responses
+    responses = context.responses
     items = context.item_bank.get_items(context.administered_items)
 
     def score(theta: float) -> float:
-      return float(self._modified_score(theta, response_vector, items)[0])
+      return float(self._modified_score(theta, responses, items)[0])
 
     low, high = self._bounds
     grid = numpy.linspace(low, high, _SCAN_POINTS)
-    values = self._modified_score(grid, response_vector, items)
+    values = self._modified_score(grid, responses, items)
     evaluations = grid.size
 
     # Maxima of the weighted likelihood: + to - sign changes of its derivative (a zero at the

@@ -119,7 +119,7 @@ class TestItemExposure:
     Fails if the plot draws anything other than the result's per-item exposure, in item order.
     """
     n_items = simulation_result.item_bank.n_items
-    administered = np.concatenate([session.administered_item_ids for session in simulation_result.sessions])
+    administered = np.concatenate([session.administered_items for session in simulation_result.sessions])
     expected = np.bincount(administered, minlength=n_items) / len(simulation_result.sessions)
 
     ax = plot.item_exposure(simulation=simulation_result)
@@ -214,13 +214,13 @@ class TestTestProgress:
     session = simulation_result.sessions[2]
     ax = plot.test_progress(simulation=simulation_result, index=2)
     lines = {line.get_label(): line for line in ax.get_lines()}
-    n_items = len(session.administered_item_ids)
+    n_items = len(session.administered_items)
 
     np.testing.assert_array_equal(lines[r"$\hat{\theta}$"].get_xdata(), np.arange(n_items + 1))
     np.testing.assert_allclose(lines[r"$\hat{\theta}$"].get_ydata(), session.theta_history)
     np.testing.assert_array_equal(lines["Item difficulty"].get_xdata(), np.arange(1, n_items + 1))
     np.testing.assert_allclose(
-      lines["Item difficulty"].get_ydata(), simulation_result.item_bank.items[session.administered_item_ids, 1]
+      lines["Item difficulty"].get_ydata(), simulation_result.item_bank.items[session.administered_items, 1]
     )
     (true_theta_line,) = [collection for collection in ax.collections if collection.get_label() == r"$\theta$"]
     (true_theta_segment,) = true_theta_line.get_segments()

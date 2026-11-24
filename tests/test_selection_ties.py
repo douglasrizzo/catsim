@@ -20,8 +20,9 @@ from catsim.selection import (
   RandomesqueSelector,
   The54321Selector,
   UrrySelector,
+  best_pool,
+  pick_best,
 )
-from catsim.selection.base import best_pool, pick_best
 from tests.contexts import make_context
 
 _N_COPIES = 6
@@ -133,11 +134,11 @@ SELECTOR_FACTORIES: dict[str, Callable[[], BaseSelector]] = {
 def test_selectors_break_ties_at_random(name: str) -> None:
   """On a bank of identical items, the pick is a non-administered item and varies with the seed."""
   item_bank = _identical_bank()
-  administered_items, response_vector = [0], [True]
+  administered_items, responses = [0], [True]
 
   picks = {
     SELECTOR_FACTORIES[name]().select(
-      make_context(item_bank, administered_items, response_vector, theta=0.3, rng=np.random.default_rng(seed))
+      make_context(item_bank, administered_items, responses, theta=0.3, rng=np.random.default_rng(seed))
     )
     for seed in range(60)
   }
@@ -192,23 +193,23 @@ def test_cluster_selector_draws_tied_clusters_uniformly(method: str) -> None:
   assert all(abs(count / 3000 - 1 / 3) < 0.03 for count in counts.values())
 
 
-def _old_max_info(item_bank: ItemBank, administered_items: list[int], est_theta: float, rates, r_max: float) -> int:
+def _old_max_info(item_bank: ItemBank, administered_items: list[int], theta: float, rates, r_max: float) -> int:
   """Return MaxInfoSelector's pick as implemented before ADR-0008."""
   if item_bank.model == IrtModel.PL1:
-    ordered = list(np.abs(item_bank.difficulty - est_theta).argsort())
+    ordered = list(np.abs(item_bank.difficulty - theta).argsort())
   else:
-    ordered = list((-item_bank.information(est_theta)).argsort())
+    ordered = list((-item_bank.information(theta)).argsort())
   valid = [idx for idx in ordered if idx not in administered_items]
   low = [idx for idx in valid if rates[idx] < r_max]
   return int(low[0] if low else valid[0])
 
 
-def _old_bin(item_bank: ItemBank, administered_items: list[int], est_theta: float, size: int) -> list[int]:
+def _old_bin(item_bank: ItemBank, administered_items: list[int], theta: float, size: int) -> list[int]:
   """Return the Randomesque / 5-4-3-2-1 bin, best first, as built before ADR-0008."""
   if item_bank.model == IrtModel.PL1:
-    ordered = list(np.abs(item_bank.difficulty - est_theta).argsort())
+    ordered = list(np.abs(item_bank.difficulty - theta).argsort())
   else:
-    ordered = list((-item_bank.information(est_theta)).argsort())
+    ordered = list((-item_bank.information(theta)).argsort())
   return [idx for idx in ordered if idx not in administered_items][:size]
 
 
@@ -219,30 +220,30 @@ def test_untied_banks_give_the_same_picks_as_before(model: str) -> None:
   for _ in range(40):
     item_bank = ItemBank.generate(60, model=model, rng=int(rng.integers(1_000_000)))
     administered_items = [int(idx) for idx in rng.choice(60, int(rng.integers(0, 20)), replace=False)]
-    est_theta = float(rng.normal())
+    theta = float(rng.normal())
     rates = rng.uniform(0.0, 0.6, 60)
     seed = int(rng.integers(1_000_000))
 
     assert MaxInfoSelector(r_max=0.3).select(
-      make_context(item_bank, administered_items, theta=est_theta, exposure_rates=rates)
-    ) == _old_max_info(item_bank, administered_items, est_theta, rates, 0.3)
+      make_context(item_bank, administered_items, theta=theta, exposure_rates=rates)
+    ) == _old_max_info(item_bank, administered_items, theta, rates, 0.3)
 
-    closest = next(idx for idx in np.abs(item_bank.difficulty - est_theta).argsort() if idx not in administered_items)
-    assert UrrySelector().select(make_context(item_bank, administered_items, theta=est_theta)) == closest
+    closest = next(idx for idx in np.abs(item_bank.difficulty - theta).argsort() if idx not in administered_items)
+    assert UrrySelector().select(make_context(item_bank, administered_items, theta=theta)) == closest
 
-    old_randomesque = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, est_theta, 4)))
+    old_randomesque = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, theta, 4)))
     assert (
       RandomesqueSelector(bin_size=4).select(
-        make_context(item_bank, administered_items, theta=est_theta, rng=np.random.default_rng(seed))
+        make_context(item_bank, administered_items, theta=theta, rng=np.random.default_rng(seed))
       )
       == old_randomesque
     )
 
     bin_size = max(1, 5 - len(administered_items))
-    old_54321 = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, est_theta, bin_size)))
+    old_54321 = int(np.random.default_rng(seed).choice(_old_bin(item_bank, administered_items, theta, bin_size)))
     assert (
       The54321Selector().select(
-        make_context(item_bank, administered_items, theta=est_theta, rng=np.random.default_rng(seed))
+        make_context(item_bank, administered_items, theta=theta, rng=np.random.default_rng(seed))
       )
       == old_54321
     )

@@ -204,22 +204,22 @@ class QuadratureGrid:
 
 
 def posterior(
-  response_vector: Sequence[bool],
-  administered_items: FloatArray,
+  responses: Sequence[bool],
+  items: FloatArray,
   grid: QuadratureGrid,
   log_prior: LogPrior,
 ) -> FloatArray:
   r"""Compute the normalized discrete posterior over ``grid.nodes``.
 
   Each node gets mass proportional to :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`,
-  computed in log space and shifted by its maximum before exponentiating, so long response
-  vectors do not underflow.
+  computed in log space and shifted by its maximum before exponentiating, so the likelihood of
+  many responses does not underflow.
 
   Parameters
   ----------
-  response_vector : Sequence[bool]
-      Responses to the administered items, in the same order as ``administered_items``.
-  administered_items : numpy.ndarray
+  responses : Sequence[bool]
+      Responses to the administered items, in the same order as ``items``.
+  items : numpy.ndarray
       Parameter matrix of the administered items, one row per item.
   grid : QuadratureGrid
       Nodes and weights of the discrete approximation.
@@ -235,10 +235,10 @@ def posterior(
   ------
   ValueError
       If the log-prior or log-likelihood is NaN or :math:`+\infty` at any node, if every node has
-      zero posterior mass, if ``response_vector`` and ``administered_items`` differ in length, or
-      if ``response_vector`` contains non-Boolean elements.
+      zero posterior mass, if ``responses`` and ``items`` differ in length, or if ``responses``
+      contains non-Boolean elements.
   """
-  log_lik = irt.log_likelihood(grid.nodes, response_vector, administered_items)
+  log_lik = irt.log_likelihood(grid.nodes, responses, items)
   log_post = log_prior(grid.nodes) + log_lik + numpy.log(grid.weights)
   if numpy.isnan(log_post).any() or numpy.isposinf(log_post).any():
     msg = "posterior is undefined: the log-prior or log-likelihood is NaN or +inf at some node"
@@ -403,9 +403,9 @@ class MAPEstimator(BaseEstimator):
     """Return the estimator as a constructor call that names every argument, with None for a default prior."""
     return f"{type(self).__name__}(log_prior={self._log_prior_argument!r}, tol={self._tol!r}, bounds={self._bounds!r})"
 
-  def _negative_log_posterior(self, theta: float, response_vector: Sequence[bool], items: FloatArray) -> float:
+  def _negative_log_posterior(self, theta: float, responses: Sequence[bool], items: FloatArray) -> float:
     """Return the negative log-posterior at a candidate theta."""
-    log_lik = irt.log_likelihood(theta, response_vector, items)
+    log_lik = irt.log_likelihood(theta, responses, items)
     log_pr = float(self._log_prior(numpy.array([theta], dtype=float))[0])
     return -(log_lik + log_pr)
 

@@ -135,7 +135,7 @@ class CatEngine:
     return StepContext(
       item_bank=self._item_bank,
       rng=context.rng,
-      administered_items=tuple(state.administered_item_ids),
+      administered_items=tuple(state.administered_items),
       responses=tuple(state.responses),
       theta=state.current_theta,
       se=state.current_se,
@@ -299,7 +299,7 @@ class CatEngine:
     )
     stopped = bool(self._stopper.stop(dataclasses.replace(answered, theta=estimate.theta, se=estimate.se)))
 
-    state.administered_item_ids.append(item_id)
+    state.administered_items.append(item_id)
     state.responses.append(response)
     if context.exposure_tracker is not None:
       context.exposure_tracker.record(item_id)
@@ -364,7 +364,7 @@ class CatEngine:
     if item_id < 0 or item_id >= self._item_bank.n_items:
       msg = f"Invalid item index {item_id}. Must be between 0 and {self._item_bank.n_items - 1}"
       raise ValueError(msg)
-    if item_id in state.administered_item_ids:
+    if item_id in state.administered_items:
       msg = f"Item {item_id} has already been administered in this session"
       raise ValueError(msg)
     return item_id

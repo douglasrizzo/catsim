@@ -1,4 +1,4 @@
-"""Random selector implementations."""
+"""Selectors that randomize the choice: random, randomesque and 5-4-3-2-1."""
 
 import operator
 

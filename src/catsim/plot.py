@@ -475,7 +475,7 @@ def test_progress(
       raise ValueError(msg)
     session = simulation.sessions[index]
     thetas = list(session.theta_history)
-    administered_items = simulation.item_bank.get_items(session.administered_item_ids)
+    administered_items = simulation.item_bank.get_items(session.administered_items)
     true_theta = session.true_theta
 
   if session is not None and simulation is None:

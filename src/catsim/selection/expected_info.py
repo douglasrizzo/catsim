@@ -62,14 +62,14 @@ class MEISelector(BaseSelector):
 
   def _expected_information(self, context: StepContext, candidate: int) -> float:
     """Return the candidate's information, expected over its two responses, at the one-step-ahead estimates."""
-    administered = (*context.administered_items, candidate)
-    correct = dataclasses.replace(context, administered_items=administered, responses=(*context.responses, True))
+    administered_items = (*context.administered_items, candidate)
+    correct = dataclasses.replace(context, administered_items=administered_items, responses=(*context.responses, True))
     incorrect = dataclasses.replace(correct, responses=(*context.responses, False))
     theta_correct = self._estimator.estimate(correct).theta
     theta_incorrect = self._estimator.estimate(incorrect).theta
     p_correct = irt.icc(context.theta, context.item_bank.items[candidate])
-    info_correct = context.item_bank.test_information(theta_correct, administered)
-    info_incorrect = context.item_bank.test_information(theta_incorrect, administered)
+    info_correct = context.item_bank.total_information(theta_correct, administered_items)
+    info_incorrect = context.item_bank.total_information(theta_incorrect, administered_items)
     return float(p_correct * info_correct + (1.0 - p_correct) * info_incorrect)
 
   def select(self, context: StepContext) -> int:

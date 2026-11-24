@@ -7,8 +7,7 @@ import math
 import numpy as np
 import pytest
 
-from catsim.initialization import FixedPointInitializer, NormalInitializer, UniformInitializer
-from catsim.initialization.base import BaseInitializer
+from catsim.initialization import BaseInitializer, FixedPointInitializer, NormalInitializer, UniformInitializer
 from catsim.item_bank import ItemBank
 
 NAN = float("nan")
