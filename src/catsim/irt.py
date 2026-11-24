@@ -631,7 +631,7 @@ def _log_asymptotes(items: FloatArray) -> tuple[FloatArray, FloatArray, FloatArr
 
 
 def _log_probability(z: FloatArray, log_floor: FloatArray, log_dmc: FloatArray) -> FloatArray:
-  """Return log P from the logit with the floor log c, or log Q from the negated logit with the floor log(1 - d)."""
+  """Return log P from the logit and log c, or log Q from the negated logit and log(1 - d)."""
   return numpy.logaddexp(log_floor, log_dmc + log_expit(z))
 
 
@@ -689,8 +689,8 @@ def log_likelihood_function(
 
   The returned function gives, for any ``theta``, the value of :py:func:`log_likelihood` with the same
   shape and type. ``responses`` is validated here, once, and the terms that do not depend on the
-  ability are computed here too, so a search that evaluates the log-likelihood many times pays for
-  them once. Changing ``responses`` or ``items`` afterwards does not change the function.
+  ability are computed here too. Changing ``responses`` or ``items`` afterwards does not change the
+  function.
 
   Parameters
   ----------
