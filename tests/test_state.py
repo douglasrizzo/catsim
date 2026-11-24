@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import math
 
 import numpy as np
 import pytest
 
+from catsim import Estimate
 from catsim.item_bank import ItemBank
 from catsim.state import CatSessionState, ExposureTracker, SimulationResult, StopReason
 
@@ -15,14 +17,14 @@ def finished_session(session_id: int, items: list[int]) -> CatSessionState:
   """Return a session that administered ``items``, all answered correctly, with a constant estimate."""
   return CatSessionState(
     session_id=session_id,
-    theta_history=[0.0] * (len(items) + 1),
+    estimates=[Estimate(0.0, math.inf)] * (len(items) + 1),
     administered_item_ids=items,
     responses=[True] * len(items),
   )
 
 
 @pytest.mark.parametrize(
-  ("items", "responses", "theta_history", "match"),
+  ("items", "responses", "thetas", "match"),
   [
     pytest.param([0, 1], [True], [0.0, 0.5], "one response per administered item", id="item-without-response"),
     pytest.param([0], [True], [0.0], "one estimate per response", id="missing-estimate"),
@@ -31,7 +33,7 @@ def finished_session(session_id: int, items: list[int]) -> CatSessionState:
   ],
 )
 def test_session_state_rejects_a_history_that_does_not_match_its_responses(
-  items: list[int], responses: list[bool], theta_history: list[float], match: str
+  items: list[int], responses: list[bool], thetas: list[float], match: str
 ) -> None:
   """A session holds one response per item and one estimate more than responses.
 
@@ -39,7 +41,53 @@ def test_session_state_rejects_a_history_that_does_not_match_its_responses(
   be the estimate after its last response (or, with an empty history, would not exist).
   """
   with pytest.raises(ValueError, match=match):
-    CatSessionState(session_id=0, theta_history=theta_history, administered_item_ids=items, responses=responses)
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(theta, math.inf) for theta in thetas],
+      administered_item_ids=items,
+      responses=responses,
+    )
+
+
+@pytest.mark.parametrize(
+  "estimates",
+  [
+    pytest.param([0.0], id="bare-theta"),
+    pytest.param([{"theta": 0.0, "se": math.inf, "evaluations": 0}], id="mapping"),
+    pytest.param([Estimate(0.0, math.inf), 0.5], id="one-bare-theta-among-estimates"),
+  ],
+)
+def test_session_state_rejects_estimates_that_are_not_estimate_objects(estimates: list[object]) -> None:
+  """A session restored with bare thetas or mappings in its estimates is rejected when it is built.
+
+  Fails if such a session is accepted: its theta history, its current SE and the engine's next step would fail on it
+  later with an AttributeError.
+  """
+  n_responses = len(estimates) - 1
+
+  with pytest.raises(TypeError, match="needs Estimate entries in estimates"):
+    CatSessionState(
+      session_id=0,
+      estimates=estimates,  # type: ignore[arg-type]
+      administered_item_ids=list(range(n_responses)),
+      responses=[True] * n_responses,
+    )
+
+
+def test_a_snapshot_keeps_the_estimates_and_both_derive_the_history_from_them() -> None:
+  """A snapshot holds the session's estimates, and session and snapshot read the history and current SE from them.
+
+  Fails if the snapshot drops the standard errors or evaluation counts, or if theta_history, current_theta or
+  current_se read another field or another entry than the last.
+  """
+  estimates = [Estimate(0.0, math.inf, 0), Estimate(0.6, 1.1, 14), Estimate(0.4, 0.8, 12)]
+  state = CatSessionState(session_id=0, estimates=estimates, administered_item_ids=[2, 5], responses=[True, False])
+
+  snapshot = state.snapshot()
+
+  assert snapshot.estimates == tuple(estimates)
+  for view in (state, snapshot):
+    assert (view.theta_history, view.current_theta, view.current_se) == ((0.0, 0.6, 0.4), 0.4, 0.8)
 
 
 def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> None:
@@ -50,11 +98,11 @@ def test_session_state_turns_a_persisted_stop_reason_back_into_the_enum() -> Non
   """
   persisted = json.loads(json.dumps({"stop_reason": StopReason.STOPPER, "unknown": "paused"}))
 
-  restored = CatSessionState(session_id=0, theta_history=[0.0], stop_reason=persisted["stop_reason"])
+  restored = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)], stop_reason=persisted["stop_reason"])
 
   assert restored.stop_reason is StopReason.STOPPER
   with pytest.raises(ValueError, match="'paused' is not a valid StopReason"):
-    CatSessionState(session_id=0, theta_history=[0.0], stop_reason=persisted["unknown"])
+    CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)], stop_reason=persisted["unknown"])
 
 
 def test_exposure_tracker_gives_each_session_the_rates_of_the_sessions_before_it() -> None:
@@ -110,8 +158,8 @@ def test_simulation_result_uses_zero_for_missing_true_theta(item_bank) -> None:
   latest_estimations.
   """
   sessions = [
-    CatSessionState(session_id=0, theta_history=[0.2], true_theta=None),
-    CatSessionState(session_id=1, theta_history=[-0.4], true_theta=1.0),
+    CatSessionState(session_id=0, estimates=[Estimate(0.2, math.inf)], true_theta=None),
+    CatSessionState(session_id=1, estimates=[Estimate(-0.4, math.inf)], true_theta=1.0),
   ]
   result = SimulationResult(
     item_bank=item_bank,

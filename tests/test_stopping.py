@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -14,6 +16,11 @@ from tests.contexts import make_context
 def identical_1pl_bank(n_items: int, difficulty: float) -> ItemBank:
   """Return `n_items` copies of a 1PL item; at theta = `difficulty`, n of them give a standard error of 2/sqrt(n)."""
   return ItemBank(np.tile([1.0, difficulty, 0.0, 1.0], (n_items, 1)))
+
+
+def identical_1pl_se(n_items: int) -> float:
+  """Return the standard error of `n_items` identical 1PL items at theta = b, 2/sqrt(n), infinite for none."""
+  return 2.0 / math.sqrt(n_items) if n_items else math.inf
 
 
 class TestMaxLengthStopper:
@@ -36,7 +43,7 @@ class TestStandardErrorStopper:
       StandardErrorStopper(value)
 
   def test_first_stops_when_the_standard_error_reaches_the_target(self) -> None:
-    """A stopper that compares strictly (first stopping at 17), or reads the wrong items or theta, fails.
+    """A stopper that compares strictly (first stopping at 17) fails.
 
     At theta = b, n identical 1PL items give a standard error of 2/sqrt(n), which is 0.5 exactly at n = 16.
     """
@@ -44,9 +51,24 @@ class TestStandardErrorStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = StandardErrorStopper(0.5)
 
-    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
+    stops = [
+      stopper.stop(make_context(item_bank, list(range(n)), theta=theta, se=identical_1pl_se(n))) for n in range(21)
+    ]
 
     assert stops == [n >= 16 for n in range(21)]
+
+  def test_judges_the_standard_error_the_context_reports(self) -> None:
+    """The stopper judges the context's se, the estimator's own, not the Fisher SE of the administered items.
+
+    Sixteen identical 1PL items at theta = b have a Fisher SE of exactly 0.5, the target. A stopper that computed it
+    from the items stops at both reported errors, 0.6 and 0.4.
+    """
+    item_bank = identical_1pl_bank(16, difficulty=0.0)
+    stopper = StandardErrorStopper(0.5)
+
+    stops = [stopper.stop(make_context(item_bank, range(16), theta=0.0, se=se)) for se in (0.6, 0.4)]
+
+    assert stops == [False, True]
 
 
 class TestConfidenceIntervalStopper:
@@ -81,7 +103,9 @@ class TestConfidenceIntervalStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
+    stops = [
+      stopper.stop(make_context(item_bank, list(range(n)), theta=theta, se=identical_1pl_se(n))) for n in range(21)
+    ]
 
     assert stops == [n >= 16 for n in range(21)]
 
@@ -95,9 +119,32 @@ class TestConfidenceIntervalStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
+    stops = [
+      stopper.stop(make_context(item_bank, list(range(n)), theta=theta, se=identical_1pl_se(n))) for n in range(21)
+    ]
 
     assert not any(stops)
+
+  def test_builds_the_interval_from_the_standard_error_the_context_reports(self) -> None:
+    """The interval is theta +/- 1.96 se with the context's se, not the Fisher SE of the administered items.
+
+    Sixteen identical 1PL items at theta = b = 0 have a Fisher SE of 0.5, a half-width of 0.98 that fits between the
+    bounds -1 and 1. The reported errors 0.6 and 0.4 give half-widths of 1.18, which does not fit, and 0.78, which
+    does; a stopper that computed the interval from the items stops at both.
+    """
+    item_bank = identical_1pl_bank(16, difficulty=0.0)
+    stopper = ConfidenceIntervalStopper([-1.0, 1.0])
+
+    stops = [stopper.stop(make_context(item_bank, range(16), theta=0.0, se=se)) for se in (0.6, 0.4)]
+
+    assert stops == [False, True]
+
+  def test_does_not_stop_on_an_infinite_error_at_a_confidence_near_zero(self) -> None:
+    """There z is 0 and 0 * inf is NaN; no bound lies inside a NaN interval, so sessions ended before any item."""
+    stopper = ConfidenceIntervalStopper([0.0], confidence=1e-17)
+    unanswered = StepContext(item_bank=identical_1pl_bank(3, difficulty=0.0), rng=np.random.default_rng(0))
+
+    assert stopper.stop(unanswered) is False
 
 
 class TestStopRule:

@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
+from catsim import Estimate
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
@@ -41,7 +44,7 @@ def test_select_next_returns_unseen_item_within_bank(
   administered = list(range(administered_prefix))
   state = CatSessionState(
     session_id=0,
-    theta_history=[0.0] * (administered_prefix + 1),
+    estimates=[Estimate(0.0, math.inf)] * (administered_prefix + 1),
     administered_item_ids=administered,
     responses=[True] * administered_prefix,
   )

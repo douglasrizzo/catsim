@@ -76,6 +76,19 @@ hardest item, half the distance to it would move the estimate down after a
 correct answer, so the $\max$ and $\min$ keep it where it is instead. Dodd also
 studied fixed steps of 0.4 and 0.7, which catsim does not implement.
 
+The estimator returns a {py:class}`~catsim.context.Estimate`. Its standard error
+is the asymptotic standard error of the maximum likelihood estimate (Magis &
+Raîche, 2012, p. 4, Equation 3),
+
+$$
+SE(\hat{\theta}) = \frac{1}{\sqrt{I(\hat{\theta})}},
+$$
+
+where $I$ is the test information of the administered items, and it is infinite
+where $I(\hat{\theta}) = 0$. After Dodd's step it is the same formula at the
+stepped estimate. Its evaluation count is the number of log-likelihood
+evaluations SciPy's search made, and 0 after Dodd's step, which evaluates none.
+
 ## Parameters
 
 ```{eval-rst}
@@ -101,10 +114,10 @@ Any correct implementation must satisfy the following properties:
 
 1. For mixed response patterns, it returns a local maximum of the log-likelihood inside the search bounds, to within `tol`.
 2. For all-correct and all-incorrect patterns, it returns Dodd's step, which never moves against the responses and lies inside the search bounds.
-3. The estimator increments its call counter on every estimation request.
-4. Evaluation counts are the optimizer's reported function evaluations.
+3. The standard error is $1/\sqrt{I(\hat{\theta})}$ at the returned estimate, or `math.inf` where the information is 0.
+4. The evaluation count is the optimizer's reported function evaluations, and 0 for Dodd's step.
 5. A `tol` that is not positive is rejected at construction.
-6. With no administered items, it returns the context's `theta` unchanged.
+6. With no administered items, it returns the context's `theta` and `se` unchanged, after no evaluation.
 
 ## References
 
@@ -121,6 +134,8 @@ Chang, H.-H., & Ying, Z. (1996). A global information approach to computerized a
 Veerkamp, W. J. J., & Berger, M. P. F. (1994). *Some new item selection criteria for adaptive testing* (Research Report 94-6). Enschede: University of Twente. Open copy: [University of Twente](https://ris.utwente.nl/ws/files/5155670/RR_94-6.pdf).
 
 Brent, R. P. (2002). *Algorithms for Minimization Without Derivatives*. Mineola, NY: Dover Publications. A reprint of the 1973 Prentice-Hall edition, a scan of which is on the [author's page](https://maths-people.anu.edu.au/~brent/pub/pub011.html).
+
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 ## API Reference
 

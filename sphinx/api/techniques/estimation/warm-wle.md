@@ -71,9 +71,19 @@ sign, the estimate is the bound it points to. This mirrors `catR` (Magis and
 Raîche, 2012), whose
 [`thetaEst.R`](https://github.com/cran/catR/blob/master/R/thetaEst.R) solves the
 same equation with `uniroot`; catsim adds the explicit handling of multiple
-roots. Magis
-and Raîche (2012, p. 6, Equation 14) also give the WLE's standard error, which
-catsim does not compute.
+roots.
+
+The estimator returns a {py:class}`~catsim.context.Estimate`. Its standard error
+is the Fisher one at the estimate, $1/\sqrt{I(\hat{\theta})}$, infinite where
+the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
+14), who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since
+version 3.0 its `semTheta` gives the WLE the maximum likelihood formula, because
+the corrected one sometimes led to mathematical problems ([catR's
+NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
+default `sem.type = "classic"` still does. The corrected sum can be negative,
+which leaves no standard error. The evaluation count is the number of
+modified-score evaluations: the 121 scan points, Brent's refinement of each
+bracketed root and, when several roots compete, the integrals that rank them.
 
 ## Parameters
 
@@ -97,7 +107,7 @@ catsim does not compute.
 
 Any correct implementation must satisfy the following properties:
 
-1. With no administered items, the estimator returns the input starting value unchanged.
+1. With no administered items, the estimator returns the context's `theta` and `se` unchanged, after no evaluation.
 2. Every interior estimate is a root of the modified score equation, including for items with guessing.
 3. For items without guessing or slipping, the estimate maximizes $L(\theta)\sqrt{I(\theta)}$.
 4. The estimate is finite and inside the search interval for every response pattern, including
@@ -107,6 +117,7 @@ Any correct implementation must satisfy the following properties:
    is small, and smaller than the MLE's first-order bias $-J/(2I^2)$ wherever that bias is
    non-negligible. With guessing and few items, the WLE at low ability is pulled upward, toward
    the items, so no unconditional bias guarantee is made for that case.
+7. The standard error is $1/\sqrt{I(\hat{\theta})}$ at the returned estimate, or `math.inf` where the information is 0.
 
 ## References
 

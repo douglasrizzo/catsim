@@ -16,6 +16,7 @@ from hypothesis.stateful import (
   run_state_machine_as_test,
 )
 
+from catsim import Estimate
 from catsim.engine import CatEngine, RunContext
 from catsim.estimation import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
@@ -42,8 +43,8 @@ class RecordingEstimator:
 
   theta: float
 
-  def estimate(self, context) -> float:  # noqa: ARG002
-    return float(self.theta)
+  def estimate(self, context) -> Estimate:  # noqa: ARG002
+    return Estimate(theta=float(self.theta), se=1.0)
 
 
 class QueueOrderSelector:

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import numpy
 
 from . import cat
+from .context import Estimate
 
 if TYPE_CHECKING:
   from collections.abc import Hashable
@@ -34,19 +35,24 @@ class CatSessionState:
   """Mutable runtime state for a single examinee CAT session.
 
   ``session_id`` is whatever hashable value the application identifies the session by, such as an
-  int, a str or a UUID. ``theta_history`` starts with the initial estimate and gains one estimate
-  per response; its last entry is the current estimate. A session runs while ``stop_reason`` is
-  None.
+  int, a str or a UUID. ``estimates`` starts with the initial estimate (which
+  :meth:`~catsim.engine.CatEngine.start_session` records with an infinite standard error and no
+  evaluations) and gains the :class:`~catsim.context.Estimate` the estimator returned for each
+  response; its last entry is the current estimate. A restored session's estimates are trusted
+  as given. A session runs
+  while ``stop_reason`` is None.
 
   Raises
   ------
   ValueError
       If the session does not have one response per administered item and one more estimate than
       responses, or if ``stop_reason`` is not a :class:`StopReason` value.
+  TypeError
+      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`.
   """
 
   session_id: Hashable
-  theta_history: list[float]
+  estimates: list[Estimate]
   true_theta: float | None = None
   administered_item_ids: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
@@ -58,7 +64,11 @@ class CatSessionState:
     # would fail half-way through a step, and a caller's lists would change under the caller.
     self.administered_item_ids = list(self.administered_item_ids)
     self.responses = list(self.responses)
-    self.theta_history = list(self.theta_history)
+    self.estimates = list(self.estimates)
+    if not all(isinstance(estimate, Estimate) for estimate in self.estimates):
+      # A session restored from storage needs its estimates rebuilt, not bare thetas or mappings.
+      msg = f"Session {self.session_id} needs Estimate entries in estimates, got {self.estimates!r}"
+      raise TypeError(msg)
     if self.stop_reason is not None:
       # A stop reason restored from storage comes back as its string value.
       self.stop_reason = StopReason(self.stop_reason)
@@ -69,17 +79,27 @@ class CatSessionState:
         f"len(administered_item_ids)={len(self.administered_item_ids)} and len(responses)={n_responses}"
       )
       raise ValueError(msg)
-    if len(self.theta_history) != n_responses + 1:
+    if len(self.estimates) != n_responses + 1:
       msg = (
         f"Session {self.session_id} needs the initial estimate and one estimate per response in "
-        f"theta_history, got len(theta_history)={len(self.theta_history)} and len(responses)={n_responses}"
+        f"estimates, got len(estimates)={len(self.estimates)} and len(responses)={n_responses}"
       )
       raise ValueError(msg)
 
   @property
+  def theta_history(self) -> tuple[float, ...]:
+    """Return the ability estimates in order, the initial one first."""
+    return tuple(estimate.theta for estimate in self.estimates)
+
+  @property
   def current_theta(self) -> float:
-    """Return the current ability estimate, the last entry of ``theta_history``."""
-    return self.theta_history[-1]
+    """Return the current ability estimate, that of the last entry of ``estimates``."""
+    return self.estimates[-1].theta
+
+  @property
+  def current_se(self) -> float:
+    """Return the standard error of the current ability estimate."""
+    return self.estimates[-1].se
 
   @property
   def is_stopped(self) -> bool:
@@ -95,7 +115,7 @@ class CatSessionState:
     """Return an immutable copy of the current session state."""
     return CatSessionSnapshot(
       session_id=self.session_id,
-      theta_history=tuple(self.theta_history),
+      estimates=tuple(self.estimates),
       true_theta=self.true_theta,
       administered_item_ids=tuple(self.administered_item_ids),
       responses=tuple(self.responses),
@@ -108,16 +128,26 @@ class CatSessionSnapshot:
   """Immutable, hashable copy of a session at a specific point in time."""
 
   session_id: Hashable
-  theta_history: tuple[float, ...]
+  estimates: tuple[Estimate, ...]
   true_theta: float | None
   administered_item_ids: tuple[int, ...]
   responses: tuple[bool, ...]
   stop_reason: StopReason | None
 
   @property
+  def theta_history(self) -> tuple[float, ...]:
+    """Return the ability estimates up to the snapshot, the initial one first."""
+    return tuple(estimate.theta for estimate in self.estimates)
+
+  @property
   def current_theta(self) -> float:
     """Return the ability estimate at the time of the snapshot."""
-    return self.theta_history[-1]
+    return self.estimates[-1].theta
+
+  @property
+  def current_se(self) -> float:
+    """Return the standard error of the ability estimate at the time of the snapshot."""
+    return self.estimates[-1].se
 
   @property
   def is_stopped(self) -> bool:
@@ -230,7 +260,7 @@ class SimulationResult:
   @property
   def estimations(self) -> list[list[float]]:
     """Return theta history for each session."""
-    return [session.theta_history for session in self.sessions]
+    return [list(session.theta_history) for session in self.sessions]
 
   @property
   def response_vectors(self) -> list[list[bool]]:

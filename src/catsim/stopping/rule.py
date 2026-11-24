@@ -53,13 +53,17 @@ class StopRule(BaseStopper):
   StopRule(StandardErrorStopper(max_se=0.5), MaxLengthStopper(max_items=20), min_items=5)
   >>> bank = ItemBank.generate_item_bank(100, seed=0)
   >>> rng = numpy.random.default_rng(0)
-  >>> ten = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10)
+  >>> ten = StepContext(
+  ...   item_bank=bank, rng=rng, administered_items=tuple(range(10)), responses=(True,) * 10, se=0.6
+  ... )
   >>> rule.stop(ten)
   False
 
-  After 20 items the standard error is still above 0.5, so the length cap is what ends the test:
+  If the standard error is still above 0.5 after 20 items, the length cap is what ends the test:
 
-  >>> twenty = StepContext(item_bank=bank, rng=rng, administered_items=tuple(range(20)), responses=(True,) * 20)
+  >>> twenty = StepContext(
+  ...   item_bank=bank, rng=rng, administered_items=tuple(range(20)), responses=(True,) * 20, se=0.6
+  ... )
   >>> rule.satisfied(twenty)
   (MaxLengthStopper(max_items=20),)
   """
@@ -112,8 +116,10 @@ class StopRule(BaseStopper):
   def satisfied(self, context: StepContext) -> tuple[BaseStopper, ...]:
     """Return the stoppers that hold for a session, regardless of `min_items`.
 
-    Called with a finished session's items and final estimate, it tells which criteria
-    ended the session, for example precision or the length cap.
+    Called with a finished session's items, final estimate and its standard error
+    (``se=session.current_se``; a context built without it has an infinite error, which no
+    precision stopper accepts), it tells which criteria ended the session, for example precision
+    or the length cap.
 
     Parameters
     ----------

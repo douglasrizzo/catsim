@@ -4,7 +4,7 @@ import numpy
 from scipy.optimize import minimize_scalar
 
 from .. import irt
-from ..context import StepContext
+from ..context import Estimate, StepContext
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
 from .base import BaseEstimator
@@ -90,7 +90,6 @@ class NumericalSearchEstimator(BaseEstimator):
     ValueError
         If ``tol`` is not positive, or if ``bounds`` is not a finite interval with low < high.
     """
-    super().__init__()
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
@@ -98,10 +97,14 @@ class NumericalSearchEstimator(BaseEstimator):
     """Return the estimator as a constructor call that names every argument."""
     return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
-  def estimate(self, context: StepContext) -> float:
+  def estimate(self, context: StepContext) -> Estimate:
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 
-    With no administered item, the estimate is ``context.theta``, unchanged.
+    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test
+    information at the estimate (:cite:t:`Magis12`, Eq. 3, p. 4), or ``math.inf`` where the
+    information is 0. The evaluation count is the number of log-likelihood evaluations SciPy's
+    search made; Dodd's step makes none. With no administered item, the estimate is
+    ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 
     Parameters
     ----------
@@ -110,28 +113,26 @@ class NumericalSearchEstimator(BaseEstimator):
 
     Returns
     -------
-    float
-        The updated ability estimate :math:`\hat\theta`, inside ``bounds``.
+    Estimate
+        The updated ability estimate :math:`\hat\theta`, inside ``bounds``, its standard error and
+        the number of log-likelihood evaluations.
     """
-    self._calls += 1
-    self._last_evaluations = 0
-
     responses = context.responses
     if not responses:
-      return float(context.theta)
+      return Estimate(theta=float(context.theta), se=context.se, evaluations=0)
 
+    items = context.item_bank.get_items(context.administered_items)
     if len(set(responses)) == 1:
-      return _dodd(context.theta, context.item_bank, responses[0], self._bounds)
+      theta = _dodd(context.theta, context.item_bank, responses[0], self._bounds)
+      return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
     res = minimize_scalar(
       irt.negative_log_likelihood,
       bounds=self._bounds,
       method="bounded",
-      args=(responses, context.item_bank.get_items(context.administered_items)),
+      args=(responses, items),
       # SciPy's bounded method takes its absolute tolerance only through options
       options={"xatol": self._tol},
     )
-    self._last_evaluations = res.nfev
-    self._total_evaluations += self._last_evaluations
-
-    return res.x
+    theta = float(res.x)
+    return Estimate(theta=theta, se=irt.see(theta, items), evaluations=int(res.nfev))

@@ -1,7 +1,8 @@
-"""What a per-step strategy may read about the session it serves."""
+"""What a per-step strategy may read about the session it serves, and what an estimator returns."""
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -36,8 +37,9 @@ class StepContext:
   >>> context = StepContext(
   ...   item_bank=bank, rng=numpy.random.default_rng(0), administered_items=(3, 7), responses=(True, False)
   ... )
-  >>> round(EAPEstimator().estimate(context), 3)
-  -0.427
+  >>> estimate = EAPEstimator().estimate(context)
+  >>> round(estimate.theta, 3), round(estimate.se, 3), estimate.evaluations
+  (-0.427, 0.978, 121)
 
   Wrappers pass a changed copy on with :func:`dataclasses.replace`, which checks it the same way.
 
@@ -61,6 +63,9 @@ class StepContext:
   theta : float, optional
       The current ability estimate. For the estimator, it is the estimate before the newest
       response, the starting point of its update. Default is 0.
+  se : float, optional
+      The standard error of ``theta``, as its estimator reported it. For the estimator, it is the
+      error before the newest response. Default is ``math.inf``, the error before any response.
   exposure_rates : numpy.ndarray or None, optional
       Each item's exposure rate over the other sessions of the run (ADR-0003), which selectors
       compare with their ``r_max`` cap. None when the run has no exposure tracker, which means no
@@ -85,6 +90,7 @@ class StepContext:
   responses: tuple[bool, ...] = ()
   excluded_items: tuple[int, ...] = ()
   theta: float = 0.0
+  se: float = math.inf
   exposure_rates: FloatArray | None = None
 
   def __post_init__(self) -> None:
@@ -99,3 +105,44 @@ class StepContext:
       if items and not (min(items) >= 0 and max(items) < n_items):
         msg = f"{name} must hold item indices between 0 and {n_items - 1}, got {items}"
         raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class Estimate:
+  """An ability estimate, as an estimator returns it and a session records it.
+
+  Parameters
+  ----------
+  theta : float
+      The ability estimate.
+  se : float
+      Its standard error, by the estimator's own formula (ADR-0004): finite, or ``math.inf`` when
+      the responses carry no information about the ability, as before any response.
+  evaluations : int or None, optional
+      How many times the estimator evaluated its objective (the likelihood, the posterior or the
+      estimating equation) for this estimate, for comparing the cost of estimators. None where the
+      count has no meaning. Default is None.
+
+  Raises
+  ------
+  ValueError
+      If ``theta`` is not finite, ``se`` is negative or NaN, or ``evaluations`` is negative.
+  """
+
+  theta: float
+  se: float
+  evaluations: int | None = None
+
+  def __post_init__(self) -> None:
+    """Reject an estimate that the stoppers and the session could not use."""
+    # A NaN error would make every comparison False: a confidence-interval stopper would stop at
+    # once and a standard-error stopper never.
+    if not math.isfinite(self.theta):
+      msg = f"theta must be finite, got {self.theta}"
+      raise ValueError(msg)
+    if not self.se >= 0:
+      msg = f"se must be non-negative (math.inf allowed), got {self.se}"
+      raise ValueError(msg)
+    if self.evaluations is not None and self.evaluations < 0:
+      msg = f"evaluations must be non-negative, got {self.evaluations}"
+      raise ValueError(msg)

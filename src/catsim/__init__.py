@@ -2,7 +2,7 @@
 
 import importlib.metadata
 
-from .context import StepContext
+from .context import Estimate, StepContext
 from .engine import CatEngine, RunContext, SimulatedResponseProvider
 from .exceptions import NoItemsAvailableError
 from .item_bank import ItemBank
@@ -20,6 +20,7 @@ __all__ = [
   "CatSessionSnapshot",
   "CatSessionState",
   "CatStepResult",
+  "Estimate",
   "ExposureTracker",
   "ItemBank",
   "NoItemsAvailableError",

@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import dataclasses
+import math
 import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 import numpy
 
-from .context import StepContext
+from .context import Estimate, StepContext
 from .exceptions import NoItemsAvailableError
 from .irt import icc
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
@@ -75,7 +76,8 @@ def _step_context(state: CatSessionState, item_bank: ItemBank, context: RunConte
   Returns
   -------
   StepContext
-      The session's items, responses and current estimate, with no excluded items.
+      The session's items, responses and current estimate with its standard error, with no
+      excluded items.
   """
   tracker = context.exposure_tracker
   return StepContext(
@@ -84,6 +86,7 @@ def _step_context(state: CatSessionState, item_bank: ItemBank, context: RunConte
     administered_items=tuple(state.administered_item_ids),
     responses=tuple(state.responses),
     theta=state.current_theta,
+    se=state.current_se,
     exposure_rates=None if tracker is None else tracker.rates(),
   )
 
@@ -129,12 +132,14 @@ class CatEngine:
     Returns
     -------
     CatSessionState
-        A running session whose theta history holds the initial estimate.
+        A running session whose estimate history holds the initial estimate, with an infinite
+        standard error.
     """
     initial_theta = float(self._initializer.initialize(item_bank=item_bank, rng=context.rng))
     if context.exposure_tracker is not None:
       context.exposure_tracker.start_session()
-    return CatSessionState(session_id=session_id, theta_history=[initial_theta], true_theta=true_theta)
+    initial = Estimate(theta=initial_theta, se=math.inf, evaluations=0)
+    return CatSessionState(session_id=session_id, estimates=[initial], true_theta=true_theta)
 
   def should_stop(self, state: CatSessionState, item_bank: ItemBank, context: RunContext) -> bool:
     """Return whether the session satisfies the stopping criterion.
@@ -235,7 +240,8 @@ class CatEngine:
         If the session has stopped, the item index is outside the bank or the item was already
         administered in this session.
     TypeError
-        If the item index is not an integer, or the response is not a ``bool`` or ``numpy.bool_``.
+        If the item index is not an integer, the response is not a ``bool`` or ``numpy.bool_``, or
+        the estimator returns something other than an :class:`~catsim.context.Estimate`.
     """
     if state.is_stopped:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
@@ -264,14 +270,24 @@ class CatEngine:
       administered_items=(*current.administered_items, item_id),
       responses=(*current.responses, response),
     )
-    updated_theta = float(self._estimator.estimate(answered))
-    stopped = bool(self._stopper.stop(dataclasses.replace(answered, theta=updated_theta)))
+    estimate = self._estimator.estimate(answered)
+    if not isinstance(estimate, Estimate):
+      # An estimator written for the float-returning contract would otherwise fail on .theta.
+      msg = f"{type(self._estimator).__name__}.estimate must return an Estimate, got {type(estimate).__name__}"
+      raise TypeError(msg)
+    # The session holds Python scalars, whatever NumPy types a custom estimator puts in its Estimate.
+    estimate = Estimate(
+      theta=float(estimate.theta),
+      se=float(estimate.se),
+      evaluations=None if estimate.evaluations is None else int(estimate.evaluations),
+    )
+    stopped = bool(self._stopper.stop(dataclasses.replace(answered, theta=estimate.theta, se=estimate.se)))
 
     state.administered_item_ids.append(item_id)
     state.responses.append(response)
     if context.exposure_tracker is not None:
       context.exposure_tracker.record(item_id)
-    state.theta_history.append(updated_theta)
+    state.estimates.append(estimate)
     if stopped:
       state.stop_reason = StopReason.STOPPER
 

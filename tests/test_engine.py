@@ -4,21 +4,23 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import math
 from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
 import pytest
 
-from catsim import StepContext
+from catsim import Estimate, StepContext
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import BaseInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import BaseSelector, MaxInfoSelector, RandomSelector
+from catsim.selection import BaseSelector, LinearSelector, MaxInfoSelector, MEISelector, RandomSelector
 from catsim.selection.base import remaining
 from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, MaxLengthStopper
+from tests.contexts import make_context
 
 
 @dataclass
@@ -29,6 +31,16 @@ class FixedResponseProvider:
 
   def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
     return self.response
+
+
+@dataclass
+class ScriptedResponseProvider:
+  """Response provider that gives the n-th scripted response to the n-th item, whichever item it is."""
+
+  responses: list[bool]
+
+  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+    return self.responses[len(state.responses)]
 
 
 class ExhaustedSelector:
@@ -71,17 +83,27 @@ class RecordingEstimator:
   """Estimator stub that records the context it is given."""
 
   theta: float
+  se: float = 0.5
+  evaluations: int | None = None
   seen: StepContext | None = None
 
-  def estimate(self, context: StepContext) -> float:
+  def estimate(self, context: StepContext) -> Estimate:
     self.seen = context
-    return self.theta
+    return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
+
+
+class FloatEstimator:
+  """Estimator stub written for the contract where estimate returned a bare float."""
+
+  def estimate(self, context: StepContext) -> float:
+    del context
+    return 0.5
 
 
 class FailingEstimator:
   """Estimator stub that fails on every call."""
 
-  def estimate(self, context: StepContext) -> float:
+  def estimate(self, context: StepContext) -> Estimate:
     del context
     msg = "estimation failed"
     raise ValueError(msg)
@@ -149,8 +171,8 @@ class LowestIndexSelector(BaseSelector):
 class CorrectCountEstimator(BaseEstimator):
   """Custom estimator: the number of correct responses."""
 
-  def estimate(self, context: StepContext) -> float:
-    return float(sum(context.responses))
+  def estimate(self, context: StepContext) -> Estimate:
+    return Estimate(theta=float(sum(context.responses)), se=1.0)
 
 
 class ThreeItemStopper(BaseStopper):
@@ -189,7 +211,7 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   assert session.session_id == 7
   assert session.current_theta == pytest.approx(1.25)
   assert session.true_theta == pytest.approx(-0.5)
-  assert session.theta_history == [pytest.approx(1.25)]
+  assert session.theta_history == (pytest.approx(1.25),)
   assert session.stop_reason is None
 
 
@@ -211,14 +233,17 @@ def test_start_session_counts_a_session_in_the_tracker_only_once_it_has_started(
 
 
 def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
-  """The stopper sees the session's bank, items, responses and latest estimate, and the run's generator.
+  """The stopper sees the session's bank, items, responses, latest estimate and its SE, and the run's generator.
 
   Fails if any of them is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
   """
   stopper = RecordingStopper(should_stop=True)
   engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
   state = CatSessionState(
-    session_id=3, theta_history=[0.0, 0.5, 1.75], administered_item_ids=[2, 4], responses=[True, False]
+    session_id=3,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(1.75, 0.6)],
+    administered_item_ids=[2, 4],
+    responses=[True, False],
   )
   rng = np.random.default_rng(5)
 
@@ -228,12 +253,12 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   assert stopper.seen.item_bank is item_bank
   assert stopper.seen.rng is rng
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((2, 4), (True, False))
-  assert stopper.seen.theta == pytest.approx(1.75)
+  assert (stopper.seen.theta, stopper.seen.se) == (1.75, 0.6)
 
 
 def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
-  """select_next hands the selector the bank, the session's items, responses and current estimate, the generator, the
-  rates and no excluded items.
+  """select_next hands the selector the bank, the session's items, responses and current estimate with its SE, the
+  generator, the rates and no excluded items.
 
   Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
   input is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
@@ -249,7 +274,10 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   context = RunContext(rng=rng, exposure_tracker=tracker)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
   state = CatSessionState(
-    session_id=0, theta_history=[0.0, 0.5, -0.25], administered_item_ids=[1, 2], responses=[True, False]
+    session_id=0,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(-0.25, 0.6)],
+    administered_item_ids=[1, 2],
+    responses=[True, False],
   )
 
   selected = engine.select_next(state, item_bank, context)
@@ -258,7 +286,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   assert selector.seen.item_bank is item_bank
   assert (selector.seen.administered_items, selector.seen.responses) == ((1, 2), (True, False))
   assert selector.seen.excluded_items == ()
-  assert selector.seen.theta == pytest.approx(-0.25)
+  assert (selector.seen.theta, selector.seen.se) == (-0.25, 0.6)
   assert selector.seen.rng is rng
   expected_rates = np.zeros(item_bank.n_items)
   expected_rates[[0, 3]] = [1.0, 0.5]
@@ -335,22 +363,41 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert result.session.theta_history == pytest.approx((0.7, 1.1))
 
 
+def test_apply_response_starts_the_estimator_from_the_current_estimate_and_its_se(item_bank) -> None:
+  """The estimator gets the session's current theta and SE, and the session then reports the ones it returned.
+
+  The session's current estimate is 0.5 with an SE of 0.9, unlike StepContext's defaults of 0 and infinity. Fails if
+  the estimator starts from the defaults or the initial estimate, or if current_se is not the SE the estimator
+  returned.
+  """
+  estimator = RecordingEstimator(theta=1.1, se=0.42)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
+  session = CatSessionState(
+    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9)], administered_item_ids=[1], responses=[True]
+  )
+
+  engine.apply_response(session, item_bank, item_id=3, response=False, context=RunContext(rng=np.random.default_rng(0)))
+
+  assert (estimator.seen.theta, estimator.seen.se) == (0.5, 0.9)
+  assert (session.current_theta, session.current_se) == (1.1, 0.42)
+
+
 def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   """A stopper satisfied by the new state ends the session, and the step result reports it.
 
-  Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate), if
-  the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports the
-  session still running.
+  Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate or its
+  SE), if the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports
+  the session still running.
   """
   stopper = RecordingStopper(True)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3), stopper)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3, se=0.42), stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 
   result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
 
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
-  assert stopper.seen.theta == pytest.approx(0.3)
+  assert (stopper.seen.theta, stopper.seen.se) == (0.3, 0.42)
   assert session.stop_reason is StopReason.STOPPER
   assert result.stopped is True
   assert result.stop_reason is StopReason.STOPPER
@@ -359,21 +406,28 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
 
 
 @pytest.mark.parametrize(
-  ("estimator", "stopper", "error"),
+  ("estimator", "stopper", "exception", "error"),
   [
-    (FailingEstimator(), RecordingStopper(False), "estimation failed"),
-    (RecordingEstimator(0.5), FailingStopper(), "stopping failed"),
+    (FailingEstimator(), RecordingStopper(False), ValueError, "estimation failed"),
+    (
+      FloatEstimator(),
+      RecordingStopper(False),
+      TypeError,
+      "FloatEstimator.estimate must return an Estimate, got float",
+    ),
+    (RecordingEstimator(0.5), FailingStopper(), ValueError, "stopping failed"),
   ],
-  ids=["estimator", "stopper"],
+  ids=["estimator", "estimator-returning-a-float", "stopper"],
 )
 def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
-  item_bank, estimator, stopper, error
+  item_bank, estimator, stopper, exception, error
 ) -> None:
   """A response whose estimate or stop decision fails is not applied at all.
 
   Fails if the item, the response or its exposure is recorded before the estimator and the
   stopper run: the half-applied step left the session with one more response than estimates, and
-  retrying the item was rejected as already administered.
+  retrying the item was rejected as already administered. An estimator that returns a float
+  instead of an Estimate must fail with a TypeError that says so, not an AttributeError.
   """
   tracker = ExposureTracker(item_bank.n_items)
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
@@ -381,7 +435,7 @@ def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
   before = copy.deepcopy(session)
 
-  with pytest.raises(ValueError, match=error):
+  with pytest.raises(exception, match=error):
     engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
 
   assert session == before
@@ -430,14 +484,14 @@ def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
 def test_session_state_holds_builtin_python_values(item_bank) -> None:
   """The engine stores Python scalars whatever numeric types the strategies and the examinee return.
 
-  Fails if an int initial theta, a ``numpy.float64`` estimate (as NumericalSearchEstimator
-  returns), a ``numpy.int64`` item index (from the selector, or passed to apply_response by the
-  caller), a ``numpy.bool_`` response or a ``numpy.bool_`` stop decision is stored as given.
+  Fails if an int initial theta, an estimate whose theta, standard error or evaluation count is a NumPy scalar, a
+  ``numpy.int64`` item index (from the selector, or passed to apply_response by the caller), a ``numpy.bool_``
+  response or a ``numpy.bool_`` stop decision is stored as given.
   """
   engine = CatEngine(
     RecordingInitializer(theta=0),
     RecordingSelector(item_id=np.int64(3)),
-    RecordingEstimator(theta=np.float64(0.25)),
+    RecordingEstimator(theta=np.float64(0.25), se=np.float64(0.4), evaluations=np.int64(7)),
     RecordingStopper(np.False_),
   )
   context = RunContext(rng=np.random.default_rng(42))
@@ -446,9 +500,11 @@ def test_session_state_holds_builtin_python_values(item_bank) -> None:
   result = engine.step(session, item_bank, FixedResponseProvider(np.True_), context)
   engine.apply_response(session, item_bank, item_id=np.int64(5), response=np.False_, context=context)
 
-  assert session.theta_history == [0.0, 0.25, 0.25]
+  assert session.theta_history == (0.0, 0.25, 0.25)
   assert [type(theta) for theta in session.theta_history] == [float, float, float]
   assert type(session.current_theta) is float
+  assert session.estimates[1:] == [Estimate(0.25, 0.4, 7)] * 2
+  assert [(type(e.theta), type(e.se), type(e.evaluations)) for e in session.estimates[1:]] == [(float, float, int)] * 2
   assert session.administered_item_ids == [3, 5]
   assert [type(item) for item in session.administered_item_ids] == [int, int]
   assert session.responses == [True, False]
@@ -497,7 +553,7 @@ def test_a_session_rebuilt_from_a_snapshot_takes_the_next_step(item_bank) -> Non
   assert (rebuilt.administered_item_ids, rebuilt.responses, rebuilt.theta_history) == (
     [3, 4],
     [True, False],
-    [0.0, 0.5, 0.5],
+    (0.0, 0.5, 0.5),
   )
   assert (snapshot.administered_item_ids, snapshot.responses, snapshot.theta_history) == ((3,), (True,), (0.0, 0.5))
 
@@ -535,7 +591,7 @@ def test_a_step_result_cannot_be_changed(item_bank) -> None:
 
   with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
     result.response = False  # type: ignore[misc]
-  for sequence in (result.session.administered_item_ids, result.session.responses, result.session.theta_history):
+  for sequence in (result.session.administered_item_ids, result.session.responses, result.session.estimates):
     with pytest.raises(AttributeError, match="object has no attribute 'append'"):
       sequence.append(sequence[0])  # type: ignore[attr-defined]
   assert (result.session.administered_item_ids, result.session.responses) == ((3,), (True,))
@@ -571,7 +627,7 @@ def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> 
   assert (result.selected_item_id, result.response, result.updated_theta) == (4, False, pytest.approx(0.7))
   assert session.administered_item_ids == [4]
   assert session.responses == [False]
-  assert session.theta_history == [0.0, pytest.approx(0.7)]
+  assert session.theta_history == (0.0, pytest.approx(0.7))
 
 
 def test_run_session_stops_at_fixed_length(
@@ -616,7 +672,7 @@ def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
   """Simulated responses require a true theta on the session."""
   provider = SimulatedResponseProvider()
   context = RunContext(rng=np.random.default_rng(42))
-  state = CatSessionState(session_id=0, theta_history=[0.0])
+  state = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)])
 
   with pytest.raises(ValueError, match="true_theta is required") as exc_info:
     provider.answer(state, item_bank, 0, context)
@@ -647,7 +703,7 @@ def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_pro
   item_bank = ItemBank(
     np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
   )
-  state = CatSessionState(session_id=0, theta_history=[-1.5], true_theta=1.5)
+  state = CatSessionState(session_id=0, estimates=[Estimate(-1.5, math.inf)], true_theta=1.5)
   context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
 
   assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
@@ -700,7 +756,9 @@ def test_apply_response_rejects_duplicate_items(
   """A session cannot administer the same item twice."""
   engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = CatSessionState(session_id=0, theta_history=[0.0, 0.5], administered_item_ids=[0], responses=[True])
+  session = CatSessionState(
+    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)], administered_item_ids=[0], responses=[True]
+  )
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
     engine.apply_response(session, item_bank, 0, False, context)
@@ -755,5 +813,56 @@ def test_custom_strategies_written_against_the_base_classes_run_a_session(item_b
   engine.run_session(session, item_bank, FixedResponseProvider(True), context)
 
   assert session.administered_item_ids == [0, 1, 2]
-  assert session.theta_history == [0.5, 1.0, 2.0, 3.0]
+  assert session.theta_history == (0.5, 1.0, 2.0, 3.0)
   assert session.stop_reason is StopReason.STOPPER
+
+
+MIXED_PATTERN = [True, False, False, True, True, False]
+
+
+def _run_scripted_session(item_bank: ItemBank, selector: BaseSelector, estimator: BaseEstimator) -> CatSessionState:
+  """Return a session that answered MIXED_PATTERN to the items the selector chose, from an initial estimate of 0."""
+  engine = CatEngine(RecordingInitializer(0.0), selector, estimator, MaxLengthStopper(len(MIXED_PATTERN)))
+  context = RunContext(rng=np.random.default_rng(0))
+  session = engine.start_session(0, item_bank, context)
+  return engine.run_session(session, item_bank, ScriptedResponseProvider(MIXED_PATTERN), context)
+
+
+def test_a_session_records_the_estimate_the_estimator_returns_for_each_step(item_bank) -> None:
+  """Each recorded Estimate, evaluation count included, is what the estimator returns for that step's context.
+
+  The context of step k is rebuilt here from the session's first k items and responses and its estimate k - 1, and
+  the estimator called on it directly. Fails if the engine records a count of its own, such as a running total over
+  the session or the estimator's lifetime, or another theta or SE than the estimator's. The first answer alone takes
+  Dodd's step, which evaluates nothing; every later step searches, so its count is not 0.
+  """
+  estimator = NumericalSearchEstimator()
+  session = _run_scripted_session(item_bank, MaxInfoSelector(), estimator)
+  items, responses, estimates = session.administered_item_ids, session.responses, session.estimates
+
+  direct = [
+    estimator.estimate(
+      make_context(item_bank, items[:k], responses[:k], theta=estimates[k - 1].theta, se=estimates[k - 1].se)
+    )
+    for k in range(1, len(responses) + 1)
+  ]
+
+  assert estimates[0] == Estimate(0.0, math.inf, 0)
+  assert estimates[1:] == direct
+  assert all(estimate.evaluations for estimate in direct[1:])
+
+
+def test_mei_look_ahead_adds_nothing_to_the_recorded_estimates(item_bank) -> None:
+  """A session selected by MEISelector records what a session given the same items without look-ahead records.
+
+  MEISelector estimates twice per candidate item with the engine's own estimator here. Fails if those look-ahead
+  estimates add to the evaluation counts the session records, as they did to the estimator's shared counters, or
+  change the recorded estimates.
+  """
+  estimator = NumericalSearchEstimator()
+  mei = _run_scripted_session(item_bank, MEISelector(estimator=estimator), estimator)
+
+  replay = _run_scripted_session(item_bank, LinearSelector(mei.administered_item_ids), estimator)
+
+  assert replay.administered_item_ids == mei.administered_item_ids
+  assert replay.estimates == mei.estimates

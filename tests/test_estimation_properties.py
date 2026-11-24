@@ -42,7 +42,7 @@ def test_estimate_is_a_likelihood_maximum_on_the_ability_scale(
   bank = ItemBank(params, validate=True)
   items = bank.get_items(administered_items)
   estimator = NumericalSearchEstimator()
-  theta = estimator.estimate(make_context(bank, administered_items, response_vector, theta=0.0))
+  theta = estimator.estimate(make_context(bank, administered_items, response_vector, theta=0.0)).theta
   neighbours = np.clip([theta - 1e-3, theta + 1e-3], THETA_MIN_EXTENDED, THETA_MAX_EXTENDED)
 
   assert THETA_MIN_EXTENDED <= theta <= THETA_MAX_EXTENDED

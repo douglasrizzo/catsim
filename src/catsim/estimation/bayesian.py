@@ -15,6 +15,7 @@ import numpy
 from scipy.optimize import minimize_scalar
 
 from .. import irt
+from ..context import Estimate
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..typing import FloatArray
 from .base import BaseEstimator
@@ -24,6 +25,8 @@ if TYPE_CHECKING:
 
 LogPrior = Callable[[FloatArray], FloatArray]
 _MIN_QUADRATURE_NODES = 2
+# Step of the central difference that gives a prior's curvature at the MAP estimate.
+_CURVATURE_STEP = 1e-4
 
 __all__ = [
   "EAPEstimator",
@@ -310,7 +313,6 @@ class EAPEstimator(BaseEstimator):
     grid: QuadratureGrid | None = None,
     log_prior: LogPrior | None = None,
   ) -> None:
-    super().__init__()
     # Kept as given for the repr, where a default shows as None: the default grid's repr would list every
     # node, and a prior function has no source form.
     self._grid_argument = grid
@@ -322,28 +324,32 @@ class EAPEstimator(BaseEstimator):
     """Return the estimator as a constructor call that names every argument, with None for a default."""
     return f"{type(self).__name__}(grid={self._grid_argument!r}, log_prior={self._log_prior_argument!r})"
 
-  def estimate(self, context: StepContext) -> float:
-    r"""Return the posterior mean, the prior mean when no item has been administered.
+  def estimate(self, context: StepContext) -> Estimate:
+    r"""Return the posterior mean and the posterior standard deviation.
 
-    Each call evaluates the likelihood once per grid node, which the ``evaluations`` counters
-    report.
+    With no administered item they are the prior's mean and standard deviation on the grid. The
+    standard error is the posterior standard deviation (:cite:t:`Magis12`, Eq. 11, p. 6), as in
+    catR. Each call evaluates the likelihood once per grid node, which is its evaluation count.
 
     Parameters
     ----------
     context : StepContext
-        The session to estimate for. Its ``theta`` is not used.
+        The session to estimate for. Its ``theta`` and ``se`` are not used.
 
     Returns
     -------
-    float
-        The posterior mean of :math:`\theta`.
+    Estimate
+        The posterior mean of :math:`\theta`, the posterior standard deviation and the number of
+        grid nodes.
     """
     items = context.item_bank.get_items(context.administered_items)
+    nodes = self._grid.nodes
     post = posterior(context.responses, items, self._grid, self._log_prior)
-    self._calls += 1
-    self._last_evaluations = self._grid.nodes.size
-    self._total_evaluations += self._last_evaluations
-    return posterior_mean(post, self._grid.nodes)
+    return Estimate(
+      theta=posterior_mean(post, nodes),
+      se=math.sqrt(posterior_variance(post, nodes)),
+      evaluations=int(nodes.size),
+    )
 
   @property
   def grid(self) -> QuadratureGrid:
@@ -387,7 +393,6 @@ class MAPEstimator(BaseEstimator):
     tol: float = 1e-6,
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
-    super().__init__()
     # Kept as given for the repr, where the default shows as None: a prior function has no source form.
     self._log_prior_argument = log_prior
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
@@ -404,33 +409,62 @@ class MAPEstimator(BaseEstimator):
     log_pr = float(self._log_prior(numpy.array([theta], dtype=float))[0])
     return -(log_lik + log_pr)
 
-  def estimate(self, context: StepContext) -> float:
-    r"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.
+  def _standard_error(self, theta: float, items: FloatArray) -> float:
+    r"""Return the standard error of a posterior mode, :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`.
+
+    The prior's curvature is a central difference, so any :data:`LogPrior` works. Where it is not
+    finite, as at the edge of a bounded prior's support, the prior adds nothing and the error is
+    the Fisher one. Where the sum is not positive, the error is ``math.inf``.
 
     Parameters
     ----------
-    context : StepContext
-        The session to estimate for. Its ``theta`` is not used: the search covers the whole bounds
-        on every call.
+    theta : float
+        The posterior mode.
+    items : numpy.ndarray
+        Parameters of the administered items.
 
     Returns
     -------
     float
-        The posterior mode of :math:`\theta` within the search bounds.
+        The standard error, finite and positive, or ``math.inf``.
+    """
+    h = _CURVATURE_STEP
+    below, at, above = self._log_prior(numpy.array([theta - h, theta, theta + h], dtype=float))
+    curvature = float((above - 2.0 * at + below) / h**2)
+    precision = irt.test_info(theta, items) - (curvature if math.isfinite(curvature) else 0.0)
+    return 1.0 / math.sqrt(precision) if precision > 0.0 and math.isfinite(precision) else math.inf
+
+  def estimate(self, context: StepContext) -> Estimate:
+    r"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.
+
+    The standard error is :math:`1/\sqrt{I(\hat\theta) - (\log p)''(\hat\theta)}`, the test
+    information plus the prior's negative curvature at the mode, taken by a central difference so
+    any prior works. For a normal prior with variance :math:`\sigma^2` that is
+    :math:`1/\sqrt{I(\hat\theta) + 1/\sigma^2}` (:cite:t:`Magis12`, Eq. 6, p. 5; catR's
+    default), and inside a uniform prior's support the Fisher standard error. The evaluation count
+    is the number of search points plus the refinement's posterior evaluations.
+
+    Parameters
+    ----------
+    context : StepContext
+        The session to estimate for. Its ``theta`` and ``se`` are not used: the search covers the
+        whole bounds on every call.
+
+    Returns
+    -------
+    Estimate
+        The posterior mode of :math:`\theta` within the search bounds, its standard error and the
+        number of posterior evaluations.
 
     Raises
     ------
     ValueError
         If the log-posterior has no finite maximum within the search bounds.
     """
-    self._calls += 1
-
     responses = context.responses
     items = context.item_bank.get_items(context.administered_items)
     nodes = numpy.linspace(self._bounds[0], self._bounds[1], _MODE_SEARCH_POINTS)
     log_post = irt.log_likelihood_hpc(nodes, responses, items) + self._log_prior(nodes)
-    self._last_evaluations = nodes.size
-    self._total_evaluations += nodes.size
     peak = log_post.max()
     if not numpy.isfinite(peak):
       msg = (
@@ -443,7 +477,8 @@ class MAPEstimator(BaseEstimator):
     best = int(ties[ties.size // 2])
     # A flat maximum, such as a uniform prior with no responses, has no unique mode
     if ties.size >= _FLAT_MAXIMUM_POINTS:
-      return float(nodes[best])
+      theta = float(nodes[best])
+      return Estimate(theta=theta, se=self._standard_error(theta, items), evaluations=int(nodes.size))
 
     # Past a narrow prior's support the objective is +inf, and SciPy's parabolic step then
     # subtracts infinities; the result is checked against the best point below
@@ -455,8 +490,7 @@ class MAPEstimator(BaseEstimator):
         method="bounded",
         options={"xatol": self._tol},
       )
-    self._last_evaluations += int(result.nfev)
-    self._total_evaluations += int(result.nfev)
     # A neighbour can lie outside a narrow prior's support, so keep the refinement only if it
     # did at least as well as the best node; the estimate then always lies inside the support
-    return float(result.x) if result.fun <= -peak else float(nodes[best])
+    theta = float(result.x) if result.fun <= -peak else float(nodes[best])
+    return Estimate(theta=theta, se=self._standard_error(theta, items), evaluations=int(nodes.size + result.nfev))
