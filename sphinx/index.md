@@ -1,7 +1,7 @@
 # `catsim` - Computerized Adaptive Testing Toolkit
 
-```{include} readme_body.md
-```
+catsim is a Python package for computerized adaptive testing (CAT) with item response theory, for
+simulation studies and for adaptive tests in applications.
 
 ```{toctree}
 :hidden: true

@@ -318,11 +318,6 @@ jobs:
         # -W fails the build on any warning; --keep-going reports all of them before failing
         run: uv run sphinx-build -b html -W --keep-going . ../docs/build/html
 
-      - name: Check README.md matches sphinx/readme_head.md and sphinx/readme_body.md
-        # sphinx/conf.py rewrites README.md from those two files during the build above,
-        # so any difference means README.md was edited, or its sources were, without the other.
-        run: git diff --exit-code README.md
-
       - name: Check for broken links
         run: |
           cd sphinx

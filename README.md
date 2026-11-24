@@ -1,110 +1,88 @@
-<!-- DO NOT EDIT README.md, edit sphinx/readme_head.md and sphinx/readme_body.md -->
-
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/douglasrizzo/catsim/dev/sphinx/logo/stacked-dark.svg" />
     <img src="https://raw.githubusercontent.com/douglasrizzo/catsim/dev/sphinx/logo/stacked-light.svg" alt="catsim" width="240" />
   </picture>
 </p>
-<!-- DO NOT EDIT README.md, edit sphinx/readme_head.md and sphinx/readme_body.md -->
 
 [![CI/CD](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/douglasrizzo/catsim/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/github/douglasrizzo/catsim/graph/badge.svg?token=EEAcb8N7Qk)](https://codecov.io/github/douglasrizzo/catsim)
-[![Latest Version](https://badge.fury.io/py/catsim.svg)](https://badge.fury.io/py/catsim)
-[![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](http://dx.doi.org/10.5281/zenodo.46420)
+[![Latest Version](https://badge.fury.io/py/catsim.svg)](https://pypi.org/project/catsim/)
+[![Digital Object Identifier](https://zenodo.org/badge/doi/10.5281/zenodo.46420.svg)](https://doi.org/10.5281/zenodo.46420)
 
-A Python package for computerized adaptive testing (CAT). It provides a reusable CAT engine, simulation tools, and multiple methods for:
-
-- [test initialization](https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html) (selecting the initial ability of the examinees)
-- [item selection](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html)
-- [ability estimation](https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html)
-- [test stopping](https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html)
-
-These methods can either be used in a standalone fashion to power other software or be used with _catsim_ to run and simulate [computerized adaptive tests](https://douglasrizzo.com.br/catsim/introduction.html#computerized-adaptive-tests), given a sample of examinees, represented by their ability levels, and an item bank, represented by their parameters according to some [logistic Item Response Theory model](https://douglasrizzo.com.br/catsim/introduction.html#item-response-theory-models).
+_catsim_ is a Python package for computerized adaptive testing (CAT) with item response theory.
+Researchers use it to run simulation studies that compare methods of item selection, ability
+estimation and stopping, and application developers use the same engine to run adaptive tests in
+their products.
 
 ## Installation
 
-Install it using `pip install catsim`. The plotting functions in `catsim.plot` need matplotlib,
-which the plot extra installs: `pip install 'catsim[plot]'`.
+```bash
+pip install catsim
+```
 
-## Basic Usage
+The plotting functions in `catsim.plot` need matplotlib, which the `plot` extra installs:
 
-Tutorial notebooks are available in the repository under [`notebooks/`](https://github.com/douglasrizzo/catsim/tree/main/notebooks):
+```bash
+pip install 'catsim[plot]'
+```
 
-- [Introduction](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/01_introduction_to_catsim.ipynb)
-- [Manual CAT sessions](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/02_manual_cat_sessions.ipynb)
-- [Simulation studies](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/03_simulation_studies.ipynb)
-- [Item selection and stopping](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/04_item_selection_and_stopping.ipynb)
-- [Visualization and analysis](https://colab.research.google.com/github/douglasrizzo/catsim/blob/main/notebooks/05_visualization_and_analysis.ipynb)
+_catsim_ supports Python 3.11 to 3.15.
 
-The main architecture decisions behind the current engine and simulation model are documented as
-[Architecture Decision Records](https://douglasrizzo.com.br/catsim/architecture_decisions.html).
+## Quickstart
 
-1. Have an [item bank](https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix);
-1. Have the true abilities of the examinees to simulate, for example drawn from a normal
-   distribution;
-1. Create an [initializer](https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html),
-   an item [selector](https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html), an
-   ability [estimator](https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html)
-   and a [stopping criterion](https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html);
-1. Build a [CAT engine](https://douglasrizzo.com.br/catsim/api/engine.html) from the item bank and
-   those components, and a [simulation runner](https://douglasrizzo.com.br/catsim/api/simulation.html)
-   on that engine;
-1. Run the simulation and inspect the returned result object;
-1. [Plot](https://douglasrizzo.com.br/catsim/api/plot.html) your results.
+This simulates adaptive tests for ten examinees on a generated bank of 100 items. Each test gives
+the item with the most information at the current ability estimate, and stops once the estimate's
+standard error is at most 0.5, or after 20 items.
 
 ```python
 import numpy
 from catsim import CatEngine, ItemBank, SimulationRunner
+from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import UniformInitializer
 from catsim.selection import MaxInfoSelector
-from catsim.estimation import NumericalSearchEstimator
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
+
 engine = CatEngine(
     ItemBank.generate(100, rng=0),
     UniformInitializer(),
     MaxInfoSelector(),
     NumericalSearchEstimator(),
-    StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
+    StopRule(StandardErrorStopper(0.5), MaxLengthStopper(20)),
 )
 true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)
 result = SimulationRunner(engine).run(true_thetas, rng=0)
-print(result.rmse)
+print(result.rmse, result.test_lengths)
 ```
 
-The same `rng` gives the same result on every run; see
-[Reproducibility](https://douglasrizzo.com.br/catsim/reproducibility.html).
+It prints the root mean squared error of the final estimates and each test's length; most tests
+reach the target before the 20-item limit. The result also holds each examinee's estimates,
+standard errors and responses, and the same `rng` gives the same result on every run.
 
-## Dependencies
+## Where to go next
 
-Runtime dependencies are declared in `pyproject.toml` and are installed automatically with `pip install catsim` or `uv pip install catsim`.
-
-If you are contributing from a clone of the repository, install the full developer toolchain (tests, linting, type checking, notebooks, coverage) with:
-
-```bash
-uv sync --group dev
-```
-
-To build the HTML documentation locally, install Sphinx and its extensions with:
-
-```bash
-uv sync --group docs
-```
-
-## Compatibility
-
-_catsim_ is compatible and tested against Python 3.11, 3.12, 3.13, 3.14, and 3.15.
+- [Introduction to CAT and IRT](https://douglasrizzo.com.br/catsim/introduction.html), if adaptive
+  testing is new to you.
+- The guides: [Running simulations](https://douglasrizzo.com.br/catsim/running-simulations.html),
+  [Live CAT sessions](https://douglasrizzo.com.br/catsim/live-sessions.html),
+  [Reproducibility](https://douglasrizzo.com.br/catsim/reproducibility.html) and
+  [Extending catsim](https://douglasrizzo.com.br/catsim/extending.html).
+- [Techniques](https://douglasrizzo.com.br/catsim/api/techniques/index.html): each initialization,
+  selection, estimation and stopping method, with its formulas and sources.
+- The [tutorial notebooks](https://github.com/douglasrizzo/catsim/tree/main/notebooks), which open in
+  Colab.
+- The [API reference](https://douglasrizzo.com.br/catsim/api/index.html).
 
 ## Important links
 
-- Official source code repo: <https://github.com/douglasrizzo/catsim>
-- HTML documentation (stable release):
-  <https://douglasrizzo.com.br/catsim>
+- Documentation: <https://douglasrizzo.com.br/catsim>
+- Source code: <https://github.com/douglasrizzo/catsim>
 - Issue tracker: <https://github.com/douglasrizzo/catsim/issues>
+- [Architecture decision records](https://douglasrizzo.com.br/catsim/architecture_decisions.html):
+  why _catsim_ is designed the way it is.
+- How to contribute: <https://douglasrizzo.com.br/catsim/contributing.html>
 
 ## Citing catsim
-
-You can cite the package using the following bibtex entry:
 
 ```bibtex
 @article{catsim,
@@ -120,16 +98,10 @@ You can cite the package using the following bibtex entry:
 }
 ```
 
-## What's a CAT
+## Calibrating items
 
-Computerized adaptive tests are educational evaluations, usually taken by examinees in a computer or some other digital means, in which the examinee's ability is evaluated after the response of each item. The new ability is then used to select a new item, closer to the examinee's real ability. This method of test application has several advantages compared to the traditional paper-and-pencil method or even linear tests applied electronically, since high-ability examinees are not required to answer all the easy items in a test, answering only the items that actually give some information regarding his or hers true knowledge of the subject at matter. A similar, but inverse effect happens for those examinees of low ability level.
-
-More information is available [in the docs](https://douglasrizzo.com.br/catsim/introduction.html) and over at [Wikipedia](https://en.wikipedia.org/wiki/Computerized_adaptive_testing).
-
-## If you are looking for IRT item parameter estimation
-
-_catsim_ does not implement item parameter estimation. I have had great joy outsourcing that functionality to the [mirt](https://cran.r-project.org/web//packages/mirt/) R package along the years. However, since many users request packages with item parameter estimation capabilities in the Python ecosystem, here are a few links. While I have not used them personally, specialized packages like these are hard to come by, so I hope these are helpful.
-
-- [eribean/girth](https://github.com/eribean/girth)
-- [eribean/girth_mcmc](https://github.com/eribean/girth_mcmc)
-- [nd-ball/py-irt](https://github.com/nd-ball/py-irt)
+_catsim_ takes calibrated item parameters and does not estimate them. I calibrate items with the
+[mirt](https://cran.r-project.org/package=mirt) R package. For Python, these packages estimate item
+parameters, though I have not used them myself:
+[girth](https://github.com/eribean/girth), [girth_mcmc](https://github.com/eribean/girth_mcmc) and
+[py-irt](https://github.com/nd-ball/py-irt).

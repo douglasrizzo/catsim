@@ -122,7 +122,7 @@ Each kind has one job, audience and level. "Not here" names where the excluded m
 
 - **Job:** the website's front door, with two entry paths: running a simulation study ("Running
   simulations") and running CAT in an application ("Live CAT sessions"). It links the guides, the
-  techniques, the tutorials and the API reference. It may have its own source, separate from the
+  techniques, the tutorials and the API reference. It has its own source, separate from the
   README.
 - **Audience and level:** researchers and application developers; introductory.
 - **Not here:** install minutiae and badges (README).

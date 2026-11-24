@@ -23,7 +23,7 @@ uv sync --group dev
 uv run pre-commit install
 ```
 
-pre-commit then runs the repository's formatters and checks on every commit.
+The first command installs catsim with its runtime dependencies, declared in `pyproject.toml`, and the tools for tests, linting, type checking, coverage and notebooks. pre-commit then runs the repository's formatters and checks on every commit.
 
 ## Quality gate
 
@@ -44,13 +44,13 @@ uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb
 
 ## Building the documentation
 
-The documentation sources are in `sphinx/`. Build the HTML pages with:
+The documentation sources are in `sphinx/`. Build the HTML pages with the command below, which also installs Sphinx and its extensions (the `docs` dependency group):
 
 ```bash
 uv run --group docs sphinx-build -b html -W --keep-going sphinx sphinx/_build/html
 ```
 
-`-W` turns warnings into errors. The build also regenerates `README.md` from `sphinx/readme_head.md` and `sphinx/readme_body.md`, so edit those two files instead of `README.md`.
+`-W` turns warnings into errors.
 
 Links to the Python, NumPy, Matplotlib and SciPy documentation come from those projects' intersphinx inventories. The build downloads each inventory and, when a site cannot be reached, reads the copy stored in `sphinx/_inventories/`. Refresh the stored copies with:
 

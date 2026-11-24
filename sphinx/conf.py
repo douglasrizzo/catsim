@@ -1,4 +1,4 @@
-"""Sphinx configuration for the catsim documentation; it also regenerates README.md from its sources."""
+"""Sphinx configuration for the catsim documentation."""
 
 import datetime
 import pathlib
@@ -8,10 +8,6 @@ from importlib.metadata import version as get_version
 # Sphinx runs this file from the sphinx/ directory.
 sys.path.insert(0, str(pathlib.Path("../src").resolve()))
 sys.path.insert(0, str(pathlib.Path("_ext").resolve()))
-
-filenames = ["readme_head.md", "readme_body.md"]
-with pathlib.Path("../README.md").open("w", encoding="utf-8") as outfile:
-  outfile.writelines(pathlib.Path(fname).read_text(encoding="utf-8") for fname in filenames)
 
 # -- General configuration ------------------------------------------------
 
@@ -97,7 +93,7 @@ language = "en"
 
 # AGENTS.md and CLAUDE.md are instructions for agents and contributors, and the templates are copied,
 # not read: none of them is a page.
-exclude_patterns = ["_build", "readme_head.md", "readme_body.md", "AGENTS.md", "CLAUDE.md", "**/_template.md"]
+exclude_patterns = ["_build", "AGENTS.md", "CLAUDE.md", "**/_template.md"]
 
 pygments_style = "sphinx"
 
