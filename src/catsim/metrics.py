@@ -1,4 +1,4 @@
-"""Functions used specifically during the application/simulation of computerized adaptive tests."""
+"""Metrics that score a simulation study: how accurate the ability estimates are and how much the tests overlap."""
 
 import math
 
@@ -12,32 +12,36 @@ def bias(
   actual: npt.ArrayLike,
   predicted: npt.ArrayLike,
 ) -> float:
-  r"""Compute the test bias, an evaluation criterion for computerized adaptive test methodologies :cite:p:`Chang2001`.
+  r"""Return the mean signed error of the ability estimates :cite:p:`Chang2001`.
 
-  The value is computed as:
+  .. math:: \mathrm{Bias} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)
 
-  .. math:: Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}
-
-  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and
-  :math:`\theta_i` is examinee :math:`i` actual ability. A positive bias indicates
-  systematic overestimation, while a negative bias indicates systematic underestimation.
+  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate
+  and :math:`N` the number of examinees. A positive bias means the estimates overestimate ability on
+  average, a negative one that they underestimate it.
 
   Parameters
   ----------
-  actual : npt.ArrayLike
-      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
-  predicted : npt.ArrayLike
-      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
+  actual : array-like
+      The true abilities.
+  predicted : array-like
+      The estimated abilities, one per true ability.
 
   Returns
   -------
   float
-      The bias between the predicted values and actual values.
+      The bias.
 
   Raises
   ------
   ValueError
-      If actual and predicted vectors are not the same size.
+      If ``actual`` and ``predicted`` differ in length.
+
+  Examples
+  --------
+  >>> from catsim.metrics import bias
+  >>> bias([1.0, -1.0], [0.0, 6.0])
+  3.0
   """
   actual = numpy.asarray(actual)
   predicted = numpy.asarray(predicted)
@@ -52,35 +56,36 @@ def mse(
   actual: npt.ArrayLike,
   predicted: npt.ArrayLike,
 ) -> float:
-  r"""Compute the mean squared error (MSE) between two array-like objects.
+  r"""Return the mean squared error of the ability estimates :cite:p:`Chang2001`.
 
-  The MSE is used when measuring the precision with which a computerized adaptive
-  test estimates examinees abilities :cite:p:`Chang2001`. Lower MSE values indicate better
-  estimation accuracy.
+  .. math:: \mathrm{MSE} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2
 
-  The value is computed as:
-
-  .. math:: MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}
-
-  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and
-  :math:`\theta_i` is examinee :math:`i` actual ability.
+  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate
+  and :math:`N` the number of examinees. Lower values mean more accurate estimates; the MSE is the
+  squared :func:`bias` plus the variance of the errors.
 
   Parameters
   ----------
-  actual : npt.ArrayLike
-      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
-  predicted : npt.ArrayLike
-      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
+  actual : array-like
+      The true abilities.
+  predicted : array-like
+      The estimated abilities, one per true ability.
 
   Returns
   -------
   float
-      The mean squared error between the predicted values and actual values.
+      The mean squared error.
 
   Raises
   ------
   ValueError
-      If actual and predicted vectors are not the same size.
+      If ``actual`` and ``predicted`` differ in length.
+
+  Examples
+  --------
+  >>> from catsim.metrics import mse
+  >>> mse([1.0, -1.0], [0.0, 6.0])
+  25.0
   """
   actual = numpy.asarray(actual)
   predicted = numpy.asarray(predicted)
@@ -96,77 +101,75 @@ def rmse(
   actual: npt.ArrayLike,
   predicted: npt.ArrayLike,
 ) -> float:
-  r"""Compute the root mean squared error (RMSE) between two array-like objects.
+  r"""Return the root mean squared error of the ability estimates :cite:p:`Bar10`.
 
-  A common value used when measuring the precision with which a computerized adaptive
-  test estimates examinees abilities :cite:p:`Bar10`. RMSE is in the same units as the ability
-  scale, making it easier to interpret than MSE.
+  .. math:: \mathrm{RMSE} = \sqrt{\frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2}
 
-  The value is computed as:
-
-  .. math:: RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}
-
-  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and
-  :math:`\theta_i` is examinee :math:`i` actual ability.
+  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate
+  and :math:`N` the number of examinees. It is the square root of :func:`mse`, in the units of the
+  ability scale.
 
   Parameters
   ----------
-  actual : npt.ArrayLike
-      Array-like (list, tuple, or numpy array) containing the true ability values (float type).
-  predicted : npt.ArrayLike
-      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).
+  actual : array-like
+      The true abilities.
+  predicted : array-like
+      The estimated abilities, one per true ability.
 
   Returns
   -------
   float
-      The root mean squared error between the predicted values and actual values.
+      The root mean squared error.
 
   Raises
   ------
   ValueError
-      If actual and predicted vectors are not the same size.
+      If ``actual`` and ``predicted`` differ in length.
+
+  Examples
+  --------
+  >>> from catsim.metrics import rmse
+  >>> rmse([1.0, -1.0], [0.0, 6.0])
+  5.0
   """
   return math.sqrt(mse(actual, predicted))
 
 
 def overlap_rate(exposure_rates: FloatArray, test_size: int) -> float:
-  r"""Compute the test overlap rate.
+  r"""Return the test overlap rate: the expected share of items two examinees' tests have in common :cite:p:`Bar10`.
 
-  An average measure of how much of the test two examinees take is equal :cite:p:`Bar10`.
-  The overlap rate provides insight into test security: higher values indicate that
-  examinees see more similar items, potentially compromising test security.
+  .. math:: T = \frac{M}{n} S_r^2 + \frac{n}{M}
 
-  The overlap rate is given by:
-
-  .. math:: T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}
-
-  where :math:`N` is the bank size, :math:`Q` is the test size, and :math:`S_{r}^2`
-  is the variance of exposure rates.
-
-  If, for example :math:`T = 0.5`, it means that the tests of two random examinees
-  have 50% of equal items.
+  where :math:`M` is the bank size, :math:`n` the test length and :math:`S_r^2` the population
+  variance (divisor :math:`M`) of the items' exposure rates. It assumes every examinee takes
+  :math:`n` items. It is :math:`n/M` when every item is equally exposed and 1 when every examinee
+  takes the same test; higher values mean examinees share more items, which weakens test security.
 
   Parameters
   ----------
   exposure_rates : numpy.ndarray
-      A numpy array containing the exposure rate (proportion) of each item, where
-      each value is between 0 and 1, representing the proportion of examinees who
-      received that item.
+      Each item's exposure rate, the share of examinees who took it.
   test_size : int
-      The number of items in a test.
+      The number of items in each test.
 
   Returns
   -------
   float
-      Test overlap rate between 0 and 1.
+      The overlap rate, between 0 and 1.
 
   Raises
   ------
   ValueError
-      If exposure rates are not between 0 and 1, if test size is not positive,
-      or if test size is larger than bank size.
+      If an exposure rate is outside [0, 1], if ``test_size`` is not positive, or if it is larger
+      than the bank.
+
+  Examples
+  --------
+  >>> import numpy
+  >>> from catsim.metrics import overlap_rate
+  >>> overlap_rate(numpy.array([1.0, 0.5, 0.5, 0.0]), test_size=2)
+  0.75
   """
-  # Validate that exposure_rates contains proportions
   if numpy.any(exposure_rates < 0) or numpy.any(exposure_rates > 1):
     msg = "Exposure rates must be between 0 and 1"
     raise ValueError(msg)
