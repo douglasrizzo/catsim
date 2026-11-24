@@ -1,4 +1,4 @@
-# ADR-0003: Keep Runtime State Outside Domain Objects
+# ADR-0004: Keep Runtime State Outside Domain Objects
 
 ## Status
 
@@ -27,7 +27,7 @@ first respondent and none at all when `rmax` is 1.
 Calibrated item data is domain data; runtime state lives in dedicated execution objects:
 
 - `ItemBank` holds the item parameters and the values derived from them, in read-only arrays.
-- `CatSessionState` holds one examinee's runtime state, the items it excluded included (ADR-0016).
+- `CatSessionState` holds one examinee's runtime state, the items it excluded included (ADR-0008).
 - `ExposureTracker` and `SimulationResult` hold run-level exposure information.
 
 `ExposureTracker` owns the denominator of the exposure rates, which follow catR:

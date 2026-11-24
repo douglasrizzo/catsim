@@ -1,4 +1,4 @@
-"""Tests for catsim's public import paths and the names its public signatures use (ADR-0014)."""
+"""Tests for catsim's public import paths and the names its public signatures use (ADR-0006)."""
 
 import ast
 import dataclasses
@@ -21,7 +21,7 @@ PACKAGES = [
 ]
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
 PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
-# Names that ADR-0014's table retired, each for the one its concept keeps.
+# Names that ADR-0006's table retired, each for the one its concept keeps.
 RETIRED_NAMES = {
   "administered_item_ids",
   "est_theta",
@@ -143,7 +143,7 @@ def test_every_public_definition_of_an_internal_module_is_exported(package_name:
 def test_no_public_signature_takes_a_retired_name() -> None:
   """A public function, constructor or method with a parameter of a retired name, such as est_theta or seed, fails here.
 
-  ADR-0014 gives each concept one name; ``posterior`` took ``response_vector`` and ``ItemBank.test_information`` took
+  ADR-0006 gives each concept one name; ``posterior`` took ``response_vector`` and ``ItemBank.test_information`` took
   ``item_indices`` where the rest of the API says ``responses`` and ``indices``. Only parameter names are checked, not
   the functions' own names: ``irt.validate_response_vector`` keeps its name.
   """

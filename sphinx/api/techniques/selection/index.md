@@ -49,7 +49,7 @@ Ties are exact equality of the selector's own score, so items that are equally g
 arithmetic tie only if their scores also round to the same value.
 The Randomesque and 5-4-3-2-1 bins also take in every item tied with their least informative item.
 No random number is drawn when nothing ties, so seeded results on banks without ties do not depend
-on this rule. See {doc}`/adr/0008-random-tie-breaking`.
+on this rule. See {doc}`/adr/0011-random-tie-breaking`.
 
 ## Class Hierarchy
 

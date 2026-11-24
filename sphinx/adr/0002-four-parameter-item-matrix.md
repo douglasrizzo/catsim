@@ -1,4 +1,4 @@
-# ADR-0017: Items Are an n×4 Matrix of 4PL Parameters
+# ADR-0002: Items Are an n×4 Matrix of 4PL Parameters
 
 ## Status
 
@@ -12,7 +12,7 @@ guessing parameter $c$ and the 4PL also the upper asymptote $d$. Each is the 4PL
 it leaves out fixed at $a = 1$, $c = 0$ and $d = 1$. Calibration software writes the parameters its
 model estimates, so item banks arrive with one to four columns.
 
-The item bank kept a fifth column of exposure rates beside the parameters (ADR-0003), its
+The item bank kept a fifth column of exposure rates beside the parameters (ADR-0004), its
 validation could be turned off with `validate=False`, the expansion and validation of a matrix were
 public functions of `catsim.irt`, and the bank reported its model as the number of parameters, an
 `int`. A bank built without validation could carry a NaN or out-of-range parameter into every value
@@ -56,7 +56,7 @@ bank.model              # IrtModel.PL1 to IrtModel.PL4
 - A matrix as wide as its model, with each function dispatching on the width: every function and
   strategy would branch on the shape.
 - Further columns for metadata such as exposure or content area: exposure is runtime state
-  (ADR-0003), and other metadata belongs to the application, keyed by the item's index.
+  (ADR-0004), and other metadata belongs to the application, keyed by the item's index.
 - Optional validation, for speed: a bank built without it carries invalid parameters into every
   derived value, while validation runs once per bank.
 - The model as its number of parameters: an `int` reads like a column count, which is always 4,

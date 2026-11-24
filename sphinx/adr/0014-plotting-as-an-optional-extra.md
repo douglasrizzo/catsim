@@ -1,4 +1,4 @@
-# ADR-0015: Plotting as an Optional Extra
+# ADR-0014: Plotting as an Optional Extra
 
 ## Status
 

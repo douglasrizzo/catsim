@@ -1,4 +1,4 @@
-# ADR-0013: Random Numbers and Reproducibility
+# ADR-0010: Random Numbers and Reproducibility
 
 ## Status
 
@@ -7,7 +7,7 @@ Accepted 2026-11-24
 ## Context
 
 Three components of a simulated CAT draw random numbers: the initializer (a random starting
-ability), the selectors (breaking ties, ADR-0008, and the randomized selectors' draws) and the
+ability), the selectors (breaking ties, ADR-0011, and the randomized selectors' draws) and the
 simulated responses, each a uniform draw against the item's probability of a correct answer. The
 estimators and stoppers draw nothing.
 
@@ -27,8 +27,8 @@ generator comes from and on what draws from it, which nothing recorded.
   `numpy.random.Generator`: None draws fresh entropy (NumPy's convention), a seed gives a generator
   in a fixed state, and a generator is used as is and advanced by the run.
 - That one generator serves the whole run. It reaches the strategies through `RunContext.rng` and
-  `StepContext.rng` (ADR-0004) and the simulated responses through `ResponseProvider.answer`, so the
-  initializer, the selectors, the engine's exposure control (ADR-0016) and the responses of every
+  `StepContext.rng` (ADR-0005) and the simulated responses through `ResponseProvider.answer`, so the
+  initializer, the selectors, the engine's exposure control (ADR-0008) and the responses of every
   session draw from one stream. An engine without an exposure control draws nothing for it.
 - The sessions run one after another, in the order of `true_thetas`, so the draws of a session
   depend on every draw of the sessions before it.

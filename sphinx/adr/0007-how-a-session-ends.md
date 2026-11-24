@@ -1,4 +1,4 @@
-# ADR-0011: Decide in One Place How a Session Ends
+# ADR-0007: Decide in One Place How a Session Ends
 
 ## Status
 
@@ -23,13 +23,13 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
 - A session ends for one of two reasons, the members of the `StopReason` enum:
   - `STOPPER` (`"stopper"`): the engine's stopper is satisfied by the session's current state;
   - `NO_ITEMS` (`"no_items"`): the selector has no item to offer, or none that the engine's
-    exposure control accepts (ADR-0016).
+    exposure control accepts (ADR-0008).
 
   `stop_reason` is `None` while the session runs, and it is the only record of whether the
   session has ended: `is_stopped` reads it. Lifecycle states such as paused or abandoned belong to
   the application.
 - A selector says that it has no item by raising `NoItemsAvailableError`. That is the single "no
-  item" signal: `select` returns an `int` (ADR-0004).
+  item" signal: `select` returns an `int` (ADR-0005).
 - `select_next` is the only place that decides whether a session continues. It returns `None` and
   records the reason when the stopper is satisfied or the selector has no item, and it returns
   `None` without changing anything for a session that has already stopped. It records the items
@@ -52,7 +52,7 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   its stopper said stop.
 - `apply_response` applies a response atomically, and only to a running session. It estimates and
   asks the stopper on step contexts built from the session with the new item and response
-  (ADR-0004), and commits the item, the response, the estimate, the exposure count and the stop
+  (ADR-0005), and commits the item, the response, the estimate, the exposure count and the stop
   decision only once both have succeeded.
 
 ## Consequences

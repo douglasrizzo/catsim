@@ -1,4 +1,4 @@
-# ADR-0005: Make Step Results Immutable Snapshots
+# ADR-0009: Make Step Results Immutable Snapshots
 
 ## Status
 

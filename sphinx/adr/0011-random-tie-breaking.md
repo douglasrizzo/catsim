@@ -1,4 +1,4 @@
-# ADR-0008: Break Ties Between Items Uniformly at Random
+# ADR-0011: Break Ties Between Items Uniformly at Random
 
 ## Status
 
@@ -36,7 +36,7 @@ rule.
 The rule is fixed. There is no parameter, enum or package setting to change it.
 
 When there is no tie, no random number is drawn. The generator is the run's, which every step
-context carries (ADR-0004), so a selector called directly breaks ties the same way as under
+context carries (ADR-0005), so a selector called directly breaks ties the same way as under
 `CatEngine`.
 
 Ties are exact equality of each selector's own score, as in catR, so they depend on how the score

@@ -66,7 +66,7 @@ hidden runtime coupling.
   (`from catsim.selection import MaxInfoSelector`), not from the module file that defines it. Name
   things by the one-name-per-concept table (`theta`, `current_theta`, `administered_items`, `items`,
   `responses`, `n_items`, `model`, `rng`). Both rules are in
-  `sphinx/adr/0014-public-import-paths-and-names.md`.
+  `sphinx/adr/0006-public-import-paths-and-names.md`.
 - A new top-level module in `src/catsim/` must be placed in the import-linter `layers` contract in
   `pyproject.toml`. The contract is exhaustive, so `lint-imports` fails until the module is placed.
 

@@ -88,7 +88,7 @@ class KLSelector(BaseSelector):
     log_p, log_q = irt.log_response_probabilities(theta_hat + half_width * nodes, items)
     divergence = numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
     # one rule for every item, and a sum over the node axis that adds each column in the same order,
-    # so identical items tie exactly (ADR-0008); a matrix product may round columns differently
+    # so identical items tie exactly (ADR-0011); a matrix product may round columns differently
     return half_width * (weights[:, None] * divergence).sum(axis=0)
 
   @override

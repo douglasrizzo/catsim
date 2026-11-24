@@ -1,4 +1,4 @@
-# ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT
+# ADR-0001: Scope 1.0 to Unidimensional, Dichotomous IRT
 
 ## Status
 

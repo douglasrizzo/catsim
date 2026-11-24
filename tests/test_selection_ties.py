@@ -1,4 +1,4 @@
-"""Tests for the package-wide tie-breaking rule of item selectors (ADR-0008)."""
+"""Tests for the package-wide tie-breaking rule of item selectors (ADR-0011)."""
 
 from collections import Counter
 from collections.abc import Callable
@@ -219,7 +219,7 @@ def test_54321_breaks_ties_at_random_once_the_bin_has_one_item() -> None:
 def test_cluster_selector_draws_tied_clusters_uniformly(method: str) -> None:
   """Three clusters holding the same two items tie under every method, so each is chosen about a third of the time.
 
-  Before ADR-0008 reached the choice of cluster, the first tied cluster in sort order won every draw. Each share is
+  Before ADR-0011 reached the choice of cluster, the first tied cluster in sort order won every draw. Each share is
   binomial with p = 1/3 over 3000 draws, a standard deviation of 0.0086, so the 0.03 tolerance is 3.5 of them; a
   selector that favoured one cluster, or split the draws between two, would miss by at least 1/6.
   """

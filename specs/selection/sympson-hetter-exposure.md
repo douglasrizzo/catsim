@@ -202,7 +202,7 @@ class SympsonHetterControl(BaseExposureControl):
       msg = "SympsonHetterControl needs one calibrated acceptance probability per item; see calibrate()"
       raise RuntimeError(msg)
     # An item with K = 1 draws no random number, so K = 1 everywhere reproduces the run without a
-    # control exactly, as pick_best does for untied scores (ADR-0008).
+    # control exactly, as pick_best does for untied scores (ADR-0011).
     return bool(k_values[item_id] >= 1 or context.rng.random() < k_values[item_id])
 
 
@@ -270,7 +270,7 @@ def calibrate(
 
 **Implementation notes:**
 
-- The engine does the rest of step 4 and Contract 3 (ADR-0016): it adds a declined item to the
+- The engine does the rest of step 4 and Contract 3 (ADR-0008): it adds a declined item to the
   session's `excluded_items`, which lasts for the rest of the test, and asks the selector again. A
   session whose remaining items are all declined ends with `StopReason.NO_ITEMS`. The control only
   decides, and keeps no per-session state.
@@ -291,7 +291,7 @@ def calibrate(
 - The control imports only `catsim.context`, as the import-linter contract requires of the
   `exposure` layer; `calibrate` takes the simulation as a callable, so the module needs no runtime
   layer.
-- The acceptance draw uses the context's `rng`, the run's generator (ADR-0013), and an item with
+- The acceptance draw uses the context's `rng`, the run's generator (ADR-0010), and an item with
   $K_i = 1$ draws nothing.
 - One acceptance draw per proposal assumes that applications do not select again on a page reload:
   a second `select_next` before the answer draws again, so the item on screen would pass with a

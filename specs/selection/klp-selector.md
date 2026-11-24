@@ -214,7 +214,7 @@ class KLPSelector(BaseSelector):
 **Implementation notes:**
 
 - The posterior comes from the context's responses at every call: estimators keep no per-session
-  posterior ({doc}`ADR-0004 </adr/0004-explicit-strategy-contracts>`), and `posterior()` is one
+  posterior ({doc}`ADR-0005 </adr/0005-explicit-strategy-contracts>`), and `posterior()` is one
   vectorized pass over the grid. With no responses it is the prior on the grid.
 - The reference point of the divergence is the context's `theta`, the engine's current estimate
   from whichever estimator it runs, not the posterior mean; the definition's $\hat\theta$ is the
@@ -226,7 +226,7 @@ class KLPSelector(BaseSelector):
   `_kl_divergences` with it rather than keeping two copies.
 - The score sums over the nodes rather than using `post @ divergences`, as `KLSelector` and
   `MLWISelector` do: a matrix product can round identical columns differently, which breaks the
-  exact ties of {doc}`ADR-0008 </adr/0008-random-tie-breaking>`.
+  exact ties of {doc}`ADR-0011 </adr/0011-random-tie-breaking>`.
 - The selection and estimation layers do not import each other (`[tool.importlinter]` in
   `pyproject.toml`). Add `"catsim.selection.kl -> catsim.estimation"` to that contract's
   `ignore_imports`, as `MLWISelector` does for the same helpers, or move the grid and posterior

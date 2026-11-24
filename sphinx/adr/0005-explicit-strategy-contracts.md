@@ -1,4 +1,4 @@
-# ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate
+# ADR-0005: Strategies Take One Step Context and Estimators Return an Estimate
 
 ## Status
 
@@ -9,7 +9,7 @@ Accepted 2026-11-24
 The strategy interfaces took the session's inputs as explicit parameters, and the four contracts
 named and ordered them differently: the estimate was `est_theta` in two and `theta` in the third.
 `rng` and the exposure rates were optional in `select` although the engine always passed them, so a
-deterministic selector called directly without `rng` raised when items tied (ADR-0008).
+deterministic selector called directly without `rng` raised when items tied (ADR-0011).
 
 Every added input changed every signature, so a custom strategy written against an older one failed
 at its first call, and the planned techniques need more inputs: the responses in `stop` for SPRT,
@@ -48,7 +48,7 @@ class BaseInitializer(ABC):
 - `excluded_items` holds the items a selector must not choose although they have not been
   administered, so the test position stays the number of administered items. A wrapper that passes
   a changed context on adds to them, never replaces them.
-- The exposure control, an optional engine component (ADR-0016), follows the same rules:
+- The exposure control, an optional engine component (ADR-0008), follows the same rules:
   `accept(context, item_id) -> bool`.
 - The initializer runs before any step state exists, so it keeps its two keyword-only arguments.
 - Strategies hold configuration and caches derived from the item bank, never per-session state:
