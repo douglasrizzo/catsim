@@ -772,27 +772,6 @@ class TestMLWISelector:
     # the pick of test_select_matches_brute_force_weighted_information for these responses
     assert selected == 3
 
-  def test_select_with_no_responses_reduces_to_information_integral(self) -> None:
-    """With no responses, MLWI should reduce to the integral of item information.
-
-    This verifies the no-data degeneracy case where likelihood weights become
-    uniform; if that fallback changed, MLWI would stop matching its mathematical definition.
-    """
-    item_bank = ItemBank.generate(8, rng=0)
-    n_nodes = 21
-    selector = MLWISelector(n_nodes=n_nodes)
-    nodes = np.linspace(-6.0, 6.0, n_nodes)
-    delta = (6.0 - (-6.0)) / (n_nodes - 1)
-
-    manual_scores = np.array(
-      [float(np.sum(irt.information(nodes, item_bank.items[idx])) * delta) for idx in range(item_bank.n_items)],
-      dtype=float,
-    )
-
-    selected = selector.select(make_context(item_bank, [], [], theta=0.0))
-
-    assert selected == int(manual_scores.argmax())
-
   def test_select_with_no_data_prefers_the_most_discriminating_item(self) -> None:
     """With flat weights a 2PL item's integrated information is its discrimination a, whatever its difficulty."""
     item_bank = ItemBank(
@@ -810,8 +789,8 @@ class TestMLWISelector:
     """Items far from every node leave the likelihood flat inside the grid, so the most discriminating item is chosen.
 
     A wrong answer to an item at b = -6 and a right one to an item at b = 6, both with a = 200, have a log-likelihood
-    of -2400 at every inner node. With log(1 - P) computed after P rounded to 1 it was -inf at every node, and the
-    selection failed.
+    of -2400 at every inner node. Computing log(1 - P) after P rounds to 1 would make it -inf at every node, and the
+    selection would raise.
     """
     item_bank = ItemBank(
       np.array([
