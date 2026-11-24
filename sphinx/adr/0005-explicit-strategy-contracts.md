@@ -6,16 +6,13 @@ Accepted 2026-11-24
 
 ## Context
 
-The strategy interfaces took the session's inputs as explicit parameters, and the four contracts
-named and ordered them differently: the estimate was `est_theta` in two and `theta` in the third.
-`rng` and the exposure rates were optional in `select` although the engine always passed them, so a
-deterministic selector called directly without `rng` raised when items tied (ADR-0011).
-
+The strategy interfaces took the session's inputs as explicit parameters, which the four
+contracts named and ordered differently, and `rng` was optional in `select` although the engine
+always passed it, so a deterministic selector called directly raised when items tied (ADR-0011).
 Every added input changed every signature, so a custom strategy written against an older one failed
-at its first call, and the planned techniques need more inputs: the responses in `stop` for SPRT,
-GLR and curtailment stoppers, a generator for curtailment, and items to pass over for
-Sympson-Hetter exposure control. Some planned techniques also kept per-session state on the
-strategy object, which the next session on the same engine overwrites.
+at its first call, and the planned techniques need more: the responses in `stop` for SPRT, GLR and
+curtailment stoppers, and items to pass over for Sympson-Hetter exposure control. Some also kept
+per-session state on the strategy object, which the next session on the same engine overwrites.
 
 The estimator returned a bare `float`, so the precision stoppers computed the Fisher standard error
 themselves, whatever the estimator. For EAP that is not the estimator's own error, the posterior
@@ -46,8 +43,7 @@ class BaseInitializer(ABC):
   (`StepContext`'s docstring and {doc}`/extending` list its fields). The examinee's true ability is
   not in it, so strategies cannot see the simulated truth.
 - `excluded_items` holds the items a selector must not choose although they have not been
-  administered, so the test position stays the number of administered items. A wrapper that passes
-  a changed context on adds to them, never replaces them.
+  administered (ADR-0008), so the test position stays the number of administered items.
 - The exposure control, an optional engine component (ADR-0008), follows the same rules:
   `accept(context, item_id) -> bool`.
 - The initializer runs before any step state exists, so it keeps its two keyword-only arguments.
@@ -67,15 +63,13 @@ class BaseInitializer(ABC):
 
 - Custom strategies keep working when the context gains a field, and each input has one name in
   every contract.
-- `rng` and `responses` are always present, so a deterministic selector called directly breaks ties
-  as under the engine. A direct call builds a context:
-  `selector.select(StepContext(item_bank=bank, rng=numpy.random.default_rng(0)))`.
-- ty checks the built-in strategies against the base signatures; a custom strategy is checked only
-  by its author's type checker.
+- `rng` and `responses` are always present, so a deterministic selector called directly, with a
+  context it builds ({doc}`/extending`), breaks ties as under the engine.
+- ty checks the built-in strategies' signatures against their base classes; a custom strategy's
+  is checked only by its author's type checker.
 - A precision stopper's decision depends on the estimator: the Bayesian standard errors are usually
   below the Fisher one ({doc}`/api/techniques/estimation/index` compares them).
-- The engine raises a `TypeError` naming an estimator that returns anything but an `Estimate`; one
-  with no formula of its own can report `irt.see`, the Fisher standard error.
+- An estimator with no standard error formula of its own reports `irt.see`, the Fisher one.
 - An estimator's cost is the sum of a session's recorded `evaluations`. Look-ahead estimates are
   never recorded, so MEI may share the engine's estimator.
 

@@ -34,8 +34,8 @@ receives what it needs as arguments.
 - Each state transition can be tested through the engine alone, without a batch around it.
 - The documentation and tutorials teach the engine, session and result objects directly, and
   catsim is a CAT toolkit of which simulation is one use.
-- An extension point that relied on the simulator has no counterpart: a strategy gets its inputs
-  from its arguments (the strategy contract, ADR-0005).
+- A strategy gets its inputs from its arguments (the strategy contract, ADR-0005), so it can be
+  called and tested on its own.
 - The import-linter contract in `pyproject.toml` keeps the runner above the engine and the engine
   above the strategies, and keeps the strategy families from importing one another, with two
   exceptions: `MEISelector` and `MLWISelector` import the estimators, for their look-ahead estimates

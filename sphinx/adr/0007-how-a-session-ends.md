@@ -34,19 +34,11 @@ built-in stoppers checked bank exhaustion themselves, so a bank that really ran 
   records the reason when the stopper is satisfied or the selector has no item, and it returns
   `None` without changing anything for a session that has already stopped. It records the items
   the exposure control declined once the selection has ended, so a selection that raises changes
-  nothing. A manual session is therefore one loop with no other stop check:
-
-  ```python
-  while (item_id := engine.select_next(state, context)) is not None:
-    engine.apply_response(state, item_id, response=response, context=context)
-  ```
-
-  `step()` makes the same three moves: select, get the response, apply it.
-- The stopper is evaluated once per session state: by `select_next` for the initial state, before
-  any response, and by `apply_response` after each new estimate. What `apply_response` records is
-  final; `select_next` does not ask again.
-- Stoppers are pure: the same inputs give the same answer, and asking has no side effects. Asking
-  once per state therefore loses nothing.
+  nothing. A manual session is therefore one loop with no other stop check: `select_next` until it
+  returns `None`, and `apply_response` after each item ({doc}`/live-sessions`); `step()` is one turn
+  of it.
+- The stopper is evaluated once per session state: by `select_next` for the initial state and by
+  `apply_response` after each new estimate. Stoppers are pure, so asking once loses nothing.
 - Running out of items is the engine's to detect, through the selector: it reports `NO_ITEMS`. A
   stopper that checks bank exhaustion itself reports `STOPPER`, since all the engine knows is that
   its stopper said stop.

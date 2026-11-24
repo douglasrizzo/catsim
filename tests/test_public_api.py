@@ -21,7 +21,7 @@ PACKAGES = [
 ]
 # Top-level modules that are import paths of their own; catsim's other modules are internal.
 PUBLIC_MODULES = ["catsim.irt", "catsim.metrics", "catsim.plot", "catsim.typing"]
-# Names that ADR-0006's table retired, each for the one its concept keeps.
+# Names that ADR-0006's list retired, each for the one its concept keeps.
 RETIRED_NAMES = {
   "administered_item_ids",
   "est_theta",

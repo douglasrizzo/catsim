@@ -19,11 +19,8 @@ parameterisation of both:
   `sharpness = 6` by default. In the published method the exponent grows to the test length.
 
 The documentation said so, but under the same method names users comparing with catR got different
-behaviour, and the default exponent left the end of a test far from maximum-information selection.
-At the last item of a 20-item test at θ = 0, over 20 simulated 500-item 3PL banks
-(`ItemBank.generate(500, model="3PL", rng=s)` for `s` from 0 to 19), the most
-informative item was drawn with probability 0.08 to 0.24 (median 0.12), against 0.32 to 0.96
-(median 0.64) with the published exponent of 20.
+behaviour, and the default exponent left the last item of a test far from maximum-information
+selection, which the published exponent comes close to.
 
 ## Decision
 

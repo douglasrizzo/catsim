@@ -45,8 +45,7 @@ first and took either a `SimulationResult` or raw arrays through mutually exclus
 - A session plots the same way whether it comes from a simulation (`result.sessions[j]`) or from a
   live loop, because the function reads the session, not the result that holds it.
 - Figures with several panels are laid out by the caller with matplotlib's own tools, and each plot
-  function fills one axes. Callers that relied on a function creating a sized figure create it
-  themselves.
+  function fills one axes.
 - The test suite, the documentation build and the notebooks need matplotlib, so the development and
   documentation dependency groups include it, and the CI job that tests the built wheel installs
   the wheel with the extra.
