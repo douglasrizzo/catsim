@@ -153,6 +153,12 @@ def test_selectors_break_ties_at_random(name: str) -> None:
       lambda bank: KLSelector._kl_global(1.0, bank.get_items(range(1, bank.n_items)), 3.0),
       id="KLSelector",
     ),
+    pytest.param(
+      lambda bank: MLWISelector()._score(
+        make_context(bank, [0, 1, 2], [True, False, True]), np.arange(3, bank.n_items)
+      ),
+      id="MLWISelector",
+    ),
   ],
 )
 def test_selectors_that_integrate_over_ability_tie_identical_items_exactly(
