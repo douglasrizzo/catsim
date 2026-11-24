@@ -376,6 +376,37 @@ class TestLogLikelihood:
     with pytest.raises(ValueError, match="responses must contain only Boolean elements"):
       build([True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
 
+  @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
+  @pytest.mark.parametrize(
+    ("items", "responses"),
+    [
+      pytest.param(np.array([1.0, 0.0, 0.0, 1.0]), [True, False, True, True], id="one item, 1-D"),
+      pytest.param(np.ones((1, 1, 4)), [True], id="3-D"),
+      pytest.param(np.ones((1, 3)), [True], id="three columns"),
+    ],
+  )
+  def test_log_likelihood_rejects_items_that_are_not_an_n_by_4_matrix(
+    self, build: Callable[[list[bool], np.ndarray], object], items: np.ndarray, responses: list[bool]
+  ) -> None:
+    """Items that are not one (a, b, c, d) row per response raise a ValueError when the function is built.
+
+    Fails if a single 1-D item is read as four items (one row broadcast across four responses), or if a 3-D matrix or a
+    missing column passes construction and fails later with an IndexError or TypeError.
+    """
+    with pytest.raises(ValueError, match=r"items must be an \(n, 4\) matrix"):
+      build(responses, items)
+
+  def test_log_likelihood_of_unsigned_integer_items_is_the_formula(self) -> None:
+    """Items stored as unsigned integers give the log-likelihood of the same parameters as floats.
+
+    At theta = 0.5, a correct answer to (1, 0, 0, 1) gives log sigma(0.5) and a wrong one to (2, 1, 0, 1) gives
+    log sigma(1). Fails if the discrimination's sign is flipped in the items' own dtype, where -2 wraps to 254.
+    """
+    items = np.array([[1, 0, 0, 1], [2, 1, 0, 1]], dtype=np.uint8)
+    expected = -math.log1p(math.exp(-0.5)) - math.log1p(math.exp(-1.0))
+
+    assert irt.log_likelihood(0.5, [True, False], items) == pytest.approx(expected, rel=1e-12)
+
 
 class TestThetaToScale:
   """Tests for the theta_to_scale() function."""

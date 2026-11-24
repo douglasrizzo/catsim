@@ -46,6 +46,10 @@ than the item bank difficulty range prevents artificial restrictions on ability
 estimates."""
 
 
+# the columns of an item matrix: a, b, c and d
+_N_COLUMNS = 4
+
+
 def _split_params(items: FloatArray) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
   """Return the a, b, c and d parameters of a row or matrix of items, each of shape ``items.shape[:-1]``."""
   return items[..., 0], items[..., 1], items[..., 2], items[..., 3]
@@ -647,8 +651,8 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
       \log L(\theta) = \sum_{i=1}^{n} \left[ u_i \log P_i(\theta) + (1 - u_i) \log Q_i(\theta) \right]
 
   where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`
-  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms come from
-  :py:func:`log_response_probabilities` and are exact at any distance from the difficulty: far from
+  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are computed as in
+  :py:func:`log_response_probabilities`, exact at any distance from the difficulty: far from
   it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
   log-likelihood is 0.
 
@@ -709,7 +713,7 @@ def log_likelihood_function(
   Raises
   ------
   ValueError
-      If ``responses`` does not hold one Boolean per item.
+      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one Boolean per item.
 
   Examples
   --------
@@ -719,13 +723,19 @@ def log_likelihood_function(
   >>> round(log_lik(0.0), 4), log_lik(numpy.array([0.0, 1.0])).round(4)
   (-1.3863, array([-1.3863, -1.6265]))
   """
+  # a float copy: later changes to the caller's matrix cannot reach the function, and negating a
+  # below does not wrap around in an unsigned integer type
+  items = numpy.array(items, dtype=float)
+  if items.shape[1:] != (_N_COLUMNS,):
+    msg = f"items must be an (n, 4) matrix, one row per response, got shape {items.shape}"
+    raise ValueError(msg)
   validate_response_vector(responses, items.shape[0])
   correct = numpy.asarray(responses, dtype=bool)
   log_c, log_1md, log_dmc = _log_asymptotes(items)
   log_floor = numpy.where(correct, log_c, log_1md)
   # An incorrect response's log Q is log P's formula at the negated logit, and negating a negates
   # the logit exactly, so each item computes only the term its response selects
-  signed_items = items.copy()
+  signed_items = items
   signed_items[:, 0] = numpy.where(correct, items[:, 0], -items[:, 0])
 
   def log_likelihood_at(theta: float | FloatArray) -> float | FloatArray:
