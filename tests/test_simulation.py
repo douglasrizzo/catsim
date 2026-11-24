@@ -491,7 +491,7 @@ class FakeRng(np.random.Generator):
 
 
 def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
-  """Simulated responses require a true theta on the session."""
+  """A session without a true theta raises: the probability at None is NaN, so every response would be incorrect."""
   session = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)]).snapshot()
 
   with pytest.raises(ValueError, match="true_theta is required") as exc_info:
