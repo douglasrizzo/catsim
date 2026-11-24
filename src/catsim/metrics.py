@@ -8,6 +8,28 @@ import numpy.typing as npt
 from .typing import FloatArray
 
 
+def _errors(actual: npt.ArrayLike, predicted: npt.ArrayLike) -> FloatArray:
+  """Return the estimates minus the true abilities.
+
+  Returns
+  -------
+  numpy.ndarray
+      Each examinee's estimated minus true ability.
+
+  Raises
+  ------
+  ValueError
+      If ``actual`` and ``predicted`` differ in length; a one-element vector would otherwise
+      broadcast against the other.
+  """
+  actual = numpy.asarray(actual, dtype=float)
+  predicted = numpy.asarray(predicted, dtype=float)
+  if len(actual) != len(predicted):
+    msg = "actual and predicted vectors need to be the same size"
+    raise ValueError(msg)
+  return predicted - actual
+
+
 def bias(
   actual: npt.ArrayLike,
   predicted: npt.ArrayLike,
@@ -43,13 +65,7 @@ def bias(
   >>> bias([1.0, -1.0], [0.0, 6.0])
   3.0
   """
-  actual = numpy.asarray(actual)
-  predicted = numpy.asarray(predicted)
-
-  if len(actual) != len(predicted):
-    msg = "actual and predicted vectors need to be the same size"
-    raise ValueError(msg)
-  return float(numpy.mean(predicted - actual))
+  return float(numpy.mean(_errors(actual, predicted)))
 
 
 def mse(
@@ -87,14 +103,8 @@ def mse(
   >>> mse([1.0, -1.0], [0.0, 6.0])
   25.0
   """
-  actual = numpy.asarray(actual)
-  predicted = numpy.asarray(predicted)
-
-  if len(actual) != len(predicted):
-    msg = "Actual and predicted vectors need to be the same size"
-    raise ValueError(msg)
-  diff = predicted - actual
-  return float(numpy.mean(diff * diff))
+  errors = _errors(actual, predicted)
+  return float(numpy.mean(errors * errors))
 
 
 def rmse(
