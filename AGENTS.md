@@ -52,7 +52,7 @@ hidden runtime coupling.
 - Annotate NumPy arrays with the public aliases in `catsim.typing` (`FloatArray`, `IntArray`).
   Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
 - A method that overrides a base-class method carries `@override` (from `typing_extensions`); ty's
-  `missing-override-decorator` enforces it in `src/`.
+  `missing-override-decorator` enforces it in `src/` and `tests/`.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with
   a final `case _`.
 - No backward-compatibility aliases or deprecation shims before 1.0: a renamed or removed name is
@@ -117,6 +117,9 @@ Hard rules:
   - `uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb`
 - Every test has a docstring naming what it tests for: the behaviour, or the bug that would make it
   fail. Test docstrings have no argument sections.
+- ty checks `tests/` too. A test double subclasses the base class it stands in for; a line that
+  passes a deliberately wrong type carries `# ty: ignore[<rule>]` (ty does not read mypy's
+  `# type: ignore[<code>]`).
 
 ### When To Run What
 

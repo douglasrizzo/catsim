@@ -116,7 +116,7 @@ class TestFixedPointInitializerInit:
   def test_init_non_numeric_start_raises(self, start: object) -> None:
     """A non-numeric start was accepted and returned as the initial estimate, despite the documented TypeError."""
     with pytest.raises(TypeError, match="must be real number"):
-      FixedPointInitializer(start)  # type: ignore[arg-type]
+      FixedPointInitializer(start)  # ty: ignore[invalid-argument-type]
 
 
 class TestFixedPointInitializerInitialize:

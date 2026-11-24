@@ -13,7 +13,7 @@ from catsim import irt
 from tests.hypothesis_strategies import item_params_matrix, pl4_item_row, scale_mapping
 
 # Keep CI fast; properties are meant to stress invariants rather than sample size.
-IRT_SETTINGS = settings(max_examples=30, deadline=None)
+IRT_SETTINGS = settings(max_examples=30)
 
 
 _ABILITY = st.floats(-4.0, 4.0, allow_nan=False, allow_infinity=False)

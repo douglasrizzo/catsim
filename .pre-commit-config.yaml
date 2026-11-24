@@ -11,10 +11,14 @@ repos:
         language: fail
         files: ^(\.claude|\.plans|\.pre-commit-cache|papers)/
       # Tests mock only at boundaries (network, files, clocks, random draws), never catsim itself.
-      # --multiline: a long call puts the target string on its own line.
+      # monkeypatch.setattr/delattr/setitem/delitem and mock's patch, patch.object and the like are rejected when the
+      # target, positional or `target=`, is a "catsim..." string, a catsim.* object, or a name that a
+      # `from catsim... import` or `import catsim... as` line binds (the regex captures that name and
+      # looks for it as the target).
+      # A catsim object held in a local variable is not caught. --multiline: the pattern spans lines.
       - id: no-patching-catsim
         name: tests patch only boundaries, not catsim internals
-        entry: 'monkeypatch\.setattr\(\s*["'']catsim\.'
+        entry: '(?:^[ \t]*(?:from[ \t]+catsim[\w.]*[ \t]+import[ \t]+(?:\([^)]*?|[^\n]*?)|import[ \t]+catsim[\w.]*[ \t]+as[ \t]+)\b(\w+)\b.*?)?(?:monkeypatch\.(?:set|del)(?:attr|item)|\bpatch(?:\.\w+)?)\(\s*(?:target\s*=\s*)?(?:["'']?catsim\b|\1\b)'
         language: pygrep
         args: [--multiline]
         files: ^tests/

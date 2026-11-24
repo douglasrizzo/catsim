@@ -138,8 +138,11 @@ class TestNumericalSearchEstimatorEstimate:
       for estimator in (coarse, fine)
     ]
 
+    coarse_evaluations, fine_evaluations = (estimate.evaluations for estimate in estimates)
     assert estimates[1].theta == pytest.approx(reference, abs=1e-7)
-    assert estimates[0].evaluations < estimates[1].evaluations
+    assert coarse_evaluations is not None
+    assert fine_evaluations is not None
+    assert coarse_evaluations < fine_evaluations
 
   def test_standard_error_is_the_inverse_root_of_the_information_at_the_estimate(self) -> None:
     """Sixteen identical 1PL items at b = 0, half answered correctly, give theta = 0 and SE = 2 / sqrt(16) = 0.5.
@@ -258,14 +261,18 @@ def test_estimators_accept_numpy_item_indices(
   item_bank = ItemBank.generate(10, rng=42)
 
   from_list = make_estimator().estimate(make_context(item_bank, administered_items, responses, theta=0.7))
-  from_array = make_estimator().estimate(make_context(item_bank, np.array(administered_items), responses, theta=0.7))
+  from_array = make_estimator().estimate(
+    make_context(item_bank, np.array(administered_items), responses, theta=0.7)  # ty: ignore[invalid-argument-type]
+  )
 
   assert from_array.theta == pytest.approx(from_list.theta, abs=1e-15)
 
 
 @pytest.mark.parametrize("estimator_class", [NumericalSearchEstimator, MAPEstimator, WarmLikelihoodEstimator])
 @pytest.mark.parametrize("tol", [0.0, -1e-6, float("nan")])
-def test_estimators_reject_a_tolerance_that_is_not_positive(estimator_class: type[BaseEstimator], tol: float) -> None:
+def test_estimators_reject_a_tolerance_that_is_not_positive(
+  estimator_class: type[NumericalSearchEstimator | MAPEstimator | WarmLikelihoodEstimator], tol: float
+) -> None:
   """A tol that is not positive fails at construction, not mid-session inside SciPy (WLE's brentq raised there)."""
   with pytest.raises(ValueError, match="tol must be positive"):
     estimator_class(tol=tol)
@@ -282,7 +289,7 @@ def test_estimators_reject_a_tolerance_that_is_not_positive(estimator_class: typ
   ],
 )
 def test_estimators_reject_bounds_that_are_not_a_finite_interval(
-  estimator_class: type[BaseEstimator], bounds: tuple[float, float]
+  estimator_class: type[NumericalSearchEstimator | MAPEstimator | WarmLikelihoodEstimator], bounds: tuple[float, float]
 ) -> None:
   """Bounds that are not a finite interval with low < high fail at construction, not inside SciPy."""
   with pytest.raises(ValueError, match="bounds must be finite with low < high"):
@@ -945,7 +952,7 @@ class TestWarmLikelihoodEstimator:
       scan = np.linspace(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED, 121)
       values = np.array([score(theta) for theta in scan])
       brackets = np.flatnonzero((values[:-1] > 0) & (values[1:] <= 0))
-      searches = [brentq(score, scan[k], scan[k + 1], xtol=1e-6, full_output=True) for k in brackets]
+      searches = [brentq(score, scan[k], scan[k + 1], xtol=1e-6, full_output=True) for k in brackets.tolist()]
       expected = 121 + sum(result.function_calls for _, result in searches)
       if len(searches) > 1:
         expected += sum(

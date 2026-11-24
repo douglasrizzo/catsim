@@ -16,14 +16,14 @@ from hypothesis.stateful import (
 )
 from typing_extensions import override
 
-from catsim import Estimate
+from catsim import Estimate, StepContext
 from catsim.engine import CatEngine, RunContext
-from catsim.estimation import NumericalSearchEstimator
+from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.exposure import BaseExposureControl
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
-from catsim.selection import MaxInfoSelector
+from catsim.selection import BaseSelector, MaxInfoSelector
 from catsim.state import CatSessionState, ExposureTracker, StopReason
 from catsim.stopping import MaxLengthStopper
 
@@ -40,23 +40,25 @@ class FixedResponseProvider:
 
 
 @dataclass
-class RecordingEstimator:
+class RecordingEstimator(BaseEstimator):
   """Estimator stub returning a fixed theta."""
 
   theta: float
 
-  def estimate(self, context) -> Estimate:  # noqa: ARG002
+  @override
+  def estimate(self, context: StepContext) -> Estimate:
     """Return the fixed theta with a standard error of 1."""
     return Estimate(theta=float(self.theta), se=1.0)
 
 
-class QueueOrderSelector:
+class QueueOrderSelector(BaseSelector):
   """Select the next item by scanning a fixed permutation, skipping administered ids."""
 
   def __init__(self, order: tuple[int, ...] | list[int]) -> None:
     self._order = tuple(order)
 
-  def select(self, context):
+  @override
+  def select(self, context: StepContext) -> int:
     """Return the first item of the permutation not yet administered, or else the lowest-index one."""
     administered_set = set(context.administered_items)
     n = context.item_bank.n_items
@@ -96,13 +98,11 @@ class RandomlyDecliningControl(BaseExposureControl):
 _ORCHESTRATION_SETTINGS = settings(
   max_examples=25,
   stateful_step_count=60,
-  deadline=None,
 )
 
 _INTEGRATION_SETTINGS = settings(
   max_examples=10,
   stateful_step_count=40,
-  deadline=None,
 )
 
 

@@ -22,6 +22,7 @@ class RecordingEstimator(BaseEstimator):
     self.records.append((context.administered_items, context.responses, context.theta))
     return Estimate(theta=float(len(context.responses)), se=1.0)
 
+  @override
   def __repr__(self) -> str:
     return "RecordingEstimator()"
 
@@ -131,7 +132,7 @@ class TestMEISelector:
       expected[candidate] = p_correct * total_information(theta + 0.5, [0, candidate]) + (
         1.0 - p_correct
       ) * total_information(theta - 0.5, [0, candidate])
-      score = selector._expected_information(context, candidate)
+      score = selector._expected_information(context, candidate)  # noqa: SLF001 - select shows only the best score
       assert score == pytest.approx(expected[candidate], rel=1e-12)
 
     selected = selector.select(context)

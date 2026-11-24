@@ -22,6 +22,7 @@ class TestClusterSelector:
     self,
     administered: list[int],
     exposure_rates: np.ndarray | None = None,
+    *,
     method: str = "item_info",
     r_max: float = 1.0,
     r_control: str = "passive",
@@ -95,7 +96,7 @@ class TestClusterSelector:
   def test_constructor_rejects_invalid_arguments(self, kwargs: dict[str, object], match: str) -> None:
     """A bad label, method or fallback must fail at construction; float labels used to be accepted."""
     with pytest.raises(ValueError, match=match):
-      ClusterSelector(**kwargs)
+      ClusterSelector(**kwargs)  # ty: ignore[invalid-argument-type]
 
   def test_select_prefers_items_below_the_exposure_cap(self) -> None:
     """Inside the chosen cluster, an item at the cap is passed over for a less informative one below it."""

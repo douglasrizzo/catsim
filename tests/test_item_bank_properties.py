@@ -13,7 +13,7 @@ from catsim import irt
 from catsim.item_bank import ItemBank
 from tests.hypothesis_strategies import item_params_matrix
 
-BANK_SETTINGS = settings(max_examples=25, deadline=None)
+BANK_SETTINGS = settings(max_examples=25)
 
 
 @given(params=item_params_matrix())

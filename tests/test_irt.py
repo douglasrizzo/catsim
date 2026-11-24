@@ -373,7 +373,7 @@ class TestLogLikelihood:
     log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
     """
     with pytest.raises(ValueError, match="responses must contain only Boolean elements"):
-      build([True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
+      build([True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))  # ty: ignore[invalid-argument-type]
 
   @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
   @pytest.mark.parametrize(
@@ -404,7 +404,7 @@ class TestLogLikelihood:
     items = np.array([[1, 0, 0, 1], [2, 1, 0, 1]], dtype=np.uint8)
     expected = -math.log1p(math.exp(-0.5)) - math.log1p(math.exp(-1.0))
 
-    assert irt.log_likelihood(0.5, [True, False], items) == pytest.approx(expected, rel=1e-12)
+    assert irt.log_likelihood(0.5, [True, False], items) == pytest.approx(expected, rel=1e-12)  # ty: ignore[no-matching-overload]
 
 
 class TestThetaToScale:

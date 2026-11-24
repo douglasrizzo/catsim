@@ -108,7 +108,7 @@ select = [
     "PLR01",
     "PLR02",
     "PLR04",
-    "PLR09",  # too many arguments (at most 6), locals, statements, branches or returns
+    "PLR09",  # too many arguments (at most 6, 5 positional), locals, statements, branches or returns
     "PLR1",
     "PLR2",
     "PLR5",
@@ -129,7 +129,6 @@ ignore = [
   "E111",
   "E114",
   "PLR0912",  # too many branches: C901 already bounds the branching
-  "PLR0917",  # too many positional arguments: left until the strategy and constructor signatures settle
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
   "RUF201",  # Keep rule codes in this config rather than migrating to rule names
 ]
@@ -145,7 +144,9 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 max-complexity = 10
 
 [tool.ruff.lint.pylint]
+# CatEngine.__init__ takes the bank, four strategies and the keyword-only exposure_control.
 max-args = 6
+max-positional-args = 5
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
@@ -172,7 +173,6 @@ ignore-one-line-docstrings = true
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
   "RUF069",   # Exact float expectations are acceptable in tests
   "S",        # Security rules are too noisy for intentionally non-production test code
-  "SLF001",   # Tests may access private members to set up or inspect internal state
   "TC001",    # Test-only type imports do not justify TYPE_CHECKING indirection
   "TC003",    # Test-only type imports do not justify TYPE_CHECKING indirection
 ]
@@ -247,7 +247,7 @@ source = ["catsim"]
 exclude_also = ["if TYPE_CHECKING:", "if __name__ == .__main__.:", "raise NotImplementedError"]
 # Below the measured coverage while the 1.0 work deletes code and tests; raise it as tests for the
 # uncovered input checks land.
-fail_under = 88
+fail_under = 89
 show_missing = true
 
 [tool.vulture]
@@ -280,7 +280,7 @@ thr = "thr"  # catR's nextItem argument for the test length, quoted on the progr
 writeable = "writeable"  # numpy's ndarray.flags.writeable
 
 [tool.ty.src]
-include = ["src/catsim"]
+include = ["src/catsim", "tests"]
 
 [tool.ty.rules]
 # ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (NumPy and
@@ -296,6 +296,8 @@ unused-type-ignore-comment = "error"
 # A function tested for truth instead of called; both rules only warn by default.
 redundant-condition = "error"
 truthiness-test-of-callable = "error"
+# A condition always true or always false: a dead branch, or an exhaustive check written as an elif.
+redundant-condition-strict = "error"
 # Every override carries @override, so a base-class rename fails the check at each orphaned override.
 missing-override-decorator = "error"
 

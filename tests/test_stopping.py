@@ -181,7 +181,7 @@ class TestStopRule:
     The rule would then fail on its first stop check, in the middle of a run, instead of when it is built.
     """
     with pytest.raises(TypeError, match="got int"):
-      StopRule(StandardErrorStopper(0.3), 40)
+      StopRule(StandardErrorStopper(0.3), 40)  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.parametrize(

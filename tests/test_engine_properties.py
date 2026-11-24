@@ -18,7 +18,7 @@ from catsim.state import CatSessionState
 from catsim.stopping import MaxLengthStopper
 from tests.hypothesis_strategies import item_params_matrix
 
-ENGINE_SETTINGS = settings(max_examples=20, deadline=None)
+ENGINE_SETTINGS = settings(max_examples=20)
 
 
 @given(
