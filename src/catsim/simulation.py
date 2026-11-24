@@ -40,7 +40,7 @@ class SimulationRunner:
       raise TypeError(msg)
 
     self._item_bank = item_bank
-    self._engine = CatEngine(initializer, selector, estimator, stopper)
+    self._engine = CatEngine(item_bank, initializer, selector, estimator, stopper)
     self._rng = numpy.random.default_rng(seed=seed)
 
   @property
@@ -85,11 +85,10 @@ class SimulationRunner:
     for session_id, true_theta in enumerate(thetas):
       session = self._engine.start_session(
         session_id=session_id,
-        item_bank=self._item_bank,
         context=context,
         true_theta=float(true_theta),
       )
-      session = self._engine.run_session(session, self._item_bank, response_provider, context)
+      session = self._engine.run_session(session, response_provider, context)
       sessions.append(session)
       if pbar is not None:
         pbar.update()
