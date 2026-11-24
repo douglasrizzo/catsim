@@ -278,8 +278,15 @@ class TestLogResponseProbabilities:
     np.testing.assert_allclose(log_q[:, 0], -np.logaddexp(0.0, z), rtol=1e-12)
 
 
+# log_likelihood validates its responses through log_likelihood_function, which must do it when built
+_LOG_LIKELIHOOD_BUILDERS = [
+  pytest.param(lambda responses, items: irt.log_likelihood(0.0, responses, items), id="log_likelihood"),
+  pytest.param(irt.log_likelihood_function, id="log_likelihood_function"),
+]
+
+
 class TestLogLikelihood:
-  """Tests for the log_likelihood() function."""
+  """Tests for the log_likelihood() and log_likelihood_function() functions."""
 
   def test_log_likelihood_of_two_hand_worked_items(self) -> None:
     """At theta = 0, a right answer to [1, -1, 0, 1] has P = 1 / (1 + e^-1), a wrong one to [1, 0, 0.2, 0.9] Q = 0.45.
@@ -319,12 +326,14 @@ class TestLogLikelihood:
     responses = [True, False]
     thetas = np.linspace(-3.0, 3.0, 6).reshape(2, 3)
 
+    # near the difficulties log P and log(1 - P) are accurate to 1e-12
+    probabilities = irt.icc(thetas, items)
+    expected = np.log(probabilities[..., 0]) + np.log(1.0 - probabilities[..., 1])
+
     values = irt.log_likelihood(thetas, responses, items)
 
     assert values.shape == (2, 3)
-    np.testing.assert_allclose(
-      values, [[irt.log_likelihood(float(theta), responses, items) for theta in row] for row in thetas], rtol=1e-12
-    )
+    np.testing.assert_allclose(values, expected, rtol=1e-12)
 
   def test_log_likelihood_is_zero_without_items(self) -> None:
     """With no administered items, every ability has log-likelihood 0."""
@@ -332,15 +341,71 @@ class TestLogLikelihood:
 
     np.testing.assert_array_equal(values, np.zeros(5))
 
-  def test_log_likelihood_rejects_mismatched_lengths(self) -> None:
-    """A response vector that does not match the items raises instead of broadcasting against them."""
-    with pytest.raises(ValueError, match="responses and items must have the same length, got 2 and 1"):
-      irt.log_likelihood(0.0, [True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
+  def test_log_likelihood_function_keeps_the_pattern_it_was_built_from(self) -> None:
+    """At theta = 1 a right answer to [1, 0, 0, 1] has log P = -log(1 + e^-1), even after the caller reuses its arrays.
 
-  def test_log_likelihood_rejects_non_boolean_responses(self) -> None:
-    """Responses other than True and False raise instead of being read as correct."""
+    A function that reads the caller's items or responses at each call gives log Q = log 0.5 for the wrong answer to
+    [1, 1, 0, 1] written over them.
+    """
+    items = np.array([[1.0, 0.0, 0.0, 1.0]])
+    responses = [True]
+    log_lik = irt.log_likelihood_function(responses, items)
+
+    items[0, 1] = 1.0
+    responses[0] = False
+
+    assert log_lik(1.0) == pytest.approx(-math.log1p(math.exp(-1.0)), rel=1e-12)
+
+  @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
+  def test_log_likelihood_rejects_mismatched_lengths(self, build: Callable[[list[bool], np.ndarray], object]) -> None:
+    """A response vector that does not match the items raises instead of broadcasting against them.
+
+    log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
+    """
+    with pytest.raises(ValueError, match="responses and items must have the same length, got 2 and 1"):
+      build([True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
+
+  @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
+  def test_log_likelihood_rejects_non_boolean_responses(
+    self, build: Callable[[list[bool], np.ndarray], object]
+  ) -> None:
+    """Responses other than True and False raise instead of being read as correct.
+
+    log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
+    """
     with pytest.raises(ValueError, match="responses must contain only Boolean elements"):
-      irt.log_likelihood(0.0, [True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
+      build([True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
+
+  @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
+  @pytest.mark.parametrize(
+    ("items", "responses"),
+    [
+      pytest.param(np.array([1.0, 0.0, 0.0, 1.0]), [True, False, True, True], id="one item, 1-D"),
+      pytest.param(np.ones((1, 1, 4)), [True], id="3-D"),
+      pytest.param(np.ones((1, 3)), [True], id="three columns"),
+    ],
+  )
+  def test_log_likelihood_rejects_items_that_are_not_an_n_by_4_matrix(
+    self, build: Callable[[list[bool], np.ndarray], object], items: np.ndarray, responses: list[bool]
+  ) -> None:
+    """Items that are not one (a, b, c, d) row per response raise a ValueError when the function is built.
+
+    Fails if a single 1-D item is read as four items (one row broadcast across four responses), or if a 3-D matrix or a
+    missing column passes construction and fails later with an IndexError or TypeError.
+    """
+    with pytest.raises(ValueError, match=r"items must be an \(n, 4\) matrix"):
+      build(responses, items)
+
+  def test_log_likelihood_of_unsigned_integer_items_is_the_formula(self) -> None:
+    """Items stored as unsigned integers give the log-likelihood of the same parameters as floats.
+
+    At theta = 0.5, a correct answer to (1, 0, 0, 1) gives log sigma(0.5) and a wrong one to (2, 1, 0, 1) gives
+    log sigma(1). Fails if the discrimination's sign is flipped in the items' own dtype, where -2 wraps to 254.
+    """
+    items = np.array([[1, 0, 0, 1], [2, 1, 0, 1]], dtype=np.uint8)
+    expected = -math.log1p(math.exp(-0.5)) - math.log1p(math.exp(-1.0))
+
+    assert irt.log_likelihood(0.5, [True, False], items) == pytest.approx(expected, rel=1e-12)
 
 
 class TestThetaToScale:

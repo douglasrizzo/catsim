@@ -64,9 +64,9 @@ branches from the first item.
 Each selection estimates ability twice for every candidate item, once per
 hypothetical response, so MEI is the slowest selector in catsim and its cost
 grows in proportion to the bank. With the default estimator, one selection
-after 20 items takes about 0.16 s on a bank of 500 items and 1.5 s on a bank of
+after 20 items takes about 0.11 s on a bank of 500 items and 1 s on a bank of
 5,000, measured on one core of an Apple M4 Pro. A simulation of 1,000 examinees
-taking 20 items each from a 500-item bank spends about an hour in item
+taking 20 items each from a 500-item bank spends about half an hour in item
 selection.
 
 ## Parameters

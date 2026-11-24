@@ -221,9 +221,9 @@ class KLPSelector(BaseSelector):
   current estimate.
 - The divergence table depends on the current estimate, so it is computed for the candidates at
   every call and not cached (Contract 3).
-- The log-probabilities come from `irt.log_response_probabilities`, which `irt.log_likelihood` and
-  `KLSelector` also use. `KLSelector._kl_global` computes the same divergence at its Gauss-Legendre
-  nodes: share `_kl_divergences` with it rather than keeping two copies.
+- The log-probabilities come from `irt.log_response_probabilities`, which `KLSelector` also uses.
+  `KLSelector._kl_global` computes the same divergence at its Gauss-Legendre nodes: share
+  `_kl_divergences` with it rather than keeping two copies.
 - The score sums over the nodes rather than using `post @ divergences`, as `KLSelector` and
   `MLWISelector` do: a matrix product can round identical columns differently, which breaks the
   exact ties of {doc}`ADR-0008 </adr/0008-random-tie-breaking>`.

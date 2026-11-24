@@ -6,7 +6,7 @@ such rows, shape ``(n, 4)``: discrimination, difficulty, pseudo-guessing and upp
 """
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import overload
 
 import numpy
@@ -44,6 +44,10 @@ abilities are normally distributed N(0, 1). Recommended for numerical search
 algorithms to avoid ceiling/floor effects during estimation. Using bounds wider
 than the item bank difficulty range prevents artificial restrictions on ability
 estimates."""
+
+
+# the columns of an item matrix: a, b, c and d
+_N_COLUMNS = 4
 
 
 def _split_params(items: FloatArray) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
@@ -617,12 +621,22 @@ def log_response_probabilities(theta: float | FloatArray, items: FloatArray) -> 
   >>> numpy.exp(log_p).round(4), numpy.exp(log_q).round(4)
   (array([0.6]), array([0.4]))
   """
-  _, _, c, d = _split_params(items)
   z = _logit(theta, items)
+  log_c, log_1md, log_dmc = _log_asymptotes(items)
+  return _log_probability(z, log_c, log_dmc), _log_probability(-z, log_1md, log_dmc)
+
+
+def _log_asymptotes(items: FloatArray) -> tuple[FloatArray, FloatArray, FloatArray]:
+  """Return log c, log(1 - d) and log(d - c) of every item, which do not depend on the ability."""
+  _, _, c, d = _split_params(items)
   # c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly
   with numpy.errstate(divide="ignore"):
-    log_c, log_1md, log_dmc = numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
-  return numpy.logaddexp(log_c, log_dmc + log_expit(z)), numpy.logaddexp(log_1md, log_dmc + log_expit(-z))
+    return numpy.log(c), numpy.log1p(-d), numpy.log(d - c)
+
+
+def _log_probability(z: FloatArray, log_floor: FloatArray, log_dmc: FloatArray) -> FloatArray:
+  """Return log P from the logit and log c, or log Q from the negated logit and log(1 - d)."""
+  return numpy.logaddexp(log_floor, log_dmc + log_expit(z))
 
 
 @overload
@@ -637,8 +651,8 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
       \log L(\theta) = \sum_{i=1}^{n} \left[ u_i \log P_i(\theta) + (1 - u_i) \log Q_i(\theta) \right]
 
   where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`
-  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms come from
-  :py:func:`log_response_probabilities` and are exact at any distance from the difficulty: far from
+  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are computed as in
+  :py:func:`log_response_probabilities`, exact at any distance from the difficulty: far from
   it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the
   log-likelihood is 0.
 
@@ -669,10 +683,66 @@ def log_likelihood(theta: float | FloatArray, responses: Sequence[bool], items: 
   >>> round(log_likelihood(0.0, [True, False], numpy.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]])), 4)
   -1.3863
   """
+  return log_likelihood_function(responses, items)(theta)
+
+
+def log_likelihood_function(
+  responses: Sequence[bool], items: FloatArray
+) -> Callable[[float | FloatArray], float | FloatArray]:
+  r"""Return the log-likelihood of the responses as a function of the ability.
+
+  The returned function gives, for any ``theta``, the value of :py:func:`log_likelihood` with the same
+  shape and type. ``responses`` is validated here, once, and the terms that do not depend on the
+  ability are computed here too. Changing ``responses`` or ``items`` afterwards does not change the
+  function.
+
+  Parameters
+  ----------
+  responses : Sequence[bool]
+      One response per item, True for a correct one.
+  items : numpy.ndarray
+      The answered items, a matrix of shape ``(n, 4)`` whose items satisfy
+      :math:`0 \leq c < d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.
+
+  Returns
+  -------
+  Callable[[float | numpy.ndarray], float | numpy.ndarray]
+      The log-likelihood of each ability: a float for a float ``theta``, otherwise an array of the
+      shape of ``theta``.
+
+  Raises
+  ------
+  ValueError
+      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one Boolean per item.
+
+  Examples
+  --------
+  >>> import numpy
+  >>> items = numpy.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]])
+  >>> log_lik = log_likelihood_function([True, False], items)
+  >>> round(log_lik(0.0), 4), log_lik(numpy.array([0.0, 1.0])).round(4)
+  (-1.3863, array([-1.3863, -1.6265]))
+  """
+  # a float copy: later changes to the caller's matrix cannot reach the function, and negating a
+  # below does not wrap around in an unsigned integer type
+  items = numpy.array(items, dtype=float)
+  if items.shape[1:] != (_N_COLUMNS,):
+    msg = f"items must be an (n, 4) matrix, one row per response, got shape {items.shape}"
+    raise ValueError(msg)
   validate_response_vector(responses, items.shape[0])
-  log_p, log_q = log_response_probabilities(theta, items)
-  values = numpy.sum(numpy.where(numpy.asarray(responses, dtype=bool), log_p, log_q), axis=-1)
-  return values if numpy.ndim(theta) else float(values)
+  correct = numpy.asarray(responses, dtype=bool)
+  log_c, log_1md, log_dmc = _log_asymptotes(items)
+  log_floor = numpy.where(correct, log_c, log_1md)
+  # An incorrect response's log Q is log P's formula at the negated logit, and negating a negates
+  # the logit exactly, so each item computes only the term its response selects
+  signed_items = items
+  signed_items[:, 0] = numpy.where(correct, items[:, 0], -items[:, 0])
+
+  def log_likelihood_at(theta: float | FloatArray) -> float | FloatArray:
+    values = numpy.sum(_log_probability(_logit(theta, signed_items), log_floor, log_dmc), axis=-1)
+    return values if numpy.ndim(theta) else float(values)
+
+  return log_likelihood_at
 
 
 def validate_response_vector(responses: Sequence[bool], n_items: int) -> None:

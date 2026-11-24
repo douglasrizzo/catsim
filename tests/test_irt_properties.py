@@ -119,6 +119,32 @@ def test_log_likelihood_matches_the_probability_formula_at_each_theta(
     assert value == pytest.approx(reference, abs=tolerance)
 
 
+@given(
+  thetas=st.lists(st.floats(-30.0, 30.0, allow_nan=False, allow_infinity=False), min_size=1, max_size=8),
+  items=item_params_matrix(min_items=1, max_items=10),
+  responses=st.lists(st.booleans(), min_size=10, max_size=10),
+)
+@IRT_SETTINGS
+def test_log_likelihood_function_sums_the_log_probability_each_response_selects(
+  thetas: list[float],
+  items: np.ndarray,
+  responses: list[bool],
+) -> None:
+  """At a float or an array of abilities, the function sums log P over correct responses and log Q over incorrect ones.
+
+  An incorrect response's term built from log c or from the unnegated logit, or the theta-free terms paired with the
+  wrong items, change the sum.
+  """
+  responses = responses[: items.shape[0]]
+  log_p, log_q = irt.log_response_probabilities(np.array(thetas), items)
+  expected = np.sum(np.where(responses, log_p, log_q), axis=-1)
+
+  log_lik = irt.log_likelihood_function(responses, items)
+
+  np.testing.assert_allclose(log_lik(np.array(thetas)), expected, rtol=1e-12)
+  np.testing.assert_allclose([log_lik(theta) for theta in thetas], expected, rtol=1e-12)
+
+
 @given(m=scale_mapping())
 @IRT_SETTINGS
 def test_theta_scale_round_trip_identity(m: tuple[float, float, float, float]) -> None:
