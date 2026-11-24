@@ -76,6 +76,9 @@ a spacing of 0.1, to keep precision down to a posterior standard deviation of
 0.2.
 A coarser grid degrades sooner: with 41 nodes (spacing 0.3), errors reach about
 7% at a posterior standard deviation of 0.15 and about 44% at 0.11.
+`EAPEstimator` reports the posterior standard deviation as its standard error,
+so a precision stopper with a threshold below about 0.065 needs a finer grid
+than the default.
 
 Bock and Mislevy also applied Sheppard's correction to the posterior variance
 (p. 433).

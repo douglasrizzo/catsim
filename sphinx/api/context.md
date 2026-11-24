@@ -1,4 +1,4 @@
-# Strategy Inputs -- {mod}`catsim.context`
+# Strategy Inputs and Estimates -- {mod}`catsim.context`
 
 ```{eval-rst}
 .. automodule:: catsim.context
