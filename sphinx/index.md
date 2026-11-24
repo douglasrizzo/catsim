@@ -8,6 +8,7 @@
 :maxdepth: 2
 
 introduction
+terms-and-notation
 api/index
 reproducibility
 architecture_decisions
