@@ -1,0 +1,11 @@
+# The list of pull requests that `gh release create --generate-notes` puts under each release's
+# hand-written summary. Dependabot's dependency bumps would bury the changes users read for.
+changelog:
+  exclude:
+    authors:
+      - dependabot
+      - "dependabot[bot]"
+  categories:
+    - title: Changes
+      labels:
+        - "*"
