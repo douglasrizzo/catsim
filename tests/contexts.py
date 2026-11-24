@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 
 import numpy as np
@@ -16,6 +17,7 @@ def make_context(
   responses: Sequence[bool] | None = None,
   *,
   theta: float = 0.0,
+  se: float = math.inf,
   rng: np.random.Generator | None = None,
   exposure_rates: FloatArray | None = None,
   excluded_items: Sequence[int] = (),
@@ -32,5 +34,6 @@ def make_context(
     responses=(True,) * len(administered_items) if responses is None else tuple(responses),
     excluded_items=tuple(excluded_items),
     theta=theta,
+    se=se,
     exposure_rates=exposure_rates,
   )

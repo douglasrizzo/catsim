@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import math
 from dataclasses import FrozenInstanceError, dataclass
 
 import numpy as np
 import pytest
 
-from catsim import StepContext
+from catsim import Estimate, StepContext
 from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
@@ -71,17 +72,18 @@ class RecordingEstimator:
   """Estimator stub that records the context it is given."""
 
   theta: float
+  se: float = 0.5
   seen: StepContext | None = None
 
-  def estimate(self, context: StepContext) -> float:
+  def estimate(self, context: StepContext) -> Estimate:
     self.seen = context
-    return self.theta
+    return Estimate(theta=self.theta, se=self.se)
 
 
 class FailingEstimator:
   """Estimator stub that fails on every call."""
 
-  def estimate(self, context: StepContext) -> float:
+  def estimate(self, context: StepContext) -> Estimate:
     del context
     msg = "estimation failed"
     raise ValueError(msg)
@@ -149,8 +151,8 @@ class LowestIndexSelector(BaseSelector):
 class CorrectCountEstimator(BaseEstimator):
   """Custom estimator: the number of correct responses."""
 
-  def estimate(self, context: StepContext) -> float:
-    return float(sum(context.responses))
+  def estimate(self, context: StepContext) -> Estimate:
+    return Estimate(theta=float(sum(context.responses)), se=1.0)
 
 
 class ThreeItemStopper(BaseStopper):
@@ -189,7 +191,7 @@ def test_start_session_passes_item_bank_and_rng_to_initializer(item_bank) -> Non
   assert session.session_id == 7
   assert session.current_theta == pytest.approx(1.25)
   assert session.true_theta == pytest.approx(-0.5)
-  assert session.theta_history == [pytest.approx(1.25)]
+  assert session.theta_history == (pytest.approx(1.25),)
   assert session.stop_reason is None
 
 
@@ -218,7 +220,10 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   stopper = RecordingStopper(should_stop=True)
   engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(0.0), stopper)
   state = CatSessionState(
-    session_id=3, theta_history=[0.0, 0.5, 1.75], administered_item_ids=[2, 4], responses=[True, False]
+    session_id=3,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(1.75, 0.6)],
+    administered_item_ids=[2, 4],
+    responses=[True, False],
   )
   rng = np.random.default_rng(5)
 
@@ -249,7 +254,10 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   context = RunContext(rng=rng, exposure_tracker=tracker)
   engine = CatEngine(RecordingInitializer(0.0), selector, RecordingEstimator(0.0), RecordingStopper(False))
   state = CatSessionState(
-    session_id=0, theta_history=[0.0, 0.5, -0.25], administered_item_ids=[1, 2], responses=[True, False]
+    session_id=0,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9), Estimate(-0.25, 0.6)],
+    administered_item_ids=[1, 2],
+    responses=[True, False],
   )
 
   selected = engine.select_next(state, item_bank, context)
@@ -430,14 +438,14 @@ def test_apply_response_rejects_a_stopped_session(item_bank) -> None:
 def test_session_state_holds_builtin_python_values(item_bank) -> None:
   """The engine stores Python scalars whatever numeric types the strategies and the examinee return.
 
-  Fails if an int initial theta, a ``numpy.float64`` estimate (as NumericalSearchEstimator
-  returns), a ``numpy.int64`` item index (from the selector, or passed to apply_response by the
-  caller), a ``numpy.bool_`` response or a ``numpy.bool_`` stop decision is stored as given.
+  Fails if an int initial theta, a ``numpy.int64`` item index (from the selector, or passed to
+  apply_response by the caller), a ``numpy.bool_`` response or a ``numpy.bool_`` stop decision is
+  stored as given.
   """
   engine = CatEngine(
     RecordingInitializer(theta=0),
     RecordingSelector(item_id=np.int64(3)),
-    RecordingEstimator(theta=np.float64(0.25)),
+    RecordingEstimator(theta=0.25),
     RecordingStopper(np.False_),
   )
   context = RunContext(rng=np.random.default_rng(42))
@@ -446,7 +454,7 @@ def test_session_state_holds_builtin_python_values(item_bank) -> None:
   result = engine.step(session, item_bank, FixedResponseProvider(np.True_), context)
   engine.apply_response(session, item_bank, item_id=np.int64(5), response=np.False_, context=context)
 
-  assert session.theta_history == [0.0, 0.25, 0.25]
+  assert session.theta_history == (0.0, 0.25, 0.25)
   assert [type(theta) for theta in session.theta_history] == [float, float, float]
   assert type(session.current_theta) is float
   assert session.administered_item_ids == [3, 5]
@@ -497,7 +505,7 @@ def test_a_session_rebuilt_from_a_snapshot_takes_the_next_step(item_bank) -> Non
   assert (rebuilt.administered_item_ids, rebuilt.responses, rebuilt.theta_history) == (
     [3, 4],
     [True, False],
-    [0.0, 0.5, 0.5],
+    (0.0, 0.5, 0.5),
   )
   assert (snapshot.administered_item_ids, snapshot.responses, snapshot.theta_history) == ((3,), (True,), (0.0, 0.5))
 
@@ -535,7 +543,7 @@ def test_a_step_result_cannot_be_changed(item_bank) -> None:
 
   with pytest.raises(FrozenInstanceError, match="cannot assign to field 'response'"):
     result.response = False  # type: ignore[misc]
-  for sequence in (result.session.administered_item_ids, result.session.responses, result.session.theta_history):
+  for sequence in (result.session.administered_item_ids, result.session.responses, result.session.estimates):
     with pytest.raises(AttributeError, match="object has no attribute 'append'"):
       sequence.append(sequence[0])  # type: ignore[attr-defined]
   assert (result.session.administered_item_ids, result.session.responses) == ((3,), (True,))
@@ -571,7 +579,7 @@ def test_step_applies_the_providers_response_to_the_selected_item(item_bank) -> 
   assert (result.selected_item_id, result.response, result.updated_theta) == (4, False, pytest.approx(0.7))
   assert session.administered_item_ids == [4]
   assert session.responses == [False]
-  assert session.theta_history == [0.0, pytest.approx(0.7)]
+  assert session.theta_history == (0.0, pytest.approx(0.7))
 
 
 def test_run_session_stops_at_fixed_length(
@@ -616,7 +624,7 @@ def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
   """Simulated responses require a true theta on the session."""
   provider = SimulatedResponseProvider()
   context = RunContext(rng=np.random.default_rng(42))
-  state = CatSessionState(session_id=0, theta_history=[0.0])
+  state = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)])
 
   with pytest.raises(ValueError, match="true_theta is required") as exc_info:
     provider.answer(state, item_bank, 0, context)
@@ -647,7 +655,7 @@ def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_pro
   item_bank = ItemBank(
     np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
   )
-  state = CatSessionState(session_id=0, theta_history=[-1.5], true_theta=1.5)
+  state = CatSessionState(session_id=0, estimates=[Estimate(-1.5, math.inf)], true_theta=1.5)
   context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
 
   assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
@@ -700,7 +708,9 @@ def test_apply_response_rejects_duplicate_items(
   """A session cannot administer the same item twice."""
   engine = CatEngine(fixed_initializer, random_selector, estimator, fixed_length_stopper)
   context = RunContext(rng=np.random.default_rng(42))
-  session = CatSessionState(session_id=0, theta_history=[0.0, 0.5], administered_item_ids=[0], responses=[True])
+  session = CatSessionState(
+    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)], administered_item_ids=[0], responses=[True]
+  )
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
     engine.apply_response(session, item_bank, 0, False, context)
@@ -755,5 +765,5 @@ def test_custom_strategies_written_against_the_base_classes_run_a_session(item_b
   engine.run_session(session, item_bank, FixedResponseProvider(True), context)
 
   assert session.administered_item_ids == [0, 1, 2]
-  assert session.theta_history == [0.5, 1.0, 2.0, 3.0]
+  assert session.theta_history == (0.5, 1.0, 2.0, 3.0)
   assert session.stop_reason is StopReason.STOPPER

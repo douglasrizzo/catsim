@@ -469,7 +469,7 @@ def test_progress(
       msg = "index must be provided when simulation is passed"
       raise ValueError(msg)
     session = simulation.sessions[index]
-    thetas = session.theta_history
+    thetas = list(session.theta_history)
     administered_items = simulation.item_bank.get_items(session.administered_item_ids)
     true_theta = session.true_theta
 

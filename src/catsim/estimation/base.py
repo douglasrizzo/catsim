@@ -3,14 +3,18 @@
 import math
 from abc import ABC, abstractmethod
 
-from ..context import StepContext
+from ..context import Estimate, StepContext
 
 
 class BaseEstimator(ABC):
   """Base class for ability estimators.
 
   An estimator updates the ability estimate from the responses a
-  :class:`~catsim.context.StepContext` holds, the newest one included.
+  :class:`~catsim.context.StepContext` holds, the newest one included, and reports it as an
+  :class:`~catsim.context.Estimate`: the estimate, its standard error by the estimator's own
+  formula, and how many objective evaluations it took. The engine records every step's
+  :class:`~catsim.context.Estimate` in the session, and stoppers judge the standard error the
+  estimator reported (ADR-0004).
 
   An estimator holds its configuration and caches derived from the item bank, never per-session
   state: one estimator serves every session of a run, an application may interleave the sessions
@@ -18,15 +22,9 @@ class BaseEstimator(ABC):
   responses.
   """
 
-  def __init__(self) -> None:
-    """Initialize the evaluation counters."""
-    self._calls = 0
-    self._last_evaluations = 0
-    self._total_evaluations = 0
-
   @abstractmethod
-  def estimate(self, context: StepContext) -> float:
-    r"""Return the updated ability estimate given the responses so far.
+  def estimate(self, context: StepContext) -> Estimate:
+    r"""Return the updated ability estimate given the responses so far, with its standard error.
 
     Once an item has been administered, the estimate is finite and lies within the estimator's
     bounds, whatever the response pattern, all correct and all incorrect included.
@@ -39,8 +37,9 @@ class BaseEstimator(ABC):
 
     Returns
     -------
-    float
-        The updated ability estimate :math:`\hat\theta`.
+    Estimate
+        The updated ability estimate :math:`\hat\theta`, its standard error (finite, or
+        ``math.inf``, never NaN) and the number of objective evaluations it took.
     """
 
   @staticmethod
@@ -91,44 +90,3 @@ class BaseEstimator(ABC):
       msg = f"bounds must be finite with low < high, got {bounds}"
       raise ValueError(msg)
     return float(low), float(high)
-
-  @property
-  def calls(self) -> int:
-    """Get how many times the estimator has been called to maximize/minimize the log-likelihood function.
-
-    Returns
-    -------
-    int
-        Number of times the estimator has been called to maximize/minimize the
-        log-likelihood function.
-    """
-    return self._calls
-
-  @property
-  def evaluations(self) -> int:
-    """Get the total number of times the estimator has evaluated the log-likelihood function during its existence.
-
-    Returns
-    -------
-    int
-        Number of function evaluations in the most recent estimate call.
-    """
-    return self._last_evaluations
-
-  @property
-  def total_evaluations(self) -> int:
-    """Get the total number of evaluations across the estimator lifetime."""
-    return self._total_evaluations
-
-  @property
-  def avg_evaluations(self) -> float:
-    """Get the average number of function evaluations for all tests the estimator has been used.
-
-    Returns
-    -------
-    float
-        Average number of function evaluations per estimate call.
-    """
-    if self._calls == 0:
-      return 0.0
-    return self._total_evaluations / self._calls

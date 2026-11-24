@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 from scipy.integrate import quad
 
-from catsim import StepContext, irt
+from catsim import Estimate, StepContext, irt
 from catsim.estimation import BaseEstimator
 from catsim.estimation.numerical import NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
@@ -44,12 +44,11 @@ class RecordingEstimator(BaseEstimator):
   """Estimator stub that records the history it receives."""
 
   def __init__(self) -> None:
-    super().__init__()
     self.records: list[tuple[tuple[int, ...], tuple[bool, ...], float]] = []
 
-  def estimate(self, context: StepContext) -> float:
+  def estimate(self, context: StepContext) -> Estimate:
     self.records.append((context.administered_items, context.responses, context.theta))
-    return float(len(context.responses))
+    return Estimate(theta=float(len(context.responses)), se=1.0)
 
   def __repr__(self) -> str:
     return "RecordingEstimator()"
@@ -58,8 +57,8 @@ class RecordingEstimator(BaseEstimator):
 class ShiftEstimator(BaseEstimator):
   """Estimator stub that moves the estimate 0.5 toward the last response."""
 
-  def estimate(self, context: StepContext) -> float:
-    return context.theta + (0.5 if context.responses[-1] else -0.5)
+  def estimate(self, context: StepContext) -> Estimate:
+    return Estimate(theta=context.theta + (0.5 if context.responses[-1] else -0.5), se=1.0)
 
 
 def _two_pl_bank(discriminations: list[float], difficulties: list[float]) -> ItemBank:
@@ -650,7 +649,7 @@ class TestMEISelector:
             * item_bank.test_information(
               estimator.estimate(
                 make_context(item_bank, [*administered_items, int(idx)], [*response_vector, True], theta=est_theta)
-              ),
+              ).theta,
               [*administered_items, int(idx)],
             )
           )
@@ -659,7 +658,7 @@ class TestMEISelector:
             * item_bank.test_information(
               estimator.estimate(
                 make_context(item_bank, [*administered_items, int(idx)], [*response_vector, False], theta=est_theta)
-              ),
+              ).theta,
               [*administered_items, int(idx)],
             )
           )
@@ -841,8 +840,10 @@ class TestMLWISelector:
     rng = np.random.default_rng(5)
     administered_items = list(range(20))
     response_vector = [bool(rng.random() < irt.icc(theta_true, *item_bank.items[idx])) for idx in administered_items]
-    mle_theta = NumericalSearchEstimator().estimate(
-      make_context(item_bank, administered_items, response_vector, theta=theta_true)
+    mle_theta = (
+      NumericalSearchEstimator()
+      .estimate(make_context(item_bank, administered_items, response_vector, theta=theta_true))
+      .theta
     )
 
     mlwi = MLWISelector(n_nodes=81)

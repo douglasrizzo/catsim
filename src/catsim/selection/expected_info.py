@@ -23,9 +23,8 @@ class MEISelector(BaseSelector):
   ----------
   estimator : BaseEstimator or None, optional
       Estimator used for the one-step-ahead ability updates. Default is a new
-      :py:class:`catsim.estimation.NumericalSearchEstimator`. Give the selector its own instance:
-      it calls ``estimate`` twice per candidate item, which would inflate the call and evaluation
-      counters of an estimator shared with the engine.
+      :py:class:`catsim.estimation.NumericalSearchEstimator`. It may be the engine's own
+      estimator: the look-ahead estimates are never recorded in the session.
   r_max : float, optional
       Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
       other item remains. Default is 1 (no restriction).
@@ -66,8 +65,8 @@ class MEISelector(BaseSelector):
     administered = (*context.administered_items, candidate)
     correct = dataclasses.replace(context, administered_items=administered, responses=(*context.responses, True))
     incorrect = dataclasses.replace(correct, responses=(*context.responses, False))
-    theta_correct = self._estimator.estimate(correct)
-    theta_incorrect = self._estimator.estimate(incorrect)
+    theta_correct = self._estimator.estimate(correct).theta
+    theta_incorrect = self._estimator.estimate(incorrect).theta
     item = context.item_bank.items[candidate]
     p_correct = irt.icc(context.theta, item[0], item[1], item[2], item[3])
     info_correct = context.item_bank.test_information(theta_correct, administered)

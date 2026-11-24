@@ -6,7 +6,8 @@ import itertools
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from .. import irt
+from scipy import stats
+
 from .base import BaseStopper
 
 if TYPE_CHECKING:
@@ -19,8 +20,9 @@ if TYPE_CHECKING:
 class StandardErrorStopper(BaseStopper):
   """Stop once the standard error of the ability estimate is at most a target value.
 
-  The standard error is :func:`catsim.irt.see` of the administered items at the current
-  estimate. With no administered items it is infinite, so the test does not stop.
+  The standard error is the one the estimator reported with the current estimate,
+  ``context.se`` (ADR-0004): the posterior standard deviation for EAP, the Fisher standard error
+  for maximum likelihood. Before any response it is infinite, so the test does not stop.
 
   Parameters
   ----------
@@ -60,7 +62,7 @@ class StandardErrorStopper(BaseStopper):
     bool
         True if the standard error of the estimate is at most `max_se`, False otherwise.
     """
-    return irt.see(context.theta, context.item_bank.get_items(context.administered_items)) <= self.max_se
+    return context.se <= self.max_se
 
 
 @dataclass(frozen=True)
@@ -70,8 +72,10 @@ class ConfidenceIntervalStopper(BaseStopper):
   The bounds cut the ability scale into bands. For example, ``[-2.0, -0.5, 0.5, 2.0]``
   gives five: :math:`(-\infty, -2.0]`, :math:`[-2.0, -0.5]`, :math:`[-0.5, 0.5]`,
   :math:`[0.5, 2.0]` and :math:`[2.0, \infty)`. The test stops once no bound lies strictly
-  inside the interval from :func:`catsim.irt.confidence_interval`. With no administered
-  items the interval is infinite, so the test does not stop.
+  inside the interval :math:`\hat\theta \pm z \cdot SE`, where :math:`SE` is the standard error
+  the estimator reported, ``context.se`` (ADR-0004), and :math:`z` the standard normal quantile
+  of the confidence level. Before any response the standard error is infinite, so the test does
+  not stop.
 
   Parameters
   ----------
@@ -123,6 +127,6 @@ class ConfidenceIntervalStopper(BaseStopper):
     bool
         True if no bound lies strictly inside the confidence interval, False otherwise.
     """
-    items = context.item_bank.get_items(context.administered_items)
-    lower, upper = irt.confidence_interval(context.theta, items, self.confidence)
+    margin = float(stats.norm.ppf((1 + self.confidence) / 2)) * context.se
+    lower, upper = context.theta - margin, context.theta + margin
     return not any(lower < bound < upper for bound in self.interval_bounds)

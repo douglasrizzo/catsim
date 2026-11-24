@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -14,6 +16,11 @@ from tests.contexts import make_context
 def identical_1pl_bank(n_items: int, difficulty: float) -> ItemBank:
   """Return `n_items` copies of a 1PL item; at theta = `difficulty`, n of them give a standard error of 2/sqrt(n)."""
   return ItemBank(np.tile([1.0, difficulty, 0.0, 1.0], (n_items, 1)))
+
+
+def identical_1pl_se(n_items: int) -> float:
+  """Return the standard error of `n_items` identical 1PL items at theta = b, 2/sqrt(n), infinite for none."""
+  return 2.0 / math.sqrt(n_items) if n_items else math.inf
 
 
 class TestMaxLengthStopper:
@@ -36,7 +43,7 @@ class TestStandardErrorStopper:
       StandardErrorStopper(value)
 
   def test_first_stops_when_the_standard_error_reaches_the_target(self) -> None:
-    """A stopper that compares strictly (first stopping at 17), or reads the wrong items or theta, fails.
+    """A stopper that compares strictly (first stopping at 17) fails.
 
     At theta = b, n identical 1PL items give a standard error of 2/sqrt(n), which is 0.5 exactly at n = 16.
     """
@@ -44,7 +51,9 @@ class TestStandardErrorStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = StandardErrorStopper(0.5)
 
-    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
+    stops = [
+      stopper.stop(make_context(item_bank, list(range(n)), theta=theta, se=identical_1pl_se(n))) for n in range(21)
+    ]
 
     assert stops == [n >= 16 for n in range(21)]
 
@@ -81,7 +90,9 @@ class TestConfidenceIntervalStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
+    stops = [
+      stopper.stop(make_context(item_bank, list(range(n)), theta=theta, se=identical_1pl_se(n))) for n in range(21)
+    ]
 
     assert stops == [n >= 16 for n in range(21)]
 
@@ -95,7 +106,9 @@ class TestConfidenceIntervalStopper:
     item_bank = identical_1pl_bank(20, difficulty=theta)
     stopper = ConfidenceIntervalStopper([-3.0, -1.0, 1.0, 3.0])
 
-    stops = [stopper.stop(make_context(item_bank, list(range(n)), theta=theta)) for n in range(21)]
+    stops = [
+      stopper.stop(make_context(item_bank, list(range(n)), theta=theta, se=identical_1pl_se(n))) for n in range(21)
+    ]
 
     assert not any(stops)
 

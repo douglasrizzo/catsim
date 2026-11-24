@@ -11,6 +11,8 @@ from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq
 from scipy.special import expit
 
+from .. import irt
+from ..context import Estimate
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator
 
@@ -65,7 +67,6 @@ class WarmLikelihoodEstimator(BaseEstimator):
     tol: float = 1e-6,
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
-    super().__init__()
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
@@ -111,8 +112,17 @@ class WarmLikelihoodEstimator(BaseEstimator):
     correction = numpy.divide(j, 2.0 * info, out=numpy.zeros_like(j), where=info > 0.0)
     return score + correction
 
-  def estimate(self, context: StepContext) -> float:
-    """Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.
+  def estimate(self, context: StepContext) -> Estimate:
+    r"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.
+
+    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test
+    information at the estimate, or ``math.inf`` where the information is 0. This is catR's
+    default for the WLE (``semTheta`` with ``sem.type = "classic"``). :cite:t:`Magis12` (Eq. 14,
+    p. 6) add a term to the information, :math:`(I'J - IJ')/(2I^2)`, which catR has not used since
+    version 3.0 and which can make the sum negative; catsim follows catR. The evaluation count is
+    the number of modified-score evaluations: the scan, Brent's refinement and, when several roots
+    compete, the integration that ranks them. With no administered item, the estimate is
+    ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 
     Parameters
     ----------
@@ -121,14 +131,12 @@ class WarmLikelihoodEstimator(BaseEstimator):
 
     Returns
     -------
-    float
-        The weighted likelihood estimate, within ``bounds``.
+    Estimate
+        The weighted likelihood estimate, within ``bounds``, its standard error and the number of
+        modified-score evaluations.
     """
-    self._calls += 1
-    self._last_evaluations = 0
-
     if not context.administered_items:
-      return float(context.theta)
+      return Estimate(theta=float(context.theta), se=context.se, evaluations=0)
 
     response_vector = context.responses
     items = context.item_bank.get_items(context.administered_items)
@@ -169,6 +177,5 @@ class WarmLikelihoodEstimator(BaseEstimator):
           warnings.warn(message[0], IntegrationWarning, stacklevel=2)
       theta_hat = candidates[int(numpy.argmax(heights))]
 
-    self._last_evaluations = evaluations
-    self._total_evaluations += evaluations
-    return float(theta_hat)
+    theta_hat = float(theta_hat)
+    return Estimate(theta=theta_hat, se=irt.see(theta_hat, items), evaluations=int(evaluations))
