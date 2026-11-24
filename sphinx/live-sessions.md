@@ -182,7 +182,8 @@ on its context: processes with trackers of their own do not see each other's adm
 
 An engine can also take an *exposure control*, a {py:class}`~catsim.exposure.BaseExposureControl`,
 which may decline the item the selector proposes. The control below administers each item with a
-probability of its own, 0.5 for every item here; the Extending catsim guide shows how to write one.
+probability of its own, 0.5 for every item here; {doc}`extending` gives the rules every control
+keeps.
 
 ```python
 from typing_extensions import override

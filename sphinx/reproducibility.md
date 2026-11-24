@@ -9,7 +9,7 @@ shows how to seed one run, a study of many replications and a study split across
 {py:meth}`SimulationRunner.run <catsim.SimulationRunner.run>` takes `rng`, the source of every
 random draw of the run: the initializer's starting points, the selectors' random choices and
 tie-breaks, the decisions of the engine's exposure control, if it has one, and every simulated
-response. It can be:
+response. Custom strategies draw from it too ({doc}`extending`). It can be:
 
 - `None`, the default: the run draws fresh randomness, so every call gives other tests and none can
   be repeated;
