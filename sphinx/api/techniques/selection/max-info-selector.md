@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.MaxInfoSelector`
-**Reference:** Lord (1977); Lord (1980)
-
 # Maximum Fisher Information Selector
+
+:Class: {py:class}`catsim.selection.MaxInfoSelector`
+:Sources: Lord (1977); Lord (1980)
 
 ## Motivation
 
@@ -13,29 +12,12 @@ efficiency and implementation simplicity. Lord (1977, p. 97) describes the
 rule: after each response the ability is re-estimated, and the next item is "the
 item that gives the most information at his estimated ability level".
 
-Its main weakness is that it trusts $\hat{\theta}$ completely. Early in a test,
-when the estimate is still unstable, the rule can overuse highly discriminating
-items and produce skewed exposure patterns. The selector remains valuable because
-many other criteria in the literature are best understood as relaxations or
-extensions of this rule.
-
 ## Definition
 
-For each non-administered item $i$, the selector evaluates Fisher
-information at the current estimate:
-
-$$
-I_i(\hat{\theta})
-=
-\frac{a_i^2 [P_i(\hat{\theta})-c_i]^2 [d_i-P_i(\hat{\theta})]^2}
-     {(d_i-c_i)^2 P_i(\hat{\theta}) [1-P_i(\hat{\theta})]}.
-$$
-
-This is the general item information $P_i'^2 / [P_i (1 - P_i)]$ (Magis &
-Raîche, 2012, p. 4, Equation 4) with the 4PL derivative
-$P_i' = a_i (P_i - c_i)(d_i - P_i)/(d_i - c_i)$.
-
-The selected item is
+For each item $i$ that is neither administered nor excluded, the selector
+evaluates the item information $I_i(\hat{\theta})$ at the current estimate:
+the general item information of Magis and Raîche (2012, p. 4, Equation 4), which
+{py:func}`catsim.irt.information` computes under the 4PL. The selected item is
 
 $$
 i^*
@@ -43,11 +25,10 @@ i^*
 \arg\max_{i \in R_k} I_i(\hat{\theta}),
 $$
 
-where $R_k$ is the set of non-administered items at step $k$. In the
-package implementation, items are first ordered by descending information; any
-item whose exposure rate is below `r_max` is preferred, but if every remaining
-item is at or above the cap the selector falls back to the highest-information
-item anyway.
+where $R_k$ is the set of remaining items at step $k$. With an exposure cap
+`r_max` below 1, any item whose exposure rate is below `r_max` is preferred, but
+if every remaining item is at or above the cap the selector falls back to the
+highest-information item anyway.
 
 ## Parameters
 
@@ -67,15 +48,24 @@ item anyway.
        no cap.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+Its main weakness is that it trusts $\hat{\theta}$ completely. Early in a test,
+when the estimate is still unstable, the rule can overuse highly discriminating
+items and produce skewed exposure patterns. The selector remains valuable because
+many other criteria in the literature are best understood as relaxations or
+extensions of this rule.
 
-1. It orders candidate items by decreasing Fisher information at the current estimate, the context's `theta`.
-2. It never returns an already administered item.
-3. If `r_max` is below 1 and at least one non-administered item has exposure rate below `r_max`, the returned item comes from that subset.
-4. If all remaining items violate the exposure cap, it still returns the highest-information remaining item.
-5. If no non-administered items remain, it raises `NoItemsAvailableError`.
+## Guarantees
+
+1. Without an exposure cap, it returns the most informative remaining item at the
+   current estimate.
+2. It never returns an item that was already administered or excluded.
+3. If `r_max` is below 1 and at least one remaining item has an exposure rate
+   below `r_max`, the returned item comes from that subset.
+4. If every remaining item is at or above the exposure cap, it still returns the
+   highest-information remaining item.
+5. When no item remains, it raises `NoItemsAvailableError`.
 
 ## References
 
