@@ -37,8 +37,9 @@ first and took either a `SimulationResult` or raw arrays through mutually exclus
 
 ## Consequences
 
-- A plain install of catsim needs numpy, scipy and tqdm only. Users who plot install the extra;
-  code that imports `catsim.plot` without it fails at the import, with the fix in the message.
+- A plain install of catsim needs numpy, scipy, tqdm and typing-extensions only. Users who plot
+  install the extra; code that imports `catsim.plot` without it fails at the import, with the fix in
+  the message.
 - Domain, strategy and runtime modules cannot grow a plotting helper: a figure belongs in
   `catsim.plot`.
 - A session plots the same way whether it comes from a simulation (`result.sessions[j]`) or from a

@@ -238,11 +238,14 @@ In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.
 The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.context.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an {py:class}`~catsim.context.Estimate`. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
 
 ```python
+from typing_extensions import override
+
 from catsim import StepContext
 from catsim.selection import BaseSelector, pick_best, remaining
 
 
 class EasiestFirstSelector(BaseSelector):
+    @override
     def select(self, context: StepContext) -> int:
         candidates = remaining(context)
         return pick_best(candidates, -context.item_bank.difficulty[candidates], context.rng)
