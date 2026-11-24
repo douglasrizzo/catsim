@@ -802,7 +802,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">overload</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
@@ -840,6 +840,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">algorithms to avoid ceiling/floor effects during estimation. Using bounds wider</span>
 <span class="sd">than the item bank difficulty range prevents artificial restrictions on ability</span>
 <span class="sd">estimates."""</span>
+
+
+<span class="c1"># the columns of an item matrix: a, b, c and d</span>
+<span class="n">_N_COLUMNS</span> <span class="o">=</span> <span class="mi">4</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">]:</span>
@@ -1409,6 +1413,64 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<div class="viewcode-block" id="log_response_probabilities">
+<a class="viewcode-back" href="../../api/irt.html#catsim.irt.log_response_probabilities">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_response_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the log-probabilities of a correct and of an incorrect response to each item.</span>
+
+<span class="sd">  With the logit :math:`z_i = a_i(\theta - b_i)` and the logistic function</span>
+<span class="sd">  :math:`\sigma(z) = 1 / (1 + e^{-z})`, the :py:func:`icc` and its complement :math:`Q_i = 1 - P_i` are</span>
+
+<span class="sd">  .. math::</span>
+
+<span class="sd">      P_i(\theta) = c_i + (d_i - c_i)\,\sigma(z_i), \qquad</span>
+<span class="sd">      Q_i(\theta) = (1 - d_i) + (d_i - c_i)\,\sigma(-z_i)</span>
+
+<span class="sd">  Both logarithms are computed from :math:`z_i`, never from a :math:`P_i` that has rounded to 0 or 1, so</span>
+<span class="sd">  they are exact at any distance from the difficulty: far below it :math:`\log P_i` tends to</span>
+<span class="sd">  :math:`\log c_i`, far above it :math:`\log Q_i` tends to :math:`\log(1 - d_i)`, and without guessing</span>
+<span class="sd">  or slipping they keep falling linearly in :math:`z_i`.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  theta : float or numpy.ndarray</span>
+<span class="sd">      An ability, or an array of abilities.</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      One item ``[a, b, c, d]``, shape ``(4,)``, or a matrix of items, shape ``(n, 4)``, whose items</span>
+<span class="sd">      satisfy :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  tuple[numpy.ndarray, numpy.ndarray]</span>
+<span class="sd">      :math:`\log P_i(\theta)` and :math:`\log Q_i(\theta)`, every ability against every item, each of</span>
+<span class="sd">      shape ``numpy.shape(theta) + items.shape[:-1]``.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; import numpy</span>
+<span class="sd">  &gt;&gt;&gt; log_p, log_q = log_response_probabilities(0.0, numpy.array([[1.0, 0.0, 0.2, 1.0]]))</span>
+<span class="sd">  &gt;&gt;&gt; numpy.exp(log_p).round(4), numpy.exp(log_q).round(4)</span>
+<span class="sd">  (array([0.6]), array([0.4]))</span>
+<span class="sd">  """</span>
+  <span class="n">z</span> <span class="o">=</span> <span class="n">_logit</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+  <span class="n">log_c</span><span class="p">,</span> <span class="n">log_1md</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">=</span> <span class="n">_log_asymptotes</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">_log_probability</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">log_c</span><span class="p">,</span> <span class="n">log_dmc</span><span class="p">),</span> <span class="n">_log_probability</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">,</span> <span class="n">log_1md</span><span class="p">,</span> <span class="n">log_dmc</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_asymptotes</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sd">"""Return log c, log(1 - d) and log(d - c) of every item, which do not depend on the ability."""</span>
+  <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+  <span class="c1"># c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly</span>
+  <span class="k">with</span> <span class="n">numpy</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_log_probability</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">log_floor</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">log_dmc</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return log P from the logit and log c, or log Q from the negated logit and log(1 - d)."""</span>
+  <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">log_floor</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">+</span> <span class="n">log_expit</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+
+
 <span class="nd">@overload</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">log_likelihood</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span> <span class="o">...</span>
 <span class="nd">@overload</span>
@@ -1423,9 +1485,10 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      \log L(\theta) = \sum_{i=1}^{n} \left[ u_i \log P_i(\theta) + (1 - u_i) \log Q_i(\theta) \right]</span>
 
 <span class="sd">  where :math:`u_i` is 1 for a correct response and 0 otherwise, :math:`P_i` is the :py:func:`icc`</span>
-<span class="sd">  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are exact at any distance from the</span>
-<span class="sd">  difficulty: far from it, a correct guess costs :math:`\log c_i` and a slip</span>
-<span class="sd">  :math:`\log(1 - d_i)`. With no items the log-likelihood is 0.</span>
+<span class="sd">  and :math:`Q_i = 1 - P_i` :cite:p:`Ayala2009`. Both logarithms are computed as in</span>
+<span class="sd">  :py:func:`log_response_probabilities`, exact at any distance from the difficulty: far from</span>
+<span class="sd">  it, a correct guess costs :math:`\log c_i` and a slip :math:`\log(1 - d_i)`. With no items the</span>
+<span class="sd">  log-likelihood is 0.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1454,16 +1517,69 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  &gt;&gt;&gt; round(log_likelihood(0.0, [True, False], numpy.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]])), 4)</span>
 <span class="sd">  -1.3863</span>
 <span class="sd">  """</span>
+  <span class="k">return</span> <span class="n">log_likelihood_function</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="p">)(</span><span class="n">theta</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="log_likelihood_function">
+<a class="viewcode-back" href="../../api/irt.html#catsim.irt.log_likelihood_function">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_likelihood_function</span><span class="p">(</span>
+  <span class="n">responses</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">],</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the log-likelihood of the responses as a function of the ability.</span>
+
+<span class="sd">  The returned function gives, for any ``theta``, the value of :py:func:`log_likelihood` with the same</span>
+<span class="sd">  shape and type. ``responses`` is validated here, once, and the terms that do not depend on the</span>
+<span class="sd">  ability are computed here too. Changing ``responses`` or ``items`` afterwards does not change the</span>
+<span class="sd">  function.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  responses : Sequence[bool]</span>
+<span class="sd">      One response per item, True for a correct one.</span>
+<span class="sd">  items : numpy.ndarray</span>
+<span class="sd">      The answered items, a matrix of shape ``(n, 4)`` whose items satisfy</span>
+<span class="sd">      :math:`0 \leq c &lt; d \leq 1`, as :py:class:`~catsim.item_bank.ItemBank` validates.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  Callable[[float | numpy.ndarray], float | numpy.ndarray]</span>
+<span class="sd">      The log-likelihood of each ability: a float for a float ``theta``, otherwise an array of the</span>
+<span class="sd">      shape of ``theta``.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``items`` is not an ``(n, 4)`` matrix or ``responses`` does not hold one Boolean per item.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; import numpy</span>
+<span class="sd">  &gt;&gt;&gt; items = numpy.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]])</span>
+<span class="sd">  &gt;&gt;&gt; log_lik = log_likelihood_function([True, False], items)</span>
+<span class="sd">  &gt;&gt;&gt; round(log_lik(0.0), 4), log_lik(numpy.array([0.0, 1.0])).round(4)</span>
+<span class="sd">  (-1.3863, array([-1.3863, -1.6265]))</span>
+<span class="sd">  """</span>
+  <span class="c1"># a float copy: later changes to the caller's matrix cannot reach the function, and negating a</span>
+  <span class="c1"># below does not wrap around in an unsigned integer type</span>
+  <span class="n">items</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="p">(</span><span class="n">_N_COLUMNS</span><span class="p">,):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"items must be an (n, 4) matrix, one row per response, got shape </span><span class="si">{</span><span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
   <span class="n">validate_response_vector</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">items</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-  <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_split_params</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-  <span class="n">z</span> <span class="o">=</span> <span class="n">_logit</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
-  <span class="c1"># c = 0 and d = 1 give log(0) = -inf, which logaddexp handles exactly</span>
-  <span class="k">with</span> <span class="n">numpy</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
-    <span class="n">log_c</span><span class="p">,</span> <span class="n">log_1md</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span>
-  <span class="n">log_p</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">log_c</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">+</span> <span class="n">log_expit</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
-  <span class="n">log_q</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">log_1md</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">+</span> <span class="n">log_expit</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">))</span>
-  <span class="n">values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">),</span> <span class="n">log_p</span><span class="p">,</span> <span class="n">log_q</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">values</span> <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+  <span class="n">correct</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">responses</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+  <span class="n">log_c</span><span class="p">,</span> <span class="n">log_1md</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">=</span> <span class="n">_log_asymptotes</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+  <span class="n">log_floor</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">correct</span><span class="p">,</span> <span class="n">log_c</span><span class="p">,</span> <span class="n">log_1md</span><span class="p">)</span>
+  <span class="c1"># An incorrect response's log Q is log P's formula at the negated logit, and negating a negates</span>
+  <span class="c1"># the logit exactly, so each item computes only the term its response selects</span>
+  <span class="n">signed_items</span> <span class="o">=</span> <span class="n">items</span>
+  <span class="n">signed_items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">correct</span><span class="p">,</span> <span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">log_likelihood_at</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">:</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">_log_probability</span><span class="p">(</span><span class="n">_logit</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">signed_items</span><span class="p">),</span> <span class="n">log_floor</span><span class="p">,</span> <span class="n">log_dmc</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">values</span> <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">log_likelihood_at</span></div>
 
 
 

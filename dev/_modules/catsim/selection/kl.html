@@ -796,52 +796,33 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for catsim.selection.kl</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Kullback-Leibler item selector."""</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_expit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..context</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">below_cap</span><span class="p">,</span> <span class="n">check_r_max</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
 
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">  </span><span class="sd">"""Return the log-probabilities of a correct and an incorrect response at ``theta``.</span>
-
-<span class="sd">  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood`, so</span>
-<span class="sd">  the log-probability of an incorrect response stays exact where the probability of a correct one</span>
-<span class="sd">  rounds to 1.</span>
-
-<span class="sd">  Returns</span>
-<span class="sd">  -------</span>
-<span class="sd">  tuple[float, float]</span>
-<span class="sd">      The log-probabilities of a correct and of an incorrect response.</span>
-<span class="sd">  """</span>
-  <span class="n">z</span> <span class="o">=</span> <span class="n">a</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-  <span class="n">log_dmc</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span>
-  <span class="n">log_c</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span>
-  <span class="n">log_1md</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="o">-</span><span class="n">d</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span>
-  <span class="k">return</span> <span class="p">(</span>
-    <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">log_c</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">+</span> <span class="n">log_expit</span><span class="p">(</span><span class="n">z</span><span class="p">))),</span>
-    <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">logaddexp</span><span class="p">(</span><span class="n">log_1md</span><span class="p">,</span> <span class="n">log_dmc</span> <span class="o">+</span> <span class="n">log_expit</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">))),</span>
-  <span class="p">)</span>
+<span class="c1"># The integrand's complex singularities lie about pi / a from the real axis, so the Gauss-Legendre</span>
+<span class="c1"># error falls like exp(-2 pi n / (a h)) for n nodes, discrimination a and half-width h. Four nodes</span>
+<span class="c1"># per unit of a * h, for the steepest item, keep every integral within a relative 1e-10 of</span>
+<span class="c1"># adaptive quadrature up to a * h = 60 (a = 10 over theta_hat +- 6), for integrals above 1e-5; smaller</span>
+<span class="c1"># ones are limited by rounding in the integrand instead. Past a * h = 60 the count stays at the cap and the</span>
+<span class="c1"># error grows: about 3e-9 at a * h = 90 and 2e-7 at 120.</span>
+<span class="n">_NODES_PER_UNIT</span> <span class="o">=</span> <span class="mf">4.0</span>
+<span class="n">_MIN_NODES</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">_MAX_NODES</span> <span class="o">=</span> <span class="mi">240</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_kl_integrand</span><span class="p">(</span>
-  <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-  <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Return the KL divergence between response distributions at two ability values."""</span>
-  <span class="n">log_p_hat</span><span class="p">,</span> <span class="n">log_q_hat</span> <span class="o">=</span> <span class="n">_log_probabilities</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
-  <span class="n">log_p</span><span class="p">,</span> <span class="n">log_q</span> <span class="o">=</span> <span class="n">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
-  <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_p_hat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_p_hat</span> <span class="o">-</span> <span class="n">log_p</span><span class="p">)</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_q_hat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_q_hat</span> <span class="o">-</span> <span class="n">log_q</span><span class="p">)</span>
+<span class="nd">@functools</span><span class="o">.</span><span class="n">cache</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_gauss_legendre</span><span class="p">(</span><span class="n">n_nodes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">FloatArray</span><span class="p">,</span> <span class="n">FloatArray</span><span class="p">]:</span>
+<span class="w">  </span><span class="sd">"""Return the nodes on [-1, 1] and the weights of the n-node Gauss-Legendre rule, read-only."""</span>
+  <span class="n">nodes</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">polynomial</span><span class="o">.</span><span class="n">legendre</span><span class="o">.</span><span class="n">leggauss</span><span class="p">(</span><span class="n">n_nodes</span><span class="p">)</span>
+  <span class="n">nodes</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">writeable</span> <span class="o">=</span> <span class="kc">False</span>
+  <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">weights</span>
 
 
 <div class="viewcode-block" id="KLSelector">
@@ -899,15 +880,17 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span>
 
   <span class="nd">@staticmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">_kl_global</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">half_width</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Integrate the KL divergence for one item over the local ability window."""</span>
-    <span class="n">val</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">quad</span><span class="p">(</span>
-      <span class="n">_kl_integrand</span><span class="p">,</span>
-      <span class="n">theta_hat</span> <span class="o">-</span> <span class="n">half_width</span><span class="p">,</span>
-      <span class="n">theta_hat</span> <span class="o">+</span> <span class="n">half_width</span><span class="p">,</span>
-      <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_kl_global</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">half_width</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Integrate each item's KL divergence over theta_hat +- half_width, with one rule sized for the steepest item."""</span>
+    <span class="n">steepness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">items</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span> <span class="o">*</span> <span class="n">half_width</span>
+    <span class="n">n_nodes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">_NODES_PER_UNIT</span> <span class="o">*</span> <span class="n">steepness</span><span class="p">),</span> <span class="n">_MIN_NODES</span><span class="p">,</span> <span class="n">_MAX_NODES</span><span class="p">))</span>
+    <span class="n">nodes</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">_gauss_legendre</span><span class="p">(</span><span class="n">n_nodes</span><span class="p">)</span>
+    <span class="n">log_p_hat</span><span class="p">,</span> <span class="n">log_q_hat</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_response_probabilities</span><span class="p">(</span><span class="n">theta_hat</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="n">log_p</span><span class="p">,</span> <span class="n">log_q</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_response_probabilities</span><span class="p">(</span><span class="n">theta_hat</span> <span class="o">+</span> <span class="n">half_width</span> <span class="o">*</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="n">divergence</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_p_hat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_p_hat</span> <span class="o">-</span> <span class="n">log_p</span><span class="p">)</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_q_hat</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_q_hat</span> <span class="o">-</span> <span class="n">log_q</span><span class="p">)</span>
+    <span class="c1"># one rule for every item, and a sum over the node axis that adds each column in the same order,</span>
+    <span class="c1"># so identical items tie exactly (ADR-0008); a matrix product may round columns differently</span>
+    <span class="k">return</span> <span class="n">half_width</span> <span class="o">*</span> <span class="p">(</span><span class="n">weights</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">divergence</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="KLSelector.select">
 <a class="viewcode-back" href="../../../api/techniques/selection/kl-selector.html#catsim.selection.KLSelector.select">[docs]</a>
@@ -928,9 +911,8 @@ window.runMermaid = runMermaid;</script>
     <span class="n">candidates</span> <span class="o">=</span> <span class="n">below_cap</span><span class="p">(</span><span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_r_max</span><span class="p">)</span>
     <span class="n">half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_window</span> <span class="o">/</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">)))</span>
 
-    <span class="n">items</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">items</span>
-    <span class="n">kl_values</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_kl_global</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx</span><span class="p">)],</span> <span class="n">half_width</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">kl_values</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
+    <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kl_global</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">theta</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">candidates</span><span class="p">),</span> <span class="n">half_width</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

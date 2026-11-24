@@ -525,9 +525,18 @@ curvature, that is, by the Fisher information; for a large one, by the tails of
 the divergence (p. 220). Before the first item, catsim uses <span class="math notranslate nohighlight">\(n = 1\)</span>, so the
 window is <span class="math notranslate nohighlight">\(\hat{\theta} \pm c\)</span>. Chang and Ying also define a Bayesian version
 that weights the divergence by the posterior (p. 222), a planned extension,
-KLP. Each integral is computed with SciPy’s adaptive
-quadrature. The selector chooses the non-administered item with the
+KLP. The selector chooses the non-administered item with the
 largest value of <span class="math notranslate nohighlight">\(K_i(\hat{\theta})\)</span>.</p>
+<p>Each integral is computed with a Gauss-Legendre rule over the window, the same
+rule for every candidate. A steep item’s divergence changes quickly near its
+difficulty, so the rule’s number of nodes is four times the largest
+discrimination among the candidates times the half-width <span class="math notranslate nohighlight">\(\delta_n\)</span>, at least
+24 and at most 240. Banks drawn by <code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> with the default window
+need 24 to 28 nodes. Up to <span class="math notranslate nohighlight">\(a\,\delta_n = 60\)</span>, for example <span class="math notranslate nohighlight">\(a = 10\)</span> over
+<span class="math notranslate nohighlight">\(\hat{\theta} \pm 6\)</span>, every integral above <span class="math notranslate nohighlight">\(10^{-5}\)</span> is within a relative
+<span class="math notranslate nohighlight">\(10^{-10}\)</span> of adaptive quadrature: at most <span class="math notranslate nohighlight">\(7 \times 10^{-11}\)</span> over 2PL and
+4PL items with <span class="math notranslate nohighlight">\(c \leq 0.3\)</span> and <span class="math notranslate nohighlight">\(d \geq 0.85\)</span>. Beyond that the rule keeps 240
+nodes and the error grows, to about <span class="math notranslate nohighlight">\(2 \times 10^{-7}\)</span> at <span class="math notranslate nohighlight">\(a\,\delta_n = 120\)</span>.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>

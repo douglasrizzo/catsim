@@ -494,9 +494,6 @@
 information curve by the likelihood of ability values given the observed
 responses. This makes it a frequentist analogue of posterior-weighted selectors:
 it spreads attention across plausible ability values without introducing a prior.</p>
-<p>That positioning is useful strategically. It gives catsim a weighted-information
-selector that is conceptually close to later Bayesian variants while staying
-independent of the Bayesian infrastructure.</p>
 </section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">#</a></h2>
@@ -520,8 +517,11 @@ the integral on a fixed grid
 \[\mathrm{MLWI}_i
 \approx
 \sum_{q=1}^{Q} I_i(\theta_q)\,L(\mathbf{u}\mid\theta_q)\,\Delta_q.\]</div>
-<p>Likelihood values are normalized numerically with a log-sum-exp style shift
-before exponentiation; the constant factor cancels under <span class="math notranslate nohighlight">\(\arg\max\)</span>.</p>
+<p>catsim divides the likelihood values by their sum over the grid, which makes them
+the posterior that <a class="reference internal" href="../estimation/bayesian-infrastructure.html#catsim.estimation.posterior" title="catsim.estimation.posterior"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.estimation.posterior()</span></code></a> computes under a
+uniform prior on <code class="docutils literal notranslate"><span class="pre">bounds</span></code>. That division and the spacing <span class="math notranslate nohighlight">\(\Delta_q\)</span>, the same
+at every node, scale every item’s score by one constant, so they do not change
+which item is selected.</p>
 </section>
 <section id="parameters">
 <h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading">#</a></h2>
