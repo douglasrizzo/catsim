@@ -117,6 +117,42 @@ def test_session_state_rejects_excluded_items_it_cannot_hold(excluded: list[int]
     )
 
 
+@pytest.mark.parametrize("field_name", ["administered_items", "excluded_items"])
+@pytest.mark.parametrize("entry", [pytest.param(2.5, id="float"), pytest.param("3", id="str")])
+def test_session_state_rejects_item_indices_that_are_not_integers(field_name: str, entry: object) -> None:
+  """A restored session whose item lists hold a float or a string fails when it is built, naming the field.
+
+  Fails if 2.5 is accepted: the engine's membership checks never match it while ``remaining`` truncates it to item 2,
+  so an excluded item could be given or an administered one given again. Fails too if "3" is accepted and the session
+  breaks later inside a strategy with a TypeError that says nothing about the saved data.
+  """
+  n_responses = 1 if field_name == "administered_items" else 0
+  with pytest.raises(TypeError, match=rf"needs integer item indices in {field_name}, got {entry!r}"):
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(0.0, math.inf)] * (n_responses + 1),
+      responses=[True] * n_responses,
+      **{field_name: [entry]},
+    )
+
+
+def test_session_state_stores_numpy_integer_indices_as_python_ints() -> None:
+  """Item indices restored as NumPy integers, such as from a saved array, are stored as builtin ints.
+
+  Fails if the session keeps the numpy.int64 entries: saving it again with json.dumps would raise TypeError.
+  """
+  state = CatSessionState(
+    session_id=0,
+    estimates=[Estimate(0.0, math.inf), Estimate(0.5, 1.0)],
+    administered_items=[np.int64(4)],
+    responses=[True],
+    excluded_items=[np.int64(7)],
+  )
+
+  assert json.dumps([state.administered_items, state.excluded_items]) == "[[4], [7]]"
+  assert [type(item) for item in state.administered_items + state.excluded_items] == [int, int]
+
+
 def test_a_session_and_its_snapshot_keep_their_own_excluded_items() -> None:
   """The session copies the excluded items it is given, and a snapshot keeps them as they were.
 

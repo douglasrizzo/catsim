@@ -12,7 +12,7 @@ import numpy
 from .context import Estimate
 
 if TYPE_CHECKING:
-  from collections.abc import Hashable
+  from collections.abc import Hashable, Iterable
 
   import numpy.typing as npt
 
@@ -56,7 +56,8 @@ class CatSessionState:
       responses, if ``excluded_items`` repeats an item or holds an administered one, or if
       ``stop_reason`` is not a :class:`StopReason` value.
   TypeError
-      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`.
+      If an entry of ``estimates`` is not an :class:`~catsim.context.Estimate`, or an entry of
+      ``administered_items`` or ``excluded_items`` is not an integer.
   """
 
   session_id: Hashable
@@ -71,10 +72,10 @@ class CatSessionState:
     """Take its own copy of the histories and reject a session whose entries do not line up."""
     # The engine appends to these lists, so they must be lists the session owns: a snapshot's tuples
     # would fail half-way through a step, and a caller's lists would change under the caller.
-    self.administered_items = list(self.administered_items)
+    self.administered_items = _item_indices(self.session_id, "administered_items", self.administered_items)
     self.responses = list(self.responses)
     self.estimates = list(self.estimates)
-    self.excluded_items = list(self.excluded_items)
+    self.excluded_items = _item_indices(self.session_id, "excluded_items", self.excluded_items)
     if not all(isinstance(estimate, Estimate) for estimate in self.estimates):
       # A session restored from storage needs its estimates rebuilt, not bare thetas or mappings.
       msg = f"Session {self.session_id} needs Estimate entries in estimates, got {self.estimates!r}"
@@ -330,6 +331,40 @@ class ExposureTracker:
     if others < 1:
       return numpy.zeros(self.n_items)
     return self.counts / others
+
+
+def _item_indices(session_id: Hashable, name: str, items: Iterable[int]) -> list[int]:
+  """Return a session's item indices as a new list of builtin ints.
+
+  Parameters
+  ----------
+  session_id : Hashable
+      The session's identifier, for the error message.
+  name : str
+      The session field the indices belong to, for the error message.
+  items : Iterable[int]
+      The indices, which may be NumPy integers.
+
+  Returns
+  -------
+  list[int]
+      A list the session owns.
+
+  Raises
+  ------
+  TypeError
+      If an entry is not an integer.
+  """
+  indices = []
+  for item in items:
+    # A float such as 2.5 would never match the engine's membership checks, while selectors
+    # truncate it to an item when they index the bank with it.
+    try:
+      indices.append(operator.index(item))
+    except TypeError:
+      msg = f"Session {session_id} needs integer item indices in {name}, got {item!r}"
+      raise TypeError(msg) from None
+  return indices
 
 
 def _restored_counts(n_items: int, counts: npt.ArrayLike, name: str) -> IntArray:
