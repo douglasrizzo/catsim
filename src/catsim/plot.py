@@ -2,9 +2,14 @@
 
 from enum import Enum, auto
 
-import matplotlib.pyplot as plt
 import numpy
-from matplotlib.axes import Axes
+
+try:
+  import matplotlib.pyplot as plt
+  from matplotlib.axes import Axes
+except ImportError as error:
+  _missing = "catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
+  raise ImportError(_missing) from error
 
 from . import irt
 from .item_bank import ItemBank

@@ -24,7 +24,8 @@ These methods can either be used in a standalone fashion to power other software
 
 ## Installation
 
-Install it using `pip install catsim`.
+Install it using `pip install catsim`. The plotting functions in `catsim.plot` need matplotlib,
+which the plot extra installs: `pip install 'catsim[plot]'`.
 
 ## Basic Usage
 

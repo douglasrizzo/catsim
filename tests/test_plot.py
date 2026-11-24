@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
@@ -9,6 +12,44 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from catsim import plot
 from catsim.plot import PlotType
+
+
+def _run_python(code: str) -> subprocess.CompletedProcess[str]:
+  """Run ``code`` in a fresh interpreter, whose module cache holds nothing the test session imported."""
+  return subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
+
+
+class TestOptionalMatplotlib:
+  """Tests for matplotlib as the optional plot extra."""
+
+  def test_importing_catsim_loads_no_plotting_module(self) -> None:
+    """Importing catsim and its public modules other than catsim.plot loads neither catsim.plot nor matplotlib.
+
+    Fails if any of them imports matplotlib, even indirectly, so that ``import catsim`` breaks for users who did not
+    install the plot extra.
+    """
+    result = _run_python(
+      "import sys\n"
+      "import catsim, catsim.estimation, catsim.initialization, catsim.irt, catsim.metrics\n"
+      "import catsim.selection, catsim.stopping, catsim.typing\n"
+      "print(sorted(name for name in sys.modules if name.partition('.')[0] in {'matplotlib', 'mpl_toolkits'}"
+      " or name == 'catsim.plot'))\n"
+    )
+
+    assert (result.returncode, result.stdout) == (0, "[]\n"), result.stderr
+
+  def test_plot_without_matplotlib_names_the_extra(self) -> None:
+    """Without matplotlib, importing catsim.plot raises an ImportError that says to install catsim[plot].
+
+    Fails if the user gets matplotlib's bare ModuleNotFoundError, or an error that drops the original one.
+    """
+    result = _run_python("import sys\nsys.modules['matplotlib'] = None\nimport catsim.plot\n")
+
+    assert result.returncode == 1
+    assert "The above exception was the direct cause of the following exception" in result.stderr
+    assert result.stderr.splitlines()[-1] == (
+      "ImportError: catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
+    )
 
 
 class TestItemCurve:

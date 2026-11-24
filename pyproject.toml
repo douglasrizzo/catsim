@@ -34,13 +34,15 @@ version = "0.21.0"
 description = "Computerized adaptive testing toolkit"
 dependencies = [
     "scipy",
-    "matplotlib",
     "tqdm",
     "numpy",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
 license = "BSD-3-Clause"
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.10"]  # catsim.plot, the only module that imports matplotlib
 
 [project.urls]
 Documentation = "https://douglasrizzo.com.br/catsim"
@@ -175,6 +177,7 @@ dev = [
     "hypothesis>=6.127.0",
     "import-linter>=2.17",
     "ipykernel>=7.1.0",
+    "matplotlib>=3.10",  # the plot extra: tests/test_plot.py and the notebooks
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
     "pylint>=4.0.5",

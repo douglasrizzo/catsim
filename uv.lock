@@ -95,7 +95,6 @@ name = "catsim"
 version = "0.21.0"
 source = { editable = "." }
 dependencies = [
-    { name = "matplotlib", marker = "python_full_version >= '3.11.5'" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5' and python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11.5' and python_full_version < '3.12'" },
@@ -103,11 +102,17 @@ dependencies = [
     { name = "tqdm", marker = "python_full_version >= '3.11.5'" },
 ]
 
+[package.optional-dependencies]
+plot = [
+    { name = "matplotlib", marker = "python_full_version >= '3.11.5'" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "hypothesis", marker = "python_full_version >= '3.11.5'" },
     { name = "import-linter", marker = "python_full_version >= '3.11.5'" },
     { name = "ipykernel", marker = "python_full_version >= '3.11.5'" },
+    { name = "matplotlib", marker = "python_full_version >= '3.11.5'" },
     { name = "nbmake", marker = "python_full_version >= '3.11.5'" },
     { name = "pre-commit", marker = "python_full_version >= '3.11.5'" },
     { name = "pylint", marker = "python_full_version >= '3.11.5'" },
@@ -130,17 +135,19 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "matplotlib" },
+    { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10" },
     { name = "numpy" },
     { name = "scipy" },
     { name = "tqdm" },
 ]
+provides-extras = ["plot"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "hypothesis", specifier = ">=6.127.0" },
     { name = "import-linter", specifier = ">=2.17" },
     { name = "ipykernel", specifier = ">=7.1.0" },
+    { name = "matplotlib", specifier = ">=3.10" },
     { name = "nbmake", specifier = ">=1.5.5" },
     { name = "pre-commit", specifier = ">=4.5.1" },
     { name = "pylint", specifier = ">=4.0.5" },

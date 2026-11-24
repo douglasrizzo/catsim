@@ -199,7 +199,9 @@ jobs:
           # Without the source tree, the only catsim the tests can import is the installed wheel.
           rm -rf src
           uv venv --python 3.11 "$RUNNER_TEMP/wheel-venv"
-          uv pip install --python "$RUNNER_TEMP/wheel-venv" dist/*.whl pytest hypothesis
+          # The plot extra: the tests import matplotlib.
+          wheel=(dist/*.whl)
+          uv pip install --python "$RUNNER_TEMP/wheel-venv" "${wheel[0]}[plot]" pytest hypothesis
 
       - name: Run tests against the installed wheel
         run: |
