@@ -300,24 +300,26 @@ class ItemBank:
     """
     return irt.information(theta, self._items)
 
-  def test_information(self, theta: float, item_indices: npt.ArrayLike | None = None) -> float:
-    """Compute test information at a given theta.
+  def total_information(self, theta: float, indices: npt.ArrayLike | None = None) -> float:
+    """Return the test information of the given items at ``theta``.
+
+    It is :func:`catsim.irt.total_information` of the items' rows.
 
     Parameters
     ----------
     theta : float
         Ability value.
-    item_indices : npt.ArrayLike or None, optional
-        Array-like (list, tuple, or numpy array) of item indices (int type) to include.
-        If None, uses all items. Default is None.
+    indices : array-like of int or None, optional
+        Item indices, as in :meth:`get_items`: a list, tuple or integer array, possibly empty.
+        Default is None, every item.
 
     Returns
     -------
     float
-        Test information (sum of item information values).
+        The sum of the items' information at ``theta``.
     """
-    items_to_use = self._items if item_indices is None else self._items[numpy.asarray(item_indices, dtype=int)]
-    return irt.total_information(theta, items_to_use)
+    items = self._items if indices is None else self._items[numpy.asarray(indices, dtype=int)]
+    return irt.total_information(theta, items)
 
   @classmethod
   def generate(

@@ -442,4 +442,4 @@ class TestItemBankMethods:
     bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0], [1.0, -1.0, 0.0, 1.0]]))
     logistic = 1 / (1 + math.exp(-1.0))
 
-    assert bank.test_information(0.0, item_indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)
+    assert bank.total_information(0.0, indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)

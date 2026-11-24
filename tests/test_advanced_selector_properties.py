@@ -111,14 +111,14 @@ def test_linear_selector_raises_when_all_indexes_administered(
 @given(
   bank_clusters=bank_with_clusters(),
   method=st.sampled_from(["item_info", "cluster_info", "weighted_info"]),
-  est_theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
+  theta=st.floats(-3.5, 3.5, allow_nan=False, allow_infinity=False),
   administered_count=st.integers(min_value=0, max_value=10),
 )
 @CLUSTER_SETTINGS
 def test_cluster_selector_returns_valid_unseen_item(
   bank_clusters: tuple[ItemBank, list[int]],
   method: str,
-  est_theta: float,
+  theta: float,
   administered_count: int,
 ) -> None:
   """A method that returns an administered item, an index outside the bank or a numpy integer fails.
@@ -131,7 +131,7 @@ def test_cluster_selector_returns_valid_unseen_item(
   administered = list(range(administered_count))
   selector = ClusterSelector(clusters=clusters, method=method)
   # generated banks can hold tied items, which are broken at random (ADR-0008)
-  item_id = selector.select(make_context(bank, administered, theta=est_theta, rng=np.random.default_rng(0)))
+  item_id = selector.select(make_context(bank, administered, theta=theta, rng=np.random.default_rng(0)))
   assert type(item_id) is int
   assert 0 <= int(item_id) < n
   assert int(item_id) not in administered
