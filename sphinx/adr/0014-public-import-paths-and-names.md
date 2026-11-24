@@ -42,7 +42,7 @@ while `administered_items` also named a parameter matrix; the responses were `re
     exception;
   - `responses` for the responses to the administered items, in the same order;
   - `n_items` for a number of items, `model` for the logistic model, and
-    `rng: int | numpy.random.Generator` for the random source (ADR-0013);
+    `rng: int | numpy.random.Generator | None` for the random source (ADR-0013);
   - `test_size` for the test length a selector plans its schedule for, and `max_items` for the
     length at which `MaxLengthStopper` ends a test. They are different settings: a test may stop
     before or after the length its selector planned.

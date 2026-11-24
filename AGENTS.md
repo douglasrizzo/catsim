@@ -57,9 +57,9 @@ hidden runtime coupling.
   a final `case _`.
 - No backward-compatibility aliases or deprecation shims before 1.0: a renamed or removed name is
   gone.
-- Randomness comes only from an `rng: int | numpy.random.Generator` argument, passed through
-  `numpy.random.default_rng` (strategies draw from the generator they are given). No global NumPy
-  random state, no stdlib `random`.
+- Randomness comes only from an `rng: int | numpy.random.Generator | None` argument, passed through
+  `numpy.random.default_rng`, where None draws fresh entropy (strategies draw from the generator
+  they are given). No global NumPy random state, no stdlib `random`.
 - When changing architecture-level behavior, update or add an ADR in `sphinx/adr/`.
 - Follow existing naming and module boundaries unless there is a strong reason to change them.
 - Outside `src/catsim`, import each name from its public package path
