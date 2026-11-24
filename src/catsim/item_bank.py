@@ -36,7 +36,7 @@ class ItemBank:
       The normalized item parameter matrix (n_items x 4) with columns
       [discrimination, difficulty, pseudo-guessing, upper_asymptote]. It is read-only,
       like the column views returned by the parameter properties. Exposure
-      is a property of a run, kept in :py:class:`catsim.state.SimulationResult`.
+      is a property of a run, kept in :py:class:`catsim.simulation.SimulationResult`.
   n_items : int
       Number of items in the bank.
   max_info_thetas : numpy.ndarray

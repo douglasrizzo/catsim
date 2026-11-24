@@ -1,23 +1,25 @@
-"""Simulation runner built on top of the explicit CAT engine."""
+"""Simulated CAT runs on an engine, and their aggregate results."""
 
 from __future__ import annotations
 
 import time
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy
 
+from . import cat
 from .engine import RunContext
 from .irt import icc
-from .state import ExposureTracker, SimulationResult
+from .state import ExposureTracker
 
 if TYPE_CHECKING:
   import numpy.typing as npt
 
   from .engine import CatEngine
   from .item_bank import ItemBank
-  from .state import CatSessionSnapshot
-  from .typing import FloatArray
+  from .state import CatSessionSnapshot, CatSessionState
+  from .typing import FloatArray, IntArray
 
 
 class SimulatedResponseProvider:
@@ -99,6 +101,170 @@ def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:
     msg = "true_thetas must be finite numbers"
     raise ValueError(msg)
   return thetas
+
+
+@dataclass(slots=True)
+class SimulationResult:
+  """The sessions of a simulated run, with the run's item exposure and duration.
+
+  :meth:`SimulationRunner.run` returns one; one can also be built from sessions an application ran
+  itself, whose true abilities may be unknown. ``exposure_counts`` holds each item's
+  administrations over the run and ``duration`` the run's wall-clock time in seconds.
+  """
+
+  item_bank: ItemBank
+  sessions: list[CatSessionState]
+  exposure_counts: IntArray
+  duration: float
+
+  @property
+  def exposure_rates(self) -> FloatArray:
+    """Return per-item exposure rates across the simulated sessions."""
+    n_sessions = len(self.sessions)
+    if n_sessions == 0:
+      return numpy.zeros(self.item_bank.n_items, dtype=float)
+    return self.exposure_counts.astype(float) / n_sessions
+
+  @property
+  def administered_items(self) -> list[list[int]]:
+    """Return administered item ids for each session."""
+    return [session.administered_item_ids for session in self.sessions]
+
+  @property
+  def theta_histories(self) -> list[list[float]]:
+    """Return each session's ability estimates, the initial one first."""
+    return [list(session.theta_history) for session in self.sessions]
+
+  @property
+  def response_vectors(self) -> list[list[bool]]:
+    """Return response vectors for each session."""
+    return [session.responses for session in self.sessions]
+
+  @property
+  def final_thetas(self) -> list[float]:
+    """Return each session's final ability estimate."""
+    return [session.current_theta for session in self.sessions]
+
+  @property
+  def final_ses(self) -> list[float]:
+    """Return the standard error of each session's final ability estimate.
+
+    It is infinite for a session that ended before its first response.
+    """
+    return [session.current_se for session in self.sessions]
+
+  @property
+  def test_lengths(self) -> list[int]:
+    """Return how many items each session administered."""
+    return [session.administered_count for session in self.sessions]
+
+  @property
+  def true_thetas(self) -> FloatArray:
+    """Return each session's true ability, NaN for a session that has none."""
+    return numpy.array(
+      [numpy.nan if session.true_theta is None else session.true_theta for session in self.sessions], dtype=float
+    )
+
+  @property
+  def evaluations(self) -> list[int | None]:
+    """Return how many objective evaluations each session's estimates took, summed over its responses.
+
+    The initial estimate, which no estimator computed, counts 0. A session is None when the estimator
+    gave no count for one of its estimates (:attr:`~catsim.context.Estimate.evaluations`).
+    """
+    totals: list[int | None] = []
+    for session in self.sessions:
+      counts = [estimate.evaluations for estimate in session.estimates[1:]]
+      totals.append(None if None in counts else sum(count for count in counts if count is not None))
+    return totals
+
+  @property
+  def mean_evaluations(self) -> float | None:
+    """Return the mean number of objective evaluations per estimate over the run's responses.
+
+    Only the estimates that have a count take part. None when no estimate of the run has one, as for
+    a run whose estimator gives no counts or whose sessions have no responses.
+    """
+    counts = [
+      estimate.evaluations
+      for session in self.sessions
+      for estimate in session.estimates[1:]
+      if estimate.evaluations is not None
+    ]
+    return float(numpy.mean(counts)) if counts else None
+
+  def _known_true_thetas(self) -> FloatArray:
+    """Return the true abilities, raising if a session has none.
+
+    Returns
+    -------
+    numpy.ndarray
+        Each session's true ability.
+
+    Raises
+    ------
+    ValueError
+        If any session has no true ability.
+    """
+    true_thetas = self.true_thetas
+    missing = int(numpy.isnan(true_thetas).sum())
+    if missing:
+      msg = (
+        f"bias, mse and rmse need every session's true theta, but {missing} of {len(self.sessions)} sessions have none"
+      )
+      raise ValueError(msg)
+    return true_thetas
+
+  @property
+  def bias(self) -> float:
+    """Return the mean of the final estimates minus the true abilities.
+
+    Raises
+    ------
+    ValueError
+        If any session has no true ability.
+    """
+    return cat.bias(self._known_true_thetas(), self.final_thetas)
+
+  @property
+  def mse(self) -> float:
+    """Return the mean squared difference between the final estimates and the true abilities.
+
+    Raises
+    ------
+    ValueError
+        If any session has no true ability.
+    """
+    return cat.mse(self._known_true_thetas(), self.final_thetas)
+
+  @property
+  def rmse(self) -> float:
+    """Return the square root of :attr:`mse`.
+
+    Raises
+    ------
+    ValueError
+        If any session has no true ability.
+    """
+    return cat.rmse(self._known_true_thetas(), self.final_thetas)
+
+  @property
+  def overlap_rate(self) -> float | None:
+    """Return the test overlap rate, or None unless every session administered the same number of items.
+
+    The overlap-rate formula (:func:`catsim.cat.overlap_rate`) assumes one fixed test length, so
+    there is no overlap rate for a run of variable-length tests, for a run with no sessions or for
+    tests of no items.
+    """
+    if not self.sessions:
+      return None
+    test_sizes = set(self.test_lengths)
+    if len(test_sizes) != 1:
+      return None
+    test_size = test_sizes.pop()
+    if test_size == 0:
+      return None
+    return cat.overlap_rate(self.exposure_rates, test_size)
 
 
 class SimulationRunner:

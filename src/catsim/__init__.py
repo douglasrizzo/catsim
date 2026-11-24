@@ -6,8 +6,8 @@ from .context import Estimate, StepContext
 from .engine import CatEngine, ResponseProvider, RunContext
 from .exceptions import NoItemsAvailableError
 from .item_bank import ItemBank
-from .simulation import SimulatedResponseProvider, SimulationRunner
-from .state import CatSessionSnapshot, CatSessionState, CatStepResult, ExposureTracker, SimulationResult, StopReason
+from .simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
+from .state import CatSessionSnapshot, CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 try:  # noqa: RUF067 - the version lookup needs a fallback, so it cannot be a plain re-export
   __version__ = importlib.metadata.version("catsim")

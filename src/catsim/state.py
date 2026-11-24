@@ -1,4 +1,4 @@
-"""State models for CAT execution and simulation."""
+"""Runtime state of CAT sessions and of the runs they belong to."""
 
 from __future__ import annotations
 
@@ -8,13 +8,11 @@ from typing import TYPE_CHECKING
 
 import numpy
 
-from . import cat
 from .context import Estimate
 
 if TYPE_CHECKING:
   from collections.abc import Hashable
 
-  from .item_bank import ItemBank
   from .typing import FloatArray, IntArray
 
 
@@ -227,80 +225,10 @@ class ExposureTracker:
     -------
     numpy.ndarray
         A new array with one rate per item; all zero while at most one session has started. This is
-        not the run's final exposure, which :attr:`SimulationResult.exposure_rates` gives.
+        not the run's final exposure, which
+        :attr:`~catsim.simulation.SimulationResult.exposure_rates` gives.
     """
     others = self.n_sessions - 1
     if others < 1:
       return numpy.zeros(self.n_items)
     return self.counts / others
-
-
-@dataclass(slots=True)
-class SimulationResult:
-  """Aggregate result for a batch of CAT sessions."""
-
-  item_bank: ItemBank
-  sessions: list[CatSessionState]
-  exposure_counts: IntArray
-  duration: float
-
-  @property
-  def exposure_rates(self) -> FloatArray:
-    """Return per-item exposure rates across the simulated sessions."""
-    n_sessions = len(self.sessions)
-    if n_sessions == 0:
-      return numpy.zeros(self.item_bank.n_items, dtype=float)
-    return self.exposure_counts.astype(float) / n_sessions
-
-  @property
-  def administered_items(self) -> list[list[int]]:
-    """Return administered item ids for each session."""
-    return [session.administered_item_ids for session in self.sessions]
-
-  @property
-  def estimations(self) -> list[list[float]]:
-    """Return theta history for each session."""
-    return [list(session.theta_history) for session in self.sessions]
-
-  @property
-  def response_vectors(self) -> list[list[bool]]:
-    """Return response vectors for each session."""
-    return [session.responses for session in self.sessions]
-
-  @property
-  def latest_estimations(self) -> list[float]:
-    """Return final theta estimates for each session."""
-    return [session.current_theta for session in self.sessions]
-
-  @property
-  def examinees(self) -> FloatArray:
-    """Return true theta values for the simulated sessions."""
-    return numpy.asarray([0.0 if session.true_theta is None else session.true_theta for session in self.sessions])
-
-  @property
-  def bias(self) -> float:
-    """Return simulation bias."""
-    return cat.bias(self.examinees, self.latest_estimations)
-
-  @property
-  def mse(self) -> float:
-    """Return simulation MSE."""
-    return cat.mse(self.examinees, self.latest_estimations)
-
-  @property
-  def rmse(self) -> float:
-    """Return simulation RMSE."""
-    return cat.rmse(self.examinees, self.latest_estimations)
-
-  @property
-  def overlap_rate(self) -> float | None:
-    """Return overlap rate when all sessions have the same test length."""
-    if not self.sessions:
-      return None
-    test_sizes = {len(session.administered_item_ids) for session in self.sessions}
-    if len(test_sizes) != 1:
-      return None
-    test_size = test_sizes.pop()
-    if test_size == 0:
-      return None
-    return cat.overlap_rate(self.exposure_rates, test_size)

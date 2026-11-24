@@ -1,4 +1,4 @@
-"""Tests for the refactored simulation architecture."""
+"""Tests for the simulation runner, its simulated responses and its results."""
 
 from __future__ import annotations
 
@@ -16,8 +16,8 @@ from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector
-from catsim.simulation import SimulatedResponseProvider, SimulationRunner
-from catsim.state import CatSessionState, SimulationResult, StopReason
+from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
+from catsim.state import CatSessionState, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -109,7 +109,7 @@ class TestSimulationRunnerRun:
 
     assert second.administered_items == first.administered_items
     assert second.response_vectors == first.response_vectors
-    assert second.estimations == first.estimations
+    assert second.theta_histories == first.theta_histories
     assert np.array_equal(second.exposure_counts, first.exposure_counts)
     assert other_seed.administered_items != first.administered_items
 
@@ -132,7 +132,7 @@ class TestSimulationRunnerRun:
     quiet, shown = simulation_runner.run(thetas, progress=False), simulation_runner.run(thetas, progress=True)
 
     assert shown.administered_items == quiet.administered_items
-    assert shown.latest_estimations == quiet.latest_estimations
+    assert shown.theta_histories == quiet.theta_histories
 
   def test_importing_the_simulation_module_does_not_import_tqdm(self) -> None:
     """tqdm is imported only for a run that shows a progress bar; fails if catsim imports it at module level."""
@@ -172,38 +172,206 @@ class TestSimulationRunnerRun:
     assert result.exposure_rates[:2].tolist() == [1.0, 1.0]
 
 
+def finished_session(session_id: int, items: list[int]) -> CatSessionState:
+  """Return a session that administered ``items``, all answered correctly, with a constant estimate."""
+  return CatSessionState(
+    session_id=session_id,
+    estimates=[Estimate(0.0, math.inf)] * (len(items) + 1),
+    administered_item_ids=items,
+    responses=[True] * len(items),
+  )
+
+
+def result_of(sessions: list[CatSessionState], n_items: int = 5) -> SimulationResult:
+  """Return a result holding the given sessions, on a bank of n_items items no session's exposure is counted in."""
+  return SimulationResult(
+    item_bank=ItemBank.generate_item_bank(n_items, seed=0),
+    sessions=sessions,
+    exposure_counts=np.zeros(n_items, dtype=int),
+    duration=0.0,
+  )
+
+
+def two_finished_sessions() -> list[CatSessionState]:
+  """Return two hand-built sessions with known true abilities, estimates and evaluation counts.
+
+  The first ends at 0.6 (SE 0.9) for a true 0.5 after two items, its estimates costing 7 and 5
+  evaluations; the second at -0.8 (SE 1.1) for a true -1.0 after one item costing 4. The second's
+  initial estimate has no count, as a hand-built one need not.
+  """
+  return [
+    CatSessionState(
+      session_id=0,
+      estimates=[Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 7), Estimate(0.6, 0.9, 5)],
+      true_theta=0.5,
+      administered_item_ids=[3, 1],
+      responses=[True, False],
+    ),
+    CatSessionState(
+      session_id=1,
+      estimates=[Estimate(0.0, math.inf), Estimate(-0.8, 1.1, 4)],
+      true_theta=-1.0,
+      administered_item_ids=[2],
+      responses=[False],
+    ),
+  ]
+
+
 class TestSimulationResult:
   """Tests for SimulationResult derived properties."""
 
-  def test_latest_estimations_matches_session_thetas(self, simulation_result: SimulationResult) -> None:
-    """latest_estimations holds the last estimate of each session's history.
+  def test_per_session_properties_read_each_session_in_order(self) -> None:
+    """Each per-session property has one entry per session, in session order.
 
-    Fails if it reports an earlier estimate, such as the initial one.
+    Fails if final_thetas or final_ses read an earlier estimate (such as the initial one), if
+    theta_histories drops the initial estimate, or if test_lengths counts the estimates (one more
+    than the items).
     """
-    assert simulation_result.latest_estimations == [session.theta_history[-1] for session in simulation_result.sessions]
+    result = result_of(two_finished_sessions())
 
-  def test_estimations_returns_theta_histories(self, simulation_result: SimulationResult) -> None:
-    """Estimations should expose one theta-history per session."""
-    assert len(simulation_result.estimations) == len(simulation_result.sessions)
-    assert all(len(history) >= 2 for history in simulation_result.estimations)
+    assert result.final_thetas == [0.6, -0.8]
+    assert result.final_ses == [0.9, 1.1]
+    assert result.test_lengths == [2, 1]
+    assert result.theta_histories == [[0.0, 0.4, 0.6], [0.0, -0.8]]
+    assert result.true_thetas.tolist() == [0.5, -1.0]
 
-  def test_response_vectors_have_expected_length(self, simulation_result: SimulationResult) -> None:
-    """Response vectors should match administered item counts."""
-    for responses, items in zip(simulation_result.response_vectors, simulation_result.administered_items, strict=False):
-      assert len(responses) == len(items)
+  def test_evaluations_sum_each_sessions_counts_over_its_responses(self) -> None:
+    """Session totals are 7 + 5 = 12 and 4; the mean per estimate is 16 / 3.
+
+    Fails if the initial estimate takes part (the second session would be None for its missing
+    count), or if mean_evaluations averages the session totals (8) instead of the estimates.
+    """
+    result = result_of(two_finished_sessions())
+
+    assert result.evaluations == [12, 4]
+    assert result.mean_evaluations == pytest.approx(16 / 3)
+
+  def test_a_session_with_an_estimate_without_a_count_has_no_evaluation_total(self) -> None:
+    """A session with an uncounted estimate has no total; the mean is over the estimates that have a count.
+
+    The first session's estimates cost 3 and an unknown number, the second's 4, so the totals are
+    [None, 4] and the mean is (3 + 4) / 2. Fails if an unknown count is read as 0 (a total of 3 and a
+    mean of 7 / 3).
+    """
+    sessions = [
+      CatSessionState(
+        session_id=0,
+        estimates=[Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 3), Estimate(0.6, 0.9)],
+        administered_item_ids=[3, 1],
+        responses=[True, False],
+      ),
+      CatSessionState(
+        session_id=1,
+        estimates=[Estimate(0.0, math.inf, 0), Estimate(-0.8, 1.1, 4)],
+        administered_item_ids=[2],
+        responses=[False],
+      ),
+    ]
+    result = result_of(sessions)
+
+    assert result.evaluations == [None, 4]
+    assert result.mean_evaluations == pytest.approx(3.5)
+
+  def test_mean_evaluations_is_none_without_a_counted_estimate(self) -> None:
+    """A run whose sessions have no response has no mean count; fails if it reports 0 or NaN instead."""
+    result = result_of([finished_session(0, []), finished_session(1, [])])
+
+    assert result.evaluations == [0, 0]
+    assert result.mean_evaluations is None
 
   def test_exposure_rates_sum_to_the_test_length(self, simulation_result: SimulationResult) -> None:
     """With one rate per item, and every examinee given 10 items, the rates sum to 10."""
     assert simulation_result.exposure_rates.shape == (simulation_result.item_bank.n_items,)
     assert simulation_result.exposure_rates.sum() == pytest.approx(10.0)
 
-  def test_metrics_compare_final_estimates_with_true_abilities(self, simulation_result: SimulationResult) -> None:
-    """Bias is the mean of estimate minus true ability, MSE the mean squared error, RMSE its square root."""
-    errors = np.asarray(simulation_result.latest_estimations) - simulation_result.examinees
+  def test_metrics_compare_final_estimates_with_true_abilities(self) -> None:
+    """Errors 0.6 - 0.5 and -0.8 + 1.0 give bias 0.15, MSE (0.01 + 0.04) / 2 = 0.025 and RMSE its root.
 
-    assert simulation_result.bias == pytest.approx(errors.mean())
-    assert simulation_result.mse == pytest.approx(np.mean(errors**2))
-    assert simulation_result.rmse == pytest.approx(np.sqrt(np.mean(errors**2)))
+    Fails if a metric compares another estimate than the final one, or swaps the sign of the bias.
+    """
+    result = result_of(two_finished_sessions())
+
+    assert result.bias == pytest.approx(0.15)
+    assert result.mse == pytest.approx(0.025)
+    assert result.rmse == pytest.approx(math.sqrt(0.025))
+
+  def test_true_thetas_are_nan_for_a_session_without_one(self) -> None:
+    """A session with no true theta, such as one run by hand, has NaN in true_thetas.
+
+    Fails if the result substitutes a number (0.0, as it once did) or drops the session, so the
+    true abilities no longer line up with the sessions.
+    """
+    sessions = two_finished_sessions()
+    sessions[0].true_theta = None
+    true_thetas = result_of(sessions).true_thetas
+
+    assert true_thetas.shape == (2,)
+    assert np.isnan(true_thetas[0])
+    assert true_thetas[1] == -1.0
+
+  @pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
+  def test_metrics_need_every_true_theta(self, metric: str) -> None:
+    """Bias, MSE and RMSE raise for a result with a session without a true theta, naming how many lack one.
+
+    Fails if a metric silently compares the estimate with a stand-in such as 0, as it once did
+    (bias 0.5 for estimates [1, 1] against true [None, 1]), or ignores the session.
+    """
+    sessions = two_finished_sessions()
+    sessions[1].true_theta = None
+
+    with pytest.raises(ValueError, match="need every session's true theta, but 1 of 2 sessions have none"):
+      getattr(result_of(sessions), metric)
+
+
+def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> None:
+  """A result with no sessions has zero exposure rates and no overlap rate.
+
+  Fails if exposure_rates divides the counts by zero sessions (NaN, with a warning that the test settings turn into
+  an error), or if overlap_rate computes a number for a run without tests.
+  """
+  result = SimulationResult(
+    item_bank=item_bank,
+    sessions=[],
+    exposure_counts=np.zeros(item_bank.n_items, dtype=int),
+    duration=0.0,
+  )
+
+  assert np.array_equal(result.exposure_rates, np.zeros(item_bank.n_items))
+  assert result.overlap_rate is None
+
+
+def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
+  """Two 2-item tests, [0, 1] and [0, 2], on a 5-item bank give exposure rates [1, 0.5, 0.5, 0, 0].
+
+  The rates average Q / N, so (N / Q) var(r) + Q / N reduces to sum(r^2) / Q = 1.5 / 2 = 0.75. A wrong test
+  length of 1 would give 0.9.
+  """
+  sessions = [
+    finished_session(0, [0, 1]),
+    finished_session(1, [0, 2]),
+  ]
+  result = SimulationResult(
+    item_bank=ItemBank.generate_item_bank(5, seed=0),
+    sessions=sessions,
+    exposure_counts=np.array([2, 1, 1, 0, 0]),
+    duration=0.0,
+  )
+
+  assert result.exposure_rates.tolist() == [1.0, 0.5, 0.5, 0.0, 0.0]
+  assert result.overlap_rate == pytest.approx(0.75)
+
+
+def test_simulation_result_overlap_requires_uniform_non_zero_test_lengths() -> None:
+  """Overlap is None for sessions of different lengths or of no items.
+
+  Fails if overlap_rate computes a number from a test length the sessions do not share, or divides
+  by a test length of zero.
+  """
+  heterogeneous = result_of([finished_session(0, [0]), finished_session(1, [0, 1])])
+  zero_length = result_of([finished_session(0, []), finished_session(1, [])])
+
+  assert heterogeneous.overlap_rate is None
+  assert zero_length.overlap_rate is None
 
 
 @dataclass

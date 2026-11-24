@@ -8,7 +8,8 @@ from matplotlib.axes import Axes
 
 from . import irt
 from .item_bank import ItemBank
-from .state import CatSessionState, SimulationResult
+from .simulation import SimulationResult
+from .state import CatSessionState
 from .typing import FloatArray
 
 

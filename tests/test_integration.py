@@ -26,8 +26,8 @@ from catsim.selection import (
   UrrySelector,
 )
 from catsim.selection.base import BaseSelector
-from catsim.simulation import SimulatedResponseProvider, SimulationRunner
-from catsim.state import ExposureTracker, SimulationResult, StopReason
+from catsim.simulation import SimulatedResponseProvider, SimulationResult, SimulationRunner
+from catsim.state import ExposureTracker, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 
 
