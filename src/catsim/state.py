@@ -35,9 +35,11 @@ class CatSessionState:
   """Mutable runtime state for a single examinee CAT session.
 
   ``session_id`` is whatever hashable value the application identifies the session by, such as an
-  int, a str or a UUID. ``estimates`` starts with the initial estimate, whose standard error is
-  ``math.inf`` and which took no evaluation, and gains the :class:`~catsim.context.Estimate` the
-  estimator returned for each response; its last entry is the current estimate. A session runs
+  int, a str or a UUID. ``estimates`` starts with the initial estimate (which
+  :meth:`~catsim.engine.CatEngine.start_session` records with an infinite standard error and no
+  evaluations) and gains the :class:`~catsim.context.Estimate` the estimator returned for each
+  response; its last entry is the current estimate. A restored session's estimates are trusted
+  as given. A session runs
   while ``stop_reason`` is None.
 
   Raises
