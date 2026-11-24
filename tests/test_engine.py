@@ -81,6 +81,14 @@ class RecordingEstimator:
     return Estimate(theta=self.theta, se=self.se, evaluations=self.evaluations)
 
 
+class FloatEstimator:
+  """Estimator stub written for the contract where estimate returned a bare float."""
+
+  def estimate(self, context: StepContext) -> float:
+    del context
+    return 0.5
+
+
 class FailingEstimator:
   """Estimator stub that fails on every call."""
 
@@ -368,21 +376,28 @@ def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
 
 
 @pytest.mark.parametrize(
-  ("estimator", "stopper", "error"),
+  ("estimator", "stopper", "exception", "error"),
   [
-    (FailingEstimator(), RecordingStopper(False), "estimation failed"),
-    (RecordingEstimator(0.5), FailingStopper(), "stopping failed"),
+    (FailingEstimator(), RecordingStopper(False), ValueError, "estimation failed"),
+    (
+      FloatEstimator(),
+      RecordingStopper(False),
+      TypeError,
+      "FloatEstimator.estimate must return an Estimate, got float",
+    ),
+    (RecordingEstimator(0.5), FailingStopper(), ValueError, "stopping failed"),
   ],
-  ids=["estimator", "stopper"],
+  ids=["estimator", "estimator-returning-a-float", "stopper"],
 )
 def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
-  item_bank, estimator, stopper, error
+  item_bank, estimator, stopper, exception, error
 ) -> None:
   """A response whose estimate or stop decision fails is not applied at all.
 
   Fails if the item, the response or its exposure is recorded before the estimator and the
   stopper run: the half-applied step left the session with one more response than estimates, and
-  retrying the item was rejected as already administered.
+  retrying the item was rejected as already administered. An estimator that returns a float
+  instead of an Estimate must fail with a TypeError that says so, not an AttributeError.
   """
   tracker = ExposureTracker(item_bank.n_items)
   context = RunContext(rng=np.random.default_rng(42), exposure_tracker=tracker)
@@ -390,7 +405,7 @@ def test_apply_response_leaves_the_session_unchanged_when_a_strategy_fails(
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context)
   before = copy.deepcopy(session)
 
-  with pytest.raises(ValueError, match=error):
+  with pytest.raises(exception, match=error):
     engine.apply_response(session, item_bank, item_id=3, response=True, context=context)
 
   assert session == before
