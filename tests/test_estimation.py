@@ -61,15 +61,16 @@ class TestNumericalSearchEstimatorEstimate:
     assert theta == pytest.approx(reference, abs=1e-4)
 
   def test_estimate_without_items_returns_est_theta(self) -> None:
-    """With no item administered the estimate is est_theta, not a search bound.
+    """With no item administered the estimate is est_theta with the context's standard error, not a search bound.
 
-    The log-likelihood of no responses is flat, and searching it returned 5.9999995.
+    The log-likelihood of no responses is flat, and searching it returned 5.9999995. Its information is 0, so an SE
+    taken from it would be infinite instead of the 0.8 the context reports, and the search would count evaluations.
     """
     item_bank = ItemBank.generate_item_bank(10, seed=42)
 
-    theta = NumericalSearchEstimator().estimate(make_context(item_bank, [], [], theta=1.7)).theta
+    estimate = NumericalSearchEstimator().estimate(make_context(item_bank, [], [], theta=1.7, se=0.8))
 
-    assert theta == 1.7
+    assert estimate == Estimate(theta=1.7, se=0.8, evaluations=0)
 
   @pytest.mark.parametrize(
     ("est_theta", "correct", "expected"),
@@ -88,13 +89,16 @@ class TestNumericalSearchEstimatorEstimate:
     The bank's difficulties are -3, 0 and 2, and only the item at 0 is administered, so the step
     targets the bank's extremes, not the administered item. From 0 it reaches 2 / 2 = 1 or -3 / 2 = -1.5.
     Beyond the extreme, the step used to point back toward it: 4.0 fell to 3.0 after a correct
-    answer and -4.0 rose to -3.5 after an incorrect one.
+    answer and -4.0 rose to -3.5 after an incorrect one. The step evaluates no likelihood, and its
+    standard error is the Fisher one of the administered item at the new estimate, 1 / sqrt(P Q).
     """
     item_bank = ItemBank(np.array([[1.0, -3.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
 
-    theta = NumericalSearchEstimator().estimate(make_context(item_bank, [1], [correct], theta=est_theta)).theta
+    estimate = NumericalSearchEstimator().estimate(make_context(item_bank, [1], [correct], theta=est_theta))
 
-    assert theta == expected
+    assert estimate.theta == expected
+    assert estimate.se == pytest.approx(1.0 / np.sqrt(expit(expected) * expit(-expected)), rel=1e-12)
+    assert estimate.evaluations == 0
 
   @pytest.mark.parametrize(
     ("est_theta", "correct", "bounds", "expected"),
@@ -143,6 +147,42 @@ class TestNumericalSearchEstimatorEstimate:
 
     assert estimates[1].theta == pytest.approx(reference, abs=1e-7)
     assert estimates[0].evaluations < estimates[1].evaluations
+
+  def test_standard_error_is_the_inverse_root_of_the_information_at_the_estimate(self) -> None:
+    """Sixteen identical 1PL items at b = 0, half answered correctly, give theta = 0 and SE = 2 / sqrt(16) = 0.5.
+
+    The likelihood P^8 Q^8 peaks where P = 1/2, at theta = 0, where each item's information is P Q = 1/4, so the
+    test information is 4. An SE that was the variance 1/I (0.25), the information at the previous estimate (0.564
+    at theta = 1), or anything but the Fisher one fails.
+    """
+    item_bank = ItemBank(np.tile([1.0, 0.0, 0.0, 1.0], (16, 1)))
+
+    estimate = NumericalSearchEstimator().estimate(make_context(item_bank, range(16), [True, False] * 8, theta=1.0))
+
+    assert estimate.theta == pytest.approx(0.0, abs=1e-5)
+    assert estimate.se == pytest.approx(0.5, rel=1e-9)
+
+  def test_evaluations_are_the_likelihood_evaluations_of_the_search(self) -> None:
+    """The evaluation count is SciPy's own count for a bounded search of the same negative log-likelihood.
+
+    A count that is a constant, one per estimate, or that adds the information evaluated for the standard error, fails.
+    """
+    item_bank = ItemBank.generate_item_bank(30, seed=3)
+    administered_items = list(range(10))
+    response_vector = [True, False] * 5
+    reference = minimize_scalar(
+      irt.negative_log_likelihood,
+      bounds=(irt.THETA_MIN_EXTENDED, irt.THETA_MAX_EXTENDED),
+      method="bounded",
+      args=(response_vector, item_bank.get_items(administered_items)),
+      options={"xatol": 1e-6},
+    )
+
+    estimate = NumericalSearchEstimator(tol=1e-6).estimate(
+      make_context(item_bank, administered_items, response_vector, theta=0.0)
+    )
+
+    assert estimate.evaluations == reference.nfev
 
 
 ESTIMATORS = [
