@@ -57,6 +57,19 @@ class TestStandardErrorStopper:
 
     assert stops == [n >= 16 for n in range(21)]
 
+  def test_judges_the_standard_error_the_context_reports(self) -> None:
+    """The stopper judges the context's se, the estimator's own, not the Fisher SE of the administered items.
+
+    Sixteen identical 1PL items at theta = b have a Fisher SE of exactly 0.5, the target. A stopper that computed it
+    from the items stops at both reported errors, 0.6 and 0.4.
+    """
+    item_bank = identical_1pl_bank(16, difficulty=0.0)
+    stopper = StandardErrorStopper(0.5)
+
+    stops = [stopper.stop(make_context(item_bank, range(16), theta=0.0, se=se)) for se in (0.6, 0.4)]
+
+    assert stops == [False, True]
+
 
 class TestConfidenceIntervalStopper:
   """Tests for ConfidenceIntervalStopper."""
@@ -111,6 +124,20 @@ class TestConfidenceIntervalStopper:
     ]
 
     assert not any(stops)
+
+  def test_builds_the_interval_from_the_standard_error_the_context_reports(self) -> None:
+    """The interval is theta +/- 1.96 se with the context's se, not the Fisher SE of the administered items.
+
+    Sixteen identical 1PL items at theta = b = 0 have a Fisher SE of 0.5, a half-width of 0.98 that fits between the
+    bounds -1 and 1. The reported errors 0.6 and 0.4 give half-widths of 1.18, which does not fit, and 0.78, which
+    does; a stopper that computed the interval from the items stops at both.
+    """
+    item_bank = identical_1pl_bank(16, difficulty=0.0)
+    stopper = ConfidenceIntervalStopper([-1.0, 1.0])
+
+    stops = [stopper.stop(make_context(item_bank, range(16), theta=0.0, se=se)) for se in (0.6, 0.4)]
+
+    assert stops == [False, True]
 
 
 class TestStopRule:
