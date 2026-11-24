@@ -60,7 +60,7 @@ from catsim.selection import MaxInfoSelector
 from catsim.estimation import NumericalSearchEstimator
 from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 engine = CatEngine(
-    ItemBank.generate_item_bank(100),
+    ItemBank.generate(100),
     UniformInitializer(),
     MaxInfoSelector(),
     NumericalSearchEstimator(),

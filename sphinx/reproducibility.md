@@ -12,7 +12,7 @@ from catsim.selection import RandomesqueSelector, RandomSelector, The54321Select
 from numpy.random import default_rng
 
 for _ in range(5):
-    item_bank = ItemBank.generate_item_bank(5000, seed=42)
+    item_bank = ItemBank.generate(5000, rng=42)
     print(
         RandomSelector().select(StepContext(item_bank=item_bank, rng=default_rng(42))),
         The54321Selector().select(StepContext(item_bank=item_bank, rng=default_rng(42))),
@@ -34,7 +34,7 @@ The same seed and the same true abilities give identical results, however many t
 >>> from catsim.selection import MaxInfoSelector
 >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
 >>> engine = CatEngine(
-...     ItemBank.generate_item_bank(500, seed=42),
+...     ItemBank.generate(500, rng=42),
 ...     UniformInitializer(),
 ...     MaxInfoSelector(),
 ...     NumericalSearchEstimator(),

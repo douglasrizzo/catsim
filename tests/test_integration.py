@@ -60,7 +60,7 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
   One estimator instance serves every examinee, and MEI calls it again with hypothetical
   responses, so sharing one instance between the engine and MEI must not change any estimate.
   """
-  item_bank = ItemBank.generate_item_bank(80, seed=42)
+  item_bank = ItemBank.generate(80, rng=42)
   stopper = MaxLengthStopper(6)
   shared = factory()
   reused = run_simulation(item_bank, MEISelector(estimator=shared), stopper, estimator=shared, examinees=4)
@@ -85,7 +85,7 @@ def test_bayesian_estimators_complete_simulation(factory: Callable[[], BaseEstim
 )
 def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseSelector]) -> None:
   """Finite selectors should drive the shared simulation path without legacy adapters."""
-  item_bank = ItemBank.generate_item_bank(80, seed=42)
+  item_bank = ItemBank.generate(80, rng=42)
   result = run_simulation(item_bank, factory(), MaxLengthStopper(8))
 
   assert all(len(session.administered_item_ids) == 8 for session in result.sessions)
@@ -103,7 +103,7 @@ def test_finite_selectors_complete_fixed_length_runs(factory: Callable[[], BaseS
 )
 def test_infinite_selectors_complete_variable_length_runs(selector: BaseSelector) -> None:
   """An infinite selector that raises, or ends a session outside its stopping rule's 3 to 10 items, fails the run."""
-  item_bank = ItemBank.generate_item_bank(100, seed=42)
+  item_bank = ItemBank.generate(100, rng=42)
   result = run_simulation(item_bank, selector, StopRule(StandardErrorStopper(0.6), MaxLengthStopper(10), min_items=3))
 
   assert all(3 <= len(session.administered_item_ids) <= 10 for session in result.sessions)
@@ -117,7 +117,7 @@ def test_cluster_selector_completes_runs(method: str) -> None:
   The selector treats cluster ids as labels, and this test checks only that each method completes a run, so four
   fixed groups of 15 items are enough. Four groups for six items also make each session reuse a cluster.
   """
-  item_bank = ItemBank.generate_item_bank(60, seed=42)
+  item_bank = ItemBank.generate(60, rng=42)
   clusters = (np.arange(item_bank.n_items) % 4).tolist()
   result = run_simulation(
     item_bank,
@@ -144,7 +144,7 @@ def test_cluster_selector_completes_runs(method: str) -> None:
 )
 def test_stoppers_complete_runs(stopper: BaseStopper, expected_min: int, expected_max: int) -> None:
   """A stopper that ends a session before its minimum or after its maximum number of items fails the run."""
-  item_bank = ItemBank.generate_item_bank(100, seed=42)
+  item_bank = ItemBank.generate(100, rng=42)
   result = run_simulation(item_bank, MaxInfoSelector(), stopper)
 
   assert all(expected_min <= len(session.administered_item_ids) <= expected_max for session in result.sessions)
@@ -156,7 +156,7 @@ def test_a_session_whose_stopper_never_holds_ends_when_the_bank_runs_out() -> No
 
   A standard error of 0.001 needs an information of a million, which five items cannot give.
   """
-  item_bank = ItemBank.generate_item_bank(5, seed=42)
+  item_bank = ItemBank.generate(5, rng=42)
   result = run_simulation(item_bank, MaxInfoSelector(), StandardErrorStopper(0.001))
 
   assert all(sorted(session.administered_item_ids) == [0, 1, 2, 3, 4] for session in result.sessions)
@@ -169,7 +169,7 @@ def test_stepping_the_engine_by_hand_reproduces_a_simulation_runner_session() ->
   The randomesque selector and the simulated responses draw from the same generator in turn, so the two
   paths agree only if they make the same draws in the same order.
   """
-  item_bank = ItemBank.generate_item_bank(40, seed=42)
+  item_bank = ItemBank.generate(40, rng=42)
 
   def components() -> tuple[FixedPointInitializer, RandomesqueSelector, NumericalSearchEstimator, MaxLengthStopper]:
     return FixedPointInitializer(0.0), RandomesqueSelector(3), NumericalSearchEstimator(), MaxLengthStopper(6)

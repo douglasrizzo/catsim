@@ -44,7 +44,7 @@ class TestNumericalSearchEstimatorEstimate:
     as bounds, followed that slope and returned -107.7 and -41.7. The reference is the argmax of
     the log-likelihood, written out here, on a grid 1e-4 apart over the ability scale.
     """
-    item_bank = ItemBank.generate_item_bank(50, seed=42)
+    item_bank = ItemBank.generate(50, rng=42)
     administered_items = list(range(10))
     response_vector = [True, True, False, True, False, True, True, False, True, False]
     items = item_bank.get_items(administered_items)
@@ -67,7 +67,7 @@ class TestNumericalSearchEstimatorEstimate:
     The log-likelihood of no responses is flat, and searching it returned 5.9999995. Its information is 0, so an SE
     taken from it would be infinite instead of the 0.8 the context reports, and the search would count evaluations.
     """
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
 
     estimate = NumericalSearchEstimator().estimate(make_context(item_bank, [], [], theta=1.7, se=0.8))
 
@@ -129,7 +129,7 @@ class TestNumericalSearchEstimatorEstimate:
 
   def test_bounded_search_honors_tol(self) -> None:
     """The default bounded method used to ignore tol and always stop at SciPy's default of 1e-5."""
-    item_bank = ItemBank.generate_item_bank(30, seed=3)
+    item_bank = ItemBank.generate(30, rng=3)
     administered_items = list(range(10))
     response_vector = [True, False] * 5
     reference = minimize_scalar(
@@ -167,7 +167,7 @@ class TestNumericalSearchEstimatorEstimate:
 
     A count that is a constant, one per estimate, or that adds the information evaluated for the standard error, fails.
     """
-    item_bank = ItemBank.generate_item_bank(30, seed=3)
+    item_bank = ItemBank.generate(30, rng=3)
     administered_items = list(range(10))
     response_vector = [True, False] * 5
     reference = minimize_scalar(
@@ -200,7 +200,7 @@ def test_estimate_takes_a_minimal_context(make_estimator: Callable[[], BaseEstim
   their standard normal prior, 0 too. An estimator that still took the old arguments, or that needs a field the
   minimal context leaves at its default, fails here.
   """
-  context = StepContext(item_bank=ItemBank.generate_item_bank(5, seed=0), rng=np.random.default_rng(0))
+  context = StepContext(item_bank=ItemBank.generate(5, rng=0), rng=np.random.default_rng(0))
 
   estimate = make_estimator().estimate(context)
 
@@ -262,7 +262,7 @@ def test_estimators_accept_numpy_item_indices(
   Testing the indices for truth raises for an array of two or more, and reads the array [0] as
   empty, so WLE returned est_theta for it without estimating anything.
   """
-  item_bank = ItemBank.generate_item_bank(10, seed=42)
+  item_bank = ItemBank.generate(10, rng=42)
 
   from_list = make_estimator().estimate(make_context(item_bank, administered_items, response_vector, theta=0.7))
   from_array = make_estimator().estimate(
@@ -620,7 +620,7 @@ class TestEAPEstimator:
     """
     estimator = EAPEstimator(log_prior=log_prior)
 
-    theta = estimator.estimate(make_context(ItemBank.generate_item_bank(10, seed=42), [], [], theta=0.7)).theta
+    theta = estimator.estimate(make_context(ItemBank.generate(10, rng=42), [], [], theta=0.7)).theta
 
     assert theta == pytest.approx(expected, abs=1e-12)
 
@@ -702,7 +702,7 @@ class TestEAPEstimator:
 
     A count of anything but the grid's 31 nodes, such as one per administered item or the default grid's 121, fails.
     """
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
     estimator = EAPEstimator(grid=QuadratureGrid.uniform(n_nodes=31))
 
     first = estimator.estimate(make_context(item_bank, [0], [True], theta=0.0))
@@ -716,7 +716,7 @@ class TestMAPEstimator:
 
   def test_estimate_empty_response_vector_returns_prior_mode(self) -> None:
     """With no responses the estimate is the default prior's mode, 0, not the est_theta passed in."""
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
     estimator = MAPEstimator()
 
     theta = estimator.estimate(make_context(item_bank, [], [], theta=1.7)).theta
@@ -760,7 +760,7 @@ class TestMAPEstimator:
       sizes.append(theta.size)
       return normal(theta)
 
-    item_bank = ItemBank.generate_item_bank(20, seed=7)
+    item_bank = ItemBank.generate(20, rng=7)
 
     estimate = MAPEstimator(log_prior=recording_prior).estimate(
       make_context(item_bank, [0, 1, 2, 3], [True, False, True, True], theta=0.0)
@@ -916,7 +916,7 @@ class TestWarmLikelihoodEstimator:
 
     An estimator that scanned the empty score, or took the SE from the information of no items (infinite), fails.
     """
-    item_bank = ItemBank.generate_item_bank(10, seed=42)
+    item_bank = ItemBank.generate(10, rng=42)
     estimator = WarmLikelihoodEstimator()
 
     estimate = estimator.estimate(make_context(item_bank, [], [], theta=1.25, se=0.8))
@@ -1062,7 +1062,7 @@ class TestWarmLikelihoodEstimator:
     including those whose likelihood is maximized at the search bound: an earlier one-step
     correction (MLE + J / (2 I^2)) returned about 2670 for the pattern 00010 on this bank.
     """
-    item_bank = ItemBank.generate_item_bank(100, seed=0)
+    item_bank = ItemBank.generate(100, rng=0)
     administered_items = list(range(5))
     items = item_bank.get_items(administered_items)
     estimator = WarmLikelihoodEstimator()

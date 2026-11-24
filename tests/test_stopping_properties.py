@@ -31,7 +31,7 @@ def test_length_stopper_stops_once_max_items_are_administered(
 ) -> None:
   """A length stopper that stops one item early or late, or because the bank ran out, fails."""
   assume(administered_count <= bank_size)
-  bank = ItemBank.generate_item_bank(bank_size, seed=123)
+  bank = ItemBank.generate(bank_size, rng=123)
   stopper = MaxLengthStopper(max_items)
   administered = list(range(administered_count))
 
@@ -51,7 +51,7 @@ class FixedStopper(BaseStopper):
     return self.holds
 
 
-RULE_BANK = ItemBank.generate_item_bank(12, seed=0)
+RULE_BANK = ItemBank.generate(12, rng=0)
 
 
 @given(
@@ -97,7 +97,7 @@ CI_SETTINGS = settings(max_examples=25, deadline=None)
 
 @given(
   params=st.integers(min_value=4, max_value=12).flatmap(
-    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate_item_bank(n, seed=seed))
+    lambda n: st.integers(min_value=0, max_value=999_999).map(lambda seed: ItemBank.generate(n, rng=seed))
   ),
   theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
   confidence=st.floats(0.5, 0.99, allow_nan=False, allow_infinity=False),

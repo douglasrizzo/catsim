@@ -276,17 +276,7 @@ class CatEngine:
     if not isinstance(response, (bool, numpy.bool_)):
       msg = f"response must be a bool, got {type(response).__name__} {response!r}"
       raise TypeError(msg)
-    try:
-      item_id = operator.index(item_id)
-    except TypeError:
-      msg = f"item_id must be an integer, got {type(item_id).__name__} {item_id!r}"
-      raise TypeError(msg) from None
-    if item_id < 0 or item_id >= self._item_bank.n_items:
-      msg = f"Invalid item index {item_id}. Must be between 0 and {self._item_bank.n_items - 1}"
-      raise ValueError(msg)
-    if item_id in state.administered_item_ids:
-      msg = f"Item {item_id} has already been administered in this session"
-      raise ValueError(msg)
+    item_id = self._checked_item(state, item_id)
 
     response = bool(response)
     current = self._step_context(state, context)
@@ -346,8 +336,38 @@ class CatEngine:
     item_id = self.select_next(state, context)
     if item_id is None:
       return CatStepResult(session=state.snapshot(), selected_item_id=None, response=None)
+    # checked before the provider is asked: a live provider shows the item to an examinee
+    item_id = self._checked_item(state, item_id)
     response = response_provider.answer(self._item_bank, item_id, state.snapshot(), context.rng)
     return self.apply_response(state, item_id, response, context)
+
+  def _checked_item(self, state: CatSessionState, item_id: int) -> int:
+    """Return ``item_id`` as an int, raising unless it is an item of the bank the session has not had.
+
+    Returns
+    -------
+    int
+        The item index.
+
+    Raises
+    ------
+    TypeError
+        If ``item_id`` is not an integer.
+    ValueError
+        If ``item_id`` is not an index of the bank, or the session has already had the item.
+    """
+    try:
+      item_id = operator.index(item_id)
+    except TypeError:
+      msg = f"item_id must be an integer, got {type(item_id).__name__} {item_id!r}"
+      raise TypeError(msg) from None
+    if item_id < 0 or item_id >= self._item_bank.n_items:
+      msg = f"Invalid item index {item_id}. Must be between 0 and {self._item_bank.n_items - 1}"
+      raise ValueError(msg)
+    if item_id in state.administered_item_ids:
+      msg = f"Item {item_id} has already been administered in this session"
+      raise ValueError(msg)
+    return item_id
 
   def run_session(
     self,

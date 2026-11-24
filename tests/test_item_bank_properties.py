@@ -23,7 +23,7 @@ def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.n
 
   Passing every peak to irt.information evaluates each peak against every item, an n x n matrix.
   """
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   expected = list(starmap(irt.information, zip(irt.max_info_theta(params), params, strict=True)))
 
   np.testing.assert_allclose(bank.max_info_thetas, irt.max_info_theta(params), rtol=1e-12)
@@ -34,7 +34,7 @@ def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.n
 @BANK_SETTINGS
 def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None:
   """A four-column matrix is stored unchanged; completing or reordering columns it already has would change it."""
-  np.testing.assert_array_equal(ItemBank(params, validate=True).items, params)
+  np.testing.assert_array_equal(ItemBank(params).items, params)
 
 
 @given(
@@ -93,12 +93,12 @@ def test_three_columns_are_read_as_a_b_and_c(three_pl: np.ndarray) -> None:
 @given(
   n=st.integers(min_value=12, max_value=80),
   seed=st.integers(min_value=0, max_value=999_999),
-  itemtype=st.sampled_from(["1PL", "2PL", "3PL", "4PL"]),
+  model=st.sampled_from(["1PL", "2PL", "3PL", "4PL"]),
 )
 @BANK_SETTINGS
-def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, itemtype: str) -> None:
+def test_generate_gives_n_valid_items(n: int, seed: int, model: str) -> None:
   """Every model and seed gives n items that pass validation; an invalid draw (a <= 0, c >= d) would raise here."""
-  bank = ItemBank.generate_item_bank(n, itemtype=itemtype, seed=seed, validate=True)
+  bank = ItemBank.generate(n, model=model, rng=seed)
   assert bank.n_items == n
 
 
@@ -111,17 +111,21 @@ def test_test_information_sums_every_item_by_default(params: np.ndarray, theta: 
   """Without item indices the test information sums the information of every item; a default subset leaves some out."""
   expected = sum(float(irt.information(theta, item)) for item in params)
 
-  assert ItemBank(params, validate=True).test_information(theta) == pytest.approx(expected, rel=1e-12)
+  assert ItemBank(params).test_information(theta) == pytest.approx(expected, rel=1e-12)
 
 
 @given(params=item_params_matrix(min_items=3, max_items=12), data=st.data())
 @BANK_SETTINGS
-def test_get_items_preserves_row_order(params: np.ndarray, data) -> None:
-  n = params.shape[0]
-  k = data.draw(st.integers(min_value=1, max_value=n))
-  indices = list(range(k))
-  bank = ItemBank(params, validate=True)
-  subset = bank.get_items(indices)
+def test_get_items_gives_one_row_per_index_in_order(params: np.ndarray, data: st.DataObject) -> None:
+  """A tuple of indices, in any order, repeated or empty, gives row k = the parameters of item indices[k].
+
+  Indexing the matrix with the tuple itself reads (1, 2) as one parameter and () as every item, and sorting or
+  deduplicating the indices reorders or drops rows.
+  """
+  indices = tuple(data.draw(st.lists(st.integers(0, params.shape[0] - 1), max_size=8)))
+
+  subset = ItemBank(params).get_items(indices)
+
   assert subset.shape == (len(indices), 4)
-  for row, idx in enumerate(indices):
-    assert np.allclose(subset[row], params[idx])
+  for row, index in zip(subset, indices, strict=True):
+    np.testing.assert_array_equal(row, params[index])

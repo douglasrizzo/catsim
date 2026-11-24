@@ -59,7 +59,7 @@ class SimulatedResponseProvider:
       msg = "true_theta is required to simulate responses"
       raise ValueError(msg)
 
-    item = item_bank.get_item(item_id)
+    item = item_bank[item_id]
     probability = icc(session.true_theta, item)
     return bool(probability >= rng.uniform())
 

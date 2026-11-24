@@ -34,7 +34,7 @@ def test_select_next_returns_unseen_item_within_bank(
 ) -> None:
   n = params.shape[0]
   assume(administered_prefix < n - 1)
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   engine = CatEngine(
     bank,
     FixedPointInitializer(0.0),

@@ -31,7 +31,7 @@ def rng() -> np.random.Generator:
 @pytest.fixture
 def item_bank() -> ItemBank:
   """Provide a deterministic item bank for tests."""
-  return ItemBank.generate_item_bank(50, seed=42)
+  return ItemBank.generate(50, rng=42)
 
 
 @pytest.fixture

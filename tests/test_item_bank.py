@@ -47,19 +47,17 @@ class TestItemBankCreation:
     ):
       ItemBank(np.ones(shape))
 
-  @pytest.mark.parametrize("validate", [True, False])
-  def test_rejects_a_matrix_with_more_than_four_columns(self, validate: bool) -> None:
+  def test_rejects_a_matrix_with_more_than_four_columns(self) -> None:
     """A bank saved with the old fifth exposure-rate column raises and says how to drop it, instead of being misread."""
     items = np.array([[1.0, 0.0, 0.1, 0.95, 0.3]])
 
     with pytest.raises(ValueError, match=r"5 columns.*items\[:, :4\]"):
-      ItemBank(items, validate=validate)
+      ItemBank(items)
 
-  @pytest.mark.parametrize("validate", [True, False])
-  def test_rejects_a_matrix_without_columns(self, validate: bool) -> None:
+  def test_rejects_a_matrix_without_columns(self) -> None:
     """An (n, 0) matrix raises at construction instead of failing at first use with an IndexError."""
     with pytest.raises(ValueError, match="0 columns"):
-      ItemBank(np.empty((3, 0)), validate=validate)
+      ItemBank(np.empty((3, 0)))
 
   def test_keeps_its_own_float_copy_of_the_parameters(self) -> None:
     """Editing the caller's matrix later must not change a validated bank or leave its cached values stale.
@@ -81,20 +79,16 @@ class TestItemBankCreation:
     [
       pytest.param(lambda bank: bank.items, (0, 1), id="items"),
       pytest.param(lambda bank: bank.difficulty, 0, id="difficulty"),
-      pytest.param(lambda bank: bank.get_item(0), 1, id="get_item"),
       pytest.param(operator.itemgetter(0), 1, id="getitem"),
     ],
   )
-  @pytest.mark.parametrize("validate", [True, False])
-  def test_parameters_are_read_only(
-    self, view: Callable[[ItemBank], np.ndarray], index: int | tuple[int, int], validate: bool
-  ) -> None:
-    """Writing into the parameters raises and leaves the bank alone, validated or not.
+  def test_parameters_are_read_only(self, view: Callable[[ItemBank], np.ndarray], index: int | tuple[int, int]) -> None:
+    """Writing into the parameters raises and leaves the bank alone.
 
     The arrays used to be writable, so a write changed the difficulty behind the cached max_info_thetas, model and
     strata.
     """
-    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]), validate=validate)
+    bank = ItemBank(np.array([[1.0, 0.5, 0.0, 1.0], [1.3, -0.2, 0.0, 1.0]]))
 
     with pytest.raises(ValueError, match="read-only"):
       view(bank)[index] = 99.0
@@ -153,23 +147,9 @@ class TestItemBankCreation:
     with pytest.raises(ValueError, match="read-only"):
       array(copied)[0] = 99.0
 
-  def test_validation_enabled_by_default(self) -> None:
-    """A bank is validated unless told otherwise, so a = -1 raises instead of being accepted."""
-    items = np.array([[-1.0, 0.0, 0.0, 1.0]])
-
-    with pytest.raises(ValueError, match="discrimination <= 0"):
-      ItemBank(items)
-
-  def test_validation_can_be_disabled(self) -> None:
-    """With validate=False the parameter checks are skipped, so a bank with a = -1 is built instead of raising."""
-    items = np.array([[-1.0, 0.0, 0.0, 1.0]])
-
-    bank = ItemBank(items, validate=False)
-    assert bank.n_items == 1
-
 
 class TestItemBankValidation:
-  """Tests for the parameter checks a bank runs when validate is True."""
+  """Tests for the parameter checks a bank runs when it is built."""
 
   def test_accepts_parameters_on_the_edges_of_their_ranges(self) -> None:
     """A small positive a, c = 0 and d = 1 are valid; a strict comparison in the wrong place would reject them."""
@@ -258,76 +238,92 @@ class TestItemBankValidation:
 
 
 class TestItemBankGenerate:
-  """Tests for ItemBank.generate() factory method."""
+  """Tests for ItemBank.generate."""
 
-  def test_generate_4pl(self) -> None:
-    """Test generating 4PL item bank."""
-    bank = ItemBank.generate(50, item_type="4PL", seed=42)
+  @pytest.mark.parametrize(
+    ("model", "fixed"),
+    [
+      pytest.param(IrtModel.PL1, {0: 1.0, 2: 0.0, 3: 1.0}, id="1PL"),
+      pytest.param(IrtModel.PL2, {2: 0.0, 3: 1.0}, id="2PL"),
+      pytest.param(IrtModel.PL3, {3: 1.0}, id="3PL"),
+      pytest.param(IrtModel.PL4, {}, id="4PL"),
+    ],
+  )
+  def test_a_model_draws_only_the_parameters_it_varies(self, model: IrtModel, fixed: dict[int, float]) -> None:
+    """The parameters a model leaves out are a = 1, c = 0 and d = 1, and the bank is of that model.
 
-    assert bank.n_items == 50
-    assert bank.model == IrtModel.PL4
-    # Check distributions are reasonable
-    assert 0.5 < np.mean(bank.discrimination) < 2.0
-    assert -2 < np.mean(bank.difficulty) < 2
-    assert np.min(bank.pseudo_guessing) >= 0
-    assert 0.94 <= np.min(bank.upper_asymptote) <= 1.0
+    Drawing c for a 2PL bank, or leaving d at 1 for a 4PL bank, gives a bank of another model.
+    """
+    bank = ItemBank.generate(50, model=model, rng=42)
 
-  def test_generate_3pl(self) -> None:
-    """Test generating 3PL item bank."""
-    bank = ItemBank.generate(30, item_type="3PL", seed=42)
+    assert bank.model is model
+    for column, value in fixed.items():
+      np.testing.assert_array_equal(bank.items[:, column], value)
 
-    assert bank.n_items == 30
-    assert bank.model == IrtModel.PL3
-    assert np.allclose(bank.upper_asymptote, 1.0)
-    assert np.any(bank.pseudo_guessing > 0)
+  def test_parameters_follow_the_documented_distributions(self) -> None:
+    """Over 5,000 4PL items each parameter has the mean and standard deviation of its distribution.
 
-  def test_generate_2pl(self) -> None:
-    """Test generating 2PL item bank."""
-    bank = ItemBank.generate(20, item_type="2PL", seed=42)
+    The discrimination is N(1.2, 0.25), the difficulty N(0, 1), the guessing parameter N(0.25, 0.02) and the upper
+    asymptote U(0.94, 1), whose standard deviation is 0.06 / sqrt(12); swapping a mean and a standard deviation, or
+    the bounds of d, moves them. The tolerances are about five standard errors.
+    """
+    bank = ItemBank.generate(5000, rng=1)
+    expected = [(1.2, 0.25, 0.02), (0.0, 1.0, 0.07), (0.25, 0.02, 0.002), (0.97, 0.06 / math.sqrt(12), 0.002)]
 
-    assert bank.n_items == 20
-    assert bank.model == IrtModel.PL2
-    assert np.allclose(bank.pseudo_guessing, 0.0)
-    assert np.allclose(bank.upper_asymptote, 1.0)
+    for column, (mean, std, tolerance) in zip(bank.items.T, expected, strict=True):
+      assert np.mean(column) == pytest.approx(mean, abs=tolerance)
+      assert np.std(column) == pytest.approx(std, abs=tolerance)
+    assert 0.94 <= bank.upper_asymptote.min() <= bank.upper_asymptote.max() <= 1
 
-  def test_generate_1pl(self) -> None:
-    """Test generating 1PL (Rasch) item bank."""
-    bank = ItemBank.generate(15, item_type="1PL", seed=42)
+  @pytest.mark.parametrize("corr", [-0.5, 0.5])
+  def test_discrimination_and_difficulty_have_the_given_correlation(self, corr: float) -> None:
+    """Over 5,000 items the sample correlation of a and b is within 0.05 of corr; ignoring corr gives about 0."""
+    bank = ItemBank.generate(5000, model=IrtModel.PL2, corr=corr, rng=3)
 
-    assert bank.n_items == 15
-    assert bank.model == IrtModel.PL1
-    assert np.allclose(bank.discrimination, 1.0)
-    assert np.allclose(bank.pseudo_guessing, 0.0)
-    assert np.allclose(bank.upper_asymptote, 1.0)
+    assert np.corrcoef(bank.discrimination, bank.difficulty)[0, 1] == pytest.approx(corr, abs=0.05)
 
-  def test_generate_with_correlation(self) -> None:
-    """Test generating items with correlated a and b parameters."""
-    bank = ItemBank.generate(100, item_type="2PL", corr=0.5, seed=42)
+  @pytest.mark.parametrize("model", ["3pl", "3Pl", IrtModel.PL3])
+  def test_a_model_name_in_any_case_or_a_member_gives_the_same_bank(self, model: IrtModel | str) -> None:
+    """A lower- or mixed-case name and the IrtModel member give the bank "3PL" gives.
 
-    # Check that there's positive correlation
-    correlation = np.corrcoef(bank.discrimination, bank.difficulty)[0, 1]
-    assert correlation > 0.3  # Should be somewhat positive
+    A conversion that only takes upper-case names, or only plain strings, rejects them.
+    """
+    bank = ItemBank.generate(10, model=model, rng=42)
 
-  def test_generate_case_insensitive(self) -> None:
-    """Test that item_type strings are case insensitive."""
-    bank1 = ItemBank.generate(10, item_type="3pl", seed=42)
-    bank2 = ItemBank.generate(10, item_type="3PL", seed=42)
-    bank3 = ItemBank.generate(10, item_type="3Pl", seed=42)
+    assert bank.model is IrtModel.PL3
+    np.testing.assert_array_equal(bank.items, ItemBank.generate(10, model="3PL", rng=42).items)
 
-    assert bank1.model == bank2.model == bank3.model == IrtModel.PL3
+  @pytest.mark.parametrize("model", ["5PL", "pl1", 3])
+  def test_an_unknown_model_raises_and_lists_the_models(self, model: object) -> None:
+    """An unknown name or a non-string raises ValueError echoing what was passed and listing the four models.
 
-  def test_generate_invalid_type_raises(self) -> None:
-    """Test that invalid item_type raises ValueError."""
-    with pytest.raises(ValueError, match="'5PL' is not a valid IrtModel"):
-      ItemBank.generate(10, item_type="5PL")
+    Converting with IrtModel(model.upper()) alone echoes "PL1" for "pl1" and raises AttributeError for 3.
+    """
+    with pytest.raises(ValueError, match=re.escape(f"Invalid model {model!r}; must be one of: 1PL, 2PL, 3PL, 4PL")):
+      ItemBank.generate(10, model=model)  # type: ignore[arg-type]
 
-  def test_generate_with_an_irt_model(self) -> None:
-    """An IrtModel member is accepted like its name; a conversion that only takes plain strings would reject it."""
-    bank = ItemBank.generate(10, item_type=IrtModel.PL3, seed=42)
+  def test_the_same_seed_gives_the_same_bank(self) -> None:
+    """Two calls with seed 5 give the same parameters, and seed 6 others.
 
-    assert bank.model == IrtModel.PL3
-    assert np.all(bank.pseudo_guessing > 0)
-    np.testing.assert_array_equal(bank.upper_asymptote, 1.0)
+    Drawing from NumPy's global random state, or from an unseeded generator, gives another bank on every call.
+    """
+    first = ItemBank.generate(20, rng=5).items
+
+    np.testing.assert_array_equal(ItemBank.generate(20, rng=5).items, first)
+    assert not np.array_equal(ItemBank.generate(20, rng=6).items, first)
+
+  def test_a_generator_gives_the_bank_of_its_seed_and_is_advanced(self) -> None:
+    """A generator built from seed 5 gives the seed-5 bank, and the next call on it another bank.
+
+    Ignoring the generator gives the seed-0 bank; drawing from a copy of it gives the same bank twice.
+    """
+    generator = np.random.default_rng(5)
+
+    first = ItemBank.generate(20, rng=generator).items
+    second = ItemBank.generate(20, rng=generator).items
+
+    np.testing.assert_array_equal(first, ItemBank.generate(20, rng=5).items)
+    assert not np.array_equal(second, first)
 
   def test_generate_redraws_non_positive_discriminations(self) -> None:
     """A negative draw is redrawn rather than shifting every discrimination.
@@ -339,7 +335,7 @@ class TestItemBankGenerate:
     _, raw_a = rng.multivariate_normal([0, 1.2], [[1, 0], [0, 0.25**2]], 500).T
     assert (raw_a <= 0).sum() == 1
 
-    bank = ItemBank.generate_item_bank(500, itemtype="2PL", seed=876)
+    bank = ItemBank.generate(500, model="2PL", rng=876)
 
     assert bank.discrimination.min() > 0
     np.testing.assert_array_equal(bank.discrimination[raw_a > 0], raw_a[raw_a > 0])
@@ -400,41 +396,6 @@ class TestItemBankProperties:
 class TestItemBankMethods:
   """Tests for ItemBank methods."""
 
-  def test_get_item(self) -> None:
-    """Test getting a single item by index."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    item = bank.get_item(1)
-    assert len(item) == 4
-    assert item[0] == pytest.approx(1.5)  # discrimination
-    assert item[1] == pytest.approx(1.0)  # difficulty
-
-  def test_get_item_out_of_bounds_raises(self) -> None:
-    """Test that out of bounds index raises IndexError."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    with pytest.raises(IndexError, match="out of bounds"):
-      bank.get_item(5)
-
-    with pytest.raises(IndexError, match="out of bounds"):
-      bank.get_item(-1)
-
-  def test_get_items(self) -> None:
-    """Test getting multiple items by indices."""
-    items = np.array([
-      [1.0, 0.0, 0.0, 1.0],
-      [1.5, 1.0, 0.1, 1.0],
-      [0.8, -0.5, 0.05, 1.0],
-    ])
-    bank = ItemBank(items)
-
-    selected = bank.get_items([0, 2])
-    assert selected.shape == (2, 4)
-    assert selected[0, 0] == pytest.approx(1.0)
-    assert selected[1, 0] == pytest.approx(0.8)
-
   @pytest.mark.parametrize(
     ("method", "expected"),
     [
@@ -482,33 +443,3 @@ class TestItemBankMethods:
     logistic = 1 / (1 + math.exp(-1.0))
 
     assert bank.test_information(0.0, item_indices=[0, 2]) == pytest.approx(0.25 + logistic * (1 - logistic), rel=1e-12)
-
-
-class TestItemBankDunderMethods:
-  """Tests for ItemBank dunder methods."""
-
-  def test_getitem_int(self) -> None:
-    """Test __getitem__ with integer index."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0]])
-    bank = ItemBank(items)
-
-    item = bank[1]
-    assert item[0] == pytest.approx(1.5)
-
-  def test_getitem_slice(self) -> None:
-    """Test __getitem__ with slice."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0], [0.8, -0.5, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    subset = bank[0:2]
-    assert subset.shape == (2, 4)
-
-  def test_getitem_list(self) -> None:
-    """Test __getitem__ with list of indices."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 1.0, 0.1, 1.0], [0.8, -0.5, 0.0, 1.0]])
-    bank = ItemBank(items)
-
-    subset = bank[[0, 2]]
-    assert subset.shape == (2, 4)
-    assert subset[0, 0] == pytest.approx(1.0)
-    assert subset[1, 0] == pytest.approx(0.8)

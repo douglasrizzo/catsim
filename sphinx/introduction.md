@@ -94,7 +94,7 @@ Both of these functions are graphically represented in the following figure. It 
     from catsim import ItemBank
     from catsim.plot import item_curve, PlotType
 
-    item_bank = ItemBank.generate_item_bank(1)
+    item_bank = ItemBank.generate(1)
     item = item_bank[0]
     item_curve(a=item[0], b=item[1], c=item[2], d=item[3], ptype=PlotType.BOTH)
     plt.show()
@@ -120,19 +120,19 @@ Since the denominator in the calculation of the $SEE$ is $I(\theta)$, it is clea
 
 ### The Item Matrix
 
-In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The item matrix has four columns, which hold the parameters $a$, $b$, $c$ and $d$, in this order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing parameters are filled in with $a = 1$, $c = 0$ and $d = 1$. An {py:class}`catsim.item_bank.ItemBank` holds an item matrix, and its {py:meth}`~catsim.item_bank.ItemBank.generate_item_bank` method generates one as follows:
+In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The item matrix has four columns, which hold the parameters $a$, $b$, $c$ and $d$, in this order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing parameters are filled in with $a = 1$, $c = 0$ and $d = 1$. An {py:class}`catsim.item_bank.ItemBank` holds an item matrix, and its {py:meth}`~catsim.item_bank.ItemBank.generate` method generates one as follows:
 
 ```pycon
 >>> from catsim import ItemBank
->>> ItemBank.generate_item_bank(5, "1PL")
+>>> ItemBank.generate(5, "1PL")
 ItemBank(n_items=5, model=1PL)
->>> ItemBank.generate_item_bank(5, "2PL")
+>>> ItemBank.generate(5, "2PL")
 ItemBank(n_items=5, model=2PL)
->>> ItemBank.generate_item_bank(5, "3PL")
+>>> ItemBank.generate(5, "3PL")
 ItemBank(n_items=5, model=3PL)
->>> ItemBank.generate_item_bank(5, "4PL")
+>>> ItemBank.generate(5, "4PL")
 ItemBank(n_items=5, model=4PL)
->>> ItemBank.generate_item_bank(5, "3PL", corr=0.5).items.shape
+>>> ItemBank.generate(5, "3PL", corr=0.5).items.shape
 (5, 4)
 ```
 

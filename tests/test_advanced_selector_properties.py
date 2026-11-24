@@ -37,7 +37,7 @@ def bank_with_clusters(draw: DrawFn, min_items: int = 4, max_items: int = 16) ->
   n = params.shape[0]
   n_clusters = draw(st.integers(min_value=1, max_value=max(1, n // 2)))
   clusters = draw(st.lists(st.integers(min_value=0, max_value=n_clusters - 1), min_size=n, max_size=n))
-  return ItemBank(params, validate=True), clusters
+  return ItemBank(params), clusters
 
 
 @composite
@@ -50,7 +50,7 @@ def bank_with_test_size(
   params = draw(item_params_matrix(min_items=min_items, max_items=max_items))
   n = params.shape[0]
   test_size = draw(st.integers(min_value=1, max_value=n))
-  return ItemBank(params, validate=True), test_size
+  return ItemBank(params), test_size
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ def test_linear_selector_returns_first_non_administered_in_order(
   n = params.shape[0]
   assume(administered_count < n)
   indexes = list(range(n))
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   rng = np.random.default_rng(seed)
   selector = LinearSelector(indexes)
   administered = indexes[:administered_count]
@@ -94,7 +94,7 @@ def test_linear_selector_raises_when_all_indexes_administered(
 ) -> None:
   n = params.shape[0]
   indexes = list(range(n))
-  bank = ItemBank(params, validate=True)
+  bank = ItemBank(params)
   rng = np.random.default_rng(seed)
   selector = LinearSelector(indexes)
   import pytest
