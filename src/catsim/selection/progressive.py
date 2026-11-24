@@ -1,6 +1,7 @@
 """Progressive and proportional selector implementations."""
 
 import numpy
+from typing_extensions import override
 
 from ..context import StepContext
 from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_best, remaining
@@ -102,6 +103,7 @@ class ProgressiveSelector(BaseSelector):
     self._acceleration = _check_acceleration(acceleration)
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return (
@@ -124,6 +126,7 @@ class ProgressiveSelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the largest blend of a random draw and its scaled information.
 
@@ -195,6 +198,7 @@ class ProportionalSelector(BaseSelector):
     self._acceleration = _check_acceleration(acceleration)
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return (
@@ -217,6 +221,7 @@ class ProportionalSelector(BaseSelector):
     """Return the maximum exposure rate accepted by the selector."""
     return self._r_max
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return an available item drawn with probability proportional to its information raised to the schedule's power.
 

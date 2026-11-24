@@ -17,6 +17,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Education :: Testing",
     "Topic :: Scientific/Engineering",
     "Typing :: Typed",
@@ -32,15 +33,22 @@ keywords = [
 name = "catsim"
 version = "0.21.0"
 description = "Computerized adaptive testing toolkit"
+# The CI test job's lowest-direct entry installs exactly these floors. numpy 2.0 changed the C ABI,
+# so scipy releases before 1.13 do not work with it.
 dependencies = [
-    "scipy",
-    "matplotlib",
-    "tqdm",
-    "numpy",
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "tqdm>=4.64",
+    "typing-extensions>=4.4",
 ]
 requires-python = ">=3.11"
 readme = "README.md"
 license = "BSD-3-Clause"
+
+[project.optional-dependencies]
+# matplotlib before 3.10.7 warns about deprecated pyparsing 3.3 names on import, which the tests
+# turn into an error.
+plot = ["matplotlib>=3.10.7"]  # catsim.plot, the only module that imports matplotlib
 
 [project.urls]
 Documentation = "https://douglasrizzo.com.br/catsim"
@@ -74,9 +82,11 @@ select = [
     "A",
     "BLE",
     "C4",
+    "C90",  # McCabe complexity, at most 10 (lint.mccabe below)
     "EM",
     "ERA",
     "EXE",
+    "FBT",  # a boolean flag is keyword-only, so a call reads flag=True rather than a bare True
     "G",
     "PIE",
     "Q",
@@ -97,6 +107,7 @@ select = [
     "PLR01",
     "PLR02",
     "PLR04",
+    "PLR09",  # too many arguments (at most 6), locals, statements, branches or returns
     "PLR1",
     "PLR2",
     "PLR5",
@@ -116,6 +127,8 @@ ignore = [
   "DOC502",  # numpydoc lists the exceptions a function lets propagate from its callees
   "E111",
   "E114",
+  "PLR0912",  # too many branches: C901 already bounds the branching
+  "PLR0917",  # too many positional arguments: left until the strategy and constructor signatures settle
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
   "RUF201",  # Keep rule codes in this config rather than migrating to rule names
 ]
@@ -126,6 +139,12 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 6
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
@@ -141,12 +160,13 @@ ignore-one-line-docstrings = true
 [tool.ruff.lint.per-file-ignores]
 "src/catsim/typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
 "notebooks/*" = ["T20"]  # tutorials print their results
-"src/**" = ["PT"]  # pytest style; PT reads plot.test_progress as a test
 "tests/*" = [
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
   "D",        # Test docstrings name what the test checks (AGENTS.md), with no numpydoc sections
   "DOC",      # Test and fixture docstrings have no Returns or Raises sections
+  "FBT",      # Test helpers and parametrized tests take booleans positionally
+  "PLR0913",  # make_context takes each of StepContext's eight fields
   "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
@@ -175,6 +195,7 @@ dev = [
     "hypothesis>=6.127.0",
     "import-linter>=2.17",
     "ipykernel>=7.1.0",
+    "matplotlib>=3.10.7",  # the plot extra: tests/test_plot.py and the notebooks
     "nbmake>=1.5.5",
     "pre-commit>=4.5.1",
     "pylint>=4.0.5",
@@ -259,8 +280,7 @@ include = ["src/catsim"]
 
 [tool.ty.rules]
 # ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (NumPy and
-# SciPy stubs leak Any into return values), and missing-override-decorator until the strategies use
-# typing.override.
+# SciPy stubs leak Any into return values).
 possibly-unresolved-reference = "error"
 missing-type-argument = "error"
 blanket-ignore-comment = "error"
@@ -272,6 +292,8 @@ unused-type-ignore-comment = "error"
 # A function tested for truth instead of called; both rules only warn by default.
 redundant-condition = "error"
 truthiness-test-of-callable = "error"
+# Every override carries @override, so a base-class rename fails the check at each orphaned override.
+missing-override-decorator = "error"
 
 [tool.uv]
 # soupsieve 4 (the first release without its ReDoS) needs Python >= 3.11.5. Resolving the lock
@@ -324,7 +346,7 @@ type = "layers"
 containers = ["catsim"]
 exhaustive = true  # every new top-level module must be placed in a layer
 layers = [
-  "plot",  # reads SimulationResult
+  "plot",  # draws items and sessions; nothing in catsim imports it
   "simulation",
   "engine",
   "selection | estimation | initialization | stopping",  # "|": siblings that never import each other

@@ -24,7 +24,8 @@ These methods can either be used in a standalone fashion to power other software
 
 ## Installation
 
-Install it using `pip install catsim`.
+Install it using `pip install catsim`. The plotting functions in `catsim.plot` need matplotlib,
+which the plot extra installs: `pip install 'catsim[plot]'`.
 
 ## Basic Usage
 
@@ -92,7 +93,7 @@ uv sync --group docs
 
 ## Compatibility
 
-_catsim_ is compatible and tested against Python 3.11, 3.12, 3.13, and 3.14.
+_catsim_ is compatible and tested against Python 3.11, 3.12, 3.13, 3.14, and 3.15.
 
 ## Important links
 

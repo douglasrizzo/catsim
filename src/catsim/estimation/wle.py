@@ -10,6 +10,7 @@ import numpy.typing as npt
 from scipy.integrate import IntegrationWarning, quad
 from scipy.optimize import brentq
 from scipy.special import expit
+from typing_extensions import override
 
 from .. import irt
 from ..context import Estimate
@@ -17,7 +18,7 @@ from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
-  from collections.abc import Sequence
+  from collections.abc import Callable, Sequence
 
   from ..context import StepContext
   from ..typing import FloatArray
@@ -70,6 +71,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument."""
     return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
@@ -93,15 +95,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
         The likelihood score plus :math:`J(\theta) / [2 I(\theta)]`, one value per ``theta``.
     """
     thetas = numpy.atleast_1d(numpy.asarray(theta, dtype=float))[:, None]
-    a, b, c, d = items[:, 0], items[:, 1], items[:, 2], items[:, 3]
-    z = a * (thetas - b)
-    # The logistic and its complement both come from the logit, so Q and P Q stay exact where P
-    # rounds to 1 instead of losing their digits to 1 - P
-    logistic, complement = expit(z), expit(-z)
-    p = c + (d - c) * logistic
-    q = (1.0 - d) + (d - c) * complement
-    dp = a * (d - c) * logistic * complement
-    d2p = a * dp * (complement - logistic)
+    p, q, dp, d2p = _response_curves(thetas, items)
     pq = numpy.maximum(p * q, numpy.finfo(float).tiny)
 
     # u - P is Q for a correct response and -P for an incorrect one
@@ -112,6 +106,7 @@ class WarmLikelihoodEstimator(BaseEstimator):
     correction = numpy.divide(j, 2.0 * info, out=numpy.zeros_like(j), where=info > 0.0)
     return score + correction
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.
 
@@ -166,17 +161,38 @@ class WarmLikelihoodEstimator(BaseEstimator):
     if len(candidates) == 1:
       theta_hat = candidates[0]
     else:
-      # The modified score is the derivative of the weighted log-likelihood, so integrating it
-      # from the lower bound ranks the candidates by weighted likelihood.
-      heights = []
-      for candidate in candidates:
-        # With full_output, quad returns its convergence warning instead of raising it
-        height, _, info, *message = quad(score, low, candidate, limit=200, full_output=1)
-        heights.append(height)
-        evaluations += info["neval"]
-        if message:
-          warnings.warn(message[0], IntegrationWarning, stacklevel=2)
-      theta_hat = candidates[int(numpy.argmax(heights))]
+      theta_hat, ranking_evaluations = _most_likely(score, low, candidates)
+      evaluations += ranking_evaluations
 
     theta_hat = float(theta_hat)
     return Estimate(theta=theta_hat, se=irt.see(theta_hat, items), evaluations=int(evaluations))
+
+
+def _response_curves(thetas: FloatArray, items: FloatArray) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
+  """Return P, Q and the first and second derivatives of P, for every ability against every item."""
+  a, b, c, d = items[:, 0], items[:, 1], items[:, 2], items[:, 3]
+  z = a * (thetas - b)
+  # The logistic and its complement both come from the logit, so Q and P Q stay exact where P
+  # rounds to 1 instead of losing their digits to 1 - P
+  logistic, complement = expit(z), expit(-z)
+  p = c + (d - c) * logistic
+  q = (1.0 - d) + (d - c) * complement
+  dp = a * (d - c) * logistic * complement
+  return p, q, dp, a * dp * (complement - logistic)
+
+
+def _most_likely(score: Callable[[float], float], low: float, candidates: list[float]) -> tuple[float, int]:
+  """Return the candidate of highest weighted likelihood and the score evaluations spent ranking the candidates."""
+  # The modified score is the derivative of the weighted log-likelihood, so integrating it
+  # from the lower bound ranks the candidates by weighted likelihood.
+  heights = []
+  evaluations = 0
+  for candidate in candidates:
+    # With full_output, quad returns its convergence warning instead of raising it; stacklevel 3
+    # points the warning at the caller of WarmLikelihoodEstimator.estimate.
+    height, _, info, *message = quad(score, low, candidate, limit=200, full_output=1)
+    heights.append(height)
+    evaluations += info["neval"]
+    if message:
+      warnings.warn(message[0], IntegrationWarning, stacklevel=3)
+  return candidates[int(numpy.argmax(heights))], evaluations

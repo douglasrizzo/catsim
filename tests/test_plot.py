@@ -2,40 +2,146 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-from mpl_toolkits.mplot3d import Axes3D
 
-from catsim import plot
+from catsim import CatSessionSnapshot, CatSessionState, Estimate, ItemBank, plot
 from catsim.plot import PlotType
+
+if TYPE_CHECKING:
+  from matplotlib.lines import Line2D
+
+
+def _run_python(code: str) -> subprocess.CompletedProcess[str]:
+  """Run ``code`` in a fresh interpreter, whose module cache holds nothing the test session imported."""
+  return subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
+
+
+class TestOptionalMatplotlib:
+  """Tests for matplotlib as the optional plot extra."""
+
+  def test_importing_catsim_loads_no_plotting_module(self) -> None:
+    """Importing catsim and its public modules other than catsim.plot loads neither catsim.plot nor matplotlib.
+
+    Fails if any of them imports matplotlib, even indirectly, so that ``import catsim`` breaks for users who did not
+    install the plot extra.
+    """
+    result = _run_python(
+      "import sys\n"
+      "import catsim, catsim.estimation, catsim.initialization, catsim.irt, catsim.metrics\n"
+      "import catsim.selection, catsim.stopping, catsim.typing\n"
+      "print(sorted(name for name in sys.modules if name.partition('.')[0] in {'matplotlib', 'mpl_toolkits'}"
+      " or name == 'catsim.plot'))\n"
+    )
+
+    assert (result.returncode, result.stdout) == (0, "[]\n"), result.stderr
+
+  def test_plot_without_matplotlib_names_the_extra(self) -> None:
+    """Without matplotlib, importing catsim.plot raises an ImportError that says to install catsim[plot].
+
+    Fails if the user gets matplotlib's bare ModuleNotFoundError, or an error that drops the original one.
+    """
+    result = _run_python("import sys\nsys.modules['matplotlib'] = None\nimport catsim.plot\n")
+
+    assert result.returncode == 1
+    assert "The above exception was the direct cause of the following exception" in result.stderr
+    assert result.stderr.splitlines()[-1] == (
+      "ImportError: catsim.plot needs matplotlib; install it with: pip install 'catsim[plot]'"
+    )
 
 
 class TestItemCurve:
   """Tests for item_curve()."""
 
   # A three-parameter item whose discrimination has more digits than the parameter box should show.
-  ITEM = (1.1669737841771746, -0.4321, 0.2, 1.0)
+  ITEM = np.array([1.1669737841771746, -0.4321, 0.2, 1.0])
+  A, B, C = ITEM[:3]
 
-  @pytest.mark.parametrize("ptype", list(PlotType))
-  def test_item_curve_rounds_the_parameters(self, ptype: PlotType) -> None:
+  @classmethod
+  def _icc(cls, theta: np.ndarray) -> np.ndarray:
+    """The item's characteristic curve in closed form, c + (1 - c) / (1 + exp(-a (theta - b)))."""
+    return cls.C + (1 - cls.C) / (1 + np.exp(-cls.A * (theta - cls.B)))
+
+  @classmethod
+  def _information(cls, theta: np.ndarray) -> np.ndarray:
+    """The three-parameter item's information in closed form, a^2 (P - c)^2 (1 - P) / ((1 - c)^2 P)."""
+    p = cls._icc(theta)
+    return cls.A**2 * (p - cls.C) ** 2 * (1 - p) / ((1 - cls.C) ** 2 * p)
+
+  def test_item_curve_draws_the_items_characteristic_curve(self) -> None:
+    """The curve spans four units around the difficulty and passes through (c + d) / 2 = 0.6 at it.
+
+    Fails if the parameters are read in another order than [a, b, c, d], if the curve is centred elsewhere, or if the
+    information is drawn instead.
+    """
+    ax = plot.item_curve(self.ITEM, kind=PlotType.ICC)
+    (line,) = ax.get_lines()
+    x, y = line.get_xdata(), line.get_ydata()
+
+    np.testing.assert_allclose([x[0], x[-1]], [self.B - 4, self.B + 4])
+    np.testing.assert_allclose(np.interp(self.B, x, y), 0.6)
+    np.testing.assert_allclose(y, self._icc(x))
+    assert ax.get_ylabel() == r"$P(\theta)$"
+
+  def test_item_curve_marks_the_peak_of_the_information_in_the_curves_colour(self) -> None:
+    """The information is a^2 / 6 at the difficulty, and the dot sits at Birnbaum's peak, in the curve's colour.
+
+    For d = 1 the peak is at b + log((1 + sqrt(1 + 8c)) / 2) / a. Fails if the dot is off the peak or off the curve, or
+    if it takes the next colour of the axes' cycle instead of the curve's.
+    """
+    ax = plot.item_curve(self.ITEM, kind=PlotType.IIC)
+    curve, dot = ax.get_lines()
+    x, y = curve.get_xdata(), curve.get_ydata()
+    peak = self.B + np.log((1 + np.sqrt(1 + 8 * self.C)) / 2) / self.A
+
+    np.testing.assert_allclose(np.interp(self.B, x, y), self.A**2 / 6)
+    np.testing.assert_allclose(y, self._information(x))
+    np.testing.assert_allclose(dot.get_xydata(), [[peak, self._information(peak)]])
+    assert dot.get_color() == curve.get_color()
+
+  @pytest.mark.parametrize(
+    ("kind", "max_info", "expected"),
+    [
+      ("icc", True, [[r"$P(\theta)$"]]),
+      ("iic", True, [[r"$I(\theta)$", "Maximum information"]]),
+      ("iic", False, [[r"$I(\theta)$"]]),
+      ("both", True, [[r"$P(\theta)$"], [r"$I(\theta)$", "Maximum information"]]),
+      ("both", False, [[r"$P(\theta)$"], [r"$I(\theta)$"]]),
+    ],
+  )
+  def test_item_curve_draws_the_curves_of_its_kind(self, kind: str, max_info: bool, expected: list[list[str]]) -> None:
+    """Each kind draws its own curves, the dot only with max_info, and BOTH puts the information on a second y axis.
+
+    Fails if a kind draws another curve, if max_info=False still marks the peak, or if BOTH draws both curves against
+    one y axis, whose scale cannot suit a probability and an information at once.
+    """
+    ax = plot.item_curve(self.ITEM, kind=kind, max_info=max_info)
+    assert [[line.get_label() for line in axes.get_lines()] for axes in ax.figure.axes] == expected
+
+  @pytest.mark.parametrize("kind", list(PlotType))
+  def test_item_curve_rounds_the_parameters(self, kind: PlotType) -> None:
     """The parameter box shows each parameter to three significant digits.
 
     Fails if a parameter is printed at full float precision (a = 1.1669737841771746), which made the
     box wider than the axes.
     """
-    ax = plot.item_curve(*self.ITEM, ptype=ptype)
+    ax = plot.item_curve(self.ITEM, kind=kind)
     texts = [text.get_text() for axis in ax.figure.axes for text in axis.texts]
     assert texts == ["$a = 1.17$\n$b = -0.432$\n$c = 0.2$\n$d = 1$"]
 
-  @pytest.mark.parametrize("ptype", list(PlotType))
-  def test_item_curve_parameter_box_stays_inside_the_axes_and_off_the_curves(self, ptype: PlotType) -> None:
+  @pytest.mark.parametrize("kind", list(PlotType))
+  def test_item_curve_parameter_box_stays_inside_the_axes_and_off_the_curves(self, kind: PlotType) -> None:
     """The parameter box lies within the axes and no plotted point falls under it.
 
     Fails if the box sticks out past the edge of the axes, or sits where a curve passes, as the
     information curve's tail does in the lower right corner.
     """
-    ax = plot.item_curve(*self.ITEM, ptype=ptype)
+    ax = plot.item_curve(self.ITEM, kind=kind)
     figure = ax.figure
     figure.canvas.draw()
     (annotation,) = [text for axis in figure.axes for text in axis.texts]
@@ -48,35 +154,38 @@ class TestItemCurve:
       for line in axis.get_lines():
         assert box.count_contains(line.get_transform().transform(line.get_xydata())) == 0
 
-  def test_item_curve_respects_title(self) -> None:
-    """A title passed in is set on the axes.
+  @pytest.mark.parametrize(
+    ("item", "kind", "message"),
+    [
+      (ITEM[:3], PlotType.ICC, r"one row of four parameters \[a, b, c, d\], got shape \(3,\)"),
+      (np.array([ITEM, ITEM]), PlotType.ICC, r"got shape \(2, 4\)"),
+      (ITEM, "pdf", "'pdf' is not a valid PlotType"),
+    ],
+    ids=["three-parameters", "two-items", "unknown-kind"],
+  )
+  def test_item_curve_rejects_bad_input_before_drawing(self, item: np.ndarray, kind: str, message: str) -> None:
+    """An item that is not one row of four parameters, or an unknown kind, raises before any figure exists.
 
-    Fails if the title argument is ignored.
+    Fails if a matrix of items draws one curve per item under a box that cannot show their parameters, or if a bad call
+    leaves an empty figure open behind the error.
     """
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, title="Test Item")
-    assert ax.get_title() == "Test Item"
-
-
-class TestGen3dDatasetScatter:
-  """Tests for gen3d_dataset_scatter()."""
-
-  def test_gen3d_scatter_returns_3d_axes(self, item_bank) -> None:
-    """3D dataset plots should return 3D axes."""
-    ax = plot.gen3d_dataset_scatter(item_bank)
-    assert isinstance(ax, Axes3D)
-    plt.close("all")
+    with pytest.raises(ValueError, match=message):
+      plot.item_curve(item, kind=kind)
+    assert plt.get_fignums() == []
 
 
 class TestItemExposure:
   """Tests for item_exposure()."""
 
   # Each parameter column orders the four items differently.
-  ITEMS = np.array([
-    [1.2, 0.5, 0.10, 0.95],
-    [0.8, -1.0, 0.25, 0.90],
-    [2.0, 2.0, 0.00, 1.00],
-    [1.5, 0.0, 0.15, 0.85],
-  ])
+  ITEM_BANK = ItemBank(
+    np.array([
+      [1.2, 0.5, 0.10, 0.95],
+      [0.8, -1.0, 0.25, 0.90],
+      [2.0, 2.0, 0.00, 1.00],
+      [1.5, 0.0, 0.15, 0.85],
+    ])
+  )
   RATES = np.array([0.1, 0.2, 0.3, 0.4])
 
   @pytest.mark.parametrize(
@@ -84,21 +193,21 @@ class TestItemExposure:
     [
       ("a", "Item discrimination", [0.8, 1.2, 1.5, 2.0], [0.2, 0.1, 0.4, 0.3]),
       ("b", "Item difficulty", [-1.0, 0.0, 0.5, 2.0], [0.2, 0.4, 0.1, 0.3]),
-      ("c", "Item Guessing", [0.0, 0.10, 0.15, 0.25], [0.3, 0.1, 0.4, 0.2]),
+      ("c", "Item guessing parameter", [0.0, 0.10, 0.15, 0.25], [0.3, 0.1, 0.4, 0.2]),
       ("d", "Item upper asymptote", [0.85, 0.90, 0.95, 1.00], [0.4, 0.2, 0.1, 0.3]),
     ],
   )
   def test_item_exposure_plots_rates_against_the_parameter(
     self, par: str, xlabel: str, expected_x: list[float], expected_y: list[float]
   ) -> None:
-    """The x data is the sorted parameter named on the axis, each paired with its item's exposure.
+    """The x data is the sorted parameter named on the axis, each paired with its item's exposure rate.
 
-    Fails if the x axis carries ranks (0, 1, 2, ...) under a parameter label, if an exposure is
-    paired with another item's parameter, or if a parameter reads the wrong item bank column.
+    Fails if the x axis carries ranks (0, 1, 2, ...) under a parameter label, if a rate is paired with
+    another item's parameter, or if a parameter reads the wrong item bank column.
     """
-    ax = plot.item_exposure(item_bank=self.ITEMS, exposure_rates=self.RATES, par=par)
+    ax = plot.item_exposure(self.RATES, item_bank=self.ITEM_BANK, par=par)
     (line,) = ax.get_lines()
-    assert ax.get_xlabel() == xlabel
+    assert (ax.get_xlabel(), ax.get_ylabel()) == (xlabel, "Exposure rate")
     np.testing.assert_allclose(line.get_xdata(), expected_x)
     np.testing.assert_allclose(line.get_ydata(), expected_y)
 
@@ -107,25 +216,11 @@ class TestItemExposure:
 
     Fails if the call demands an item bank it does not need, or reorders the items.
     """
-    ax = plot.item_exposure(exposure_rates=self.RATES)
+    ax = plot.item_exposure(self.RATES)
     (line,) = ax.get_lines()
     assert ax.get_xlabel() == "Items"
     np.testing.assert_array_equal(line.get_xdata(), [0, 1, 2, 3])
     np.testing.assert_allclose(line.get_ydata(), self.RATES)
-
-  def test_item_exposure_from_simulation_result(self, simulation_result) -> None:
-    """A SimulationResult supplies the exposure of each item: its share of sessions that gave it.
-
-    Fails if the plot draws anything other than the result's per-item exposure, in item order.
-    """
-    n_items = simulation_result.item_bank.n_items
-    administered = np.concatenate([session.administered_items for session in simulation_result.sessions])
-    expected = np.bincount(administered, minlength=n_items) / len(simulation_result.sessions)
-
-    ax = plot.item_exposure(simulation=simulation_result)
-    (line,) = ax.get_lines()
-    np.testing.assert_array_equal(line.get_xdata(), np.arange(n_items))
-    np.testing.assert_allclose(line.get_ydata(), expected)
 
   def test_item_exposure_histogram(self) -> None:
     """The histogram counts the items in each exposure bin, with at least three bins.
@@ -133,112 +228,174 @@ class TestItemExposure:
     Rates [0, 0, 0.5, 1] in three equal bins over [0, 1] give counts [2, 1, 1]. Fails if the histogram
     is drawn from other data or with another number of bins.
     """
-    ax = plot.item_exposure(exposure_rates=np.array([0.0, 0.0, 0.5, 1.0]), hist=True)
+    ax = plot.item_exposure(np.array([0.0, 0.0, 0.5, 1.0]), hist=True)
     assert [patch.get_height() for patch in ax.patches] == [2, 1, 1]
 
   @pytest.mark.parametrize(
-    ("kwargs", "message"),
+    ("rates", "kwargs", "message"),
     [
-      ({}, "Exposure data must be passed"),
-      ({"item_bank": ITEMS}, "Exposure data must be passed"),
-      ({"exposure_rates": RATES, "par": "b"}, "item_bank must be passed"),
-      ({"item_bank": ITEMS, "exposure_rates": RATES[:3]}, "3 values but the item bank has 4"),
-      ({"item_bank": ITEMS, "exposure_rates": RATES, "par": "e"}, "Unsupported parameter 'e'"),
+      (RATES, {"par": "b"}, "item_bank must be passed"),
+      (RATES, {"item_bank": ITEM_BANK, "par": "b", "hist": True}, "pass par='b' or hist=True, not both"),
+      (RATES[:3], {"item_bank": ITEM_BANK}, "3 values but the item bank has 4"),
+      (RATES, {"item_bank": ITEM_BANK, "par": "e"}, "Unsupported parameter 'e'"),
+      (np.array([RATES, RATES]), {}, r"one rate per item, got an array of shape \(2, 4\)"),
     ],
-    ids=["nothing", "item-bank-alone", "par-without-item-bank", "length-mismatch", "unknown-par"],
+    ids=["par-without-item-bank", "par-with-hist", "length-mismatch", "unknown-par", "two-dimensional-rates"],
   )
-  def test_item_exposure_rejects_incomplete_inputs(self, kwargs: dict, message: str) -> None:
+  def test_item_exposure_rejects_inputs_that_cannot_give_a_true_plot(
+    self, rates: np.ndarray, kwargs: dict, message: str
+  ) -> None:
     """Inputs that cannot give a true plot raise a ValueError before any figure is created.
 
-    Fails if an item bank alone plots zero exposure for every item, if a parameter is plotted
-    without the item bank that holds it, if rates and items of different lengths are paired, if an
-    unknown parameter is accepted, or if a figure is left open behind the error.
+    Fails if a parameter is plotted without the item bank that holds it, if a histogram silently ignores the parameter
+    it was given, if rates and items of different lengths are paired, if an unknown parameter or a matrix of rates is
+    accepted, or if a figure is left open behind the error.
     """
     with pytest.raises(ValueError, match=message):
-      plot.item_exposure(**kwargs)
+      plot.item_exposure(rates, **kwargs)
     assert plt.get_fignums() == []
 
-  @pytest.mark.parametrize("extra", ["item_bank", "exposure_rates"])
-  def test_item_exposure_rejects_data_beside_a_simulation(self, simulation_result, extra: str) -> None:
-    """A SimulationResult already holds the item bank and exposure, so passing either again is an error.
 
-    Fails if the extra argument is silently ignored in favour of the simulation's own data.
+class TestSessionProgress:
+  """Tests for session_progress()."""
+
+  # Three items whose difficulties differ from every estimate and standard error below.
+  ITEM_BANK = ItemBank(np.array([[1.0, -0.5, 0.0, 1.0], [1.0, 0.3, 0.0, 1.0], [1.0, 1.2, 0.0, 1.0]]))
+  # The initial estimate has an infinite standard error, as CatEngine.start_session records it.
+  SESSION = CatSessionState(
+    session_id="examinee",
+    estimates=[Estimate(0.0, np.inf, 0), Estimate(0.8, 1.1, 3), Estimate(0.5, 0.9, 4), Estimate(0.6, 0.7, 5)],
+    true_theta=0.4,
+    administered_items=[2, 0, 1],
+    responses=[True, False, True],
+  )
+
+  @staticmethod
+  def _lines(ax) -> dict[str, Line2D]:
+    """Return the lines of the plot and of its twin axes, by label."""
+    return {line.get_label(): line for axes in ax.figure.axes for line in axes.get_lines()}
+
+  @pytest.mark.parametrize("session", [SESSION, SESSION.snapshot()], ids=["state", "snapshot"])
+  def test_session_progress_plots_the_recorded_estimates_at_each_test_length(
+    self, session: CatSessionState | CatSessionSnapshot
+  ) -> None:
+    """After k items the plot shows the k-th estimate and standard error the session recorded, and the k-th item.
+
+    Fails if an estimate is paired with another number of items, if the standard error is recomputed rather than read
+    from the session (what the stopper judged), if the initial estimate's infinite error is drawn, if difficulties are
+    taken in bank order rather than administration order, or if a session snapshot cannot be plotted.
     """
-    kwargs = {"item_bank": self.ITEMS, "exposure_rates": self.RATES}
-    with pytest.raises(ValueError, match="not both"):
-      plot.item_exposure(simulation=simulation_result, **{extra: kwargs[extra]})
+    ax = plot.session_progress(session, self.ITEM_BANK)
+    lines = self._lines(ax)
 
+    estimate = lines[r"Ability estimate $\hat{\theta}$"]
+    np.testing.assert_array_equal(estimate.get_xdata(), [0, 1, 2, 3])
+    np.testing.assert_allclose(estimate.get_ydata(), [0.0, 0.8, 0.5, 0.6])
+    standard_error = lines["Standard error"]
+    np.testing.assert_array_equal(standard_error.get_xdata(), [1, 2, 3])
+    np.testing.assert_allclose(standard_error.get_ydata(), [1.1, 0.9, 0.7])
+    assert standard_error.axes is not ax
+    difficulty = lines["Item difficulty"]
+    np.testing.assert_array_equal(difficulty.get_xdata(), [1, 2, 3])
+    np.testing.assert_allclose(difficulty.get_ydata(), [1.2, -0.5, 0.3])
+    np.testing.assert_allclose(lines[r"True ability $\theta$"].get_ydata(), [0.4, 0.4])
 
-class TestTestProgress:
-  """Tests for test_progress()."""
+  def test_session_progress_band_spans_one_standard_error_around_each_estimate(self) -> None:
+    """The band runs from estimate minus to estimate plus its standard error, from the first item on.
 
-  # Two-parameter items (c = 0, d = 1): each item's information is a^2 P (1 - P), with
-  # P = 1 / (1 + exp(-a (theta - b))).
-  ITEMS = np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 0.5, 0.0, 1.0], [0.8, -0.5, 0.0, 1.0]])
-  THETAS = (0.0, 0.4, 0.7, 0.9)
+    Fails if the band uses another width, or reaches x = 0, where the initial estimate's standard error is infinite.
+    """
+    ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
+    (band,) = ax.collections
+    vertices = {(float(x), round(float(y), 9)) for path in band.get_paths() for x, y in path.vertices}
 
-  @classmethod
-  def _info_after(cls, k: int) -> float:
-    """Test information of the first k items at the estimate made after them, in closed form."""
-    a, b = cls.ITEMS[:k, 0], cls.ITEMS[:k, 1]
-    p = 1 / (1 + np.exp(-a * (cls.THETAS[k] - b)))
-    return float(np.sum(a**2 * p * (1 - p)))
+    assert vertices == {(1.0, -0.3), (1.0, 1.9), (2.0, -0.4), (2.0, 1.4), (3.0, -0.1), (3.0, 1.3)}
+
+  def test_session_progress_without_true_ability_draws_no_true_ability_line(self) -> None:
+    """A live session has no true ability, so the plot draws no line for one.
+
+    Fails if a session without ``true_theta`` raises, or draws a line at some made-up ability.
+    """
+    live = CatSessionState(
+      session_id="live", estimates=list(self.SESSION.estimates[:2]), administered_items=[2], responses=[True]
+    )
+    ax = plot.session_progress(live, self.ITEM_BANK)
+
+    assert set(self._lines(ax)) == {r"Ability estimate $\hat{\theta}$", "Item difficulty", "Standard error"}
+
+  def test_session_progress_ticks_whole_numbers_of_items(self) -> None:
+    """The x axis counts items, so its ticks are whole numbers.
+
+    Fails if a short test gets fractional ticks such as 0.5 or 2.5 items.
+    """
+    ax = plot.session_progress(self.SESSION, self.ITEM_BANK)
+    ax.figure.canvas.draw()
+
+    ticks = ax.get_xticks()
+    assert len(ticks) > 1
+    np.testing.assert_array_equal(ticks, np.round(ticks))
 
   @pytest.mark.parametrize(
-    ("flag", "label", "from_info"),
-    [
-      ("info", r"$I(\theta)$", lambda info: info),
-      ("var", "$Var$", lambda info: 1 / info),
-      ("see", "$SEE$", lambda info: np.sqrt(1 / info)),
-      ("reliability", "Reliability", lambda info: 1 - 1 / info),
-    ],
+    ("items", "bank_size"),
+    [pytest.param([2, 0, 1], 2, id="past the bank"), pytest.param([2, 0, -1], 3, id="negative")],
   )
-  def test_test_progress_pairs_each_estimate_with_the_items_before_it(self, flag: str, label: str, from_info) -> None:
-    """The quality curve at x items uses the estimate after x responses and those x items, from x = 1.
+  def test_session_progress_rejects_items_outside_the_bank_before_drawing(
+    self, items: list[int], bank_size: int
+  ) -> None:
+    """A session whose items are not in the item bank raises before any figure exists.
 
-    Fails if point x also counts item x + 1 (which made the plotted information drop at the last
-    item), or if the curve starts at x = 0, where no item has been given.
+    Fails if a bad call leaves an empty figure open behind the error, or if a negative item index wraps around to the
+    bank's last item, as numpy indexing does, instead of raising.
     """
-    ax = plot.test_progress(thetas=list(self.THETAS), administered_items=self.ITEMS, **{flag: True})
-    (line,) = [line for line in ax.get_lines() if line.get_label() == label]
-    info = np.array([self._info_after(k) for k in (1, 2, 3)])
-    np.testing.assert_array_equal(line.get_xdata(), [1, 2, 3])
-    np.testing.assert_allclose(line.get_ydata(), from_info(info))
-
-  def test_test_progress_from_simulation_result(self, simulation_result) -> None:
-    """The chosen session's estimates, item difficulties and true ability are plotted.
-
-    Fails if another session is plotted, if the initial estimate is not drawn at x = 0, or if the difficulty of item k
-    is not drawn at x = k.
-    """
-    session = simulation_result.sessions[2]
-    ax = plot.test_progress(simulation=simulation_result, index=2)
-    lines = {line.get_label(): line for line in ax.get_lines()}
-    n_items = len(session.administered_items)
-
-    np.testing.assert_array_equal(lines[r"$\hat{\theta}$"].get_xdata(), np.arange(n_items + 1))
-    np.testing.assert_allclose(lines[r"$\hat{\theta}$"].get_ydata(), session.theta_history)
-    np.testing.assert_array_equal(lines["Item difficulty"].get_xdata(), np.arange(1, n_items + 1))
-    np.testing.assert_allclose(
-      lines["Item difficulty"].get_ydata(), simulation_result.item_bank.items[session.administered_items, 1]
+    session = CatSessionState(
+      session_id="examinee",
+      estimates=list(self.SESSION.estimates),
+      administered_items=items,
+      responses=[True, False, True],
     )
-    (true_theta_line,) = [collection for collection in ax.collections if collection.get_label() == r"$\theta$"]
-    (true_theta_segment,) = true_theta_line.get_segments()
-    np.testing.assert_allclose(true_theta_segment, [[0, session.true_theta], [n_items, session.true_theta]])
 
-  def test_test_progress_requires_index_with_simulation(self, simulation_result) -> None:
-    """A SimulationResult holds many sessions, so it needs an index.
+    with pytest.raises(IndexError, match="not items of the bank"):
+      plot.session_progress(session, ItemBank(self.ITEM_BANK.items[:bank_size]))
+    assert plt.get_fignums() == []
 
-    Fails if the call guesses a session instead of raising.
-    """
-    with pytest.raises(ValueError, match="index must be provided"):
-      plot.test_progress(simulation=simulation_result)
 
-  def test_test_progress_rejects_mismatched_lengths(self, item_bank) -> None:
-    """The theta history holds one more value than there are items (the initial estimate).
+@pytest.mark.parametrize(
+  "draw",
+  [
+    lambda ax, title: plot.item_curve(TestItemCurve.ITEM, ax=ax, title=title),
+    lambda ax, title: plot.item_exposure(TestItemExposure.RATES, ax=ax, title=title),
+    lambda ax, title: plot.session_progress(
+      TestSessionProgress.SESSION, TestSessionProgress.ITEM_BANK, ax=ax, title=title
+    ),
+  ],
+  ids=["item_curve", "item_exposure", "session_progress"],
+)
+def test_plot_draws_on_the_given_axes_and_returns_them(draw) -> None:
+  """A plot function draws on the axes it is given, sets the title there and returns those axes.
 
-    Fails if histories and items that do not line up are plotted anyway.
-    """
-    administered_items = item_bank.get_items([0, 1, 2])
-    with pytest.raises(ValueError, match="not the same"):
-      plot.test_progress(thetas=[0.0, 0.1], administered_items=administered_items, true_theta=0.0)
+  Fails if a function opens a figure of its own despite ``ax``, ignores ``title``, or returns other axes than the
+  caller's.
+  """
+  figure, ax = plt.subplots()
+
+  assert draw(ax, "A title") is ax
+  assert ax.get_title() == "A title"
+  assert ax.get_lines() or ax.patches
+  assert plt.get_fignums() == [figure.number]
+
+
+def test_importing_every_plot_name_collects_no_test(pytester: pytest.Pytester) -> None:
+  """A public catsim.plot name that pytest collects runs as a test in every test module that imports it.
+
+  Fails if any catsim.plot name looks like a test to pytest, as test_progress did.
+  """
+  names = [
+    name
+    for name in vars(plot)
+    if not name.startswith("_") and getattr(getattr(plot, name), "__module__", None) == "catsim.plot"
+  ]
+  pytester.makepyfile(test_user_module=f"from catsim.plot import {', '.join(names)}\n")
+
+  result = pytester.runpytest("--collect-only", "-q")
+
+  assert result.ret == pytest.ExitCode.NO_TESTS_COLLECTED

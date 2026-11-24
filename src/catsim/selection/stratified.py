@@ -4,6 +4,7 @@ import operator
 from abc import abstractmethod
 
 import numpy
+from typing_extensions import override
 
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
@@ -35,6 +36,7 @@ class StratifiedSelector(BaseSelector):
   For full family-level details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(test_size={self._test_size!r}, n_strata={self._n_strata!r})"
@@ -132,6 +134,7 @@ class StratifiedSelector(BaseSelector):
     """Return the 0-indexed stage of a 0-indexed test position below ``test_size``."""
     return position * self._n_strata // self._test_size
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item of the current stage's stratum whose location is closest to the estimate.
 
@@ -186,11 +189,13 @@ class AStratSelector(StratifiedSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.
   """
 
-  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
+  @override
+  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:
     """Stratify by increasing discrimination."""
     return item_bank.discrimination
 
-  def _location(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
+  @override
+  def _location(self, item_bank: ItemBank) -> FloatArray:
     """Match item difficulty to the ability estimate."""
     return item_bank.difficulty
 
@@ -210,7 +215,8 @@ class AStratBBlockSelector(AStratSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.
   """
 
-  def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
+  @override
+  def _blocking_key(self, item_bank: ItemBank) -> FloatArray:
     """Block on item difficulty so every stratum spans the difficulty range."""
     return item_bank.difficulty
 
@@ -230,11 +236,13 @@ class MaxInfoStratSelector(StratifiedSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.
   """
 
-  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
+  @override
+  def _stratification_key(self, item_bank: ItemBank) -> FloatArray:
     """Stratify by increasing maximum information."""
     return item_bank.max_info_values
 
-  def _location(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
+  @override
+  def _location(self, item_bank: ItemBank) -> FloatArray:
     """Match the ability at which each item is most informative to the ability estimate."""
     return item_bank.max_info_thetas
 
@@ -254,6 +262,7 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.
   """
 
-  def _blocking_key(self, item_bank: ItemBank) -> FloatArray:  # noqa: PLR6301
+  @override
+  def _blocking_key(self, item_bank: ItemBank) -> FloatArray:
     """Block on the ability of maximum information so every stratum spans the ability range."""
     return item_bank.max_info_thetas

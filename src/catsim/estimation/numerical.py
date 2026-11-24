@@ -2,6 +2,7 @@
 
 import numpy
 from scipy.optimize import minimize_scalar
+from typing_extensions import override
 
 from .. import irt
 from ..context import Estimate, StepContext
@@ -10,7 +11,7 @@ from ..item_bank import ItemBank
 from .base import BaseEstimator
 
 
-def _dodd(theta: float, item_bank: ItemBank, correct: bool, bounds: tuple[float, float]) -> float:
+def _dodd(theta: float, item_bank: ItemBank, *, correct: bool, bounds: tuple[float, float]) -> float:
   r"""Return Dodd's estimate after a response pattern that is all correct or all incorrect.
 
   Dodd's variable step size :cite:p:`Dod90` moves the estimate half the distance to the bank's
@@ -93,10 +94,12 @@ class NumericalSearchEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument."""
     return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.
 
@@ -123,7 +126,7 @@ class NumericalSearchEstimator(BaseEstimator):
 
     items = context.item_bank.get_items(context.administered_items)
     if len(set(responses)) == 1:
-      theta = _dodd(context.theta, context.item_bank, responses[0], self._bounds)
+      theta = _dodd(context.theta, context.item_bank, correct=responses[0], bounds=self._bounds)
       return Estimate(theta=theta, se=irt.see(theta, items), evaluations=0)
 
     def negative_log_likelihood(theta: float) -> float:

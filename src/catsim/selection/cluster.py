@@ -8,6 +8,7 @@ cluster has no item below the exposure cap.
 from enum import StrEnum
 
 import numpy
+from typing_extensions import override
 
 from ..context import StepContext
 from ..item_bank import ItemBank
@@ -88,6 +89,7 @@ class ClusterSelector(BaseSelector):
   :doc:`/api/techniques/selection/cluster-selector`.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return (
@@ -172,6 +174,7 @@ class ClusterSelector(BaseSelector):
     self._r_max = check_r_max(r_max)
     self._r_control = r_control
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the most informative available item of the best-scoring cluster that has an item left.
 

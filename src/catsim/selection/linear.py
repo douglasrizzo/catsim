@@ -1,5 +1,7 @@
 """Linear selector implementation."""
 
+from typing_extensions import override
+
 from ..context import StepContext
 from ..exceptions import NoItemsAvailableError
 from .base import BaseSelector, remaining
@@ -18,6 +20,7 @@ class LinearSelector(BaseSelector):
       every selection.
   """
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(items={self._items!r})"
@@ -50,6 +53,7 @@ class LinearSelector(BaseSelector):
     """Get the indices of the items to administer, in order."""
     return list(self._items)
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the first of the selector's items that is neither administered nor excluded.
 

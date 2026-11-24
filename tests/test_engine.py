@@ -319,7 +319,7 @@ def test_a_tracker_caps_exposure_across_sessions_with_no_other_setting() -> None
   for session_id in range(4):
     session = engine.start_session(session_id, context)
     item_id = engine.select_next(session, context)
-    engine.apply_response(session, item_id, True, context)
+    engine.apply_response(session, item_id, response=True, context=context)
     first_items.append(item_id)
 
   assert first_items == [0, 1, 2, 0]
@@ -758,7 +758,7 @@ def test_apply_response_rejects_invalid_item_index(
     ValueError,
     match=rf"Invalid item index {item_bank.n_items}\. Must be between 0 and {item_bank.n_items - 1}",
   ):
-    engine.apply_response(session, item_bank.n_items, True, context)
+    engine.apply_response(session, item_bank.n_items, response=True, context=context)
 
 
 @pytest.mark.parametrize(
@@ -798,7 +798,7 @@ def test_apply_response_rejects_duplicate_items(
   )
 
   with pytest.raises(ValueError, match=r"Item 0 has already been administered in this session"):
-    engine.apply_response(session, 0, False, context)
+    engine.apply_response(session, 0, response=False, context=context)
 
 
 def test_step_ends_a_session_whose_initial_state_satisfies_the_stopper(item_bank) -> None:

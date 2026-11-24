@@ -3,6 +3,7 @@
 import dataclasses
 
 import numpy
+from typing_extensions import override
 
 from .. import irt
 from ..context import StepContext
@@ -46,6 +47,7 @@ class MEISelector(BaseSelector):
     self._estimator = estimator if estimator is not None else NumericalSearchEstimator()
     self._r_max = check_r_max(r_max)
 
+  @override
   def __repr__(self) -> str:
     """Return the selector as a constructor call that names every argument."""
     return f"{type(self).__name__}(estimator={self._estimator!r}, r_max={self._r_max!r})"
@@ -72,6 +74,7 @@ class MEISelector(BaseSelector):
     info_incorrect = context.item_bank.total_information(theta_incorrect, administered_items)
     return float(p_correct * info_correct + (1.0 - p_correct) * info_incorrect)
 
+  @override
   def select(self, context: StepContext) -> int:
     """Return the available item with the largest expected information after its response.
 

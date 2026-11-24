@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 
 import numpy
 from scipy.optimize import minimize_scalar
+from typing_extensions import override
 
 from .. import irt
 from ..context import Estimate
@@ -320,10 +321,12 @@ class EAPEstimator(BaseEstimator):
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument, with None for a default."""
     return f"{type(self).__name__}(grid={self._grid_argument!r}, log_prior={self._log_prior_argument!r})"
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the posterior mean and the posterior standard deviation.
 
@@ -399,6 +402,7 @@ class MAPEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
+  @override
   def __repr__(self) -> str:
     """Return the estimator as a constructor call that names every argument, with None for a default prior."""
     return f"{type(self).__name__}(log_prior={self._log_prior_argument!r}, tol={self._tol!r}, bounds={self._bounds!r})"
@@ -434,6 +438,7 @@ class MAPEstimator(BaseEstimator):
     precision = irt.total_information(theta, items) - (curvature if math.isfinite(curvature) else 0.0)
     return 1.0 / math.sqrt(precision) if precision > 0.0 and math.isfinite(precision) else math.inf
 
+  @override
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the posterior mode within the search bounds, the prior mode when no item has been administered.
 

@@ -497,13 +497,12 @@ def max_info_theta(items: FloatArray) -> FloatArray:
       :caption: Item information curves for two distinct items. The point of maximum information denoted by a dot.
 
       import matplotlib.pyplot as plt
-      from catsim.item_bank import ItemBank
-      from catsim.plot import item_curve, PlotType
-      n_items = 2
-      item_bank = ItemBank.generate(n_items)
-      fig, axes = plt.subplots(n_items, 1)
-      for idx, item in enumerate(item_bank.items):
-        item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, max_info=True, ax=axes[idx])
+      from catsim import ItemBank
+      from catsim.plot import PlotType, item_curve
+      item_bank = ItemBank.generate(2)
+      fig, axes = plt.subplots(2, 1, figsize=(6.4, 8))
+      for item, ax in zip(item_bank.items, axes):
+        item_curve(item, kind=PlotType.IIC, ax=ax)
       plt.tight_layout()
       plt.show()
 

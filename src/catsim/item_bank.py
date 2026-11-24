@@ -10,6 +10,7 @@ from typing import Any, Self, assert_never
 import numpy
 import numpy.typing as npt
 from numpy.random import Generator
+from typing_extensions import override
 
 from . import irt
 from .typing import FloatArray, IntArray
@@ -416,6 +417,7 @@ class ItemBank:
 
     return cls(numpy.array([a, b, c, d]).T)
 
+  @override
   def __repr__(self) -> str:
     """Get string representation of the ItemBank."""
     return f"ItemBank(n_items={self.n_items}, model={self.model})"
@@ -505,22 +507,17 @@ def _validate(items: FloatArray) -> None:
     msg = "Item matrix has no items"
     raise ValueError(msg)
 
-  errors: list[str] = []
-  if not numpy.isfinite(items).all():
-    errors.append("There are items with NaN or infinite parameters")
-  if any(items[:, 0] <= 0):
-    errors.append("There are items with discrimination <= 0")
-  if any(items[:, 2] < 0):
-    errors.append("There are items with pseudo-guessing < 0")
-  if any(items[:, 2] > 1):
-    errors.append("There are items with pseudo-guessing > 1")
-  if any(items[:, 3] > 1):
-    errors.append("There are items with upper asymptote > 1")
-  if any(items[:, 3] < 0):
-    errors.append("There are items with upper asymptote < 0")
-  if any(items[:, 2] >= items[:, 3]):
-    errors.append("There are items with pseudo-guessing >= upper asymptote")
-
+  a, c, d = items[:, 0], items[:, 2], items[:, 3]
+  violations = (
+    (~numpy.isfinite(items), "There are items with NaN or infinite parameters"),
+    (a <= 0, "There are items with discrimination <= 0"),
+    (c < 0, "There are items with pseudo-guessing < 0"),
+    (c > 1, "There are items with pseudo-guessing > 1"),
+    (d > 1, "There are items with upper asymptote > 1"),
+    (d < 0, "There are items with upper asymptote < 0"),
+    (c >= d, "There are items with pseudo-guessing >= upper asymptote"),
+  )
+  errors = [message for violated, message in violations if violated.any()]
   if errors:
     raise ValueError("; ".join(errors))
 
