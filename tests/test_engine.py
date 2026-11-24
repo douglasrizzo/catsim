@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 from catsim import Estimate, StepContext
-from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
+from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, NumericalSearchEstimator
 from catsim.exceptions import NoItemsAvailableError
 from catsim.initialization import BaseInitializer
@@ -29,7 +29,7 @@ class FixedResponseProvider:
 
   response: bool
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     return self.response
 
 
@@ -39,8 +39,8 @@ class ScriptedResponseProvider:
 
   responses: list[bool]
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
-    return self.responses[len(state.responses)]
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
+    return self.responses[len(session.responses)]
 
 
 class ExhaustedSelector:
@@ -149,16 +149,6 @@ class RecordingStopper:
   def stop(self, context: StepContext) -> bool:
     self.seen = context
     return self.should_stop
-
-
-@dataclass
-class FakeRng:
-  """Minimal RNG stub for deterministic response-provider tests."""
-
-  sample: float
-
-  def uniform(self) -> float:
-    return self.sample
 
 
 class LowestIndexSelector(BaseSelector):
@@ -687,47 +677,6 @@ def test_the_stopper_is_evaluated_once_per_session_state(item_bank, max_info_sel
 
   assert session.administered_count == 5
   assert stopper.calls == 6
-
-
-def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
-  """Simulated responses require a true theta on the session."""
-  provider = SimulatedResponseProvider()
-  context = RunContext(rng=np.random.default_rng(42))
-  state = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)])
-
-  with pytest.raises(ValueError, match="true_theta is required") as exc_info:
-    provider.answer(state, item_bank, 0, context)
-
-  assert str(exc_info.value) == "true_theta is required to simulate responses"
-
-
-@pytest.mark.parametrize(
-  ("item_id", "draw", "expected"),
-  [
-    # 2PL item at b = 0: P = 0.82; the estimate (-1.5) or item 0 would both give P below 0.2
-    pytest.param(1, 0.5, True, id="2pl-correct"),
-    pytest.param(1, 0.9, False, id="2pl-incorrect"),
-    # 4PL item with c = 0.2, d = 0.9: P = 0.2 + 0.7 * 0.82 = 0.77; without c and d it would be 0.82
-    pytest.param(2, 0.79, False, id="4pl-upper-asymptote"),
-    # 3PL item at b = 5 with c = 0.3: P = 0.3 + 0.7 * 0.03 = 0.32; without c it would be 0.03
-    pytest.param(3, 0.31, True, id="3pl-guessing"),
-  ],
-)
-def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_probability(
-  item_id: int, draw: float, expected: bool
-) -> None:
-  """The response is correct when the uniform draw falls below the chosen item's 4PL probability at the true theta.
-
-  Together the cases fail if the response used the estimate instead of the true theta (1.5), another item,
-  or dropped the item's guessing or upper-asymptote parameter.
-  """
-  item_bank = ItemBank(
-    np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
-  )
-  state = CatSessionState(session_id=0, estimates=[Estimate(-1.5, math.inf)], true_theta=1.5)
-  context = RunContext(rng=FakeRng(sample=draw))  # type: ignore[arg-type]
-
-  assert SimulatedResponseProvider().answer(state, item_bank, item_id, context) is expected
 
 
 def test_stepping_a_stopped_session_keeps_its_stop_reason(item_bank) -> None:

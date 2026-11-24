@@ -7,14 +7,59 @@ from typing import TYPE_CHECKING
 
 import numpy
 
-from .engine import RunContext, SimulatedResponseProvider
+from .engine import RunContext
+from .irt import icc
 from .state import ExposureTracker, SimulationResult
 
 if TYPE_CHECKING:
   import numpy.typing as npt
 
   from .engine import CatEngine
+  from .item_bank import ItemBank
+  from .state import CatSessionSnapshot
   from .typing import FloatArray
+
+
+class SimulatedResponseProvider:
+  """Draw a simulated examinee's responses from their true ability.
+
+  The response to an item is correct with the probability the item's 4PL model gives at
+  ``session.true_theta``, decided by one uniform draw from the run's generator.
+  """
+
+  def answer(  # noqa: PLR6301
+    self, item_bank: ItemBank, item_id: int, session: CatSessionSnapshot, rng: numpy.random.Generator
+  ) -> bool:
+    """Return a correct response with the item's probability of a correct answer at the true ability.
+
+    Parameters
+    ----------
+    item_bank : ItemBank
+        The engine's item bank.
+    item_id : int
+        Index of the item the selector chose.
+    session : CatSessionSnapshot
+        The session as it stands before the response; it must have a true ability.
+    rng : numpy.random.Generator
+        The run's random generator.
+
+    Returns
+    -------
+    bool
+        True for a correct response.
+
+    Raises
+    ------
+    ValueError
+        If the session has no true ability.
+    """
+    if session.true_theta is None:
+      msg = "true_theta is required to simulate responses"
+      raise ValueError(msg)
+
+    item = item_bank.get_item(item_id)
+    probability = icc(session.true_theta, item[0], item[1], item[2], item[3])
+    return bool(probability >= rng.uniform())
 
 
 def _true_thetas(true_thetas: npt.ArrayLike) -> FloatArray:

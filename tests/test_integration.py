@@ -7,7 +7,7 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from catsim.engine import CatEngine, RunContext, SimulatedResponseProvider
+from catsim.engine import CatEngine, RunContext
 from catsim.estimation import BaseEstimator, EAPEstimator, MAPEstimator, NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer, UniformInitializer
 from catsim.item_bank import ItemBank
@@ -26,7 +26,7 @@ from catsim.selection import (
   UrrySelector,
 )
 from catsim.selection.base import BaseSelector
-from catsim.simulation import SimulationRunner
+from catsim.simulation import SimulatedResponseProvider, SimulationRunner
 from catsim.state import ExposureTracker, SimulationResult, StopReason
 from catsim.stopping import BaseStopper, ConfidenceIntervalStopper, MaxLengthStopper, StandardErrorStopper, StopRule
 

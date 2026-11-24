@@ -33,7 +33,7 @@ class FixedResponseProvider:
 
   response: bool
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     return self.response
 
 
@@ -72,7 +72,7 @@ class AlternatingResponseProvider:
   def __init__(self) -> None:
     self._count = 0
 
-  def answer(self, state, item_bank, item_id, context) -> bool:  # noqa: ARG002
+  def answer(self, item_bank, item_id, session, rng) -> bool:  # noqa: ARG002
     self._count += 1
     return self._count % 2 == 0
 

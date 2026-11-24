@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
+import math
 import subprocess
 import sys
+from dataclasses import dataclass
 
 import numpy as np
 import pytest
 
-from catsim import StepContext
+from catsim import Estimate, StepContext
 from catsim.engine import CatEngine
 from catsim.estimation import NumericalSearchEstimator
 from catsim.initialization import FixedPointInitializer
 from catsim.item_bank import ItemBank
 from catsim.selection import BaseSelector
-from catsim.simulation import SimulationRunner
-from catsim.state import SimulationResult, StopReason
+from catsim.simulation import SimulatedResponseProvider, SimulationRunner
+from catsim.state import CatSessionState, SimulationResult, StopReason
 from catsim.stopping import MaxLengthStopper
 
 
@@ -202,3 +204,52 @@ class TestSimulationResult:
     assert simulation_result.bias == pytest.approx(errors.mean())
     assert simulation_result.mse == pytest.approx(np.mean(errors**2))
     assert simulation_result.rmse == pytest.approx(np.sqrt(np.mean(errors**2)))
+
+
+@dataclass
+class FakeRng:
+  """Minimal RNG stub for deterministic response-provider tests."""
+
+  sample: float
+
+  def uniform(self) -> float:
+    return self.sample
+
+
+def test_simulated_response_provider_requires_true_theta(item_bank) -> None:
+  """Simulated responses require a true theta on the session."""
+  session = CatSessionState(session_id=0, estimates=[Estimate(0.0, math.inf)]).snapshot()
+
+  with pytest.raises(ValueError, match="true_theta is required") as exc_info:
+    SimulatedResponseProvider().answer(item_bank, 0, session, np.random.default_rng(42))
+
+  assert str(exc_info.value) == "true_theta is required to simulate responses"
+
+
+@pytest.mark.parametrize(
+  ("item_id", "draw", "expected"),
+  [
+    # 2PL item at b = 0: P = 0.82; the estimate (-1.5) or item 0 would both give P below 0.2
+    pytest.param(1, 0.5, True, id="2pl-correct"),
+    pytest.param(1, 0.9, False, id="2pl-incorrect"),
+    # 4PL item with c = 0.2, d = 0.9: P = 0.2 + 0.7 * 0.82 = 0.77; without c and d it would be 0.82
+    pytest.param(2, 0.79, False, id="4pl-upper-asymptote"),
+    # 3PL item at b = 5 with c = 0.3: P = 0.3 + 0.7 * 0.03 = 0.32; without c it would be 0.03
+    pytest.param(3, 0.31, True, id="3pl-guessing"),
+  ],
+)
+def test_simulated_response_is_correct_when_the_draw_is_below_the_true_theta_probability(
+  item_id: int, draw: float, expected: bool
+) -> None:
+  """The response is correct when the uniform draw falls below the chosen item's 4PL probability at the true theta.
+
+  Together the cases fail if the response used the estimate instead of the true theta (1.5), another item,
+  or dropped the item's guessing or upper-asymptote parameter.
+  """
+  item_bank = ItemBank(
+    np.array([[1.0, 5.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.2, 0.9], [1.0, 5.0, 0.3, 1.0]])
+  )
+  session = CatSessionState(session_id=0, estimates=[Estimate(-1.5, math.inf)], true_theta=1.5).snapshot()
+  rng = FakeRng(sample=draw)
+
+  assert SimulatedResponseProvider().answer(item_bank, item_id, session, rng) is expected  # type: ignore[arg-type]

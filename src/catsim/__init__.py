@@ -3,10 +3,10 @@
 import importlib.metadata
 
 from .context import Estimate, StepContext
-from .engine import CatEngine, RunContext, SimulatedResponseProvider
+from .engine import CatEngine, ResponseProvider, RunContext
 from .exceptions import NoItemsAvailableError
 from .item_bank import ItemBank
-from .simulation import SimulationRunner
+from .simulation import SimulatedResponseProvider, SimulationRunner
 from .state import CatSessionSnapshot, CatSessionState, CatStepResult, ExposureTracker, SimulationResult, StopReason
 
 try:  # noqa: RUF067 - the version lookup needs a fallback, so it cannot be a plain re-export
@@ -24,6 +24,7 @@ __all__ = [
   "ExposureTracker",
   "ItemBank",
   "NoItemsAvailableError",
+  "ResponseProvider",
   "RunContext",
   "SimulatedResponseProvider",
   "SimulationResult",

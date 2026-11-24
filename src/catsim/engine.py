@@ -12,7 +12,6 @@ import numpy
 
 from .context import Estimate, StepContext
 from .exceptions import NoItemsAvailableError
-from .irt import icc
 from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
@@ -22,6 +21,7 @@ if TYPE_CHECKING:
   from .initialization import BaseInitializer
   from .item_bank import ItemBank
   from .selection import BaseSelector
+  from .state import CatSessionSnapshot
   from .stopping import BaseStopper
 
 
@@ -39,26 +39,31 @@ class RunContext:
 
 
 class ResponseProvider(Protocol):
-  """Protocol for providing responses to administered items."""
+  """Source of the examinee's responses for :meth:`CatEngine.step` and :meth:`CatEngine.run_session`.
 
-  def answer(self, state: CatSessionState, item_bank: ItemBank, item_id: int, context: RunContext) -> bool:
-    """Return the response for the selected item."""
+  :class:`~catsim.simulation.SimulatedResponseProvider` draws them from a simulated examinee's true
+  ability; an application that steps sessions itself can wrap whatever collects real answers.
+  """
 
+  def answer(self, item_bank: ItemBank, item_id: int, session: CatSessionSnapshot, rng: numpy.random.Generator) -> bool:
+    """Return whether the examinee answers the item correctly.
 
-class SimulatedResponseProvider:
-  """Generate responses from an examinee's true theta."""
+    Parameters
+    ----------
+    item_bank : ItemBank
+        The engine's item bank.
+    item_id : int
+        Index of the item the selector chose.
+    session : CatSessionSnapshot
+        The session as it stands before the response, which the provider cannot change.
+    rng : numpy.random.Generator
+        The run's random generator, the one the strategies draw from.
 
-  def answer(  # noqa: PLR6301
-    self, state: CatSessionState, item_bank: ItemBank, item_id: int, context: RunContext
-  ) -> bool:
-    """Sample a Bernoulli response using the 4PL model."""
-    if state.true_theta is None:
-      msg = "true_theta is required to simulate responses"
-      raise ValueError(msg)
-
-    item = item_bank.get_item(item_id)
-    probability = icc(state.true_theta, item[0], item[1], item[2], item[3])
-    return bool(probability >= context.rng.uniform())
+    Returns
+    -------
+    bool
+        True for a correct response.
+    """
 
 
 class CatEngine:
@@ -332,7 +337,7 @@ class CatEngine:
     item_id = self.select_next(state, context)
     if item_id is None:
       return CatStepResult(session=state.snapshot(), selected_item_id=None, response=None)
-    response = response_provider.answer(state, self._item_bank, item_id, context)
+    response = response_provider.answer(self._item_bank, item_id, state.snapshot(), context.rng)
     return self.apply_response(state, item_id, response, context)
 
   def run_session(
