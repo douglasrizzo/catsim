@@ -37,6 +37,7 @@ from catsim.selection import (
   progressive,
   remaining,
 )
+from tests.conftest import SELECTOR_FACTORIES
 from tests.contexts import make_context
 
 
@@ -586,15 +587,6 @@ class TestIntervalInfoSelector:
 
     assert selected == int(np.argmax(integrals))
 
-  def test_select_excludes_administered_and_raises_when_exhausted(self) -> None:
-    """Administered items are never returned; an exhausted bank raises NoItemsAvailableError."""
-    item_bank = ItemBank.generate(3, rng=9)
-    selector = IntervalInfoSelector(interval=1.0)
-
-    assert selector.select(make_context(item_bank, [0, 2], theta=0.0)) == 1
-    with pytest.raises(NoItemsAvailableError):
-      selector.select(make_context(item_bank, [0, 1, 2], theta=0.0))
-
 
 class TestMEISelector:
   """Tests for MEISelector."""
@@ -1002,13 +994,6 @@ class TestKLSelector:
 
     assert (uncapped, capped) == (1, 2)
 
-  def test_select_raises_when_exhausted(self) -> None:
-    """An exhausted bank must raise NoItemsAvailableError, which ends the session, not score an empty array."""
-    item_bank = ItemBank(np.array([[1.0, -2.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0], [1.0, 2.0, 0.0, 1.0]]))
-
-    with pytest.raises(NoItemsAvailableError, match="no more items"):
-      KLSelector().select(make_context(item_bank, [0, 1, 2], theta=0.0, rng=np.random.default_rng(42)))
-
 
 class TestClusterSelector:
   """Tests for ClusterSelector."""
@@ -1058,11 +1043,6 @@ class TestClusterSelector:
     item_bank = ItemBank(np.array([[2.5, 0.0, 0.0, 1.0], [0.5, 3.0, 0.0, 1.0], [2.0, 0.0, 0.0, 1.0]]))
 
     assert ClusterSelector(clusters=[0, 0, 1]).select(make_context(item_bank, [0], theta=0.0)) == 1
-
-  def test_select_raises_when_every_cluster_is_exhausted(self) -> None:
-    """An exhausted bank raises NoItemsAvailableError, which the engine turns into a stop."""
-    with pytest.raises(NoItemsAvailableError, match="no more items"):
-      self._select(list(range(len(self.CLUSTERS))))
 
   @pytest.mark.parametrize("method", ["item_info", "cluster_info", "weighted_info"])
   @pytest.mark.parametrize("n_labels", [len(CLUSTERS) - 1, len(CLUSTERS) + 1])
@@ -1349,26 +1329,6 @@ def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[
 
 
 _N_ITEMS = 30
-# Each factory builds its selector for a bank of n_items items.
-SELECTOR_FACTORIES: dict[str, Callable[[int], BaseSelector]] = {
-  "MaxInfoSelector": lambda _: MaxInfoSelector(),
-  "UrrySelector": lambda _: UrrySelector(),
-  "KLSelector": lambda _: KLSelector(),
-  "IntervalInfoSelector": lambda _: IntervalInfoSelector(),
-  "RandomSelector": lambda _: RandomSelector(),
-  "RandomesqueSelector": lambda _: RandomesqueSelector(bin_size=5),
-  "The54321Selector": lambda _: The54321Selector(),
-  "LinearSelector": lambda n_items: LinearSelector(list(range(n_items))),
-  "ProgressiveSelector": lambda _: ProgressiveSelector(test_size=10),
-  "ProportionalSelector": lambda _: ProportionalSelector(test_size=10),
-  "ClusterSelector": lambda n_items: ClusterSelector(clusters=[i % 3 for i in range(n_items)]),
-  "AStratSelector": lambda _: AStratSelector(test_size=10),
-  "AStratBBlockSelector": lambda _: AStratBBlockSelector(test_size=10),
-  "MaxInfoStratSelector": lambda _: MaxInfoStratSelector(test_size=10),
-  "MaxInfoBBlockSelector": lambda _: MaxInfoBBlockSelector(test_size=10),
-  "MEISelector": lambda _: MEISelector(),
-  "MLWISelector": lambda _: MLWISelector(),
-}
 
 
 @pytest.mark.parametrize("make_selector", SELECTOR_FACTORIES.values(), ids=SELECTOR_FACTORIES.keys())

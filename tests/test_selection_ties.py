@@ -117,27 +117,31 @@ class TestBestPool:
       best_pool(np.arange(3), np.array([0.1, np.nan, 0.3]), 3)
 
 
-SELECTOR_FACTORIES: dict[str, Callable[[], BaseSelector]] = {
-  "MaxInfoSelector": MaxInfoSelector,
-  "UrrySelector": UrrySelector,
-  "IntervalInfoSelector": lambda: IntervalInfoSelector(interval=1.0),
-  "AStratSelector": lambda: AStratSelector(test_size=_N_COPIES, n_strata=1),
-  "ClusterSelector": lambda: ClusterSelector(clusters=[0] * _N_COPIES),
-  "MEISelector": MEISelector,
-  "MLWISelector": MLWISelector,
-  "KLSelector": KLSelector,
-  "RandomesqueSelector": lambda: RandomesqueSelector(bin_size=1),
-}
+@pytest.mark.parametrize(
+  "make_selector",
+  [
+    pytest.param(MaxInfoSelector, id="MaxInfoSelector"),
+    pytest.param(UrrySelector, id="UrrySelector"),
+    pytest.param(lambda: IntervalInfoSelector(interval=1.0), id="IntervalInfoSelector"),
+    pytest.param(lambda: AStratSelector(test_size=_N_COPIES, n_strata=1), id="AStratSelector"),
+    pytest.param(lambda: ClusterSelector(clusters=[0] * _N_COPIES), id="ClusterSelector"),
+    pytest.param(MEISelector, id="MEISelector"),
+    pytest.param(MLWISelector, id="MLWISelector"),
+    pytest.param(KLSelector, id="KLSelector"),
+    pytest.param(lambda: RandomesqueSelector(bin_size=1), id="RandomesqueSelector"),
+  ],
+)
+def test_selectors_break_ties_at_random(make_selector: Callable[[], BaseSelector]) -> None:
+  """On a bank of identical items, the pick is a non-administered item and varies with the seed.
 
-
-@pytest.mark.parametrize("name", sorted(SELECTOR_FACTORIES))
-def test_selectors_break_ties_at_random(name: str) -> None:
-  """On a bank of identical items, the pick is a non-administered item and varies with the seed."""
+  Each selector is set up so that the tie is its only random choice (one stratum, one cluster, a bin of one item): a
+  selector that took the first tied item would return item 1 for every seed.
+  """
   item_bank = _identical_bank()
   administered_items, responses = [0], [True]
 
   picks = {
-    SELECTOR_FACTORIES[name]().select(
+    make_selector().select(
       make_context(item_bank, administered_items, responses, theta=0.3, rng=np.random.default_rng(seed))
     )
     for seed in range(60)
