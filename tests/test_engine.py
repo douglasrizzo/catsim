@@ -222,7 +222,7 @@ def test_start_session_counts_a_session_in_the_tracker_only_once_it_has_started(
 
 
 def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
-  """The stopper sees the session's bank, items, responses and latest estimate, and the run's generator.
+  """The stopper sees the session's bank, items, responses, latest estimate and its SE, and the run's generator.
 
   Fails if any of them is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
   """
@@ -242,12 +242,12 @@ def test_should_stop_passes_runtime_state_to_stopper(item_bank) -> None:
   assert stopper.seen.item_bank is item_bank
   assert stopper.seen.rng is rng
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((2, 4), (True, False))
-  assert stopper.seen.theta == pytest.approx(1.75)
+  assert (stopper.seen.theta, stopper.seen.se) == (1.75, 0.6)
 
 
 def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
-  """select_next hands the selector the bank, the session's items, responses and current estimate, the generator, the
-  rates and no excluded items.
+  """select_next hands the selector the bank, the session's items, responses and current estimate with its SE, the
+  generator, the rates and no excluded items.
 
   Two earlier sessions administered [0, 3] and [0], so the rates are 1 for item 0 and 0.5 for item 3. Fails if any
   input is dropped or taken from elsewhere, such as the initial estimate instead of the current one.
@@ -275,7 +275,7 @@ def test_select_next_passes_complete_context_to_selector(item_bank) -> None:
   assert selector.seen.item_bank is item_bank
   assert (selector.seen.administered_items, selector.seen.responses) == ((1, 2), (True, False))
   assert selector.seen.excluded_items == ()
-  assert selector.seen.theta == pytest.approx(-0.25)
+  assert (selector.seen.theta, selector.seen.se) == (-0.25, 0.6)
   assert selector.seen.rng is rng
   expected_rates = np.zeros(item_bank.n_items)
   expected_rates[[0, 3]] = [1.0, 0.5]
@@ -352,22 +352,41 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
   assert result.session.theta_history == pytest.approx((0.7, 1.1))
 
 
+def test_apply_response_starts_the_estimator_from_the_current_estimate_and_its_se(item_bank) -> None:
+  """The estimator gets the session's current theta and SE, and the session then reports the ones it returned.
+
+  The session's current estimate is 0.5 with an SE of 0.9, unlike StepContext's defaults of 0 and infinity. Fails if
+  the estimator starts from the defaults or the initial estimate, or if current_se is not the SE the estimator
+  returned.
+  """
+  estimator = RecordingEstimator(theta=1.1, se=0.42)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), estimator, RecordingStopper(False))
+  session = CatSessionState(
+    session_id=0, estimates=[Estimate(0.0, math.inf), Estimate(0.5, 0.9)], administered_item_ids=[1], responses=[True]
+  )
+
+  engine.apply_response(session, item_bank, item_id=3, response=False, context=RunContext(rng=np.random.default_rng(0)))
+
+  assert (estimator.seen.theta, estimator.seen.se) == (0.5, 0.9)
+  assert (session.current_theta, session.current_se) == (1.1, 0.42)
+
+
 def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
   """A stopper satisfied by the new state ends the session, and the step result reports it.
 
-  Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate), if
-  the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports the
-  session still running.
+  Fails if the stopper judges a stale state (without the new item and response, or with the previous estimate or its
+  SE), if the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports
+  the session still running.
   """
   stopper = RecordingStopper(True)
-  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3), stopper)
+  engine = CatEngine(RecordingInitializer(0.0), RecordingSelector(0), RecordingEstimator(theta=0.3, se=0.42), stopper)
   context = RunContext(rng=np.random.default_rng(42))
   session = engine.start_session(session_id=0, item_bank=item_bank, context=context, true_theta=0.0)
 
   result = engine.apply_response(session, item_bank, item_id=0, response=False, context=context)
 
   assert (stopper.seen.administered_items, stopper.seen.responses) == ((0,), (False,))
-  assert stopper.seen.theta == pytest.approx(0.3)
+  assert (stopper.seen.theta, stopper.seen.se) == (0.3, 0.42)
   assert session.stop_reason is StopReason.STOPPER
   assert result.stopped is True
   assert result.stop_reason is StopReason.STOPPER
