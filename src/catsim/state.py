@@ -249,22 +249,16 @@ class CatStepResult:
 
 @dataclass(slots=True, init=False)
 class ExposureTracker:
-  """Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.
+  """Count item administrations, proposals and sessions, and give sessions their exposure rates.
 
-  One tracker is shared by every session of a run or of a live deployment, through
-  :class:`~catsim.RunContext`, and the engine updates it. ``counts`` holds each item's
-  administrations so far, those of sessions still in progress included, ``proposals`` its
-  administrations plus the times the engine's exposure control declined it, and ``n_sessions`` the
-  number of sessions started. A session proposes an item at most once, so neither count can exceed
-  ``n_sessions``.
+  Every session of a run or deployment shares one tracker through :class:`~catsim.RunContext`, and
+  the engine updates it. ``counts`` holds each item's administrations, sessions in progress
+  included; ``proposals`` adds the exposure control's declines; ``n_sessions`` counts the sessions
+  started.
 
-  A session is selected against each item's administrations divided by the number of other sessions
-  started so far. With sessions run one after another, as a simulation runs them, that is the share
-  of the examinees tested before the current one; the first session sees every rate at 0. Sessions
-  that run side by side, as in a live deployment, see each other's administrations as they happen.
-
-  A new tracker starts from zero. An application that must keep the exposure across restarts saves
-  ``counts``, ``proposals`` and ``n_sessions`` and passes them back to rebuild the tracker.
+  A session sees each item's administrations divided by the other sessions started: for sessions run
+  one after another, the share of the examinees tested before it, so the first sees every rate at 0.
+  For saving and sharing a tracker, see :doc:`/live-sessions`.
 
   Parameters
   ----------
@@ -289,6 +283,22 @@ class ExposureTracker:
   TypeError
       If ``counts`` or ``proposals`` holds a value that is not an integer, or ``n_sessions`` is not
       an integer (a bool included).
+
+  Examples
+  --------
+  The second session sees item 0 at a rate of 1, since the one other session was given it. A
+  tracker rebuilt from its saved fields gives the same rates:
+
+  >>> from catsim import ExposureTracker
+  >>> tracker = ExposureTracker(3)
+  >>> tracker.start_session()
+  >>> tracker.record(0)
+  >>> tracker.start_session()
+  >>> tracker.rates()
+  array([1., 0., 0.])
+  >>> saved = {"counts": tracker.counts, "proposals": tracker.proposals, "n_sessions": tracker.n_sessions}
+  >>> ExposureTracker(3, **saved).rates()
+  array([1., 0., 0.])
   """
 
   n_items: int
