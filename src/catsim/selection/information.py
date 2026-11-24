@@ -1,6 +1,7 @@
 """Information-based selectors: maximum information, Urry's rule and interval information."""
 
 import numpy
+from scipy import stats
 from typing_extensions import override
 
 from .. import irt
@@ -111,26 +112,19 @@ class UrrySelector(BaseSelector):
 class IntervalInfoSelector(BaseSelector):
   r"""Select the item whose information, integrated over an interval around the estimate, is largest.
 
-  By default the interval is the confidence interval of the interval information criterion
-  :cite:p:`Veerkamp1997`, which narrows as the test information grows:
-
-  .. math::
-
-      \arg\max_{i \in R} \int_{\theta_L}^{\theta_U} I_i(\theta)\, d\theta, \qquad
-      \theta_{L, U} = \hat\theta \mp \frac{\lambda}{\sqrt{I(\hat\theta)}}, \qquad
-      \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)
-
-  where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the
-  confidence level. A fixed half-width :math:`\delta` can be used instead. The selector applies no
-  exposure cap: ``context.exposure_rates`` is ignored.
+  By default the interval is the estimate plus or minus :math:`\lambda` times the estimator's
+  standard error (``context.se``), where :math:`\lambda` is the standard normal quantile of
+  ``(1 + confidence) / 2`` :cite:p:`Veerkamp1997`. It spans the whole ability scale before the first
+  response and narrows as the standard error falls. Setting ``interval`` fixes the half-width. The
+  selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
   interval : float or None, optional
-      Fixed half-width :math:`\delta` of the interval. Default is None, which uses the confidence
-      interval above.
+      Fixed half-width of the interval around the estimate. Default is None, which uses the
+      confidence interval.
   confidence : float, optional
-      Confidence level :math:`\gamma` of the default interval. Default is 0.95.
+      Confidence level of the default interval. Default is 0.95.
 
   Notes
   -----
@@ -197,10 +191,10 @@ class IntervalInfoSelector(BaseSelector):
     item_bank, theta = context.item_bank, context.theta
 
     if self._interval is None:
-      # infinite before any item is administered, since there is no information yet
-      lower, upper = irt.confidence_interval(theta, item_bank.get_items(context.administered_items), self._confidence)
+      # context.se is infinite before the first response, so the interval starts as the whole scale
+      half_width = float(stats.norm.ppf((1 + self._confidence) / 2)) * context.se
     else:
-      lower, upper = theta - self._interval, theta + self._interval
+      half_width = self._interval
 
-    information_integral = irt.info_integral(lower, upper, item_bank.items[candidates])
+    information_integral = irt.info_integral(theta - half_width, theta + half_width, item_bank.items[candidates])
     return pick_best(candidates, information_integral, context.rng)

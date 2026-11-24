@@ -485,40 +485,48 @@ class TestIntervalInfoSelector:
     with pytest.raises(ValueError, match=match):
       IntervalInfoSelector(**kwargs)
 
-  def test_default_interval_is_the_confidence_interval_of_the_estimate(self) -> None:
-    """Veerkamp & Berger (1997) integrate over theta_hat +/- z / sqrt(I(theta_hat)) of the administered items."""
+  def test_default_interval_is_scaled_by_the_context_standard_error(self) -> None:
+    """A selector that ignored context.se, such as one that recomputed the Fisher standard error, picks one item twice.
+
+    Over [-w, w] the 2PL integral is a [sigma(a (w - b)) - sigma(a (-w - b))]. With w = 1.96 * 0.15 = 0.29, item 0
+    (a = 2, b = 0) scores 0.572 and item 1 (a = 3, b = 1.5) 0.065; with w = 1.96 * 1.5 = 2.94, 1.989 and 2.961.
+    """
+    item_bank = ItemBank(np.array([[2.0, 0.0, 0.0, 1.0], [3.0, 1.5, 0.0, 1.0]]))
+
+    narrow = IntervalInfoSelector().select(make_context(item_bank, theta=0.0, se=0.15))
+    wide = IntervalInfoSelector().select(make_context(item_bank, theta=0.0, se=1.5))
+
+    assert (narrow, wide) == (0, 1)
+
+  def test_default_interval_with_the_fisher_standard_error_is_equation_11(self) -> None:
+    """With the MLE's standard error 1 / sqrt(I(theta_hat)), the interval must be Veerkamp & Berger's (1994) Eq. 11.
+
+    The quadrature over theta_hat +/- 1.96 SE picks item 51; the whole scale, an interval of the same width centred at 0
+    and one 2.576 SE wide each pick item 24.
+    """
     item_bank = ItemBank.generate(60, model="3PL", rng=7)
     administered = [3, 11, 25, 40, 52]
     theta = 0.7
-    half_width = 1.959963984540054 / np.sqrt(irt.total_information(theta, item_bank.items[administered]))
+    se = 1 / np.sqrt(irt.total_information(theta, item_bank.items[administered]))
+    half_width = 1.959963984540054 * se
     remaining = [i for i in range(item_bank.n_items) if i not in administered]
     integrals = [
       quad(irt.information, theta - half_width, theta + half_width, args=(item_bank.items[i],))[0] for i in remaining
     ]
 
-    selected = IntervalInfoSelector().select(make_context(item_bank, administered, theta=theta))
+    selected = IntervalInfoSelector().select(make_context(item_bank, administered, theta=theta, se=se))
 
     assert selected == remaining[int(np.argmax(integrals))]
 
-  def test_default_selection_adapts_to_the_estimate(self) -> None:
-    """The default no longer integrates over the whole ability scale, which ignored the estimate.
+  def test_default_interval_is_the_whole_scale_while_the_standard_error_is_infinite(self) -> None:
+    """An infinite standard error must integrate over the whole ability scale (Equation 16), where a 2PL item scores a.
 
-    Those integrals were NaN, so earlier versions administered items in bank order. Before any item is
-    administered the confidence interval is still unbounded, and the 2PL integral over it is a. With
-    equal discriminations, the item whose difficulty is nearest the estimate has the largest integral
-    over any interval centered on it.
+    Item 1 (a = 2, b = 5) then scores 2 against item 0's (a = 1, b = 0) 1. Over any interval narrower than
+    theta_hat +/- 4.98, item 0 scores more.
     """
-    items = np.column_stack([np.linspace(0.6, 2.0, 41), np.zeros(41), np.zeros(41), np.ones(41)])
-    assert IntervalInfoSelector().select(make_context(ItemBank(items), [], theta=0.0)) == 40
+    item_bank = ItemBank(np.array([[1.0, 0.0, 0.0, 1.0], [2.0, 5.0, 0.0, 1.0]]))
 
-    items[:, 0], items[:, 1] = 1.2, np.linspace(-3.0, 3.0, 41)
-    item_bank = ItemBank(items)
-    administered = [18, 19, 20, 21, 22]
-    low = IntervalInfoSelector().select(make_context(item_bank, administered, theta=-2.0))
-    high = IntervalInfoSelector().select(make_context(item_bank, administered, theta=2.0))
-
-    assert item_bank.difficulty[low] == pytest.approx(-1.95)
-    assert item_bank.difficulty[high] == pytest.approx(1.95)
+    assert IntervalInfoSelector().select(make_context(item_bank, theta=0.0, se=np.inf)) == 1
 
   def test_fixed_interval_matches_numerical_integration(self) -> None:
     """A fixed half-width integrates information over theta_hat +/- interval."""
