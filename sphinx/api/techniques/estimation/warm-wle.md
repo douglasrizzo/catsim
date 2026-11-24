@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.estimation.WarmLikelihoodEstimator`
-**Reference:** Warm (1989)
-
 # Warm Weighted Likelihood Estimator
+
+:Class: {py:class}`catsim.estimation.WarmLikelihoodEstimator`
+:Sources: Warm (1989)
 
 ## Motivation
 
@@ -56,6 +55,19 @@ does not use this approximation: it fails exactly where WLE matters most, becaus
 the MLE is infinite for all-correct and all-incorrect patterns, and with guessing it
 can sit on the search bound, where $I \approx 0$ makes the correction explode.
 
+The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
+is the Fisher one at the estimate, $1/\sqrt{I(\hat{\theta})}$, infinite where
+the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
+14), who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since
+version 3.0 its `semTheta` gives the WLE the maximum likelihood formula, because
+the corrected one sometimes led to mathematical problems ([catR's
+NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
+default `sem.type = "classic"` still does. Under the 1PL and 2PL models the
+corrected sum is the curvature of the weighted likelihood at its maximum, so it is
+positive; with guessing or slipping parameters it can be negative, which leaves no
+standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.
+
 ### Computation
 
 The modified score is evaluated at 121 equally spaced points over the search
@@ -72,32 +84,6 @@ Raîche, 2012), whose
 [`thetaEst.R`](https://github.com/cran/catR/blob/master/R/thetaEst.R) solves the
 same equation with `uniroot`; catsim adds the explicit handling of multiple
 roots.
-
-The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
-is the Fisher one at the estimate, $1/\sqrt{I(\hat{\theta})}$, infinite where
-the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
-14), who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since
-version 3.0 its `semTheta` gives the WLE the maximum likelihood formula, because
-the corrected one sometimes led to mathematical problems ([catR's
-NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
-default `sem.type = "classic"` still does. Under the 1PL and 2PL models the
-corrected sum is the curvature of the weighted likelihood at its maximum, so it is
-positive; with guessing or slipping parameters it can be negative, which leaves no
-standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
-3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.
-
-Against the WLE's sampling spread at a known ability (every response pattern for 5
-and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
-overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
-at 5 items. That is conservative: a standard-error stopper runs a few items longer
-than needed. Equation 14 roughly halves that gap. The sandwich formula of Magis
-(2016), catR's `sem.type = "new"`, is closest under the 3PL but underestimates the
-error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
-items on, the three agree within about 3%.
-
-The evaluation count is the number of
-modified-score evaluations: the 121 scan points, Brent's refinement of each
-bracketed root and, when several roots compete, the integrals that rank them.
 
 ## Parameters
 
@@ -117,21 +103,29 @@ bracketed root and, when several roots compete, the integrals that rank them.
      - Search range of the estimate. Must be finite, with the lower bound below the upper one.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+Against the WLE's sampling spread at a known ability (every response pattern for 5
+and 10 items, 3,000 simulated ones for 20 and 40), the classic formula
+overestimates the error in short tests, by 10% under the 2PL and 28% under the 3PL
+at 5 items. That is conservative: a standard-error stopper runs a few items longer
+than needed. Equation 14 roughly halves that gap. The sandwich formula of Magis
+(2016), catR's `sem.type = "new"`, is closest under the 3PL but underestimates the
+error under the 2PL (by 8% at 5 items), which would stop tests too early. From 20
+items on, the three agree within about 3%.
 
-1. With no administered items, the estimator returns the context's `theta` and `se` unchanged, after no evaluation.
-2. Every interior estimate is a root of the modified score equation, including for items with guessing.
-3. For items without guessing or slipping, the estimate maximizes $L(\theta)\sqrt{I(\theta)}$.
-4. The estimate is finite and inside the search interval for every response pattern, including
+## Guarantees
+
+1. Every interior estimate is a root of the modified score equation, including for items with guessing.
+2. For items without guessing or slipping, the estimate maximizes the likelihood under a Jeffreys prior.
+3. The estimate is finite and inside the search interval for every response pattern, including
    all-correct and all-incorrect patterns where the MLE diverges.
-5. Relative to a finite MLE, the WLE is pulled toward the abilities at which the administered items are most informative.
-6. On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
-   is small, and smaller than the MLE's first-order bias $-J/(2I^2)$ wherever that bias is
+4. Relative to a finite MLE, the WLE is pulled toward the abilities at which the administered items are most informative.
+5. On a short test without guessing, the exact expected bias (by enumeration of all response patterns)
+   is small, and smaller than the MLE's first-order bias above wherever that bias is
    non-negligible. With guessing and few items, the WLE at low ability is pulled upward, toward
    the items, so no unconditional bias guarantee is made for that case.
-7. The standard error is $1/\sqrt{I(\hat{\theta})}$ at the returned estimate, or `math.inf` where the information is 0.
+6. The standard error is the Fisher standard error at the returned estimate, or `math.inf` where the information is 0.
 
 ## References
 

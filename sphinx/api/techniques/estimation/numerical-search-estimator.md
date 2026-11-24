@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.estimation.NumericalSearchEstimator`
-**Reference:** Birnbaum (1968); Lord (1980); Dodd (1990)
-
 # Numerical Search Estimator (MLE)
+
+:Class: {py:class}`catsim.estimation.NumericalSearchEstimator`
+:Sources: Birnbaum (1968); Lord (1980); Dodd (1990)
 
 ## Motivation
 
@@ -16,38 +15,19 @@ response patterns, so every estimate is finite and inside the search bounds.
 
 ## Definition
 
-For administered items $i = 1, \dots, m$ and responses
-$u_i \in \{0,1\}$, the estimator maximizes
-
-$$
-\ell(\theta)
-=
-\sum_{i=1}^{m}
-\left[
-  u_i \log P_i(\theta)
-  +
-  (1-u_i)\log(1-P_i(\theta))
-\right].
-$$
-
-The returned estimate is
+The estimator maximizes the log-likelihood $\log L(\theta)$ of the responses
+$u_i \in \{0,1\}$ to the administered items, which
+{py:func}`catsim.irt.log_likelihood` computes. The returned estimate is
 
 $$
 \hat{\theta}_{\mathrm{MLE}}
 =
-\arg\max_{\theta \in [\theta_{\min}, \theta_{\max}]} \ell(\theta),
+\arg\max_{\theta \in [\theta_{\min}, \theta_{\max}]} \log L(\theta),
 $$
 
 with search bounds $[\theta_{\min}, \theta_{\max}]$ given by `bounds`, by default
 the package's extended theta range $[-6, 6]$ (`THETA_MIN_EXTENDED`,
-`THETA_MAX_EXTENDED`). For mixed
-response patterns, the implementation minimizes $-\ell(\theta)$ with SciPy's
-bounded Brent method (Brent, 2002), which never evaluates outside the bounds and
-takes `tol` as its absolute tolerance on $\theta$ (SciPy's `xatol`). With
-guessing, the likelihood can have several local maxima (Chang & Ying, 1996,
-p. 223; Veerkamp & Berger, 1994, p. 4), and the search returns one of them. With
-guessing or slipping parameters, the likelihood of a mixed pattern can also
-still be rising at a bound, and the estimate is then within `tol` of that bound.
+`THETA_MAX_EXTENDED`).
 
 When every response is identical, the unconstrained MLE is not finite. In that
 case the implementation takes Dodd's heuristic step from the current estimate
@@ -86,8 +66,14 @@ $$
 
 where $I$ is the test information of the administered items, and it is infinite
 where $I(\hat{\theta}) = 0$. After Dodd's step it is the same formula at the
-stepped estimate. Its evaluation count is the number of log-likelihood
-evaluations SciPy's search made, and 0 after Dodd's step, which evaluates none.
+stepped estimate.
+
+### Computation
+
+For mixed response patterns, the implementation minimizes $-\log L(\theta)$ with
+SciPy's bounded Brent method, {py:func}`scipy.optimize.minimize_scalar` (Brent,
+2002), which never evaluates outside the bounds and takes `tol` as its absolute
+tolerance on $\theta$ (SciPy's `xatol`).
 
 ## Parameters
 
@@ -108,16 +94,18 @@ evaluations SciPy's search made, and 0 after Dodd's step, which evaluates none.
        Must be finite, with the lower bound below the upper one.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+With guessing, the likelihood can have several local maxima (Chang & Ying, 1996,
+p. 223; Veerkamp & Berger, 1994, p. 4), and the search returns one of them. With
+guessing or slipping parameters, the likelihood of a mixed pattern can also
+still be rising at a bound, and the estimate is then within `tol` of that bound.
 
-1. For mixed response patterns, it returns a local maximum of the log-likelihood inside the search bounds, to within `tol`.
-2. For all-correct and all-incorrect patterns, it returns Dodd's step, which never moves against the responses and lies inside the search bounds.
-3. The standard error is $1/\sqrt{I(\hat{\theta})}$ at the returned estimate, or `math.inf` where the information is 0.
-4. The evaluation count is the optimizer's reported function evaluations, and 0 for Dodd's step.
-5. A `tol` that is not positive is rejected at construction.
-6. With no administered items, it returns the context's `theta` and `se` unchanged, after no evaluation.
+## Guarantees
+
+1. For mixed response patterns, the estimate is a local maximum of the log-likelihood inside `bounds`, to within `tol`.
+2. For all-correct and all-incorrect patterns, the estimate is Dodd's step: finite, inside `bounds`, and never moved against the responses.
+3. The standard error is the asymptotic one above, at the returned estimate, and `math.inf` where the test information is 0.
 
 ## References
 
