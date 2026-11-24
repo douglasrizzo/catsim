@@ -32,10 +32,6 @@ progressive-selector
 proportional-selector
 cluster-selector
 stratified-selector
-a-strat-selector
-a-strat-b-block-selector
-max-info-strat-selector
-max-info-b-block-selector
 mei-selector
 mlwi-selector
 ```
