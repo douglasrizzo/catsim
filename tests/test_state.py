@@ -33,7 +33,7 @@ def test_session_state_rejects_a_history_that_does_not_match_its_responses(
     CatSessionState(
       session_id=0,
       estimates=[Estimate(theta, math.inf) for theta in thetas],
-      administered_item_ids=items,
+      administered_items=items,
       responses=responses,
     )
 
@@ -58,7 +58,7 @@ def test_session_state_rejects_estimates_that_are_not_estimate_objects(estimates
     CatSessionState(
       session_id=0,
       estimates=estimates,  # type: ignore[arg-type]
-      administered_item_ids=list(range(n_responses)),
+      administered_items=list(range(n_responses)),
       responses=[True] * n_responses,
     )
 
@@ -70,7 +70,7 @@ def test_a_snapshot_keeps_the_estimates_and_both_derive_the_history_from_them() 
   current_se read another field or another entry than the last.
   """
   estimates = [Estimate(0.0, math.inf, 0), Estimate(0.6, 1.1, 14), Estimate(0.4, 0.8, 12)]
-  state = CatSessionState(session_id=0, estimates=estimates, administered_item_ids=[2, 5], responses=[True, False])
+  state = CatSessionState(session_id=0, estimates=estimates, administered_items=[2, 5], responses=[True, False])
 
   snapshot = state.snapshot()
 

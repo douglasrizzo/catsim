@@ -125,7 +125,7 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
   @rule()
   def step(self) -> None:
     prev_hist = len(self.session.theta_history)
-    prev_admin = len(self.session.administered_item_ids)
+    prev_admin = len(self.session.administered_items)
     was_stopped = self.session.is_stopped
     prev_reason = self.session.stop_reason
     result = self.engine.step(self.session, self.response_provider, self.context)
@@ -133,12 +133,12 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
       # Stepping a terminal session must be a no-op.
       assert result.stopped is True
       assert result.selected_item_id is None
-      assert len(self.session.administered_item_ids) == prev_admin
+      assert len(self.session.administered_items) == prev_admin
       assert self.session.stop_reason == prev_reason
     elif not self.session.is_stopped:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
-        assert len(self.session.administered_item_ids) == prev_admin + 1
+        assert len(self.session.administered_items) == prev_admin + 1
         assert result.response is True
     else:
       assert result.stopped is True
@@ -149,11 +149,11 @@ class CatEngineOrchestrationMachine(RuleBasedStateMachine):
   def session_lists_consistent(self) -> None:
     s = self.session
     n = self.item_bank.n_items
-    for i in s.administered_item_ids:
+    for i in s.administered_items:
       assert 0 <= int(i) < n
-    assert len(s.responses) == len(s.administered_item_ids)
-    assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
-    assert len(s.theta_history) == 1 + len(s.administered_item_ids)
+    assert len(s.responses) == len(s.administered_items)
+    assert len(set(s.administered_items)) == len(s.administered_items)
+    assert len(s.theta_history) == 1 + len(s.administered_items)
     assert s.stop_reason in {None, StopReason.STOPPER}
 
 
@@ -187,19 +187,19 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
   @rule()
   def step(self) -> None:
     prev_hist = len(self.session.theta_history)
-    prev_admin = len(self.session.administered_item_ids)
+    prev_admin = len(self.session.administered_items)
     was_stopped = self.session.is_stopped
     prev_reason = self.session.stop_reason
     result = self.engine.step(self.session, self.response_provider, self.context)
     if was_stopped:
       assert result.stopped is True
       assert result.selected_item_id is None
-      assert len(self.session.administered_item_ids) == prev_admin
+      assert len(self.session.administered_items) == prev_admin
       assert self.session.stop_reason == prev_reason
     elif not self.session.is_stopped:
       if result.selected_item_id is not None:
         assert len(self.session.theta_history) == prev_hist + 1
-        assert len(self.session.administered_item_ids) == prev_admin + 1
+        assert len(self.session.administered_items) == prev_admin + 1
         assert np.isfinite(self.session.current_theta)
     else:
       assert result.stopped is True
@@ -210,11 +210,11 @@ class CatEngineIntegrationMachine(RuleBasedStateMachine):
   def session_lists_consistent(self) -> None:
     s = self.session
     n = self.item_bank.n_items
-    for i in s.administered_item_ids:
+    for i in s.administered_items:
       assert 0 <= int(i) < n
-    assert len(s.responses) == len(s.administered_item_ids)
-    assert len(set(s.administered_item_ids)) == len(s.administered_item_ids)
-    assert len(s.theta_history) == 1 + len(s.administered_item_ids)
+    assert len(s.responses) == len(s.administered_items)
+    assert len(set(s.administered_items)) == len(s.administered_items)
+    assert len(s.theta_history) == 1 + len(s.administered_items)
     assert s.stop_reason in {None, StopReason.STOPPER}
 
 

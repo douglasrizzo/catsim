@@ -289,7 +289,7 @@ class SPRTStopper(BaseStopper):
   compute the statistic from the context each time instead of storing the last classification
   or statistic. An application classifies a finished session by building its context, the kind
   `StopRule.satisfied` takes: `StepContext(item_bank=bank, rng=rng,
-  administered_items=tuple(session.administered_item_ids), responses=tuple(session.responses),
+  administered_items=tuple(session.administered_items), responses=tuple(session.responses),
   theta=session.current_theta, se=session.current_se)`. The SPRT reads only the items and
   responses, but the other stoppers of a rule, and the GLR and curtailment stoppers, read the
   estimate and its error, which default to 0 and infinity. `classify` is the decision whether the

@@ -127,8 +127,8 @@ class SimulationResult:
 
   @property
   def administered_items(self) -> list[list[int]]:
-    """Return administered item ids for each session."""
-    return [session.administered_item_ids for session in self.sessions]
+    """Return each session's administered items, in the order given."""
+    return [session.administered_items for session in self.sessions]
 
   @property
   def theta_histories(self) -> list[list[float]]:
@@ -136,8 +136,8 @@ class SimulationResult:
     return [list(session.theta_history) for session in self.sessions]
 
   @property
-  def response_vectors(self) -> list[list[bool]]:
-    """Return response vectors for each session."""
+  def responses(self) -> list[list[bool]]:
+    """Return each session's responses, in the order given."""
     return [session.responses for session in self.sessions]
 
   @property

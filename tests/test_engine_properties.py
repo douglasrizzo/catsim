@@ -46,7 +46,7 @@ def test_select_next_returns_unseen_item_within_bank(
   state = CatSessionState(
     session_id=0,
     estimates=[Estimate(0.0, math.inf)] * (administered_prefix + 1),
-    administered_item_ids=administered,
+    administered_items=administered,
     responses=[True] * administered_prefix,
   )
   ctx = RunContext(rng=np.random.default_rng(seed))

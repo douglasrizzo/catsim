@@ -108,7 +108,7 @@ class TestSimulationRunnerRun:
     other_seed = simulation_runner.run(thetas, rng=4)
 
     assert second.administered_items == first.administered_items
-    assert second.response_vectors == first.response_vectors
+    assert second.responses == first.responses
     assert second.theta_histories == first.theta_histories
     assert np.array_equal(second.exposure_counts, first.exposure_counts)
     assert other_seed.administered_items != first.administered_items
@@ -149,7 +149,7 @@ class TestSimulationRunnerRun:
     assert len(simulation_result.sessions) == 5
     for session in simulation_result.sessions:
       assert session.stop_reason is StopReason.STOPPER
-      assert (len(session.administered_item_ids), len(session.responses), len(session.theta_history)) == (10, 10, 11)
+      assert (len(session.administered_items), len(session.responses), len(session.theta_history)) == (10, 10, 11)
 
   def test_each_session_sees_the_exposure_of_the_sessions_before_it(self, item_bank: ItemBank) -> None:
     """The runner shares one tracker across its sessions, so each sees the exposure of the examinees before it.
@@ -177,7 +177,7 @@ def finished_session(session_id: int, items: list[int]) -> CatSessionState:
   return CatSessionState(
     session_id=session_id,
     estimates=[Estimate(0.0, math.inf)] * (len(items) + 1),
-    administered_item_ids=items,
+    administered_items=items,
     responses=[True] * len(items),
   )
 
@@ -204,14 +204,14 @@ def two_finished_sessions() -> list[CatSessionState]:
       session_id=0,
       estimates=[Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 7), Estimate(0.6, 0.9, 5)],
       true_theta=0.5,
-      administered_item_ids=[3, 1],
+      administered_items=[3, 1],
       responses=[True, False],
     ),
     CatSessionState(
       session_id=1,
       estimates=[Estimate(0.0, math.inf), Estimate(-0.8, 1.1, 4)],
       true_theta=-1.0,
-      administered_item_ids=[2],
+      administered_items=[2],
       responses=[False],
     ),
   ]
@@ -260,13 +260,13 @@ class TestSimulationResult:
       CatSessionState(
         session_id=0,
         estimates=[Estimate(0.0, math.inf, 0), Estimate(0.4, 1.2, 3), Estimate(0.6, 0.9)],
-        administered_item_ids=[3, 1],
+        administered_items=[3, 1],
         responses=[True, False],
       ),
       CatSessionState(
         session_id=1,
         estimates=[Estimate(0.0, math.inf, 0), Estimate(-0.8, 1.1, 4)],
-        administered_item_ids=[2],
+        administered_items=[2],
         responses=[False],
       ),
     ]

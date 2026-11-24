@@ -55,7 +55,7 @@ class CatSessionState:
   session_id: Hashable
   estimates: list[Estimate]
   true_theta: float | None = None
-  administered_item_ids: list[int] = field(default_factory=list)
+  administered_items: list[int] = field(default_factory=list)
   responses: list[bool] = field(default_factory=list)
   stop_reason: StopReason | None = None
 
@@ -63,7 +63,7 @@ class CatSessionState:
     """Take its own copy of the histories and reject a session whose entries do not line up."""
     # The engine appends to these lists, so they must be lists the session owns: a snapshot's tuples
     # would fail half-way through a step, and a caller's lists would change under the caller.
-    self.administered_item_ids = list(self.administered_item_ids)
+    self.administered_items = list(self.administered_items)
     self.responses = list(self.responses)
     self.estimates = list(self.estimates)
     if not all(isinstance(estimate, Estimate) for estimate in self.estimates):
@@ -74,10 +74,10 @@ class CatSessionState:
       # A stop reason restored from storage comes back as its string value.
       self.stop_reason = StopReason(self.stop_reason)
     n_responses = len(self.responses)
-    if len(self.administered_item_ids) != n_responses:
+    if len(self.administered_items) != n_responses:
       msg = (
         f"Session {self.session_id} needs one response per administered item, got "
-        f"len(administered_item_ids)={len(self.administered_item_ids)} and len(responses)={n_responses}"
+        f"len(administered_items)={len(self.administered_items)} and len(responses)={n_responses}"
       )
       raise ValueError(msg)
     if len(self.estimates) != n_responses + 1:
@@ -110,7 +110,7 @@ class CatSessionState:
   @property
   def administered_count(self) -> int:
     """Return the number of administered items."""
-    return len(self.administered_item_ids)
+    return len(self.administered_items)
 
   def snapshot(self) -> CatSessionSnapshot:
     """Return an immutable copy of the current session state."""
@@ -118,7 +118,7 @@ class CatSessionState:
       session_id=self.session_id,
       estimates=tuple(self.estimates),
       true_theta=self.true_theta,
-      administered_item_ids=tuple(self.administered_item_ids),
+      administered_items=tuple(self.administered_items),
       responses=tuple(self.responses),
       stop_reason=self.stop_reason,
     )
@@ -131,7 +131,7 @@ class CatSessionSnapshot:
   session_id: Hashable
   estimates: tuple[Estimate, ...]
   true_theta: float | None
-  administered_item_ids: tuple[int, ...]
+  administered_items: tuple[int, ...]
   responses: tuple[bool, ...]
   stop_reason: StopReason | None
 
@@ -169,7 +169,7 @@ class CatStepResult:
   response: bool | None
 
   @property
-  def updated_theta(self) -> float:
+  def current_theta(self) -> float:
     """Return the ability estimate after the step."""
     return self.session.current_theta
 
