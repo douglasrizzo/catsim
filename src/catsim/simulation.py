@@ -141,22 +141,22 @@ class SimulationResult:
     return [session.responses for session in self.sessions]
 
   @property
-  def final_thetas(self) -> list[float]:
+  def final_thetas(self) -> FloatArray:
     """Return each session's final ability estimate."""
-    return [session.current_theta for session in self.sessions]
+    return numpy.array([session.current_theta for session in self.sessions], dtype=float)
 
   @property
-  def final_ses(self) -> list[float]:
+  def final_ses(self) -> FloatArray:
     """Return the standard error of each session's final ability estimate.
 
     It is infinite for a session that ended before its first response.
     """
-    return [session.current_se for session in self.sessions]
+    return numpy.array([session.current_se for session in self.sessions], dtype=float)
 
   @property
-  def test_lengths(self) -> list[int]:
+  def test_lengths(self) -> IntArray:
     """Return how many items each session administered."""
-    return [session.administered_count for session in self.sessions]
+    return numpy.array([session.administered_count for session in self.sessions], dtype=int)
 
   @property
   def true_thetas(self) -> FloatArray:
@@ -259,13 +259,11 @@ class SimulationResult:
     there is no overlap rate for a run of variable-length tests, for a run with no sessions or for
     tests of no items.
     """
-    if not self.sessions:
+    lengths = self.test_lengths
+    if lengths.size == 0:
       return None
-    test_sizes = set(self.test_lengths)
-    if len(test_sizes) != 1:
-      return None
-    test_size = test_sizes.pop()
-    if test_size == 0:
+    test_size = int(lengths[0])
+    if test_size == 0 or numpy.any(lengths != test_size):
       return None
     return metrics.overlap_rate(self.exposure_rates, test_size)
 

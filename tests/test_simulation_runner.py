@@ -225,13 +225,16 @@ class TestSimulationResult:
 
     Fails if final_thetas or final_ses read an earlier estimate (such as the initial one), if
     theta_histories drops the initial estimate, or if test_lengths counts the estimates (one more
-    than the items).
+    than the items). Fails too if final_thetas, final_ses or test_lengths is a list rather than an
+    array (no ``.mean()``, no elementwise ``result.final_ses < 0.4``), or if test_lengths holds
+    floats, which ``numpy.bincount`` rejects.
     """
     result = result_of(two_finished_sessions())
 
-    assert result.final_thetas == [0.6, -0.8]
-    assert result.final_ses == [0.9, 1.1]
-    assert result.test_lengths == [2, 1]
+    assert result.final_thetas.tolist() == [0.6, -0.8]
+    assert result.final_ses.tolist() == [0.9, 1.1]
+    assert result.test_lengths.tolist() == [2, 1]
+    assert np.bincount(result.test_lengths).tolist() == [0, 1, 1]
     assert result.theta_histories == [[0.0, 0.4, 0.6], [0.0, -0.8]]
     assert result.true_thetas.tolist() == [0.5, -1.0]
 
