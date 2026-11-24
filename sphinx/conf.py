@@ -63,10 +63,19 @@ bibtex_bibfiles = ["references.bib"]
 bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
 
+# Each inventory comes from its project's site, or from the copy stored in _inventories/ when the
+# site cannot be reached, so that the strict build does not fail on a network timeout.
+# CONTRIBUTING.md ("Building the documentation") gives the command that refreshes the copies.
+# A site that stalls rather than refusing the connection falls back to the copy after this many seconds.
+intersphinx_timeout = 10
 intersphinx_mapping = {
-  "python": ("https://docs.python.org/3", None),
-  "numpy": ("https://numpy.org/doc/stable/", None),
-  "matplotlib": ("https://matplotlib.org/stable/", None),
+  name: (url, (None, f"_inventories/{name}.inv"))
+  for name, url in {
+    "python": "https://docs.python.org/3/",
+    "numpy": "https://numpy.org/doc/stable/",
+    "matplotlib": "https://matplotlib.org/stable/",
+    "scipy": "https://docs.scipy.org/doc/scipy/",
+  }.items()
 }
 
 source_suffix = {

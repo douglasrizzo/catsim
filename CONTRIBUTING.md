@@ -52,6 +52,12 @@ uv run --group docs sphinx-build -b html -W --keep-going sphinx sphinx/_build/ht
 
 `-W` turns warnings into errors. The build also regenerates `README.md` from `sphinx/readme_head.md` and `sphinx/readme_body.md`, so edit those two files instead of `README.md`.
 
+Links to the Python, NumPy, Matplotlib and SciPy documentation come from those projects' intersphinx inventories. The build downloads each inventory and, when a site cannot be reached, reads the copy stored in `sphinx/_inventories/`. Refresh the stored copies with:
+
+```bash
+cd sphinx && for p in python=https://docs.python.org/3/ numpy=https://numpy.org/doc/stable/ matplotlib=https://matplotlib.org/stable/ scipy=https://docs.scipy.org/doc/scipy/; do curl -fsSL -o "_inventories/${p%%=*}.inv" "${p#*=}objects.inv"; done
+```
+
 A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the `dev` → `main` pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer's approval in the `pypi` environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.
 
 ## Adding a technique
