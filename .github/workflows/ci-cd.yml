@@ -59,6 +59,8 @@ jobs:
     env:
       # Force a headless backend so plot tests don't depend on Tk/Tcl being available on runners.
       MPLBACKEND: Agg
+      # uv would otherwise take the repository's .python-version (3.13) over setup-python's interpreter.
+      UV_PYTHON: ${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
