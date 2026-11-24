@@ -913,10 +913,9 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">satisfied</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">BaseStopper</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""Return the stoppers that hold for a session, regardless of `min_items`.</span>
 
-<span class="sd">    Called with a finished session's items, final estimate and its standard error</span>
-<span class="sd">    (``se=session.current_se``; a context built without it has an infinite error, which no</span>
-<span class="sd">    precision stopper accepts), it tells which criteria ended the session, for example precision</span>
-<span class="sd">    or the length cap.</span>
+<span class="sd">    Called with a finished session's context, ``rule.satisfied(engine.context(session))``, it tells</span>
+<span class="sd">    which criteria hold as the session ended, for example precision or the length cap; when the</span>
+<span class="sd">    session's ``stop_reason`` is ``STOPPER``, they are the criteria that ended it.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>

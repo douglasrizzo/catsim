@@ -794,6 +794,8 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Protocol</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span><span class="p">,</span> <span class="n">StepContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExcludedItemError</span><span class="p">,</span> <span class="n">NoItemsAvailableError</span>
@@ -802,8 +804,6 @@ window.runMermaid = runMermaid;</script>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
-
-  <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
   <span class="kn">from</span><span class="w"> </span><span class="nn">.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">.exposure</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseExposureControl</span>
@@ -927,22 +927,49 @@ window.runMermaid = runMermaid;</script>
 <span class="w">    </span><span class="sd">"""Return the item bank the engine's sessions are tested on."""</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">_step_context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepContext</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return what a strategy may read about a session as it stands.</span>
+<div class="viewcode-block" id="CatEngine.context">
+<a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.context">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StepContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return what the strategies may read about a session as it stands.</span>
+
+<span class="sd">    It is the context the selector is given for its next proposal: the session's items, responses,</span>
+<span class="sd">    excluded items and current estimate with its standard error, with the run's generator and</span>
+<span class="sd">    exposure rates. Without a run context, as for a finished session of a</span>
+<span class="sd">    :class:`~catsim.SimulationResult`, the generator is a fresh unseeded one and there are no</span>
+<span class="sd">    exposure rates, so a selector given it applies no ``r_max`` cap. A</span>
+<span class="sd">    :class:`~catsim.stopping.StopRule` asked with it tells which of its criteria hold. See</span>
+<span class="sd">    :doc:`/live-sessions`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    state : CatSessionState</span>
 <span class="sd">        The session.</span>
-<span class="sd">    context : RunContext</span>
+<span class="sd">    context : RunContext or None, optional</span>
 <span class="sd">        Runtime services of the run, which give the random generator and the exposure rates.</span>
+<span class="sd">        Default is None.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    StepContext</span>
-<span class="sd">        The session's items, responses, excluded items and current estimate with its standard</span>
-<span class="sd">        error.</span>
+<span class="sd">        The session's bank, items, responses, excluded items, current estimate and standard error,</span>
+<span class="sd">        generator and exposure rates.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from catsim import CatEngine, ItemBank, SimulationRunner</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
+<span class="sd">    &gt;&gt;&gt; rule = StopRule(StandardErrorStopper(0.2), MaxLengthStopper(5))</span>
+<span class="sd">    &gt;&gt;&gt; bank = ItemBank.generate(50, rng=0)</span>
+<span class="sd">    &gt;&gt;&gt; engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), rule)</span>
+<span class="sd">    &gt;&gt;&gt; session = SimulationRunner(engine).run([0.0], rng=0).sessions[0]</span>
+<span class="sd">    &gt;&gt;&gt; rule.satisfied(engine.context(session))</span>
+<span class="sd">    (MaxLengthStopper(max_items=5),)</span>
 <span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">context</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">())</span>
     <span class="n">tracker</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">exposure_tracker</span>
     <span class="k">return</span> <span class="n">StepContext</span><span class="p">(</span>
       <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span>
@@ -953,7 +980,8 @@ window.runMermaid = runMermaid;</script>
       <span class="n">theta</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_theta</span><span class="p">,</span>
       <span class="n">se</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">current_se</span><span class="p">,</span>
       <span class="n">exposure_rates</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">tracker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">(),</span>
-    <span class="p">)</span>
+    <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="CatEngine.start_session">
 <a class="viewcode-back" href="../../api/engine.html#catsim.CatEngine.start_session">[docs]</a>
@@ -1007,7 +1035,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    bool</span>
 <span class="sd">        What the stopper says about the session as it stands.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)))</span></div>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopper</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)))</span></div>
 
 
 <div class="viewcode-block" id="CatEngine.select_next">
@@ -1069,7 +1097,7 @@ window.runMermaid = runMermaid;</script>
 
     <span class="n">declined</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepted_item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">),</span> <span class="n">declined</span><span class="p">)</span>
+      <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepted_item</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">),</span> <span class="n">declined</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">NoItemsAvailableError</span><span class="p">:</span>
       <span class="n">item_id</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># Committed only here, so a selection that raises changes neither the session nor the tracker.</span>
@@ -1159,7 +1187,7 @@ window.runMermaid = runMermaid;</script>
       <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Session </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">session_id</span><span class="si">}</span><span class="s2"> has stopped (reason: </span><span class="si">{</span><span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span><span class="si">}</span><span class="s2">) and accepts no more responses"</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="n">irt</span><span class="o">.</span><span class="n">validate_response_vector</span><span class="p">((</span><span class="n">response</span><span class="p">,),</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_step_context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="n">item_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checked_item</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">item_id</span><span class="p">)</span>
 
     <span class="n">response</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>

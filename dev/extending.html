@@ -640,8 +640,9 @@ context at every call, never stored.</p>
 </pre></div>
 </div>
 <p>Among the areas with items left, <code class="docutils literal notranslate"><span class="pre">argmin</span></code> picks the one given least, the lowest-numbered on a tie.
-A strategy can be called by hand, with a context built from its two required fields and any
-others, which is how to test one:</p>
+A strategy can be called by hand, which is how to test one, with a context built from its two
+required fields and any others (for a session an engine runs, <a class="reference internal" href="api/engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">context()</span></code></a>
+gives the one its selector sees next):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="s2">"3PL"</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">areas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">resize</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
 <span class="n">selector</span> <span class="o">=</span> <span class="n">ContentBalancedSelector</span><span class="p">(</span><span class="n">areas</span><span class="p">,</span> <span class="n">r_max</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>

@@ -105,11 +105,21 @@ the reason is a {py:class}`~catsim.StopReason`:
 
 Each reason equals its string, so `session.stop_reason == "stopper"` holds, and a saved string
 restores it. `NO_ITEMS` does not always mean that the bank ran out: a selector that follows a fixed
-list or works through strata can run out first. To tell which criterion of a
-{py:class}`~catsim.stopping.StopRule` ended a test, compare the session's `current_se` and
-`administered_count` with its targets, or ask the rule ({ref}`combining-stopping-rules`). A stopped
-session takes no more responses: `apply_response` raises `ValueError`, and `select_next` keeps
-returning `None`.
+list or works through strata can run out first. A stopped session takes no more responses:
+`apply_response` raises `ValueError`, and `select_next` keeps returning `None`.
+
+To tell which criteria of a {py:class}`~catsim.stopping.StopRule` hold when a test ends (those that
+ended it, when its `stop_reason` is `STOPPER`), compare the
+session's `current_se` and `administered_count` with its targets, or ask the rule
+({ref}`combining-stopping-rules`) about the session as {py:meth}`~catsim.CatEngine.context` gives
+it:
+
+```python
+print(stopper.satisfied(engine.context(session)))
+```
+
+The rule returns the stoppers that hold, here `(StandardErrorStopper(max_se=0.4),)`: the standard
+error reached its target before the test reached 25 items.
 
 ## Save and Resume a Session
 

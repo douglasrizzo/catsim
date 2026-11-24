@@ -565,11 +565,18 @@ the reason is a <a class="reference internal" href="api/state.html#catsim.StopRe
 </div>
 <p>Each reason equals its string, so <code class="docutils literal notranslate"><span class="pre">session.stop_reason</span> <span class="pre">==</span> <span class="pre">&quot;stopper&quot;</span></code> holds, and a saved string
 restores it. <code class="docutils literal notranslate"><span class="pre">NO_ITEMS</span></code> does not always mean that the bank ran out: a selector that follows a fixed
-list or works through strata can run out first. To tell which criterion of a
-<a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> ended a test, compare the session’s <code class="docutils literal notranslate"><span class="pre">current_se</span></code> and
-<code class="docutils literal notranslate"><span class="pre">administered_count</span></code> with its targets, or ask the rule (<a class="reference internal" href="api/techniques/stopping/index.html#combining-stopping-rules"><span class="std std-ref">Combining stopping rules</span></a>). A stopped
-session takes no more responses: <code class="docutils literal notranslate"><span class="pre">apply_response</span></code> raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, and <code class="docutils literal notranslate"><span class="pre">select_next</span></code> keeps
-returning <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+list or works through strata can run out first. A stopped session takes no more responses:
+<code class="docutils literal notranslate"><span class="pre">apply_response</span></code> raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, and <code class="docutils literal notranslate"><span class="pre">select_next</span></code> keeps returning <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>To tell which criteria of a <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> hold when a test ends (those that
+ended it, when its <code class="docutils literal notranslate"><span class="pre">stop_reason</span></code> is <code class="docutils literal notranslate"><span class="pre">STOPPER</span></code>), compare the
+session’s <code class="docutils literal notranslate"><span class="pre">current_se</span></code> and <code class="docutils literal notranslate"><span class="pre">administered_count</span></code> with its targets, or ask the rule
+(<a class="reference internal" href="api/techniques/stopping/index.html#combining-stopping-rules"><span class="std std-ref">Combining stopping rules</span></a>) about the session as <a class="reference internal" href="api/engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">context()</span></code></a> gives
+it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stopper</span><span class="o">.</span><span class="n">satisfied</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">session</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>The rule returns the stoppers that hold, here <code class="docutils literal notranslate"><span class="pre">(StandardErrorStopper(max_se=0.4),)</span></code>: the standard
+error reached its target before the test reached 25 items.</p>
 </section>
 <section id="save-and-resume-a-session">
 <h2>Save and Resume a Session<a class="headerlink" href="#save-and-resume-a-session" title="Link to this heading">#</a></h2>

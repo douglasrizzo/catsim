@@ -48,9 +48,9 @@ $$
 Equivalently, the interval lies within one band exactly when no boundary lies
 strictly inside it, which is what the implementation checks. Before any response
 the standard error is infinite, and so is the interval, so the test does not
-stop. A context built by hand, such as one for
-{meth}`~catsim.stopping.StopRule.satisfied` after a run, must pass the session's
-`current_se` as `se`, whose default is infinite.
+stop. To ask {meth}`~catsim.stopping.StopRule.satisfied` about a finished
+session, pass it {meth}`engine.context(session) <catsim.CatEngine.context>`, which
+carries the session's standard error.
 
 ## Parameters
 

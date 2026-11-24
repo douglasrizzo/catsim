@@ -35,9 +35,10 @@ information of the administered test at the current estimate. For
 standard deviation, and for
 {doc}`MAP </api/techniques/estimation/map-estimator>` the information plus the
 prior's negative curvature. Before any response the standard error is
-infinite, so the test does not stop. A context built by hand, such as one for
-{meth}`~catsim.stopping.StopRule.satisfied` after a run, must pass the session's
-`current_se` as `se`, whose default is infinite. As in catR, items are
+infinite, so the test does not stop. To ask
+{meth}`~catsim.stopping.StopRule.satisfied` about a finished session, pass it
+{meth}`engine.context(session) <catsim.CatEngine.context>`, which carries the session's
+standard error. As in catR, items are
 administered "until the standard error of the provisional ability estimate gets
 smaller than or equal to that threshold" (Magis and Raîche, 2012, p. 11).
 

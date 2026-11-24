@@ -501,9 +501,10 @@ information of the administered test at the current estimate. For
 standard deviation, and for
 <a class="reference internal" href="../estimation/map-estimator.html"><span class="doc">MAP</span></a> the information plus the
 prior’s negative curvature. Before any response the standard error is
-infinite, so the test does not stop. A context built by hand, such as one for
-<a class="reference internal" href="index.html#catsim.stopping.StopRule.satisfied" title="catsim.stopping.StopRule.satisfied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">satisfied()</span></code></a> after a run, must pass the session’s
-<code class="docutils literal notranslate"><span class="pre">current_se</span></code> as <code class="docutils literal notranslate"><span class="pre">se</span></code>, whose default is infinite. As in catR, items are
+infinite, so the test does not stop. To ask
+<a class="reference internal" href="index.html#catsim.stopping.StopRule.satisfied" title="catsim.stopping.StopRule.satisfied"><code class="xref py py-meth docutils literal notranslate"><span class="pre">satisfied()</span></code></a> about a finished session, pass it
+<a class="reference internal" href="../../engine.html#catsim.CatEngine.context" title="catsim.CatEngine.context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">engine.context(session)</span></code></a>, which carries the session’s
+standard error. As in catR, items are
 administered “until the standard error of the provisional ability estimate gets
 smaller than or equal to that threshold” (Magis and Raîche, 2012, p. 11).</p>
 <p>Samejima (1977, p. 238) suggests terminating an adaptive test when the test

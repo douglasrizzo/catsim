@@ -537,6 +537,51 @@ the estimator returns something other than an <a class="reference internal" href
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="catsim.CatEngine.context">
+<span class="sig-name descname"><span class="pre">context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.CatSessionState" title="catsim.state.CatSessionState"><span class="pre">CatSessionState</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.RunContext" title="catsim.engine.RunContext"><span class="pre">RunContext</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="context.html#catsim.StepContext" title="catsim.context.StepContext"><span class="pre">StepContext</span></a></span></span><a class="reference internal" href="../_modules/catsim/engine.html#CatEngine.context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.CatEngine.context" title="Link to this definition">#</a></dt>
+<dd><p>Return what the strategies may read about a session as it stands.</p>
+<p>It is the context the selector is given for its next proposal: the session’s items, responses,
+excluded items and current estimate with its standard error, with the run’s generator and
+exposure rates. Without a run context, as for a finished session of a
+<a class="reference internal" href="simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a>, the generator is a fresh unseeded one and there are no
+exposure rates, so a selector given it applies no <code class="docutils literal notranslate"><span class="pre">r_max</span></code> cap. A
+<a class="reference internal" href="techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopRule</span></code></a> asked with it tells which of its criteria hold. See
+<a class="reference internal" href="../live-sessions.html"><span class="doc">Live CAT Sessions</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>state</strong><span class="classifier">CatSessionState</span></dt><dd><p>The session.</p>
+</dd>
+<dt><strong>context</strong><span class="classifier">RunContext or None, optional</span></dt><dd><p>Runtime services of the run, which give the random generator and the exposure rates.
+Default is None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>StepContext</dt><dd><p>The session’s bank, items, responses, excluded items, current estimate and standard error,
+generator and exposure rates.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">SimulationRunner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rule</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">rule</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">session</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sessions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rule</span><span class="o">.</span><span class="n">satisfied</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="n">session</span><span class="p">))</span>
+<span class="go">(MaxLengthStopper(max_items=5),)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="catsim.CatEngine.item_bank">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">item_bank</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="item_bank.html#catsim.ItemBank" title="catsim.item_bank.ItemBank"><span class="pre">ItemBank</span></a></span><a class="headerlink" href="#catsim.CatEngine.item_bank" title="Link to this definition">#</a></dt>
@@ -702,7 +747,7 @@ reason it has (an already stopped session keeps its earlier one).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.RunContext">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">RunContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">numpy.random.Generator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.ExposureTracker" title="catsim.ExposureTracker"><span class="pre">ExposureTracker</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#RunContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.RunContext" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">RunContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><span class="pre">Generator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_tracker</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.ExposureTracker" title="catsim.state.ExposureTracker"><span class="pre">ExposureTracker</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/engine.html#RunContext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.RunContext" title="Link to this definition">#</a></dt>
 <dd><p>Runtime services shared by CAT sessions in one run.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -804,6 +849,7 @@ ability; an application that steps sessions itself can wrap whatever collects re
     <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatEngine"><code class="docutils literal notranslate"><span class="pre">CatEngine</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatEngine.apply_response"><code class="docutils literal notranslate"><span class="pre">CatEngine.apply_response()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatEngine.context"><code class="docutils literal notranslate"><span class="pre">CatEngine.context()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatEngine.item_bank"><code class="docutils literal notranslate"><span class="pre">CatEngine.item_bank</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatEngine.run_session"><code class="docutils literal notranslate"><span class="pre">CatEngine.run_session()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.CatEngine.select_next"><code class="docutils literal notranslate"><span class="pre">CatEngine.select_next()</span></code></a></li>
