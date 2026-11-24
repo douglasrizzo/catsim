@@ -8,8 +8,7 @@ import operator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-import numpy
-
+from . import irt
 from .context import Estimate, StepContext
 from .exceptions import ExcludedItemError, NoItemsAvailableError
 from .item_bank import ItemBank
@@ -17,6 +16,8 @@ from .state import CatSessionState, CatStepResult, ExposureTracker, StopReason
 
 if TYPE_CHECKING:
   from collections.abc import Hashable
+
+  import numpy
 
   from .estimation import BaseEstimator
   from .exposure import BaseExposureControl
@@ -349,10 +350,7 @@ class CatEngine:
     if state.is_stopped:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
       raise ValueError(msg)
-    # Rejected rather than converted: bool(1.0), bool("no") or bool(None) would silently misscore.
-    if not isinstance(response, (bool, numpy.bool_)):
-      msg = f"response must be a bool, got {type(response).__name__} {response!r}"
-      raise TypeError(msg)
+    irt.validate_response_vector((response,), 1)
     current = self._step_context(state, context)
     item_id = self._checked_item(current, item_id)
 

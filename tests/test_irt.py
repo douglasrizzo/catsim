@@ -1,6 +1,7 @@
 """Tests for catsim.irt module."""
 
 import math
+import re
 from collections.abc import Callable
 
 import numpy as np
@@ -365,15 +366,39 @@ class TestLogLikelihood:
       build([True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
 
   @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
-  def test_log_likelihood_rejects_non_boolean_responses(
-    self, build: Callable[[list[bool], np.ndarray], object]
+  @pytest.mark.parametrize(
+    ("responses", "offender"),
+    [
+      pytest.param([1, 0], "int 1", id="ints"),
+      pytest.param([1.0, 0.0], "float 1.0", id="floats"),
+      pytest.param(np.array([1, 0], dtype=np.int64), "int64 np.int64(1)", id="numpy-ints"),
+      pytest.param([True, 2], "int 2", id="two"),
+      pytest.param([True, None], "NoneType None", id="none"),
+      pytest.param([True, "no"], "str 'no'", id="string"),
+    ],
+  )
+  def test_log_likelihood_rejects_responses_that_are_not_booleans(
+    self, build: Callable[[list[bool], np.ndarray], object], responses: list[bool], offender: str
   ) -> None:
-    """Responses other than True and False raise instead of being read as correct.
+    """Only bool and numpy.bool_ responses are scored; the error names the first other response's type and value.
 
-    log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
+    Fails if 1, 0, 1.0 or 0.0 pass because they compare equal to True and False, if 2, None or "no" pass, or if
+    log_likelihood_function checks only inside the function it returns, once it is given an ability.
     """
-    with pytest.raises(ValueError, match="responses must contain only Boolean elements"):
-      build([True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))  # ty: ignore[invalid-argument-type]
+    with pytest.raises(TypeError, match=f"got {re.escape(offender)}$"):
+      build(responses, np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
+
+  def test_log_likelihood_scores_a_numpy_boolean_array(self) -> None:
+    """Responses in a NumPy Boolean array, whose elements are numpy.bool_, are scored like Python bools.
+
+    At theta = 0, a right answer to [1, -1, 0, 1] and a wrong one to [1, 1, 0, 1] each have log-probability
+    -log(1 + e^-1). Fails if the response check accepts Python bools only.
+    """
+    items = np.array([[1.0, -1.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]])
+
+    value = irt.log_likelihood(0.0, list(np.array([True, False])), items)
+
+    assert value == pytest.approx(-2 * math.log1p(math.exp(-1.0)), rel=1e-12)
 
   @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
   @pytest.mark.parametrize(

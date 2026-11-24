@@ -1,6 +1,7 @@
 """Tests for catsim.context.StepContext."""
 
 import dataclasses
+import re
 
 import numpy as np
 import pytest
@@ -34,7 +35,6 @@ def test_lists_are_stored_as_tuples() -> None:
     pytest.param((0, 1, 2), (True,), "same length", id="too_short"),
     pytest.param((0, 1, 2), (True, True, True, False), "same length", id="too_long"),
     pytest.param((), (True,), "same length", id="responses_without_items"),
-    pytest.param((0, 1, 2), (1.0, 0.5, 0.0), "only Boolean", id="not_boolean"),
   ],
 )
 def test_rejects_responses_that_do_not_fit_the_items(
@@ -49,6 +49,19 @@ def test_rejects_responses_that_do_not_fit_the_items(
     StepContext(
       item_bank=BANK, rng=np.random.default_rng(0), administered_items=administered_items, responses=responses
     )
+
+
+@pytest.mark.parametrize(
+  ("responses", "offender"),
+  [pytest.param((1, 0), "int 1", id="ints"), pytest.param((1.0, 0.0), "float 1.0", id="floats")],
+)
+def test_rejects_responses_that_are_not_booleans(responses: tuple[bool, ...], offender: str) -> None:
+  """A context built with 1 and 0, or 1.0 and 0.0, raises as CatEngine.apply_response does for one such response.
+
+  Fails if they are taken for True and False because they compare equal to them.
+  """
+  with pytest.raises(TypeError, match=f"got {re.escape(offender)}$"):
+    StepContext(item_bank=BANK, rng=np.random.default_rng(0), administered_items=(0, 1), responses=responses)
 
 
 def test_contexts_with_exposure_rates_compare_by_identity() -> None:
