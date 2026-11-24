@@ -278,8 +278,15 @@ class TestLogResponseProbabilities:
     np.testing.assert_allclose(log_q[:, 0], -np.logaddexp(0.0, z), rtol=1e-12)
 
 
+# log_likelihood validates its responses through log_likelihood_function, which must do it when built
+_LOG_LIKELIHOOD_BUILDERS = [
+  pytest.param(lambda responses, items: irt.log_likelihood(0.0, responses, items), id="log_likelihood"),
+  pytest.param(irt.log_likelihood_function, id="log_likelihood_function"),
+]
+
+
 class TestLogLikelihood:
-  """Tests for the log_likelihood() function."""
+  """Tests for the log_likelihood() and log_likelihood_function() functions."""
 
   def test_log_likelihood_of_two_hand_worked_items(self) -> None:
     """At theta = 0, a right answer to [1, -1, 0, 1] has P = 1 / (1 + e^-1), a wrong one to [1, 0, 0.2, 0.9] Q = 0.45.
@@ -332,15 +339,25 @@ class TestLogLikelihood:
 
     np.testing.assert_array_equal(values, np.zeros(5))
 
-  def test_log_likelihood_rejects_mismatched_lengths(self) -> None:
-    """A response vector that does not match the items raises instead of broadcasting against them."""
-    with pytest.raises(ValueError, match="responses and items must have the same length, got 2 and 1"):
-      irt.log_likelihood(0.0, [True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
+  @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
+  def test_log_likelihood_rejects_mismatched_lengths(self, build: Callable[[list[bool], np.ndarray], object]) -> None:
+    """A response vector that does not match the items raises instead of broadcasting against them.
 
-  def test_log_likelihood_rejects_non_boolean_responses(self) -> None:
-    """Responses other than True and False raise instead of being read as correct."""
+    log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
+    """
+    with pytest.raises(ValueError, match="responses and items must have the same length, got 2 and 1"):
+      build([True, False], np.array([[1.0, 0.0, 0.0, 1.0]]))
+
+  @pytest.mark.parametrize("build", _LOG_LIKELIHOOD_BUILDERS)
+  def test_log_likelihood_rejects_non_boolean_responses(
+    self, build: Callable[[list[bool], np.ndarray], object]
+  ) -> None:
+    """Responses other than True and False raise instead of being read as correct.
+
+    log_likelihood_function raises before it is given an ability; checking only inside the returned function does not.
+    """
     with pytest.raises(ValueError, match="responses must contain only Boolean elements"):
-      irt.log_likelihood(0.0, [True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
+      build([True, 2], np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 1.0, 0.0, 1.0]]))
 
 
 class TestThetaToScale:
