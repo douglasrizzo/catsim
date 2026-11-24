@@ -1,7 +1,7 @@
 """Item response theory quantities of the four-parameter logistic (4PL) model.
 
 The functions take one item as a row ``[a, b, c, d]`` of shape ``(4,)``, or several as a matrix of
-such rows, shape ``(n, 4)``: discrimination, difficulty, pseudo-guessing and upper asymptote.
+such rows, shape ``(n, 4)``: discrimination, difficulty, guessing parameter and upper asymptote.
 :py:class:`catsim.ItemBank` builds and validates such a matrix.
 """
 
@@ -70,7 +70,7 @@ def icc(theta: float | FloatArray, items: FloatArray) -> FloatArray:
 
   .. math:: P_i(\theta) = c_i + \frac{d_i - c_i}{1 + e^{-a_i(\theta - b_i)}}
 
-  The probability rises with :math:`\theta` from the pseudo-guessing parameter :math:`c_i` to the
+  The probability rises with :math:`\theta` from the guessing parameter :math:`c_i` to the
   upper asymptote :math:`d_i`. It rises fastest at the difficulty :math:`b_i`, where it equals
   :math:`(c_i + d_i) / 2`, and the discrimination :math:`a_i` sets how fast.
 
