@@ -247,7 +247,7 @@ source = ["catsim"]
 exclude_also = ["if TYPE_CHECKING:", "if __name__ == .__main__.:", "raise NotImplementedError"]
 # Below the measured coverage while the 1.0 work deletes code and tests; raise it as tests for the
 # uncovered input checks land.
-fail_under = 88
+fail_under = 89
 show_missing = true
 
 [tool.vulture]
