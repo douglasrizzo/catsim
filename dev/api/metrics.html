@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Computerized Adaptive Test-related Functions – catsim.cat &#8212; catsim 0.21.0 documentation</title>
+    <title>Evaluation Metrics – catsim.metrics &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -44,7 +44,7 @@
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/cat';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/metrics';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -149,6 +149,13 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../terms-and-notation.html">
+    Terms and Notation
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="index.html">
     API Reference
@@ -169,20 +176,30 @@
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../contributing.html">
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../contributing.html">
     Contributing
   </a>
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../references.html">
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../references.html">
     Bibliography
   </a>
 </li>
 
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -285,6 +302,13 @@
 </li>
 
 
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../terms-and-notation.html">
+    Terms and Notation
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="index.html">
     API Reference
@@ -382,7 +406,7 @@
 <li class="toctree-l1"><a class="reference internal" href="state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="typing.html">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a></li>
@@ -429,7 +453,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Evaluation Metrics – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -446,154 +470,166 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.cat">
-<span id="computerized-adaptive-test-related-functions-catsim-cat"></span><h1>Computerized Adaptive Test-related Functions – <a class="reference internal" href="#module-catsim.cat" title="catsim.cat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a><a class="headerlink" href="#module-catsim.cat" title="Link to this heading">#</a></h1>
-<p>Functions used specifically during the application/simulation of computerized adaptive tests.</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.metrics">
+<span id="evaluation-metrics-catsim-metrics"></span><h1>Evaluation Metrics – <a class="reference internal" href="#module-catsim.metrics" title="catsim.metrics"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.metrics</span></code></a><a class="headerlink" href="#module-catsim.metrics" title="Link to this heading">#</a></h1>
+<p>Metrics that score a simulation study: how accurate the ability estimates are and how much the tests overlap.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="catsim.cat.bias">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/cat.html#bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.bias" title="Link to this definition">#</a></dt>
-<dd><p>Compute the test bias, an evaluation criterion for computerized adaptive test methodologies <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
-<p>The value is computed as:</p>
+<dt class="sig sig-object py" id="catsim.metrics.bias">
+<span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">bias</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/metrics.html#bias"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.bias" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean signed error of the ability estimates <span class="bibtex-citation" id="id1">[<a class="reference internal" href="../references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
 <div class="math notranslate nohighlight">
-\[Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
-<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability. A positive bias indicates
-systematic overestimation, while a negative bias indicates systematic underestimation.</p>
+\[\mathrm{Bias} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\theta_j\)</span> is examinee <span class="math notranslate nohighlight">\(j\)</span>’s true ability, <span class="math notranslate nohighlight">\(\hat{\theta}_j\)</span> their estimate
+and <span class="math notranslate nohighlight">\(N\)</span> the number of examinees. A positive bias means the estimates overestimate ability on
+average, a negative one that they underestimate it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>actual</strong><span class="classifier">npt.ArrayLike</span></dt><dd><p>Array-like (list, tuple, or numpy array) containing the true ability values (float type).</p>
+<dt><strong>actual</strong><span class="classifier">array-like</span></dt><dd><p>The true abilities.</p>
 </dd>
-<dt><strong>predicted</strong><span class="classifier">npt.ArrayLike</span></dt><dd><p>Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</p>
+<dt><strong>predicted</strong><span class="classifier">array-like</span></dt><dd><p>The estimated abilities, one per true ability.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>The bias between the predicted values and actual values.</p>
+<dt>float</dt><dd><p>The bias.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If actual and predicted vectors are not the same size.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">actual</span></code> and <code class="docutils literal notranslate"><span class="pre">predicted</span></code> differ in length.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">bias</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bias</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="go">3.0</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="catsim.cat.mse">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/cat.html#mse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.mse" title="Link to this definition">#</a></dt>
-<dd><p>Compute the mean squared error (MSE) between two array-like objects.</p>
-<p>The MSE is used when measuring the precision with which a computerized adaptive
-test estimates examinees abilities <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>. Lower MSE values indicate better
-estimation accuracy.</p>
-<p>The value is computed as:</p>
+<dt class="sig sig-object py" id="catsim.metrics.mse">
+<span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/metrics.html#mse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.mse" title="Link to this definition">#</a></dt>
+<dd><p>Return the mean squared error of the ability estimates <span class="bibtex-citation" id="id2">[<a class="reference internal" href="../references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
 <div class="math notranslate nohighlight">
-\[MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
-<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
+\[\mathrm{MSE} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2\]</div>
+<p>where <span class="math notranslate nohighlight">\(\theta_j\)</span> is examinee <span class="math notranslate nohighlight">\(j\)</span>’s true ability, <span class="math notranslate nohighlight">\(\hat{\theta}_j\)</span> their estimate
+and <span class="math notranslate nohighlight">\(N\)</span> the number of examinees. Lower values mean more accurate estimates; the MSE is the
+squared <a class="reference internal" href="#catsim.metrics.bias" title="catsim.metrics.bias"><code class="xref py py-func docutils literal notranslate"><span class="pre">bias()</span></code></a> plus the variance of the errors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>actual</strong><span class="classifier">npt.ArrayLike</span></dt><dd><p>Array-like (list, tuple, or numpy array) containing the true ability values (float type).</p>
+<dt><strong>actual</strong><span class="classifier">array-like</span></dt><dd><p>The true abilities.</p>
 </dd>
-<dt><strong>predicted</strong><span class="classifier">npt.ArrayLike</span></dt><dd><p>Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</p>
+<dt><strong>predicted</strong><span class="classifier">array-like</span></dt><dd><p>The estimated abilities, one per true ability.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>The mean squared error between the predicted values and actual values.</p>
+<dt>float</dt><dd><p>The mean squared error.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If actual and predicted vectors are not the same size.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">actual</span></code> and <code class="docutils literal notranslate"><span class="pre">predicted</span></code> differ in length.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">mse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mse</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="go">25.0</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="catsim.cat.overlap_rate">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/cat.html#overlap_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.overlap_rate" title="Link to this definition">#</a></dt>
-<dd><p>Compute the test overlap rate.</p>
-<p>An average measure of how much of the test two examinees take is equal <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../references.html#id2" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, 34(6):438–452, 2010. doi:10.1177/0146621610370152.">Barrada <em>et al.</em>, 2010</a>]</span>.
-The overlap rate provides insight into test security: higher values indicate that
-examinees see more similar items, potentially compromising test security.</p>
-<p>The overlap rate is given by:</p>
+<dt class="sig sig-object py" id="catsim.metrics.overlap_rate">
+<span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exposure_rates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.floating" title="(in NumPy v2.5)"><span class="pre">floating</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/metrics.html#overlap_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.overlap_rate" title="Link to this definition">#</a></dt>
+<dd><p>Return the test overlap rate: the expected share of items two examinees’ tests have in common <span class="bibtex-citation" id="id3">[<a class="reference internal" href="../references.html#id2" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, 34(6):438–452, 2010. doi:10.1177/0146621610370152.">Barrada <em>et al.</em>, 2010</a>]</span>.</p>
 <div class="math notranslate nohighlight">
-\[T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}\]</div>
-<p>where <span class="math notranslate nohighlight">\(N\)</span> is the bank size, <span class="math notranslate nohighlight">\(Q\)</span> is the test size, and <span class="math notranslate nohighlight">\(S_{r}^2\)</span>
-is the variance of exposure rates.</p>
-<p>If, for example <span class="math notranslate nohighlight">\(T = 0.5\)</span>, it means that the tests of two random examinees
-have 50% of equal items.</p>
+\[T = \frac{M}{n} S_r^2 + \frac{n}{M}\]</div>
+<p>where <span class="math notranslate nohighlight">\(M\)</span> is the bank size, <span class="math notranslate nohighlight">\(n\)</span> the test length and <span class="math notranslate nohighlight">\(S_r^2\)</span> the population
+variance (divisor <span class="math notranslate nohighlight">\(M\)</span>) of the items’ exposure rates. It assumes every examinee takes
+<span class="math notranslate nohighlight">\(n\)</span> items. It is <span class="math notranslate nohighlight">\(n/M\)</span> when every item is equally exposed and 1 when every examinee
+takes the same test; higher values mean examinees share more items, which weakens test security.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>A numpy array containing the exposure rate (proportion) of each item, where
-each value is between 0 and 1, representing the proportion of examinees who
-received that item.</p>
+<dt><strong>exposure_rates</strong><span class="classifier">numpy.ndarray</span></dt><dd><p>Each item’s exposure rate, the share of examinees who took it.</p>
 </dd>
-<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>The number of items in a test.</p>
+<dt><strong>test_size</strong><span class="classifier">int</span></dt><dd><p>The number of items in each test.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>Test overlap rate between 0 and 1.</p>
+<dt>float</dt><dd><p>The overlap rate, between 0 and 1.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If exposure rates are not between 0 and 1, if test size is not positive,
-or if test size is larger than bank size.</p>
+<dt>ValueError</dt><dd><p>If an exposure rate is outside [0, 1], if <code class="docutils literal notranslate"><span class="pre">test_size</span></code> is not positive, or if it is larger
+than the bank.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">overlap_rate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">overlap_rate</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]),</span> <span class="n">test_size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">0.75</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="catsim.cat.rmse">
-<span class="sig-prename descclassname"><span class="pre">catsim.cat.</span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/cat.html#rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.cat.rmse" title="Link to this definition">#</a></dt>
-<dd><p>Compute the root mean squared error (RMSE) between two array-like objects.</p>
-<p>A common value used when measuring the precision with which a computerized adaptive
-test estimates examinees abilities <span class="bibtex-citation" id="id4">[<a class="reference internal" href="../references.html#id2" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, 34(6):438–452, 2010. doi:10.1177/0146621610370152.">Barrada <em>et al.</em>, 2010</a>]</span>. RMSE is in the same units as the ability
-scale, making it easier to interpret than MSE.</p>
-<p>The value is computed as:</p>
+<dt class="sig sig-object py" id="catsim.metrics.rmse">
+<span class="sig-prename descclassname"><span class="pre">catsim.metrics.</span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ArrayLike</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/catsim/metrics.html#rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.metrics.rmse" title="Link to this definition">#</a></dt>
+<dd><p>Return the root mean squared error of the ability estimates <span class="bibtex-citation" id="id4">[<a class="reference internal" href="../references.html#id2" title="Juan Ramón Barrada, Julio Olea, Vicente Ponsoda, and Francisco J. Abad. A method for the comparison of item selection rules in computerized adaptive testing. Applied Psychological Measurement, 34(6):438–452, 2010. doi:10.1177/0146621610370152.">Barrada <em>et al.</em>, 2010</a>]</span>.</p>
 <div class="math notranslate nohighlight">
-\[RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}\]</div>
-<p>where <span class="math notranslate nohighlight">\(\hat{\theta}_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> estimated ability and
-<span class="math notranslate nohighlight">\(\theta_i\)</span> is examinee <span class="math notranslate nohighlight">\(i\)</span> actual ability.</p>
+\[\mathrm{RMSE} = \sqrt{\frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\theta_j\)</span> is examinee <span class="math notranslate nohighlight">\(j\)</span>’s true ability, <span class="math notranslate nohighlight">\(\hat{\theta}_j\)</span> their estimate
+and <span class="math notranslate nohighlight">\(N\)</span> the number of examinees. It is the square root of <a class="reference internal" href="#catsim.metrics.mse" title="catsim.metrics.mse"><code class="xref py py-func docutils literal notranslate"><span class="pre">mse()</span></code></a>, in the units of the
+ability scale.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>actual</strong><span class="classifier">npt.ArrayLike</span></dt><dd><p>Array-like (list, tuple, or numpy array) containing the true ability values (float type).</p>
+<dt><strong>actual</strong><span class="classifier">array-like</span></dt><dd><p>The true abilities.</p>
 </dd>
-<dt><strong>predicted</strong><span class="classifier">npt.ArrayLike</span></dt><dd><p>Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</p>
+<dt><strong>predicted</strong><span class="classifier">array-like</span></dt><dd><p>The estimated abilities, one per true ability.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt>float</dt><dd><p>The root mean squared error between the predicted values and actual values.</p>
+<dt>float</dt><dd><p>The root mean squared error.</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
-<dt>ValueError</dt><dd><p>If actual and predicted vectors are not the same size.</p>
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">actual</span></code> and <code class="docutils literal notranslate"><span class="pre">predicted</span></code> differ in length.</p>
 </dd>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">rmse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rmse</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">])</span>
+<span class="go">5.0</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
@@ -645,17 +681,17 @@ scale, making it easier to interpret than MSE.</p>
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.cat.bias"><code class="docutils literal notranslate"><span class="pre">bias()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.cat.mse"><code class="docutils literal notranslate"><span class="pre">mse()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.cat.overlap_rate"><code class="docutils literal notranslate"><span class="pre">overlap_rate()</span></code></a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.cat.rmse"><code class="docutils literal notranslate"><span class="pre">rmse()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.metrics.bias"><code class="docutils literal notranslate"><span class="pre">bias()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.metrics.mse"><code class="docutils literal notranslate"><span class="pre">mse()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.metrics.overlap_rate"><code class="docutils literal notranslate"><span class="pre">overlap_rate()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.metrics.rmse"><code class="docutils literal notranslate"><span class="pre">rmse()</span></code></a></li>
 </ul>
   </nav></div>
 
   <div class="sidebar-secondary-item">
 
   <div class="tocsection sourcelink">
-    <a href="../_sources/api/cat.md.txt">
+    <a href="../_sources/api/metrics.md.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
   </div>

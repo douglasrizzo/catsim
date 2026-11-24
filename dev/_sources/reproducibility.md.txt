@@ -42,9 +42,10 @@ The same seed and the same true abilities give identical results, however many t
 ... )
 >>> true_thetas = numpy.random.default_rng(7).normal(0, 1, 10)
 >>> runner = SimulationRunner(engine)
->>> runner.run(true_thetas, rng=42).final_thetas == runner.run(true_thetas, rng=42).final_thetas
+>>> first = runner.run(true_thetas, rng=42).final_thetas
+>>> numpy.array_equal(first, runner.run(true_thetas, rng=42).final_thetas)
 True
->>> runner.run(true_thetas, rng=42).final_thetas == runner.run(true_thetas, rng=43).final_thetas
+>>> numpy.array_equal(first, runner.run(true_thetas, rng=43).final_thetas)
 False
 ```
 

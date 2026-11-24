@@ -503,6 +503,13 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../terms-and-notation.html">
+    Terms and Notation
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../api/index.html">
     API Reference
   </a>
@@ -522,20 +529,30 @@ window.runMermaid = runMermaid;</script>
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../contributing.html">
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
     Contributing
   </a>
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../references.html">
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../references.html">
     Bibliography
   </a>
 </li>
 
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -632,6 +649,13 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../introduction.html">
     Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../terms-and-notation.html">
+    Terms and Notation
   </a>
 </li>
 
@@ -780,7 +804,7 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">metrics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunContext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">icc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExposureTracker</span>
@@ -921,22 +945,22 @@ window.runMermaid = runMermaid;</script>
     <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">final_thetas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">final_thetas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return each session's final ability estimate."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">final_ses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">final_ses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the standard error of each session's final ability estimate.</span>
 
 <span class="sd">    It is infinite for a session that ended before its first response.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">current_se</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">session</span><span class="o">.</span><span class="n">current_se</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">test_lengths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">test_lengths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return how many items each session administered."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_count</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">session</span><span class="o">.</span><span class="n">administered_count</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">true_thetas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
@@ -1007,7 +1031,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the result has no session, or any session has no true ability.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">metrics</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1018,7 +1042,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the result has no session, or any session has no true ability.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">metrics</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1029,25 +1053,23 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the result has no session, or any session has no true ability.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">metrics</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the test overlap rate, or None unless every session administered the same number of items.</span>
 
-<span class="sd">    The overlap-rate formula (:func:`catsim.cat.overlap_rate`) assumes one fixed test length, so</span>
+<span class="sd">    The overlap-rate formula (:func:`catsim.metrics.overlap_rate`) assumes one fixed test length, so</span>
 <span class="sd">    there is no overlap rate for a run of variable-length tests, for a run with no sessions or for</span>
 <span class="sd">    tests of no items.</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_lengths</span>
+    <span class="k">if</span> <span class="n">lengths</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">test_sizes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_lengths</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lengths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">test_size</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">lengths</span> <span class="o">!=</span> <span class="n">test_size</span><span class="p">):</span>
       <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">test_size</span> <span class="o">=</span> <span class="n">test_sizes</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">test_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">metrics</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span></div>
 
 
 

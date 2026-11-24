@@ -6,7 +6,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>catsim.cat &#8212; catsim 0.21.0 documentation</title>
+    <title>catsim.metrics &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -399,7 +399,7 @@ mermaid.initialize(
 
 window.addEventListener("load", load);
 window.runMermaid = runMermaid;</script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/catsim/cat';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/catsim/metrics';</script>
     <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="icon" href="../../_static/favicon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -503,6 +503,13 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../terms-and-notation.html">
+    Terms and Notation
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../api/index.html">
     API Reference
   </a>
@@ -522,20 +529,30 @@ window.runMermaid = runMermaid;</script>
   </a>
 </li>
 
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../contributing.html">
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
     Contributing
   </a>
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../references.html">
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../references.html">
     Bibliography
   </a>
 </li>
 
+                </ul>
+            </li>
+            
   </ul>
 </nav></div>
       
@@ -632,6 +649,13 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../introduction.html">
     Introduction
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../terms-and-notation.html">
+    Terms and Notation
   </a>
 </li>
 
@@ -752,7 +776,7 @@ window.runMermaid = runMermaid;</script>
     
     <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">catsim.cat</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">catsim.metrics</span></li>
   </ul>
 </nav>
 </div>
@@ -769,8 +793,10 @@ window.runMermaid = runMermaid;</script>
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <h1>Source code for catsim.cat</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Functions used specifically during the application/simulation of computerized adaptive tests."""</span>
+  <h1>Source code for catsim.metrics</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Metrics that score a simulation study: how accurate the ability estimates are and how much the tests overlap."""</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
@@ -778,176 +804,189 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_errors</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return the estimates minus the true abilities.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      Each examinee's estimated minus true ability.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``actual`` and ``predicted`` differ in length; a one-element vector would otherwise</span>
+<span class="sd">      broadcast against the other.</span>
+<span class="sd">  """</span>
+  <span class="n">actual</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+  <span class="n">predicted</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predicted</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"actual and predicted vectors need to be the same size"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span>
+
+
 <div class="viewcode-block" id="bias">
-<a class="viewcode-back" href="../../api/cat.html#catsim.cat.bias">[docs]</a>
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.bias">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span>
   <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
   <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the test bias, an evaluation criterion for computerized adaptive test methodologies :cite:p:`Chang2001`.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean signed error of the ability estimates :cite:p:`Chang2001`.</span>
 
-<span class="sd">  The value is computed as:</span>
+<span class="sd">  .. math:: \mathrm{Bias} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)</span>
 
-<span class="sd">  .. math:: Bias = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})}{N}</span>
-
-<span class="sd">  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and</span>
-<span class="sd">  :math:`\theta_i` is examinee :math:`i` actual ability. A positive bias indicates</span>
-<span class="sd">  systematic overestimation, while a negative bias indicates systematic underestimation.</span>
+<span class="sd">  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate</span>
+<span class="sd">  and :math:`N` the number of examinees. A positive bias means the estimates overestimate ability on</span>
+<span class="sd">  average, a negative one that they underestimate it.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : npt.ArrayLike</span>
-<span class="sd">      Array-like (list, tuple, or numpy array) containing the true ability values (float type).</span>
-<span class="sd">  predicted : npt.ArrayLike</span>
-<span class="sd">      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</span>
+<span class="sd">  actual : array-like</span>
+<span class="sd">      The true abilities.</span>
+<span class="sd">  predicted : array-like</span>
+<span class="sd">      The estimated abilities, one per true ability.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      The bias between the predicted values and actual values.</span>
+<span class="sd">      The bias.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If actual and predicted vectors are not the same size.</span>
-<span class="sd">  """</span>
-  <span class="n">actual</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
-  <span class="n">predicted</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predicted</span><span class="p">)</span>
+<span class="sd">      If ``actual`` and ``predicted`` differ in length.</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"actual and predicted vectors need to be the same size"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span><span class="p">))</span></div>
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import bias</span>
+<span class="sd">  &gt;&gt;&gt; bias([1.0, -1.0], [0.0, 6.0])</span>
+<span class="sd">  3.0</span>
+<span class="sd">  """</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">_errors</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)))</span></div>
 
 
 
 <div class="viewcode-block" id="mse">
-<a class="viewcode-back" href="../../api/cat.html#catsim.cat.mse">[docs]</a>
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.mse">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span>
   <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
   <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the mean squared error (MSE) between two array-like objects.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the mean squared error of the ability estimates :cite:p:`Chang2001`.</span>
 
-<span class="sd">  The MSE is used when measuring the precision with which a computerized adaptive</span>
-<span class="sd">  test estimates examinees abilities :cite:p:`Chang2001`. Lower MSE values indicate better</span>
-<span class="sd">  estimation accuracy.</span>
+<span class="sd">  .. math:: \mathrm{MSE} = \frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2</span>
 
-<span class="sd">  The value is computed as:</span>
-
-<span class="sd">  .. math:: MSE = \frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}</span>
-
-<span class="sd">  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and</span>
-<span class="sd">  :math:`\theta_i` is examinee :math:`i` actual ability.</span>
+<span class="sd">  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate</span>
+<span class="sd">  and :math:`N` the number of examinees. Lower values mean more accurate estimates; the MSE is the</span>
+<span class="sd">  squared :func:`bias` plus the variance of the errors.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : npt.ArrayLike</span>
-<span class="sd">      Array-like (list, tuple, or numpy array) containing the true ability values (float type).</span>
-<span class="sd">  predicted : npt.ArrayLike</span>
-<span class="sd">      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</span>
+<span class="sd">  actual : array-like</span>
+<span class="sd">      The true abilities.</span>
+<span class="sd">  predicted : array-like</span>
+<span class="sd">      The estimated abilities, one per true ability.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      The mean squared error between the predicted values and actual values.</span>
+<span class="sd">      The mean squared error.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If actual and predicted vectors are not the same size.</span>
-<span class="sd">  """</span>
-  <span class="n">actual</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span>
-  <span class="n">predicted</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">predicted</span><span class="p">)</span>
+<span class="sd">      If ``actual`` and ``predicted`` differ in length.</span>
 
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">predicted</span><span class="p">):</span>
-    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Actual and predicted vectors need to be the same size"</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-  <span class="n">diff</span> <span class="o">=</span> <span class="n">predicted</span> <span class="o">-</span> <span class="n">actual</span>
-  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span> <span class="o">*</span> <span class="n">diff</span><span class="p">))</span></div>
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import mse</span>
+<span class="sd">  &gt;&gt;&gt; mse([1.0, -1.0], [0.0, 6.0])</span>
+<span class="sd">  25.0</span>
+<span class="sd">  """</span>
+  <span class="n">errors</span> <span class="o">=</span> <span class="n">_errors</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">errors</span> <span class="o">*</span> <span class="n">errors</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="rmse">
-<a class="viewcode-back" href="../../api/cat.html#catsim.cat.rmse">[docs]</a>
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.rmse">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span>
   <span class="n">actual</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
   <span class="n">predicted</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the root mean squared error (RMSE) between two array-like objects.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the root mean squared error of the ability estimates :cite:p:`Bar10`.</span>
 
-<span class="sd">  A common value used when measuring the precision with which a computerized adaptive</span>
-<span class="sd">  test estimates examinees abilities :cite:p:`Bar10`. RMSE is in the same units as the ability</span>
-<span class="sd">  scale, making it easier to interpret than MSE.</span>
+<span class="sd">  .. math:: \mathrm{RMSE} = \sqrt{\frac{1}{N} \sum_{j=1}^{N} (\hat{\theta}_j - \theta_j)^2}</span>
 
-<span class="sd">  The value is computed as:</span>
-
-<span class="sd">  .. math:: RMSE = \sqrt{\frac{\sum_{i=1}^{N} (\hat{\theta}_i - \theta_{i})^2}{N}}</span>
-
-<span class="sd">  where :math:`\hat{\theta}_i` is examinee :math:`i` estimated ability and</span>
-<span class="sd">  :math:`\theta_i` is examinee :math:`i` actual ability.</span>
+<span class="sd">  where :math:`\theta_j` is examinee :math:`j`'s true ability, :math:`\hat{\theta}_j` their estimate</span>
+<span class="sd">  and :math:`N` the number of examinees. It is the square root of :func:`mse`, in the units of the</span>
+<span class="sd">  ability scale.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
-<span class="sd">  actual : npt.ArrayLike</span>
-<span class="sd">      Array-like (list, tuple, or numpy array) containing the true ability values (float type).</span>
-<span class="sd">  predicted : npt.ArrayLike</span>
-<span class="sd">      Array-like (list, tuple, or numpy array) containing the estimated ability values (float type).</span>
+<span class="sd">  actual : array-like</span>
+<span class="sd">      The true abilities.</span>
+<span class="sd">  predicted : array-like</span>
+<span class="sd">      The estimated abilities, one per true ability.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      The root mean squared error between the predicted values and actual values.</span>
+<span class="sd">      The root mean squared error.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If actual and predicted vectors are not the same size.</span>
+<span class="sd">      If ``actual`` and ``predicted`` differ in length.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import rmse</span>
+<span class="sd">  &gt;&gt;&gt; rmse([1.0, -1.0], [0.0, 6.0])</span>
+<span class="sd">  5.0</span>
 <span class="sd">  """</span>
-  <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">))</span></div>
+  <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="n">predicted</span><span class="p">))</span></div>
 
 
 
 <div class="viewcode-block" id="overlap_rate">
-<a class="viewcode-back" href="../../api/cat.html#catsim.cat.overlap_rate">[docs]</a>
+<a class="viewcode-back" href="../../api/metrics.html#catsim.metrics.overlap_rate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">test_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">  </span><span class="sa">r</span><span class="sd">"""Compute the test overlap rate.</span>
+<span class="w">  </span><span class="sa">r</span><span class="sd">"""Return the test overlap rate: the expected share of items two examinees' tests have in common :cite:p:`Bar10`.</span>
 
-<span class="sd">  An average measure of how much of the test two examinees take is equal :cite:p:`Bar10`.</span>
-<span class="sd">  The overlap rate provides insight into test security: higher values indicate that</span>
-<span class="sd">  examinees see more similar items, potentially compromising test security.</span>
+<span class="sd">  .. math:: T = \frac{M}{n} S_r^2 + \frac{n}{M}</span>
 
-<span class="sd">  The overlap rate is given by:</span>
-
-<span class="sd">  .. math:: T=\frac{N}{Q}S_{r}^2 + \frac{Q}{N}</span>
-
-<span class="sd">  where :math:`N` is the bank size, :math:`Q` is the test size, and :math:`S_{r}^2`</span>
-<span class="sd">  is the variance of exposure rates.</span>
-
-<span class="sd">  If, for example :math:`T = 0.5`, it means that the tests of two random examinees</span>
-<span class="sd">  have 50% of equal items.</span>
+<span class="sd">  where :math:`M` is the bank size, :math:`n` the test length and :math:`S_r^2` the population</span>
+<span class="sd">  variance (divisor :math:`M`) of the items' exposure rates. It assumes every examinee takes</span>
+<span class="sd">  :math:`n` items. It is :math:`n/M` when every item is equally exposed and 1 when every examinee</span>
+<span class="sd">  takes the same test; higher values mean examinees share more items, which weakens test security.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  exposure_rates : numpy.ndarray</span>
-<span class="sd">      A numpy array containing the exposure rate (proportion) of each item, where</span>
-<span class="sd">      each value is between 0 and 1, representing the proportion of examinees who</span>
-<span class="sd">      received that item.</span>
+<span class="sd">      Each item's exposure rate, the share of examinees who took it.</span>
 <span class="sd">  test_size : int</span>
-<span class="sd">      The number of items in a test.</span>
+<span class="sd">      The number of items in each test.</span>
 
 <span class="sd">  Returns</span>
 <span class="sd">  -------</span>
 <span class="sd">  float</span>
-<span class="sd">      Test overlap rate between 0 and 1.</span>
+<span class="sd">      The overlap rate, between 0 and 1.</span>
 
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If exposure rates are not between 0 and 1, if test size is not positive,</span>
-<span class="sd">      or if test size is larger than bank size.</span>
+<span class="sd">      If an exposure rate is outside [0, 1], if ``test_size`` is not positive, or if it is larger</span>
+<span class="sd">      than the bank.</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  &gt;&gt;&gt; import numpy</span>
+<span class="sd">  &gt;&gt;&gt; from catsim.metrics import overlap_rate</span>
+<span class="sd">  &gt;&gt;&gt; overlap_rate(numpy.array([1.0, 0.5, 0.5, 0.0]), test_size=2)</span>
+<span class="sd">  0.75</span>
 <span class="sd">  """</span>
-  <span class="c1"># Validate that exposure_rates contains proportions</span>
   <span class="k">if</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exposure_rates</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">numpy</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">exposure_rates</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Exposure rates must be between 0 and 1"</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
@@ -962,10 +1001,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Test size (</span><span class="si">{</span><span class="n">test_size</span><span class="si">}</span><span class="s2">) cannot be larger than bank size (</span><span class="si">{</span><span class="n">bank_size</span><span class="si">}</span><span class="s2">)"</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-  <span class="c1"># Compute variance of exposure rates</span>
-  <span class="n">var_r</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">)</span>
-
-  <span class="c1"># Apply Barrada et al. (2010) formula</span>
+  <span class="n">var_r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">exposure_rates</span><span class="p">))</span>
   <span class="k">return</span> <span class="p">(</span><span class="n">bank_size</span> <span class="o">/</span> <span class="n">test_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">var_r</span> <span class="o">+</span> <span class="p">(</span><span class="n">test_size</span> <span class="o">/</span> <span class="n">bank_size</span><span class="p">)</span></div>
 
 </pre></div>
