@@ -112,12 +112,11 @@ _MIN_HALF_WIDTH = math.sqrt(numpy.finfo(float).eps)
 class IntervalInfoSelector(BaseSelector):
   r"""Select the item whose information, integrated over an interval around the estimate, is largest.
 
-  By default the interval is the estimate plus or minus :math:`\lambda` times the estimator's
-  standard error (``context.se``), where :math:`\lambda` is the standard normal quantile of
-  ``(1 + confidence) / 2`` :cite:p:`Veerkamp1997`. It spans the whole ability scale before the first
-  response and narrows as the standard error falls; a standard error of zero, or nearly zero, selects
-  by the items' information at the estimate, the interval's limit. Setting ``interval`` fixes the
-  half-width. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.
+  By default the interval is a confidence interval for the estimate, built from the estimator's
+  standard error (``context.se``) :cite:p:`Veerkamp1997`. It spans the whole ability scale before the
+  first response and narrows as the standard error falls; a standard error of zero, or nearly zero,
+  selects by the items' information at the estimate. Setting ``interval`` fixes the half-width. The
+  selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------

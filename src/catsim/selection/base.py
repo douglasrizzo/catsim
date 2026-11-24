@@ -2,8 +2,8 @@
 
 The module functions are what makes the built-in selectors behave alike, and custom selectors can
 use them too: :func:`remaining` and :func:`below_cap` give the items a selector may choose from,
-:func:`pick_best` and :func:`best_pool` choose among them under the package's tie-breaking rule
-(ADR-0008), and :func:`check_r_max` and :func:`check_test_size` check constructor arguments.
+:func:`pick_best` and :func:`best_pool` choose among them under the package's tie-breaking rule,
+and :func:`check_r_max` and :func:`check_test_size` check constructor arguments.
 """
 
 import operator
@@ -77,10 +77,9 @@ def below_cap(candidates: IntArray, exposure_rates: FloatArray | None, r_max: fl
 def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator) -> int:
   """Return the candidate with the highest score, breaking exact ties uniformly at random.
 
-  This is the package's single tie-breaking rule (ADR-0008), the one catR uses: the candidates
-  whose score equals the best score exactly are tied, and one of them is drawn uniformly with
-  ``rng``. With a single best candidate, ``rng`` is not used, so untied selections consume no
-  random numbers.
+  This is the package's single tie-breaking rule: the candidates whose score equals the best score
+  exactly are tied, and one of them is drawn uniformly with ``rng``. With a single best candidate,
+  ``rng`` is not used, so untied selections consume no random numbers.
 
   Parameters
   ----------
@@ -114,8 +113,8 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator) -> int:
 def best_pool(candidates: IntArray, scores: FloatArray, size: int) -> IntArray:
   """Return the candidates scoring at least the ``size``-th best score, best first.
 
-  As in catR (ADR-0008), every candidate tied with the ``size``-th best score joins the pool, so
-  the pool holds more than ``size`` items only when items tie at the cutoff. Tied candidates keep
+  Every candidate tied with the ``size``-th best score joins the pool, so the pool holds more than
+  ``size`` items only when items tie at the cutoff. Tied candidates keep
   their order in ``candidates``.
 
   Parameters
@@ -205,20 +204,16 @@ def check_test_size(test_size: int) -> int:
 class BaseSelector(ABC):
   """Base class for item selectors.
 
-  A selector chooses the next item to administer from what a
-  :class:`~catsim.StepContext` tells it about the session. A custom selector behaves like
-  the built-in ones when it draws its candidates with :func:`remaining`, which leaves out the
-  administered and the excluded items, applies its exposure cap with :func:`below_cap`, and
-  chooses with :func:`pick_best` or :func:`best_pool`, which apply the package's tie-breaking rule
-  (ADR-0008). The test position is ``len(context.administered_items)``.
+  A selector chooses the next item to administer from what a :class:`~catsim.StepContext` tells it
+  about the session; the test position is ``len(context.administered_items)``. A custom selector
+  behaves like the built-in ones when it draws its candidates with :func:`remaining`, applies its
+  exposure cap with :func:`below_cap`, and chooses with :func:`pick_best` or :func:`best_pool`,
+  which break ties the same way.
 
-  The excluded items are the session's, among them those the engine's exposure control declined. A
-  selector that passes a changed context to another adds to them, never replaces them. The engine
-  raises for a proposed item that is outside the bank, administered or excluded.
-
-  A selector holds its configuration and caches derived from the item bank, never per-session
-  state: one selector serves every session of a run, and an application may interleave the
-  sessions of several examinees on it.
+  A selector that passes a changed context to another adds to its excluded items, never replaces
+  them. The engine raises for a proposed item that is outside the bank, administered or excluded. A
+  selector holds its configuration and caches derived from the item bank, never per-session state:
+  one selector serves every session of a run, which an application may interleave.
   """
 
   @abstractmethod

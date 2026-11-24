@@ -58,7 +58,7 @@ class ClusterSelector(BaseSelector):
   a cluster, for example by clustering the item parameters. At each step the selector scores every
   cluster that still has an item left, takes the best one, and administers that cluster's most
   informative remaining item whose exposure rate is below ``r_max``. Exact ties between clusters and
-  between items are broken uniformly at random (ADR-0008).
+  between items are broken uniformly at random.
 
   Parameters
   ----------
@@ -84,14 +84,8 @@ class ClusterSelector(BaseSelector):
 
   Notes
   -----
-  The method has known limits. A cluster keeps the score of items already administered, so
-  ``item_info`` can return to a cluster whose remaining items are much less informative than items
-  elsewhere in the bank; in simulations it gave less test information and more test overlap than
-  :class:`~catsim.selection.MaxInfoSelector`, and no scoring rule improved on
-  :class:`~catsim.selection.MaxInfoSelector` or :class:`~catsim.selection.RandomesqueSelector`.
-  Because ``r_max`` applies only inside the chosen cluster, items can end above the cap.
-
-  For full algorithmic details and the simulation results, see
+  Because ``r_max`` applies only inside the chosen cluster, items can end above the cap. For the
+  method, its known limits and its simulation results, see
   :doc:`/api/techniques/selection/cluster-selector`.
   """
 

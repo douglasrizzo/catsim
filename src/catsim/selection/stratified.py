@@ -19,8 +19,8 @@ class StratifiedSelector(BaseSelector):
   The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking
   on a location key so that every stratum covers the whole ability range. The test is split into
   ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item
-  whose location is closest to the current ability estimate. The strata are the selector's exposure
-  control: it applies no exposure cap, and ``context.exposure_rates`` is ignored.
+  whose location is closest to the current ability estimate. The strata are its exposure control:
+  it applies no exposure cap and ignores ``context.exposure_rates``.
 
   Parameters
   ----------
@@ -84,11 +84,8 @@ class StratifiedSelector(BaseSelector):
   def strata(self, item_bank: ItemBank) -> list[IntArray]:
     """Return the item indices of each stratum, from the first test stage to the last.
 
-    Without blocking, items are sorted by the stratification key and split into ``n_strata`` contiguous
-    groups. With blocking :cite:p:`Chang2001`, items are sorted by the blocking key and grouped into
-    consecutive blocks of ``n_strata`` items; each block is sorted by the stratification key and its
-    :math:`j`-th item goes to stratum :math:`j`, so every stratum spans the range of the blocking key.
-    The strata are computed once per item bank.
+    The strata ascend in the stratification key; with blocking, every stratum spans the range of the
+    blocking key. The strata are computed once per item bank.
 
     Parameters
     ----------

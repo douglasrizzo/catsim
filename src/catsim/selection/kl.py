@@ -30,12 +30,11 @@ def _gauss_legendre(n_nodes: int) -> tuple[FloatArray, FloatArray]:
 
 
 class KLSelector(BaseSelector):
-  r"""Kullback-Leibler global-information item selector.
+  r"""Select the item with the most Kullback-Leibler information around the current estimate.
 
-  Each candidate's KL divergence between the response distributions at the current estimate
-  and at nearby abilities is integrated over :math:`\hat\theta \pm c / \sqrt{\max(1, n)}`,
-  where :math:`c` is ``window`` and :math:`n` the number of administered items, and the item with
-  the largest integral is selected.
+  Each candidate's KL divergence between the response distributions at the estimate and at nearby
+  abilities is integrated over a window around the estimate, which narrows as items are
+  administered, and the item with the largest integral is selected.
 
   Parameters
   ----------
@@ -71,7 +70,7 @@ class KLSelector(BaseSelector):
 
   @property
   def window(self) -> float:
-    r"""Return Chang and Ying's constant :math:`c`: the integration half-width is :math:`c / \sqrt{\max(1, n)}`."""
+    r"""Return Chang and Ying's constant :math:`c`, the window's half-width before it narrows."""
     return self._window
 
   @property
