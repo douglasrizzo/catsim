@@ -859,7 +859,7 @@ window.runMermaid = runMermaid;</script>
     <span class="n">administered_items</span><span class="p">:</span> <span class="n">FloatArray</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
     <span class="n">log_likelihood</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">log_likelihood_hpc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">,</span> <span class="n">response_vector</span><span class="p">,</span> <span class="n">administered_items</span><span class="p">)</span>
-    <span class="n">log_likelihood</span> <span class="o">-=</span> <span class="nb">float</span><span class="p">(</span><span class="n">log_likelihood</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">log_likelihood</span> <span class="o">-=</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_likelihood</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_likelihood</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MLWISelector.select">

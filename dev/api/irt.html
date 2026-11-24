@@ -1045,6 +1045,13 @@ back to the standard IRT theta scale (typically centered at 0).</p>
 </dd>
 </dl>
 </dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">theta_max</span></code> is not greater than <code class="docutils literal notranslate"><span class="pre">theta_min</span></code>, or <code class="docutils literal notranslate"><span class="pre">scale_max</span></code> is not greater than
+<code class="docutils literal notranslate"><span class="pre">scale_min</span></code>.</p>
+</dd>
+</dl>
+</dd>
 </dl>
 <p class="rubric">Notes</p>
 <ul class="simple">
@@ -1161,6 +1168,13 @@ Higher values indicate more precise ability estimation.</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
 <dt>float or numpy.ndarray</dt><dd><p>The transformed score(s) on the target scale. Returns the same type as input.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">theta_max</span></code> is not greater than <code class="docutils literal notranslate"><span class="pre">theta_min</span></code>, or <code class="docutils literal notranslate"><span class="pre">scale_max</span></code> is not greater than
+<code class="docutils literal notranslate"><span class="pre">scale_min</span></code>.</p>
 </dd>
 </dl>
 </dd>

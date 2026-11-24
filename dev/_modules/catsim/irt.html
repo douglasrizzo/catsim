@@ -1287,6 +1287,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  float or numpy.ndarray</span>
 <span class="sd">      The transformed score(s) on the target scale. Returns the same type as input.</span>
 
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than</span>
+<span class="sd">      ``scale_min``.</span>
+
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
 <span class="sd">  - Values outside [theta_min, theta_max] are extrapolated linearly</span>
@@ -1366,6 +1372,12 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  -------</span>
 <span class="sd">  float or numpy.ndarray</span>
 <span class="sd">      The transformed theta value(s). Returns the same type as input.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than</span>
+<span class="sd">      ``scale_min``.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -1721,7 +1733,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="negative_log_likelihood">
 <a class="viewcode-back" href="../../api/irt.html#catsim.irt.negative_log_likelihood">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">negative_log_likelihood</span><span class="p">(</span><span class="n">est_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># noqa: ANN401 (scipy.optimize's args= tuple)</span>
 <span class="w">  </span><span class="sd">"""Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.</span>
 
 <span class="sd">  This function is used by :py:mod:`scipy.optimize` optimization functions that tend to</span>

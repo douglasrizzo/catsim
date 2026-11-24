@@ -777,7 +777,6 @@ window.runMermaid = runMermaid;</script>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.axes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">mpl_toolkits.mplot3d</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes3D</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
@@ -817,7 +816,7 @@ window.runMermaid = runMermaid;</script>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
   <span class="n">ptype</span><span class="p">:</span> <span class="n">PlotType</span> <span class="o">=</span> <span class="n">PlotType</span><span class="o">.</span><span class="n">ICC</span><span class="p">,</span>
   <span class="n">max_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-  <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Plot Item Response Theory-related item plots.</span>
 
@@ -869,7 +868,7 @@ window.runMermaid = runMermaid;</script>
   <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
 
-  <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s2">"double"</span><span class="p">)</span>
+  <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
   <span class="n">p_thetas</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">i_thetas</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">for</span> <span class="n">theta</span> <span class="ow">in</span> <span class="n">thetas</span><span class="p">:</span>
@@ -944,7 +943,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">gen3d_dataset_scatter</span><span class="p">(</span>
   <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span>
   <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Generate a 3D scatter plot of item parameters.</span>
 
@@ -975,7 +974,6 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  matplotlib.axes.Axes</span>
 <span class="sd">      The matplotlib 3D axes object containing the plot.</span>
 <span class="sd">  """</span>
-  <span class="k">assert</span> <span class="n">Axes3D</span>
   <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
     <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
 
@@ -1152,7 +1150,7 @@ window.runMermaid = runMermaid;</script>
   <span class="n">see</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
   <span class="n">reliability</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
   <span class="n">marker</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-  <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+  <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Generate a plot representing an examinee's test progress over time.</span>
 
@@ -1201,6 +1199,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      Simulation result containing session traces. Default is None.</span>
 <span class="sd">  index : int or None, optional</span>
 <span class="sd">      The index of the session to be plotted when ``simulation`` is provided.</span>
+<span class="sd">  session : CatSessionState or None, optional</span>
+<span class="sd">      Not plotted on its own: passing it without ``simulation`` raises ``ValueError``, and with</span>
+<span class="sd">      ``simulation`` the session at ``index`` is plotted instead. Default is None.</span>
 <span class="sd">  thetas : list[float] or None, optional</span>
 <span class="sd">      If a simulation result is not passed, then a list of ability estimations can be manually</span>
 <span class="sd">      passed to the function. Default is None.</span>
@@ -1235,8 +1236,9 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  Raises</span>
 <span class="sd">  ------</span>
 <span class="sd">  ValueError</span>
-<span class="sd">      If neither simulation nor the required manual parameters are provided, or if thetas</span>
-<span class="sd">      and administered_items have mismatched lengths.</span>
+<span class="sd">      If ``simulation`` is passed without ``index``, ``session`` without ``simulation``, or</span>
+<span class="sd">      neither ``simulation`` nor both ``thetas`` and ``administered_items``; or if ``thetas``</span>
+<span class="sd">      does not hold one more estimate than there are administered items.</span>
 <span class="sd">  """</span>
   <span class="k">if</span> <span class="n">simulation</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">thetas</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">administered_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="s2">"One of: simulation, session, thetas, administered_items must be passed."</span>
