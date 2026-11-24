@@ -323,9 +323,9 @@ class SimulationRunner:
     """Run one simulated session per true ability, one after another.
 
     One random generator serves the whole run: the initializer, the selectors' tie-breaking and
-    randomization and the simulated responses of every session draw from it, in session order
-    (ADR-0013). It is built from ``rng`` at the start of every call, so the same seed gives the same
-    result however many times the runner has run.
+    randomization and the simulated responses of every session draw from it, in session order. It
+    is built from ``rng`` at the start of every call, so the same seed gives the same result however
+    many times the runner has run; see :doc:`/reproducibility`.
 
     Parameters
     ----------

@@ -252,18 +252,16 @@ class ExposureTracker:
   """Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.
 
   One tracker is shared by every session of a run or of a live deployment, through
-  :class:`~catsim.RunContext`. The engine calls :meth:`start_session` when a session starts,
-  :meth:`record` for every administered item and :meth:`record_decline` for every item the engine's
-  exposure control declines. ``counts`` holds each item's administrations so far, those of sessions
-  still in progress included, ``proposals`` its administrations plus its declines, and
-  ``n_sessions`` the number of sessions started. A session proposes an item at most once, so
-  neither count can exceed ``n_sessions``.
+  :class:`~catsim.RunContext`, and the engine updates it. ``counts`` holds each item's
+  administrations so far, those of sessions still in progress included, ``proposals`` its
+  administrations plus the times the engine's exposure control declined it, and ``n_sessions`` the
+  number of sessions started. A session proposes an item at most once, so neither count can exceed
+  ``n_sessions``.
 
   A session is selected against each item's administrations divided by the number of other sessions
-  started so far (ADR-0003). With sessions run one after another, as a simulation runs them, that
-  is the share of the examinees tested before the current one, as in catR's
-  ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,
-  as in a live deployment, see each other's administrations as they happen.
+  started so far. With sessions run one after another, as a simulation runs them, that is the share
+  of the examinees tested before the current one; the first session sees every rate at 0. Sessions
+  that run side by side, as in a live deployment, see each other's administrations as they happen.
 
   A new tracker starts from zero. An application that must keep the exposure across restarts saves
   ``counts``, ``proposals`` and ``n_sessions`` and passes them back to rebuild the tracker.

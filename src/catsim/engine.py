@@ -209,23 +209,21 @@ class CatEngine:
   def select_next(self, state: CatSessionState, context: RunContext) -> int | None:
     """Select the next item to administer, or end the session.
 
-    This is the one place that decides whether a session continues, so a manual loop needs no
-    other check::
+    This alone decides whether a session continues, so a manual loop needs no other check::
 
       while (item_id := engine.select_next(state, context)) is not None:
         engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)
 
-    The stopper is consulted here only for a session that has no responses yet. After that,
-    :meth:`apply_response` evaluates it once for every new state, and what it records is final.
-
-    With an exposure control, the items it declines join the session's ``excluded_items`` and the
-    exposure tracker's proposals, once the selection has ended, so an application that saves its
-    sessions saves them after this call too. A selection that raises leaves both unchanged.
+    The stopper is consulted here only before the first response; after that,
+    :meth:`apply_response` evaluates it once per new state, and what it records is final. The items
+    the exposure control declines join the session's ``excluded_items`` and the tracker's proposals
+    when the selection ends, so save sessions after this call too; a selection that raises changes
+    neither.
 
     Each call selects anew, and the exposure control decides anew: a second call before the
     response may decline the item the first returned, or end the session. An application that has
-    shown an item keeps its id, which :meth:`apply_response` needs, and shows it again rather than
-    calling this method again.
+    shown an item keeps its id for :meth:`apply_response` and shows it again rather than calling
+    this method again.
 
     Parameters
     ----------
