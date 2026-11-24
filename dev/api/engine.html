@@ -154,9 +154,16 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
-    API Reference
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -164,13 +171,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../reproducibility.html">
     Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../architecture_decisions.html">
-    Architecture Decision Records
   </a>
 </li>
 
@@ -182,6 +182,27 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="../contributing.html">
     Contributing
@@ -307,9 +328,16 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
-    API Reference
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -317,6 +345,20 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../reproducibility.html">
     Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    API Reference
   </a>
 </li>
 
@@ -582,20 +624,12 @@ the estimator returns something other than an <a class="reference internal" href
 <dt class="sig sig-object py" id="catsim.CatEngine.select_next">
 <span class="sig-name descname"><span class="pre">select_next</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="state.html#catsim.CatSessionState" title="catsim.state.CatSessionState"><span class="pre">CatSessionState</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.RunContext" title="catsim.engine.RunContext"><span class="pre">RunContext</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/engine.html#CatEngine.select_next"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.CatEngine.select_next" title="Link to this definition">#</a></dt>
 <dd><p>Select the next item to administer, or end the session.</p>
-<p>This alone decides whether a session continues, so a manual loop needs no other check:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">item_id</span> <span class="o">:=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-  <span class="n">engine</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">ask_examinee</span><span class="p">(</span><span class="n">item_id</span><span class="p">),</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>The stopper is consulted here only before the first response; after that,
-<a class="reference internal" href="#catsim.CatEngine.apply_response" title="catsim.CatEngine.apply_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">apply_response()</span></code></a> evaluates it once per new state, and what it records is final. The items
-the exposure control declines join the session’s <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> and the tracker’s proposals
-when the selection ends, so save sessions after this call too; a selection that raises changes
-neither.</p>
-<p>Each call selects anew, and the exposure control decides anew: a second call before the
-response may decline the item the first returned, or end the session. An application that has
-shown an item keeps its id for <a class="reference internal" href="#catsim.CatEngine.apply_response" title="catsim.CatEngine.apply_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">apply_response()</span></code></a> and shows it again rather than calling
-this method again.</p>
+<p>It returns None once the session has ended, so a loop needs no other check. The stopper is
+consulted here only before the first response; after that, <a class="reference internal" href="#catsim.CatEngine.apply_response" title="catsim.CatEngine.apply_response"><code class="xref py py-meth docutils literal notranslate"><span class="pre">apply_response()</span></code></a> consults it.
+The items the exposure control declines join the session’s <code class="docutils literal notranslate"><span class="pre">excluded_items</span></code> and the tracker’s
+proposals, unless the selection raises, so save the session after this call too. Each call
+selects anew, so a second call may return another item or end the session: keep the returned id
+until its response arrives. See <a class="reference internal" href="../live-sessions.html"><span class="doc">Live CAT Sessions</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -623,6 +657,23 @@ or the selector has no item to offer, or none the exposure control accepts (reas
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">RunContext</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">EAPEstimator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">FixedPointInitializer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">FixedPointInitializer</span><span class="p">(</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">MaxInfoSelector</span><span class="p">(),</span> <span class="n">EAPEstimator</span><span class="p">(),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">context</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">start_session</span><span class="p">(</span><span class="s2">"examinee-1"</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="p">(</span><span class="n">item_id</span> <span class="o">:=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>  <span class="n">step</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">[</span><span class="n">item_id</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">state</span><span class="o">.</span><span class="n">administered_count</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">stop_reason</span>
+<span class="go">(5, &lt;StopReason.STOPPER: 'stopper'&gt;)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

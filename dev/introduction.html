@@ -515,8 +515,15 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -524,13 +531,6 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="reproducibility.html">
     Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="architecture_decisions.html">
-    Architecture Decision Records
   </a>
 </li>
 
@@ -542,6 +542,27 @@ window.runMermaid = runMermaid;</script>
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="contributing.html">
     Contributing
@@ -668,8 +689,15 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -677,6 +705,20 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="reproducibility.html">
     Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API Reference
   </a>
 </li>
 
@@ -816,10 +858,17 @@ window.runMermaid = runMermaid;</script>
                   
   <section class="tex2jax_ignore mathjax_ignore" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h1>
-<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> is a Python package for computerized adaptive testing (CAT), providing both stepwise CAT execution and CAT simulation tools for a modern assessment workflow that adapts to each examinee’s ability level in real time.</p>
-<section id="what-are-latent-traits">
-<h2>What are Latent Traits?<a class="headerlink" href="#what-are-latent-traits" title="Link to this heading">#</a></h2>
-<p>Assessment instruments measure <em>latent traits</em> - internal characteristics that cannot be directly observed, such as knowledge or personality traits. Educational and psychological tests are common examples. When a latent trait is expressed numerically, it is called an <em>ability</em> or <em>proficiency</em>.</p>
+<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> is a Python package for computerized adaptive testing (CAT). It runs adaptive
+tests one item at a time, in an application, and simulates them on examinees whose abilities are
+known, to compare testing methods. This page introduces CAT and the item response theory behind it,
+and ends with a map of catsim’s parts. <a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms and symbols these
+pages use.</p>
+<section id="what-a-test-measures">
+<h2>What a Test Measures<a class="headerlink" href="#what-a-test-measures" title="Link to this heading">#</a></h2>
+<p>A test measures an examinee’s <em>ability</em>: a characteristic that cannot be observed directly, such as
+knowledge of a subject or a personality trait. Educational and psychological tests are common
+examples. What can be observed are the examinee’s answers to the test’s items, and the ability is
+inferred from them as a number on a continuous scale.</p>
 </section>
 <section id="the-problem-with-linear-tests">
 <h2>The Problem with Linear Tests<a class="headerlink" href="#the-problem-with-linear-tests" title="Link to this heading">#</a></h2>
@@ -829,90 +878,83 @@ window.runMermaid = runMermaid;</script>
 <li><p>Low-ability examinees become frustrated with overly difficult questions</p></li>
 <li><p>Test length cannot be optimized for individual examinees</p></li>
 </ul>
-</section>
-<section id="what-is-computerized-adaptive-testing">
-<h2>What is Computerized Adaptive Testing?<a class="headerlink" href="#what-is-computerized-adaptive-testing" title="Link to this heading">#</a></h2>
-<p>Computerized adaptive testing (CAT) emerged in the 1970s as <em>tailored testing</em>
-<span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id11" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. doi:10.1177/014662167700100115.">Lord, 1977</a>]</span>. Unlike linear tests, CAT adapts in real time:</p>
-<ol class="arabic simple">
-<li><p>After each item, the examinee’s ability is re-estimated</p></li>
-<li><p>The next item is selected based on the updated ability estimate</p></li>
-<li><p>Each examinee receives items matched to their ability level</p></li>
-</ol>
-<p>This approach is more efficient and engaging, reducing test length while maintaining accuracy.</p>
-</section>
-<section id="about-catsim">
-<h2>About catsim<a class="headerlink" href="#about-catsim" title="Link to this heading">#</a></h2>
-<p>CAT systems rely on Item Response Theory (IRT), which provides the mathematical
-framework for modeling tests, items, and examinees. While CAT packages exist for
-R <span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id13" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">Magis and Raîche, 2012</a>]</span>, <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> brings these capabilities to Python. Built
-on <a class="reference external" href="https://numpy.org/doc/stable/reference/index.html#module-numpy" title="(in NumPy v2.5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">numpy</span></code></a> and <a class="reference external" href="https://scipy.org/">SciPy</a>, it provides:</p>
-<ul class="simple">
-<li><p>Multiple initialization, selection, estimation, and stopping methods</p></li>
-<li><p>A reusable CAT engine for manual and embedded workflows</p></li>
-<li><p>Simulation tools for comparing different CAT methodologies</p></li>
-</ul>
+<p>A computerized adaptive test avoids them by choosing each examinee’s items during the test. It rests
+on item response theory, the subject of the next section.</p>
 </section>
 <section id="item-response-theory-models">
 <h2>Item Response Theory Models<a class="headerlink" href="#item-response-theory-models" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> borrows many concepts from Item Response Theory
-<span class="bibtex-citation" id="id3">[<a class="reference internal" href="references.html#id10" title="F. M. Lord, M. R. Novick, and A. Birnbaum. Statistical theories of mental test scores. Addison-Wesley, Reading, MA, 1968.">Lord <em>et al.</em>, 1968</a>, <a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>, a series of models created in the second part of the 20th century
-with the goal of <em>measuring latent traits</em>. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> makes use of Item
-Response Theory one-, two-, three- and four-parameter logistic models, a series of models
-in which examinees and items are represented by a set of numerical values (the
-models’ parameters). Item Response Theory itself was created with the goal of
-measuring latent traits as well as assessing and comparing individuals’ abilities
-by allocating them in ability scales, inspiring as well as justifying its use in
-adaptive testing.</p>
-<p>The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of <em>items</em> in which examinees manifest their latent traits when answering them.</p>
-<p>In unidimensional IRT models, an examinee’s ability is represented as <span class="math notranslate nohighlight">\(\theta\)</span>. Usually <span class="math notranslate nohighlight">\(-\infty &lt; \theta &lt; \infty\)</span>, but since the scale of <span class="math notranslate nohighlight">\(\theta\)</span> is up to the individuals creating the instrument, it is common for the values to follow the normal distribution <span class="math notranslate nohighlight">\(N(0, 1)\)</span>, such that <span class="math notranslate nohighlight">\(-4 &lt; \theta &lt; 4\)</span>. Additionally, <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> is the estimate of <span class="math notranslate nohighlight">\(\theta\)</span>. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true <span class="math notranslate nohighlight">\(\theta\)</span> as the test progresses in length. <a class="reference internal" href="terms-and-notation.html"><span class="doc">Terms and Notation</span></a> lists the terms and symbols these pages use.</p>
-<p>Under the logistic models of IRT, an item is represented by the following parameters:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(a\)</span> represents an item’s <em>discrimination</em> parameter, that is, how well it discriminates individuals who answer the item correctly (or, in an alternative interpretation, individuals who agree with the idea of the item) and those who don’t. An item with a high <span class="math notranslate nohighlight">\(a\)</span> value tends to be answered correctly by all individuals whose <span class="math notranslate nohighlight">\(\theta\)</span> is above the items difficulty level and wrongly by all the others; as this value gets lower, this threshold gets blurry and the item starts not to be as informative. It is common for <span class="math notranslate nohighlight">\(a &gt; 0\)</span>.</p></li>
-<li><p><span class="math notranslate nohighlight">\(b\)</span> represents an item’s <em>difficulty</em> parameter. This parameter, which is measured in the same scale as <span class="math notranslate nohighlight">\(\theta\)</span>, shows at which point of the ability scale an item is more informative, that is, where it discriminates the individuals who agree and those who disagree with the item. Since <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(\theta\)</span> are measured in the same scale, <span class="math notranslate nohighlight">\(b\)</span> follows the same distributions as <span class="math notranslate nohighlight">\(\theta\)</span>. For a CAT, it is good for an item bank to have as many items as possible in all difficulty levels, so that the CAT may select the best item for each individual in all ability levels.</p></li>
-<li><p><span class="math notranslate nohighlight">\(c\)</span> represents an item’s <em>pseudo-guessing</em> parameter, the lower asymptote of its characteristic curve. This parameter denotes what is the probability of individuals with low ability values to still answer the item correctly. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> requires <span class="math notranslate nohighlight">\(0 \leq c &lt; d\)</span>, and the lower the value of this parameter, the better the item is considered.</p></li>
-<li><p><span class="math notranslate nohighlight">\(d\)</span> represents an item’s <em>upper asymptote</em>. This parameter denotes what is the probability of individuals with high ability values to answer the item correctly, so <span class="math notranslate nohighlight">\(1 - d\)</span> is the probability that they still answer it incorrectly. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> requires <span class="math notranslate nohighlight">\(c &lt; d \leq 1\)</span>, and the higher the value of this parameter, the better the item is considered.</p></li>
+<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> uses item response theory <span class="bibtex-citation" id="id1">[<a class="reference internal" href="references.html#id10" title="F. M. Lord, M. R. Novick, and A. Birnbaum. Statistical theories of mental test scores. Addison-Wesley, Reading, MA, 1968.">Lord <em>et al.</em>, 1968</a>, <a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>, a family of models developed
+in the second half of the 20th century to measure abilities and to compare examinees on a common
+ability scale, which also justifies its use in adaptive testing. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> implements its
+one-, two-, three- and four-parameter logistic models, in which examinees and items are represented
+by numbers, the models’ parameters.</p>
+<p>The logistic models are unidimensional: a test measures a single ability. The test is made of
+<em>items</em>, the questions an examinee answers, each scored correct or incorrect.</p>
+<p>An examinee’s ability is written <span class="math notranslate nohighlight">\(\theta\)</span>. It can take any real value, and its scale is set by
+whoever calibrates the test. It is common to set it so that the abilities of the population follow
+the standard normal distribution <span class="math notranslate nohighlight">\(N(0, 1)\)</span>, under which about 99.99% of examinees lie between <span class="math notranslate nohighlight">\(-4\)</span>
+and <span class="math notranslate nohighlight">\(4\)</span>. The ability cannot be observed, so it is estimated from the responses: the <em>ability
+estimate</em> <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, which tends to get closer to the true <span class="math notranslate nohighlight">\(\theta\)</span> as the test gets longer.
+By default, <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>’s estimators keep their estimates within <span class="math notranslate nohighlight">\([-6, 6]\)</span>, wider than any plausible
+examinee or item bank (<a class="reference internal" href="adr/0009-ability-scale-and-extreme-patterns.html"><span class="doc">ADR-0009: Ability Scale and Extreme Response Patterns</span></a>).</p>
+<p>Under the logistic models, item <span class="math notranslate nohighlight">\(i\)</span> has up to four parameters:</p>
+<ul class="simple">
+<li><p>its <em>discrimination</em> <span class="math notranslate nohighlight">\(a_i\)</span>: how sharply the item separates examinees of lower and higher ability.
+Examinees whose <span class="math notranslate nohighlight">\(\theta\)</span> is above the item’s difficulty tend to answer a highly discriminating item
+correctly, and the others incorrectly; as <span class="math notranslate nohighlight">\(a_i\)</span> gets lower, this threshold blurs and the item
+gives less information. It is common for <span class="math notranslate nohighlight">\(a_i &gt; 0\)</span>.</p></li>
+<li><p>its <em>difficulty</em> <span class="math notranslate nohighlight">\(b_i\)</span>: the point of the ability scale at which the item’s characteristic curve is
+steepest, where it separates examinees best. The item is most informative at or near it (exactly at
+it when <span class="math notranslate nohighlight">\(c_i = 0\)</span> and <span class="math notranslate nohighlight">\(d_i = 1\)</span>). It is on the same scale as <span class="math notranslate nohighlight">\(\theta\)</span>, so difficulties and abilities
+can be compared directly. A CAT needs items at every difficulty, so that it can give each
+examinee the items that suit their ability.</p></li>
+<li><p>its <em>guessing parameter</em> <span class="math notranslate nohighlight">\(c_i\)</span>, the lower asymptote of its characteristic curve: the probability
+that an examinee of very low ability still answers the item correctly. It lies between 0 and the
+upper asymptote, <span class="math notranslate nohighlight">\(0 \leq c_i &lt; d_i\)</span>, and the lower it is, the better the item.</p></li>
+<li><p>its <em>upper asymptote</em> <span class="math notranslate nohighlight">\(d_i\)</span>: the probability that an examinee of very high ability answers the
+item correctly. <span class="math notranslate nohighlight">\(1 - d_i\)</span>, the <em>slipping parameter</em>, is the probability that they still answer it
+incorrectly. It lies between the guessing parameter and 1, <span class="math notranslate nohighlight">\(c_i &lt; d_i \leq 1\)</span>, and the higher it
+is, the better the item.</p></li>
 </ul>
-</div></blockquote>
-<p>For a set of items <span class="math notranslate nohighlight">\(I\)</span>, when <span class="math notranslate nohighlight">\(\forall i \in I, d_i = 1\)</span>, the four-parameter
-logistic model is reduced to the three-parameter logistic model. When, in
-addition, <span class="math notranslate nohighlight">\(\forall i \in I, c_i = 0\)</span>, the three-parameter logistic model is
-reduced to the two-parameter logistic model.
-Additionally, if all values of <span class="math notranslate nohighlight">\(a\)</span> are equal, the two-parameter logistic
-model is reduced to the one-parameter logistic model. Finally, when
-<span class="math notranslate nohighlight">\(\forall i \in I, a_i = 1\)</span>, we have the Rasch model <span class="bibtex-citation" id="id4">[<a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>. Thus,
-<a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> can treat all of the logistic models presented above,
-since the underlying functions of all logistic models related to test simulations
-are the same, given the correct item parameters.</p>
-<p>Under IRT, the probability of an examinee with a given <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value
-to answer item <span class="math notranslate nohighlight">\(i\)</span> correctly, given the item parameters, is given by
-<span class="bibtex-citation" id="id5">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id9" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
+<p>When every item has <span class="math notranslate nohighlight">\(d_i = 1\)</span>, the four-parameter logistic model reduces to the three-parameter
+one. When, in addition, every <span class="math notranslate nohighlight">\(c_i = 0\)</span>, it reduces to the two-parameter model, and when every
+<span class="math notranslate nohighlight">\(a_i\)</span> is also equal, to the one-parameter model. The one-parameter model with every <span class="math notranslate nohighlight">\(a_i = 1\)</span> is
+the Rasch model <span class="bibtex-citation" id="id2">[<a class="reference internal" href="references.html#id12" title="G. Rasch. An item analysis which takes individual differences into account. The British Journal of Mathematical and Statistical Psychology, 19(1):49–57, 1966. doi:10.1111/j.2044-8317.1966.tb00354.x.">Rasch, 1966</a>]</span>. The formulas below hold for all of them, given the item
+parameters, so <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> treats the four models alike.</p>
+<p>Under IRT, the probability that an examinee of ability <span class="math notranslate nohighlight">\(\theta\)</span> answers item <span class="math notranslate nohighlight">\(i\)</span> correctly is the
+item’s <em>characteristic curve</em> <span class="bibtex-citation" id="id3">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id9" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
 <div class="math notranslate nohighlight">
-\[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.\]</div>
-<p>The information this item gives is computed as <span class="bibtex-citation" id="id6">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id9" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
+\[P_i(\theta) = c_i + \frac{d_i - c_i}{1 + e^{-a_i(\theta - b_i)}}.\]</div>
+<p>The <em>information</em> the item gives at ability <span class="math notranslate nohighlight">\(\theta\)</span>, how much a response to it sharpens an
+estimate near <span class="math notranslate nohighlight">\(\theta\)</span>, is <span class="bibtex-citation" id="id4">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>, <a class="reference internal" href="references.html#id9" title="D. Magis. A note on the item information function of the four-parameter logistic model. Applied Psychological Measurement, 37(4):304–315, 2013. doi:10.1177/0146621613475471.">Magis, 2013</a>]</span></p>
 <div class="math notranslate nohighlight">
-\[I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.\]</div>
-<p>Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee’s ability.</p>
-<figure class="align-default" id="id10">
+\[I_i(\theta) = \frac{a_i^2 [P_i(\theta) - c_i]^2 [d_i - P_i(\theta)]^2}{(d_i - c_i)^2 P_i(\theta) Q_i(\theta)},\]</div>
+<p>where <span class="math notranslate nohighlight">\(Q_i(\theta) = 1 - P_i(\theta)\)</span> is the probability of an incorrect response. The following
+figure draws both curves for one item: the item is most informative near its difficulty.</p>
+<figure class="align-default" id="id9">
 <img alt="_images/introduction-1.svg" class="plot-directive" src="_images/introduction-1.svg" />
 <figcaption>
-<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.</span><a class="headerlink" href="#id10" title="Link to this image">#</a></p>
+<p><span class="caption-number">Fig. 1 </span><span class="caption-text">Item characteristic and information curves for an item. The dot represents the point at which the item is most informative.</span><a class="headerlink" href="#id9" title="Link to this image">#</a></p>
 </figcaption>
 </figure>
-<p>The sum of the information of all items in a test is called <em>test information</em>
-<span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>]</span>:</p>
+<p>The sum of the information of the items administered to an examinee is the <em>test information</em>
+<span class="bibtex-citation" id="id5">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>]</span>:</p>
 <div class="math notranslate nohighlight">
-\[I(\theta) = \sum_{j \in J} I_j(\theta).\]</div>
-<p>The amount of error in the estimate of an examinee’s ability after a test is
-called the <em>standard error of estimation</em> <span class="bibtex-citation" id="id8">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>]</span> and it is given by</p>
+\[I(\theta) = \sum_i I_i(\theta).\]</div>
+<p>The uncertainty of an ability estimate is its <em>standard error</em> <span class="math notranslate nohighlight">\(SE(\hat{\theta})\)</span>. For a maximum
+likelihood estimate it is <span class="bibtex-citation" id="id6">[<a class="reference internal" href="references.html#id3" title="R. J. De Ayala. The Theory and Practice of Item Response Theory. Guilford Press, New York, 2009. URL: http://books.google.com/books?id=-k36zbOBa28C&amp;pgis=1.">De Ayala, 2009</a>]</span></p>
 <div class="math notranslate nohighlight">
-\[SEE = \sqrt{\frac{1}{I(\theta)}}\]</div>
-<p>Since the denominator in the calculation of the <span class="math notranslate nohighlight">\(SEE\)</span> is <span class="math notranslate nohighlight">\(I(\theta)\)</span>, it is clear to see that the more items an examinee answers, the smaller SEE gets.</p>
-<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> provides these functions in the <a class="reference internal" href="api/irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a> module.</p>
+\[SE(\hat{\theta}) = \frac{1}{\sqrt{I(\hat{\theta})}}.\]</div>
+<p>Every item adds information, so the more items an examinee answers, the smaller the standard
+error. <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> computes these quantities with the functions of the <a class="reference internal" href="api/irt.html#module-catsim.irt" title="catsim.irt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a>
+module.</p>
 <section id="the-item-matrix">
 <h3>The Item Matrix<a class="headerlink" href="#the-item-matrix" title="Link to this heading">#</a></h3>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, a collection of items is represented as a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the <em>item matrix</em>. The item matrix has four columns, which hold the parameters <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>, in this order. A matrix with one, two or three columns is read as <span class="math notranslate nohighlight">\([b]\)</span>, <span class="math notranslate nohighlight">\([a, b]\)</span> or <span class="math notranslate nohighlight">\([a, b, c]\)</span>, and the missing parameters are filled in with <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>. An <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.ItemBank</span></code></a> holds an item matrix, and its <a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">generate()</span></code></a> method generates one as follows:</p>
+<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, the items are a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> with one row per item and one column
+per parameter, the <em>item matrix</em>. Its four columns hold <span class="math notranslate nohighlight">\(a\)</span>, <span class="math notranslate nohighlight">\(b\)</span>, <span class="math notranslate nohighlight">\(c\)</span> and <span class="math notranslate nohighlight">\(d\)</span>, in this order. A
+matrix with one, two or three columns is read as <span class="math notranslate nohighlight">\([b]\)</span>, <span class="math notranslate nohighlight">\([a, b]\)</span> or <span class="math notranslate nohighlight">\([a, b, c]\)</span>, and the missing
+parameters take the values <span class="math notranslate nohighlight">\(a = 1\)</span>, <span class="math notranslate nohighlight">\(c = 0\)</span> and <span class="math notranslate nohighlight">\(d = 1\)</span>. An <a class="reference internal" href="api/item_bank.html#catsim.ItemBank" title="catsim.ItemBank"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemBank</span></code></a> holds an
+item matrix, and <a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.generate</span></code></a> draws one at random:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">"1PL"</span><span class="p">)</span>
 <span class="go">ItemBank(n_items=5, model=1PL)</span>
@@ -926,111 +968,112 @@ called the <em>standard error of estimation</em> <span class="bibtex-citation" i
 <span class="go">(5, 4)</span>
 </pre></div>
 </div>
-<p>These examples depict the generation of five items according to the
-different logistic models. Whatever the model, the item matrix has four columns.
-In the last example, parameters <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(b\)</span> have a
-correlation of <span class="math notranslate nohighlight">\(0.5\)</span>, an adjustment that may be useful in case simulations
-require it <span class="bibtex-citation" id="id9">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
-<p>The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results (<a class="reference internal" href="api/simulation.html#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">catsim.SimulationResult.exposure_rates</span></code></a>). The exposure rate is commonly denoted as <span class="math notranslate nohighlight">\(r\)</span> and computed as follows:</p>
-<div class="math notranslate nohighlight">
-\[r_i = \frac{q_i}{N}\]</div>
-<p>Where <span class="math notranslate nohighlight">\(q_i\)</span> represents the number of tests item <span class="math notranslate nohighlight">\(i\)</span> has been used on and <span class="math notranslate nohighlight">\(N\)</span> is the total number of tests applied.</p>
-<p>During a run, a selector’s exposure cap (<code class="docutils literal notranslate"><span class="pre">r_max</span></code>) is checked against the same rate over the examinees tested so far: an <a class="reference internal" href="api/state.html#catsim.ExposureTracker" title="catsim.ExposureTracker"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExposureTracker</span></code></a> in the run context gives each session <span class="math notranslate nohighlight">\(q_i\)</span> and <span class="math notranslate nohighlight">\(N\)</span> over the other sessions started so far, which for sessions run one after another is catR’s rate over the examinees tested before the current one (<a class="reference internal" href="adr/0003-runtime-state-ownership.html"><span class="doc">ADR-0003: Keep Runtime State Outside Domain Objects</span></a>).</p>
+<p>These examples draw five items under each logistic model. Whatever the model, the item matrix has
+four columns. In the last example, the discrimination and the difficulty have a correlation of
+<span class="math notranslate nohighlight">\(0.5\)</span>, which simulations may need <span class="bibtex-citation" id="id7">[<a class="reference internal" href="references.html#id14" title="H.-H. Chang, J. Qian, and Z. Ying. A-stratified multistage computerized adaptive testing with b blocking. Applied Psychological Measurement, 25(4):333–341, 2001. doi:10.1177/01466210122032181.">Chang <em>et al.</em>, 2001</a>]</span>.</p>
 </section>
 </section>
 <section id="computerized-adaptive-tests">
-<h2>Computerized adaptive tests<a class="headerlink" href="#computerized-adaptive-tests" title="Link to this heading">#</a></h2>
-<p>Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee’s ability is updated after the response of each item. The updated knowledge of an examinee’s ability at each step of the test allows for the selection of more informative items <em>during</em> the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.</p>
+<h2>Computerized Adaptive Tests<a class="headerlink" href="#computerized-adaptive-tests" title="Link to this heading">#</a></h2>
+<p>Computerized adaptive testing emerged in the 1970s as <em>tailored testing</em> <span class="bibtex-citation" id="id8">[<a class="reference internal" href="references.html#id11" title="F. M. Lord. A broad-range tailored test of verbal ability. Applied Psychological Measurement, 1(1):95–100, 1977. doi:10.1177/014662167700100115.">Lord, 1977</a>]</span>. A linear
+test estimates an examinee’s ability once, at the end. A computerized adaptive test (CAT) updates the
+estimate after each response. Knowing more about the ability at each step lets the test
+choose more informative items <em>during</em> the test, so the standard error of the estimate falls
+faster.</p>
 <section id="the-cat-lifecycle">
 <h3>The CAT Lifecycle<a class="headerlink" href="#the-cat-lifecycle" title="Link to this heading">#</a></h3>
-<p>In general, a computerized adaptive test has a very well-defined lifecycle:</p>
+<p>A computerized adaptive test follows a well-defined lifecycle:</p>
 <pre  class="mermaid">
         flowchart TD
-    start([Start]) --&gt; init[Initial ability estimation]
+    start([Start]) --&gt; init[Initial ability estimate]
     init --&gt; select[Item selection and administration]
-    select --&gt; answer[Capture answer]
-    answer --&gt; estimate[Proficiency estimation]
+    select --&gt; answer[Response]
+    answer --&gt; estimate[Ability estimation]
     estimate --&gt; stop{Stopping criterion&lt;br&gt;reached?}
     stop -- No --&gt; select
     stop -- Yes --&gt; finish([End])
     </pre><ol class="arabic simple">
-<li><p>The examinee’s initial ability is estimated;</p></li>
-<li><p>An item is selected based on the current ability estimation;</p></li>
-<li><p>The ability is reestimated based on the answers to all items up until now;</p></li>
-<li><p><strong>If</strong> a stopping criterion is met, stop the test. <strong>Else</strong> go back to step 2.</p></li>
+<li><p>The examinee’s initial ability estimate is set;</p></li>
+<li><p>an item is selected at the current ability estimate and administered;</p></li>
+<li><p>the ability is estimated again from the responses to all items so far;</p></li>
+<li><p><strong>if</strong> a stopping criterion is met, the test ends; <strong>else</strong> it goes back to step 2.</p></li>
 </ol>
-<p>There is a considerable amount of literature covering these four phases proposed by many authors. In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, each phase is separated in its own module, which makes it easy to create simulations combining different methods for each phase. Each module will be explained separately, along with its API.</p>
+<p>The literature proposes many methods for each of these four phases. In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, each
+phase is a strategy with a module of its own, an <em>initializer</em>, a <em>selector</em>, an <em>estimator</em> and a
+<em>stopper</em>, so a test can combine any method for each phase. The sections below introduce each
+phase.</p>
 <section id="initialization">
 <h4>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">#</a></h4>
-<p>The initialization procedure is done only once during each examinee’s test. In it, the initial value of an examinee’s ability <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>); it can be drawn from a uniform or a normal distribution (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.UniformInitializer" title="catsim.initialization.UniformInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.UniformInitializer</span></code></a>, <a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.NormalInitializer" title="catsim.initialization.NormalInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.NormalInitializer</span></code></a>); the place in the item bank with items of more information can be chosen to initialize <span class="math notranslate nohighlight">\(\hat\theta_0\)</span> etc.</p>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, initialization procedures can be found in the <a class="reference internal" href="api/techniques/initialization/index.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a> module.</p>
+<p>The initializer runs once per examinee and sets the initial ability estimate <span class="math notranslate nohighlight">\(\hat\theta_0\)</span>. It may
+give every examinee the same value (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.FixedPointInitializer" title="catsim.initialization.FixedPointInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.FixedPointInitializer</span></code></a>), draw
+one from a uniform or a normal distribution (<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.UniformInitializer" title="catsim.initialization.UniformInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.UniformInitializer</span></code></a>,
+<a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.NormalInitializer" title="catsim.initialization.NormalInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.NormalInitializer</span></code></a>). The literature also starts at other points,
+such as the ability at which the item bank is most informative.</p>
+<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, initializers are in the <a class="reference internal" href="api/techniques/initialization/index.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a> module.</p>
 </section>
 <section id="item-selection">
 <h4>Item Selection<a class="headerlink" href="#item-selection" title="Link to this heading">#</a></h4>
-<p>With a set value for <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>.</p>
-<p>Item selection methods are diverse. The most famous method is to choose the item that maximizes the <em>gain of information</em>, represented by <a class="reference internal" href="api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.</p>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, an examinee’s response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of <span class="math notranslate nohighlight">\(p\)</span> is given by the IRT logistic model characteristic function (<a class="reference internal" href="api/irt.html#catsim.irt.icc" title="catsim.irt.icc"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.icc()</span></code></a>) at the examinee’s true ability <span class="math notranslate nohighlight">\(\theta\)</span>, given by:</p>
+<p>At the current estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>, the selector chooses an item from the item bank and the
+examinee answers it. The best-known method gives the item that is most informative at
+<span class="math notranslate nohighlight">\(\hat{\theta}\)</span> (<a class="reference internal" href="api/techniques/selection/max-info-selector.html#catsim.selection.MaxInfoSelector" title="catsim.selection.MaxInfoSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.MaxInfoSelector</span></code></a>). It tends to give the same few items
+to many examinees and to leave the rest of the bank unused, so other selection methods were
+proposed.</p>
+<p>How often an item is given is measured by its <em>exposure rate</em>, the share of examinees given it:</p>
 <div class="math notranslate nohighlight">
-\[P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}\]</div>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, item selection procedures can be found in the <a class="reference internal" href="api/techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> module.</p>
+\[r_i = \frac{q_i}{N},\]</div>
+<p>where <span class="math notranslate nohighlight">\(q_i\)</span> is the number of examinees given item <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(N\)</span> the number of examinees. An item given
+to many examinees becomes known to future ones. Exposure-control methods keep the rates below a cap
+<span class="math notranslate nohighlight">\(r_{\max}\)</span> or choose among the best items at random
+(<a class="reference internal" href="api/techniques/selection/index.html"><span class="doc">selection techniques</span></a>). A simulation reports the rates as
+<a class="reference internal" href="api/simulation.html#catsim.SimulationResult.exposure_rates" title="catsim.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">exposure_rates</span></code></a>.</p>
+<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, selectors are in the <a class="reference internal" href="api/techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a> module.</p>
 </section>
-<section id="proficiency-estimation">
-<h4>Proficiency Estimation<a class="headerlink" href="#proficiency-estimation" title="Link to this heading">#</a></h4>
-<p>Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee’s <span class="math notranslate nohighlight">\(\hat{\theta}\)</span>. This value reflects the examinee’s ability, given his or hers answers up until that point of the test. An estimator returns it as an <a class="reference internal" href="api/context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>, which also holds the estimate’s standard error, by the estimator’s own formula, and how many times the estimator evaluated its objective to find it.</p>
-<p>In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+<section id="ability-estimation">
+<h4>Ability Estimation<a class="headerlink" href="#ability-estimation" title="Link to this heading">#</a></h4>
+<p>After each response, the estimator updates the ability estimate <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> from the responses
+so far, each correct or incorrect, and the parameters of the items answered. In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>,
+the responses are a list of booleans, <code class="docutils literal notranslate"><span class="pre">True</span></code> for a correct response, one for each administered
+item, in the order they were given:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">responses</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the <span class="math notranslate nohighlight">\(\hat{\theta}\)</span> value that maximizes the <em>log-likelihood</em> function, presented in <a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee’s abilities to estimate new values for them.</p>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, ability estimation procedures can be found in the <a class="reference internal" href="api/techniques/estimation/index.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a> module.</p>
+<p>Estimators fall into two groups. Maximum likelihood estimators return the ability at which the
+responses are most likely, the maximum of the <em>log-likelihood</em> (<a class="reference internal" href="api/irt.html#catsim.irt.log_likelihood" title="catsim.irt.log_likelihood"><code class="xref py py-func docutils literal notranslate"><span class="pre">catsim.irt.log_likelihood()</span></code></a>).
+Bayesian estimators combine the likelihood with a prior distribution of the abilities in the
+population. Each estimator also gives the standard error of its estimate, by its own formula
+(<a class="reference internal" href="api/techniques/estimation/index.html"><span class="doc">estimation techniques</span></a>).</p>
+<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, estimators are in the <a class="reference internal" href="api/techniques/estimation/index.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a> module.</p>
 </section>
 <section id="stopping-criterion">
 <h4>Stopping Criterion<a class="headerlink" href="#stopping-criterion" title="Link to this heading">#</a></h4>
-<p>Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items (<a class="reference internal" href="api/techniques/stopping/max-length-stopper.html#catsim.stopping.MaxLengthStopper" title="catsim.stopping.MaxLengthStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxLengthStopper</span></code></a>), when the standard error the estimator reports with its estimate (the <span class="math notranslate nohighlight">\(SEE\)</span> above for maximum likelihood, the posterior standard deviation for EAP) reaches a lower threshold (<a class="reference internal" href="api/techniques/stopping/standard-error-stopper.html#catsim.stopping.StandardErrorStopper" title="catsim.stopping.StandardErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.StandardErrorStopper</span></code></a>), or when a confidence interval for the ability estimate falls within one ability band (<a class="reference internal" href="api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper" title="catsim.stopping.ConfidenceIntervalStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.ConfidenceIntervalStopper</span></code></a>). A <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.StopRule</span></code></a> combines several of them, ending the test as soon as any one holds, after an optional minimum number of items.</p>
-<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, test stopping criteria can be found in the <a class="reference internal" href="api/techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> module.</p>
+<p>Since a CAT selects its items during the test, a stopping criterion decides when the test ends and
+no further items are given. A stopper may end the test at a fixed number of items
+(<a class="reference internal" href="api/techniques/stopping/max-length-stopper.html#catsim.stopping.MaxLengthStopper" title="catsim.stopping.MaxLengthStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.MaxLengthStopper</span></code></a>), once the standard error of the estimate falls to a
+threshold (<a class="reference internal" href="api/techniques/stopping/standard-error-stopper.html#catsim.stopping.StandardErrorStopper" title="catsim.stopping.StandardErrorStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.StandardErrorStopper</span></code></a>), or once a confidence interval for the
+ability estimate falls within one ability band (<a class="reference internal" href="api/techniques/stopping/confidence-interval-stopper.html#catsim.stopping.ConfidenceIntervalStopper" title="catsim.stopping.ConfidenceIntervalStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.ConfidenceIntervalStopper</span></code></a>).
+A <a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.StopRule" title="catsim.stopping.StopRule"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.StopRule</span></code></a> combines several stoppers, ending the test as soon as any one
+holds, after an optional minimum number of items.</p>
+<p>In <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a>, stoppers are in the <a class="reference internal" href="api/techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a> module.</p>
 </section>
 </section>
 </section>
-<section id="package-architecture">
-<h2>Package architecture<a class="headerlink" href="#package-architecture" title="Link to this heading">#</a></h2>
-<p><a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> was built using an object-oriented architecture, which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionally, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module’s respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using <a class="reference internal" href="api/index.html#module-catsim" title="catsim"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim</span></code></a> and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on <a class="reference internal" href="#modules-classes"><span class="std std-numref">Table 1</span></a>.</p>
-<div class="pst-scrollable-table-container"><table class="table" id="modules-classes">
-<caption><span class="caption-number">Table 1 </span><span class="caption-text">Modules and their corresponding abstract classes</span><a class="headerlink" href="#modules-classes" title="Link to this table">#</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"><p>Module</p></th>
-<th class="head"><p>Abstract class</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="api/techniques/initialization/index.html#module-catsim.initialization" title="catsim.initialization"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.initialization</span></code></a></p></td>
-<td><p><a class="reference internal" href="api/techniques/initialization/index.html#catsim.initialization.BaseInitializer" title="catsim.initialization.BaseInitializer"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.initialization.BaseInitializer</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/techniques/selection/index.html#module-catsim.selection" title="catsim.selection"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.selection</span></code></a></p></td>
-<td><p><a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.BaseSelector" title="catsim.selection.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.selection.BaseSelector</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/techniques/estimation/index.html#module-catsim.estimation" title="catsim.estimation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.estimation</span></code></a></p></td>
-<td><p><a class="reference internal" href="api/techniques/estimation/index.html#catsim.estimation.BaseEstimator" title="catsim.estimation.BaseEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.estimation.BaseEstimator</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/techniques/stopping/index.html#module-catsim.stopping" title="catsim.stopping"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.stopping</span></code></a></p></td>
-<td><p><a class="reference internal" href="api/techniques/stopping/index.html#catsim.stopping.BaseStopper" title="catsim.stopping.BaseStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">catsim.stopping.BaseStopper</span></code></a></p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>The initializer runs once per session and receives the item bank and the run’s random generator. The selector, the estimator and the stopper run at every step and receive one <a class="reference internal" href="api/context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a>, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an <a class="reference internal" href="api/context.html#catsim.Estimate" title="catsim.Estimate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Estimate</span></code></a>. The helpers that make the built-in selectors behave alike are listed in <a class="reference internal" href="api/techniques/selection/index.html#catsim.selection.BaseSelector" title="catsim.selection.BaseSelector"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSelector</span></code></a>, and <a class="reference internal" href="api/typing.html#module-catsim.typing" title="catsim.typing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></a> holds the array types catsim annotates with (<a class="reference internal" href="adr/0004-explicit-strategy-contracts.html"><span class="doc">ADR-0004: Strategies Take One Step Context and Estimators Return an Estimate</span></a>). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">StepContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span><span class="p">,</span> <span class="n">pick_best</span><span class="p">,</span> <span class="n">remaining</span>
-
-
-<span class="k">class</span><span class="w"> </span><span class="nc">EasiestFirstSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
-    <span class="nd">@override</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">StepContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="n">candidates</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="o">-</span><span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">[</span><span class="n">candidates</span><span class="p">],</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span>
-</pre></div>
-</div>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h2>
+<pre  class="mermaid">
+        flowchart LR
+    bank[(Item bank)] --&gt; engine[CatEngine]
+    strategies[&quot;Strategies:&lt;br&gt;initializer, selector,&lt;br&gt;estimator, stopper&quot;] --&gt; engine
+    app([Your application]) -- &quot;one session,&lt;br&gt;item by item&quot; --&gt; engine
+    runner[SimulationRunner] -- &quot;one session per&lt;br&gt;simulated examinee&quot; --&gt; engine
+    runner -- returns --&gt; result[SimulationResult]
+    </pre><p>A <a class="reference internal" href="api/engine.html#catsim.CatEngine" title="catsim.CatEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">CatEngine</span></code></a> holds an item bank and four strategies, one for each phase of the
+lifecycle above, and runs each examinee’s test one item at a time. An application asks it for each
+item and gives it each response (<a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a>). A <a class="reference internal" href="api/simulation.html#catsim.SimulationRunner" title="catsim.SimulationRunner"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationRunner</span></code></a> gives
+the same test to simulated examinees whose true abilities are known, and returns a
+<a class="reference internal" href="api/simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a> that compares the final estimates with those abilities
+(<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a>). <a class="reference internal" href="reproducibility.html"><span class="doc">Reproducibility</span></a> shows how to seed a simulation study so that
+it repeats, and <a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a> how to write a strategy of your own.
+<a class="reference internal" href="adr/0001-explicit-cat-engine.html"><span class="doc">ADR-0001: Adopt Explicit CAT Engine Architecture</span></a> records why catsim is built around the engine.</p>
 </section>
 </section>
 
@@ -1081,25 +1124,23 @@ require it <span class="bibtex-citation" id="id9">[<a class="reference internal"
   </div>
   <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-are-latent-traits">What are Latent Traits?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-a-test-measures">What a Test Measures</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-problem-with-linear-tests">The Problem with Linear Tests</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-computerized-adaptive-testing">What is Computerized Adaptive Testing?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-catsim">About catsim</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#item-response-theory-models">Item Response Theory Models</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-item-matrix">The Item Matrix</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computerized-adaptive-tests">Computerized adaptive tests</a><ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computerized-adaptive-tests">Computerized Adaptive Tests</a><ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#the-cat-lifecycle">The CAT Lifecycle</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#initialization">Initialization</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#item-selection">Item Selection</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#proficiency-estimation">Proficiency Estimation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ability-estimation">Ability Estimation</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#stopping-criterion">Stopping Criterion</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-architecture">Package architecture</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture">Architecture</a></li>
 </ul>
   </nav></div>
 

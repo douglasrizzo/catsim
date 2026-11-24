@@ -47,8 +47,8 @@
     <link rel="icon" href="_static/favicon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Architecture Decision Records" href="architecture_decisions.html" />
-    <link rel="prev" title="Array Type Aliases – catsim.typing" href="api/typing.html" />
+    <link rel="next" title="Extending catsim" href="extending.html" />
+    <link rel="prev" title="Live CAT Sessions" href="live-sessions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
@@ -155,8 +155,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -164,13 +171,6 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
     Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="architecture_decisions.html">
-    Architecture Decision Records
   </a>
 </li>
 
@@ -182,6 +182,27 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="contributing.html">
     Contributing
@@ -308,8 +329,15 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -317,6 +345,20 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="#" aria-current="page">
     Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/index.html">
+    API Reference
   </a>
 </li>
 
@@ -456,27 +498,27 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="reproducibility">
 <h1>Reproducibility<a class="headerlink" href="#reproducibility" title="Link to this heading">#</a></h1>
-<p>Objects that use random number generation directly, mainly initializers, selectors and exposure controls, can have reproducible outputs by receiving a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a> instance: initializers take it as the <code class="docutils literal notranslate"><span class="pre">rng</span></code> keyword argument of <code class="docutils literal notranslate"><span class="pre">initialize</span></code>, and selectors and exposure controls read it from the <code class="docutils literal notranslate"><span class="pre">rng</span></code> field of the <a class="reference internal" href="api/context.html#catsim.StepContext" title="catsim.StepContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">StepContext</span></code></a> passed to <code class="docutils literal notranslate"><span class="pre">select</span></code> or <code class="docutils literal notranslate"><span class="pre">accept</span></code>.</p>
-<p>In the snippet below, all selectors that have random behavior produce the same outputs, when given the same input arguments.</p>
-<div class="literal-block-wrapper docutils container" id="id1">
-<div class="code-block-caption"><span class="caption-number">Listing 1 </span><span class="caption-text">Generating reproducible outputs from CAT components.</span><a class="headerlink" href="#id1" title="Link to this code">#</a></div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">StepContext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomesqueSelector</span><span class="p">,</span> <span class="n">RandomSelector</span><span class="p">,</span> <span class="n">The54321Selector</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.random</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_rng</span>
-
-<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
-    <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span>
-        <span class="n">RandomSelector</span><span class="p">()</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">))),</span>
-        <span class="n">The54321Selector</span><span class="p">()</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">))),</span>
-        <span class="n">RandomesqueSelector</span><span class="p">(</span><span class="n">bin_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">StepContext</span><span class="p">(</span><span class="n">item_bank</span><span class="o">=</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">))),</span>
-    <span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<p><a class="reference internal" href="api/simulation.html#catsim.SimulationRunner.run" title="catsim.SimulationRunner.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimulationRunner.run</span></code></a> builds one <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a> from its <code class="docutils literal notranslate"><span class="pre">rng</span></code> argument at the start of every call, and every random draw of the run comes from it: the initializer, the selectors, the engine’s exposure control, if it has one, and the simulated responses of every session (<a class="reference internal" href="adr/0013-random-numbers-and-reproducibility.html"><span class="doc">ADR-0013: Random Numbers and Reproducibility</span></a>). Results are reproducible when <code class="docutils literal notranslate"><span class="pre">rng</span></code> is passed. Without it, the run draws fresh randomness, so every call gives other tests: replications in a loop differ, as they should, but no such run can be repeated. <code class="docutils literal notranslate"><span class="pre">rng</span></code> can also be a generator, which the run uses as is and advances. <a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.generate</span></code></a> takes an <code class="docutils literal notranslate"><span class="pre">rng</span></code> of its own, with the same rules, so pass a seed there too to draw the same bank every time.</p>
-<p>The runner draws nothing else. The examinees’ true abilities are an input to <code class="docutils literal notranslate"><span class="pre">run</span></code>: to simulate a population, draw them with a generator of your own, as <code class="docutils literal notranslate"><span class="pre">rng.normal(0,</span> <span class="pre">1,</span> <span class="pre">n)</span></code> does below, so the same abilities can be run again, on another engine or with another seed.</p>
-<p>The same seed and the same true abilities give identical results, however many times the runner has run and on any runner built with the same components. A different seed, or no <code class="docutils literal notranslate"><span class="pre">rng</span></code> at all, gives other tests. A generator passed as <code class="docutils literal notranslate"><span class="pre">rng</span></code> is not a seed: each run advances it, so passing the same generator object again gives other tests.</p>
+<p>A simulation study is reproducible when running its code again gives the same numbers. This guide
+shows how to seed one run, a study of many replications and a study split across processes.
+<a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> shows how to build and run the test itself.</p>
+<section id="one-seed-per-run">
+<h2>One Seed per Run<a class="headerlink" href="#one-seed-per-run" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="api/simulation.html#catsim.SimulationRunner.run" title="catsim.SimulationRunner.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SimulationRunner.run</span></code></a> takes <code class="docutils literal notranslate"><span class="pre">rng</span></code>, the source of every
+random draw of the run: the initializer’s starting points, the selectors’ random choices and
+tie-breaks, the decisions of the engine’s exposure control, if it has one, and every simulated
+response. Custom strategies draw from it too (<a class="reference internal" href="extending.html"><span class="doc">Extending catsim</span></a>). It can be:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>, the default: the run draws fresh randomness, so every call gives other tests and none can
+be repeated;</p></li>
+<li><p>an int: a seed, so the same seed and the same true abilities give the same result every time,
+however many times the runner has run, and on any runner built with the same item bank and
+strategies;</p></li>
+<li><p>a <a class="reference external" href="https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code></a>: the run draws from it as it is and advances it, so passing
+the same generator to a second run gives other tests.</p></li>
+</ul>
+<p>A seeded run repeats on the same versions of catsim and NumPy. Seeded results can change between
+catsim versions, when a strategy changes how many random numbers it draws, so record the versions
+with a study’s seeds.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">SimulationRunner</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
@@ -499,9 +541,92 @@
 <span class="go">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
 <span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generator</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">numpy</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">generator</span><span class="p">)</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+<span class="go">False</span>
 </pre></div>
 </div>
-<p>Sessions run one after another, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, so each session’s draws depend on the sessions before it. Reordering the examinees, or adding or removing one, changes the tests of the sessions after it, and the sessions of one run cannot run in parallel without changing the results. To parallelise a study, split the population and run each part with a generator of its own, such as <code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(child)</span></code> for each <code class="docutils literal notranslate"><span class="pre">child</span></code> of <code class="docutils literal notranslate"><span class="pre">numpy.random.SeedSequence(42).spawn(4)</span></code>, and accept that the results differ from those of one sequential run.</p>
+<p>The same seed gives the same estimates, another seed or no seed other ones. A generator built from
+seed 42 gives the run of seed 42 the first time, and other tests the second time, because the first
+run advanced it.</p>
+<p><a class="reference internal" href="api/item_bank.html#catsim.ItemBank.generate" title="catsim.ItemBank.generate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ItemBank.generate</span></code></a> takes an <code class="docutils literal notranslate"><span class="pre">rng</span></code> of its own, with the same
+rules: pass it a seed to draw the same bank every time. A calibrated bank read from a file needs
+none.</p>
+</section>
+<section id="the-population-is-an-input">
+<h2>The Population Is an Input<a class="headerlink" href="#the-population-is-an-input" title="Link to this heading">#</a></h2>
+<p>The runner never draws the examinees: their true abilities are an input to <code class="docutils literal notranslate"><span class="pre">run</span></code>. To simulate a
+population, draw the abilities with a generator of your own, as
+<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(7).normal(0,</span> <span class="pre">1,</span> <span class="pre">10)</span></code> does above, and pass the same array to every engine
+you compare, so that every strategy meets the same examinees. Seeding the population apart from the
+run also lets a study hold the examinees fixed while it varies the run’s seed, or the reverse.
+Abilities from elsewhere, such as the estimates of a calibration sample, work the same way.</p>
+</section>
+<section id="sessions-run-in-sequence">
+<h2>Sessions Run in Sequence<a class="headerlink" href="#sessions-run-in-sequence" title="Link to this heading">#</a></h2>
+<p>A run gives its tests one examinee after another, in the order of <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code>, and every session
+draws from the one generator in turn. Each session’s draws therefore depend on all the sessions
+before it:</p>
+<ul class="simple">
+<li><p>reordering the examinees, or adding or removing one, changes the tests of every examinee after
+it, even under the same seed;</p></li>
+<li><p>with an exposure cap, the items a session may be given also depend on the items given to the
+examinees before it.</p></li>
+</ul>
+<p>To compare one examinee’s test across two runs, keep the population array identical. Why catsim
+runs the sessions in sequence and draws from one generator is in
+<a class="reference internal" href="adr/0013-random-numbers-and-reproducibility.html"><span class="doc">ADR-0013: Random Numbers and Reproducibility</span></a>.</p>
+</section>
+<section id="replications">
+<h2>Replications<a class="headerlink" href="#replications" title="Link to this heading">#</a></h2>
+<p>The metrics of one run depend on its draws. To measure their spread, run each configuration several
+times, each replication with a seed of its own, spawned from one root seed with
+<a class="reference external" href="https://numpy.org/doc/stable/reference/random/bit_generators/generated/numpy.random.SeedSequence.html#numpy.random.SeedSequence" title="(in NumPy v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.random.SeedSequence</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">replications</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">SeedSequence</span><span class="p">(</span><span class="mi">2026</span><span class="p">)</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span> <span class="k">for</span> <span class="n">seed</span> <span class="ow">in</span> <span class="n">replications</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">([</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">],</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The whole study repeats from the root seed, and the spawned seeds give independent streams. Give
+every configuration you compare the same spawned seeds; <a class="reference internal" href="running-simulations.html"><span class="doc">Running Simulations</span></a> compares
+selectors this way. Unseeded replications would differ from each other too, but the study could not
+be repeated.</p>
+</section>
+<section id="parallel-studies">
+<h2>Parallel Studies<a class="headerlink" href="#parallel-studies" title="Link to this heading">#</a></h2>
+<p>A run’s sessions do not run in parallel: their draws would then depend on which session drew first.
+To use several processes, split the study into parts that do not share a generator, each with a
+seed of its own. Independent replications are such parts, and so is a population split in pieces:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationResult</span>
+
+<span class="n">parts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">seeds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">SeedSequence</span><span class="p">(</span><span class="mi">2026</span><span class="p">)</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">))</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">))</span> <span class="k">for</span> <span class="n">part</span><span class="p">,</span> <span class="n">seed</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">seeds</span><span class="p">)]</span>
+<span class="n">combined</span> <span class="o">=</span> <span class="n">SimulationResult</span><span class="p">(</span>
+    <span class="n">runner</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span>
+    <span class="n">sessions</span><span class="o">=</span><span class="p">[</span><span class="n">session</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">sessions</span><span class="p">],</span>
+    <span class="n">exposure_counts</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">exposure_counts</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
+    <span class="n">duration</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">duration</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
+    <span class="n">proposal_counts</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">proposal_counts</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">combined</span><span class="o">.</span><span class="n">rmse</span><span class="p">,</span> <span class="n">combined</span><span class="o">.</span><span class="n">exposure_rates</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Each part depends only on its own abilities and seed, so the parts can run in separate processes,
+for example with <a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">concurrent.futures.ProcessPoolExecutor</span></code></a>, in any order, and give the same
+results. Building one <a class="reference internal" href="api/simulation.html#catsim.SimulationResult" title="catsim.SimulationResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimulationResult</span></code></a> from their sessions and counts gives the
+metrics and exposure rates of the whole population. They differ from those of one sequential run of
+the same population: each part draws from its own stream, and with an exposure cap, each part’s
+sessions see the exposure of that part alone.</p>
+<p>Two fields of the combined result describe the parts, not one run. Its <code class="docutils literal notranslate"><span class="pre">duration</span></code> is the sum of the
+parts’ run times: compute time, longer than the wall-clock time when the parts run in parallel. Its
+session ids repeat, since each run numbers its sessions from 0, so tell the parts’ sessions apart by
+their position in <code class="docutils literal notranslate"><span class="pre">sessions</span></code>.</p>
+<p>In a live deployment the application builds the <a class="reference internal" href="api/engine.html#catsim.RunContext" title="catsim.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>, and so the
+generator, that its sessions draw from; <a class="reference internal" href="live-sessions.html"><span class="doc">Live CAT Sessions</span></a> shows how.</p>
+</section>
 </section>
 
 
@@ -515,20 +640,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="api/typing.html"
+       href="live-sessions.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Array Type Aliases – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.typing</span></code></p>
+        <p class="prev-next-title">Live CAT Sessions</p>
       </div>
     </a>
     <a class="right-next"
-       href="architecture_decisions.html"
+       href="extending.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Architecture Decision Records</p>
+        <p class="prev-next-title">Extending catsim</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -542,6 +667,22 @@
                 <dialog id="pst-secondary-sidebar-modal" tabindex="-1"></dialog>
                 <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#one-seed-per-run">One Seed per Run</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-population-is-an-input">The Population Is an Input</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sessions-run-in-sequence">Sessions Run in Sequence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#replications">Replications</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parallel-studies">Parallel Studies</a></li>
+</ul>
+  </nav></div>
 
   <div class="sidebar-secondary-item">
 

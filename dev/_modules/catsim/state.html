@@ -510,8 +510,15 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="../../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -519,13 +526,6 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../reproducibility.html">
     Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../architecture_decisions.html">
-    Architecture Decision Records
   </a>
 </li>
 
@@ -537,6 +537,27 @@ window.runMermaid = runMermaid;</script>
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
     Contributing
@@ -661,8 +682,15 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="../../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -670,6 +698,20 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../reproducibility.html">
     Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API Reference
   </a>
 </li>
 
@@ -1062,22 +1104,16 @@ window.runMermaid = runMermaid;</script>
 <a class="viewcode-back" href="../../api/state.html#catsim.ExposureTracker">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExposureTracker</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.</span>
+<span class="w">  </span><span class="sd">"""Count item administrations, proposals and sessions, and give sessions their exposure rates.</span>
 
-<span class="sd">  One tracker is shared by every session of a run or of a live deployment, through</span>
-<span class="sd">  :class:`~catsim.RunContext`, and the engine updates it. ``counts`` holds each item's</span>
-<span class="sd">  administrations so far, those of sessions still in progress included, ``proposals`` its</span>
-<span class="sd">  administrations plus the times the engine's exposure control declined it, and ``n_sessions`` the</span>
-<span class="sd">  number of sessions started. A session proposes an item at most once, so neither count can exceed</span>
-<span class="sd">  ``n_sessions``.</span>
+<span class="sd">  Every session of a run or deployment shares one tracker through :class:`~catsim.RunContext`, and</span>
+<span class="sd">  the engine updates it. ``counts`` holds each item's administrations, sessions in progress</span>
+<span class="sd">  included; ``proposals`` adds the exposure control's declines; ``n_sessions`` counts the sessions</span>
+<span class="sd">  started.</span>
 
-<span class="sd">  A session is selected against each item's administrations divided by the number of other sessions</span>
-<span class="sd">  started so far. With sessions run one after another, as a simulation runs them, that is the share</span>
-<span class="sd">  of the examinees tested before the current one; the first session sees every rate at 0. Sessions</span>
-<span class="sd">  that run side by side, as in a live deployment, see each other's administrations as they happen.</span>
-
-<span class="sd">  A new tracker starts from zero. An application that must keep the exposure across restarts saves</span>
-<span class="sd">  ``counts``, ``proposals`` and ``n_sessions`` and passes them back to rebuild the tracker.</span>
+<span class="sd">  A session sees each item's administrations divided by the other sessions started: for sessions run</span>
+<span class="sd">  one after another, the share of the examinees tested before it, so the first sees every rate at 0.</span>
+<span class="sd">  For saving and sharing a tracker, see :doc:`/live-sessions`.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
@@ -1102,6 +1138,22 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  TypeError</span>
 <span class="sd">      If ``counts`` or ``proposals`` holds a value that is not an integer, or ``n_sessions`` is not</span>
 <span class="sd">      an integer (a bool included).</span>
+
+<span class="sd">  Examples</span>
+<span class="sd">  --------</span>
+<span class="sd">  The second session sees item 0 at a rate of 1, since the one other session was given it. A</span>
+<span class="sd">  tracker rebuilt from its saved fields gives the same rates:</span>
+
+<span class="sd">  &gt;&gt;&gt; from catsim import ExposureTracker</span>
+<span class="sd">  &gt;&gt;&gt; tracker = ExposureTracker(3)</span>
+<span class="sd">  &gt;&gt;&gt; tracker.start_session()</span>
+<span class="sd">  &gt;&gt;&gt; tracker.record(0)</span>
+<span class="sd">  &gt;&gt;&gt; tracker.start_session()</span>
+<span class="sd">  &gt;&gt;&gt; tracker.rates()</span>
+<span class="sd">  array([1., 0., 0.])</span>
+<span class="sd">  &gt;&gt;&gt; saved = {"counts": tracker.counts, "proposals": tracker.proposals, "n_sessions": tracker.n_sessions}</span>
+<span class="sd">  &gt;&gt;&gt; ExposureTracker(3, **saved).rates()</span>
+<span class="sd">  array([1., 0., 0.])</span>
 <span class="sd">  """</span>
 
   <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span>

@@ -154,9 +154,16 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
-    API Reference
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -164,13 +171,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../reproducibility.html">
     Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../architecture_decisions.html">
-    Architecture Decision Records
   </a>
 </li>
 
@@ -182,6 +182,27 @@
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" current active">
+  <a class="nav-link dropdown-item nav-internal" href="index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="../contributing.html">
     Contributing
@@ -307,9 +328,16 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
-    API Reference
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -317,6 +345,20 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../reproducibility.html">
     Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    API Reference
   </a>
 </li>
 
@@ -659,19 +701,14 @@ selector that follows a fixed list or works through strata can run out first.</p
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.ExposureTracker">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.</span></span><span class="sig-name descname"><span class="pre">ExposureTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">proposals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker" title="Link to this definition">#</a></dt>
-<dd><p>Count item administrations, proposals and sessions across a run, and give sessions their exposure rates.</p>
-<p>One tracker is shared by every session of a run or of a live deployment, through
-<a class="reference internal" href="engine.html#catsim.RunContext" title="catsim.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>, and the engine updates it. <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds each item’s
-administrations so far, those of sessions still in progress included, <code class="docutils literal notranslate"><span class="pre">proposals</span></code> its
-administrations plus the times the engine’s exposure control declined it, and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> the
-number of sessions started. A session proposes an item at most once, so neither count can exceed
-<code class="docutils literal notranslate"><span class="pre">n_sessions</span></code>.</p>
-<p>A session is selected against each item’s administrations divided by the number of other sessions
-started so far. With sessions run one after another, as a simulation runs them, that is the share
-of the examinees tested before the current one; the first session sees every rate at 0. Sessions
-that run side by side, as in a live deployment, see each other’s administrations as they happen.</p>
-<p>A new tracker starts from zero. An application that must keep the exposure across restarts saves
-<code class="docutils literal notranslate"><span class="pre">counts</span></code>, <code class="docutils literal notranslate"><span class="pre">proposals</span></code> and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> and passes them back to rebuild the tracker.</p>
+<dd><p>Count item administrations, proposals and sessions, and give sessions their exposure rates.</p>
+<p>Every session of a run or deployment shares one tracker through <a class="reference internal" href="engine.html#catsim.RunContext" title="catsim.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>, and
+the engine updates it. <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds each item’s administrations, sessions in progress
+included; <code class="docutils literal notranslate"><span class="pre">proposals</span></code> adds the exposure control’s declines; <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> counts the sessions
+started.</p>
+<p>A session sees each item’s administrations divided by the other sessions started: for sessions run
+one after another, the share of the examinees tested before it, so the first sees every rate at 0.
+For saving and sharing a tracker, see <a class="reference internal" href="../live-sessions.html"><span class="doc">Live CAT Sessions</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
@@ -700,6 +737,21 @@ an integer (a bool included).</p>
 </dl>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<p>The second session sees item 0 at a rate of 1, since the one other session was given it. A
+tracker rebuilt from its saved fields gives the same rates:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExposureTracker</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span> <span class="o">=</span> <span class="n">ExposureTracker</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span><span class="o">.</span><span class="n">start_session</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span><span class="o">.</span><span class="n">record</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span><span class="o">.</span><span class="n">start_session</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tracker</span><span class="o">.</span><span class="n">rates</span><span class="p">()</span>
+<span class="go">array([1., 0., 0.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">saved</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"counts"</span><span class="p">:</span> <span class="n">tracker</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="s2">"proposals"</span><span class="p">:</span> <span class="n">tracker</span><span class="o">.</span><span class="n">proposals</span><span class="p">,</span> <span class="s2">"n_sessions"</span><span class="p">:</span> <span class="n">tracker</span><span class="o">.</span><span class="n">n_sessions</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ExposureTracker</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">**</span><span class="n">saved</span><span class="p">)</span><span class="o">.</span><span class="n">rates</span><span class="p">()</span>
+<span class="go">array([1., 0., 0.])</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.ExposureTracker.rates">
 <span class="sig-name descname"><span class="pre">rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.ExposureTracker.rates" title="Link to this definition">#</a></dt>

@@ -510,8 +510,15 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="../../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -519,13 +526,6 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../reproducibility.html">
     Reproducibility
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../architecture_decisions.html">
-    Architecture Decision Records
   </a>
 </li>
 
@@ -537,6 +537,27 @@ window.runMermaid = runMermaid;</script>
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
                     
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../api/index.html">
+    API Reference
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../architecture_decisions.html">
+    Architecture Decision Records
+  </a>
+</li>
+
+
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
     Contributing
@@ -661,8 +682,15 @@ window.runMermaid = runMermaid;</script>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/index.html">
-    API Reference
+  <a class="nav-link nav-internal" href="../../running-simulations.html">
+    Running Simulations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../live-sessions.html">
+    Live CAT Sessions
   </a>
 </li>
 
@@ -670,6 +698,20 @@ window.runMermaid = runMermaid;</script>
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../reproducibility.html">
     Reproducibility
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../extending.html">
+    Extending catsim
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/index.html">
+    API Reference
   </a>
 </li>
 
@@ -1024,21 +1066,12 @@ window.runMermaid = runMermaid;</script>
   <span class="k">def</span><span class="w"> </span><span class="nf">select_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Select the next item to administer, or end the session.</span>
 
-<span class="sd">    This alone decides whether a session continues, so a manual loop needs no other check::</span>
-
-<span class="sd">      while (item_id := engine.select_next(state, context)) is not None:</span>
-<span class="sd">        engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)</span>
-
-<span class="sd">    The stopper is consulted here only before the first response; after that,</span>
-<span class="sd">    :meth:`apply_response` evaluates it once per new state, and what it records is final. The items</span>
-<span class="sd">    the exposure control declines join the session's ``excluded_items`` and the tracker's proposals</span>
-<span class="sd">    when the selection ends, so save sessions after this call too; a selection that raises changes</span>
-<span class="sd">    neither.</span>
-
-<span class="sd">    Each call selects anew, and the exposure control decides anew: a second call before the</span>
-<span class="sd">    response may decline the item the first returned, or end the session. An application that has</span>
-<span class="sd">    shown an item keeps its id for :meth:`apply_response` and shows it again rather than calling</span>
-<span class="sd">    this method again.</span>
+<span class="sd">    It returns None once the session has ended, so a loop needs no other check. The stopper is</span>
+<span class="sd">    consulted here only before the first response; after that, :meth:`apply_response` consults it.</span>
+<span class="sd">    The items the exposure control declines join the session's ``excluded_items`` and the tracker's</span>
+<span class="sd">    proposals, unless the selection raises, so save the session after this call too. Each call</span>
+<span class="sd">    selects anew, so a second call may return another item or end the session: keep the returned id</span>
+<span class="sd">    until its response arrives. See :doc:`/live-sessions`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1061,6 +1094,23 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        If the selector proposes an item the session excluded.</span>
 <span class="sd">    ValueError</span>
 <span class="sd">        If the selector proposes an item outside the bank or one already administered.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy</span>
+<span class="sd">    &gt;&gt;&gt; from catsim import CatEngine, ItemBank, RunContext</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.estimation import EAPEstimator</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.initialization import FixedPointInitializer</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.selection import MaxInfoSelector</span>
+<span class="sd">    &gt;&gt;&gt; from catsim.stopping import MaxLengthStopper</span>
+<span class="sd">    &gt;&gt;&gt; bank = ItemBank.generate(50, rng=0)</span>
+<span class="sd">    &gt;&gt;&gt; engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(5))</span>
+<span class="sd">    &gt;&gt;&gt; context = RunContext(rng=numpy.random.default_rng(0))</span>
+<span class="sd">    &gt;&gt;&gt; state = engine.start_session("examinee-1", context)</span>
+<span class="sd">    &gt;&gt;&gt; while (item_id := engine.select_next(state, context)) is not None:</span>
+<span class="sd">    ...   step = engine.apply_response(state, item_id, response=bool(bank.difficulty[item_id] &lt; 0), context=context)</span>
+<span class="sd">    &gt;&gt;&gt; state.administered_count, state.stop_reason</span>
+<span class="sd">    (5, &lt;StopReason.STOPPER: 'stopper'&gt;)</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">is_stopped</span><span class="p">:</span>
       <span class="k">return</span> <span class="kc">None</span>
