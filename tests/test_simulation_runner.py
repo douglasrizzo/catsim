@@ -340,6 +340,13 @@ def test_simulation_result_empty_sessions_exposure_and_overlap(item_bank) -> Non
   assert result.overlap_rate is None
 
 
+@pytest.mark.parametrize("metric", ["bias", "mse", "rmse"])
+def test_metrics_of_a_result_without_sessions_raise(metric: str) -> None:
+  """With no session, the metrics averaged an empty array: NaN and a RuntimeWarning instead of a clear error."""
+  with pytest.raises(ValueError, match="need at least one session, and the result has none"):
+    getattr(result_of([]), metric)
+
+
 def test_simulation_result_overlap_rate_for_a_hand_worked_run() -> None:
   """Two 2-item tests, [0, 1] and [0, 2], on a 5-item bank give exposure rates [1, 0.5, 0.5, 0, 0].
 

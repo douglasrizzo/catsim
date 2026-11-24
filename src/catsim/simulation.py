@@ -204,8 +204,11 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If any session has no true ability.
+        If the result has no session, or any session has no true ability.
     """
+    if not self.sessions:
+      msg = "bias, mse and rmse need at least one session, and the result has none"
+      raise ValueError(msg)
     true_thetas = self.true_thetas
     missing = int(numpy.isnan(true_thetas).sum())
     if missing:
@@ -222,7 +225,7 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If any session has no true ability.
+        If the result has no session, or any session has no true ability.
     """
     return cat.bias(self._known_true_thetas(), self.final_thetas)
 
@@ -233,7 +236,7 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If any session has no true ability.
+        If the result has no session, or any session has no true ability.
     """
     return cat.mse(self._known_true_thetas(), self.final_thetas)
 
@@ -244,7 +247,7 @@ class SimulationResult:
     Raises
     ------
     ValueError
-        If any session has no true ability.
+        If the result has no session, or any session has no true ability.
     """
     return cat.rmse(self._known_true_thetas(), self.final_thetas)
 
@@ -306,7 +309,8 @@ class SimulationRunner:
         id ``i``. To simulate ``n`` examinees from a population, draw their abilities, e.g.
         ``numpy.random.default_rng(1).normal(0, 1, n)``.
     rng : int or numpy.random.Generator, optional
-        Seed of the run's random generator, or a generator to draw from, which the run advances.
+        Seed of the run's random generator, or a generator to draw from, which the run advances, so
+        passing the same generator to another run gives other results.
         Default is 0, so a call that passes no seed is deterministic.
     progress : bool, optional
         Whether to show a ``tqdm`` progress bar over the sessions. Default is False.
