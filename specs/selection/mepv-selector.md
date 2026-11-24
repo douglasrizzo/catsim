@@ -2,7 +2,7 @@
 **Module:** `catsim.selection.weighted_info.MEPVSelector` (planned)
 **Reference:** van der Linden (1998); Choi and Swartz (2009)
 **Last validated:** 2026-11-23, against van der Linden (1996, RR 96-01); Choi & Swartz (2009); Magis & Raîche (2012); catR 3.17 (`EPV.R`, `eapEst.R`, `eapSem.R`, `nextItem.R`).
-**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
+**Implementation guidance:** updated to the 1.0 strategy contract (`StepContext` in) on 2026-11-24.
 
 # Minimum Expected Posterior Variance Selector
 
@@ -98,7 +98,7 @@ Any correct implementation must satisfy the following properties:
 1. Each candidate's score is an expectation over two hypothetical response-conditioned posterior variances.
 2. The rule is an argmin criterion, not an argmax criterion.
 3. The selector can cache the item-response probability table on the quadrature grid because it is bank-static for a fixed grid.
-4. The selector requires access to the response vector unless a reusable posterior is already available.
+4. The scores depend on the context's responses, through the posterior, and not on its `theta`: the branches are weighted by posterior-predictive probabilities, not by the probabilities at the current estimate.
 5. Exposure filtering applies before choosing the minimum-scoring candidate, with fallback to the unrestricted remaining pool.
 
 ## References
@@ -118,157 +118,137 @@ This section is for contributors and agents implementing this technique.
 It is removed when the spec is promoted to "Implemented" status.
 :::
 
-**Proposed location:** `src/catsim/selection/weighted_info.py`
+**Proposed location:** `src/catsim/selection/weighted_info.py`, next to `MPWISelector`.
 
 **Mock implementation:**
 
 ```python
-# src/catsim/selection/weighted_info.py  (alongside MLWISelector and MPWISelector)
-"""Minimum Expected Posterior Variance selector (van der Linden, 1998)."""
+# src/catsim/selection/weighted_info.py (added to the existing module, after MPWISelector and the
+# _table_at_nodes helper its spec defines)
 
 import numpy
 
 from .. import irt
-from .._typing import FloatArray
-from ..estimation.bayesian import (
-  LogPrior,
-  QuadratureGrid,
-  normal_log_prior,
-  posterior,
-  posterior_variance,
-)
-from ..exceptions import NoItemsAvailableError
-from ..item_bank import ItemBank
-from .base import BaseSelector
+from ..context import StepContext
+from ..estimation.bayesian import LogPrior, QuadratureGrid, normal_log_prior, posterior
+from ..typing import FloatArray
+from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
+
+
+def _expected_posterior_variance(post: FloatArray, nodes: FloatArray, probabilities: FloatArray) -> FloatArray:
+  """Return each item's posterior variance after its response, expected under the posterior predictive.
+
+  A branch's unnormalized posterior, the posterior times the probability of that response at each
+  node, sums to the branch's posterior-predictive probability, so its squared deviations from the
+  branch mean, summed with those weights, are that probability times the branch's variance.
+
+  Returns
+  -------
+  numpy.ndarray
+      One expected posterior variance per column of ``probabilities``.
+  """
+  expected = numpy.zeros(probabilities.shape[1])
+  for likelihood in (probabilities, 1.0 - probabilities):
+    branch = post[:, numpy.newaxis] * likelihood
+    mass = branch.sum(axis=0)
+    # A response with no posterior-predictive mass, where P rounds to 0 or 1 at every node the
+    # posterior weighs, adds nothing; dividing by its zero mass would give NaN, which pick_best rejects.
+    mean = numpy.divide(nodes @ branch, mass, out=numpy.zeros_like(mass), where=mass > 0)
+    expected += ((nodes[:, numpy.newaxis] - mean) ** 2 * branch).sum(axis=0)
+  return expected
 
 
 class MEPVSelector(BaseSelector):
   """Minimum Expected Posterior Variance selector.
 
+  For each candidate item, the posterior of the responses so far is updated with a correct and
+  with an incorrect response, and the two posterior variances are averaged with the posterior-
+  predictive probabilities of the two responses. The item with the smallest average is selected.
+
   Parameters
   ----------
-  grid : QuadratureGrid or None
-      Quadrature grid. Defaults to ``QuadratureGrid.uniform()``.
-  log_prior : callable or None
-      Prior log-density. Defaults to N(0, 1).
-  r_max : float
-      Exposure cap.
+  grid : QuadratureGrid or None, optional
+      Grid on which the posteriors are computed. Default is ``QuadratureGrid.uniform()``.
+  log_prior : LogPrior or None, optional
+      Vectorized log-density of the prior. Default is ``normal_log_prior()``, the standard normal.
+  r_max : float, optional
+      Maximum exposure rate for items. Items with exposure rates >= r_max are only selected when no
+      other item remains. Default is 1 (no restriction).
+
+  Raises
+  ------
+  ValueError
+      If r_max is not in (0, 1].
   """
 
-  def __init__(
-    self,
-    grid: QuadratureGrid | None = None,
-    log_prior: LogPrior | None = None,
-    r_max: float = 1.0,
-  ) -> None:
-    if not 0 <= r_max <= 1:
-      raise ValueError(f"r_max must be between 0 and 1, got {r_max}")
-    super().__init__()
+  def __init__(self, grid: QuadratureGrid | None = None, log_prior: LogPrior | None = None, r_max: float = 1.0) -> None:
+    # Kept as given for the repr, as EAPEstimator does: the default grid's repr would list every
+    # node, and a prior function has no source form.
+    self._grid_argument = grid
+    self._log_prior_argument = log_prior
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
-    self._r_max = float(r_max)
+    self._r_max = check_r_max(r_max)
 
-  def __str__(self) -> str:
-    return "Minimum Expected Posterior Variance Selector"
+  def __repr__(self) -> str:
+    """Return the selector as a constructor call that names every argument, with None for a default."""
+    return (
+      f"{type(self).__name__}(grid={self._grid_argument!r}, log_prior={self._log_prior_argument!r}, "
+      f"r_max={self._r_max!r})"
+    )
 
-  # ---- core kernel ----
-  def _p_table(self, item_bank: ItemBank) -> FloatArray:
-    """(n_items, Q) matrix of item response probabilities at each grid node."""
-    cache_key = f"mepv:p_table:{id(self._grid)}"
-    cached = item_bank._selector_cache.get(cache_key)
-    if cached is not None:
-      return cached
-    nodes = self._grid.nodes
-    table = numpy.array([
-      [irt.icc(float(t), *item_bank.items[i, :4]) for t in nodes]
-      for i in range(item_bank.n_items)
-    ])
-    item_bank._selector_cache[cache_key] = table
-    return table
+  def select(self, context: StepContext) -> int:
+    """Return the available item with the smallest expected posterior variance after its response.
 
-  def _get_posterior(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    response_vector: list[bool],
-  ) -> FloatArray:
-    if not administered_items:
-      lp = self._log_prior(self._grid.nodes) + numpy.log(self._grid.weights)
-      lp -= lp.max()
-      pp = numpy.exp(lp)
-      return pp / pp.sum()
-    items = item_bank.items[administered_items, :4]
-    return posterior(response_vector, items, self._grid, self._log_prior)
+    Parameters
+    ----------
+    context : StepContext
+        The session to select for. Its ``theta`` is not used: the branches are weighted by
+        posterior-predictive probabilities.
 
-  @staticmethod
-  def _reweighted_variance(
-    current_post: FloatArray,
-    nodes: FloatArray,
-    p_grid: FloatArray,  # shape (Q,) -- P_i(theta_q)
-    response: bool,
-  ) -> float:
-    """Posterior variance after reweighting by the hypothetical response."""
-    likelihood = p_grid if response else (1.0 - p_grid)
-    unnorm = current_post * likelihood
-    total = unnorm.sum()
-    if total <= 0:
-      return float("inf")
-    new_post = unnorm / total
-    return posterior_variance(new_post, nodes)
-
-  def select(
-    self,
-    item_bank: ItemBank,
-    administered_items: list[int],
-    est_theta: float,  # noqa: ARG002 -- posterior carries the ability info
-    rng: numpy.random.Generator | None = None,  # noqa: ARG002
-    exposure_rates: FloatArray | None = None,
-    response_vector: list[bool] | None = None,
-  ) -> int | None:
-    if response_vector is None:
-      raise ValueError("MEPVSelector requires the response_vector to compute the posterior.")
-
-    current_post = self._get_posterior(item_bank, administered_items, response_vector)
-    p_table = self._p_table(item_bank)
-    nodes = self._grid.nodes
-
-    # Predicted response probability for each item under the current posterior
-    p_tilde = p_table @ current_post  # shape (n_items,)
-
-    # Expected posterior variance under each candidate's two possible responses
-    epv = numpy.empty(item_bank.n_items, dtype=float)
-    for i in range(item_bank.n_items):
-      var_correct = self._reweighted_variance(current_post, nodes, p_table[i], response=True)
-      var_wrong = self._reweighted_variance(current_post, nodes, p_table[i], response=False)
-      epv[i] = p_tilde[i] * var_correct + (1 - p_tilde[i]) * var_wrong
-
-    candidate_mask = numpy.ones(item_bank.n_items, dtype=bool)
-    candidate_mask[administered_items] = False
-    if exposure_rates is None:
-      exposure_rates = numpy.zeros(item_bank.n_items, dtype=float)
-    pool = candidate_mask & (exposure_rates < self._r_max)
-    if not pool.any():
-      pool = candidate_mask
-    if not pool.any():
-      raise NoItemsAvailableError("There are no more items to apply.")
-
-    candidates = numpy.flatnonzero(pool)
-    # MEPV = *minimum* expected posterior variance
-    return int(candidates[int(epv[candidates].argmin())])
+    Returns
+    -------
+    int
+        Index of the selected item.
+    """
+    candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
+    item_bank = context.item_bank
+    post = posterior(context.responses, item_bank.get_items(context.administered_items), self._grid, self._log_prior)
+    probabilities = _table_at_nodes(item_bank, self._grid.nodes, irt.icc_hpc)[:, candidates]
+    expected = _expected_posterior_variance(post, self._grid.nodes, probabilities)
+    # pick_best takes the highest score, and the smallest variance wins
+    return pick_best(candidates, -expected, context.rng)
 ```
 
 **Implementation notes:**
 
-- Cache the response-probability table on the quadrature grid because it is bank-static.
-- This selector is structurally close to MPWI and belongs in the same module.
-- Runtime is still only `O(n_items * Q)` with a somewhat larger constant than MPWI.
-
-**Dependencies:**
-
-- Planned card 01 (`Bayesian Estimation Infrastructure`)
+- The response-probability table depends only on the item bank and the grid's nodes, so it is
+  cached in `ItemBank._selector_cache` through MPWI's `_table_at_nodes`, under a key of its own
+  (the function's name and the node values).
+- The branch weights are the posterior-predictive probabilities, as the definition requires, so
+  the selector does not read the context's `theta`. catR's weights, $P_i(\hat\theta)$ and
+  $1 - P_i(\hat\theta)$ at the current estimate, would be
+  `irt.icc_hpc(context.theta, item_bank.get_items(candidates))`; a comparison with catR needs that
+  variant, and its rankings can differ.
+- The posterior comes from the context's responses at every call, as in MPWI; estimators keep no
+  per-session posterior ({doc}`ADR-0003 </adr/0003-runtime-state-ownership>`). Each call costs two
+  passes over a $Q \times$ candidates table, about twice MPWI's.
+- The import-linter exception MPWI's spec names (`catsim.selection.weighted_info ->
+  catsim.estimation.bayesian`) covers this selector too.
+- MPWI and MEPV share their arguments, constructor and repr; if Pylint's duplicate-code check
+  flags them, share that code once rather than copying it.
 
 **Testing notes:**
 
-- Identical items should yield equal expected posterior variances.
-- Banks with a clear posterior-precision winner should produce a stable argmin.
-- Validate exposure-cap fallback behavior.
+- A hand-worked case: a two-node grid at $\pm 1$ with equal weights, a prior that is flat on
+  it, no responses, and an item with $P(-1) = 0.2$ and $P(1) = 0.8$. Both branches have
+  variance $0.64$, so the expected posterior variance is $0.64$, against the prior's $1$.
+- An independent route: `EAPEstimator` with the same grid and prior, on the context with each
+  hypothetical response appended (`dataclasses.replace`), gives each branch's variance as `se**2`;
+  weighted by the posterior-predictive probabilities, they reproduce the score that decides the
+  selection.
+- Contract 2: on a bank built for it, the selected item has the smallest expected variance, not
+  the largest.
+- Identical items have equal expected variances, and the tie is broken with the context's `rng`.
+- Contract 5: a cap that leaves some candidates, and one that leaves none, falling back to all
+  remaining items.
