@@ -1,4 +1,4 @@
-"""Shared test fixtures for the refactored CAT architecture."""
+"""Fixtures shared by the test suite, and the registry of every selector the selection tests run."""
 
 from __future__ import annotations
 

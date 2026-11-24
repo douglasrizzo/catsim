@@ -104,17 +104,19 @@ def test_select_raises_once_the_bank_is_administered_or_excluded(
 def test_cluster_picks_are_unseen_items_of_the_bank_for_any_labels(
   params: np.ndarray, data: st.DataObject, method: str, theta: float, seed: int
 ) -> None:
-  """Under every method, with labels that skip values and so leave clusters with no items, picks stay valid.
+  """Under every method, with labels that can skip values and so leave clusters with no items, picks stay valid.
 
-  A method that scored an empty cluster, or picked from a cluster whose items were all administered, would return an
-  administered item or an index past the bank.
+  A method that chose a label with no items, or a cluster whose items were all administered, would raise on an empty
+  candidate set or return an administered item, and one that returned a numpy integer would let it into the session.
   """
   item_bank = ItemBank(params)
   n_clusters = data.draw(st.integers(min_value=1, max_value=item_bank.n_items // 2))
   clusters = data.draw(st.lists(st.integers(0, n_clusters - 1), min_size=item_bank.n_items, max_size=item_bank.n_items))
+  # the selector has no test length, so a session may run through the whole bank
   responses = data.draw(st.lists(st.booleans(), max_size=item_bank.n_items))
 
   picks = _session(ClusterSelector(clusters=clusters, method=method), item_bank, responses, theta=theta, seed=seed)
 
+  assert all(type(item_id) is int for item_id in picks)
   assert all(0 <= item_id < item_bank.n_items for item_id in picks)
   assert len(set(picks)) == len(picks)

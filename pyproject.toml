@@ -179,7 +179,7 @@ ignore-one-line-docstrings = true
 # Every test has a docstring naming the behaviour it checks, or the bug that would make it fail (AGENTS.md):
 # D102 and D103 stay on for tests, with no numpydoc sections, so the other pydocstyle rules are off.
 "tests/test_*.py" = ["D100", "D101", "D104", "D105", "D106", "D107", "D2", "D3", "D4"]
-# Fixtures, strategies and builders are not tests.
+# Fixtures, strategies and builders are not tests; a new helper module of tests/ joins this list.
 "tests/{__init__,banks,conftest,contexts,hypothesis_strategies}.py" = ["D"]
 
 [tool.ruff.format]
