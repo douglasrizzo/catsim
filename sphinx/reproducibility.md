@@ -24,7 +24,7 @@ for _ in range(5):
 
 The runner draws nothing else. The examinees' true abilities are an input to `run`: to simulate a population, draw them with a generator of your own, as `rng.normal(0, 1, n)` does below, so the same abilities can be run again, on another engine or with another seed.
 
-The same `rng` and the same true abilities give identical results, however many times the runner has run and on any runner built with the same components. A different `rng` gives other tests.
+The same seed and the same true abilities give identical results, however many times the runner has run and on any runner built with the same components. A different seed gives other tests. A generator passed as `rng` is not a seed: each run advances it, so passing the same generator object again gives other tests.
 
 ```pycon
 >>> import numpy

@@ -39,8 +39,9 @@ generator comes from and on what draws from it, which nothing recorded.
 
 ## Consequences
 
-- The same `rng` and the same `true_thetas` give identical results, run after run and runner after
-  runner, on the same engine configuration and package versions.
+- The same seed and the same `true_thetas` give identical results, run after run and runner after
+  runner, on the same engine configuration and package versions. A generator passed as `rng` is
+  advanced by each run, so reusing the same generator object gives other results.
 - Reordering `true_thetas` changes the results, and so does inserting or removing an examinee:
   every later session starts from another point of the stream.
 - A change in how many numbers one component draws, such as a selector changed to break ties it
