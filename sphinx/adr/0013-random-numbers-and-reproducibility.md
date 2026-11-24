@@ -32,7 +32,8 @@ generator comes from and on what draws from it, which nothing recorded.
   in a fixed state, and a generator is used as is and advanced by the run.
 - That one generator serves the whole run. It reaches the strategies through `RunContext.rng` and
   `StepContext.rng` (ADR-0004) and the simulated responses through `ResponseProvider.answer`, so the
-  initializer, the selectors and the responses of every session draw from one stream.
+  initializer, the selectors, the engine's exposure control (ADR-0016) and the responses of every
+  session draw from one stream. An engine without an exposure control draws nothing for it.
 - The sessions run one after another, in the order of `true_thetas`, so the draws of a session
   depend on every draw of the sessions before it.
 - The runner draws nothing itself. The true abilities are an input: to simulate a population, the

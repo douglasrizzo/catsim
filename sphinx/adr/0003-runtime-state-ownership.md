@@ -29,7 +29,7 @@ no restriction for the first respondent and none at all when `rmax` is 1.
 Treat calibrated item data as domain data and keep runtime state in dedicated execution models:
 
 - `ItemBank` holds item parameters and related derived data
-- `CatSessionState` holds per-examinee runtime state
+- `CatSessionState` holds per-examinee runtime state, the items it excluded included (ADR-0016)
 - `ExposureTracker` (in `catsim.state`) and `SimulationResult` (in `catsim.simulation`) hold
   run-level exposure information
 
@@ -39,6 +39,8 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
   `tracker.start_session()` when the run context has a tracker, after the initializer has
   succeeded, and `apply_response` records each administered item. `RunContext` has no
   `total_sessions`, and `ExposureTracker.rates()` takes no argument.
+- The tracker also counts each item's proposals, its administrations plus the times the engine's
+  exposure control declined it (ADR-0016). Declines never enter the rates.
 - A session is selected against each item's administrations divided by the number of other
   sessions started so far. With sessions run one after another, as `SimulationRunner` runs them,
   that is catR's rate: the share of the examinees tested before the current one. The session being
@@ -78,9 +80,11 @@ Treat calibrated item data as domain data and keep runtime state in dedicated ex
   one examinee. The tracker cannot tell such a session from one still running, so the count stays.
 - The tracker's counts are not part of any session snapshot. A deployment that restarts with a new
   tracker applies no cap until new sessions have run. To keep the cap across restarts, the
-  application saves `tracker.counts` and `tracker.n_sessions` (e.g. as a list and an int in JSON)
-  and rebuilds the tracker with `ExposureTracker(n_items, counts=..., n_sessions=...)`, which checks
-  that there is one non-negative integer count per item and keeps its own copy of them. Saving is
-  the application's job: it decides when (after every administration, on shutdown) and where.
+  application saves `tracker.counts`, `tracker.proposals` and `tracker.n_sessions` (e.g. as two
+  lists and an int in JSON) and rebuilds the tracker with
+  `ExposureTracker(n_items, counts=..., n_sessions=..., proposals=...)`, which checks that there is
+  one non-negative integer count per item, with no more administrations than proposals and no more
+  proposals than sessions, and keeps its own copy of them. Saving is the application's job: it
+  decides when (after every administration, on shutdown) and where.
 - `ExposureTracker.rates()` gives the rates a session in progress is selected against, which leave
   that session out; the run's own exposure is `SimulationResult.exposure_rates`.
