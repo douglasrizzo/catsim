@@ -215,10 +215,11 @@ class ExposureTracker:
   Raises
   ------
   ValueError
-      If ``counts`` does not hold one count per item or holds a negative count, or ``n_sessions`` is
-      negative.
+      If ``counts`` does not hold one count per item, holds a negative count or a count above
+      ``n_sessions``, or ``n_sessions`` is negative.
   TypeError
-      If ``counts`` holds a value that is not an integer, or ``n_sessions`` is not an integer.
+      If ``counts`` holds a value that is not an integer, or ``n_sessions`` is not an integer (a
+      bool included).
   """
 
   n_items: int
@@ -228,6 +229,10 @@ class ExposureTracker:
   def __init__(self, n_items: int, counts: npt.ArrayLike | None = None, n_sessions: int = 0) -> None:
     self.n_items = n_items
     self.counts = numpy.zeros(n_items, dtype=int) if counts is None else _restored_counts(n_items, counts)
+    # bool is an int to operator.index, but a flag passed by mistake is not a session count.
+    if isinstance(n_sessions, (bool, numpy.bool_)):
+      msg = f"n_sessions must be an integer, got {type(n_sessions).__name__} {n_sessions!r}"
+      raise TypeError(msg)
     try:
       self.n_sessions = operator.index(n_sessions)
     except TypeError:
@@ -235,6 +240,13 @@ class ExposureTracker:
       raise TypeError(msg) from None
     if self.n_sessions < 0:
       msg = f"n_sessions cannot be negative, got {self.n_sessions}"
+      raise ValueError(msg)
+    # A session administers an item at most once, so no item can have more administrations than sessions.
+    if self.counts.size and int(numpy.max(self.counts)) > self.n_sessions:
+      msg = (
+        f"counts and n_sessions do not belong together: an item has {int(numpy.max(self.counts))} administrations "
+        f"but only {self.n_sessions} sessions started"
+      )
       raise ValueError(msg)
 
   def start_session(self) -> None:
@@ -299,4 +311,5 @@ def _restored_counts(n_items: int, counts: npt.ArrayLike) -> IntArray:
   if (restored < 0).any():
     msg = f"counts cannot be negative, got {restored.min()}"
     raise ValueError(msg)
-  return restored
+  # Saved in a compact type such as uint8, the counts would wrap to 0 past its maximum.
+  return restored.astype(numpy.int64)

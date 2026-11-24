@@ -187,6 +187,10 @@ def test_a_rebuilt_tracker_owns_its_counts() -> None:
     pytest.param([1.0, 0.0, 2.0, 0.0], 3, TypeError, "counts must be integers, got dtype float64", id="float-counts"),
     pytest.param([1, 0, 2, 0], -1, ValueError, "n_sessions cannot be negative, got -1", id="negative-sessions"),
     pytest.param([1, 0, 2, 0], 3.0, TypeError, "n_sessions must be an integer, got float 3.0", id="float-sessions"),
+    pytest.param([1, 0, 2, 0], True, TypeError, "n_sessions must be an integer, got bool True", id="bool-sessions"),
+    pytest.param(
+      [5, 0, 2, 0], 3, ValueError, "an item has 5 administrations but only 3 sessions", id="counts-above-sessions"
+    ),
   ],
 )
 def test_a_tracker_rejects_saved_counts_it_cannot_use(
@@ -195,7 +199,17 @@ def test_a_tracker_rejects_saved_counts_it_cannot_use(
   """Counts that are not one non-negative integer per item, or a session count that is not a non-negative integer, fail.
 
   Fails if the tracker accepts counts saved for another bank (rates() would then broadcast or fail mid-session), a
-  negative count or session count (negative rates, which no r_max cap would hold back), or fractional values.
+  negative count or session count (negative rates, which no r_max cap would hold back), fractional values, a bool
+  for the session count, or counts from another save than the session count (a rate above 1 for every session).
   """
   with pytest.raises(error, match=match):
     ExposureTracker(4, counts=counts, n_sessions=n_sessions)
+
+
+def test_a_tracker_rebuilt_from_compact_counts_counts_past_their_type() -> None:
+  """Counts saved as uint8 kept that type, so the 256th administration wrapped the count to 0 and lifted the cap."""
+  tracker = ExposureTracker(2, counts=np.array([255, 0], dtype=np.uint8), n_sessions=300)
+
+  tracker.record(0)
+
+  assert tracker.counts.tolist() == [256, 0]
