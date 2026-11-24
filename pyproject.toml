@@ -34,7 +34,6 @@ version = "0.21.0"
 description = "Computerized adaptive testing toolkit"
 dependencies = [
     "scipy",
-    "numexpr",
     "matplotlib",
     "tqdm",
     "numpy",
@@ -261,8 +260,8 @@ writeable = "writeable"  # numpy's ndarray.flags.writeable
 include = ["src/catsim"]
 
 [tool.ty.rules]
-# ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (SciPy and
-# numexpr stubs leak Any into return values), and missing-override-decorator until the strategies use
+# ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (NumPy and
+# SciPy stubs leak Any into return values), and missing-override-decorator until the strategies use
 # typing.override.
 possibly-unresolved-reference = "error"
 missing-type-argument = "error"
