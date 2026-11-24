@@ -76,6 +76,7 @@ select = [
     "A",
     "BLE",
     "C4",
+    "C90",  # McCabe complexity, at most 10 (lint.mccabe below)
     "EM",
     "ERA",
     "EXE",
@@ -100,6 +101,7 @@ select = [
     "PLR01",
     "PLR02",
     "PLR04",
+    "PLR09",  # too many arguments (at most 6), locals, statements, branches or returns
     "PLR1",
     "PLR2",
     "PLR5",
@@ -119,6 +121,8 @@ ignore = [
   "DOC502",  # numpydoc lists the exceptions a function lets propagate from its callees
   "E111",
   "E114",
+  "PLR0912",  # too many branches: C901 already bounds the branching
+  "PLR0917",  # too many positional arguments: left until the strategy and constructor signatures settle
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
   "RUF201",  # Keep rule codes in this config rather than migrating to rule names
 ]
@@ -129,6 +133,12 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-args = 6
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
@@ -150,6 +160,7 @@ ignore-one-line-docstrings = true
   "D",        # Test docstrings name what the test checks (AGENTS.md), with no numpydoc sections
   "DOC",      # Test and fixture docstrings have no Returns or Raises sections
   "FBT",      # Test helpers and parametrized tests take booleans positionally
+  "PLR0913",  # make_context takes each of StepContext's eight fields
   "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
