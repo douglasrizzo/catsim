@@ -68,8 +68,8 @@ class TestSimulationRunnerRun:
   def test_run_rejects_a_number_of_examinees(self, simulation_runner: SimulationRunner, count: int) -> None:
     """run takes the true abilities, not how many examinees to draw.
 
-    Fails if a single number is accepted, either as a count of examinees drawn from the bank, as
-    run(int) did, or as the one true ability of a one-examinee run.
+    Fails if a single number is accepted, either as a count of examinees to draw or as the one
+    true ability of a one-examinee run.
     """
     with pytest.raises(TypeError, match=r"one true ability per examinee, not a single number .*rng\.normal\(0, 1, n\)"):
       simulation_runner.run(count)
@@ -298,8 +298,8 @@ class TestSimulationResult:
   def test_true_thetas_are_nan_for_a_session_without_one(self) -> None:
     """A session with no true theta, such as one run by hand, has NaN in true_thetas.
 
-    Fails if the result substitutes a number (0.0, as it once did) or drops the session, so the
-    true abilities no longer line up with the sessions.
+    Fails if the result substitutes a number such as 0.0 or drops the session, so the true
+    abilities no longer line up with the sessions.
     """
     sessions = two_finished_sessions()
     sessions[0].true_theta = None
@@ -313,8 +313,8 @@ class TestSimulationResult:
   def test_metrics_need_every_true_theta(self, metric: str) -> None:
     """Bias, MSE and RMSE raise for a result with a session without a true theta, naming how many lack one.
 
-    Fails if a metric silently compares the estimate with a stand-in such as 0, as it once did
-    (bias 0.5 for estimates [1, 1] against true [None, 1]), or ignores the session.
+    Fails if a metric silently compares the estimate with a stand-in such as 0 (bias 0.5 for
+    estimates [1, 1] against true [None, 1]) or ignores the session.
     """
     sessions = two_finished_sessions()
     sessions[1].true_theta = None
