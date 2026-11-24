@@ -335,7 +335,11 @@ def test_apply_response_records_exposure_and_returns_complete_step_result(item_b
 
 
 def test_apply_response_sets_stop_fields_when_stopper_trips(item_bank) -> None:
-  """Applying a response should mark both session and result as stopped when required."""
+  """A stopper satisfied by the new state ends the session, and the step result reports it.
+
+  Fails if the decision is dropped, so the session runs past its criterion, or if the result or its snapshot reports
+  the session still running.
+  """
   engine = CatEngine(
     RecordingInitializer(0.0),
     RecordingSelector(0),
