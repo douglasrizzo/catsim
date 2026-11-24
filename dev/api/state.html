@@ -7,7 +7,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Runtime State and Results – catsim.state &#8212; catsim 0.21.0 documentation</title>
+    <title>Runtime State – catsim.state &#8212; catsim 0.21.0 documentation</title>
   
   
   
@@ -377,9 +377,9 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="techniques/index.html">Techniques</a></li>
 <li class="toctree-l1"><a class="reference internal" href="engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
-<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -427,7 +427,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">API Reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -445,8 +445,8 @@
                 <article class="bd-article">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="module-catsim.state">
-<span id="runtime-state-and-results-catsim-state"></span><h1>Runtime State and Results – <a class="reference internal" href="#module-catsim.state" title="catsim.state"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a><a class="headerlink" href="#module-catsim.state" title="Link to this heading">#</a></h1>
-<p>State models for CAT execution and simulation.</p>
+<span id="runtime-state-catsim-state"></span><h1>Runtime State – <a class="reference internal" href="#module-catsim.state" title="catsim.state"><code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a><a class="headerlink" href="#module-catsim.state" title="Link to this heading">#</a></h1>
+<p>Runtime state of CAT sessions and of the runs they belong to.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.state.CatSessionSnapshot">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">CatSessionSnapshot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Hashable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="context.html#catsim.context.Estimate" title="catsim.context.Estimate"><span class="pre">Estimate</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_theta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">administered_item_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">responses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#catsim.state.StopReason" title="catsim.state.StopReason"><span class="pre">StopReason</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#CatSessionSnapshot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.CatSessionSnapshot" title="Link to this definition">#</a></dt>
@@ -565,7 +565,7 @@ session had ended.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="catsim.state.ExposureTracker">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">ExposureTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">ExposureTracker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">npt.ArrayLike</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker" title="Link to this definition">#</a></dt>
 <dd><p>Count item administrations and sessions across a run, and give sessions their exposure rates.</p>
 <p>One tracker is shared by every session of a run or of a live deployment, through
 <a class="reference internal" href="engine.html#catsim.engine.RunContext" title="catsim.engine.RunContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunContext</span></code></a>. The engine calls <a class="reference internal" href="#catsim.state.ExposureTracker.start_session" title="catsim.state.ExposureTracker.start_session"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_session()</span></code></a> when a session starts and
@@ -576,6 +576,31 @@ started so far (ADR-0003). With sessions run one after another, as a simulation 
 is the share of the examinees tested before the current one, as in catR’s
 <code class="docutils literal notranslate"><span class="pre">simulateRespondents</span></code>; the first session sees every rate at 0. Sessions that run side by side,
 as in a live deployment, see each other’s administrations as they happen.</p>
+<p>A new tracker starts from zero. An application that must keep the exposure across restarts saves
+<code class="docutils literal notranslate"><span class="pre">counts</span></code> and <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> and passes them back to rebuild the tracker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>n_items</strong><span class="classifier">int</span></dt><dd><p>Number of items in the bank.</p>
+</dd>
+<dt><strong>counts</strong><span class="classifier">array-like of int or None, optional</span></dt><dd><p>Each item’s administrations so far, as a saved tracker’s <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds them. The tracker
+keeps a copy. Default is None, for no administrations.</p>
+</dd>
+<dt><strong>n_sessions</strong><span class="classifier">int, optional</span></dt><dd><p>Sessions started so far, as a saved tracker’s <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> holds them. Default is 0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>ValueError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">counts</span></code> does not hold one count per item, holds a negative count or a count above
+<code class="docutils literal notranslate"><span class="pre">n_sessions</span></code>, or <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> is negative.</p>
+</dd>
+<dt>TypeError</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">counts</span></code> holds a value that is not an integer, or <code class="docutils literal notranslate"><span class="pre">n_sessions</span></code> is not an integer (a
+bool included).</p>
+</dd>
+</dl>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="catsim.state.ExposureTracker.rates">
 <span class="sig-name descname"><span class="pre">rates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.rates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.rates" title="Link to this definition">#</a></dt>
@@ -588,7 +613,8 @@ exceed 1.</p>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><dl class="simple">
 <dt>numpy.ndarray</dt><dd><p>A new array with one rate per item; all zero while at most one session has started. This is
-not the run’s final exposure, which <a class="reference internal" href="#catsim.state.SimulationResult.exposure_rates" title="catsim.state.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code></a> gives.</p>
+not the run’s final exposure, which
+<a class="reference internal" href="simulation.html#catsim.simulation.SimulationResult.exposure_rates" title="catsim.simulation.SimulationResult.exposure_rates"><code class="xref py py-attr docutils literal notranslate"><span class="pre">exposure_rates</span></code></a> gives.</p>
 </dd>
 </dl>
 </dd>
@@ -605,72 +631,6 @@ not the run’s final exposure, which <a class="reference internal" href="#catsi
 <dt class="sig sig-object py" id="catsim.state.ExposureTracker.start_session">
 <span class="sig-name descname"><span class="pre">start_session</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/catsim/state.html#ExposureTracker.start_session"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.ExposureTracker.start_session" title="Link to this definition">#</a></dt>
 <dd><p>Count a session that has started.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">catsim.state.</span></span><span class="sig-name descname"><span class="pre">SimulationResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item_bank</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ItemBank</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sessions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#catsim.state.CatSessionState" title="catsim.state.CatSessionState"><span class="pre">CatSessionState</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exposure_counts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="typing.html#catsim.typing.IntArray" title="catsim.typing.IntArray"><span class="pre">IntArray</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catsim/state.html#SimulationResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#catsim.state.SimulationResult" title="Link to this definition">#</a></dt>
-<dd><p>Aggregate result for a batch of CAT sessions.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.administered_items">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">administered_items</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.state.SimulationResult.administered_items" title="Link to this definition">#</a></dt>
-<dd><p>Return administered item ids for each session.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.bias">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">bias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.SimulationResult.bias" title="Link to this definition">#</a></dt>
-<dd><p>Return simulation bias.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.estimations">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">estimations</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.state.SimulationResult.estimations" title="Link to this definition">#</a></dt>
-<dd><p>Return theta history for each session.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.examinees">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">examinees</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span><a class="headerlink" href="#catsim.state.SimulationResult.examinees" title="Link to this definition">#</a></dt>
-<dd><p>Return true theta values for the simulated sessions.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.exposure_rates">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">exposure_rates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="typing.html#catsim.typing.FloatArray" title="catsim.typing.FloatArray"><span class="pre">FloatArray</span></a></span><a class="headerlink" href="#catsim.state.SimulationResult.exposure_rates" title="Link to this definition">#</a></dt>
-<dd><p>Return per-item exposure rates across the simulated sessions.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.latest_estimations">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">latest_estimations</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.state.SimulationResult.latest_estimations" title="Link to this definition">#</a></dt>
-<dd><p>Return final theta estimates for each session.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.mse">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.SimulationResult.mse" title="Link to this definition">#</a></dt>
-<dd><p>Return simulation MSE.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.overlap_rate">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">overlap_rate</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#catsim.state.SimulationResult.overlap_rate" title="Link to this definition">#</a></dt>
-<dd><p>Return overlap rate when all sessions have the same test length.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.response_vectors">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">response_vectors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#catsim.state.SimulationResult.response_vectors" title="Link to this definition">#</a></dt>
-<dd><p>Return response vectors for each session.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="catsim.state.SimulationResult.rmse">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#catsim.state.SimulationResult.rmse" title="Link to this definition">#</a></dt>
-<dd><p>Return simulation RMSE.</p>
 </dd></dl>
 
 </dd></dl>
@@ -759,19 +719,6 @@ selector that follows a fixed list or works through strata can run out first.</p
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.rates"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.record"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.record()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.ExposureTracker.start_session"><code class="docutils literal notranslate"><span class="pre">ExposureTracker.start_session()</span></code></a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult"><code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code></a><ul class="pst-show_toc_level nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.administered_items"><code class="docutils literal notranslate"><span class="pre">SimulationResult.administered_items</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.bias"><code class="docutils literal notranslate"><span class="pre">SimulationResult.bias</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.estimations"><code class="docutils literal notranslate"><span class="pre">SimulationResult.estimations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.examinees"><code class="docutils literal notranslate"><span class="pre">SimulationResult.examinees</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.exposure_rates"><code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.latest_estimations"><code class="docutils literal notranslate"><span class="pre">SimulationResult.latest_estimations</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.mse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.mse</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.overlap_rate"><code class="docutils literal notranslate"><span class="pre">SimulationResult.overlap_rate</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.response_vectors"><code class="docutils literal notranslate"><span class="pre">SimulationResult.response_vectors</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.SimulationResult.rmse"><code class="docutils literal notranslate"><span class="pre">SimulationResult.rmse</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#catsim.state.StopReason"><code class="docutils literal notranslate"><span class="pre">StopReason</span></code></a></li>

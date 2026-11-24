@@ -80,8 +80,13 @@ the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
 version 3.0 its `semTheta` gives the WLE the maximum likelihood formula, because
 the corrected one sometimes led to mathematical problems ([catR's
 NEWS](https://github.com/cran/catR/blob/master/NEWS), version 3.0), and its
-default `sem.type = "classic"` still does. The corrected sum can be negative,
-which leaves no standard error. The evaluation count is the number of
+default `sem.type = "classic"` still does. Under the 1PL and 2PL models the
+corrected sum is the curvature of the weighted likelihood at its maximum, so it is
+positive; with guessing or slipping parameters it can be negative, which leaves no
+standard error. In short tests the classic formula overestimates the error (it is
+conservative, so a standard-error stopper runs a few items longer), and from about
+20 items the two agree within a few percent; ADR-0004 gives the comparison. The
+evaluation count is the number of
 modified-score evaluations: the 121 scan points, Brent's refinement of each
 bracketed root and, when several roots compete, the integrals that rank them.
 

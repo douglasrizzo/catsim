@@ -770,23 +770,24 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.state</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""State models for CAT execution and simulation."""</span>
+<span></span><span class="sd">"""Runtime state of CAT sessions and of the runs they belong to."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">Estimate</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
   <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hashable</span>
 
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+
   <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
 
 
@@ -972,7 +973,7 @@ window.runMermaid = runMermaid;</script>
 
 <div class="viewcode-block" id="ExposureTracker">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ExposureTracker</span><span class="p">:</span>
 <span class="w">  </span><span class="sd">"""Count item administrations and sessions across a run, and give sessions their exposure rates.</span>
 
@@ -986,15 +987,56 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  is the share of the examinees tested before the current one, as in catR's</span>
 <span class="sd">  ``simulateRespondents``; the first session sees every rate at 0. Sessions that run side by side,</span>
 <span class="sd">  as in a live deployment, see each other's administrations as they happen.</span>
+
+<span class="sd">  A new tracker starts from zero. An application that must keep the exposure across restarts saves</span>
+<span class="sd">  ``counts`` and ``n_sessions`` and passes them back to rebuild the tracker.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  n_items : int</span>
+<span class="sd">      Number of items in the bank.</span>
+<span class="sd">  counts : array-like of int or None, optional</span>
+<span class="sd">      Each item's administrations so far, as a saved tracker's ``counts`` holds them. The tracker</span>
+<span class="sd">      keeps a copy. Default is None, for no administrations.</span>
+<span class="sd">  n_sessions : int, optional</span>
+<span class="sd">      Sessions started so far, as a saved tracker's ``n_sessions`` holds them. Default is 0.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``counts`` does not hold one count per item, holds a negative count or a count above</span>
+<span class="sd">      ``n_sessions``, or ``n_sessions`` is negative.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``counts`` holds a value that is not an integer, or ``n_sessions`` is not an integer (a</span>
+<span class="sd">      bool included).</span>
 <span class="sd">  """</span>
 
   <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span>
-  <span class="n">counts</span><span class="p">:</span> <span class="n">IntArray</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-  <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+  <span class="n">counts</span><span class="p">:</span> <span class="n">IntArray</span>
+  <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Allocate the item counts, all zero."""</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">counts</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_sessions</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_items</span> <span class="o">=</span> <span class="n">n_items</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">if</span> <span class="n">counts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">_restored_counts</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>
+    <span class="c1"># bool is an int to operator.index, but a flag passed by mistake is not a session count.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_sessions</span><span class="p">,</span> <span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">bool_</span><span class="p">)):</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_sessions must be an integer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">n_sessions</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">n_sessions</span><span class="si">!r}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">n_sessions</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_sessions must be an integer, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">n_sessions</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">n_sessions</span><span class="si">!r}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"n_sessions cannot be negative, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span><span class="si">}</span><span class="s2">"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="c1"># A session administers an item at most once, so no item can have more administrations than sessions.</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="o">.</span><span class="n">size</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">))</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"counts and n_sessions do not belong together: an item has </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">))</span><span class="si">}</span><span class="s2"> administrations "</span>
+        <span class="sa">f</span><span class="s2">"but only </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span><span class="si">}</span><span class="s2"> sessions started"</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ExposureTracker.start_session">
 <a class="viewcode-back" href="../../api/state.html#catsim.state.ExposureTracker.start_session">[docs]</a>
@@ -1024,7 +1066,8 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">    -------</span>
 <span class="sd">    numpy.ndarray</span>
 <span class="sd">        A new array with one rate per item; all zero while at most one session has started. This is</span>
-<span class="sd">        not the run's final exposure, which :attr:`SimulationResult.exposure_rates` gives.</span>
+<span class="sd">        not the run's final exposure, which</span>
+<span class="sd">        :attr:`~catsim.simulation.SimulationResult.exposure_rates` gives.</span>
 <span class="sd">    """</span>
     <span class="n">others</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sessions</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">if</span> <span class="n">others</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1034,78 +1077,41 @@ window.runMermaid = runMermaid;</script>
 
 
 
-<div class="viewcode-block" id="SimulationResult">
-<a class="viewcode-back" href="../../api/state.html#catsim.state.SimulationResult">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">SimulationResult</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Aggregate result for a batch of CAT sessions."""</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_restored_counts</span><span class="p">(</span><span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">counts</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return a copy of a saved tracker's counts, checking there is one non-negative integer per item.</span>
 
-  <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span>
-  <span class="n">sessions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CatSessionState</span><span class="p">]</span>
-  <span class="n">exposure_counts</span><span class="p">:</span> <span class="n">IntArray</span>
-  <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  n_items : int</span>
+<span class="sd">      Number of items in the bank.</span>
+<span class="sd">  counts : array-like of int</span>
+<span class="sd">      The saved counts.</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">exposure_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return per-item exposure rates across the simulated sessions."""</span>
-    <span class="n">n_sessions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exposure_counts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_sessions</span>
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      A new integer array the tracker owns.</span>
 
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">administered_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Return administered item ids for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Return theta history for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">"""Return response vectors for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">latest_estimations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Return final theta estimates for each session."""</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">examinees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return true theta values for the simulated sessions."""</span>
-    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">0.0</span> <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">])</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return simulation bias."""</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return simulation MSE."""</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return simulation RMSE."""</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">examinees</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_estimations</span><span class="p">)</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return overlap rate when all sessions have the same test length."""</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
-      <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">test_sizes</span> <span class="o">=</span> <span class="p">{</span><span class="nb">len</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span><span class="p">)</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">}</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">test_size</span> <span class="o">=</span> <span class="n">test_sizes</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">test_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span></div>
-
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``counts`` does not hold one count per item or holds a negative count.</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``counts`` holds a value that is not an integer.</span>
+<span class="sd">  """</span>
+  <span class="n">restored</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">restored</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">n_items</span><span class="p">,):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"counts must hold one count per item (</span><span class="si">{</span><span class="n">n_items</span><span class="si">}</span><span class="s2">), got shape </span><span class="si">{</span><span class="n">restored</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="c1"># bool is not an integer dtype to NumPy, so a mask passed by mistake is rejected too.</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">restored</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"counts must be integers, got dtype </span><span class="si">{</span><span class="n">restored</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">restored</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"counts cannot be negative, got </span><span class="si">{</span><span class="n">restored</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="c1"># Saved in a compact type such as uint8, the counts would wrap to 0 past its maximum.</span>
+  <span class="k">return</span> <span class="n">restored</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
 </pre></div>
 
                 </article>

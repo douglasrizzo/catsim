@@ -387,6 +387,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 </ul>
 </div>
 </nav></div>
@@ -478,7 +479,8 @@ no restriction for the first respondent and none at all when <code class="docuti
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ItemBank</span></code> holds item parameters and related derived data</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">CatSessionState</span></code> holds per-examinee runtime state</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> and <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> hold run-level exposure information</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> (in <code class="docutils literal notranslate"><span class="pre">catsim.state</span></code>) and <code class="docutils literal notranslate"><span class="pre">SimulationResult</span></code> (in <code class="docutils literal notranslate"><span class="pre">catsim.simulation</span></code>) hold
+run-level exposure information</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">ExposureTracker</span></code> owns the denominator of the exposure rates, which follow catR:</p>
 <ul class="simple">
@@ -524,9 +526,13 @@ use. A context without a tracker gives selectors no rates, and they apply no cap
 of 1. A capped run’s results differ from earlier versions; runs with <code class="docutils literal notranslate"><span class="pre">r_max</span> <span class="pre">=</span> <span class="pre">1</span></code> do not change.</p></li>
 <li><p>In a live deployment, a session that starts and is abandoned before its first item still counts
 in the denominator, which lowers every later rate a little; so does starting a session twice for
-one examinee.</p></li>
+one examinee. The tracker cannot tell such a session from one still running, so the count stays.</p></li>
 <li><p>The tracker’s counts are not part of any session snapshot. A deployment that restarts with a new
-tracker applies no cap until new sessions have run, unless it persists the tracker itself.</p></li>
+tracker applies no cap until new sessions have run. To keep the cap across restarts, the
+application saves <code class="docutils literal notranslate"><span class="pre">tracker.counts</span></code> and <code class="docutils literal notranslate"><span class="pre">tracker.n_sessions</span></code> (e.g. as a list and an int in JSON)
+and rebuilds the tracker with <code class="docutils literal notranslate"><span class="pre">ExposureTracker(n_items,</span> <span class="pre">counts=...,</span> <span class="pre">n_sessions=...)</span></code>, which checks
+that there is one non-negative integer count per item and keeps its own copy of them. Saving is
+the application’s job: it decides when (after every administration, on shutdown) and where.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ExposureTracker.rates()</span></code> gives the rates a session in progress is selected against, which leave
 that session out; the run’s own exposure is <code class="docutils literal notranslate"><span class="pre">SimulationResult.exposure_rates</span></code>.</p></li>
 </ul>

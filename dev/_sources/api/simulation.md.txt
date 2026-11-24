@@ -1,4 +1,4 @@
-# Computerized Adaptive Testing Simulation -- {mod}`catsim.simulation`
+# Simulation Runs and Results -- {mod}`catsim.simulation`
 
 ```{eval-rst}
 .. automodule:: catsim.simulation

@@ -422,32 +422,39 @@
 <p>The main architecture decisions behind the current engine and simulation model are documented as
 <a class="reference external" href="https://douglasrizzo.com.br/catsim/architecture_decisions.html">Architecture Decision Records</a>.</p>
 <ol class="arabic simple">
-<li><p>Have an <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix">item matrix</a>;</p></li>
-<li><p>Have a sample of examinee proficiencies, or a number of examinees to be generated;</p></li>
+<li><p>Have an <a class="reference external" href="https://douglasrizzo.com.br/catsim/introduction.html#the-item-matrix">item bank</a>;</p></li>
+<li><p>Have the true abilities of the examinees to simulate, for example drawn from a normal
+distribution;</p></li>
 <li><p>Create an <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/initialization/index.html">initializer</a>,
-an item <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selector</a>, a
+an item <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/selection/index.html">selector</a>, an
 ability <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/estimation/index.html">estimator</a>
 and a <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/techniques/stopping/index.html">stopping criterion</a>;</p></li>
-<li><p>Create a <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html">simulation runner</a>
-with those components.</p></li>
+<li><p>Build a <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/engine.html">CAT engine</a> from the item bank and
+those components, and a <a class="reference external" href="https://douglasrizzo.com.br/catsim/api/simulation.html">simulation runner</a>
+on that engine;</p></li>
 <li><p>Run the simulation and inspect the returned result object;</p></li>
 <li><p><a class="reference external" href="https://douglasrizzo.com.br/catsim/api/plot.html">Plot</a> your results.</p></li>
 </ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformInitializer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">SimulationRunner</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">UniformInitializer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxInfoSelector</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericalSearchEstimator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">catsim.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLengthStopper</span><span class="p">,</span> <span class="n">StandardErrorStopper</span><span class="p">,</span> <span class="n">StopRule</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationRunner</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">catsim</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="n">initializer</span> <span class="o">=</span> <span class="n">UniformInitializer</span><span class="p">()</span>
-<span class="n">selector</span> <span class="o">=</span> <span class="n">MaxInfoSelector</span><span class="p">()</span>
-<span class="n">estimator</span> <span class="o">=</span> <span class="n">NumericalSearchEstimator</span><span class="p">()</span>
-<span class="n">stopper</span> <span class="o">=</span> <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">))</span>
-<span class="n">runner</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span>
+    <span class="n">ItemBank</span><span class="o">.</span><span class="n">generate_item_bank</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+    <span class="n">UniformInitializer</span><span class="p">(),</span>
+    <span class="n">MaxInfoSelector</span><span class="p">(),</span>
+    <span class="n">NumericalSearchEstimator</span><span class="p">(),</span>
+    <span class="n">StopRule</span><span class="p">(</span><span class="n">StandardErrorStopper</span><span class="p">(</span><span class="mf">0.4</span><span class="p">),</span> <span class="n">MaxLengthStopper</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span>
+<span class="p">)</span>
+<span class="n">true_thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">SimulationRunner</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">rmse</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The same <code class="docutils literal notranslate"><span class="pre">rng</span></code> gives the same result on every run; see
+<a class="reference external" href="https://douglasrizzo.com.br/catsim/reproducibility.html">Reproducibility</a>.</p>
 </section>
 <section id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h2>

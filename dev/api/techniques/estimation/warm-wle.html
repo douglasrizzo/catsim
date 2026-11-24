@@ -385,9 +385,9 @@
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="../../engine.html">CAT Engine – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.engine</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">Runtime State – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.state</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../context.html">Strategy Inputs and Estimates – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.context</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Computerized Adaptive Testing Simulation – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation Runs and Results – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.simulation</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../cat.html">Computerized Adaptive Test-related Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.cat</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../irt.html">Item Response Theory Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.irt</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot.html">Miscellaneous Plotting Functions – <code class="xref py py-mod docutils literal notranslate"><span class="pre">catsim.plot</span></code></a></li>
@@ -529,8 +529,13 @@ the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
 version 3.0 its <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> gives the WLE the maximum likelihood formula, because
 the corrected one sometimes led to mathematical problems (<a class="reference external" href="https://github.com/cran/catR/blob/master/NEWS">catR’s
 NEWS</a>, version 3.0), and its
-default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code> still does. The corrected sum can be negative,
-which leaves no standard error. The evaluation count is the number of
+default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code> still does. Under the 1PL and 2PL models the
+corrected sum is the curvature of the weighted likelihood at its maximum, so it is
+positive; with guessing or slipping parameters it can be negative, which leaves no
+standard error. In short tests the classic formula overestimates the error (it is
+conservative, so a standard-error stopper runs a few items longer), and from about
+20 items the two agree within a few percent; ADR-0004 gives the comparison. The
+evaluation count is the number of
 modified-score evaluations: the 121 scan points, Brent’s refinement of each
 bracketed root and, when several roots compete, the integrals that rank them.</p>
 </section>
@@ -630,7 +635,8 @@ estimate is the bound the modified score points to.</p>
 information at the estimate, or <code class="docutils literal notranslate"><span class="pre">math.inf</span></code> where the information is 0. This is catR’s
 default for the WLE (<code class="docutils literal notranslate"><span class="pre">semTheta</span></code> with <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>). <span class="bibtex-citation" id="id1">Magis and Raîche [<a class="reference internal" href="../../../references.html#id13" title="D. Magis and G. Raîche. Random generation of response patterns under computerized adaptive testing with the r package catr. Journal of Statistical Software, 48(8):1–31, 2012. doi:10.18637/jss.v048.i08.">2012</a>]</span> (Eq. 14,
 p. 6) add a term to the information, <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span>, which catR has not used since
-version 3.0 and which can make the sum negative; catsim follows catR. The evaluation count is
+version 3.0 and which, with guessing or slipping parameters, can make the sum negative; catsim
+follows catR (ADR-0004). The evaluation count is
 the number of modified-score evaluations: the scan, Brent’s refinement and, when several roots
 compete, the integration that ranks them. With no administered item, the estimate is
 <code class="docutils literal notranslate"><span class="pre">context.theta</span></code> and <code class="docutils literal notranslate"><span class="pre">context.se</span></code>, unchanged, after no evaluation.</p>

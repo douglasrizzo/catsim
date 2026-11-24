@@ -780,7 +780,8 @@ window.runMermaid = runMermaid;</script>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span><span class="p">,</span> <span class="n">SimulationResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.simulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionState</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
 
 
@@ -1014,24 +1015,27 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">      :caption: Item exposure rates for a given item bank, after a simulation has been performed.</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
+<span class="sd">      import numpy</span>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.initialization import UniformInitializer</span>
 <span class="sd">      from catsim.selection import MaxInfoSelector</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
+<span class="sd">      from catsim.engine import CatEngine</span>
 <span class="sd">      from catsim.simulation import SimulationRunner</span>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 
-<span class="sd">      runner = SimulationRunner(</span>
+<span class="sd">      engine = CatEngine(</span>
 <span class="sd">          ItemBank.generate_item_bank(100),</span>
 <span class="sd">          UniformInitializer(),</span>
 <span class="sd">          MaxInfoSelector(),</span>
 <span class="sd">          NumericalSearchEstimator(),</span>
 <span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
-<span class="sd">      result = runner.run(10)</span>
+<span class="sd">      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)</span>
+<span class="sd">      result = SimulationRunner(engine).run(true_thetas)</span>
 <span class="sd">      plot.item_exposure(title='Exposures', simulation=result, hist=True, ax=axes[0])</span>
 <span class="sd">      plot.item_exposure(title='Exposures', simulation=result, par='b', ax=axes[1])</span>
 <span class="sd">      plt.tight_layout()</span>
@@ -1167,23 +1171,26 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">  .. plot::</span>
 
 <span class="sd">      import matplotlib.pyplot as plt</span>
+<span class="sd">      import numpy</span>
 <span class="sd">      from catsim.item_bank import ItemBank</span>
 <span class="sd">      from catsim import plot</span>
 <span class="sd">      from catsim.initialization import UniformInitializer</span>
 <span class="sd">      from catsim.selection import MaxInfoSelector</span>
 <span class="sd">      from catsim.estimation import NumericalSearchEstimator</span>
 <span class="sd">      from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule</span>
+<span class="sd">      from catsim.engine import CatEngine</span>
 <span class="sd">      from catsim.simulation import SimulationRunner</span>
 
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
-<span class="sd">      runner = SimulationRunner(</span>
+<span class="sd">      engine = CatEngine(</span>
 <span class="sd">          ItemBank.generate_item_bank(100),</span>
 <span class="sd">          UniformInitializer(),</span>
 <span class="sd">          MaxInfoSelector(),</span>
 <span class="sd">          NumericalSearchEstimator(),</span>
 <span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
-<span class="sd">      result = runner.run(10)</span>
+<span class="sd">      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)</span>
+<span class="sd">      result = SimulationRunner(engine).run(true_thetas)</span>
 <span class="sd">      plot.test_progress(simulation=result, index=0, ax=axes[0])</span>
 <span class="sd">      plot.test_progress(simulation=result, index=0, info=True, var=True, see=True, ax=axes[1])</span>
 <span class="sd">      plt.tight_layout()</span>

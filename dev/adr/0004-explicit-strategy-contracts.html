@@ -389,6 +389,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0011-how-a-session-ends.html">ADR-0011: Decide in One Place How a Session Ends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 </ul>
 </div>
 </nav></div>
@@ -585,8 +586,22 @@ this estimate, or <code class="docutils literal notranslate"><span class="pre">N
 <li><p>For the WLE catsim departs from Magis and Raîche (2012, Eq. 14, p. 6), who add
 <span class="math notranslate nohighlight">\((I'J - IJ')/(2I^2)\)</span> to the information. catR dropped that term in version 3.0, whose NEWS
 says it sometimes led to mathematical problems, and its <code class="docutils literal notranslate"><span class="pre">semTheta</span></code> still returns <span class="math notranslate nohighlight">\(1/\sqrt{I}\)</span>
-for the WLE under the default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>. The sum can also be negative, which leaves
-no standard error. catsim follows catR.</p></li>
+for the WLE under the default <code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;classic&quot;</span></code>. catsim follows catR (the maintainer’s
+decision, 2026-11-24), after comparing the formulas with the WLE’s sampling spread at a known
+ability (every response pattern for 5 and 10 items, 3,000 simulated ones for 20 and 40):</p>
+<ul>
+<li><p>The classic formula overestimates the error in short tests: by 10% (2PL) and 28% (3PL) at
+5 items. That is conservative: a standard-error stopper runs a few items longer than needed.</p></li>
+<li><p>Eq. 14 roughly halves that gap. The sandwich formula of Magis (2016), catR’s
+<code class="docutils literal notranslate"><span class="pre">sem.type</span> <span class="pre">=</span> <span class="pre">&quot;new&quot;</span></code>, is closest under the 3PL but underestimates the error under the 2PL
+(by 8% at 5 items), which would stop tests too early.</p></li>
+<li><p>From 20 items on, the three agree within about 3%.</p></li>
+<li><p>Under the 1PL and 2PL, Eq. 14’s sum is the curvature of the weighted likelihood at its
+maximum, so it is positive. With guessing or slipping parameters it can be negative, which
+leaves no standard error: 13 of 3,920 response patterns (0.4% of their probability) on random
+3PL tests of 2 to 8 items, none of 4,560 on 2PL tests.</p></li>
+</ul>
+</li>
 <li><p>The engine records every step’s <code class="docutils literal notranslate"><span class="pre">Estimate</span></code> in the session. <code class="docutils literal notranslate"><span class="pre">CatSessionState.estimates</span></code> starts with
 <code class="docutils literal notranslate"><span class="pre">Estimate(theta=initial,</span> <span class="pre">se=math.inf,</span> <span class="pre">evaluations=0)</span></code> and gains the estimator’s result for each
 response; <code class="docutils literal notranslate"><span class="pre">theta_history</span></code>, <code class="docutils literal notranslate"><span class="pre">current_theta</span></code> and <code class="docutils literal notranslate"><span class="pre">current_se</span></code> are read from it, and snapshots copy

@@ -770,112 +770,368 @@ window.runMermaid = runMermaid;</script>
                 <article class="bd-article">
                   
   <h1>Source code for catsim.simulation</h1><div class="highlight"><pre>
-<span></span><span class="sd">"""Simulation runner built on top of the explicit CAT engine."""</span>
+<span></span><span class="sd">"""Simulated CAT runs on an engine, and their aggregate results."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span><span class="p">,</span> <span class="n">RunContext</span><span class="p">,</span> <span class="n">SimulatedResponseProvider</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExposureTracker</span><span class="p">,</span> <span class="n">SimulationResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">cat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">RunContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.irt</span><span class="w"> </span><span class="kn">import</span> <span class="n">icc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExposureTracker</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.estimation</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.initialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseInitializer</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseSelector</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseStopper</span>
-  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span>
+  <span class="kn">import</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">npt</span>
+
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatEngine</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.item_bank</span><span class="w"> </span><span class="kn">import</span> <span class="n">ItemBank</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span> <span class="n">CatSessionState</span>
+  <span class="kn">from</span><span class="w"> </span><span class="nn">.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FloatArray</span><span class="p">,</span> <span class="n">IntArray</span>
+
+
+<div class="viewcode-block" id="SimulatedResponseProvider">
+<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulatedResponseProvider">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulatedResponseProvider</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Draw a simulated examinee's responses from their true ability.</span>
+
+<span class="sd">  The response to an item is correct with the probability the item's 4PL model gives at</span>
+<span class="sd">  ``session.true_theta``, decided by one uniform draw from the run's generator.</span>
+<span class="sd">  """</span>
+
+<div class="viewcode-block" id="SimulatedResponseProvider.answer">
+<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulatedResponseProvider.answer">[docs]</a>
+  <span class="k">def</span><span class="w"> </span><span class="nf">answer</span><span class="p">(</span>  <span class="c1"># noqa: PLR6301</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">CatSessionSnapshot</span><span class="p">,</span> <span class="n">rng</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return a correct response with the item's probability of a correct answer at the true ability.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    item_bank : ItemBank</span>
+<span class="sd">        The engine's item bank.</span>
+<span class="sd">    item_id : int</span>
+<span class="sd">        Index of the item the selector chose.</span>
+<span class="sd">    session : CatSessionSnapshot</span>
+<span class="sd">        The session as it stands before the response; it must have a true ability.</span>
+<span class="sd">    rng : numpy.random.Generator</span>
+<span class="sd">        The run's random generator.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True for a correct response.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the session has no true ability.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"true_theta is required to simulate responses"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">item</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
+    <span class="n">probability</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">())</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_true_thetas</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""Return the true abilities as a float array, checking there is one finite number per examinee.</span>
+
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  true_thetas : array-like</span>
+<span class="sd">      The true abilities passed to :meth:`SimulationRunner.run`.</span>
+
+<span class="sd">  Returns</span>
+<span class="sd">  -------</span>
+<span class="sd">  numpy.ndarray</span>
+<span class="sd">      The abilities as a one-dimensional float array.</span>
+
+<span class="sd">  Raises</span>
+<span class="sd">  ------</span>
+<span class="sd">  TypeError</span>
+<span class="sd">      If ``true_thetas`` is a single number or has more than one dimension.</span>
+<span class="sd">  ValueError</span>
+<span class="sd">      If ``true_thetas`` is empty or holds a value that is not finite.</span>
+<span class="sd">  """</span>
+  <span class="n">thetas</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">thetas</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+      <span class="sa">f</span><span class="s2">"true_thetas must hold one true ability per examinee, not a single number (</span><span class="si">{</span><span class="n">true_thetas</span><span class="si">!r}</span><span class="s2">); "</span>
+      <span class="s2">"to simulate n examinees, pass their abilities, e.g. rng.normal(0, 1, n)"</span>
+    <span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">thetas</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"true_thetas must be one-dimensional, one true ability per examinee, got shape </span><span class="si">{</span><span class="n">thetas</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">thetas</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"true_thetas cannot be empty"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">"true_thetas must be finite numbers"</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">thetas</span>
+
+
+<div class="viewcode-block" id="SimulationResult">
+<a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulationResult">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimulationResult</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">"""The sessions of a simulated run, with the run's item exposure and duration.</span>
+
+<span class="sd">  :meth:`SimulationRunner.run` returns one; one can also be built from sessions an application ran</span>
+<span class="sd">  itself, whose true abilities may be unknown. ``exposure_counts`` holds each item's</span>
+<span class="sd">  administrations over the run and ``duration`` the run's wall-clock time in seconds.</span>
+<span class="sd">  """</span>
+
+  <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span>
+  <span class="n">sessions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CatSessionState</span><span class="p">]</span>
+  <span class="n">exposure_counts</span><span class="p">:</span> <span class="n">IntArray</span>
+  <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">exposure_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return per-item exposure rates across the simulated sessions."""</span>
+    <span class="n">n_sessions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_sessions</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exposure_counts</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_sessions</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">administered_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return administered item ids for each session."""</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_item_ids</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">theta_histories</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return each session's ability estimates, the initial one first."""</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">theta_history</span><span class="p">)</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">response_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Return response vectors for each session."""</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">responses</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">final_thetas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return each session's final ability estimate."""</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">current_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">final_ses</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the standard error of each session's final ability estimate.</span>
+
+<span class="sd">    It is infinite for a session that ended before its first response.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">current_se</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">test_lengths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return how many items each session administered."""</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">session</span><span class="o">.</span><span class="n">administered_count</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">]</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">true_thetas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return each session's true ability, NaN for a session that has none."""</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+      <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">session</span><span class="o">.</span><span class="n">true_theta</span> <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span>
+    <span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return how many objective evaluations each session's estimates took, summed over its responses.</span>
+
+<span class="sd">    The initial estimate, which no estimator computed, counts 0. A session is None when the estimator</span>
+<span class="sd">    gave no count for one of its estimates (:attr:`~catsim.context.Estimate.evaluations`).</span>
+<span class="sd">    """</span>
+    <span class="n">totals</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+      <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span><span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span> <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">estimates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+      <span class="n">totals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">counts</span> <span class="k">else</span> <span class="nb">sum</span><span class="p">(</span><span class="n">count</span> <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span> <span class="k">if</span> <span class="n">count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">totals</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">mean_evaluations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the mean number of objective evaluations per estimate over the run's responses.</span>
+
+<span class="sd">    Only the estimates that have a count take part. None when no estimate of the run has one, as for</span>
+<span class="sd">    a run whose estimator gives no counts or whose sessions have no responses.</span>
+<span class="sd">    """</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span>
+      <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span>
+      <span class="k">for</span> <span class="n">estimate</span> <span class="ow">in</span> <span class="n">session</span><span class="o">.</span><span class="n">estimates</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+      <span class="k">if</span> <span class="n">estimate</span><span class="o">.</span><span class="n">evaluations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span> <span class="k">if</span> <span class="n">counts</span> <span class="k">else</span> <span class="kc">None</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_known_true_thetas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the true abilities, raising if a session has none.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        Each session's true ability.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the result has no session, or any session has no true ability.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"bias, mse and rmse need at least one session, and the result has none"</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">true_thetas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">true_thetas</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"bias, mse and rmse need every session's true theta, but </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">)</span><span class="si">}</span><span class="s2"> sessions have none"</span>
+      <span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">true_thetas</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the mean of the final estimates minus the true abilities.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the result has no session, or any session has no true ability.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">bias</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the mean squared difference between the final estimates and the true abilities.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the result has no session, or any session has no true ability.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">mse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the square root of :attr:`mse`.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the result has no session, or any session has no true ability.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">rmse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_known_true_thetas</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_thetas</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the test overlap rate, or None unless every session administered the same number of items.</span>
+
+<span class="sd">    The overlap-rate formula (:func:`catsim.cat.overlap_rate`) assumes one fixed test length, so</span>
+<span class="sd">    there is no overlap rate for a run of variable-length tests, for a run with no sessions or for</span>
+<span class="sd">    tests of no items.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessions</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">test_sizes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test_lengths</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_sizes</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">test_size</span> <span class="o">=</span> <span class="n">test_sizes</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">test_size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">overlap_rate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_rates</span><span class="p">,</span> <span class="n">test_size</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="SimulationRunner">
 <a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulationRunner">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">SimulationRunner</span><span class="p">:</span>
-<span class="w">  </span><span class="sd">"""Run CAT simulations for one or more examinees."""</span>
+<span class="w">  </span><span class="sd">"""Run a simulated CAT session on an engine for each of a set of examinees.</span>
 
-  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">item_bank</span><span class="p">:</span> <span class="n">ItemBank</span> <span class="o">|</span> <span class="n">FloatArray</span><span class="p">,</span>
-    <span class="n">initializer</span><span class="p">:</span> <span class="n">BaseInitializer</span><span class="p">,</span>
-    <span class="n">selector</span><span class="p">:</span> <span class="n">BaseSelector</span><span class="p">,</span>
-    <span class="n">estimator</span><span class="p">:</span> <span class="n">BaseEstimator</span><span class="p">,</span>
-    <span class="n">stopper</span><span class="p">:</span> <span class="n">BaseStopper</span><span class="p">,</span>
-    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-  <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-      <span class="n">item_bank</span> <span class="o">=</span> <span class="n">ItemBank</span><span class="p">(</span><span class="n">item_bank</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">ItemBank</span><span class="p">):</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"item_bank must be an ItemBank or numpy.ndarray"</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="sd">  Parameters</span>
+<span class="sd">  ----------</span>
+<span class="sd">  engine : CatEngine</span>
+<span class="sd">      The engine whose item bank and strategies every simulated session uses.</span>
+<span class="sd">  """</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span> <span class="o">=</span> <span class="n">item_bank</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="n">CatEngine</span><span class="p">(</span><span class="n">initializer</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">stopper</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="n">CatEngine</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span> <span class="o">=</span> <span class="n">engine</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">item_bank</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemBank</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the configured item bank."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span>
-
-  <span class="nd">@property</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">rng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Return the simulation RNG."""</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span>
-
-  <span class="k">def</span><span class="w"> </span><span class="nf">_to_distribution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examinees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FloatArray</span><span class="p">:</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">examinees</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">examinees</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Number of examinees must be positive, got </span><span class="si">{</span><span class="n">examinees</span><span class="si">}</span><span class="s2">"</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-      <span class="n">mean</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">)</span>
-      <span class="n">stddev</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">difficulty</span><span class="p">)</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">stddev</span><span class="p">,</span> <span class="n">examinees</span><span class="p">)</span>
-
-    <span class="n">x_array</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">examinees</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x_array</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Examinees array must be one-dimensional"</span>
-      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x_array</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="n">msg</span> <span class="o">=</span> <span class="s2">"Array of examinees cannot be empty"</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">x_array</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CatEngine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the engine the runner simulates sessions on."""</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span>
 
 <div class="viewcode-block" id="SimulationRunner.run">
 <a class="viewcode-back" href="../../api/simulation.html#catsim.simulation.SimulationRunner.run">[docs]</a>
-  <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">examinees</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimulationResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Run a CAT simulation for the given examinees."""</span>
-    <span class="n">thetas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_distribution</span><span class="p">(</span><span class="n">examinees</span><span class="p">)</span>
-    <span class="n">tracker</span> <span class="o">=</span> <span class="n">ExposureTracker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rng</span><span class="p">,</span> <span class="n">exposure_tracker</span><span class="o">=</span><span class="n">tracker</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+  <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimulationResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run one simulated session per true ability, one after another.</span>
+
+<span class="sd">    One random generator serves the whole run: the initializer, the selectors' tie-breaking and</span>
+<span class="sd">    randomization and the simulated responses of every session draw from it, in session order</span>
+<span class="sd">    (ADR-0013). It is built from ``rng`` at the start of every call, so the same seed gives the same</span>
+<span class="sd">    result however many times the runner has run.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    true_thetas : array-like</span>
+<span class="sd">        True abilities of the simulated examinees: a non-empty, one-dimensional sequence of finite</span>
+<span class="sd">        numbers. Session ``i`` simulates the examinee of ability ``true_thetas[i]`` and has session</span>
+<span class="sd">        id ``i``. To simulate ``n`` examinees from a population, draw their abilities, e.g.</span>
+<span class="sd">        ``numpy.random.default_rng(1).normal(0, 1, n)``.</span>
+<span class="sd">    rng : int or numpy.random.Generator, optional</span>
+<span class="sd">        Seed of the run's random generator, or a generator to draw from, which the run advances, so</span>
+<span class="sd">        passing the same generator to another run gives other results.</span>
+<span class="sd">        Default is 0, so a call that passes no seed is deterministic.</span>
+<span class="sd">    progress : bool, optional</span>
+<span class="sd">        Whether to show a ``tqdm`` progress bar over the sessions. Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    SimulationResult</span>
+<span class="sd">        The sessions, in the order of ``true_thetas``, with the run's exposure counts and duration.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If ``true_thetas`` is a single number or has more than one dimension.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If ``true_thetas`` is empty or holds a value that is not finite.</span>
+<span class="sd">    """</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">_true_thetas</span><span class="p">(</span><span class="n">true_thetas</span><span class="p">)</span>
+    <span class="n">tracker</span> <span class="o">=</span> <span class="n">ExposureTracker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">item_bank</span><span class="o">.</span><span class="n">n_items</span><span class="p">)</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">rng</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">),</span> <span class="n">exposure_tracker</span><span class="o">=</span><span class="n">tracker</span><span class="p">)</span>
     <span class="n">response_provider</span> <span class="o">=</span> <span class="n">SimulatedResponseProvider</span><span class="p">()</span>
+    <span class="n">abilities</span> <span class="o">=</span> <span class="n">thetas</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+      <span class="c1"># A progress bar is rarely asked for, so importing catsim does not pay for tqdm's import.</span>
+      <span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>  <span class="c1"># noqa: PLC0415  # pylint: disable=import-outside-toplevel</span>
+
+      <span class="n">abilities</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">abilities</span><span class="p">)</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
     <span class="n">sessions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">true_theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">abilities</span><span class="p">):</span>
+      <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">start_session</span><span class="p">(</span><span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">true_theta</span><span class="o">=</span><span class="n">true_theta</span><span class="p">)</span>
+      <span class="n">sessions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">response_provider</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
 
-    <span class="n">pbar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">thetas</span><span class="p">))</span> <span class="k">if</span> <span class="n">verbose</span> <span class="k">else</span> <span class="kc">None</span>
-    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-
-    <span class="k">for</span> <span class="n">session_id</span><span class="p">,</span> <span class="n">true_theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">thetas</span><span class="p">):</span>
-      <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">start_session</span><span class="p">(</span>
-        <span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span>
-        <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span>
-        <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
-        <span class="n">true_theta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">true_theta</span><span class="p">),</span>
-      <span class="p">)</span>
-      <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">run_session</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span> <span class="n">response_provider</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-      <span class="n">sessions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">pbar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-    <span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
     <span class="k">return</span> <span class="n">SimulationResult</span><span class="p">(</span>
-      <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_item_bank</span><span class="p">,</span>
+      <span class="n">item_bank</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_engine</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span>
       <span class="n">sessions</span><span class="o">=</span><span class="n">sessions</span><span class="p">,</span>
       <span class="n">exposure_counts</span><span class="o">=</span><span class="n">tracker</span><span class="o">.</span><span class="n">counts</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
       <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">,</span>

@@ -387,6 +387,7 @@
 <li class="toctree-l1"><a class="reference internal" href="0010-published-progressive-schedule.html">ADR-0010: Progressive and Proportional Follow the Published Schedule</a></li>
 <li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">ADR-0011: Decide in One Place How a Session Ends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="0012-unidimensional-dichotomous-scope.html">ADR-0012: Scope 1.0 to Unidimensional, Dichotomous IRT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="0013-random-numbers-and-reproducibility.html">ADR-0013: Random Numbers and Reproducibility</a></li>
 </ul>
 </div>
 </nav></div>
@@ -486,8 +487,8 @@ item” signal: <code class="docutils literal notranslate"><span class="pre">sel
 records the reason when the stopper is satisfied or the selector has no item, and it returns
 <code class="docutils literal notranslate"><span class="pre">None</span></code> without changing anything for a session that has already stopped. A manual session is
 therefore one loop with no other stop check:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">item_id</span> <span class="o">:=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-  <span class="n">engine</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_bank</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="p">(</span><span class="n">item_id</span> <span class="o">:=</span> <span class="n">engine</span><span class="o">.</span><span class="n">select_next</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+  <span class="n">engine</span><span class="o">.</span><span class="n">apply_response</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">item_id</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">step()</span></code> is the same three moves: select, get the response, apply it.</p>
