@@ -1,6 +1,12 @@
-"""Module with functions for plotting IRT-related results."""
+"""Plots of items, exposure rates and CAT sessions, drawn with matplotlib.
 
-from enum import Enum, auto
+The module needs matplotlib, which the plot extra installs: ``pip install 'catsim[plot]'``. Each
+function takes its data first and its options as keyword-only arguments, draws on the ``ax`` it is
+given or on the axes of a new figure, and returns the axes it drew on.
+"""
+
+from enum import StrEnum
+from typing import assert_never
 
 import numpy
 
@@ -18,142 +24,140 @@ from .state import CatSessionState
 from .typing import FloatArray
 
 
-class PlotType(Enum):
-  """Enum with the available item plot types.
+class PlotType(StrEnum):
+  """The curves :func:`item_curve` draws.
 
   Attributes
   ----------
-  ICC : auto
-      Item Characteristic Curve - plots probability of correct response vs ability.
-  IIC : auto
-      Item Information Curve - plots item information vs ability.
-  BOTH : auto
-      Both ICC and IIC plotted together.
+  ICC
+      The item characteristic curve, the probability of a correct response against ability.
+  IIC
+      The item information curve, the item's information against ability.
+  BOTH
+      Both curves on one plot, each with its own y axis.
   """
 
-  ICC = auto()
-  IIC = auto()
-  BOTH = auto()
+  ICC = "icc"
+  IIC = "iic"
+  BOTH = "both"
 
 
 def item_curve(
-  a: float = 1,
-  b: float = 0,
-  c: float = 0,
-  d: float = 1,
+  item: FloatArray,
+  *,
+  kind: PlotType | str = PlotType.ICC,
+  max_info: bool = True,
   ax: Axes | None = None,
   title: str | None = None,
-  ptype: PlotType = PlotType.ICC,
-  max_info: bool = True,
-  figsize: tuple[float, float] | None = None,
 ) -> Axes:
-  """Plot Item Response Theory-related item plots.
+  r"""Plot an item's characteristic curve, its information curve, or both.
+
+  The curves span four units of ability on each side of the item's difficulty, and a box in the
+  upper left corner gives the item's parameters. With ``PlotType.BOTH`` the information curve has
+  its own y axis, on the right, and the plot has no grid.
 
   .. plot::
-      :caption: Item characteristic and information functions for a given item. Last plot contains both curves together.
+      :caption: One item's characteristic and information curves, apart and together. The dot marks its peak.
 
       import matplotlib.pyplot as plt
-      from catsim.item_bank import ItemBank
-      from catsim.plot import item_curve, PlotType
-      item_bank = ItemBank.generate(1)
-      item = item_bank.items[0]
+      from catsim import ItemBank
+      from catsim.plot import PlotType, item_curve
+      item = ItemBank.generate(1, rng=7).items[0]
       fig, axes = plt.subplots(3, 1, figsize=(7, 15))
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.ICC, ax=axes[0])
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.IIC, ax=axes[1])
-      item_curve(item[0], item[1], item[2], item[3], ptype=PlotType.BOTH, ax=axes[2])
+      item_curve(item, kind=PlotType.ICC, ax=axes[0])
+      item_curve(item, kind=PlotType.IIC, ax=axes[1])
+      item_curve(item, kind=PlotType.BOTH, ax=axes[2])
       plt.tight_layout()
       plt.show()
 
-  When both curves are plotted in the same figure, the figure has no grid, since each
-  curve has a different scale.
-
   Parameters
   ----------
-  a : float, optional
-      Item discrimination parameter. Default is 1.
-  b : float, optional
-      Item difficulty parameter. Default is 0.
-  c : float, optional
-      Item pseudo-guessing parameter. Default is 0.
-  d : float, optional
-      Item upper asymptote. Default is 1.
-  ax : matplotlib.axes.Axes or None, optional
-      Matplotlib axes object to plot on. If None, a new figure is created. Default is None.
-  title : str or None, optional
-      Plot title. Default is None.
-  ptype : PlotType, optional
-      Type of plot: PlotType.ICC for item characteristic curve, PlotType.IIC for item
-      information curve, PlotType.BOTH for both curves. Default is PlotType.ICC.
+  item : numpy.ndarray
+      One item's parameters ``[a, b, c, d]``, such as a row of ``ItemBank.items``.
+  kind : PlotType or str, optional
+      Which curves to draw, as a :class:`PlotType` or its value (``"icc"``, ``"iic"`` or
+      ``"both"``). Default is ``PlotType.ICC``.
   max_info : bool, optional
-      Whether the point of maximum information should be shown in the plot. Default is True.
-  figsize : tuple or None, optional
-      Figure size (width, height) in inches. Default is None.
+      Whether to mark the ability at which the item gives the most information with a dot on the
+      information curve. Default is True.
+  ax : matplotlib.axes.Axes or None, optional
+      The axes to draw on. Default is None, which draws on the axes of a new figure.
+  title : str or None, optional
+      The plot title. Default is None, which sets none.
 
   Returns
   -------
   matplotlib.axes.Axes
-      The matplotlib axes object containing the plot.
+      The axes the characteristic curve is on, or those of the information curve for
+      ``PlotType.IIC``.
+
+  Raises
+  ------
+  ValueError
+      If ``item`` is not one row of four parameters or ``kind`` is not a :class:`PlotType`,
+      before any figure is created.
   """
-  if ax is None:
-    _, ax = plt.subplots(figsize=figsize)
+  item = numpy.asarray(item, dtype=float)
+  if item.shape != (4,):
+    msg = f"item must be one row of four parameters [a, b, c, d], got shape {item.shape}."
+    raise ValueError(msg)
+  kind = PlotType(kind)
+  ax = _prepare_axes(ax, title)
+  thetas = numpy.linspace(item[1] - 4, item[1] + 4, 161)
 
-  item = numpy.array([a, b, c, d])
-  thetas = numpy.arange(b - 4, b + 4, 0.1)
-  p_thetas = irt.icc(thetas, item)
-  i_thetas = irt.information(thetas, item)
+  match kind:
+    case PlotType.ICC:
+      _draw_icc(ax, thetas, item)
+      ax.grid()
+      box_axes = ax
+    case PlotType.IIC:
+      _draw_information(ax, thetas, item, max_info=max_info)
+      ax.grid()
+      box_axes = ax
+    case PlotType.BOTH:
+      box_axes = ax.twinx()
+      for axes, color in ((ax, "C0"), (box_axes, "C3")):
+        axes.yaxis.label.set_color(color)
+        axes.tick_params(axis="y", colors=color)
+      _draw_icc(ax, thetas, item, color="C0")
+      _draw_information(box_axes, thetas, item, max_info=max_info, color="C3")
+    case _:
+      assert_never(kind)
 
-  if ptype in {PlotType.ICC, PlotType.IIC}:
-    if title is not None:
-      ax.set_title(title, size=18)
-
-    _annotate_parameters(ax, a, b, c, d)
-    ax.set_xlabel(r"$\theta$")
-    ax.grid()
-
-    if ptype == PlotType.ICC:
-      ax.set_ylabel(r"$P(\theta)$")
-      ax.plot(thetas, p_thetas, label=r"$P(\theta)$")
-
-    elif ptype == PlotType.IIC:
-      ax.set_ylabel(r"$I(\theta)$")
-      ax.plot(thetas, i_thetas, label=r"$I(\theta)$")
-      if max_info:
-        aux = irt.max_info_theta(item)
-        ax.plot(aux, irt.information(aux, item), "o")
-
-  elif ptype == PlotType.BOTH:
-    ax.set_xlabel(r"$\theta$", size=16)
-    ax.set_ylabel(r"$P(\theta)$", color="b", size=16)
-    ax.plot(thetas, p_thetas, "b-", label=r"$P(\theta)$")
-    # Make the y-axis label and tick labels match the line color.
-    for tl in ax.get_yticklabels():
-      tl.set_color("b")
-
-    ax2 = ax.twinx()
-    ax2.set_ylabel(r"$I(\theta)$", color="r", size=16)
-    ax2.plot(thetas, i_thetas, "r-", label=r"$I(\theta)$")
-    for tl in ax2.get_yticklabels():
-      tl.set_color("r")
-
-    if max_info:
-      aux = irt.max_info_theta(item)
-      ax2.plot(aux, irt.information(aux, item), "o")
-
-    if title is not None:
-      ax.set_title(title, size=18)
-
-    _annotate_parameters(ax2, a, b, c, d)
-
+  ax.set_xlabel(r"$\theta$")
+  _annotate_parameters(box_axes, item)
   return ax
 
 
-def _annotate_parameters(ax: Axes, a: float, b: float, c: float, d: float) -> None:
-  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes.
+def _prepare_axes(ax: Axes | None, title: str | None) -> Axes:
+  """Return ``ax``, or the axes of a new figure, with ``title`` set when one is given."""
+  if ax is None:
+    _, ax = plt.subplots()
+  if title is not None:
+    ax.set_title(title, size=18)
+  return ax
 
-  The curves of typical items keep clear of that corner: at the low end of the ability range the ICC is
-  near its lower asymptote and the IIC near zero. A very flat item with d < 1 (a around 0.1) is the
-  exception, as its information curve leans left into the corner.
-  """
+
+def _draw_icc(ax: Axes, thetas: FloatArray, item: FloatArray, color: str | None = None) -> None:
+  """Draw the item's characteristic curve, in ``color`` or the next colour of the axes' cycle."""
+  ax.plot(thetas, irt.icc(thetas, item), color=color, label=r"$P(\theta)$")
+  ax.set_ylabel(r"$P(\theta)$")
+
+
+def _draw_information(
+  ax: Axes, thetas: FloatArray, item: FloatArray, *, max_info: bool, color: str | None = None
+) -> None:
+  """Draw the item's information curve and, with ``max_info``, a dot of the curve's colour at its peak."""
+  (line,) = ax.plot(thetas, irt.information(thetas, item), color=color, label=r"$I(\theta)$")
+  ax.set_ylabel(r"$I(\theta)$")
+  if max_info:
+    peak = irt.max_info_theta(item)
+    ax.plot(peak, irt.information(peak, item), "o", color=line.get_color(), label="Maximum information")
+
+
+def _annotate_parameters(ax: Axes, item: FloatArray) -> None:
+  """Write the item parameters, to three significant digits, in a box in the upper left corner of the axes."""
+  a, b, c, d = item
   ax.annotate(
     f"$a = {a:.3g}$\n$b = {b:.3g}$\n$c = {c:.3g}$\n$d = {d:.3g}$",
     bbox={"facecolor": "white", "alpha": 1},

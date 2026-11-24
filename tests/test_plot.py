@@ -56,27 +56,89 @@ class TestItemCurve:
   """Tests for item_curve()."""
 
   # A three-parameter item whose discrimination has more digits than the parameter box should show.
-  ITEM = (1.1669737841771746, -0.4321, 0.2, 1.0)
+  ITEM = np.array([1.1669737841771746, -0.4321, 0.2, 1.0])
+  A, B, C = ITEM[:3]
 
-  @pytest.mark.parametrize("ptype", list(PlotType))
-  def test_item_curve_rounds_the_parameters(self, ptype: PlotType) -> None:
+  @classmethod
+  def _icc(cls, theta: np.ndarray) -> np.ndarray:
+    """The item's characteristic curve in closed form, c + (1 - c) / (1 + exp(-a (theta - b)))."""
+    return cls.C + (1 - cls.C) / (1 + np.exp(-cls.A * (theta - cls.B)))
+
+  @classmethod
+  def _information(cls, theta: np.ndarray) -> np.ndarray:
+    """The three-parameter item's information in closed form, a^2 (P - c)^2 (1 - P) / ((1 - c)^2 P)."""
+    p = cls._icc(theta)
+    return cls.A**2 * (p - cls.C) ** 2 * (1 - p) / ((1 - cls.C) ** 2 * p)
+
+  def test_item_curve_draws_the_items_characteristic_curve(self) -> None:
+    """The curve spans four units around the difficulty and passes through (c + d) / 2 = 0.6 at it.
+
+    Fails if the parameters are read in another order than [a, b, c, d], if the curve is centred elsewhere, or if the
+    information is drawn instead.
+    """
+    ax = plot.item_curve(self.ITEM, kind=PlotType.ICC)
+    (line,) = ax.get_lines()
+    x, y = line.get_xdata(), line.get_ydata()
+
+    np.testing.assert_allclose([x[0], x[-1]], [self.B - 4, self.B + 4])
+    np.testing.assert_allclose(np.interp(self.B, x, y), 0.6)
+    np.testing.assert_allclose(y, self._icc(x))
+    assert ax.get_ylabel() == r"$P(\theta)$"
+
+  def test_item_curve_marks_the_peak_of_the_information_in_the_curves_colour(self) -> None:
+    """The information is a^2 / 6 at the difficulty, and the dot sits at Birnbaum's peak, in the curve's colour.
+
+    For d = 1 the peak is at b + log((1 + sqrt(1 + 8c)) / 2) / a. Fails if the dot is off the peak or off the curve, or
+    if it takes the next colour of the axes' cycle instead of the curve's.
+    """
+    ax = plot.item_curve(self.ITEM, kind=PlotType.IIC)
+    curve, dot = ax.get_lines()
+    x, y = curve.get_xdata(), curve.get_ydata()
+    peak = self.B + np.log((1 + np.sqrt(1 + 8 * self.C)) / 2) / self.A
+
+    np.testing.assert_allclose(np.interp(self.B, x, y), self.A**2 / 6)
+    np.testing.assert_allclose(y, self._information(x))
+    np.testing.assert_allclose(dot.get_xydata(), [[peak, self._information(peak)]])
+    assert dot.get_color() == curve.get_color()
+
+  @pytest.mark.parametrize(
+    ("kind", "max_info", "expected"),
+    [
+      ("icc", True, [[r"$P(\theta)$"]]),
+      ("iic", True, [[r"$I(\theta)$", "Maximum information"]]),
+      ("iic", False, [[r"$I(\theta)$"]]),
+      ("both", True, [[r"$P(\theta)$"], [r"$I(\theta)$", "Maximum information"]]),
+      ("both", False, [[r"$P(\theta)$"], [r"$I(\theta)$"]]),
+    ],
+  )
+  def test_item_curve_draws_the_curves_of_its_kind(self, kind: str, max_info: bool, expected: list[list[str]]) -> None:
+    """Each kind draws its own curves, the dot only with max_info, and BOTH puts the information on a second y axis.
+
+    Fails if a kind draws another curve, if max_info=False still marks the peak, or if BOTH draws both curves against
+    one y axis, whose scale cannot suit a probability and an information at once.
+    """
+    ax = plot.item_curve(self.ITEM, kind=kind, max_info=max_info)
+    assert [[line.get_label() for line in axes.get_lines()] for axes in ax.figure.axes] == expected
+
+  @pytest.mark.parametrize("kind", list(PlotType))
+  def test_item_curve_rounds_the_parameters(self, kind: PlotType) -> None:
     """The parameter box shows each parameter to three significant digits.
 
     Fails if a parameter is printed at full float precision (a = 1.1669737841771746), which made the
     box wider than the axes.
     """
-    ax = plot.item_curve(*self.ITEM, ptype=ptype)
+    ax = plot.item_curve(self.ITEM, kind=kind)
     texts = [text.get_text() for axis in ax.figure.axes for text in axis.texts]
     assert texts == ["$a = 1.17$\n$b = -0.432$\n$c = 0.2$\n$d = 1$"]
 
-  @pytest.mark.parametrize("ptype", list(PlotType))
-  def test_item_curve_parameter_box_stays_inside_the_axes_and_off_the_curves(self, ptype: PlotType) -> None:
+  @pytest.mark.parametrize("kind", list(PlotType))
+  def test_item_curve_parameter_box_stays_inside_the_axes_and_off_the_curves(self, kind: PlotType) -> None:
     """The parameter box lies within the axes and no plotted point falls under it.
 
     Fails if the box sticks out past the edge of the axes, or sits where a curve passes, as the
     information curve's tail does in the lower right corner.
     """
-    ax = plot.item_curve(*self.ITEM, ptype=ptype)
+    ax = plot.item_curve(self.ITEM, kind=kind)
     figure = ax.figure
     figure.canvas.draw()
     (annotation,) = [text for axis in figure.axes for text in axis.texts]
@@ -89,13 +151,24 @@ class TestItemCurve:
       for line in axis.get_lines():
         assert box.count_contains(line.get_transform().transform(line.get_xydata())) == 0
 
-  def test_item_curve_respects_title(self) -> None:
-    """A title passed in is set on the axes.
+  @pytest.mark.parametrize(
+    ("item", "kind", "message"),
+    [
+      (ITEM[:3], PlotType.ICC, r"one row of four parameters \[a, b, c, d\], got shape \(3,\)"),
+      (np.array([ITEM, ITEM]), PlotType.ICC, r"got shape \(2, 4\)"),
+      (ITEM, "pdf", "'pdf' is not a valid PlotType"),
+    ],
+    ids=["three-parameters", "two-items", "unknown-kind"],
+  )
+  def test_item_curve_rejects_bad_input_before_drawing(self, item: np.ndarray, kind: str, message: str) -> None:
+    """An item that is not one row of four parameters, or an unknown kind, raises before any figure exists.
 
-    Fails if the title argument is ignored.
+    Fails if a matrix of items draws one curve per item under a box that cannot show their parameters, or if a bad call
+    leaves an empty figure open behind the error.
     """
-    ax = plot.item_curve(a=1.0, b=0.0, c=0.0, d=1.0, title="Test Item")
-    assert ax.get_title() == "Test Item"
+    with pytest.raises(ValueError, match=message):
+      plot.item_curve(item, kind=kind)
+    assert plt.get_fignums() == []
 
 
 class TestGen3dDatasetScatter:
@@ -283,3 +356,22 @@ class TestTestProgress:
     administered_items = item_bank.get_items([0, 1, 2])
     with pytest.raises(ValueError, match="not the same"):
       plot.test_progress(thetas=[0.0, 0.1], administered_items=administered_items, true_theta=0.0)
+
+
+@pytest.mark.parametrize(
+  "draw",
+  [lambda ax, title: plot.item_curve(TestItemCurve.ITEM, ax=ax, title=title)],
+  ids=["item_curve"],
+)
+def test_plot_draws_on_the_given_axes_and_returns_them(draw) -> None:
+  """A plot function draws on the axes it is given, sets the title there and returns those axes.
+
+  Fails if a function opens a figure of its own despite ``ax``, ignores ``title``, or returns other axes than the
+  caller's.
+  """
+  figure, ax = plt.subplots()
+
+  assert draw(ax, "A title") is ax
+  assert ax.get_title() == "A title"
+  assert ax.get_lines() or ax.patches
+  assert plt.get_fignums() == [figure.number]
