@@ -20,11 +20,11 @@ for _ in range(5):
     )
 ```
 
-{py:meth}`SimulationRunner.run <catsim.simulation.SimulationRunner.run>` builds one {py:class}`numpy.random.Generator` from its `rng` argument at the start of every call, and every random draw of the run comes from it: the initializer, the selectors and the simulated responses of every session ({doc}`/adr/0013-random-numbers-and-reproducibility`). `rng` defaults to 0, so a run that passes no seed is deterministic too. It can also be a generator, which the run uses as is and advances.
+{py:meth}`SimulationRunner.run <catsim.simulation.SimulationRunner.run>` builds one {py:class}`numpy.random.Generator` from its `rng` argument at the start of every call, and every random draw of the run comes from it: the initializer, the selectors and the simulated responses of every session ({doc}`/adr/0013-random-numbers-and-reproducibility`). Results are reproducible when `rng` is passed. Without it, the run draws fresh randomness, so every call gives other tests: replications in a loop differ, as they should, but no such run can be repeated. `rng` can also be a generator, which the run uses as is and advances. {py:meth}`ItemBank.generate <catsim.item_bank.ItemBank.generate>` takes an `rng` of its own, with the same rules, so pass a seed there too to draw the same bank every time.
 
 The runner draws nothing else. The examinees' true abilities are an input to `run`: to simulate a population, draw them with a generator of your own, as `rng.normal(0, 1, n)` does below, so the same abilities can be run again, on another engine or with another seed.
 
-The same seed and the same true abilities give identical results, however many times the runner has run and on any runner built with the same components. A different seed gives other tests. A generator passed as `rng` is not a seed: each run advances it, so passing the same generator object again gives other tests.
+The same seed and the same true abilities give identical results, however many times the runner has run and on any runner built with the same components. A different seed, or no `rng` at all, gives other tests. A generator passed as `rng` is not a seed: each run advances it, so passing the same generator object again gives other tests.
 
 ```pycon
 >>> import numpy
@@ -46,6 +46,8 @@ The same seed and the same true abilities give identical results, however many t
 >>> numpy.array_equal(first, runner.run(true_thetas, rng=42).final_thetas)
 True
 >>> numpy.array_equal(first, runner.run(true_thetas, rng=43).final_thetas)
+False
+>>> numpy.array_equal(runner.run(true_thetas).final_thetas, runner.run(true_thetas).final_thetas)
 False
 ```
 

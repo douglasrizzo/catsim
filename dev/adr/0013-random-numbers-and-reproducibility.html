@@ -478,7 +478,7 @@
 <h1>ADR-0013: Random Numbers and Reproducibility<a class="headerlink" href="#adr-0013-random-numbers-and-reproducibility" title="Link to this heading">#</a></h1>
 <section id="status">
 <h2>Status<a class="headerlink" href="#status" title="Link to this heading">#</a></h2>
-<p>Accepted</p>
+<p>Accepted 2026-11-24</p>
 </section>
 <section id="context">
 <h2>Context<a class="headerlink" href="#context" title="Link to this heading">#</a></h2>
@@ -491,15 +491,19 @@ it to every run. Two calls to <code class="docutils literal notranslate"><span c
 second continuing the first one’s stream. Its <code class="docutils literal notranslate"><span class="pre">run(n)</span></code> form also drew the <code class="docutils literal notranslate"><span class="pre">n</span></code> true abilities from
 the bank’s difficulties with that same generator, so the same abilities gave other tests when they
 were passed explicitly instead.</p>
+<p><code class="docutils literal notranslate"><span class="pre">run</span></code> and <code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> then defaulted to <code class="docutils literal notranslate"><span class="pre">rng=0</span></code>, so every unseeded call gave the same run
+or bank, and unseeded replications in a loop were identical, with no warning.
+NumPy, <code class="docutils literal notranslate"><span class="pre">scipy.stats</span></code> and scikit-learn read a missing seed as fresh randomness.</p>
 <p>Whether a run can be repeated, compared with another or split across processes depends on where the
 generator comes from and on what draws from it, which nothing recorded.</p>
 </section>
 <section id="decision">
 <h2>Decision<a class="headerlink" href="#decision" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">SimulationRunner.run(true_thetas,</span> <span class="pre">*,</span> <span class="pre">rng=0)</span></code> builds one generator,
-<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(rng)</span></code>, at the start of every call. <code class="docutils literal notranslate"><span class="pre">rng</span></code> is a seed or a
-<code class="docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code>; a generator is used as is, and the run advances it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SimulationRunner.run(true_thetas,</span> <span class="pre">*,</span> <span class="pre">rng=None)</span></code> builds one generator,
+<code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(rng)</span></code>, at the start of every call. <code class="docutils literal notranslate"><span class="pre">rng</span></code> is None, a seed or a
+<code class="docutils literal notranslate"><span class="pre">numpy.random.Generator</span></code>: None draws fresh entropy (NumPy’s convention), a seed gives a generator
+in a fixed state, and a generator is used as is and advanced by the run.</p></li>
 <li><p>That one generator serves the whole run. It reaches the strategies through <code class="docutils literal notranslate"><span class="pre">RunContext.rng</span></code> and
 <code class="docutils literal notranslate"><span class="pre">StepContext.rng</span></code> (ADR-0004) and the simulated responses through <code class="docutils literal notranslate"><span class="pre">ResponseProvider.answer</span></code>, so the
 initializer, the selectors and the responses of every session draw from one stream.</p></li>
@@ -508,9 +512,8 @@ depend on every draw of the sessions before it.</p></li>
 <li><p>The runner draws nothing itself. The true abilities are an input: to simulate a population, the
 caller draws them, e.g. <code class="docutils literal notranslate"><span class="pre">numpy.random.default_rng(1).normal(0,</span> <span class="pre">1,</span> <span class="pre">n)</span></code>, with a generator of its
 own.</p></li>
-<li><p>The default <code class="docutils literal notranslate"><span class="pre">rng=0</span></code> makes a call that passes no seed deterministic. This is the decided default:
-an unseeded simulation gives the same numbers on every machine and every run, and a study that
-wants independent replications passes different seeds.</p></li>
+<li><p>Reproducibility comes from passing <code class="docutils literal notranslate"><span class="pre">rng</span></code>. An unseeded call is random, so unseeded replications in
+a loop differ, as they must for their spread to mean anything.</p></li>
 </ul>
 </section>
 <section id="consequences">
@@ -519,6 +522,7 @@ wants independent replications passes different seeds.</p></li>
 <li><p>The same seed and the same <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> give identical results, run after run and runner after
 runner, on the same engine configuration and package versions. A generator passed as <code class="docutils literal notranslate"><span class="pre">rng</span></code> is
 advanced by each run, so reusing the same generator object gives other results.</p></li>
+<li><p>An unseeded run cannot be repeated: nothing records the entropy it drew.</p></li>
 <li><p>Reordering <code class="docutils literal notranslate"><span class="pre">true_thetas</span></code> changes the results, and so does inserting or removing an examinee:
 every later session starts from another point of the stream.</p></li>
 <li><p>A change in how many numbers one component draws, such as a selector changed to break ties it
@@ -531,8 +535,8 @@ own, for example <code class="docutils literal notranslate"><span class="pre">nu
 sequential run.</p></li>
 <li><p>An application that steps sessions itself (<code class="docutils literal notranslate"><span class="pre">CatEngine.step</span></code> and <code class="docutils literal notranslate"><span class="pre">apply_response</span></code>) owns its
 <code class="docutils literal notranslate"><span class="pre">RunContext</span></code> and so its generator; the same rules apply to the sessions it runs on one context.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> takes its own <code class="docutils literal notranslate"><span class="pre">rng</span></code>, also 0 by default, so a generated bank does not depend
-on any run.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItemBank.generate</span></code> takes its own <code class="docutils literal notranslate"><span class="pre">rng</span></code>, also None by default, so a generated bank does not
+depend on any run.</p></li>
 </ul>
 </section>
 </section>

@@ -626,7 +626,8 @@ changing the shared kernel.</p></td>
 <p>A fixed quadrature grid for posterior computations.</p>
 <p>The posterior at node <span class="math notranslate nohighlight">\(\theta_q\)</span> is proportional to
 <span class="math notranslate nohighlight">\(w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)\)</span>, so the weights take part in the
-posterior itself. Equal weights, as built by <a class="reference internal" href="#catsim.estimation.QuadratureGrid.uniform" title="catsim.estimation.QuadratureGrid.uniform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform()</span></code></a>, cancel in the normalization.</p>
+posterior itself. Equal weights, as built by <a class="reference internal" href="#catsim.estimation.QuadratureGrid.uniform" title="catsim.estimation.QuadratureGrid.uniform"><code class="xref py py-meth docutils literal notranslate"><span class="pre">uniform()</span></code></a>, cancel in the normalization. Two grids
+are equal only if they are the same object, and a grid can be a set member or a dictionary key.</p>
 <p>For the full posterior specification and quadrature contract, see
 <a class="reference internal" href="#"><span class="doc">Bayesian Estimation Infrastructure</span></a>.</p>
 <dl class="field-list simple">

@@ -32,8 +32,10 @@ $$
 (p. 10, Equation 14). Dividing by the interval's length would give a mean
 information, but the length is the same for every item.
 
-By default the interval is the confidence interval of the maximum-likelihood
-estimate, using the information $I(\hat{\theta})$ of the administered items:
+By default the interval is a confidence interval for $\theta$, whose size
+"expresses the uncertainty of the estimator" (p. 9). For the maximum-likelihood
+estimate, with $I(\hat{\theta})$ the information of the administered items, it
+is
 
 $$
 [\theta_L, \theta_U] = \left[\hat{\theta} - \frac{\lambda}{\sqrt{I(\hat{\theta})}},\;
@@ -42,12 +44,33 @@ $$
 \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right),
 $$
 
-where $\gamma$ is the confidence level (p. 9, Equation 11). Equation 12 gives
-an EAP version, with the posterior standard deviation in place of
-$I(\hat{\theta})^{-1/2}$; catsim always uses Equation 11, with the information
-at the current estimate, whatever estimator produced it. Before any item is
-administered the interval is the whole ability scale (p. 11, Equation 16). With a fixed `interval` $\delta$, the
-interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$ throughout the test.
+where $\gamma$ is the confidence level (p. 9, Equation 11). For the EAP
+estimate the report uses the posterior standard deviation:
+
+$$
+[\theta_L, \theta_U] = \left[\hat{\theta} - \lambda \sqrt{\operatorname{Var}(\theta \mid \mathbf{u})},\;
+\hat{\theta} + \lambda \sqrt{\operatorname{Var}(\theta \mid \mathbf{u})}\right]
+$$
+
+(p. 9, Equation 12). The report's posterior has a uniform prior (p. 10,
+Equation 13); catsim's is the EAP estimator's prior.
+
+catsim builds the interval as $\hat{\theta} \pm \lambda\, SE(\hat{\theta})$, with
+the standard error the current estimator reports (the `se` field of
+{py:class}`~catsim.context.StepContext`). MLE and WLE sessions therefore get
+Equation 11 and EAP sessions Equation 12; a MAP session gets the MAP
+estimator's standard error, which includes the prior's curvature, by the same
+reasoning. The {doc}`estimation pages </api/techniques/estimation/index>`
+define each estimator's standard error.
+
+Before the first response the standard error is infinite and the interval is
+the whole ability scale (p. 11, Equation 16). The report keeps this unbounded
+interval while the total score is zero or perfect; catsim keeps it only while
+the standard error is infinite. A standard error of zero, or nearly zero, collapses
+the interval onto $\hat{\theta}$; catsim then selects by the items' information at
+$\hat{\theta}$, the limit of the information averaged over the interval. With a
+fixed `interval` $\delta$, the interval is $[\hat{\theta} - \delta, \hat{\theta} + \delta]$
+throughout the test.
 
 The integral has a closed form (see {py:func}`catsim.irt.info_integral`). Since
 $dP/d\theta = a (P - c)(d - P)/(d - c)$, substituting $P$ for $\theta$ gives
@@ -86,7 +109,7 @@ integral over the whole scale is $a_i$ (Equation 28).
 Any correct implementation must satisfy the following properties:
 
 1. Each candidate score is the integral of the item information function over the interval.
-2. With `interval=None`, the interval is $\hat{\theta} \pm \lambda / \sqrt{I(\hat{\theta})}$ for the administered items, and the whole ability scale before any item is administered.
+2. With `interval=None`, the interval is $\hat{\theta} \pm \lambda\, SE(\hat{\theta})$, with the standard error the current estimator reports, and the whole ability scale while that standard error is infinite, as it is before the first response.
 3. With a fixed `interval`, the interval is $\hat{\theta} \pm \delta$.
 4. It never returns an already administered item.
 5. If no non-administered items remain, it raises `NoItemsAvailableError`.

@@ -1098,7 +1098,7 @@ window.runMermaid = runMermaid;</script>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">true_thetas</span><span class="p">:</span> <span class="n">npt</span><span class="o">.</span><span class="n">ArrayLike</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
   <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimulationResult</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Run one simulated session per true ability, one after another.</span>
@@ -1115,10 +1115,11 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">        numbers. Session ``i`` simulates the examinee of ability ``true_thetas[i]`` and has session</span>
 <span class="sd">        id ``i``. To simulate ``n`` examinees from a population, draw their abilities, e.g.</span>
 <span class="sd">        ``numpy.random.default_rng(1).normal(0, 1, n)``.</span>
-<span class="sd">    rng : int or numpy.random.Generator, optional</span>
-<span class="sd">        Seed of the run's random generator, or a generator to draw from, which the run advances, so</span>
-<span class="sd">        passing the same generator to another run gives other results.</span>
-<span class="sd">        Default is 0, so a call that passes no seed is deterministic.</span>
+<span class="sd">    rng : int, numpy.random.Generator or None, optional</span>
+<span class="sd">        The source of the run's random draws. None, the default, draws fresh randomness, so every</span>
+<span class="sd">        call gives other tests. An int seeds a new generator, so the same seed gives the same result.</span>
+<span class="sd">        A generator is drawn from as is, and the run advances it, so passing the same generator to</span>
+<span class="sd">        another run gives other results.</span>
 <span class="sd">    progress : bool, optional</span>
 <span class="sd">        Whether to show a ``tqdm`` progress bar over the sessions. Default is False.</span>
 

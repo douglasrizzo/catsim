@@ -1021,7 +1021,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
 <span class="sd">      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)</span>
-<span class="sd">      result = SimulationRunner(engine).run(true_thetas)</span>
+<span class="sd">      result = SimulationRunner(engine).run(true_thetas, rng=0)</span>
 <span class="sd">      fig, axes = plt.subplots(2, 1, figsize=(7, 12))</span>
 <span class="sd">      plot.item_exposure(result.exposure_rates, hist=True, ax=axes[0], title="Exposure rates")</span>
 <span class="sd">      plot.item_exposure(result.exposure_rates, item_bank=result.item_bank, par="b", ax=axes[1])</span>
@@ -1140,7 +1140,7 @@ window.runMermaid = runMermaid;</script>
 <span class="sd">          StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),</span>
 <span class="sd">      )</span>
 <span class="sd">      true_thetas = numpy.random.default_rng(1).normal(0, 1, 10)</span>
-<span class="sd">      result = SimulationRunner(engine).run(true_thetas)</span>
+<span class="sd">      result = SimulationRunner(engine).run(true_thetas, rng=0)</span>
 <span class="sd">      fig, ax = plt.subplots(figsize=(8, 5))</span>
 <span class="sd">      plot.session_progress(result.sessions[0], result.item_bank, ax=ax)</span>
 <span class="sd">      plt.show()</span>

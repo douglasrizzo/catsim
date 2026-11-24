@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted 2026-11-24
 
 ## Context
 
@@ -17,14 +17,19 @@ second continuing the first one's stream. Its `run(n)` form also drew the `n` tr
 the bank's difficulties with that same generator, so the same abilities gave other tests when they
 were passed explicitly instead.
 
+`run` and `ItemBank.generate` then defaulted to `rng=0`, so every unseeded call gave the same run
+or bank, and unseeded replications in a loop were identical, with no warning.
+NumPy, `scipy.stats` and scikit-learn read a missing seed as fresh randomness.
+
 Whether a run can be repeated, compared with another or split across processes depends on where the
 generator comes from and on what draws from it, which nothing recorded.
 
 ## Decision
 
-- `SimulationRunner.run(true_thetas, *, rng=0)` builds one generator,
-  `numpy.random.default_rng(rng)`, at the start of every call. `rng` is a seed or a
-  `numpy.random.Generator`; a generator is used as is, and the run advances it.
+- `SimulationRunner.run(true_thetas, *, rng=None)` builds one generator,
+  `numpy.random.default_rng(rng)`, at the start of every call. `rng` is None, a seed or a
+  `numpy.random.Generator`: None draws fresh entropy (NumPy's convention), a seed gives a generator
+  in a fixed state, and a generator is used as is and advanced by the run.
 - That one generator serves the whole run. It reaches the strategies through `RunContext.rng` and
   `StepContext.rng` (ADR-0004) and the simulated responses through `ResponseProvider.answer`, so the
   initializer, the selectors and the responses of every session draw from one stream.
@@ -33,15 +38,15 @@ generator comes from and on what draws from it, which nothing recorded.
 - The runner draws nothing itself. The true abilities are an input: to simulate a population, the
   caller draws them, e.g. `numpy.random.default_rng(1).normal(0, 1, n)`, with a generator of its
   own.
-- The default `rng=0` makes a call that passes no seed deterministic. This is the decided default:
-  an unseeded simulation gives the same numbers on every machine and every run, and a study that
-  wants independent replications passes different seeds.
+- Reproducibility comes from passing `rng`. An unseeded call is random, so unseeded replications in
+  a loop differ, as they must for their spread to mean anything.
 
 ## Consequences
 
 - The same seed and the same `true_thetas` give identical results, run after run and runner after
   runner, on the same engine configuration and package versions. A generator passed as `rng` is
   advanced by each run, so reusing the same generator object gives other results.
+- An unseeded run cannot be repeated: nothing records the entropy it drew.
 - Reordering `true_thetas` changes the results, and so does inserting or removing an examinee:
   every later session starts from another point of the stream.
 - A change in how many numbers one component draws, such as a selector changed to break ties it
@@ -54,5 +59,5 @@ generator comes from and on what draws from it, which nothing recorded.
   sequential run.
 - An application that steps sessions itself (`CatEngine.step` and `apply_response`) owns its
   `RunContext` and so its generator; the same rules apply to the sessions it runs on one context.
-- `ItemBank.generate` takes its own `rng`, also 0 by default, so a generated bank does not depend
-  on any run.
+- `ItemBank.generate` takes its own `rng`, also None by default, so a generated bank does not
+  depend on any run.

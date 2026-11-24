@@ -796,7 +796,10 @@ window.runMermaid = runMermaid;</script>
   <h1>Source code for catsim.selection.information</h1><div class="highlight"><pre>
 <span></span><span class="sd">"""Information-based selectors: maximum information, Urry's rule and interval information."""</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">irt</span>
@@ -916,31 +919,30 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="c1"># Below this half-width the integral's antiderivative difference loses more precision to rounding than the</span>
+<span class="c1"># information at the estimate, the interval's limit, loses to the interval's width (an O(width^2) error).</span>
+<span class="n">_MIN_HALF_WIDTH</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="IntervalInfoSelector">
 <a class="viewcode-back" href="../../../api/techniques/selection/interval-info-selector.html#catsim.selection.IntervalInfoSelector">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">IntervalInfoSelector</span><span class="p">(</span><span class="n">BaseSelector</span><span class="p">):</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""Select the item whose information, integrated over an interval around the estimate, is largest.</span>
 
-<span class="sd">  By default the interval is the confidence interval of the interval information criterion</span>
-<span class="sd">  :cite:p:`Veerkamp1997`, which narrows as the test information grows:</span>
-
-<span class="sd">  .. math::</span>
-
-<span class="sd">      \arg\max_{i \in R} \int_{\theta_L}^{\theta_U} I_i(\theta)\, d\theta, \qquad</span>
-<span class="sd">      \theta_{L, U} = \hat\theta \mp \frac{\lambda}{\sqrt{I(\hat\theta)}}, \qquad</span>
-<span class="sd">      \lambda = \Phi^{-1}\left(\frac{1 + \gamma}{2}\right)</span>
-
-<span class="sd">  where :math:`I(\hat\theta)` is the information of the administered items and :math:`\gamma` the</span>
-<span class="sd">  confidence level. A fixed half-width :math:`\delta` can be used instead. The selector applies no</span>
-<span class="sd">  exposure cap: ``context.exposure_rates`` is ignored.</span>
+<span class="sd">  By default the interval is the estimate plus or minus :math:`\lambda` times the estimator's</span>
+<span class="sd">  standard error (``context.se``), where :math:`\lambda` is the standard normal quantile of</span>
+<span class="sd">  ``(1 + confidence) / 2`` :cite:p:`Veerkamp1997`. It spans the whole ability scale before the first</span>
+<span class="sd">  response and narrows as the standard error falls; a standard error of zero, or nearly zero, selects</span>
+<span class="sd">  by the items' information at the estimate, the interval's limit. Setting ``interval`` fixes the</span>
+<span class="sd">  half-width. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.</span>
 
 <span class="sd">  Parameters</span>
 <span class="sd">  ----------</span>
 <span class="sd">  interval : float or None, optional</span>
-<span class="sd">      Fixed half-width :math:`\delta` of the interval. Default is None, which uses the confidence</span>
-<span class="sd">      interval above.</span>
+<span class="sd">      Fixed half-width of the interval around the estimate. Default is None, which uses the</span>
+<span class="sd">      confidence interval.</span>
 <span class="sd">  confidence : float, optional</span>
-<span class="sd">      Confidence level :math:`\gamma` of the default interval. Default is 0.95.</span>
+<span class="sd">      Confidence level of the default interval. Default is 0.95.</span>
 
 <span class="sd">  Notes</span>
 <span class="sd">  -----</span>
@@ -1009,13 +1011,18 @@ window.runMermaid = runMermaid;</script>
     <span class="n">item_bank</span><span class="p">,</span> <span class="n">theta</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">item_bank</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">theta</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-      <span class="c1"># infinite before any item is administered, since there is no information yet</span>
-      <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">confidence_interval</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">administered_items</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span><span class="p">)</span>
+      <span class="c1"># context.se is infinite before the first response, so the interval starts as the whole scale</span>
+      <span class="n">half_width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_confidence</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="n">context</span><span class="o">.</span><span class="n">se</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span> <span class="n">theta</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
+      <span class="n">half_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
 
-    <span class="n">information_integral</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">info_integral</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidates</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">information_integral</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidates</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">half_width</span> <span class="o">&lt;</span> <span class="n">_MIN_HALF_WIDTH</span><span class="p">:</span>
+      <span class="c1"># the interval has collapsed onto the estimate, where every integral is 0 or rounding noise</span>
+      <span class="n">scores</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">scores</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">info_integral</span><span class="p">(</span><span class="n">theta</span> <span class="o">-</span> <span class="n">half_width</span><span class="p">,</span> <span class="n">theta</span> <span class="o">+</span> <span class="n">half_width</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">scores</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

@@ -522,7 +522,7 @@ indices into a bank; <code class="docutils literal notranslate"><span class="pre
 exception;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">responses</span></code> for the responses to the administered items, in the same order;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">n_items</span></code> for a number of items, <code class="docutils literal notranslate"><span class="pre">model</span></code> for the logistic model, and
-<code class="docutils literal notranslate"><span class="pre">rng:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">numpy.random.Generator</span></code> for the random source (ADR-0013);</p></li>
+<code class="docutils literal notranslate"><span class="pre">rng:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">numpy.random.Generator</span> <span class="pre">|</span> <span class="pre">None</span></code> for the random source (ADR-0013);</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">test_size</span></code> for the test length a selector plans its schedule for, and <code class="docutils literal notranslate"><span class="pre">max_items</span></code> for the
 length at which <code class="docutils literal notranslate"><span class="pre">MaxLengthStopper</span></code> ends a test. They are different settings: a test may stop
 before or after the length its selector planned.</p></li>

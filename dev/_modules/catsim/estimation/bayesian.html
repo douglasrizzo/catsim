@@ -919,15 +919,17 @@ window.runMermaid = runMermaid;</script>
 
 
 
+<span class="c1"># eq=False: generated equality and hashing would compare the arrays, which raises; a grid is compared by identity</span>
 <div class="viewcode-block" id="QuadratureGrid">
 <a class="viewcode-back" href="../../../api/techniques/estimation/bayesian-infrastructure.html#catsim.estimation.QuadratureGrid">[docs]</a>
-<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">QuadratureGrid</span><span class="p">:</span>
 <span class="w">  </span><span class="sa">r</span><span class="sd">"""A fixed quadrature grid for posterior computations.</span>
 
 <span class="sd">  The posterior at node :math:`\theta_q` is proportional to</span>
 <span class="sd">  :math:`w_q\,p(\theta_q)\,L(\mathbf{u} \mid \theta_q)`, so the weights take part in the</span>
-<span class="sd">  posterior itself. Equal weights, as built by :meth:`uniform`, cancel in the normalization.</span>
+<span class="sd">  posterior itself. Equal weights, as built by :meth:`uniform`, cancel in the normalization. Two grids</span>
+<span class="sd">  are equal only if they are the same object, and a grid can be a set member or a dictionary key.</span>
 
 <span class="sd">  For the full posterior specification and quadrature contract, see</span>
 <span class="sd">  :doc:`/api/techniques/estimation/bayesian-infrastructure`.</span>
