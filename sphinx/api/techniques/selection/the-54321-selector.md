@@ -1,15 +1,18 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.The54321Selector`
-**Reference:** McBride & Martin (1983)
+# 5-4-3-2-1 Selector
 
-# 54321 Selector
+:Class: {py:class}`catsim.selection.The54321Selector`
+:Sources: McBride & Martin (1983)
 
-## Specification
+## Motivation
 
 Under maximum-information selection every examinee starts from the same
 ability estimate, so the opening items of every test are the same few items.
 The 5-4-3-2-1 technique of McBride and Martin (1983) randomizes only those
-opening items:
+opening items.
+
+## Definition
+
+The opening items are drawn from bins that shrink by one item at each step:
 
 - the first item is drawn uniformly at random from the 5 most informative items
   at the current estimate;
@@ -18,17 +21,12 @@ opening items:
 - from the fifth item on, the most informative remaining item is administered.
 
 This is the schedule described by Georgiadou et al. (2007, p. 9) in their
-review of exposure-control strategies. Magis and Raîche (2012, p. 12) list the
-technique among the methods that choose at random among several near-optimal
-items, without defining it.
+review of exposure-control strategies.
 
-With `initial_bin_size` $n$, the item at 0-indexed test position $k$ is drawn
-from the $\max(1, n - k)$ most informative non-administered items, plus any
-item tied in information with the last of them
-({doc}`/adr/0011-random-tie-breaking`). Unlike the
-randomesque selector, which keeps drawing from a fixed number of items for the
-whole test (Georgiadou et al., 2007, p. 9), the late items, which matter most
-for precision, are chosen by maximum information.
+With `initial_bin_size` $s$, the item at 0-indexed test position $k$ is drawn
+from the $\max(1, s - k)$ most informative items that are neither administered
+nor excluded, plus any item tied in information with the last of them
+({doc}`/adr/0011-random-tie-breaking`).
 
 ## Parameters
 
@@ -46,15 +44,22 @@ for precision, are chosen by maximum information.
        following item draws from one fewer, down to 1.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+Unlike the randomesque selector, which keeps drawing from a fixed number of
+items for the whole test (Georgiadou et al., 2007, p. 9), the late items, which
+matter most for precision, are chosen by maximum information. Magis and Raîche
+(2012, p. 12) list the technique among the methods that choose at random among
+several near-optimal items, without defining it.
 
-1. It never returns an already administered item.
-2. The item at position $k$ is drawn with the configured random number generator from the $\max(1, n - k)$ most informative non-administered items.
-3. From position $n - 1$ on, it returns the most informative non-administered item.
-4. If no non-administered items remain, it raises `NoItemsAvailableError`.
-5. It applies no exposure cap: it ignores the context's `exposure_rates`.
+## Guarantees
+
+1. It never returns an item that was already administered or excluded.
+2. The item at position $k$ is drawn with the session's random generator from the
+   $\max(1, s - k)$ most informative remaining items.
+3. From position $s - 1$ on, it returns the most informative remaining item.
+4. When no item remains, it raises `NoItemsAvailableError`.
+5. It applies no exposure cap: the run's exposure rates do not change its choice.
 
 ## References
 
