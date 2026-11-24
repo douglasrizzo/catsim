@@ -15,8 +15,8 @@ import numpy
 from scipy.optimize import minimize_scalar
 
 from .. import irt
-from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
+from ..typing import FloatArray
 from .base import BaseEstimator
 
 if TYPE_CHECKING:

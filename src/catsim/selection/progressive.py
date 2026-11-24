@@ -2,8 +2,8 @@
 
 import numpy
 
-from .._typing import FloatArray
 from ..item_bank import ItemBank
+from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, check_test_size, pick_best, remaining, require_rng
 
 

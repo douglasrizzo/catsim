@@ -13,4 +13,5 @@ simulation
 cat
 irt
 plot
+typing
 ```

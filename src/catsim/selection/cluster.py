@@ -9,8 +9,8 @@ from enum import StrEnum
 
 import numpy
 
-from .._typing import FloatArray, IntArray
 from ..item_bank import ItemBank
+from ..typing import FloatArray, IntArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 

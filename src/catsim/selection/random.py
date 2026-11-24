@@ -4,8 +4,8 @@ import operator
 
 from numpy.random import Generator
 
-from .._typing import FloatArray
 from ..item_bank import ItemBank
+from ..typing import FloatArray
 from .base import BaseSelector, best_pool, remaining, require_rng
 
 

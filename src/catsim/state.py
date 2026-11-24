@@ -13,8 +13,8 @@ from . import cat
 if TYPE_CHECKING:
   from collections.abc import Hashable
 
-  from ._typing import FloatArray, IntArray
   from .item_bank import ItemBank
+  from .typing import FloatArray, IntArray
 
 
 class StopReason(StrEnum):

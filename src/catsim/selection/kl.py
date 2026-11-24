@@ -6,8 +6,8 @@ import numpy
 from scipy.integrate import quad
 from scipy.special import log_expit
 
-from .._typing import FloatArray
 from ..item_bank import ItemBank
+from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
 

@@ -3,10 +3,10 @@
 import numpy
 
 from .. import irt
-from .._typing import FloatArray
 from ..estimation.base import BaseEstimator
 from ..estimation.numerical import NumericalSearchEstimator
 from ..item_bank import ItemBank
+from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining, require_responses
 
 

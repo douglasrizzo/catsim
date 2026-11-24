@@ -14,7 +14,7 @@ import numpy
 from scipy import stats
 from scipy.special import expit, log_expit
 
-from ._typing import FloatArray
+from .typing import FloatArray
 
 THETA_MIN_TYPICAL = -4.0
 """Typical lower bound for ability (theta) estimation.

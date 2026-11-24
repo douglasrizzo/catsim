@@ -13,9 +13,9 @@ from abc import ABC, abstractmethod
 import numpy
 from numpy.random import Generator
 
-from .._typing import FloatArray, IntArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
+from ..typing import FloatArray, IntArray
 
 
 def remaining(n_items: int, administered_items: list[int]) -> IntArray:

@@ -3,9 +3,9 @@
 import numpy
 
 from .. import irt
-from .._typing import FloatArray
 from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from ..item_bank import ItemBank
+from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining, require_responses
 
 _MIN_NODES = 5

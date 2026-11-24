@@ -2,9 +2,9 @@
 
 import numpy
 
-from .._typing import FloatArray
 from ..exceptions import NoItemsAvailableError
 from ..item_bank import ItemBank
+from ..typing import FloatArray
 from .base import BaseSelector
 
 

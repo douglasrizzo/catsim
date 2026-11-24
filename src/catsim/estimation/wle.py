@@ -15,8 +15,8 @@ from ..irt import THETA_MAX_EXTENDED, THETA_MIN_EXTENDED
 from .base import BaseEstimator
 
 if TYPE_CHECKING:
-  from .._typing import FloatArray
   from ..item_bank import ItemBank
+  from ..typing import FloatArray
 
 # Points on which the modified score is scanned to bracket its roots before Brent's method refines
 # them (0.1 apart on [-6, 6]).

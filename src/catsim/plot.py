@@ -7,9 +7,9 @@ import numpy
 from matplotlib.axes import Axes
 
 from . import irt
-from ._typing import FloatArray
 from .item_bank import ItemBank
 from .state import CatSessionState, SimulationResult
+from .typing import FloatArray
 
 
 class PlotType(Enum):

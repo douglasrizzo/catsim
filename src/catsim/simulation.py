@@ -14,11 +14,11 @@ from .item_bank import ItemBank
 from .state import ExposureTracker, SimulationResult
 
 if TYPE_CHECKING:
-  from ._typing import FloatArray
   from .estimation import BaseEstimator
   from .initialization import BaseInitializer
   from .selection import BaseSelector
   from .stopping import BaseStopper
+  from .typing import FloatArray
 
 
 class SimulationRunner:
