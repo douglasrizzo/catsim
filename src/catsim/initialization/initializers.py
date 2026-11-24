@@ -12,8 +12,6 @@ from .base import BaseInitializer
 class UniformInitializer(BaseInitializer):
   """Draw each examinee's initial ability from a uniform distribution.
 
-  The default interval, :math:`(-0.5, 0.5)`, is the starting rule of Barrada et al. (2006).
-
   Parameters
   ----------
   low : float, optional
@@ -106,7 +104,7 @@ class NormalInitializer(BaseInitializer):
 
   @override
   def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:
-    r"""Draw an initial ability value from :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.
+    """Draw an initial ability value from the normal distribution of the given mean and standard deviation.
 
     Parameters
     ----------
@@ -125,9 +123,6 @@ class NormalInitializer(BaseInitializer):
 
 class FixedPointInitializer(BaseInitializer):
   """Initialize every examinee's ability at the same fixed point.
-
-  This initializer is useful for controlled experiments where you want all
-  examinees to start with the same initial ability estimate.
 
   Parameters
   ----------
