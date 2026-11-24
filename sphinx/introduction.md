@@ -1,10 +1,17 @@
 # Introduction
 
-{py:mod}`catsim` is a Python package for computerized adaptive testing (CAT), providing both stepwise CAT execution and CAT simulation tools for a modern assessment workflow that adapts to each examinee's ability level in real time.
+{py:mod}`catsim` is a Python package for computerized adaptive testing (CAT). It runs adaptive
+tests one item at a time, in an application, and simulates them on examinees whose abilities are
+known, to compare testing methods. This page introduces CAT and the item response theory behind it,
+and ends with a map of catsim's parts. {doc}`terms-and-notation` lists the terms and symbols these
+pages use.
 
-## What are Latent Traits?
+## What a Test Measures
 
-Assessment instruments measure *latent traits* - internal characteristics that cannot be directly observed, such as knowledge or personality traits. Educational and psychological tests are common examples. When a latent trait is expressed numerically, it is called an *ability* or *proficiency*.
+A test measures an examinee's *ability*: a characteristic that cannot be observed directly, such as
+knowledge of a subject or a personality trait. Educational and psychological tests are common
+examples. What can be observed are the examinee's answers to the test's items, and the ability is
+inferred from them as a number on a continuous scale.
 
 ## The Problem with Linear Tests
 
@@ -14,77 +21,69 @@ Traditional *linear tests* use a paper-and-pencil approach where all examinees a
 - Low-ability examinees become frustrated with overly difficult questions
 - Test length cannot be optimized for individual examinees
 
-## What is Computerized Adaptive Testing?
-
-Computerized adaptive testing (CAT) emerged in the 1970s as *tailored testing*
-{cite:p}`Lord77`. Unlike linear tests, CAT adapts in real time:
-
-1. After each item, the examinee's ability is re-estimated
-2. The next item is selected based on the updated ability estimate
-3. Each examinee receives items matched to their ability level
-
-This approach is more efficient and engaging, reducing test length while maintaining accuracy.
-
-## About catsim
-
-CAT systems rely on Item Response Theory (IRT), which provides the mathematical
-framework for modeling tests, items, and examinees. While CAT packages exist for
-R {cite:p}`Magis12`, {py:mod}`catsim` brings these capabilities to Python. Built
-on {py:mod}`numpy` and [SciPy](https://scipy.org/), it provides:
-
-- Multiple initialization, selection, estimation, and stopping methods
-- A reusable CAT engine for manual and embedded workflows
-- Simulation tools for comparing different CAT methodologies
+A computerized adaptive test avoids them by choosing each examinee's items during the test. It rests
+on item response theory, the subject of the next section.
 
 ## Item Response Theory Models
 
-{py:mod}`catsim` borrows many concepts from Item Response Theory
-{cite:p}`Lord68,Rasch66`, a series of models created in the second part of the 20th century
-with the goal of *measuring latent traits*. {py:mod}`catsim` makes use of Item
-Response Theory one-, two-, three- and four-parameter logistic models, a series of models
-in which examinees and items are represented by a set of numerical values (the
-models' parameters). Item Response Theory itself was created with the goal of
-measuring latent traits as well as assessing and comparing individuals' abilities
-by allocating them in ability scales, inspiring as well as justifying its use in
-adaptive testing.
+{py:mod}`catsim` uses item response theory {cite:p}`Lord68,Rasch66`, a family of models developed
+in the second half of the 20th century to measure abilities and to compare examinees on a common
+ability scale, which also justifies its use in adaptive testing. {py:mod}`catsim` implements its
+one-, two-, three- and four-parameter logistic models, in which examinees and items are represented
+by numbers, the models' parameters.
 
-The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of *items* in which examinees manifest their latent traits when answering them.
+The logistic models are unidimensional: a test measures a single ability. The test is made of
+*items*, the questions an examinee answers, each scored correct or incorrect.
 
-In unidimensional IRT models, an examinee's ability is represented as $\theta$. Usually $-\infty < \theta < \infty$, but since the scale of $\theta$ is up to the individuals creating the instrument, it is common for the values to follow the normal distribution $N(0, 1)$, such that $-4 < \theta < 4$. Additionally, $\hat{\theta}$ is the estimate of $\theta$. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true $\theta$ as the test progresses in length. {doc}`terms-and-notation` lists the terms and symbols these pages use.
+An examinee's ability is written $\theta$. It can take any real value, and its scale is set by
+whoever calibrates the test. It is common to set it so that the abilities of the population follow
+the standard normal distribution $N(0, 1)$, under which about 99.99% of examinees lie between $-4$
+and $4$. The ability cannot be observed, so it is estimated from the responses: the *ability
+estimate* $\hat{\theta}$, which tends to get closer to the true $\theta$ as the test gets longer.
+By default, {py:mod}`catsim`'s estimators keep their estimates within $[-6, 6]$, wider than any plausible
+examinee or item bank ({doc}`/adr/0009-ability-scale-and-extreme-patterns`).
 
-Under the logistic models of IRT, an item is represented by the following parameters:
+Under the logistic models, item $i$ has up to four parameters:
 
-> - $a$ represents an item's *discrimination* parameter, that is, how well it discriminates individuals who answer the item correctly (or, in an alternative interpretation, individuals who agree with the idea of the item) and those who don't. An item with a high $a$ value tends to be answered correctly by all individuals whose $\theta$ is above the items difficulty level and wrongly by all the others; as this value gets lower, this threshold gets blurry and the item starts not to be as informative. It is common for $a > 0$.
-> - $b$ represents an item's *difficulty* parameter. This parameter, which is measured in the same scale as $\theta$, shows at which point of the ability scale an item is more informative, that is, where it discriminates the individuals who agree and those who disagree with the item. Since $b$ and $\theta$ are measured in the same scale, $b$ follows the same distributions as $\theta$. For a CAT, it is good for an item bank to have as many items as possible in all difficulty levels, so that the CAT may select the best item for each individual in all ability levels.
-> - $c$ represents an item's *pseudo-guessing* parameter, the lower asymptote of its characteristic curve. This parameter denotes what is the probability of individuals with low ability values to still answer the item correctly. {py:mod}`catsim` requires $0 \leq c < d$, and the lower the value of this parameter, the better the item is considered.
-> - $d$ represents an item's *upper asymptote*. This parameter denotes what is the probability of individuals with high ability values to answer the item correctly, so $1 - d$ is the probability that they still answer it incorrectly. {py:mod}`catsim` requires $c < d \leq 1$, and the higher the value of this parameter, the better the item is considered.
+- its *discrimination* $a_i$: how sharply the item separates examinees of lower and higher ability.
+  Examinees whose $\theta$ is above the item's difficulty tend to answer a highly discriminating item
+  correctly, and the others incorrectly; as $a_i$ gets lower, this threshold blurs and the item
+  gives less information. It is common for $a_i > 0$.
+- its *difficulty* $b_i$: the point of the ability scale at which the item's characteristic curve is
+  steepest, where it separates examinees best. The item is most informative at or near it (exactly at
+  it when $c_i = 0$ and $d_i = 1$). It is on the same scale as $\theta$, so difficulties and abilities
+  can be compared directly. A CAT needs items at every difficulty, so that it can give each
+  examinee the items that suit their ability.
+- its *guessing parameter* $c_i$, the lower asymptote of its characteristic curve: the probability
+  that an examinee of very low ability still answers the item correctly. It lies between 0 and the
+  upper asymptote, $0 \leq c_i < d_i$, and the lower it is, the better the item.
+- its *upper asymptote* $d_i$: the probability that an examinee of very high ability answers the
+  item correctly. $1 - d_i$, the *slipping parameter*, is the probability that they still answer it
+  incorrectly. It lies between the guessing parameter and 1, $c_i < d_i \leq 1$, and the higher it
+  is, the better the item.
 
-For a set of items $I$, when $\forall i \in I, d_i = 1$, the four-parameter
-logistic model is reduced to the three-parameter logistic model. When, in
-addition, $\forall i \in I, c_i = 0$, the three-parameter logistic model is
-reduced to the two-parameter logistic model.
-Additionally, if all values of $a$ are equal, the two-parameter logistic
-model is reduced to the one-parameter logistic model. Finally, when
-$\forall i \in I, a_i = 1$, we have the Rasch model {cite:p}`Rasch66`. Thus,
-{py:mod}`catsim` can treat all of the logistic models presented above,
-since the underlying functions of all logistic models related to test simulations
-are the same, given the correct item parameters.
+When every item has $d_i = 1$, the four-parameter logistic model reduces to the three-parameter
+one. When, in addition, every $c_i = 0$, it reduces to the two-parameter model, and when every
+$a_i$ is also equal, to the one-parameter model. The one-parameter model with every $a_i = 1$ is
+the Rasch model {cite:p}`Rasch66`. The formulas below hold for all of them, given the item
+parameters, so {py:mod}`catsim` treats the four models alike.
 
-Under IRT, the probability of an examinee with a given $\hat{\theta}$ value
-to answer item $i$ correctly, given the item parameters, is given by
-{cite:p}`Ayala2009,Magis13`
+Under IRT, the probability that an examinee of ability $\theta$ answers item $i$ correctly is the
+item's *characteristic curve* {cite:p}`Ayala2009,Magis13`
 
 $$
-P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}.
+P_i(\theta) = c_i + \frac{d_i - c_i}{1 + e^{-a_i(\theta - b_i)}}.
 $$
 
-The information this item gives is computed as {cite:p}`Ayala2009,Magis13`
+The *information* the item gives at ability $\theta$, how much a response to it sharpens an
+estimate near $\theta$, is {cite:p}`Ayala2009,Magis13`
 
 $$
-I_i(\theta) = \frac{a^2[(P(\theta)-c)]^2[d - P(\theta)]^2}{(d-c)^2(1-P(\theta))P(\theta)}.
+I_i(\theta) = \frac{a_i^2 [P_i(\theta) - c_i]^2 [d_i - P_i(\theta)]^2}{(d_i - c_i)^2 P_i(\theta) Q_i(\theta)},
 $$
 
-Both of these functions are graphically represented in the following figure. It is possible to see that an item is most informative when its difficulty parameter is close the examinee's ability.
+where $Q_i(\theta) = 1 - P_i(\theta)$ is the probability of an incorrect response. The following
+figure draws both curves for one item: the item is most informative near its difficulty.
 
 ```{eval-rst}
 .. plot::
@@ -99,27 +98,31 @@ Both of these functions are graphically represented in the following figure. It 
     plt.show()
 ```
 
-The sum of the information of all items in a test is called *test information*
+The sum of the information of the items administered to an examinee is the *test information*
 {cite:p}`Ayala2009`:
 
 $$
-I(\theta) = \sum_{j \in J} I_j(\theta).
+I(\theta) = \sum_i I_i(\theta).
 $$
 
-The amount of error in the estimate of an examinee's ability after a test is
-called the *standard error of estimation* {cite:p}`Ayala2009` and it is given by
+The uncertainty of an ability estimate is its *standard error* $SE(\hat{\theta})$. For a maximum
+likelihood estimate it is {cite:p}`Ayala2009`
 
 $$
-SEE = \sqrt{\frac{1}{I(\theta)}}
+SE(\hat{\theta}) = \frac{1}{\sqrt{I(\hat{\theta})}}.
 $$
 
-Since the denominator in the calculation of the $SEE$ is $I(\theta)$, it is clear to see that the more items an examinee answers, the smaller SEE gets.
-
-{py:mod}`catsim` provides these functions in the {py:mod}`catsim.irt` module.
+Every item adds information, so the more items an examinee answers, the smaller the standard
+error. {py:mod}`catsim` computes these quantities with the functions of the {py:mod}`catsim.irt`
+module.
 
 ### The Item Matrix
 
-In {py:mod}`catsim`, a collection of items is represented as a {py:class}`numpy.ndarray` whose rows and columns represent items and their parameters, respectively. Thus, it is referred to as the *item matrix*. The item matrix has four columns, which hold the parameters $a$, $b$, $c$ and $d$, in this order. A matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing parameters are filled in with $a = 1$, $c = 0$ and $d = 1$. An {py:class}`catsim.ItemBank` holds an item matrix, and its {py:meth}`~catsim.ItemBank.generate` method generates one as follows:
+In {py:mod}`catsim`, the items are a {py:class}`numpy.ndarray` with one row per item and one column
+per parameter, the *item matrix*. Its four columns hold $a$, $b$, $c$ and $d$, in this order. A
+matrix with one, two or three columns is read as $[b]$, $[a, b]$ or $[a, b, c]$, and the missing
+parameters take the values $a = 1$, $c = 0$ and $d = 1$. An {py:class}`~catsim.ItemBank` holds an
+item matrix, and {py:meth}`ItemBank.generate <catsim.ItemBank.generate>` draws one at random:
 
 ```pycon
 >>> from catsim import ItemBank
@@ -135,118 +138,122 @@ ItemBank(n_items=5, model=4PL)
 (5, 4)
 ```
 
-These examples depict the generation of five items according to the
-different logistic models. Whatever the model, the item matrix has four columns.
-In the last example, parameters $a$ and $b$ have a
-correlation of $0.5$, an adjustment that may be useful in case simulations
-require it {cite:p}`Chang2001`.
+These examples draw five items under each logistic model. Whatever the model, the item matrix has
+four columns. In the last example, the discrimination and the difficulty have a correlation of
+$0.5$, which simulations may need {cite:p}`Chang2001`.
 
-The item matrix holds only item parameters. Item exposure is run-level output, derived from simulation results ({py:attr}`catsim.SimulationResult.exposure_rates`). The exposure rate is commonly denoted as $r$ and computed as follows:
+## Computerized Adaptive Tests
 
-$$
-r_i = \frac{q_i}{N}
-$$
-
-Where $q_i$ represents the number of tests item $i$ has been used on and $N$ is the total number of tests applied.
-
-During a run, a selector's exposure cap (`r_max`) is checked against the same rate over the examinees tested so far: an {py:class}`~catsim.ExposureTracker` in the run context gives each session $q_i$ and $N$ over the other sessions started so far, which for sessions run one after another is catR's rate over the examinees tested before the current one ({doc}`/adr/0003-runtime-state-ownership`).
-
-## Computerized adaptive tests
-
-Unlike linear tests, in which items are sequentially presented to examinees and their ability estimated at the end of the test, in a computerized adaptive test (CAT), an examinee's ability is updated after the response of each item. The updated knowledge of an examinee's ability at each step of the test allows for the selection of more informative items *during* the test itself, which in turn reduces the standard error of estimation of their ability at a faster rate.
+Computerized adaptive testing emerged in the 1970s as *tailored testing* {cite:p}`Lord77`. A linear
+test estimates an examinee's ability once, at the end. A computerized adaptive test (CAT) updates the
+estimate after each response. Knowing more about the ability at each step lets the test
+choose more informative items *during* the test, so the standard error of the estimate falls
+faster.
 
 ### The CAT Lifecycle
 
-In general, a computerized adaptive test has a very well-defined lifecycle:
+A computerized adaptive test follows a well-defined lifecycle:
 
 ```{mermaid}
 flowchart TD
-    start([Start]) --> init[Initial ability estimation]
+    start([Start]) --> init[Initial ability estimate]
     init --> select[Item selection and administration]
-    select --> answer[Capture answer]
-    answer --> estimate[Proficiency estimation]
+    select --> answer[Response]
+    answer --> estimate[Ability estimation]
     estimate --> stop{Stopping criterion<br>reached?}
     stop -- No --> select
     stop -- Yes --> finish([End])
 ```
 
-1. The examinee's initial ability is estimated;
-2. An item is selected based on the current ability estimation;
-3. The ability is reestimated based on the answers to all items up until now;
-4. **If** a stopping criterion is met, stop the test. **Else** go back to step 2.
+1. The examinee's initial ability estimate is set;
+2. an item is selected at the current ability estimate and administered;
+3. the ability is estimated again from the responses to all items so far;
+4. **if** a stopping criterion is met, the test ends; **else** it goes back to step 2.
 
-There is a considerable amount of literature covering these four phases proposed by many authors. In {py:mod}`catsim`, each phase is separated in its own module, which makes it easy to create simulations combining different methods for each phase. Each module will be explained separately, along with its API.
+The literature proposes many methods for each of these four phases. In {py:mod}`catsim`, each
+phase is a strategy with a module of its own, an *initializer*, a *selector*, an *estimator* and a
+*stopper*, so a test can combine any method for each phase. The sections below introduce each
+phase.
 
 #### Initialization
 
-The initialization procedure is done only once during each examinee's test. In it, the initial value of an examinee's ability $\hat\theta_0$ is selected. This procedure may be done in a variety of ways: a standard value can be chosen to initialize all examinees ({py:class}`catsim.initialization.FixedPointInitializer`); it can be drawn from a uniform or a normal distribution ({py:class}`catsim.initialization.UniformInitializer`, {py:class}`catsim.initialization.NormalInitializer`); the place in the item bank with items of more information can be chosen to initialize $\hat\theta_0$ etc.
+The initializer runs once per examinee and sets the initial ability estimate $\hat\theta_0$. It may
+give every examinee the same value ({py:class}`catsim.initialization.FixedPointInitializer`), draw
+one from a uniform or a normal distribution ({py:class}`catsim.initialization.UniformInitializer`,
+{py:class}`catsim.initialization.NormalInitializer`). The literature also starts at other points,
+such as the ability at which the item bank is most informative.
 
-In {py:mod}`catsim`, initialization procedures can be found in the {py:mod}`catsim.initialization` module.
+In {py:mod}`catsim`, initializers are in the {py:mod}`catsim.initialization` module.
 
 #### Item Selection
 
-With a set value for $\hat{\theta}$, an item is chosen from the item bank and presented to the examinee, which the examinee answers and its answer, along with the answers to all previous items, is used to estimate $\hat{\theta}$.
+At the current estimate $\hat{\theta}$, the selector chooses an item from the item bank and the
+examinee answers it. The best-known method gives the item that is most informative at
+$\hat{\theta}$ ({py:class}`catsim.selection.MaxInfoSelector`). It tends to give the same few items
+to many examinees and to leave the rest of the bank unused, so other selection methods were
+proposed.
 
-Item selection methods are diverse. The most famous method is to choose the item that maximizes the *gain of information*, represented by {py:class}`catsim.selection.MaxInfoSelector`. This method, however, has been shown to have some drawbacks, like overusing few items from the item bank while ignoring items with inferior parameters. In order to correct that, other item selection methods were proposed.
-
-In {py:mod}`catsim`, an examinee's response to a given item is simulated by sampling a binary value from the Bernoulli distribution, in which the value of $p$ is given by the IRT logistic model characteristic function ({py:func}`catsim.irt.icc`) at the examinee's true ability $\theta$, given by:
+How often an item is given is measured by its *exposure rate*, the share of examinees given it:
 
 $$
-P(X_i = 1| \theta) = c_i + \frac{d_i-c_i}{1+ e^{-a_i(\theta-b_i)}}
+r_i = \frac{q_i}{N},
 $$
 
-In {py:mod}`catsim`, item selection procedures can be found in the {py:mod}`catsim.selection` module.
+where $q_i$ is the number of examinees given item $i$ and $N$ the number of examinees. An item given
+to many examinees becomes known to future ones. Exposure-control methods keep the rates below a cap
+$r_{\max}$ or choose among the best items at random
+({doc}`selection techniques </api/techniques/selection/index>`). A simulation reports the rates as
+{py:attr}`~catsim.SimulationResult.exposure_rates`.
 
-#### Proficiency Estimation
+In {py:mod}`catsim`, selectors are in the {py:mod}`catsim.selection` module.
 
-Proficiency estimation occurs whenever an examinee answers a new item. Given a dichotomous (binary) response vector and the parameters of the corresponding items that were answered, it is the job of an estimator to return a new value for the examinee's $\hat{\theta}$. This value reflects the examinee's ability, given his or hers answers up until that point of the test. An estimator returns it as an {py:class}`~catsim.Estimate`, which also holds the estimate's standard error, by the estimator's own formula, and how many times the estimator evaluated its objective to find it.
+#### Ability Estimation
 
-In Python, an example of a list that may be used as a valid dichotomous response vector is as follows:
+After each response, the estimator updates the ability estimate $\hat{\theta}$ from the responses
+so far, each correct or incorrect, and the parameters of the items answered. In {py:mod}`catsim`,
+the responses are a list of booleans, `True` for a correct response, one for each administered
+item, in the order they were given:
 
 ```pycon
->>> responses = [1,1,1,0,1,1,0,1,0,0,1,0,0,0,1,0]
+>>> responses = [True, True, False, True, False]
 ```
 
-Estimation techniques are generally separated between maximum-likelihood estimation procedures (whose job is to return the $\hat{\theta}$ value that maximizes the *log-likelihood* function, presented in {py:func}`catsim.irt.log_likelihood`); and Bayesian estimation procedures, which tend to use a priori information of the distributions of examinee's abilities to estimate new values for them.
+Estimators fall into two groups. Maximum likelihood estimators return the ability at which the
+responses are most likely, the maximum of the *log-likelihood* ({py:func}`catsim.irt.log_likelihood`).
+Bayesian estimators combine the likelihood with a prior distribution of the abilities in the
+population. Each estimator also gives the standard error of its estimate, by its own formula
+({doc}`estimation techniques </api/techniques/estimation/index>`).
 
-In {py:mod}`catsim`, ability estimation procedures can be found in the {py:mod}`catsim.estimation` module.
+In {py:mod}`catsim`, estimators are in the {py:mod}`catsim.estimation` module.
 
 #### Stopping Criterion
 
-Since items in a CAT are selected on-the-fly, a stopping criterion must be chosen such that, when achieved, no new items are presented to the examinee and the test is deemed finished. These stopping criteria might be achieved when the test reaches a fixed number of items ({py:class}`catsim.stopping.MaxLengthStopper`), when the standard error the estimator reports with its estimate (the $SEE$ above for maximum likelihood, the posterior standard deviation for EAP) reaches a lower threshold ({py:class}`catsim.stopping.StandardErrorStopper`), or when a confidence interval for the ability estimate falls within one ability band ({py:class}`catsim.stopping.ConfidenceIntervalStopper`). A {py:class}`catsim.stopping.StopRule` combines several of them, ending the test as soon as any one holds, after an optional minimum number of items.
+Since a CAT selects its items during the test, a stopping criterion decides when the test ends and
+no further items are given. A stopper may end the test at a fixed number of items
+({py:class}`catsim.stopping.MaxLengthStopper`), once the standard error of the estimate falls to a
+threshold ({py:class}`catsim.stopping.StandardErrorStopper`), or once a confidence interval for the
+ability estimate falls within one ability band ({py:class}`catsim.stopping.ConfidenceIntervalStopper`).
+A {py:class}`catsim.stopping.StopRule` combines several stoppers, ending the test as soon as any one
+holds, after an optional minimum number of items.
 
-In {py:mod}`catsim`, test stopping criteria can be found in the {py:mod}`catsim.stopping` module.
+In {py:mod}`catsim`, stoppers are in the {py:mod}`catsim.stopping` module.
 
-## Package architecture
+## Architecture
 
-{py:mod}`catsim` was built using an object-oriented architecture, which introduces many benefits for its maintenance and expansion. As explained in previous sections, each phase in the CAT lifecycle is represented by a different module in the package. Additionally, each module involved in the CAT lifecycle has a base abstract class, which must be implemented if a new methodology is to be presented to that module's respective phase. This way, new users can implement their own methods for each phase of the CAT lifecycle, or even an entire new CAT lifecycle while still using {py:mod}`catsim` and its features to simulate tests, plot results etc. Modules and their corresponding abstract classes are presented on {numref}`modules_classes`.
-
-```{eval-rst}
-.. table:: Modules and their corresponding abstract classes
-    :name: modules_classes
-
-    ===============================  ==============
-    Module                           Abstract class
-    ===============================  ==============
-    :py:mod:`catsim.initialization`  :py:class:`catsim.initialization.BaseInitializer`
-    :py:mod:`catsim.selection`       :py:class:`catsim.selection.BaseSelector`
-    :py:mod:`catsim.estimation`      :py:class:`catsim.estimation.BaseEstimator`
-    :py:mod:`catsim.stopping`        :py:class:`catsim.stopping.BaseStopper`
-    ===============================  ==============
+```{mermaid}
+flowchart LR
+    bank[(Item bank)] --> engine[CatEngine]
+    strategies["Strategies:<br>initializer, selector,<br>estimator, stopper"] --> engine
+    app([Your application]) -- "one session,<br>item by item" --> engine
+    runner[SimulationRunner] -- "one session per<br>simulated examinee" --> engine
+    runner -- returns --> result[SimulationResult]
 ```
 
-The initializer runs once per session and receives the item bank and the run's random generator. The selector, the estimator and the stopper run at every step and receive one {py:class}`~catsim.StepContext`, which holds what they may read about the session: the item bank, the generator, the administered items and their responses, the items to pass over, the current estimate and its standard error, and the exposure rates. A custom strategy subclasses the base class and reads the fields it needs; a custom estimator returns an {py:class}`~catsim.Estimate`. The helpers that make the built-in selectors behave alike are listed in {py:class}`~catsim.selection.BaseSelector`, and {py:mod}`catsim.typing` holds the array types catsim annotates with ({doc}`/adr/0004-explicit-strategy-contracts`). For example, a selector that gives the easiest remaining item, breaking ties the way the built-in selectors do:
-
-```python
-from typing_extensions import override
-
-from catsim import StepContext
-from catsim.selection import BaseSelector, pick_best, remaining
-
-
-class EasiestFirstSelector(BaseSelector):
-    @override
-    def select(self, context: StepContext) -> int:
-        candidates = remaining(context)
-        return pick_best(candidates, -context.item_bank.difficulty[candidates], context.rng)
-```
+A {py:class}`~catsim.CatEngine` holds an item bank and four strategies, one for each phase of the
+lifecycle above, and runs each examinee's test one item at a time. An application asks it for each
+item and gives it each response ({doc}`live-sessions`). A {py:class}`~catsim.SimulationRunner` gives
+the same test to simulated examinees whose true abilities are known, and returns a
+{py:class}`~catsim.SimulationResult` that compares the final estimates with those abilities
+({doc}`running-simulations`). {doc}`reproducibility` shows how to seed a simulation study so that
+it repeats, and {doc}`extending` how to write a strategy of your own.
+{doc}`/adr/0001-explicit-cat-engine` records why catsim is built around the engine.

@@ -209,21 +209,12 @@ class CatEngine:
   def select_next(self, state: CatSessionState, context: RunContext) -> int | None:
     """Select the next item to administer, or end the session.
 
-    This alone decides whether a session continues, so a manual loop needs no other check::
-
-      while (item_id := engine.select_next(state, context)) is not None:
-        engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)
-
-    The stopper is consulted here only before the first response; after that,
-    :meth:`apply_response` evaluates it once per new state, and what it records is final. The items
-    the exposure control declines join the session's ``excluded_items`` and the tracker's proposals
-    when the selection ends, so save sessions after this call too; a selection that raises changes
-    neither.
-
-    Each call selects anew, and the exposure control decides anew: a second call before the
-    response may decline the item the first returned, or end the session. An application that has
-    shown an item keeps its id for :meth:`apply_response` and shows it again rather than calling
-    this method again.
+    It returns None once the session has ended, so a loop needs no other check. The stopper is
+    consulted here only before the first response; after that, :meth:`apply_response` consults it.
+    The items the exposure control declines join the session's ``excluded_items`` and the tracker's
+    proposals, unless the selection raises, so save the session after this call too. Each call
+    selects anew, so a second call may return another item or end the session: keep the returned id
+    until its response arrives. See :doc:`/live-sessions`.
 
     Parameters
     ----------
@@ -246,6 +237,23 @@ class CatEngine:
         If the selector proposes an item the session excluded.
     ValueError
         If the selector proposes an item outside the bank or one already administered.
+
+    Examples
+    --------
+    >>> import numpy
+    >>> from catsim import CatEngine, ItemBank, RunContext
+    >>> from catsim.estimation import EAPEstimator
+    >>> from catsim.initialization import FixedPointInitializer
+    >>> from catsim.selection import MaxInfoSelector
+    >>> from catsim.stopping import MaxLengthStopper
+    >>> bank = ItemBank.generate(50, rng=0)
+    >>> engine = CatEngine(bank, FixedPointInitializer(0.0), MaxInfoSelector(), EAPEstimator(), MaxLengthStopper(5))
+    >>> context = RunContext(rng=numpy.random.default_rng(0))
+    >>> state = engine.start_session("examinee-1", context)
+    >>> while (item_id := engine.select_next(state, context)) is not None:
+    ...   step = engine.apply_response(state, item_id, response=bool(bank.difficulty[item_id] < 0), context=context)
+    >>> state.administered_count, state.stop_reason
+    (5, <StopReason.STOPPER: 'stopper'>)
     """
     if state.is_stopped:
       return None
