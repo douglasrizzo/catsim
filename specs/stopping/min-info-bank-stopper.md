@@ -1,6 +1,8 @@
 **Status:** Planned
 **Module:** `catsim.stopping.stopping.MinInfoInBankStopper` (planned)
-**Reference:** Choi, Grady, and Dodd (2011)
+**Reference:** Dodd, Koch, and De Ayala (1989); Choi, Grady, and Dodd (2011)
+**Last validated:** 2026-11-23, against Dodd, Koch & De Ayala (1989), Choi, Grady & Dodd (2011, PubMed Central author manuscript) and catR 3.17.
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Minimum Information in Bank Stopper
 
@@ -11,7 +13,12 @@ Instead of asking whether the target SE is reachable, it asks whether any
 remaining item is still informative enough to be worth administering.
 
 That makes it a lightweight safety-net stopper for thin banks or poorly targeted
-regions of the ability scale.
+regions of the ability scale: it gives much shorter tests to examinees at
+extreme ability levels, for whom few informative items are available (Dodd et
+al., 1989, p. 135). Used alone, it keeps administering items to examinees for
+whom informative items are abundant, and it typically gives less precise
+estimates than the minimum-error rule, so Choi et al. (2011, Introduction and
+Method) combined the two.
 
 ## Definition
 
@@ -24,6 +31,20 @@ $$
 $$
 
 where $\epsilon$ is the configured minimum-information threshold.
+
+Dodd et al. (1989, pp. 135-136) stopped the test when no item left in the pool
+had an information value of at least $\epsilon = .50$ at the current estimate,
+that is, when the maximum was below $\epsilon$; Choi et al. (2011, Method, "CAT
+Simulations") used the same threshold. The planned rule also stops when the
+maximum equals $\epsilon$, as catR does. Both studies used polytomous items
+under the graded response model.
+
+catR implements this rule as `rule = "minInfo"` (`checkStopRule.R`, catR 3.17):
+it computes the Fisher information of every item not yet administered at the
+provisional estimate (`randomCAT.R` passes the bank without the administered
+items) and stops when the largest is at most the threshold. As here, the rule
+applies only after the minimum test length, and the test also ends when the
+bank is exhausted.
 
 ## Parameters
 
@@ -58,7 +79,9 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Choi, S. W., Grady, M. W., & Dodd, B. G. (2011). A new stopping rule for computerized adaptive testing. *Educational and Psychological Measurement*, 71(1), 37-53. <https://doi.org/10.1177/0013164410387338>
+Choi, S. W., Grady, M. W., & Dodd, B. G. (2011). A new stopping rule for computerized adaptive testing. *Educational and Psychological Measurement*, 71(1), 37-53. <https://doi.org/10.1177/0013164410387338>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC3028267/) (author manuscript without the journal's page numbers; cited here by section).
+
+Dodd, B. G., Koch, W. R., & De Ayala, R. J. (1989). Operational characteristics of adaptive testing procedures using the graded response model. *Applied Psychological Measurement*, 13(2), 129-143. <https://doi.org/10.1177/014662168901300202>. Open copy: [University of Minnesota Digital Conservancy](https://hdl.handle.net/11299/107113).
 
 ## Implementation Guidance
 

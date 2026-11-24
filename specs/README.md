@@ -12,7 +12,8 @@ not part of the published documentation, and none of them is available in the pa
 
 A spec has the sections of an implemented technique page (motivation, definition, parameters,
 behavioral contracts, references) plus an "Implementation Guidance" section that sketches the code
-for whoever implements it. New specs start from [`_template.md`](_template.md).
+for whoever implements it, and, when design choices are still open, an "Open Questions" section
+that lists them with their options and the option the spec assumes for now. New specs start from [`_template.md`](_template.md).
 
 The specs are MyST Markdown, like the documentation. GitHub does not render MyST roles and
 directives (`{doc}`, `{eval-rst}`, `:::{note}`); they render once a spec is promoted into the
@@ -21,10 +22,12 @@ that syntax and breaks the `$$` math.
 
 ## Status
 
-The specs here were written together in April 2026 and have not been through the revalidation
-checklist below yet. Their implementation sketches predate the catsim 1.0 strategy contract and do
-not follow it; they will be updated once that contract is on `dev`. Do not implement a technique
-from a sketch that does not follow the contract.
+The specs here were written together in April 2026. Their citations, cited locations, definitions
+and catR comparisons were revalidated against their sources in November 2026 (checklist steps 1-4
+and 6 below); each spec's status lines say when and against which sources. Their implementation
+sketches (step 5) predate the catsim 1.0 strategy contract and do not follow it; they will be
+updated once that contract is on `dev`, and some still contradict their corrected definitions. Do
+not implement a technique from a sketch that does not follow the contract.
 
 ## Workflow
 
@@ -32,13 +35,14 @@ from a sketch that does not follow the contract.
    `**Status:** Planned`, following the citation convention below.
 2. **Revalidate** it with the checklist below, before it is implemented or its references are
    published.
-3. **Implement** the technique, with tests for its behavioral contracts.
+3. **Implement** the technique, with tests for its behavioral contracts, once its open questions
+   are answered and the spec updated to the answers.
 4. **Promote** the spec into the documentation:
    - move it to `sphinx/api/techniques/<family>/` and add it to the toctree of that family's
      `index.md`;
    - set `**Status:** Implemented` and point `**Module:**` at the class with `{py:class}`;
-   - remove the "Implementation Guidance" section and add an "API Reference" section with the
-     class's `autoclass`, as the implemented pages have;
+   - remove the "Open Questions" and "Implementation Guidance" sections and add an "API
+     Reference" section with the class's `autoclass`, as the implemented pages have;
    - link the page from the class docstring ("For full algorithmic details, see :doc:`...`");
    - remove the technique's row from the Planned techniques page of the documentation.
 

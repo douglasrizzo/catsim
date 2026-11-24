@@ -1,19 +1,28 @@
 **Status:** Planned
 **Module:** `catsim.stopping.classification.SPRTStopper` (planned)
-**Reference:** Reckase (1983); Wald (1947); Weissman (2007)
+**Reference:** Reckase (1983); Wald (1947)
+**Last validated:** 2026-11-23, against Reckase (1981), Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Sequential Probability Ratio Test Stopper
 
 ## Motivation
 
-Current catsim stoppers are precision-oriented. They are appropriate when the
-goal is to estimate ability, but they are inefficient when the real goal is a
-binary decision such as pass/fail or master/non-master.
+Most catsim stoppers are precision-oriented. They are appropriate when the
+goal is to estimate ability. When the real goal is a binary decision such as
+pass/fail or master/non-master, catsim offers only the
+{doc}`confidence-interval stopper </api/techniques/stopping/confidence-interval-stopper>`,
+which decides from the ability estimate and its standard error.
 
-The sequential probability ratio test (SPRT) is the classical optimal stopping
-rule for that setting. It stops as soon as the evidence for one side of the cut
-score is strong enough, which minimizes expected test length at fixed error
-rates.
+The sequential probability ratio test (SPRT) decides from the likelihood of the
+responses instead. Wald (1947) designed it for quality control, and Reckase
+(1981, pp. 1-4) paired it with tailored testing: after each item, the test stops
+as soon as the evidence for one side of the cut score is strong enough. For
+independent, identically distributed observations the SPRT is optimal only when
+the true ability is exactly one of its two hypothesized points; in an adaptive
+test the responses are not identically distributed, and the test is truncated
+at a maximum length, so that optimality theory does not apply (Bartroff et al.,
+2008, Sections 1 and 2.1).
 
 ## Definition
 
@@ -25,6 +34,9 @@ H_0: \theta = \theta_c - \delta,
 \qquad
 H_1: \theta = \theta_c + \delta.
 $$
+
+Reckase (1981, p. 3) uses the limits of an indifference region around the cut
+score as the two points: within it, either classification is acceptable.
 
 After $n$ responses, compute the log-likelihood ratio
 
@@ -43,8 +55,12 @@ A = \log\frac{1-\beta}{\alpha},
 B = \log\frac{\beta}{1-\alpha},
 $$
 
-where $\alpha$ and $\beta$ are the nominal Type I and Type II error
-rates. The rule is:
+where $\alpha$ is the probability of classifying above the cut an examinee at
+$\theta_c - \delta$ and $\beta$ the probability of classifying below the cut an
+examinee at $\theta_c + \delta$. The ratio, its bounds and the meaning of
+$\alpha$ and $\beta$ are Reckase's (1981, p. 3, Equations 3-5), on the log scale.
+Bartroff et al. (2008, Equation 5) write the bounds with $\alpha$ and $\beta$ in
+each other's place; the two forms agree when $\alpha = \beta$. The rule is:
 
 $$
 \Lambda_n \ge A \Rightarrow \text{classify above cut},
@@ -53,6 +69,30 @@ $$
 $$
 
 and continue testing otherwise.
+
+With a maximum test length, Reckase (1981, p. 4) classified the examinees still
+undecided after 20 items by whether the likelihood ratio exceeded 1, that is,
+by the sign of $\Lambda_n$; the planned fallback at `max_items` follows him.
+Later studies of this truncated SPRT classify by the midpoint $(A + B)/2$ of the
+bounds instead (Bartroff et al., 2008, Equations 6 and 7), which is 0 when
+$\alpha = \beta$. Truncation inflates the error rates: with a maximum of 50 items
+and $\alpha = \beta \le .1$, Bartroff et al. (2008, Section 3.1, Table 1) found an
+actual Type I error rate of about .16.
+
+Reckase (1981, p. 5) assigned four grades by running one SPRT at each of three
+cut scores, with an indifference region of one standard error of measurement on
+either side of each; Weissman (2007) also pairs the SPRT with a four-category
+test. The planned stopper takes a single cut score.
+
+catR has no SPRT. Its only classification rule (`checkStopRule.R`,
+`rule = "classification"`, catR 3.17) stops once the confidence interval
+$\hat{\theta} \pm z\,SE(\hat{\theta})$, with $z$ set by catR's `alpha`, no
+longer contains the cut score (Magis & Raîche, 2012, p. 11), the rule catsim
+implements as the confidence-interval stopper. The SPRT departs from it: it
+compares the likelihood at two points around the cut instead of using the
+estimate and its standard error, its $\alpha$ and $\beta$ are classification
+error rates at those points rather than the significance level of an interval,
+and it needs an indifference region, which catR's rule does not have.
 
 ## Parameters
 
@@ -96,11 +136,17 @@ Any correct implementation must satisfy the following properties:
 
 ## References
 
-Reckase, M. D. (1983). A procedure for decision making using tailored testing. In D. J. Weiss (Ed.), *New Horizons in Testing: Latent Trait Test Theory and Computerized Adaptive Testing* (pp. 237-255). New York: Academic Press.
+Bartroff, J., Finkelman, M. D., & Lai, T. L. (2008). Modern sequential analysis and its applications to computerized adaptive testing. *Psychometrika*, 73(3), 473-486. <https://doi.org/10.1007/s11336-007-9053-9>. Open copy: [arXiv](https://arxiv.org/abs/1106.2559) (author manuscript; cited here by section, equation and table).
 
-Wald, A. (1947). *Sequential Analysis*. New York: Wiley.
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
-Weissman, A. (2007). Mutual information item selection in adaptive classification testing. *Educational and Psychological Measurement*, 67(1), 41-58. <https://doi.org/10.1177/0013164406288164>
+Reckase, M. D. (1981). *The use of the sequential probability ratio test in making grade classifications in conjunction with tailored testing* (Research Report 81-4). Columbia: University of Missouri, Tailored Testing Research Laboratory. Open copy: [ERIC](https://files.eric.ed.gov/fulltext/ED208006.pdf).
+
+Reckase, M. D. (1983). A procedure for decision making using tailored testing. In D. J. Weiss (Ed.), *New Horizons in Testing: Latent Trait Test Theory and Computerized Adaptive Testing* (pp. 237-255). New York: Academic Press. <https://doi.org/10.1016/B978-0-12-742780-5.50023-8>. Not openly available; Reckase (1981) describes the method.
+
+Wald, A. (1947). *Sequential Analysis*. New York: Wiley. Not openly available; Reckase (1981, p. 3) gives its decision bounds.
+
+Weissman, A. (2007). Mutual information item selection in adaptive classification testing. *Educational and Psychological Measurement*, 67(1), 41-58. <https://doi.org/10.1177/0013164406288164>. Not openly available; Reckase (1981) describes the SPRT.
 
 ## Implementation Guidance
 

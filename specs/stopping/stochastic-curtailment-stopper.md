@@ -1,41 +1,98 @@
 **Status:** Planned
 **Module:** `catsim.stopping.classification.StochasticCurtailmentStopper` (planned)
 **Reference:** Finkelman (2008, 2010)
+**Last validated:** 2026-11-23, against Huebner & Finkelman (2016) and Sie, Finkelman, Bartroff & Thompson (2015) (PubMed Central full texts), the abstracts of Finkelman (2008, 2010) and catR 3.17.
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Stochastic Curtailment Stopper
 
 ## Motivation
 
 SPRT and GLR stop only when their decision statistic already crosses a stopping
-boundary. Stochastic curtailment goes one step further: it stops when future
-responses are very unlikely to change the eventual classification decision.
+boundary. With a maximum test length, the truncated SPRT can keep administering
+items whose responses will not change the final classification (Huebner &
+Finkelman, 2016, Introduction). Stochastic curtailment, introduced for clinical
+trials (Sie et al., 2015, Introduction), stops as soon as the probability that
+the classification would change before the end of the test is small.
 
-This provides another layer of test shortening on top of sequential
-classification, especially for examinees who are already clearly inside one
-decision region.
+Finkelman (2008) applied it to the truncated SPRT. The curtailed test stops
+whenever the SPRT does, so it never administers more items; in his simulation
+with an operational item bank, it shortened the test by about 7 to 10 items for
+examinees near the cut score, with virtually no loss of accuracy (Huebner &
+Finkelman, 2016, Introduction and "SCSPRT").
 
 ## Definition
 
-Let $\Lambda_n$ be the current sequential classification statistic and let
-$\hat{\theta}_n$ be the current plug-in estimate. Stochastic curtailment
-computes the probability that the eventual classification outcome is still
-undecided or flips away from the currently implied decision if testing
-continues.
-
-In the fixed-horizon approximation described in the card, the key quantity is
+Let $J$ be the maximum test length, $\Lambda_k$ the SPRT log-likelihood ratio
+after $k$ items, $A$ and $B$ the SPRT bounds (see the SPRT spec), and
+$C = (A + B)/2$ their midpoint, at which the truncated SPRT forces a decision
+after item $J$: above the cut if $\Lambda_J \ge C$, below otherwise. After $k$
+items, the interim decision $D_k^*$ is the one the same rule gives now: above
+the cut if $\Lambda_k \ge C$, below otherwise. The key probability is
 
 $$
-\gamma_n
-=
-\Pr_{\hat{\theta}_n}
-\left[
-  B < \Lambda_N < A \mid \mathcal{F}_n
-\right],
+p_k = \Pr_{\theta^*}\left[ D_J = D_k^* \mid u_1, \dots, u_k \right],
 $$
 
-the probability that the future trajectory remains undecided through the chosen
-horizon. If $\gamma_n \le \gamma_{\text{target}}$, the test is curtailed
-and the current trajectory's implied classification is declared.
+the probability that the decision forced after item $J$, computed from the
+responses so far and the responses to the $J - k$ items still to come, agrees
+with the interim decision. It is evaluated at the boundary point least
+favorable to the interim decision: $\theta^* = \theta_c - \delta$ when $D_k^*$ is
+above the cut and $\theta^* = \theta_c + \delta$ when it is below. This is the
+conservative "conditional power" approach Finkelman (2008) took from clinical
+trials (Huebner & Finkelman, 2016, "Computation of $P_{Exact}$ and $P_{CLT}$");
+Sie et al. (2015, "Standard Formulation of Stochastic Curtailment") state it as
+requiring the probability to reach the threshold under both $\theta_c - \delta$
+and $\theta_c + \delta$.
+
+After $k < J$ items, the stopper (Huebner & Finkelman, 2016, "SCSPRT"):
+
+1. stops with the SPRT's decision if $\Lambda_k \ge A$ or $\Lambda_k \le B$;
+2. otherwise stops with $D_k^*$ if $p_k \ge \gamma$;
+3. otherwise administers another item.
+
+After item $J$ the decision is forced by $C$. Finkelman (2008, 2010) used
+$\gamma = .95$ (Huebner & Finkelman, 2016, "SCSPRT").
+
+$p_k$ depends on the $J - k$ items still to come. Finkelman (2008) computes it
+exactly, by enumerating the $2^{J-k}$ response patterns to those items, or by a
+central-limit approximation from $\Lambda_k$, $\theta^*$ and the items'
+parameters (Huebner & Finkelman, 2016, "Computation of $P_{Exact}$ and
+$P_{CLT}$"). When items are selected adaptively, the items to come are not known
+in advance; Finkelman (2008) used as a representative set the $J - k$
+non-administered items with the largest Fisher information at the current
+estimate (Sie et al., 2015, "Curtailed CI Stopping Rule").
+
+The planned stopper uses that representative set and a normal approximation of
+its own. Given $\theta^*$, each item $i$ of the set adds to $\Lambda$ an
+independent increment with mean and variance
+
+$$
+\mu_i = P_i(\theta^*)\,r_i^{(1)} + Q_i(\theta^*)\,r_i^{(0)},
+\qquad
+\sigma_i^2 = P_i(\theta^*)\,\big[r_i^{(1)}\big]^2 + Q_i(\theta^*)\,\big[r_i^{(0)}\big]^2 - \mu_i^2,
+$$
+
+where $Q_i = 1 - P_i$,
+$r_i^{(1)} = \log[P_i(\theta_c + \delta)/P_i(\theta_c - \delta)]$ and
+$r_i^{(0)} = \log[Q_i(\theta_c + \delta)/Q_i(\theta_c - \delta)]$. $\Lambda_J$ is
+then approximately normal with mean $m = \Lambda_k + \sum_i \mu_i$ and standard
+deviation $s = (\sum_i \sigma_i^2)^{1/2}$, so $p_k \approx 1 - \Phi[(C - m)/s]$
+when $D_k^*$ is above the cut and $p_k \approx \Phi[(C - m)/s]$ when it is below.
+Finkelman's (2008) own central-limit formulas are not openly available, so this
+form may differ from his in detail.
+
+Finkelman (2010, abstract) estimates the key probability "more aggressively"
+than the standard formulation, which shortens tests further; Sie et al. (2015,
+"Probability Calculations of the Stochastically Curtailed CI Stopping Rule") use
+variations from it that evaluate the probability at the current estimate or at
+an end point of its confidence interval. The planned stopper keeps the standard
+formulation.
+
+catR implements no curtailment. Its only classification rule is the
+confidence-interval rule (`checkStopRule.R`, `rule = "classification"`,
+catR 3.17), catsim's confidence-interval stopper; Sie et al. (2015) apply
+stochastic curtailment to that rule as well.
 
 ## Parameters
 
@@ -60,17 +117,17 @@ and the current trajectory's implied classification is declared.
      - ``0.05``
      - Type II error rate for the underlying SPRT rule.
    * - ``gamma``
-     - ``0.05``
-     - Curtailment threshold; lower values are more conservative.
-   * - ``horizon``
-     - ``20``
-     - Number of future items considered in the forward-projection approximation.
+     - ``0.95``
+     - Curtailment threshold: the test stops when the probability that the decision forced at
+       ``max_items`` equals the interim decision is at least ``gamma``. Higher values are more
+       conservative; Finkelman (2008, 2010) used 0.95.
    * - ``min_items``
      - ``None``
      - Minimum length before curtailment may occur.
    * - ``max_items``
-     - ``None``
-     - Hard maximum length.
+     - required
+     - Maximum test length :math:`J`; the decision is forced there, and the key probability looks
+       ahead to it.
 ```
 
 ## Behavioral Contracts
@@ -78,16 +135,35 @@ and the current trajectory's implied classification is declared.
 Any correct implementation must satisfy the following properties:
 
 1. If the underlying SPRT rule already stops, stochastic curtailment must respect that decision immediately.
-2. Curtailment depends on a forward projection under the current estimate; it is not a second independent classification statistic.
-3. If the probability of remaining undecided is less than or equal to `gamma`, the rule stops and emits the tentative classification implied by the projected trajectory.
-4. Invalid `gamma` or `horizon` values are rejected at construction time.
-5. The rule inherits the response-vector dependency of the SPRT family.
+2. Curtailment evaluates the probability that the decision forced at `max_items` agrees with the interim decision, at the boundary point least favorable to that decision; it is not a second independent classification statistic.
+3. If that probability is at least `gamma`, the rule stops and emits the interim decision: above the cut if the log-likelihood ratio is at least the midpoint of the SPRT bounds, below otherwise.
+4. The rule never administers more items than the SPRT with the same bounds and maximum length.
+5. Invalid `gamma` values and a missing `max_items` are rejected at construction time.
+6. The rule inherits the response-vector dependency of the SPRT family.
 
 ## References
 
-Finkelman, M. D. (2008). On using stochastic curtailment to shorten the SPRT in sequential mastery testing. *Journal of Educational and Behavioral Statistics*, 33(4), 442-463. <https://doi.org/10.3102/1076998607302623>
+Finkelman, M. (2008). On using stochastic curtailment to shorten the SPRT in sequential mastery testing. *Journal of Educational and Behavioral Statistics*, 33(4), 442-463. <https://doi.org/10.3102/1076998607308573>. Not openly available; Huebner and Finkelman (2016) describe the method.
 
-Finkelman, M. D. (2010). Variations on stochastic curtailment in sequential mastery testing. *Applied Psychological Measurement*, 34(1), 27-45. <https://doi.org/10.1177/0146621609349807>
+Finkelman, M. D. (2010). Variations on stochastic curtailment in sequential mastery testing. *Applied Psychological Measurement*, 34(1), 27-45. <https://doi.org/10.1177/0146621609336113>. Not openly available; Sie et al. (2015) describe some of its variations.
+
+Huebner, A. R., & Finkelman, M. D. (2016). On computing the key probability in the stochastically curtailed sequential probability ratio test. *Applied Psychological Measurement*, 40(2), 142-156. <https://doi.org/10.1177/0146621615611633>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC5982174/) (full text without page numbers; cited here by section).
+
+Sie, H., Finkelman, M. D., Bartroff, J., & Thompson, N. A. (2015). Stochastic curtailment in adaptive mastery testing: Improving the efficiency of confidence interval-based stopping rules. *Applied Psychological Measurement*, 39(4), 278-292. <https://doi.org/10.1177/0146621614561314>. Open copy: [PubMed Central](https://pmc.ncbi.nlm.nih.gov/articles/PMC5978543/) (full text without page numbers; cited here by section).
+
+## Open Questions
+
+To be answered before the stopper is implemented, and removed from the spec when it is promoted.
+
+1. **Where to evaluate the agreement probability.** This spec uses the standard form above: the
+   probability is evaluated at the boundary point least favorable to the interim decision. The
+   alternative is a plug-in variant that evaluates it at the current estimate $\hat{\theta}_k$,
+   which is the rule this spec described before its revalidation. The plug-in variant does not
+   take the worse of the two boundary points, so it lacks the standard form's conservatism; the
+   standard form is the one the sources above state. Decide whether catsim offers the standard form
+   only, the plug-in variant only, or both behind a parameter. Finkelman (2010) studies variations
+   of stochastic curtailment; it is not openly available, so read it before choosing a variant from
+   it.
 
 ## Implementation Guidance
 

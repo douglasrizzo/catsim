@@ -1,6 +1,8 @@
 **Status:** Planned
 **Module:** `catsim.stopping.classification.GLRStopper` (planned)
-**Reference:** Bartroff, Finkelman, and Lai (2008); Finkelman (2010)
+**Reference:** Bartroff, Finkelman, and Lai (2008)
+**Last validated:** 2026-11-23, against Bartroff, Finkelman & Lai (2008, arXiv copy), Magis & Raîche (2012) and catR 3.17.
+**Implementation guidance:** not yet updated to the 1.0 strategy contract (M22).
 
 # Generalized Likelihood Ratio Stopper
 
@@ -11,34 +13,65 @@ it can be conservative because it does not use the full information already
 contained in the current ability estimate.
 
 The generalized likelihood ratio (GLR) rule plugs in the current MLE and compares
-it with the nearest boundary point in the competing region. In practice this
-often yields shorter classification tests than SPRT at comparable error control.
+it with the nearest boundary point of the competing hypothesis, so the statistic
+"self-tunes" to the information accumulating in the estimate (Bartroff et al.,
+2008, Section 2.1). In their simulations with a maximum of 50 items, the GLR
+test had nearly the same power function as a truncated SPRT whose final
+threshold was adjusted to the nominal Type I error, and was considerably
+shorter: about half as long for examinees above the indifference region
+(Section 3.1, Table 2).
 
 ## Definition
 
-Let $\hat{\theta}_n$ be the current MLE after $n$ items, with cut
-score $\theta_c$ and indifference half-width $\delta$. Define
+Bartroff et al. (2008, Section 2.1) test the hypothesis of mastery,
+$H_0: \theta \ge \theta_+$, against $H_1: \theta \le \theta_-$, where
+$(\theta_-, \theta_+)$ is the indifference region around the cut score; catsim
+takes $\theta_\pm = \theta_c \pm \delta$. Let $\hat{\theta}_n$ be the MLE after
+$n$ items and $\ell_n(\theta) = \log L(\mathbf{u} \mid \theta)$ the
+log-likelihood. The two GLR statistics are
 
 $$
-\Lambda_n^{\mathrm{GLR}}
-=
-\begin{cases}
-  \ell_n(\hat{\theta}_n) - \ell_n(\theta_c - \delta),
-    & \hat{\theta}_n \ge \theta_c + \delta \\
-  \ell_n(\hat{\theta}_n) - \ell_n(\theta_c + \delta),
-    & \hat{\theta}_n \le \theta_c - \delta \\
-  0, & \text{otherwise}
-\end{cases}
+\Lambda_n^{+} = \ell_n(\hat{\theta}_n) - \ell_n(\theta_c - \delta),
+\quad \text{defined when } \hat{\theta}_n > \theta_c - \delta,
 $$
 
-where $\ell_n(\theta) = \log L(\mathbf{u} \mid \theta)$. A practical first
-threshold is
-
 $$
-\Lambda_n^{\mathrm{GLR}} \ge \log(1/\alpha),
+\Lambda_n^{-} = \ell_n(\hat{\theta}_n) - \ell_n(\theta_c + \delta),
+\quad \text{defined when } \hat{\theta}_n < \theta_c + \delta.
 $$
 
-though the original paper gives refined calibrations.
+$\Lambda_n^{+}$ weighs the evidence against the region below the cut and
+$\Lambda_n^{-}$ the evidence against the region above it. Before the maximum
+length $N$, the test stops and classifies below the cut if
+$\Lambda_n^{-} \ge A$, and above the cut if $\Lambda_n^{+} \ge B$
+(Equations 8 and 9); if both hold, which happens only when the thresholds are
+artificially small, it classifies above the cut (Section 2.1). At $n = N$ it
+classifies below the cut if and only if $\hat{\theta}_N < \theta_c + \delta$ and
+$\Lambda_N^{-} \ge C$ (Equation 10). Unlike the SPRT statistic, both statistics
+can be positive while $\hat{\theta}_n$ lies inside the indifference region, so
+the test can stop there, where either classification is acceptable.
+
+The planned stopper departs from Bartroff et al. in four ways:
+
+- **Alternative.** Bartroff et al. compare with the implied alternative
+  $\theta_-^{(N)}$, the ability at which a fixed-length likelihood ratio test of
+  $N$ items has Type II error $\beta$, rather than with $\theta_-$
+  (Section 2.1); catsim uses $\theta_c - \delta$, as the SPRT does.
+- **Thresholds.** Wald's approximations do not apply to GLR statistics, so
+  Bartroff et al. calibrate $A$, $B$ and $C$ to the target error rates by Monte
+  Carlo simulation or by normal approximations (Section 2.1, Equations 11-19); in
+  their example, $A = 3.7$, $B = 3.3$ and $C = 1.4$ for
+  $\alpha = \beta = .05$ and $N = 50$ (Section 3.1). The planned default uses
+  one uncalibrated threshold, $\log(1/\alpha)$ (about 3.0 at
+  $\alpha = .05$), for both decisions; the `threshold` parameter overrides it.
+- **Minimum length.** Bartroff et al. allow stopping only after $\rho N$ items
+  ($\rho N = 5$ in Section 3.1); catsim's `min_items` plays that role.
+- **Maximum length.** At `max_items`, the implementation guidance classifies by
+  the side of $\theta_c$ on which $\hat{\theta}_n$ lies, instead of Equation 10.
+
+catR has no GLR rule; its only classification rule is the confidence-interval
+rule (`checkStopRule.R`, `rule = "classification"`, catR 3.17; Magis & Raîche,
+2012, p. 11), which the SPRT spec compares with the likelihood-ratio rules.
 
 ## Parameters
 
@@ -74,17 +107,17 @@ though the original paper gives refined calibrations.
 
 Any correct implementation must satisfy the following properties:
 
-1. If the current estimate lies inside the indifference region, the GLR statistic is zero and the rule does not classify on the statistic alone.
-2. When the estimate is above the upper indifference boundary, the decision favored by the GLR statistic is "above cut"; when below the lower boundary, it is "below cut".
+1. The statistic for classifying above the cut is defined only when the current estimate exceeds $\theta_c - \delta$, and the one for classifying below only when it is under $\theta_c + \delta$; inside the indifference region both are defined, and either can stop the test.
+2. A statistic reaching its threshold classifies on its side of the cut; when both reach their thresholds, the rule classifies above the cut.
 3. The statistic is computed from the current estimate plus boundary-point likelihoods, not from two fixed-point likelihoods as in SPRT.
 4. The stopper exposes the last statistic value and the last classification outcome.
 5. Like SPRT, the rule requires response-vector access through the stopping API.
 
 ## References
 
-Bartroff, J., Finkelman, M. D., & Lai, T. L. (2008). Modern sequential analysis and its applications to computerized adaptive testing. *Psychometrika*, 73(3), 473-486. <https://doi.org/10.1007/s11336-007-9053-9>
+Bartroff, J., Finkelman, M. D., & Lai, T. L. (2008). Modern sequential analysis and its applications to computerized adaptive testing. *Psychometrika*, 73(3), 473-486. <https://doi.org/10.1007/s11336-007-9053-9>. Open copy: [arXiv](https://arxiv.org/abs/1106.2559) (author manuscript; cited here by section, equation and table).
 
-Finkelman, M. D. (2010). Variations on stochastic curtailment in sequential mastery testing. *Applied Psychological Measurement*, 34(1), 27-45. <https://doi.org/10.1177/0146621609349807>
+Magis, D., & Raîche, G. (2012). Random generation of response patterns under computerized adaptive testing with the R package catR. *Journal of Statistical Software*, 48(8), 1-31. <https://doi.org/10.18637/jss.v048.i08> (open access).
 
 ## Implementation Guidance
 
