@@ -69,8 +69,11 @@ standard errors and responses, and the same `rng` gives the same result on every
   [Extending catsim](https://douglasrizzo.com.br/catsim/extending.html).
 - [Techniques](https://douglasrizzo.com.br/catsim/api/techniques/index.html): each initialization,
   selection, estimation and stopping method, with its formulas and sources.
-- The [tutorial notebooks](https://github.com/douglasrizzo/catsim/tree/main/notebooks), which open in
-  Colab.
+- The [tutorial notebooks](https://douglasrizzo.com.br/catsim/tutorials.html), which open in Colab:
+  [getting started](https://github.com/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb),
+  [comparing strategies](https://github.com/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb),
+  [live sessions](https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb) and
+  [custom strategies](https://github.com/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb).
 - The [API reference](https://douglasrizzo.com.br/catsim/api/index.html).
 
 ## Important links

@@ -23,8 +23,7 @@ by item, saves and resumes it, and shares item exposure across sessions.
   {doc}`terms-and-notation` lists the terms and symbols these pages use.
 - {doc}`api/techniques/index`: each method catsim implements, with its formulas, parameters and
   sources.
-- The [tutorial notebooks](https://github.com/douglasrizzo/catsim/tree/main/notebooks): the guides
-  as hands-on exercises, which open in Colab.
+- The {doc}`tutorials`: the guides as hands-on exercises, in notebooks that open in Colab.
 - {doc}`reproducibility` and {doc}`extending`: seeding a study, and writing your own strategies.
 - The {doc}`api/index`: every public class and function.
 - The [README](https://github.com/douglasrizzo/catsim#readme): installation, a quickstart and how to
