@@ -119,7 +119,8 @@ class WarmLikelihoodEstimator(BaseEstimator):
     information at the estimate, or ``math.inf`` where the information is 0. This is catR's
     default for the WLE (``semTheta`` with ``sem.type = "classic"``). :cite:t:`Magis12` (Eq. 14,
     p. 6) add a term to the information, :math:`(I'J - IJ')/(2I^2)`, which catR has not used since
-    version 3.0 and which can make the sum negative; catsim follows catR. The evaluation count is
+    version 3.0 and which, with guessing or slipping parameters, can make the sum negative; catsim
+    follows catR (ADR-0004). The evaluation count is
     the number of modified-score evaluations: the scan, Brent's refinement and, when several roots
     compete, the integration that ranks them. With no administered item, the estimate is
     ``context.theta`` and ``context.se``, unchanged, after no evaluation.
