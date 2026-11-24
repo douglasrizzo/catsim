@@ -184,22 +184,12 @@ class TestConfidenceInterval:
 class TestReliability:
   """Tests for the reliability() function."""
 
-  def test_reliability_bounded(self) -> None:
-    """Test that reliability is between 0 and 1."""
-    items = np.array([[1.0, 0.0, 0.0, 1.0]] * 20)
-    theta = 0.0
-    rel = irt.reliability(theta, items)
-    assert 0 <= rel <= 1
-
-  def test_reliability_increases_with_items(self) -> None:
-    """Test that reliability increases with more items."""
-    items1 = np.array([[1.0, 0.0, 0.0, 1.0]])
-    items10 = np.array([[1.0, 0.0, 0.0, 1.0]] * 10)
-    theta = 0.0
-    assert irt.reliability(theta, items10) > irt.reliability(theta, items1)
+  def test_reliability_is_one_minus_the_variance(self) -> None:
+    """Twenty 2PL items with a = 1 at their difficulty give I = 5, so Rel = 1 - 1/5 = 0.8; 1 - I or 1 / I is not 0.8."""
+    assert irt.reliability(0.0, np.array([[1.0, 0.0, 0.0, 1.0]] * 20)) == pytest.approx(0.8, rel=1e-12)
 
   def test_reliability_zero_info_is_negative_infinity(self) -> None:
-    """Reliability 1 - 1 / I is unbounded below without information; it used to be +inf."""
+    """Reliability 1 - 1 / I is unbounded below without information; returning +inf would read as a perfect test."""
     assert irt.reliability(0.0, np.empty((0, 4))) == float("-inf")
 
 
@@ -342,9 +332,9 @@ def test_scale_conversions_reject_an_empty_or_reversed_range(
 
 
 def test_importing_every_public_irt_name_collects_no_test(pytester: pytest.Pytester) -> None:
-  """A public irt function named test*, such as test_info, is collected by pytest in every module that imports it.
+  """A public irt function whose name starts with test is collected by pytest in every module that imports it.
 
-  pytest then runs it as a test and fails on its parameters ("fixture 'theta' not found").
+  pytest then runs it as a test, and it fails on its parameters ("fixture 'theta' not found").
   """
   pytester.makepyfile(test_user_module="from catsim.irt import *\n")
 

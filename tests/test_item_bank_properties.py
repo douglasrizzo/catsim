@@ -33,8 +33,8 @@ def test_max_info_values_are_each_items_information_at_its_own_peak(params: np.n
 @given(params=item_params_matrix())
 @BANK_SETTINGS
 def test_item_bank_stores_the_four_parameter_columns(params: np.ndarray) -> None:
-  bank = ItemBank(params, validate=True)
-  assert np.array_equal(bank.items, params)
+  """A four-column matrix is stored unchanged; completing or reordering columns it already has would change it."""
+  np.testing.assert_array_equal(ItemBank(params, validate=True).items, params)
 
 
 @given(
@@ -107,9 +107,11 @@ def test_generate_item_bank_respects_count_and_validates(n: int, seed: int, item
   theta=st.floats(-3.0, 3.0, allow_nan=False, allow_infinity=False),
 )
 @BANK_SETTINGS
-def test_test_information_matches_irt_helper(params: np.ndarray, theta: float) -> None:
-  bank = ItemBank(params, validate=True)
-  assert bank.test_information(theta) == pytest.approx(irt.total_information(theta, params), rel=1e-9, abs=1e-9)
+def test_test_information_sums_every_item_by_default(params: np.ndarray, theta: float) -> None:
+  """Without item indices the test information sums the information of every item; a default subset leaves some out."""
+  expected = sum(float(irt.information(theta, item)) for item in params)
+
+  assert ItemBank(params, validate=True).test_information(theta) == pytest.approx(expected, rel=1e-12)
 
 
 @given(params=item_params_matrix(min_items=3, max_items=12), data=st.data())

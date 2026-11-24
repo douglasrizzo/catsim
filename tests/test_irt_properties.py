@@ -120,6 +120,7 @@ def test_log_likelihood_matches_the_probability_formula_at_each_theta(
 @given(m=scale_mapping())
 @IRT_SETTINGS
 def test_theta_scale_round_trip_identity(m: tuple[float, float, float, float]) -> None:
+  """scale_to_theta undoes theta_to_scale for any ranges; a slope or intercept that differs between the two does not."""
   theta_min, theta_max, scale_min, scale_max = m
   theta = np.linspace(theta_min, theta_max, num=5)
   scores = irt.theta_to_scale(theta, scale_min, scale_max, theta_min, theta_max)
