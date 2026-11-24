@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -127,6 +128,9 @@ class ConfidenceIntervalStopper(BaseStopper):
     bool
         True if no bound lies strictly inside the confidence interval, False otherwise.
     """
+    # Checked first: with a confidence near 0, z is 0 and 0 * inf would be NaN.
+    if math.isinf(context.se):
+      return False
     margin = float(stats.norm.ppf((1 + self.confidence) / 2)) * context.se
     lower, upper = context.theta - margin, context.theta + margin
     return not any(lower < bound < upper for bound in self.interval_bounds)

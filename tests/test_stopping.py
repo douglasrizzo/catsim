@@ -139,6 +139,13 @@ class TestConfidenceIntervalStopper:
 
     assert stops == [False, True]
 
+  def test_does_not_stop_on_an_infinite_error_at_a_confidence_near_zero(self) -> None:
+    """There z is 0 and 0 * inf is NaN; no bound lies inside a NaN interval, so sessions ended before any item."""
+    stopper = ConfidenceIntervalStopper([0.0], confidence=1e-17)
+    unanswered = StepContext(item_bank=identical_1pl_bank(3, difficulty=0.0), rng=np.random.default_rng(0))
+
+    assert stopper.stop(unanswered) is False
+
 
 class TestStopRule:
   """Tests for StopRule."""
