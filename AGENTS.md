@@ -53,6 +53,11 @@ hidden runtime coupling.
   Ruff bans `numpy.typing.NDArray` elsewhere; for another dtype, add an alias there.
 - Closed option sets are `StrEnum`s, like `IrtModel`; code that branches on one uses `match`, with
   a final `case _`.
+- No backward-compatibility aliases or deprecation shims before 1.0: a renamed or removed name is
+  gone.
+- Randomness comes only from an `rng: int | numpy.random.Generator` argument, passed through
+  `numpy.random.default_rng` (strategies draw from the generator they are given). No global NumPy
+  random state, no stdlib `random`.
 - When changing architecture-level behavior, update or add an ADR in `sphinx/adr/`.
 - Follow existing naming and module boundaries unless there is a strong reason to change them.
 - A new top-level module in `src/catsim/` must be placed in the import-linter `layers` contract in
