@@ -19,6 +19,7 @@ terms-and-notation
 running-simulations
 live-sessions
 reproducibility
+extending
 ```
 
 ```{toctree}
