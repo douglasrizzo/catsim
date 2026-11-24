@@ -76,7 +76,7 @@ hardest item, half the distance to it would move the estimate down after a
 correct answer, so the $\max$ and $\min$ keep it where it is instead. Dodd also
 studied fixed steps of 0.4 and 0.7, which catsim does not implement.
 
-The estimator returns a {py:class}`~catsim.context.Estimate`. Its standard error
+The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
 is the asymptotic standard error of the maximum likelihood estimate (Magis &
 Raîche, 2012, p. 4, Equation 3),
 

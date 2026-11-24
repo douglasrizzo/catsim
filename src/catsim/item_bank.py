@@ -23,10 +23,9 @@ class IrtModel(StrEnum):
   """The logistic model of an item bank, named after the number of parameters its items vary.
 
   A member equals its name, so ``IrtModel("3PL")`` is ``IrtModel.PL3`` and either can be passed where
-  a model is expected. Each model is a special case of the next: a 1PL (Rasch) bank has one
-  discrimination for every item, no pseudo-guessing (:math:`c = 0`) and no upper asymptote below 1
-  (:math:`d = 1`); a 2PL bank varies the discrimination, a 3PL bank adds pseudo-guessing, and a 4PL
-  bank adds upper asymptotes below 1.
+  a model is expected. A 1PL (Rasch) bank has one discrimination for every item, :math:`c = 0` and
+  :math:`d = 1`; a 2PL bank varies the discrimination, a 3PL bank also the guessing parameter
+  :math:`c`, and a 4PL bank also the upper asymptote :math:`d`.
 
   Examples
   --------
@@ -59,9 +58,9 @@ class ItemBank:
   ----------
   items : numpy.ndarray
       The normalized item parameter matrix (n_items x 4) with columns
-      [discrimination, difficulty, pseudo-guessing, upper_asymptote]. It is read-only,
+      [discrimination, difficulty, guessing, upper_asymptote]. It is read-only,
       like the column views returned by the parameter properties. Exposure
-      is a property of a run, kept in :py:class:`catsim.simulation.SimulationResult`.
+      is a property of a run, kept in :py:class:`catsim.SimulationResult`.
   n_items : int
       Number of items in the bank.
   max_info_thetas : numpy.ndarray
@@ -88,20 +87,6 @@ class ItemBank:
   """
 
   def __init__(self, items: FloatArray) -> None:
-    """Initialize an ItemBank with the given item parameters.
-
-    Parameters
-    ----------
-    items : numpy.ndarray
-        Item parameter matrix.
-
-    Raises
-    ------
-    TypeError
-        If ``items`` is not a numpy.ndarray.
-    ValueError
-        If ``items`` does not have 1 to 4 columns, has no items or has an invalid parameter.
-    """
     # a float copy the caller cannot change afterwards
     self._items = _normalize(items)
     n_columns = self._items.shape[1]
@@ -193,8 +178,8 @@ class ItemBank:
     Returns
     -------
     IrtModel
-        ``PL4`` if an upper asymptote is below 1, else ``PL3`` if a pseudo-guessing parameter is above
-        0, else ``PL2`` if the discriminations differ, else ``PL1``.
+        ``PL4`` if an upper asymptote is below 1, else ``PL3`` if a guessing parameter is above 0,
+        else ``PL2`` if the discriminations differ, else ``PL1``.
     """
     if self._model is None:
       self._model = _detect_model(self._items)
@@ -224,12 +209,12 @@ class ItemBank:
 
   @property
   def pseudo_guessing(self) -> FloatArray:
-    """Get item pseudo-guessing parameters (c).
+    """Get item guessing parameters (c), also called pseudo-guessing parameters.
 
     Returns
     -------
     numpy.ndarray
-        Array of pseudo-guessing values.
+        Array of guessing parameter values.
     """
     return self._items[:, 2]
 
@@ -446,7 +431,7 @@ def _normalize(items: FloatArray) -> FloatArray:
   r"""Return a float copy of an item matrix, with the parameters a 1PL, 2PL or 3PL matrix leaves out.
 
   One column is read as [b], two as [a, b] and three as [a, b, c]; the missing discrimination is 1,
-  pseudo-guessing 0 and upper asymptote 1. A 1-D array is one item. A matrix with no column or more
+  guessing parameter 0 and upper asymptote 1. A 1-D array is one item. A matrix with no column or more
   than four is returned as it is, for :py:class:`ItemBank` to reject.
 
   Parameters
@@ -534,7 +519,7 @@ def _detect_model(items: FloatArray) -> IrtModel:
   Returns
   -------
   IrtModel
-      ``PL4`` if an upper asymptote is not 1, else ``PL3`` if a pseudo-guessing parameter is not 0,
+      ``PL4`` if an upper asymptote is not 1, else ``PL3`` if a guessing parameter is not 0,
       else ``PL2`` if the discriminations differ, else ``PL1``.
   """
   if any(items[:, 3] != 1):

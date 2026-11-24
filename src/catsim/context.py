@@ -22,10 +22,9 @@ class StepContext:
   """What a selector, an estimator or a stopper may read about the session it serves.
 
   The engine builds a new context for every call: for the selector, from the session as it stands;
-  for the estimator, from the session with the newest item and response added and ``theta`` still
-  the previous estimate; for the stopper, from that same state with the new estimate. Strategies
-  read the fields they need and ignore the rest, so a field added later breaks no strategy. The
-  examinee's true ability is deliberately not here: strategies cannot see the simulated truth.
+  for the estimator, with the newest item and response added and ``theta`` still the previous
+  estimate; for the stopper, with the new estimate as well. A context holds no true ability, so
+  strategies cannot see the simulated truth.
 
   To call a strategy directly, build a context by hand. Only the item bank and the random
   generator are required; the other fields describe a session with no responses yet:
@@ -41,7 +40,7 @@ class StepContext:
   >>> round(estimate.theta, 3), round(estimate.se, 3), estimate.evaluations
   (-0.427, 0.978, 121)
 
-  Wrappers pass a changed copy on with :func:`dataclasses.replace`, which checks it the same way.
+  A wrapper passes a changed copy on with :func:`dataclasses.replace`, which checks it the same way.
 
   Parameters
   ----------
@@ -49,7 +48,7 @@ class StepContext:
       Item bank used by the session.
   rng : numpy.random.Generator
       The run's random generator. Every random draw a strategy makes, tie-breaking included, comes
-      from it (ADR-0008).
+      from it.
   administered_items : tuple[int, ...], optional
       Indices of the items administered so far, in order. Their number is the test position.
       Default is no items.
@@ -68,9 +67,9 @@ class StepContext:
       The standard error of ``theta``, as its estimator reported it. For the estimator, it is the
       error before the newest response. Default is ``math.inf``, the error before any response.
   exposure_rates : numpy.ndarray or None, optional
-      Each item's exposure rate over the other sessions of the run (ADR-0003), which selectors
-      compare with their ``r_max`` cap. None when the run has no exposure tracker, which means no
-      cap applies. Default is None.
+      Each item's exposure rate over the other sessions of the run, as
+      :meth:`ExposureTracker.rates` counts it, which selectors compare with their ``r_max`` cap.
+      None when the run has no exposure tracker, which means no cap applies. Default is None.
 
   Raises
   ------
@@ -117,8 +116,8 @@ class Estimate:
   theta : float
       The ability estimate.
   se : float
-      Its standard error, by the estimator's own formula (ADR-0004): finite, or ``math.inf`` when
-      the responses carry no information about the ability, as before any response.
+      Its standard error, by the estimator's own formula: finite, or ``math.inf`` when the
+      responses carry no information about the ability, as before any response.
   evaluations : int or None, optional
       How many times the estimator evaluated its objective (the likelihood, the posterior or the
       estimating equation) for this estimate, for comparing the cost of estimators. None where the

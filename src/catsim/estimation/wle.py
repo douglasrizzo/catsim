@@ -31,24 +31,11 @@ _SCAN_POINTS = 121
 class WarmLikelihoodEstimator(BaseEstimator):
   r"""Warm's (1989) weighted likelihood estimator (WLE).
 
-  The estimate is the root of Warm's modified score equation
-
-  .. math::
-
-    \sum_i \frac{(u_i - P_i) P_i'}{P_i Q_i} + \frac{J(\theta)}{2 I(\theta)} = 0,
-    \qquad J(\theta) = \sum_i \frac{P_i' P_i''}{P_i Q_i},
-
-  which removes the first-order (:math:`O(n^{-1})`) bias of the MLE and stays finite for
-  all-correct and all-incorrect response patterns. For models without guessing or slipping
-  (:math:`c = 0`, :math:`d = 1`), :math:`J = I'` and the estimate maximizes
-  :math:`L(\theta)\sqrt{I(\theta)}`.
-
-  The modified score is scanned at 121 equally spaced points over ``bounds`` (0.1 apart on the
-  default bounds) to bracket its roots, which are then refined with Brent's method. If several
-  roots exist, the one with the largest weighted likelihood is returned; if none does, the
-  estimate is the bound the modified score points to.
-
-  For full algorithmic details, see :doc:`/api/techniques/estimation/warm-wle`.
+  The root of Warm's modified score equation, which removes the MLE's first-order bias and stays
+  finite for all-correct and all-incorrect response patterns; see
+  :doc:`/api/techniques/estimation/warm-wle`. If the equation has several roots within ``bounds``,
+  the one with the largest weighted likelihood is returned; if it has none, the bound the modified
+  score points to.
 
   Parameters
   ----------
@@ -110,15 +97,10 @@ class WarmLikelihoodEstimator(BaseEstimator):
   def estimate(self, context: StepContext) -> Estimate:
     r"""Return the root of Warm's modified score equation, or ``context.theta`` when no item has been administered.
 
-    The standard error is :math:`1/\sqrt{I(\hat\theta)}`, the inverse square root of the test
-    information at the estimate, or ``math.inf`` where the information is 0. This is catR's
-    default for the WLE (``semTheta`` with ``sem.type = "classic"``). :cite:t:`Magis12` (Eq. 14,
-    p. 6) add a term to the information, :math:`(I'J - IJ')/(2I^2)`, which catR has not used since
-    version 3.0 and which, with guessing or slipping parameters, can make the sum negative; catsim
-    follows catR (ADR-0004). The evaluation count is
-    the number of modified-score evaluations: the scan, Brent's refinement and, when several roots
-    compete, the integration that ranks them. With no administered item, the estimate is
-    ``context.theta`` and ``context.se``, unchanged, after no evaluation.
+    The standard error is the inverse square root of the test information at the estimate, without
+    Warm's correction (the technique page compares the two), or ``math.inf`` where the information
+    is 0. The evaluation count is the number of modified-score evaluations. With no administered
+    item, the estimate is ``context.theta`` and ``context.se``, unchanged, after no evaluation.
 
     Parameters
     ----------

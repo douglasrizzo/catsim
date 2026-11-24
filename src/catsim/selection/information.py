@@ -20,24 +20,17 @@ class MaxInfoSelector(BaseSelector):
       Maximum exposure rate for items. Items with exposure rates >= r_max will not
       be selected unless no other items are available. Default is 1 (no restriction).
 
+  Raises
+  ------
+  ValueError
+      If r_max is not in (0, 1].
+
   Notes
   -----
   For full algorithmic details, see :doc:`/api/techniques/selection/max-info-selector`.
   """
 
   def __init__(self, r_max: float = 1) -> None:
-    """Initialize a MaxInfoSelector object.
-
-    Parameters
-    ----------
-    r_max : float, optional
-        Maximum exposure rate for items. Default is 1.
-
-    Raises
-    ------
-    ValueError
-        If r_max is not in (0, 1].
-    """
     super().__init__()
     self._r_max = check_r_max(r_max)
 
@@ -119,12 +112,11 @@ _MIN_HALF_WIDTH = math.sqrt(numpy.finfo(float).eps)
 class IntervalInfoSelector(BaseSelector):
   r"""Select the item whose information, integrated over an interval around the estimate, is largest.
 
-  By default the interval is the estimate plus or minus :math:`\lambda` times the estimator's
-  standard error (``context.se``), where :math:`\lambda` is the standard normal quantile of
-  ``(1 + confidence) / 2`` :cite:p:`Veerkamp1997`. It spans the whole ability scale before the first
-  response and narrows as the standard error falls; a standard error of zero, or nearly zero, selects
-  by the items' information at the estimate, the interval's limit. Setting ``interval`` fixes the
-  half-width. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.
+  By default the interval is a confidence interval for the estimate, built from the estimator's
+  standard error (``context.se``) :cite:p:`Veerkamp1997`. It spans the whole ability scale before the
+  first response and narrows as the standard error falls; a standard error of zero, or nearly zero,
+  selects by the items' information at the estimate. Setting ``interval`` fixes the half-width. The
+  selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
@@ -133,6 +125,11 @@ class IntervalInfoSelector(BaseSelector):
       confidence interval.
   confidence : float, optional
       Confidence level of the default interval. Default is 0.95.
+
+  Raises
+  ------
+  ValueError
+      If ``interval`` is not positive or ``confidence`` is not between 0 and 1.
 
   Notes
   -----
@@ -145,21 +142,6 @@ class IntervalInfoSelector(BaseSelector):
     return f"{type(self).__name__}(interval={self._interval!r}, confidence={self._confidence!r})"
 
   def __init__(self, interval: float | None = None, confidence: float = 0.95) -> None:
-    r"""Initialize an IntervalInfoSelector object.
-
-    Parameters
-    ----------
-    interval : float or None, optional
-        Fixed half-width of the interval. Default is None, which uses a confidence interval of
-        :math:`\hat\theta`.
-    confidence : float, optional
-        Confidence level of the default interval. Default is 0.95.
-
-    Raises
-    ------
-    ValueError
-        If ``interval`` is not positive or ``confidence`` is not between 0 and 1.
-    """
     if interval is not None and interval <= 0:
       msg = f"interval must be positive, got {interval}"
       raise ValueError(msg)

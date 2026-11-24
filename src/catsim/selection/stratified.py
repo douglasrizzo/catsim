@@ -19,8 +19,8 @@ class StratifiedSelector(BaseSelector):
   The bank is sorted by a stratification key and split into ``n_strata`` strata, optionally after blocking
   on a location key so that every stratum covers the whole ability range. The test is split into
   ``n_strata`` consecutive stages, and each stage draws from its own stratum the non-administered item
-  whose location is closest to the current ability estimate. The strata are the selector's exposure
-  control: it applies no exposure cap, and ``context.exposure_rates`` is ignored.
+  whose location is closest to the current ability estimate. The strata are its exposure control:
+  it applies no exposure cap and ignores ``context.exposure_rates``.
 
   Parameters
   ----------
@@ -30,6 +30,13 @@ class StratifiedSelector(BaseSelector):
   n_strata : int or None, optional
       Number of strata (and test stages). Must be between 1 and ``test_size``. Default is None, which
       uses one stratum per test item.
+
+  Raises
+  ------
+  TypeError
+      If ``test_size`` or ``n_strata`` is not an integer.
+  ValueError
+      If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.
 
   Notes
   -----
@@ -42,22 +49,6 @@ class StratifiedSelector(BaseSelector):
     return f"{type(self).__name__}(test_size={self._test_size!r}, n_strata={self._n_strata!r})"
 
   def __init__(self, test_size: int, n_strata: int | None = None) -> None:
-    """Initialize a StratifiedSelector.
-
-    Parameters
-    ----------
-    test_size : int
-        Number of items in the test.
-    n_strata : int or None, optional
-        Number of strata. Default is None, which uses ``test_size`` strata.
-
-    Raises
-    ------
-    TypeError
-        If ``test_size`` or ``n_strata`` is not an integer.
-    ValueError
-        If ``test_size`` is smaller than 1 or ``n_strata`` is not between 1 and ``test_size``.
-    """
     super().__init__()
     self._test_size = check_test_size(test_size)
     n_strata = self._test_size if n_strata is None else operator.index(n_strata)
@@ -93,11 +84,8 @@ class StratifiedSelector(BaseSelector):
   def strata(self, item_bank: ItemBank) -> list[IntArray]:
     """Return the item indices of each stratum, from the first test stage to the last.
 
-    Without blocking, items are sorted by the stratification key and split into ``n_strata`` contiguous
-    groups. With blocking :cite:p:`Chang2001`, items are sorted by the blocking key and grouped into
-    consecutive blocks of ``n_strata`` items; each block is sorted by the stratification key and its
-    :math:`j`-th item goes to stratum :math:`j`, so every stratum spans the range of the blocking key.
-    The strata are computed once per item bank.
+    The strata ascend in the stratification key; with blocking, every stratum spans the range of the
+    blocking key. The strata are computed once per item bank.
 
     Parameters
     ----------

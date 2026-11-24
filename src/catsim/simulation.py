@@ -108,10 +108,21 @@ class SimulationResult:
   """The sessions of a simulated run, with the run's item exposure and duration.
 
   :meth:`SimulationRunner.run` returns one; one can also be built from sessions an application ran
-  itself, whose true abilities may be unknown. ``exposure_counts`` holds each item's
-  administrations over the run, ``duration`` the run's wall-clock time in seconds and
-  ``proposal_counts`` each item's proposals: its administrations plus the times the engine's
-  exposure control declined it, or None for a result built without them.
+  itself, whose true abilities may be unknown.
+
+  Parameters
+  ----------
+  item_bank : ItemBank
+      The item bank the sessions drew from.
+  sessions : list of CatSessionState
+      The run's sessions, in the order they ran.
+  exposure_counts : numpy.ndarray
+      Each item's administrations over the run.
+  duration : float
+      The run's wall-clock time, in seconds.
+  proposal_counts : numpy.ndarray or None, optional
+      Each item's proposals: its administrations plus the times the engine's exposure control
+      declined it. Default is None, for a result built without them.
   """
 
   item_bank: ItemBank
@@ -187,7 +198,7 @@ class SimulationResult:
     """Return how many objective evaluations each session's estimates took, summed over its responses.
 
     The initial estimate, which no estimator computed, counts 0. A session is None when the estimator
-    gave no count for one of its estimates (:attr:`~catsim.context.Estimate.evaluations`).
+    gave no count for one of its estimates (the ``evaluations`` of an :class:`~catsim.Estimate`).
     """
     totals: list[int | None] = []
     for session in self.sessions:
@@ -237,7 +248,7 @@ class SimulationResult:
 
   @property
   def bias(self) -> float:
-    """Return the mean of the final estimates minus the true abilities.
+    """Return the mean of the final estimates minus the true abilities, :func:`catsim.metrics.bias`.
 
     Raises
     ------
@@ -250,6 +261,8 @@ class SimulationResult:
   def mse(self) -> float:
     """Return the mean squared difference between the final estimates and the true abilities.
 
+    See :func:`catsim.metrics.mse`.
+
     Raises
     ------
     ValueError
@@ -259,7 +272,7 @@ class SimulationResult:
 
   @property
   def rmse(self) -> float:
-    """Return the square root of :attr:`mse`.
+    """Return the square root of :attr:`mse`, :func:`catsim.metrics.rmse`.
 
     Raises
     ------
@@ -312,9 +325,9 @@ class SimulationRunner:
     """Run one simulated session per true ability, one after another.
 
     One random generator serves the whole run: the initializer, the selectors' tie-breaking and
-    randomization and the simulated responses of every session draw from it, in session order
-    (ADR-0013). It is built from ``rng`` at the start of every call, so the same seed gives the same
-    result however many times the runner has run.
+    randomization and the simulated responses of every session draw from it, in session order. It
+    is built from ``rng`` at the start of every call, so the same seed gives the same result however
+    many times the runner has run; see :doc:`/reproducibility`.
 
     Parameters
     ----------

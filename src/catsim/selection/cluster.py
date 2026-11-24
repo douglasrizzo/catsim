@@ -58,7 +58,7 @@ class ClusterSelector(BaseSelector):
   a cluster, for example by clustering the item parameters. At each step the selector scores every
   cluster that still has an item left, takes the best one, and administers that cluster's most
   informative remaining item whose exposure rate is below ``r_max``. Exact ties between clusters and
-  between items are broken uniformly at random (ADR-0008).
+  between items are broken uniformly at random.
 
   Parameters
   ----------
@@ -76,16 +76,16 @@ class ClusterSelector(BaseSelector):
       What to administer when every remaining item in the selected cluster is at or above ``r_max``; see
       :class:`CapFallback`. Default is ``CapFallback.PASSIVE``.
 
+  Raises
+  ------
+  ValueError
+      If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
+      method or r_control, or r_max not in (0, 1]).
+
   Notes
   -----
-  The method has known limits. A cluster keeps the score of items already administered, so
-  ``item_info`` can return to a cluster whose remaining items are much less informative than items
-  elsewhere in the bank; in simulations it gave less test information and more test overlap than
-  :class:`~catsim.selection.MaxInfoSelector`, and no scoring rule improved on
-  :class:`~catsim.selection.MaxInfoSelector` or :class:`~catsim.selection.RandomesqueSelector`.
-  Because ``r_max`` applies only inside the chosen cluster, items can end above the cap.
-
-  For full algorithmic details and the simulation results, see
+  Because ``r_max`` applies only inside the chosen cluster, items can end above the cap. For the
+  method, its known limits and its simulation results, see
   :doc:`/api/techniques/selection/cluster-selector`.
   """
 
@@ -124,26 +124,6 @@ class ClusterSelector(BaseSelector):
     r_max: float = 1,
     r_control: CapFallback | str = CapFallback.PASSIVE,
   ) -> None:
-    """Initialize a ClusterSelector object.
-
-    Parameters
-    ----------
-    clusters : list[int]
-        One non-negative integer cluster label per item.
-    method : ClusterMethod or str, optional
-        Cluster-scoring method. Default is ``ClusterMethod.ITEM_INFO``.
-    r_max : float, optional
-        Exposure-rate cap for choosing an item inside the selected cluster. Default is 1.
-    r_control : CapFallback or str, optional
-        What to administer when no remaining item of the chosen cluster is below ``r_max``. Default
-        is ``CapFallback.PASSIVE``.
-
-    Raises
-    ------
-    ValueError
-        If parameters are invalid (empty clusters list, negative or non-integer cluster labels, invalid
-        method or r_control, or r_max not in (0, 1]).
-    """
     labels = numpy.array(clusters)
     if labels.size == 0:
       msg = "clusters list cannot be empty"

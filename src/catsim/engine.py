@@ -30,9 +30,15 @@ if TYPE_CHECKING:
 class RunContext:
   """Runtime services shared by CAT sessions in one run.
 
-  ``exposure_tracker`` counts sessions, item administrations and proposals across the run and gives
-  selectors the exposure rates their ``r_max`` cap is checked against. Without one, selectors get no
-  rates and apply no cap.
+  Parameters
+  ----------
+  rng : numpy.random.Generator
+      The run's random generator, which the initializer, the selector, the exposure control and the
+      response provider draw from.
+  exposure_tracker : ExposureTracker or None, optional
+      Counts sessions, item administrations and proposals across the run and gives selectors the
+      exposure rates their ``r_max`` cap is checked against. Without one, selectors get no rates and
+      apply no cap. Default is None.
   """
 
   rng: numpy.random.Generator
@@ -42,7 +48,7 @@ class RunContext:
 class ResponseProvider(Protocol):
   """Source of the examinee's responses for :meth:`CatEngine.step` and :meth:`CatEngine.run_session`.
 
-  :class:`~catsim.simulation.SimulatedResponseProvider` draws them from a simulated examinee's true
+  :class:`~catsim.SimulatedResponseProvider` draws them from a simulated examinee's true
   ability; an application that steps sessions itself can wrap whatever collects real answers.
   """
 
@@ -94,7 +100,7 @@ class CatEngine:
   Raises
   ------
   TypeError
-      If ``item_bank`` is not an :class:`~catsim.item_bank.ItemBank`.
+      If ``item_bank`` is not an :class:`~catsim.ItemBank`.
   """
 
   def __init__(
@@ -203,23 +209,21 @@ class CatEngine:
   def select_next(self, state: CatSessionState, context: RunContext) -> int | None:
     """Select the next item to administer, or end the session.
 
-    This is the one place that decides whether a session continues, so a manual loop needs no
-    other check::
+    This alone decides whether a session continues, so a manual loop needs no other check::
 
       while (item_id := engine.select_next(state, context)) is not None:
         engine.apply_response(state, item_id, response=ask_examinee(item_id), context=context)
 
-    The stopper is consulted here only for a session that has no responses yet. After that,
-    :meth:`apply_response` evaluates it once for every new state, and what it records is final.
-
-    With an exposure control, the items it declines join the session's ``excluded_items`` and the
-    exposure tracker's proposals, once the selection has ended, so an application that saves its
-    sessions saves them after this call too. A selection that raises leaves both unchanged.
+    The stopper is consulted here only before the first response; after that,
+    :meth:`apply_response` evaluates it once per new state, and what it records is final. The items
+    the exposure control declines join the session's ``excluded_items`` and the tracker's proposals
+    when the selection ends, so save sessions after this call too; a selection that raises changes
+    neither.
 
     Each call selects anew, and the exposure control decides anew: a second call before the
     response may decline the item the first returned, or end the session. An application that has
-    shown an item keeps its id, which :meth:`apply_response` needs, and shows it again rather than
-    calling this method again.
+    shown an item keeps its id for :meth:`apply_response` and shows it again rather than calling
+    this method again.
 
     Parameters
     ----------
@@ -332,7 +336,7 @@ class CatEngine:
         administered in this session.
     TypeError
         If the item index is not an integer, the response is not a ``bool`` or ``numpy.bool_``, or
-        the estimator returns something other than an :class:`~catsim.context.Estimate`.
+        the estimator returns something other than an :class:`~catsim.Estimate`.
     """
     if state.is_stopped:
       msg = f"Session {state.session_id} has stopped (reason: {state.stop_reason}) and accepts no more responses"
@@ -443,7 +447,22 @@ class CatEngine:
     response_provider: ResponseProvider,
     context: RunContext,
   ) -> CatSessionState:
-    """Run a session until a stop condition is reached."""
+    """Step a session until it stops.
+
+    Parameters
+    ----------
+    state : CatSessionState
+        The session to run, which this call advances in place.
+    response_provider : ResponseProvider
+        Source of the examinee's responses.
+    context : RunContext
+        Runtime services of the run.
+
+    Returns
+    -------
+    CatSessionState
+        ``state``, stopped, with its ``stop_reason`` set.
+    """
     while not state.is_stopped:
       self.step(state, response_provider, context)
     return state

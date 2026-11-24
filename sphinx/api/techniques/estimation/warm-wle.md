@@ -73,7 +73,7 @@ Raîche, 2012), whose
 same equation with `uniroot`; catsim adds the explicit handling of multiple
 roots.
 
-The estimator returns a {py:class}`~catsim.context.Estimate`. Its standard error
+The estimator returns a {py:class}`~catsim.Estimate`. Its standard error
 is the Fisher one at the estimate, $1/\sqrt{I(\hat{\theta})}$, infinite where
 the information is 0. This departs from Magis and Raîche (2012, p. 6, Equation
 14), who add $(I'J - IJ')/(2I^2)$ to the information, and follows catR: since

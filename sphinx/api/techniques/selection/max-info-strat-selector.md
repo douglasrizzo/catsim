@@ -6,7 +6,7 @@
 
 ## Motivation
 
-The a-stratified method ignores the pseudo-guessing parameter, both when
+The a-stratified method ignores the guessing parameter, both when
 stratifying and when selecting. Under the 3PL and 4PL models an item's
 discrimination no longer ranks its maximum information, and its information no
 longer peaks at $b$. Maximum-information stratification (MIS) replaces $a$ by

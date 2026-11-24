@@ -38,21 +38,26 @@ class RandomSelector(BaseSelector):
 
 
 class The54321Selector(BaseSelector):
-  r"""Implementation of the 5-4-3-2-1 selector proposed by :cite:p:`McBride83`.
+  r"""Draw each opening item at random from a shrinking bin of the most informative items.
 
-  The first item is drawn at random from the 5 most informative items at the current :math:`\hat\theta`,
-  the second from the 4 most informative remaining items, and so on, so that from the fifth item on the
-  most informative item is administered. Randomizing the opening items, which every examinee would
-  otherwise share while :math:`\hat\theta` is still rough, reduces their exposure at little cost in
-  precision. Items tied with the least informative item of a bin also join it, so from the fifth
-  item on, ties for the most information are broken uniformly at random (ADR-0008). The selector
-  applies no exposure cap: ``context.exposure_rates`` is ignored.
+  The 5-4-3-2-1 method of :cite:t:`McBride83`: the first item is drawn from the 5 most informative
+  items at the current estimate, the second from the 4 most informative remaining ones, and so on,
+  until from the fifth item on the most informative item is administered. Items tied with the least
+  informative item of a bin also join it. The selector applies no exposure cap:
+  ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
   initial_bin_size : int, optional
       Number of most informative items the first item is drawn from; each following item draws from
       one fewer. Default is 5.
+
+  Raises
+  ------
+  TypeError
+      If ``initial_bin_size`` is not an integer.
+  ValueError
+      If ``initial_bin_size`` is smaller than 1.
 
   Notes
   -----
@@ -65,20 +70,6 @@ class The54321Selector(BaseSelector):
     return f"{type(self).__name__}(initial_bin_size={self._initial_bin_size!r})"
 
   def __init__(self, initial_bin_size: int = 5) -> None:
-    """Initialize a The54321Selector object.
-
-    Parameters
-    ----------
-    initial_bin_size : int, optional
-        Number of most informative items the first item is drawn from. Default is 5.
-
-    Raises
-    ------
-    TypeError
-        If ``initial_bin_size`` is not an integer.
-    ValueError
-        If ``initial_bin_size`` is smaller than 1.
-    """
     initial_bin_size = operator.index(initial_bin_size)
     if initial_bin_size < 1:
       msg = f"initial_bin_size must be at least 1, got {initial_bin_size}"
@@ -96,7 +87,7 @@ class The54321Selector(BaseSelector):
     """Return an item drawn uniformly from the bin of the most informative remaining items.
 
     The bin holds ``initial_bin_size`` items at the first position, one fewer at each following
-    position, and at least one, plus every item tied with its least informative item (ADR-0008).
+    position, and at least one, plus every item tied with its least informative item.
 
     Parameters
     ----------
@@ -115,16 +106,22 @@ class The54321Selector(BaseSelector):
 
 
 class RandomesqueSelector(BaseSelector):
-  """Implementation of the randomesque selector proposed by :cite:p:`Kingsbury89`.
+  """Draw each item at random from the ``bin_size`` most informative remaining items.
 
-  In this selector, at each step of the test, an item is randomly chosen from the :math:`n` most informative items in
-  the item bank, :math:`n` being a user-defined value. Items tied with the least informative of those :math:`n` also
-  join the bin (ADR-0008). The selector applies no exposure cap: ``context.exposure_rates`` is ignored.
+  The randomesque method of :cite:t:`Kingsbury89`. Items tied with the least informative item of the
+  bin also join it. The selector applies no exposure cap: ``context.exposure_rates`` is ignored.
 
   Parameters
   ----------
   bin_size : int
       Number of most informative remaining items each item is drawn from, at least 1.
+
+  Raises
+  ------
+  TypeError
+      If ``bin_size`` is not an integer.
+  ValueError
+      If ``bin_size`` is smaller than 1.
   """
 
   @override
@@ -133,21 +130,6 @@ class RandomesqueSelector(BaseSelector):
     return f"{type(self).__name__}(bin_size={self._bin_size!r})"
 
   def __init__(self, bin_size: int) -> None:
-    """Initialize a RandomesqueSelector object.
-
-    Parameters
-    ----------
-    bin_size : int
-        The number of most informative items to be taken into consideration when
-        randomly selecting one of them.
-
-    Raises
-    ------
-    TypeError
-        If ``bin_size`` is not an integer.
-    ValueError
-        If ``bin_size`` is smaller than 1.
-    """
     bin_size = operator.index(bin_size)
     if bin_size < 1:
       msg = f"bin_size must be at least 1, got {bin_size}"
@@ -164,7 +146,7 @@ class RandomesqueSelector(BaseSelector):
   def select(self, context: StepContext) -> int:
     """Return an item drawn uniformly from the ``bin_size`` most informative remaining items.
 
-    The bin also holds every item tied with its least informative item (ADR-0008).
+    The bin also holds every item tied with its least informative item.
 
     Parameters
     ----------
