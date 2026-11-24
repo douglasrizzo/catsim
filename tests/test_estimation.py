@@ -1,6 +1,7 @@
 """Tests for catsim.estimation module."""
 
 import importlib
+import inspect
 from collections.abc import Callable
 from functools import partial
 from itertools import pairwise, product
@@ -189,6 +190,45 @@ ESTIMATORS = [
   pytest.param(MAPEstimator, id="map"),
   pytest.param(WarmLikelihoodEstimator, id="wle"),
 ]
+
+ESTIMATOR_REPRS = {
+  "NumericalSearchEstimator": "NumericalSearchEstimator(tol=0.001, bounds=(-4.0, 4.0))",
+  "EAPEstimator": "EAPEstimator(grid=None, log_prior=None)",
+  "MAPEstimator": "MAPEstimator(log_prior=None, tol=0.001, bounds=(-4.0, 4.0))",
+  "WarmLikelihoodEstimator": "WarmLikelihoodEstimator(tol=0.001, bounds=(-4.0, 4.0))",
+}
+
+
+@pytest.mark.parametrize("source", ESTIMATOR_REPRS.values(), ids=ESTIMATOR_REPRS.keys())
+def test_repr_is_the_constructor_call(source: str) -> None:
+  """An estimator's repr names every constructor argument with its value, so evaluating it rebuilds the estimator.
+
+  Estimators printed a display name without their tolerance or bounds, and MEISelector's repr showed its estimator
+  as an object address that does not evaluate.
+  """
+  namespace = vars(importlib.import_module("catsim.estimation"))
+
+  assert repr(eval(source, namespace)) == source
+
+
+def test_repr_shows_a_given_grid_and_prior_rather_than_none() -> None:
+  """A repr that always printed None for the grid and prior would claim the defaults for an estimator with others."""
+  grid = QuadratureGrid.uniform(n_nodes=3)
+  prior = normal_log_prior(0.0, 2.0)
+
+  assert repr(EAPEstimator(grid=grid, log_prior=prior)) == f"EAPEstimator(grid={grid!r}, log_prior={prior!r})"
+  assert repr(MAPEstimator(log_prior=prior)) == f"MAPEstimator(log_prior={prior!r}, tol=1e-06, bounds=(-6.0, 6.0))"
+
+
+def test_repr_table_covers_every_exported_estimator() -> None:
+  """An estimator left out of ESTIMATOR_REPRS could hide an argument from its repr without any test noticing."""
+  exported = {
+    name
+    for name, cls in vars(importlib.import_module("catsim.estimation")).items()
+    if isinstance(cls, type) and issubclass(cls, BaseEstimator) and not inspect.isabstract(cls)
+  }
+
+  assert exported == set(ESTIMATOR_REPRS)
 
 
 @pytest.mark.parametrize("make_estimator", ESTIMATORS)

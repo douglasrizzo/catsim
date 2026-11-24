@@ -311,12 +311,16 @@ class EAPEstimator(BaseEstimator):
     log_prior: LogPrior | None = None,
   ) -> None:
     super().__init__()
+    # Kept as given for the repr, where a default shows as None: the default grid's repr would list every
+    # node, and a prior function has no source form.
+    self._grid_argument = grid
+    self._log_prior_argument = log_prior
     self._grid = grid if grid is not None else QuadratureGrid.uniform()
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
 
-  def __str__(self) -> str:
-    """Return a human-readable name for the estimator."""
-    return "Expected a Posteriori Estimator"
+  def __repr__(self) -> str:
+    """Return the estimator as a constructor call that names every argument, with None for a default."""
+    return f"{type(self).__name__}(grid={self._grid_argument!r}, log_prior={self._log_prior_argument!r})"
 
   def estimate(self, context: StepContext) -> float:
     r"""Return the posterior mean, the prior mean when no item has been administered.
@@ -384,13 +388,15 @@ class MAPEstimator(BaseEstimator):
     bounds: tuple[float, float] = (THETA_MIN_EXTENDED, THETA_MAX_EXTENDED),
   ) -> None:
     super().__init__()
+    # Kept as given for the repr, where the default shows as None: a prior function has no source form.
+    self._log_prior_argument = log_prior
     self._log_prior = log_prior if log_prior is not None else normal_log_prior()
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
-  def __str__(self) -> str:
-    """Return a human-readable estimator name."""
-    return "Maximum a Posteriori Estimator"
+  def __repr__(self) -> str:
+    """Return the estimator as a constructor call that names every argument, with None for a default prior."""
+    return f"{type(self).__name__}(log_prior={self._log_prior_argument!r}, tol={self._tol!r}, bounds={self._bounds!r})"
 
   def _negative_log_posterior(self, theta: float, response_vector: Sequence[bool], items: FloatArray) -> float:
     """Return the negative log-posterior at a candidate theta."""

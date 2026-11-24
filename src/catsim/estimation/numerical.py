@@ -71,10 +71,6 @@ class NumericalSearchEstimator(BaseEstimator):
   For full algorithmic details, see :doc:`/api/techniques/estimation/numerical-search-estimator`.
   """
 
-  def __str__(self) -> str:
-    """Return a string representation of the estimator."""
-    return "Numerical Search Estimator"
-
   def __init__(
     self,
     tol: float = 1e-6,
@@ -97,6 +93,10 @@ class NumericalSearchEstimator(BaseEstimator):
     super().__init__()
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
+
+  def __repr__(self) -> str:
+    """Return the estimator as a constructor call that names every argument."""
+    return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
   def estimate(self, context: StepContext) -> float:
     r"""Return the maximum likelihood estimate, or Dodd's step from ``context.theta`` while every response is the same.

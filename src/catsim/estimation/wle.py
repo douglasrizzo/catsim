@@ -69,9 +69,9 @@ class WarmLikelihoodEstimator(BaseEstimator):
     self._tol = self._check_tol(tol)
     self._bounds = self._check_bounds(bounds)
 
-  def __str__(self) -> str:
-    """Return a string representation of the estimator."""
-    return "Warm Weighted Likelihood Estimator"
+  def __repr__(self) -> str:
+    """Return the estimator as a constructor call that names every argument."""
+    return f"{type(self).__name__}(tol={self._tol!r}, bounds={self._bounds!r})"
 
   @staticmethod
   def _modified_score(theta: npt.ArrayLike, response_vector: Sequence[bool], items: FloatArray) -> FloatArray:

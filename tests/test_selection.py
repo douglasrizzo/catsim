@@ -1367,6 +1367,9 @@ SELECTOR_REPRS = {
   "MaxInfoStratSelector": "MaxInfoStratSelector(test_size=12, n_strata=4)",
   "MaxInfoBBlockSelector": "MaxInfoBBlockSelector(test_size=12, n_strata=4)",
   "MEISelector": "MEISelector(estimator=RecordingEstimator(), r_max=0.5)",
+  "MEISelector-default-estimator": (
+    "MEISelector(estimator=NumericalSearchEstimator(tol=1e-06, bounds=(-6.0, 6.0)), r_max=1.0)"
+  ),
   "MLWISelector": "MLWISelector(n_nodes=21, bounds=(-4.0, 4.0), r_max=0.5)",
 }
 
@@ -1378,7 +1381,11 @@ def test_repr_is_the_constructor_call(source: str) -> None:
   Selectors used to print display names, some without their arguments (MaxInfo, Randomesque, the stratified
   selectors) and others under names their constructors do not take (s=, k=, Q=).
   """
-  namespace = {**vars(importlib.import_module("catsim.selection")), "RecordingEstimator": RecordingEstimator}
+  namespace = {
+    **vars(importlib.import_module("catsim.selection")),
+    "NumericalSearchEstimator": NumericalSearchEstimator,
+    "RecordingEstimator": RecordingEstimator,
+  }
 
   assert repr(eval(source, namespace)) == source
 
@@ -1434,4 +1441,4 @@ def test_selector_tables_cover_every_concrete_selector() -> None:
   }
 
   assert exported == set(SELECTOR_FACTORIES)
-  assert exported == set(SELECTOR_REPRS)
+  assert exported == {source.partition("(")[0] for source in SELECTOR_REPRS.values()}

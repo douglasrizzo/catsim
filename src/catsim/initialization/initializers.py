@@ -42,9 +42,9 @@ class UniformInitializer(BaseInitializer):
     self._low = float(low)
     self._high = float(high)
 
-  def __str__(self) -> str:
-    """Get a string representation of the Initializer."""
-    return "Uniform Initializer"
+  def __repr__(self) -> str:
+    """Return the initializer as a constructor call that names every argument."""
+    return f"{type(self).__name__}(low={self._low!r}, high={self._high!r})"
 
   def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     """Draw an initial ability value between ``low`` and ``high``.
@@ -96,9 +96,9 @@ class NormalInitializer(BaseInitializer):
     self._mean = float(mean)
     self._sd = float(sd)
 
-  def __str__(self) -> str:
-    """Get a string representation of the Initializer."""
-    return "Normal Initializer"
+  def __repr__(self) -> str:
+    """Return the initializer as a constructor call that names every argument."""
+    return f"{type(self).__name__}(mean={self._mean!r}, sd={self._sd!r})"
 
   def initialize(self, *, item_bank: ItemBank, rng: numpy.random.Generator) -> float:  # noqa: ARG002
     r"""Draw an initial ability value from :math:`\mathcal{N}(\text{mean}, \text{sd}^2)`.
@@ -141,9 +141,9 @@ class FixedPointInitializer(BaseInitializer):
   For full algorithmic details, see :doc:`/api/techniques/initialization/index`.
   """
 
-  def __str__(self) -> str:
-    """Get a string representation of the Initializer."""
-    return "Fixed Point Initializer"
+  def __repr__(self) -> str:
+    """Return the initializer as a constructor call that names every argument."""
+    return f"{type(self).__name__}(start={self._start!r})"
 
   def __init__(self, start: float) -> None:
     # math.isfinite raises the TypeError for a non-number, strings included.

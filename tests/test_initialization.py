@@ -1,5 +1,7 @@
 """Tests for catsim.initialization module."""
 
+import importlib
+import inspect
 import math
 
 import numpy as np
@@ -129,3 +131,33 @@ class TestFixedPointInitializerInitialize:
 
     assert type(theta) is float
     assert theta == expected
+
+
+INITIALIZER_REPRS = {
+  "UniformInitializer": "UniformInitializer(low=-1.0, high=2.0)",
+  "NormalInitializer": "NormalInitializer(mean=0.5, sd=2.0)",
+  "FixedPointInitializer": "FixedPointInitializer(start=-0.25)",
+}
+
+
+@pytest.mark.parametrize("source", INITIALIZER_REPRS.values(), ids=INITIALIZER_REPRS.keys())
+def test_repr_is_the_constructor_call(source: str) -> None:
+  """An initializer's repr names every constructor argument with its value, so evaluating it rebuilds the initializer.
+
+  Initializers printed only a display name such as "Uniform Initializer", and their default repr showed an object
+  address, so a printed strategy did not say how it was configured.
+  """
+  namespace = vars(importlib.import_module("catsim.initialization"))
+
+  assert repr(eval(source, namespace)) == source
+
+
+def test_repr_table_covers_every_exported_initializer() -> None:
+  """An initializer left out of INITIALIZER_REPRS could hide an argument from its repr without any test noticing."""
+  exported = {
+    name
+    for name, cls in vars(importlib.import_module("catsim.initialization")).items()
+    if isinstance(cls, type) and issubclass(cls, BaseInitializer) and not inspect.isabstract(cls)
+  }
+
+  assert exported == set(INITIALIZER_REPRS)
