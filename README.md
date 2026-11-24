@@ -15,6 +15,13 @@ Researchers use it to run simulation studies that compare methods of item select
 estimation and stopping, and application developers use the same engine to run adaptive tests in
 their products.
 
+> **Coming from catsim 0.x?** catsim 1.0 has a different API, and code written for 0.x does not run
+> unchanged. The [1.0.0 release notes](https://github.com/douglasrizzo/catsim/releases/tag/1.0.0) say
+> what to change, and the [guides](https://douglasrizzo.com.br/catsim/getting-started.html) and
+> [tutorials](https://douglasrizzo.com.br/catsim/tutorials.html) teach the 1.0 API. To keep running
+> 0.x code, install it with `pip install "catsim<1"`; its documentation is at the
+> [0.21.0 tag](https://github.com/douglasrizzo/catsim/tree/0.21.0) on GitHub.
+
 ## Installation
 
 ```bash
@@ -69,8 +76,11 @@ standard errors and responses, and the same `rng` gives the same result on every
   [Extending catsim](https://douglasrizzo.com.br/catsim/extending.html).
 - [Techniques](https://douglasrizzo.com.br/catsim/api/techniques/index.html): each initialization,
   selection, estimation and stopping method, with its formulas and sources.
-- The [tutorial notebooks](https://github.com/douglasrizzo/catsim/tree/main/notebooks), which open in
-  Colab.
+- The [tutorial notebooks](https://douglasrizzo.com.br/catsim/tutorials.html), which open in Colab:
+  [getting started](https://github.com/douglasrizzo/catsim/blob/main/notebooks/01_getting_started.ipynb),
+  [comparing strategies](https://github.com/douglasrizzo/catsim/blob/main/notebooks/02_comparing_strategies.ipynb),
+  [live sessions](https://github.com/douglasrizzo/catsim/blob/main/notebooks/03_live_sessions.ipynb) and
+  [custom strategies](https://github.com/douglasrizzo/catsim/blob/main/notebooks/04_custom_strategies.ipynb).
 - The [API reference](https://douglasrizzo.com.br/catsim/api/index.html).
 
 ## Important links

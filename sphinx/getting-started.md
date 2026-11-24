@@ -3,7 +3,7 @@
 Read the {doc}`introduction` first if computerized adaptive testing is new to you;
 {doc}`terms-and-notation` lists the terms and symbols every page uses. Researchers continue with the
 simulation and reproducibility guides, application developers with live sessions, and method
-authors with extending catsim.
+authors with extending catsim. The {doc}`tutorials` teach the same tasks hands-on, as notebooks.
 
 ```{toctree}
 :maxdepth: 1
@@ -14,4 +14,5 @@ running-simulations
 live-sessions
 reproducibility
 extending
+tutorials
 ```
