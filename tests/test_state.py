@@ -266,7 +266,7 @@ def test_a_decline_counts_as_a_proposal_but_not_as_an_administration() -> None:
 
 
 def test_a_tracker_rebuilt_without_proposals_takes_its_counts_as_its_own_copy() -> None:
-  """A tracker saved before proposals were kept restores with one proposal per administration.
+  """A tracker rebuilt from counts alone has one proposal per administration, in an array of its own.
 
   Fails if the rebuilt tracker starts its proposals at zero (every item would have more administrations than
   proposals) or shares the counts array (each administration would then add two to both).

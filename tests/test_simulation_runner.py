@@ -140,7 +140,7 @@ class TestSimulationRunnerRun:
     assert other_seed.administered_items != first.administered_items
 
   def test_a_seeded_run_without_a_control_gives_the_tests_it_always_gave(self, item_bank: ItemBank) -> None:
-    """A seeded run of random selection gives the items and responses pinned from a run before exposure controls.
+    """A seeded run of random selection without an exposure control gives fixed, pinned items and responses.
 
     Fails if the engine draws from the run's generator when there is no exposure control, or passes the selector
     another set of items to choose from: every later draw, and so every item and response, would move.

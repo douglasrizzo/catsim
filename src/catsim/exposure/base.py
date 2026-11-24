@@ -8,15 +8,11 @@ from ..context import StepContext
 class BaseExposureControl(ABC):
   """Base class for exposure controls, which may decline the item a selector proposes.
 
-  A control is an optional part of :class:`~catsim.engine.CatEngine`. The engine asks it about every
-  item the selector proposes. A declined item joins the session's ``excluded_items`` for the rest of
-  the test, and the engine asks the selector again, until the control accepts an item or the
-  selector has none left, which ends the session with ``StopReason.NO_ITEMS``. The run's exposure
-  tracker counts each decline as a proposal of the item.
-
-  A control holds its configuration and caches derived from the item bank, never per-session
-  state, and draws every random number from ``context.rng``. Here, a control that administers each
-  proposed item with probability one half:
+  :class:`~catsim.engine.CatEngine` asks its control about every item the selector proposes. A
+  declined item is excluded from the session for the rest of its test, and the selector proposes
+  again; a session with no item left to accept ends with ``StopReason.NO_ITEMS``. A control holds
+  configuration only, never per-session state, and draws from ``context.rng``. This one administers
+  each proposed item with probability one half:
 
   >>> import numpy
   >>> from catsim import CatEngine, ItemBank, RunContext
