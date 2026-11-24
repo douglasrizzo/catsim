@@ -47,9 +47,10 @@ generator comes from and on what draws from it, which nothing recorded.
   it did not, shifts the draws of every later session, so seeded results can change across catsim
   versions.
 - Running the sessions of one run in parallel would make the draws depend on their timing, so the
-  runner does not. To parallelise, split the population and run each part with its own seed, for
-  example from `numpy.random.SeedSequence(seed).spawn(k)`, accepting that the results differ from
-  those of one sequential run.
+  runner does not. To parallelise, split the population and run each part with a generator of its
+  own, for example `numpy.random.default_rng(child)` for each `child` of
+  `numpy.random.SeedSequence(seed).spawn(k)`, accepting that the results differ from those of one
+  sequential run.
 - An application that steps sessions itself (`CatEngine.step` and `apply_response`) owns its
   `RunContext` and so its generator; the same rules apply to the sessions it runs on one context.
 - `ItemBank.generate_item_bank` has its own `seed`, also 0 by default, and its own generator, so a

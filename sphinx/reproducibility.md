@@ -20,31 +20,32 @@ for _ in range(5):
     )
 ```
 
-A {py:class}`catsim.simulation.SimulationRunner` creates one {py:class}`numpy.random.Generator` from its `seed` argument when it is built. `seed` defaults to 0, so a runner built without a seed is deterministic too. Every random draw in a simulation comes from that one generator: sampling the examinees' abilities, the initializer, the selectors and the simulated responses. Sessions run one after another, in order, so each session's draws depend on the sessions before it.
+{py:meth}`SimulationRunner.run <catsim.simulation.SimulationRunner.run>` builds one {py:class}`numpy.random.Generator` from its `rng` argument at the start of every call, and every random draw of the run comes from it: the initializer, the selectors and the simulated responses of every session ({doc}`/adr/0013-random-numbers-and-reproducibility`). `rng` defaults to 0, so a run that passes no seed is deterministic too. It can also be a generator, which the run uses as is and advances.
 
-Two runners built with the same seed and the same components give identical results. Each call to `run()`, however, continues the runner's generator instead of restarting it, so a second `run()` on the same runner gives different results. To repeat a simulation exactly, build a new runner.
+The runner draws nothing else. The examinees' true abilities are an input to `run`: to simulate a population, draw them with a generator of your own, as `rng.normal(0, 1, n)` does below, so the same abilities can be run again, on another engine or with another seed.
+
+The same `rng` and the same true abilities give identical results, however many times the runner has run and on any runner built with the same components. A different `rng` gives other tests.
 
 ```pycon
->>> from catsim import ItemBank
+>>> import numpy
+>>> from catsim import CatEngine, ItemBank, SimulationRunner
 >>> from catsim.estimation import NumericalSearchEstimator
 >>> from catsim.initialization import UniformInitializer
 >>> from catsim.selection import MaxInfoSelector
->>> from catsim.simulation import SimulationRunner
 >>> from catsim.stopping import MaxLengthStopper, StandardErrorStopper, StopRule
->>> item_bank = ItemBank.generate_item_bank(500, seed=42)
->>> def make_runner():
-...     return SimulationRunner(
-...         item_bank,
-...         UniformInitializer(),
-...         MaxInfoSelector(),
-...         NumericalSearchEstimator(),
-...         StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
-...         seed=42,
-...     )
->>> first, second = make_runner().run(10), make_runner().run(10)
->>> first.latest_estimations == second.latest_estimations
+>>> engine = CatEngine(
+...     ItemBank.generate_item_bank(500, seed=42),
+...     UniformInitializer(),
+...     MaxInfoSelector(),
+...     NumericalSearchEstimator(),
+...     StopRule(StandardErrorStopper(0.4), MaxLengthStopper(20)),
+... )
+>>> true_thetas = numpy.random.default_rng(7).normal(0, 1, 10)
+>>> runner = SimulationRunner(engine)
+>>> runner.run(true_thetas, rng=42).final_thetas == runner.run(true_thetas, rng=42).final_thetas
 True
->>> runner = make_runner()
->>> runner.run(10).latest_estimations == runner.run(10).latest_estimations
+>>> runner.run(true_thetas, rng=42).final_thetas == runner.run(true_thetas, rng=43).final_thetas
 False
 ```
+
+Sessions run one after another, in the order of `true_thetas`, so each session's draws depend on the sessions before it. Reordering the examinees, or adding or removing one, changes the tests of the sessions after it, and the sessions of one run cannot run in parallel without changing the results. To parallelise a study, split the population and run each part with a generator of its own, such as `numpy.random.default_rng(child)` for each `child` of `numpy.random.SeedSequence(42).spawn(4)`, and accept that the results differ from those of one sequential run.
