@@ -180,7 +180,7 @@ class AStratSelector(StratifiedSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
   @override
@@ -206,7 +206,7 @@ class AStratBBlockSelector(AStratSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/selection/a-strat-b-block-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
   @override
@@ -227,7 +227,7 @@ class MaxInfoStratSelector(StratifiedSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-strat-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
   @override
@@ -253,7 +253,7 @@ class MaxInfoBBlockSelector(MaxInfoStratSelector):
 
   Notes
   -----
-  For full algorithmic details, see :doc:`/api/techniques/selection/max-info-b-block-selector`.
+  For full algorithmic details, see :doc:`/api/techniques/selection/stratified-selector`.
   """
 
   @override

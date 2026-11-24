@@ -1,7 +1,14 @@
 # Initialization Techniques
 
+:Class: {py:class}`catsim.initialization.FixedPointInitializer`
+:Class: {py:class}`catsim.initialization.UniformInitializer`
+:Class: {py:class}`catsim.initialization.NormalInitializer`
+:Sources: Barrada et al. (2006); Barrada et al. (2008)
+
 ```{py:module} catsim.initialization
 ```
+
+## Motivation
 
 Initialization techniques choose the initial ability estimate
 $\hat{\theta}_0$ before an adaptive test has administered any items. The
@@ -12,64 +19,23 @@ controlled simulations, reproducible baselines, or stochastic starting points.
 {py:class}`~catsim.initialization.FixedPointInitializer` starts every examinee
 at the same value, and {py:class}`~catsim.initialization.UniformInitializer`
 and {py:class}`~catsim.initialization.NormalInitializer` draw the value from a
-distribution. Every initializer receives the item bank to satisfy the
-initializer contract; none of these three reads it.
+distribution.
 
-## Fixed Point Initializer
+Fixed-point initialization is useful for deterministic baselines, controlled
+simulation studies, and workflows that should not introduce randomness before
+the first item is selected. Random initialization is useful when simulations
+should vary the starting point across examinees while remaining reproducible
+through the engine or runner random number generator.
 
-Fixed-point initialization gives every examinee the same initial ability
-estimate. It is useful for deterministic baselines, controlled simulation
-studies, and workflows that should not introduce randomness before the first
-item is selected.
+## Definition
 
-### Definition
-
-For a configured starting value $\theta_0$, the initializer returns the
-same value for every examinee:
+For a configured starting value $\theta_0$,
+{py:class}`~catsim.initialization.FixedPointInitializer` returns the same value
+for every examinee:
 
 $$
 \hat{\theta}_0 = \theta_0.
 $$
-
-### Parameters
-
-```{eval-rst}
-.. list-table::
-   :header-rows: 1
-   :widths: 20 15 65
-
-   * - Parameter
-     - Default
-     - Description
-   * - ``start``
-     - Required
-     - Ability estimate returned for every examinee.
-```
-
-### Behavioral Contracts
-
-Any correct implementation must satisfy the following properties:
-
-1. It rejects a `start` that is not a finite real number when it is constructed.
-2. It returns the configured `start` value, as a `float`, for every initialization request.
-3. It does not consume random numbers from the provided generator.
-
-### API Reference
-
-```{eval-rst}
-.. autoclass:: catsim.initialization.FixedPointInitializer
-   :members:
-   :show-inheritance:
-```
-
-## Random Initializers
-
-Random initialization samples the initial ability estimate from a configured
-distribution. It is useful when simulations should vary the starting point
-across examinees while remaining reproducible through the engine or runner
-random number generator.
-
-### Definition
 
 {py:class}`~catsim.initialization.UniformInitializer` samples
 
@@ -83,13 +49,7 @@ $$
 \hat{\theta}_0 \sim \mathcal{N}(\text{mean}, \text{sd}^2).
 $$
 
-The default uniform range, $(-0.5, 0.5)$, is the starting rule of Barrada et
-al. (2006, p. 158) and Barrada et al. (2008, p. 499), who drew the first
-estimate from it for examinees simulated from $\mathcal{N}(0, 1)$. The normal
-default, $\mathcal{N}(0, 1)$, is not taken from a source; it matches the
-ability distribution those studies simulate.
-
-### Parameters
+## Parameters
 
 ```{eval-rst}
 .. list-table::
@@ -99,6 +59,9 @@ ability distribution those studies simulate.
    * - Parameter
      - Default
      - Description
+   * - ``FixedPointInitializer(start)``
+     - Required
+     - Ability estimate returned for every examinee.
    * - ``UniformInitializer(low)``
      - ``-0.5``
      - Lower bound of the interval.
@@ -113,16 +76,33 @@ ability distribution those studies simulate.
      - Standard deviation of the distribution; must be positive.
 ```
 
-### Behavioral Contracts
+The default uniform range, $(-0.5, 0.5)$, is the starting rule of Barrada et
+al. (2006, p. 158) and Barrada et al. (2008, p. 499), who drew the first
+estimate from it for examinees simulated from $\mathcal{N}(0, 1)$. The normal
+default, $\mathcal{N}(0, 1)$, is not taken from a source; it matches the
+ability distribution those studies simulate.
 
-Any correct implementation must satisfy the following properties:
+## Guarantees
 
-1. It rejects non-finite parameters when it is constructed.
-2. A uniform initializer rejects `high <= low` and samples between `low` and `high`.
-3. A normal initializer rejects a non-positive `sd`.
-4. It samples using the random number generator passed to `initialize`.
+1. A fixed-point initializer starts every examinee at `start`, as a `float`,
+   whatever the seed.
+2. A uniform initializer's draws lie between `low` and `high`.
+3. The random initializers draw from the run's random generator, so the same
+   seed gives the same initial estimates.
 
-### API Reference
+## References
+
+Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
+
+Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
+
+## API Reference
+
+```{eval-rst}
+.. autoclass:: catsim.initialization.FixedPointInitializer
+   :members:
+   :show-inheritance:
+```
 
 ```{eval-rst}
 .. autoclass:: catsim.initialization.UniformInitializer
@@ -136,13 +116,7 @@ Any correct implementation must satisfy the following properties:
    :show-inheritance:
 ```
 
-## References
-
-Barrada, J. R., Mazuela, P., & Olea, J. (2006). Maximum information stratification method for controlling item exposure in computerized adaptive testing. *Psicothema*, 18(1), 156-159. <https://www.psicothema.com/pdf/3191.pdf> (open access).
-
-Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating randomness in the Fisher information for improving item-exposure control in CATs. *British Journal of Mathematical and Statistical Psychology*, 61(2), 493-513. <https://doi.org/10.1348/000711007X230937>. Open copy: [first author's page](https://personal.unizar.es/barrada/papers/08_BJMSP_Barrada.pdf).
-
-## Class Hierarchy
+### Class Hierarchy
 
 ```{autoclasstree} catsim.initialization
 :full:
@@ -150,7 +124,7 @@ Barrada, J. R., Olea, J., Ponsoda, V., & Abad, F. J. (2008). Incorporating rando
 :namespace: catsim
 ```
 
-## Base Class
+### Base Class
 
 ```{eval-rst}
 .. autoclass:: catsim.initialization.BaseInitializer

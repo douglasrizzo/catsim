@@ -1,21 +1,29 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.RandomSelector`
-
 # Random Selector
 
-## Specification
+:Class: {py:class}`catsim.selection.RandomSelector`
 
-`RandomSelector` selects uniformly at random from the non-administered item
-pool. It is a simple stochastic baseline for comparing adaptive selection
-techniques against a non-adaptive item choice rule.
+## Motivation
 
-## Behavioral Contracts
+`RandomSelector` is a non-adaptive baseline: it ignores the ability estimate, the responses and
+the item parameters. Comparing an adaptive selector against it shows how much of a test's
+precision comes from choosing items adaptively. Because every item is equally likely, it also
+spreads exposure as evenly as a selector can.
 
-Any correct implementation must satisfy the following properties:
+## Definition
 
-1. It samples only from non-administered items.
-2. It uses the configured random number generator when one is provided.
-3. If no non-administered items remain, it raises `NoItemsAvailableError`.
+At each step the selector draws one item uniformly at random from the items that are neither
+administered nor excluded.
+
+## Parameters
+
+`RandomSelector` takes no parameters.
+
+## Guarantees
+
+1. It never returns an item that was already administered or excluded.
+2. It draws with the session's random generator, so a run with the same seed administers the same
+   items.
+3. When no item remains, it raises `NoItemsAvailableError`.
 
 ## API Reference
 

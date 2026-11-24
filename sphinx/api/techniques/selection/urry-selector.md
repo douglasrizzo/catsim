@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.selection.UrrySelector`
-**Reference:** Urry (1977); Lord (1980)
-
 # Urry Selector
+
+:Class: {py:class}`catsim.selection.UrrySelector`
+:Sources: Urry (1977); Lord (1980)
 
 ## Motivation
 
@@ -11,15 +10,6 @@ difficulty is closest to the current ability estimate. This criterion is easy to
 compute, avoids the stronger preference for highly discriminating items shown by
 maximum-information rules, and is historically tied to early tailored testing
 systems.
-
-Under the 1PL model, matching difficulty to ability is the same as maximizing
-information, because every item's information curve has the same shape and peaks
-at $b_i$. Once discriminations vary (2PL) or guessing enters (3PL, 4PL), a more
-informative item can lie farther from $\hat{\theta}$, and the two rules differ;
-b-matching remains a simple and interpretable heuristic. Magis and Raîche
-(2012, p. 10) describe Urry's criterion the same way: completely equivalent to
-maximum information under the 1PL model, slightly different under other models.
-They attribute it to Urry (1970), an earlier work than the article cited below.
 
 ## Definition
 
@@ -32,23 +22,34 @@ i^*
 \arg\min_{i \in R_k} \left| b_i - \hat{\theta} \right|,
 $$
 
-where $R_k$ is the set of non-administered items. Items at exactly the same
-distance tie, and one of them is drawn at random
+where $R_k$ is the set of items neither administered nor excluded. Items at
+exactly the same distance tie, and one of them is drawn at random
 ({doc}`/adr/0011-random-tie-breaking`).
 
 ## Parameters
 
 This selector has no constructor parameters.
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+Under the 1PL model, matching difficulty to ability is the same as maximizing
+information, because every item's information curve has the same shape and peaks
+at $b_i$. Once discriminations vary (2PL) or guessing enters (3PL, 4PL), a more
+informative item can lie farther from $\hat{\theta}$, and the two rules differ;
+b-matching remains a simple and interpretable heuristic. Magis and Raîche
+(2012, p. 10) describe Urry's criterion the same way: completely equivalent to
+maximum information under the 1PL model, slightly different under other models.
+They attribute it to Urry (1970), an earlier work than the article cited below.
 
-1. It ranks items by increasing absolute distance between item difficulty and the estimate, the context's `theta`.
-2. It never returns an already administered item.
-3. It applies no exposure cap: it ignores the context's `exposure_rates`, and only difficulty proximity controls the choice.
-4. In Rasch/1PL settings, the chosen item coincides with a maximum-information choice because information is maximized near $b_i = \hat{\theta}$.
-5. If no non-administered items remain, it raises `NoItemsAvailableError`.
+## Guarantees
+
+1. It returns the remaining item whose difficulty is closest to the current
+   estimate.
+2. It never returns an item that was already administered or excluded.
+3. It applies no exposure cap: the run's exposure rates do not change its choice.
+4. Under the 1PL, the chosen item coincides with a maximum-information choice,
+   because information is maximized near $b_i = \hat{\theta}$.
+5. When no item remains, it raises `NoItemsAvailableError`.
 
 ## References
 

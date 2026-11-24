@@ -75,8 +75,8 @@ hidden runtime coupling.
 Before writing or reviewing documentation of any kind, read `sphinx/AGENTS.md`, the documentation
 charter. Each kind of document has one job and audience:
 
-- `README.md`: what catsim is, install, a quickstart; newcomers. It is generated from
-  `sphinx/readme_head.md` and `sphinx/readme_body.md`: edit those, never `README.md` alone.
+- `README.md`: what catsim is, install, a quickstart; newcomers on GitHub and PyPI. A plain file,
+  separate from the website's landing page (`sphinx/index.md`); every link in it is absolute.
 - `sphinx/introduction.md` and `sphinx/terms-and-notation.md`: the CAT and IRT primer and the
   glossary; readers new to CAT.
 - Guides: one task end to end; researchers and application developers.
@@ -97,7 +97,7 @@ Hard rules:
 - No internal names or design rationale in user pages: link the ADR.
 - One home per topic; other documents link to it.
 - When a public API changes, update its docstrings, the Sphinx pages, the notebooks and the README
-  sources in the same PR. No test runs the code in Sphinx pages or the README: run it by hand.
+  in the same PR. No test runs the code in Sphinx pages or the README: run it by hand.
 
 ## Testing And Validation
 

@@ -276,7 +276,7 @@ def test_scheduled_selectors_reject_non_finite_acceleration(
   ],
 )
 def test_randomized_selectors_repeat_with_the_same_seed(make_selector: Callable[[], BaseSelector]) -> None:
-  """Two runs seeded alike choose the same items at every position, as contract 5 promises."""
+  """Two runs seeded alike choose the same items at every position, as both selectors' pages guarantee."""
   item_bank = ItemBank.generate(40, rng=5)
 
   def run(seed: int) -> list[int | None]:

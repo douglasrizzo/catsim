@@ -1,4 +1,4 @@
-"""Sphinx configuration for the catsim documentation; it also regenerates README.md from its sources."""
+"""Sphinx configuration for the catsim documentation."""
 
 import datetime
 import pathlib
@@ -8,10 +8,6 @@ from importlib.metadata import version as get_version
 # Sphinx runs this file from the sphinx/ directory.
 sys.path.insert(0, str(pathlib.Path("../src").resolve()))
 sys.path.insert(0, str(pathlib.Path("_ext").resolve()))
-
-filenames = ["readme_head.md", "readme_body.md"]
-with pathlib.Path("../README.md").open("w", encoding="utf-8") as outfile:
-  outfile.writelines(pathlib.Path(fname).read_text(encoding="utf-8") for fname in filenames)
 
 # -- General configuration ------------------------------------------------
 
@@ -26,6 +22,7 @@ extensions = [
   "myst_parser",
   "sphinxcontrib.bibtex",
   "sphinxcontrib.mermaid",
+  "sphinx_reredirects",
   "class_tree",
 ]
 
@@ -33,6 +30,7 @@ myst_enable_extensions = [
   "colon_fence",
   "deflist",
   "dollarmath",
+  "fieldlist",
 ]
 
 # Mermaid diagrams are drawn in the reader's browser, and sphinxcontrib-mermaid redraws them
@@ -62,10 +60,19 @@ bibtex_bibfiles = ["references.bib"]
 bibtex_default_style = "plain"
 bibtex_reference_style = "author_year"
 
+# Each inventory comes from its project's site, or from the copy stored in _inventories/ when the
+# site cannot be reached, so that the strict build does not fail on a network timeout.
+# CONTRIBUTING.md ("Building the documentation") gives the command that refreshes the copies.
+# A site that stalls rather than refusing the connection falls back to the copy after this many seconds.
+intersphinx_timeout = 10
 intersphinx_mapping = {
-  "python": ("https://docs.python.org/3", None),
-  "numpy": ("https://numpy.org/doc/stable/", None),
-  "matplotlib": ("https://matplotlib.org/stable/", None),
+  name: (url, (None, f"_inventories/{name}.inv"))
+  for name, url in {
+    "python": "https://docs.python.org/3/",
+    "numpy": "https://numpy.org/doc/stable/",
+    "matplotlib": "https://matplotlib.org/stable/",
+    "scipy": "https://docs.scipy.org/doc/scipy/",
+  }.items()
 }
 
 source_suffix = {
@@ -87,7 +94,7 @@ language = "en"
 
 # AGENTS.md and CLAUDE.md are instructions for agents and contributors, and the templates are copied,
 # not read: none of them is a page.
-exclude_patterns = ["_build", "readme_head.md", "readme_body.md", "AGENTS.md", "CLAUDE.md", "**/_template.md"]
+exclude_patterns = ["_build", "AGENTS.md", "CLAUDE.md", "**/_template.md"]
 
 pygments_style = "sphinx"
 
@@ -104,6 +111,8 @@ html_theme_options = {
   "navigation_depth": 2,
   "collapse_navigation": True,
   "show_nav_level": 2,
+  # The navbar shows the seven top-level entries of the table of contents without a "More" menu.
+  "header_links_before_dropdown": 7,
   "navbar_end": ["navbar-icon-links", "theme-switcher"],
   "logo": {
     "image_light": "logo/horizontal-light.svg",
@@ -119,6 +128,61 @@ html_favicon = "logo/favicon.svg"
 
 html_static_path = ["_static"]
 html_css_files = ["mermaid.css"]
+
+# A page that moved, merged into another or left the site keeps its old address: the build writes
+# a small page there that sends the reader to the topic's current home. Each target is relative to
+# the old page's folder, because the site is served below /catsim/. Old ADR addresses are matched
+# by their full file name: an old address and a current ADR can share a number.
+redirects = {
+  # 0.21's module pages, at the site's root.
+  "cat": "api/metrics.html",
+  "estimation": "api/techniques/estimation/index.html",
+  "initialization": "api/techniques/initialization/index.html",
+  "irt": "api/irt.html",
+  "plot": "api/plot.html",
+  "selection": "api/techniques/selection/index.html",
+  "simulation": "api/simulation.html",
+  "stopping": "api/techniques/stopping/index.html",
+  "api/cat": "metrics.html",
+  # Technique pages merged into another page or renamed.
+  "api/techniques/initialization/fixed-point-initializer": "index.html",
+  "api/techniques/initialization/random-initializer": "index.html",
+  "api/techniques/selection/a-strat-b-block-selector": "stratified-selector.html",
+  "api/techniques/selection/a-strat-selector": "stratified-selector.html",
+  "api/techniques/selection/max-info-b-block-selector": "stratified-selector.html",
+  "api/techniques/selection/max-info-strat-selector": "stratified-selector.html",
+  "api/techniques/stopping/min-error-stopper": "standard-error-stopper.html",
+  "api/techniques/stopping/test-length-stopper": "max-length-stopper.html",
+  # Planned techniques, whose specifications are in specs/ on GitHub.
+  "api/techniques/estimation/owen-estimator": "../../../planned-techniques.html",
+  "api/techniques/selection/klp-selector": "../../../planned-techniques.html",
+  "api/techniques/selection/mepv-selector": "../../../planned-techniques.html",
+  "api/techniques/selection/mpwi-selector": "../../../planned-techniques.html",
+  "api/techniques/selection/sympson-hetter-exposure": "../../../planned-techniques.html",
+  "api/techniques/stopping/glr-stopper": "../../../planned-techniques.html",
+  "api/techniques/stopping/kl-stopper": "../../../planned-techniques.html",
+  "api/techniques/stopping/min-info-bank-stopper": "../../../planned-techniques.html",
+  "api/techniques/stopping/predicted-sem-stopper": "../../../planned-techniques.html",
+  "api/techniques/stopping/sprt-stopper": "../../../planned-techniques.html",
+  "api/techniques/stopping/stochastic-curtailment-stopper": "../../../planned-techniques.html",
+  # Renumbered ADRs, and the two whose content is in the contributing guide.
+  "adr/0001-explicit-cat-engine": "0003-explicit-cat-engine.html",
+  "adr/0002-remove-legacy-simulator-apis": "0003-explicit-cat-engine.html",
+  "adr/0003-runtime-state-ownership": "0004-runtime-state-ownership.html",
+  "adr/0004-explicit-strategy-contracts": "0005-explicit-strategy-contracts.html",
+  "adr/0005-immutable-step-results": "0009-immutable-step-results.html",
+  "adr/0006-versioned-tutorial-notebooks": "../contributing.html",
+  "adr/0007-release-gated-by-docs": "../contributing.html",
+  "adr/0008-random-tie-breaking": "0011-random-tie-breaking.html",
+  "adr/0009-ability-scale-and-extreme-patterns": "0012-ability-scale-and-extreme-patterns.html",
+  "adr/0010-published-progressive-schedule": "0013-published-progressive-schedule.html",
+  "adr/0011-how-a-session-ends": "0007-how-a-session-ends.html",
+  "adr/0012-unidimensional-dichotomous-scope": "0001-unidimensional-dichotomous-scope.html",
+  "adr/0013-random-numbers-and-reproducibility": "0010-random-numbers-and-reproducibility.html",
+  "adr/0014-public-import-paths-and-names": "0006-public-import-paths-and-names.html",
+  "adr/0015-plotting-as-an-optional-extra": "0014-plotting-as-an-optional-extra.html",
+  "adr/0016-session-exclusions-and-exposure-control": "0008-session-exclusions-and-exposure-control.html",
+}
 
 numpydoc_show_class_members = False
 

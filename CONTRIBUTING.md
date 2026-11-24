@@ -23,7 +23,7 @@ uv sync --group dev
 uv run pre-commit install
 ```
 
-pre-commit then runs the repository's formatters and checks on every commit.
+The first command installs catsim with its runtime dependencies, declared in `pyproject.toml`, and the tools for tests, linting, type checking, coverage and notebooks. pre-commit then runs the repository's formatters and checks on every commit.
 
 ## Quality gate
 
@@ -44,19 +44,25 @@ uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb
 
 ## Building the documentation
 
-The documentation sources are in `sphinx/`. Build the HTML pages with:
+The documentation sources are in `sphinx/`. Build the HTML pages with the command below, which also installs Sphinx and its extensions (the `docs` dependency group):
 
 ```bash
 uv run --group docs sphinx-build -b html -W --keep-going sphinx sphinx/_build/html
 ```
 
-`-W` turns warnings into errors. The build also regenerates `README.md` from `sphinx/readme_head.md` and `sphinx/readme_body.md`, so edit those two files instead of `README.md`.
+`-W` turns warnings into errors.
+
+Links to the Python, NumPy, Matplotlib and SciPy documentation come from those projects' intersphinx inventories. The build downloads each inventory and, when a site cannot be reached, reads the copy stored in `sphinx/_inventories/`. Refresh the stored copies with:
+
+```bash
+cd sphinx && for p in python=https://docs.python.org/3/ numpy=https://numpy.org/doc/stable/ matplotlib=https://matplotlib.org/stable/ scipy=https://docs.scipy.org/doc/scipy/; do curl -fsSL -o "_inventories/${p%%=*}.inv" "${p#*=}objects.inv"; done
+```
 
 A release is ready only when its documentation is online, so a documentation deployment gates every publication, in the same workflow run as the publication (a job cannot wait for a job in another run): the `dev` → `main` pull request deploys the dev documentation and then publishes a release candidate to TestPyPI, and a GitHub release deploys the production documentation and then publishes to PyPI. These are the only two publishing paths; there is no manual publish. The production documentation goes live before the PyPI upload waits for the maintainer's approval in the `pypi` environment, so a rejected upload leaves documentation online for a version that is not on PyPI until the next deployment.
 
 ## Adding a technique
 
-Each implemented technique has a page under `sphinx/api/techniques/` with its definition, parameters and behavioral contracts. A new technique starts as a spec in [`specs/`](https://github.com/douglasrizzo/catsim/tree/dev/specs), written from the [spec template](https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md); [`specs/README.md`](https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md) explains how a spec is revalidated, implemented and then promoted into the documentation. The template's Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists.
+Each implemented technique has a page under `sphinx/api/techniques/` with its definition, its parameters and its Guarantees section. A new technique starts as a spec in [`specs/`](https://github.com/douglasrizzo/catsim/tree/dev/specs), written from the [spec template](https://github.com/douglasrizzo/catsim/blob/dev/specs/_template.md); [`specs/README.md`](https://github.com/douglasrizzo/catsim/blob/dev/specs/README.md) explains how a spec is revalidated, implemented and then promoted into the documentation. The template's Definition and References sections set the citation convention: cite the page, equation, table or figure of each formula where the formula appears, cite only locations you have read, say where the implementation departs from its sources, and give every reference its DOI and an open copy when one exists.
 
 ## How to contribute
 

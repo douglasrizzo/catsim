@@ -462,19 +462,8 @@ class TestBayesianHelpers:
     with pytest.raises(ValueError, match="posterior is undefined"):
       posterior([True], items, grid, impossible_prior)
 
-  def test_posterior_mean_is_zero_with_no_responses(self) -> None:
-    """Test that the prior mean is recovered when there is no data."""
-    grid = QuadratureGrid.uniform()
-    empty_items = np.empty((0, 4), dtype=float)
-
-    post = posterior([], empty_items, grid, normal_log_prior())
-    mean = posterior_mean(post, grid.nodes)
-
-    assert mean == pytest.approx(0.0, abs=1e-12)
-    assert posterior_variance(post, grid.nodes) > 0
-
   def test_posterior_with_no_data_is_the_weighted_prior(self) -> None:
-    """With no responses the posterior is the prior times the grid weights, normalized (contract 3)."""
+    """With no responses the posterior left out the grid weights or the prior, or was not normalized."""
     nodes = np.linspace(-3.0, 3.0, 7)
     weights = np.array([1.0, 2.0, 1.0, 3.0, 1.0, 2.0, 1.0])
     grid = QuadratureGrid(nodes=nodes, weights=weights)

@@ -11,34 +11,43 @@ A selector reads the session from a {py:class}`~catsim.StepContext`: the
 administered items and their responses, the current estimate `theta`, the run's random
 generator and exposure rates, and `excluded_items`, items it must pass over although they
 have not been administered, such as those the engine's exposure control
-({py:class}`~catsim.exposure.BaseExposureControl`) declined. Where the pages below speak of non-administered items, they
+({py:class}`~catsim.exposure.BaseExposureControl`) declined. Where the pages below speak of remaining items, they
 mean the items that are neither administered nor excluded. Excluded items do not count
 toward the test position, the number of administered items.
 
-## Implemented
-
 ```{toctree}
+:caption: Information-based
 :maxdepth: 1
 
-linear-selector
-random-selector
-randomesque-selector
-the-54321-selector
 max-info-selector
 urry-selector
 interval-info-selector
 kl-selector
-progressive-selector
-proportional-selector
-cluster-selector
-stratified-selector
-a-strat-selector
-a-strat-b-block-selector
-max-info-strat-selector
-max-info-b-block-selector
 mei-selector
 mlwi-selector
 ```
+
+```{toctree}
+:caption: Randomized and exposure control
+:maxdepth: 1
+
+random-selector
+randomesque-selector
+the-54321-selector
+progressive-selector
+proportional-selector
+stratified-selector
+```
+
+```{toctree}
+:caption: Other
+:maxdepth: 1
+
+linear-selector
+cluster-selector
+```
+
+(selection-ties)=
 
 ## Ties
 
