@@ -32,7 +32,7 @@ and may not know software design; application developers know Python and may not
 - Use the terms and symbols of `terms-and-notation.md` (see "Terms and notation" below).
 - In code, import each object from its shortest public path: `from catsim import CatEngine`,
   `from catsim.selection import MaxInfoSelector`, not from the module file that defines it
-  (`catsim.engine`, `catsim.selection.selection`).
+  (`catsim.engine`, `catsim.selection.information`).
 
 ### History
 

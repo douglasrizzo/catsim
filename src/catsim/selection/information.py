@@ -1,4 +1,4 @@
-"""Concrete selector implementations."""
+"""Information-based selectors: maximum information, Urry's rule and interval information."""
 
 import numpy
 
