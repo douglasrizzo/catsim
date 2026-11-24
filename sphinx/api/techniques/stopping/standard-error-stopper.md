@@ -1,8 +1,7 @@
-**Status:** Implemented
-**Module:** {py:class}`catsim.stopping.StandardErrorStopper`
-**Reference:** Samejima (1977); Thissen (2000); Magis and Raîche (2012)
-
 # Standard Error Stopper
+
+:Class: {py:class}`catsim.stopping.StandardErrorStopper`
+:Sources: Samejima (1977); Thissen (2000); Magis and Raîche (2012)
 
 ## Motivation
 
@@ -35,10 +34,8 @@ information of the administered test at the current estimate. For
 {doc}`EAP </api/techniques/estimation/eap-estimator>` it is the posterior
 standard deviation, and for
 {doc}`MAP </api/techniques/estimation/map-estimator>` the information plus the
-prior's negative curvature. Those two are usually smaller than the Fisher error
-at the same estimate, so the same threshold ends EAP and MAP tests sooner.
-Before any response the standard error is infinite, so the test does not stop. A
-context built by hand, such as one for
+prior's negative curvature. Before any response the standard error is
+infinite, so the test does not stop. A context built by hand, such as one for
 {meth}`~catsim.stopping.StopRule.satisfied` after a run, must pass the session's
 `current_se` as `se`, whose default is infinite. As in catR, items are
 administered "until the standard error of the provisional ability estimate gets
@@ -50,11 +47,6 @@ standard error of estimation falls to a small value, which can be constant
 across ability or depend on it; catsim uses a constant. She argues that the
 standard error, rather than reliability, should be the index of dependability
 (p. 233).
-
-A target that some examinees cannot reach with the bank keeps their tests
-going until the bank runs out, so the stopper is usually combined with a
-{class}`~catsim.stopping.MaxLengthStopper` cap, and often with a minimum length,
-in a {class}`~catsim.stopping.StopRule` (see {ref}`combining-stopping-rules`).
 
 ## Parameters
 
@@ -71,13 +63,20 @@ in a {class}`~catsim.stopping.StopRule` (see {ref}`combining-stopping-rules`).
      - Largest standard error :math:`\tau` at which the test stops. Must be positive.
 ```
 
-## Behavioral Contracts
+## Behavior and Comparison
 
-Any correct implementation must satisfy the following properties:
+The EAP and MAP standard errors are usually smaller than the Fisher error at the
+same estimate, so the same threshold ends EAP and MAP tests sooner.
 
-1. The stopper returns `True` exactly when the context's standard error, the one the estimator reported, is at most `max_se`.
-2. Before any response the standard error is infinite, so the stopper returns `False`.
-3. A `max_se` of zero or less raises `ValueError`.
+A target that some examinees cannot reach with the bank keeps their tests
+going until the bank runs out, so the stopper is usually combined with a
+{class}`~catsim.stopping.MaxLengthStopper` cap, and often with a minimum length,
+in a {class}`~catsim.stopping.StopRule` (see {ref}`combining-stopping-rules`).
+
+## Guarantees
+
+1. The stopper stops the test exactly when the standard error the estimator reported is at most `max_se`.
+2. Before any response the standard error is infinite, so the test does not stop.
 
 ## References
 
