@@ -1007,7 +1007,7 @@ window.runMermaid = runMermaid;</script>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span> <span class="o">=</span> <span class="n">theta</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span> <span class="n">theta</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
 
-    <span class="n">information_integral</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">inf_integral</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidates</span><span class="p">])</span>
+    <span class="n">information_integral</span> <span class="o">=</span> <span class="n">irt</span><span class="o">.</span><span class="n">info_integral</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">items</span><span class="p">[</span><span class="n">candidates</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">pick_best</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">information_integral</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">rng</span><span class="p">)</span></div>
 </div>
 

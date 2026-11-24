@@ -810,7 +810,7 @@ window.runMermaid = runMermaid;</script>
 <span class="k">def</span><span class="w"> </span><span class="nf">_log_probabilities</span><span class="p">(</span><span class="n">theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">  </span><span class="sd">"""Return the log-probabilities of a correct and an incorrect response at ``theta``.</span>
 
-<span class="sd">  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood_hpc`, so</span>
+<span class="sd">  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood`, so</span>
 <span class="sd">  the log-probability of an incorrect response stays exact where the probability of a correct one</span>
 <span class="sd">  rounds to 1.</span>
 

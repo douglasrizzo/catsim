@@ -860,7 +860,7 @@ window.runMermaid = runMermaid;</script>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
     <span class="n">item</span> <span class="o">=</span> <span class="n">item_bank</span><span class="o">.</span><span class="n">get_item</span><span class="p">(</span><span class="n">item_id</span><span class="p">)</span>
-    <span class="n">probability</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">probability</span> <span class="o">=</span> <span class="n">icc</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">true_theta</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">probability</span> <span class="o">&gt;=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">())</span></div>
 </div>
 
