@@ -166,23 +166,23 @@ class _TieRecordingRng(np.random.Generator):
 
 
 @pytest.mark.parametrize(
-  ("selector", "administered_items", "responses", "theta"),
+  ("make_selector", "administered_items", "responses", "theta"),
   [
-    pytest.param(KLSelector(), [0], [True], 1.0, id="KLSelector"),
-    pytest.param(MLWISelector(), [0, 1, 2], [True, False, True], 0.0, id="MLWISelector"),
+    pytest.param(KLSelector, [0], [True], 1.0, id="KLSelector"),
+    pytest.param(MLWISelector, [0, 1, 2], [True, False, True], 0.0, id="MLWISelector"),
   ],
 )
 def test_selectors_that_integrate_over_ability_tie_identical_items_exactly(
-  selector: BaseSelector, administered_items: list[int], responses: list[bool], theta: float
+  make_selector: Callable[[], BaseSelector], administered_items: list[int], responses: list[bool], theta: float
 ) -> None:
   """On 1,000 identical items, the selectors that sum over ability nodes break one tie among every candidate.
 
-  A matrix product over the nodes can round columns differently: on this bank it left two distinct scores, and
-  only the copies holding the larger one could be drawn.
+  A matrix product over the nodes can round columns differently: on this bank it left two distinct scores, so the
+  tie was broken among only the copies holding the larger one.
   """
   rng = _TieRecordingRng()
 
-  selector.select(make_context(_identical_bank(1000), administered_items, responses, theta=theta, rng=rng))
+  make_selector().select(make_context(_identical_bank(1000), administered_items, responses, theta=theta, rng=rng))
 
   assert rng.ties == [list(range(len(administered_items), 1000))]
 
