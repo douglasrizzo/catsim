@@ -11,9 +11,11 @@ not part of the published documentation, and none of them is available in the pa
 - `stopping/`: stopping criteria.
 
 A spec has the sections of an implemented technique page (motivation, definition, parameters,
-behavioral contracts, references) plus an "Implementation Guidance" section that sketches the code
-for whoever implements it, and, when design choices are still open, an "Open Questions" section
-that lists them with their options and the option the spec assumes for now. New specs start from [`_template.md`](_template.md).
+behavior and comparison, guarantees, references) plus sections for contributors: "Tests", the
+properties only an implementation sees, each checked by a test; "Implementation Guidance", which
+sketches the code for whoever implements it; and, when design choices are still open, "Open
+Questions", which lists them with their options and the option the spec assumes for now. New specs
+start from [`_template.md`](_template.md).
 
 The specs are MyST Markdown, like the documentation. GitHub does not render MyST roles and
 directives (`{doc}`, `{eval-rst}`, `:::{note}`); they render once a spec is promoted into the
@@ -38,14 +40,15 @@ with open questions show the option each spec assumes for now.
    `**Status:** Planned`, following the citation convention below.
 2. **Revalidate** it with the checklist below, before it is implemented or its references are
    published.
-3. **Implement** the technique, with tests for its behavioral contracts, once its open questions
-   are answered and the spec updated to the answers.
+3. **Implement** the technique, with tests for its guarantees and its "Tests" section, once its
+   open questions are answered and the spec updated to the answers.
 4. **Promote** the spec into the documentation:
    - move it to `sphinx/api/techniques/<family>/` and add it to the toctree of that family's
      `index.md`;
-   - set `**Status:** Implemented` and point `**Module:**` at the class with `{py:class}`;
-   - remove the "Open Questions" and "Implementation Guidance" sections and add an "API
-     Reference" section with the class's `autoclass`, as the implemented pages have;
+   - replace the status lines with the header of the technique-page template,
+     `sphinx/api/techniques/_template.md`, pointing at the class with `{py:class}`;
+   - remove the "Tests", "Open Questions" and "Implementation Guidance" sections and add an "API
+     Reference" section with the class's `autoclass`, as the template has;
    - link the page from the class docstring ("For full algorithmic details, see :doc:`...`");
    - remove the technique's row from the Planned techniques page of the documentation.
 

@@ -50,7 +50,7 @@ adaptive testing.
 
 The logistic models of Item Response Theory are unidimensional, which means that a given assessment instrument only measures a single ability (or dimension of knowledge). The instrument, in turn, is composed of *items* in which examinees manifest their latent traits when answering them.
 
-In unidimensional IRT models, an examinee's ability is represented as $\theta$. Usually $-\infty < \theta < \infty$, but since the scale of $\theta$ is up to the individuals creating the instrument, it is common for the values to follow the normal distribution $N(0, 1)$, such that $-4 < \theta < 4$. Additionally, $\hat{\theta}$ is the estimate of $\theta$. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true $\theta$ as the test progresses in length.
+In unidimensional IRT models, an examinee's ability is represented as $\theta$. Usually $-\infty < \theta < \infty$, but since the scale of $\theta$ is up to the individuals creating the instrument, it is common for the values to follow the normal distribution $N(0, 1)$, such that $-4 < \theta < 4$. Additionally, $\hat{\theta}$ is the estimate of $\theta$. Since a latent trait cannot be measured directly, estimates need to be made, which tend to get closer to the theoretical true $\theta$ as the test progresses in length. {doc}`terms-and-notation` lists the terms and symbols these pages use.
 
 Under the logistic models of IRT, an item is represented by the following parameters:
 
