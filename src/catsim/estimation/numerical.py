@@ -1,5 +1,6 @@
 """Numerical estimation methods for ability estimation."""
 
+import numpy
 from scipy.optimize import minimize_scalar
 
 from .. import irt
@@ -43,9 +44,9 @@ def _dodd(theta: float, item_bank: ItemBank, correct: bool, bounds: tuple[float,
   """
   difficulty = item_bank.difficulty
   if correct:
-    estimate = max(theta, theta + (float(difficulty.max()) - theta) / 2)
+    estimate = max(theta, theta + (float(numpy.max(difficulty)) - theta) / 2)
   else:
-    estimate = min(theta, theta - (theta - float(difficulty.min())) / 2)
+    estimate = min(theta, theta - (theta - float(numpy.min(difficulty))) / 2)
   low, high = bounds
   return float(min(max(estimate, low), high))
 

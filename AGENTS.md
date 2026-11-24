@@ -84,6 +84,9 @@ hidden runtime coupling.
 ## Testing And Validation
 
 - Use `uv` for project commands.
+- Local commands run on Python 3.13 (`.python-version`), the version of CI's pre-commit job, because
+  `uv.lock` resolves some dependencies per Python version (numpy 2.4 on 3.11, 2.5 from 3.12) and ty
+  checks against the installed stubs. CI's test matrix still runs 3.11 to 3.14.
 - Pre-commit runs ruff, ty, pylint, import-linter, vulture, typos and the notebooks; run them all
   with `uv run pre-commit run --all-files`.
 - Preferred validation commands:

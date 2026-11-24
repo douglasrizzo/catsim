@@ -105,7 +105,7 @@ def pick_best(candidates: IntArray, scores: FloatArray, rng: Generator | None) -
   if numpy.isnan(scores).any():
     msg = "item scores contain NaN"
     raise ValueError(msg)
-  best = candidates[scores == scores.max()]
+  best = candidates[scores == numpy.max(scores)]
   if best.size == 1:
     return int(best[0])
   if rng is None:
