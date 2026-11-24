@@ -1,3 +1,5 @@
+"""Sphinx configuration for the catsim documentation; it also regenerates README.md from its sources."""
+
 import datetime
 import pathlib
 import sys

@@ -67,6 +67,8 @@ select = [
     "I",
     "N",
     "D",
+    "D417",  # every parameter documented; the numpy convention turns it off
+    "DOC",
     "UP",
     "ANN",
     "B",
@@ -74,6 +76,7 @@ select = [
     "BLE",
     "C4",
     "EM",
+    "ERA",
     "EXE",
     "G",
     "PIE",
@@ -85,6 +88,7 @@ select = [
     "TC",
     "ARG",
     "PTH",
+    "PT",
     "FIX",  # bans TODO/FIXME/XXX/HACK comments outright, which leaves TD nothing to check
     "TID251",  # banned APIs only; TID252 would ban the package's relative imports
     "PD",
@@ -106,16 +110,15 @@ select = [
     "FURB",
     "S",
     "RUF",
+    "T20",
 ]
 ignore = [
-  "ANN401",
-  "D100",
   "D421",    # Google-style rule; numpy-style property docstrings here start with "Return ..."
+  "DOC502",  # numpydoc lists the exceptions a function lets propagate from its callees
   "E111",
   "E114",
   "RUF105",  # Keep standard `# noqa` comments rather than migrating to `# ruff: ignore`
   "RUF201",  # Keep rule codes in this config rather than migrating to rule names
-  "S101",
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -128,15 +131,23 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
+[tool.ruff.lint.pydoclint]
+# A one-line docstring has no sections to check.
+ignore-one-line-docstrings = true
+
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "numpy.typing.NDArray".msg = "Use FloatArray or IntArray from catsim._typing; add an alias there for other dtypes."
+"random".msg = "Take a numpy.random.Generator from the caller (ADR-0008); the global random module cannot be seeded per session."
 
 [tool.ruff.lint.per-file-ignores]
 "src/catsim/_typing.py" = ["TID251"]  # the one place that defines the NDArray aliases
+"notebooks/*" = ["T20"]  # tutorials print their results
+"src/**" = ["PT"]  # pytest style; PT reads plot.test_progress as a test
 "tests/*" = [
   "ANN",      # Test fixture wiring and local helpers do not need exhaustive annotations
   "ARG005",   # Mocked call signatures often intentionally ignore parameters
-  "D",        # Test names already communicate intent; per-test docstring churn is low value
+  "D",        # Test docstrings name what the test checks (AGENTS.md), with no numpydoc sections
+  "DOC",      # Test and fixture docstrings have no Returns or Raises sections
   "PLC0415",  # Local imports in tests are acceptable when improving isolation
   "PLR6301",  # Test methods don't need to use self
   "PLR2004",  # Magic values are fine in tests - they're explicit test expectations
@@ -203,16 +214,67 @@ markers = [
     "integration: marks tests as integration tests",
 ]
 
+[tool.coverage.run]
+branch = true
+source = ["catsim"]
+
+[tool.coverage.report]
+# Input-validation raises stay measured, so an untested check shows up as missed.
+exclude_also = ["if TYPE_CHECKING:", "if __name__ == .__main__.:", "raise NotImplementedError"]
+# Below the measured coverage while the 1.0 work deletes code and tests; raise it as tests for the
+# uncovered input checks land.
+fail_under = 88
+show_missing = true
+
+[tool.vulture]
+# src and tests together: on its own, src's public API reads as unused.
+paths = ["src/catsim", "tests"]
+min_confidence = 60
+ignore_decorators = ["@initialize", "@invariant"]  # Hypothesis runs the state machines' rules
+ignore_names = [
+  "THETA_MIN_TYPICAL",  # M25 makes the two THETA_*_TYPICAL bounds the scale functions' defaults
+  "THETA_MAX_TYPICAL",
+  "WEIGHTED_INFO",  # ClusterMethod member, chosen by its value "weighted_info"
+  "_selector_cache",  # empty until the planned MPWI and MEPV selectors cache their tables in it
+  "writeable",  # numpy's ndarray.flags.writeable, set to make arrays read-only
+  "pytest_plugins",  # read by pytest
+  "close_matplotlib_figures",  # autouse fixture
+]
+
+[tool.typos.files]
+extend-exclude = ["*.svg"]  # generated figures; their path data reads as words
+
+[tool.typos.default]
+# The Portuguese title of Meneghetti (2015), cited on the cluster selector's page.
+extend-ignore-re = ["(?i)selecao[ _]de[ _]itens"]
+
+[tool.typos.default.extend-words]
+lik = "lik"  # likelihood, in variable names
+mis = "mis"  # maximum information stratification
+nd = "nd"  # numpy's NDArray
+sie = "sie"  # the surname Sie (Sie, Finkelman, Bartroff & Thompson), cited in the stopping specs
+strat = "strat"  # stratified selectors: a-strat, MaxInfoStratSelector
+thr = "thr"  # catR's nextItem argument for the test length, quoted on the progressive pages
+writeable = "writeable"  # numpy's ndarray.flags.writeable
+
 [tool.ty.src]
 include = ["src/catsim"]
 
 [tool.ty.rules]
-all = "ignore"
+# ty's default rules, plus the ones below. Left off: unsound-return and unsound-assignment (SciPy and
+# numexpr stubs leak Any into return values), and missing-override-decorator until the strategies use
+# typing.override.
+possibly-unresolved-reference = "error"
+missing-type-argument = "error"
+blanket-ignore-comment = "error"
 division-by-zero = "error"
 possibly-missing-import = "error"
 redundant-cast = "error"
 unused-ignore-comment = "error"
 unused-type-ignore-comment = "error"
+# A function tested for truth instead of called; both rules only warn by default.
+redundant-condition = "error"
+truthiness-test-of-callable = "error"
 
 [tool.uv]
 # soupsieve 4 (the first release without its ReDoS) needs Python >= 3.11.5. Resolving the lock
@@ -224,34 +286,19 @@ environments = ["python_full_version >= '3.11.5'"]
 # Pylint
 # ---------------------------------------------------------------------------
 [tool.pylint.messages-control]
+# Only messages Ruff and ty lack. ty reports incompatible overrides, overridden finals and functions
+# tested for truth; Ruff reports the slot, classmethod, except, finally, statement and dict-key checks.
 enable = [
   "duplicate-code",
   "too-many-ancestors",
   "too-many-instance-attributes",
-  "arguments-differ",
-  "signature-differs",
-  "arguments-renamed",
-  "invalid-overridden-method",
-  "overridden-final-method",
-  "subclassed-final-class",
   "attribute-defined-outside-init",
   "super-init-not-called",
   "non-parent-init-called",
   "useless-parent-delegation",
   "unused-private-member",
-  "redefined-slots-in-subclass",
-  "bad-classmethod-argument",
-  "bad-mcs-method-argument",
-  "no-classmethod-decorator",
-  "no-staticmethod-decorator",
   "bad-except-order",
-  "duplicate-except",
-  "return-in-finally",
-  "lost-exception",
   "cyclic-import",
-  "pointless-statement",
-  "duplicate-key",
-  "missing-parentheses-for-call-in-test",
   "redefined-outer-name",
 ]
 disable = ["all"]

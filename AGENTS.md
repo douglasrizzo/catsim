@@ -84,8 +84,8 @@ hidden runtime coupling.
 ## Testing And Validation
 
 - Use `uv` for project commands.
-- Pre-commit runs ruff, ty, pylint, import-linter and the notebooks; run them all with
-  `uv run pre-commit run --all-files`.
+- Pre-commit runs ruff, ty, pylint, import-linter, vulture, typos and the notebooks; run them all
+  with `uv run pre-commit run --all-files`.
 - Preferred validation commands:
   - `uv run pytest -q` (also runs the docstring examples in `src/catsim`; warnings are errors)
   - `uv run ruff check .`
@@ -94,6 +94,8 @@ hidden runtime coupling.
   - `uv run lint-imports` (the layer contracts in `pyproject.toml`)
 - Notebook validation command:
   - `uv run pytest --nbmake --nbmake-timeout=300 notebooks/*.ipynb`
+- Every test has a docstring naming what it tests for: the behaviour, or the bug that would make it
+  fail. Test docstrings have no argument sections.
 
 ### When To Run What
 
@@ -161,7 +163,7 @@ hidden runtime coupling.
   - `uv run pytest tests/<module>.py -q`
 - Run lint:
   - `uv run ruff check .`
-- Run every pre-commit hook (ruff, ty, pylint, import-linter, notebooks):
+- Run every pre-commit hook (ruff, ty, pylint, import-linter, vulture, typos, notebooks):
   - `uv run pre-commit run --all-files`
 - Run type checks:
   - `uv run ty check`

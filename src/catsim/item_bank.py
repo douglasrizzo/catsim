@@ -76,6 +76,11 @@ class ItemBank:
         Item parameter matrix.
     validate : bool, optional
         Whether to validate the parameters. Default is True.
+
+    Raises
+    ------
+    ValueError
+        If ``items`` does not have 1 to 4 columns, or ``validate`` is True and a parameter is invalid.
     """
     # Normalize to 4PL format, in a float copy the caller cannot change afterwards
     self._items = numpy.array(irt.normalize_item_bank(items), dtype=float)
@@ -370,6 +375,11 @@ class ItemBank:
     ItemBank
         A new ItemBank instance with generated parameters.
 
+    Raises
+    ------
+    ValueError
+        If ``itemtype`` is a string other than "1PL", "2PL", "3PL" or "4PL" (in any case).
+
     Examples
     --------
     >>> bank = ItemBank.generate_item_bank(100, itemtype='3PL', corr=0.3)
@@ -422,10 +432,15 @@ class ItemBank:
     return cls(irt.normalize_item_bank(numpy.array([a, b, c, d]).T), validate=validate)
 
   @classmethod
-  def generate(cls, *args: Any, **kwargs: Any) -> Self:
+  def generate(cls, *args: Any, **kwargs: Any) -> Self:  # noqa: ANN401 (forwards to generate_item_bank)
     """Alias for generate_item_bank for convenience.
 
     Accepts both 'item_type' and 'itemtype' for backward compatibility.
+
+    Returns
+    -------
+    ItemBank
+        A new ItemBank instance with generated parameters.
     """
     # Handle parameter name alias
     if "item_type" in kwargs:
@@ -452,6 +467,6 @@ class ItemBank:
       if array is not None:
         array.flags.writeable = False
 
-  def __getitem__(self, index: int | slice | list | IntArray) -> FloatArray:
+  def __getitem__(self, index: int | slice | list[int] | IntArray) -> FloatArray:
     """Get item(s) by index (allows bank[i] or bank[indices])."""
     return self._items[index]

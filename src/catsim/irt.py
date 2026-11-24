@@ -483,6 +483,12 @@ def theta_to_scale(
   float or numpy.ndarray
       The transformed score(s) on the target scale. Returns the same type as input.
 
+  Raises
+  ------
+  ValueError
+      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
+      ``scale_min``.
+
   Notes
   -----
   - Values outside [theta_min, theta_max] are extrapolated linearly
@@ -559,6 +565,12 @@ def scale_to_theta(
   -------
   float or numpy.ndarray
       The transformed theta value(s). Returns the same type as input.
+
+  Raises
+  ------
+  ValueError
+      If ``theta_max`` is not greater than ``theta_min``, or ``scale_max`` is not greater than
+      ``scale_min``.
 
   Notes
   -----
@@ -893,7 +905,7 @@ def log_likelihood(
   return float(log_likelihood_hpc(est_theta, response_vector, administered_items)[0])
 
 
-def negative_log_likelihood(est_theta: float, *args: Any) -> float:
+def negative_log_likelihood(est_theta: float, *args: Any) -> float:  # noqa: ANN401 (scipy.optimize's args= tuple)
   """Compute the negative log-likelihood of an ability value for a response vector and parameters of administered items.
 
   This function is used by :py:mod:`scipy.optimize` optimization functions that tend to

@@ -1,7 +1,5 @@
 """Functions used specifically during the application/simulation of computerized adaptive tests."""
 
-import random
-
 import numpy
 import numpy.typing as npt
 
@@ -186,22 +184,3 @@ def overlap_rate(exposure_rates: FloatArray, test_size: int) -> float:
 
   # Apply Barrada et al. (2010) formula
   return (bank_size / test_size) * var_r + (test_size / bank_size)
-
-
-def random_response_vector(size: int) -> list[bool]:
-  """Generate a list of random boolean values of the given size.
-
-  This function is useful for testing and simulation purposes when you need
-  a random response pattern.
-
-  Parameters
-  ----------
-  size : int
-      The size of the list to be generated. Must be non-negative.
-
-  Returns
-  -------
-  list[bool]
-      A list of random boolean values with equal probability of True and False.
-  """
-  return [bool(random.getrandbits(1)) for _ in range(size)]

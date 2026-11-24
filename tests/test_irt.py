@@ -462,11 +462,10 @@ class TestValidateItemBank:
   def test_validate_reports_every_violation_on_one_line(self) -> None:
     """All violations are listed, separated by "; "; the messages used to start with and be joined by newlines."""
     items = np.array([[-1.0, 0.0, -0.1, 1.0]])
+    expected = "There are items with discrimination <= 0; There are items with pseudo-guessing < 0"
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match=rf"\A{re.escape(expected)}\Z"):
       irt.validate_item_bank(items)
-
-    assert str(excinfo.value) == "There are items with discrimination <= 0; There are items with pseudo-guessing < 0"
 
 
 class TestLogLikelihood:

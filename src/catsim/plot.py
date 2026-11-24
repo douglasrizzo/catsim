@@ -5,7 +5,6 @@ from enum import Enum, auto
 import matplotlib.pyplot as plt
 import numpy
 from matplotlib.axes import Axes
-from mpl_toolkits.mplot3d import Axes3D
 
 from . import irt
 from ._typing import FloatArray
@@ -40,7 +39,7 @@ def item_curve(
   title: str | None = None,
   ptype: PlotType = PlotType.ICC,
   max_info: bool = True,
-  figsize: tuple | None = None,
+  figsize: tuple[float, float] | None = None,
 ) -> Axes:
   """Plot Item Response Theory-related item plots.
 
@@ -92,7 +91,7 @@ def item_curve(
   if ax is None:
     _, ax = plt.subplots(figsize=figsize)
 
-  thetas = numpy.arange(b - 4, b + 4, 0.1, "double")
+  thetas = numpy.arange(b - 4, b + 4, 0.1)
   p_thetas = []
   i_thetas = []
   for theta in thetas:
@@ -164,7 +163,7 @@ def _annotate_parameters(ax: Axes, a: float, b: float, c: float, d: float) -> No
 def gen3d_dataset_scatter(
   item_bank: ItemBank | FloatArray,
   title: str | None = None,
-  figsize: tuple | None = None,
+  figsize: tuple[float, float] | None = None,
 ) -> Axes:
   """Generate a 3D scatter plot of item parameters.
 
@@ -195,7 +194,6 @@ def gen3d_dataset_scatter(
   matplotlib.axes.Axes
       The matplotlib 3D axes object containing the plot.
   """
-  assert Axes3D
   if isinstance(item_bank, numpy.ndarray):
     item_bank = ItemBank(item_bank)
 
@@ -366,7 +364,7 @@ def test_progress(
   see: bool = False,
   reliability: bool = False,
   marker: str | int | None = None,
-  figsize: tuple | None = None,
+  figsize: tuple[float, float] | None = None,
 ) -> Axes:
   """Generate a plot representing an examinee's test progress over time.
 
@@ -415,6 +413,9 @@ def test_progress(
       Simulation result containing session traces. Default is None.
   index : int or None, optional
       The index of the session to be plotted when ``simulation`` is provided.
+  session : CatSessionState or None, optional
+      Not plotted on its own: passing it without ``simulation`` raises ``ValueError``, and with
+      ``simulation`` the session at ``index`` is plotted instead. Default is None.
   thetas : list[float] or None, optional
       If a simulation result is not passed, then a list of ability estimations can be manually
       passed to the function. Default is None.
@@ -449,8 +450,9 @@ def test_progress(
   Raises
   ------
   ValueError
-      If neither simulation nor the required manual parameters are provided, or if thetas
-      and administered_items have mismatched lengths.
+      If ``simulation`` is passed without ``index``, ``session`` without ``simulation``, or
+      neither ``simulation`` nor both ``thetas`` and ``administered_items``; or if ``thetas``
+      does not hold one more estimate than there are administered items.
   """
   if simulation is None and session is None and thetas is None and administered_items is None:
     msg = "One of: simulation, session, thetas, administered_items must be passed."

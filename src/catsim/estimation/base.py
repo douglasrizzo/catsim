@@ -109,12 +109,21 @@ class BaseEstimator(ABC):
 
     Every estimator calls this first, so a response vector that is too short, too long or not
     Boolean fails the same way everywhere, before any estimator-specific shortcut runs.
+
+    Raises
+    ------
+    ValueError
+        If an input is None, or the response vector does not fit the administered items.
     """
-    inputs = {"item_bank": item_bank, "administered_items": administered_items, "response_vector": response_vector}
-    for name, value in inputs.items():
-      if value is None:
-        msg = f"{name} parameter cannot be None"
-        raise ValueError(msg)
+    if item_bank is None:
+      msg = "item_bank parameter cannot be None"
+      raise ValueError(msg)
+    if administered_items is None:
+      msg = "administered_items parameter cannot be None"
+      raise ValueError(msg)
+    if response_vector is None:
+      msg = "response_vector parameter cannot be None"
+      raise ValueError(msg)
     irt.validate_response_vector(response_vector, len(administered_items))
 
   @property

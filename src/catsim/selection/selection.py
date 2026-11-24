@@ -80,6 +80,8 @@ class MaxInfoSelector(BaseSelector):
         Random number generator, used only to break ties between equally informative items.
     exposure_rates : numpy.ndarray or None, optional
         Run-level exposure-rate snapshot. ``None`` treats every item as unexposed.
+    response_vector : list[bool] or None, optional
+        Unused; accepted for the engine's selector contract.
 
     Returns
     -------
