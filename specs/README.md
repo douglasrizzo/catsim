@@ -25,9 +25,12 @@ that syntax and breaks the `$$` math.
 The specs here were written together in April 2026. Their citations, cited locations, definitions
 and catR comparisons were revalidated against their sources in November 2026 (checklist steps 1-4
 and 6 below); each spec's status lines say when and against which sources. Their implementation
-sketches (step 5) predate the catsim 1.0 strategy contract and do not follow it; they will be
-updated once that contract is on `dev`, and some still contradict their corrected definitions. Do
-not implement a technique from a sketch that does not follow the contract.
+sketches were then rewritten to the catsim 1.0 strategy contract and to the revalidated
+definitions (step 5), with one gap: the Sympson-Hetter sketch excludes a declined item only for
+the rest of the selection call, not for the rest of the test, because the 1.0 engine passes no
+excluded items from one step to the next; its implementation notes say what the engine would need.
+The sketches are illustrative: they run against the current API but are not tested, and the specs
+with open questions show the option each spec assumes for now.
 
 ## Workflow
 
