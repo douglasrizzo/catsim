@@ -146,6 +146,26 @@ def test_selectors_break_ties_at_random(name: str) -> None:
   assert picks == set(range(1, _N_COPIES))
 
 
+@pytest.mark.parametrize(
+  "score",
+  [
+    pytest.param(
+      lambda bank: KLSelector._kl_global(1.0, bank.get_items(range(1, bank.n_items)), 3.0),
+      id="KLSelector",
+    ),
+  ],
+)
+def test_selectors_that_integrate_over_ability_tie_identical_items_exactly(
+  score: Callable[[ItemBank], np.ndarray],
+) -> None:
+  """On 1,000 identical items, the selectors that sum over ability nodes give every candidate the same score.
+
+  A matrix product over the nodes can round columns differently: on this bank it left two distinct scores, and
+  only the copies holding the larger one could be drawn.
+  """
+  assert np.unique(score(_identical_bank(1000))).size == 1
+
+
 def test_progressive_breaks_ties_at_random_once_fully_information_based() -> None:
   """At the last position the progressive weight is 1, so tied information is broken at random."""
   item_bank = _identical_bank(_N_COPIES + 3)

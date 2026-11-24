@@ -1,51 +1,15 @@
 """Kullback-Leibler item selector."""
 
-import math
-
 import numpy
-from scipy.integrate import quad
-from scipy.special import log_expit
 from typing_extensions import override
 
+from .. import irt
 from ..context import StepContext
 from ..typing import FloatArray
 from .base import BaseSelector, below_cap, check_r_max, pick_best, remaining
 
-
-def _log_probabilities(theta: float, a: float, b: float, c: float, d: float) -> tuple[float, float]:
-  """Return the log-probabilities of a correct and an incorrect response at ``theta``.
-
-  Both come from the logit ``a * (theta - b)``, as in :py:func:`catsim.irt.log_likelihood`, so
-  the log-probability of an incorrect response stays exact where the probability of a correct one
-  rounds to 1.
-
-  Returns
-  -------
-  tuple[float, float]
-      The log-probabilities of a correct and of an incorrect response.
-  """
-  z = a * (theta - b)
-  log_dmc = math.log(d - c)
-  log_c = math.log(c) if c > 0 else -math.inf
-  log_1md = math.log1p(-d) if d < 1 else -math.inf
-  return (
-    float(numpy.logaddexp(log_c, log_dmc + log_expit(z))),
-    float(numpy.logaddexp(log_1md, log_dmc + log_expit(-z))),
-  )
-
-
-def _kl_integrand(
-  theta: float,
-  theta_hat: float,
-  a: float,
-  b: float,
-  c: float,
-  d: float,
-) -> float:
-  """Return the KL divergence between response distributions at two ability values."""
-  log_p_hat, log_q_hat = _log_probabilities(theta_hat, a, b, c, d)
-  log_p, log_q = _log_probabilities(theta, a, b, c, d)
-  return math.exp(log_p_hat) * (log_p_hat - log_p) + math.exp(log_q_hat) * (log_q_hat - log_q)
+# Gauss-Legendre nodes on [-1, 1] and their weights, shared by every window
+_NODES, _WEIGHTS = numpy.polynomial.legendre.leggauss(24)
 
 
 class KLSelector(BaseSelector):
@@ -101,15 +65,14 @@ class KLSelector(BaseSelector):
     return self._r_max
 
   @staticmethod
-  def _kl_global(theta_hat: float, item: FloatArray, half_width: float) -> float:
-    """Integrate the KL divergence for one item over the local ability window."""
-    val, _ = quad(
-      _kl_integrand,
-      theta_hat - half_width,
-      theta_hat + half_width,
-      args=(theta_hat, float(item[0]), float(item[1]), float(item[2]), float(item[3])),
-    )
-    return float(val)
+  def _kl_global(theta_hat: float, items: FloatArray, half_width: float) -> FloatArray:
+    """Integrate each item's KL divergence over theta_hat +- half_width with a 24-node Gauss-Legendre rule."""
+    log_p_hat, log_q_hat = irt.log_response_probabilities(theta_hat, items)
+    log_p, log_q = irt.log_response_probabilities(theta_hat + half_width * _NODES, items)
+    divergence = numpy.exp(log_p_hat) * (log_p_hat - log_p) + numpy.exp(log_q_hat) * (log_q_hat - log_q)
+    # a sum over the node axis adds each column in the same order, so identical items tie exactly
+    # (ADR-0008); a matrix product may round columns differently
+    return half_width * (_WEIGHTS[:, None] * divergence).sum(axis=0)
 
   @override
   def select(self, context: StepContext) -> int:
@@ -128,6 +91,5 @@ class KLSelector(BaseSelector):
     candidates = below_cap(remaining(context), context.exposure_rates, self._r_max)
     half_width = self._window / numpy.sqrt(max(1, len(context.administered_items)))
 
-    items = context.item_bank.items
-    kl_values = numpy.array([self._kl_global(context.theta, items[int(idx)], half_width) for idx in candidates])
-    return pick_best(candidates, kl_values, context.rng)
+    scores = self._kl_global(context.theta, context.item_bank.get_items(candidates), half_width)
+    return pick_best(candidates, scores, context.rng)

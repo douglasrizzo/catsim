@@ -887,43 +887,37 @@ class TestKLSelector:
     with pytest.raises(ValueError, match=match):
       KLSelector(**kwargs)
 
-  def test_kl_integrand_is_exact_where_the_probability_rounds_to_one(self) -> None:
-    """Test the KL integrand for an item whose correct-response probability rounds to 1.
-
-    At theta_hat = b, P = 1/2, and at a logit of z = 40 the divergence is
-    -log 2 + z/2 + log(1 + e^-z). Computing log(1 - P) after P rounds to 1 caps the
-    second term, so this guards the logit-based log-probabilities.
-    """
-    kl_module = importlib.import_module("catsim.selection.kl")
-    z = 40.0
-    value = kl_module.__dict__["_kl_integrand"](4.0, 0.0, 10.0, 0.0, 0.0, 1.0)
-    assert value == pytest.approx(-np.log(2.0) + z / 2 + np.log1p(np.exp(-z)), rel=1e-12)
-
   @pytest.mark.parametrize(
-    "item",
+    "items",
     [
-      pytest.param((1.0, 0.0, 0.0, 1.0), id="2pl"),
-      pytest.param((1.5, 0.3, 0.2, 1.0), id="3pl"),
-      pytest.param((1.2, -0.5, 0.0, 0.9), id="4pl_without_guessing"),
-      pytest.param((1.8, 0.4, 0.15, 0.85), id="4pl"),
+      *(
+        pytest.param(ItemBank.generate(30, model=model, rng=7).items, id=model)
+        for model in ("1PL", "2PL", "3PL", "4PL")
+      ),
+      pytest.param(
+        np.array([[1.0, 0.0, 0.0, 1.0], [1.5, 0.3, 0.2, 1.0], [1.2, -0.5, 0.0, 0.9], [1.8, 0.4, 0.15, 0.85]]),
+        id="every_branch",
+      ),
     ],
   )
-  @pytest.mark.parametrize(("theta", "theta_hat"), [(-2.0, 1.0), (0.5, -0.5), (3.0, 2.5)])
-  def test_kl_integrand_matches_the_bernoulli_divergence(
-    self, item: tuple[float, float, float, float], theta: float, theta_hat: float
-  ) -> None:
-    """Test the logit-based integrand against P-hat log(P-hat/P) + Q-hat log(Q-hat/Q).
+  @pytest.mark.parametrize(("theta_hat", "half_width"), [(-1.2, 3.0), (0.4, 3.0 / np.sqrt(5)), (2.0, 0.5)])
+  def test_kl_integrals_match_adaptive_quadrature(self, items: np.ndarray, theta_hat: float, half_width: float) -> None:
+    """Each item's integral matches scipy's adaptive quadrature of the Bernoulli divergence to 1e-9.
 
-    The c = 0 and d = 1 cases reach the logaddexp branches with an infinite term, the
-    others with two finite ones, so this covers every path of the log-probabilities.
+    The reference writes the divergence out from the icc. Too few nodes, nodes not scaled to the window, a
+    missing half-width factor or the two abilities swapped in the divergence all miss by far more.
     """
-    kl_module = importlib.import_module("catsim.selection.kl")
-    p_hat, p = irt.icc(theta_hat, np.array(item)), irt.icc(theta, np.array(item))
-    expected = p_hat * np.log(p_hat / p) + (1 - p_hat) * np.log((1 - p_hat) / (1 - p))
 
-    value = kl_module.__dict__["_kl_integrand"](theta, theta_hat, *item)
+    def divergence(theta: float, item: np.ndarray) -> float:
+      p_hat, p = irt.icc(theta_hat, item), irt.icc(theta, item)
+      return p_hat * np.log(p_hat / p) + (1 - p_hat) * np.log((1 - p_hat) / (1 - p))
 
-    assert value == pytest.approx(expected, rel=1e-10, abs=1e-14)
+    reference = [
+      quad(divergence, theta_hat - half_width, theta_hat + half_width, args=(item,), epsabs=0.0, epsrel=1e-12)[0]
+      for item in items
+    ]
+
+    np.testing.assert_allclose(KLSelector._kl_global(theta_hat, items, half_width), reference, rtol=1e-9)
 
   @pytest.mark.parametrize("n_administered", [0, 1, 4, 9])
   def test_select_maximizes_kl_over_a_window_shrinking_with_the_test(self, n_administered: int) -> None:
